@@ -137,7 +137,7 @@
 
     <string name="percent_of_visible">%1$.1f%% of visible</string>
     <string name="version_info">Version &amp; info</string>
-    <string name="version_info_title">UVIR %1$s</string>
+    <string name="version_info_title">Uvir %1$s</string>
     <string name="app_version">App version: %1$s</string>
     <string name="package_name_value">Package: %1$s</string>
     <string name="about_whats_new_title">What’s new in version %1$s</string>

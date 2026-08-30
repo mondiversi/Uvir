@@ -1539,6 +1539,19 @@ data class AcquisitionParameters(
     val discardExtremes: Boolean
 )
 
+internal fun formatAutomaticMeasurementNote(
+    defaultNote: String,
+    acquisitionNumber: Int
+): String {
+    val trimmedNote = defaultNote.trim()
+
+    return if (trimmedNote.isBlank()) {
+        "#$acquisitionNumber"
+    } else {
+        "$trimmedNote #$acquisitionNumber"
+    }
+}
+
 data class BiologicalEffectEstimate(
     val dnaUvProxy: Double,
     val dnaUvScore: Float,
@@ -3890,15 +3903,10 @@ fun UvirApp(
                 autoCompletedCount + 1
 
             val automaticMeasurementNote =
-                autoNote
-                    .trim()
-                    .let { defaultNote ->
-                        if (defaultNote.isBlank()) {
-                            "#$acquisitionNumber"
-                        } else {
-                            "#$acquisitionNumber $defaultNote"
-                        }
-                    }
+                formatAutomaticMeasurementNote(
+                    autoNote,
+                    acquisitionNumber
+                )
 
             val result =
                 database.saveMeasurement(

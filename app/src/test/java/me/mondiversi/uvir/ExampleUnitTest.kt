@@ -14,4 +14,26 @@ class ExampleUnitTest {
     fun addition_isCorrect() {
         assertEquals(4, 2 + 2)
     }
+
+    @Test
+    fun automaticMeasurementNumberIsAppendedToDefaultNote() {
+        assertEquals(
+            "Outdoor test #12",
+            formatAutomaticMeasurementNote(
+                "  Outdoor test  ",
+                12
+            )
+        )
+    }
+
+    @Test
+    fun automaticMeasurementWithoutDefaultNoteContainsOnlyNumber() {
+        assertEquals(
+            "#1",
+            formatAutomaticMeasurementNote(
+                "   ",
+                1
+            )
+        )
+    }
 }
