@@ -17,9 +17,10 @@ Python. ADB è necessario soltanto per USB e per la modalità tecnica presente
 nella scheda **Avanzate**.
 
 L’interfaccia rileva automaticamente la lingua del sistema: usa l’italiano sui
-sistemi configurati in italiano e l’inglese in tutti gli altri casi. Anche le
-intestazioni e la legenda dei file CSV, Excel e LibreOffice seguono la lingua
-rilevata. Le traduzioni si trovano nei file `lang/it.json` e `lang/en.json`,
+sistemi configurati in italiano e l’inglese in tutti gli altri casi. Le
+esportazioni CSV, Excel e LibreOffice vengono invece generate sempre in
+inglese, con data ISO e separatore decimale internazionale. Le traduzioni
+dell’interfaccia si trovano nei file `lang/it.json` e `lang/en.json`,
 accanto allo script, così è possibile aggiornarle senza modificare il codice
 Python.
 
@@ -113,7 +114,9 @@ vengono assegnati nuovamente. Gli ID delle sessioni automatiche sono progressivi
 
 CSV, Excel e LibreOffice usano lo stesso ordine di colonne e gli stessi campi.
 Anche il CSV condiviso dal telefono segue esattamente questo schema; la tabella
-leggibile resta volutamente più discorsiva.
+leggibile resta volutamente più discorsiva. Tutti i file esportati e la tabella
+leggibile Android sono sempre in inglese, indipendentemente dalla lingua
+dell’interfaccia.
 
 Il comando **Azzera contatori…** elimina tutte le misurazioni e riporta a zero
 entrambi i contatori; la misurazione e la sessione successive ripartono quindi

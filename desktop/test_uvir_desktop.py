@@ -145,17 +145,18 @@ class UvirDesktopTests(unittest.TestCase):
             )
             self.assertEqual(
                 uvir.EXPORT_COLUMNS[:3],
-                (
-                    ["ID_misurazione", "ID_sessione", "Data/Ora"]
-                    if uvir.LANGUAGE == "it"
-                    else ["Measurement_ID", "Session_ID", "Date/Time"]
-                )
+                ["Measurement_ID", "Session_ID", "Date/Time"]
             )
             self.assertEqual(
                 uvir.export_row(saved)[:2],
                 [1, 3]
             )
             exported = uvir.export_row(saved)
+            self.assertRegex(
+                exported[2],
+                r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$"
+            )
+            self.assertEqual(exported[4], "Automatic")
             self.assertEqual(
                 len(exported),
                 len(uvir.EXPORT_COLUMNS)
@@ -415,6 +416,19 @@ class UvirDesktopTests(unittest.TestCase):
             len(uvir.EXPORT_COLUMNS_EN)
         )
         self.assertEqual(len(uvir.EXPORT_COLUMNS_IT), 31)
+        self.assertEqual(uvir.DATA_EXPORT_LANGUAGE, "en")
+        self.assertEqual(
+            uvir.EXPORT_COLUMNS,
+            uvir.EXPORT_COLUMNS_EN
+        )
+        self.assertEqual(
+            uvir.LEGEND_ROWS,
+            uvir.LEGEND_ROWS_EN
+        )
+        self.assertEqual(
+            (uvir.MEASUREMENTS_SHEET, uvir.LEGEND_SHEET),
+            ("Measurements", "Legend")
+        )
         self.assertEqual(
             len(uvir.LEGEND_ROWS_IT),
             len(uvir.LEGEND_ROWS_EN)

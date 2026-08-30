@@ -53,6 +53,7 @@ WINDOWS_APP_ID = "Uvir.Desktop.2026.1"
 SESSION_COUNTER_NAME = "automatic_session_id"
 SETTINGS_FILE = Path(__file__).resolve().parent / "desktop_settings.json"
 BIOLOGICAL_MODEL_VERSION = "v1"
+DATA_EXPORT_LANGUAGE = "en"
 
 
 LANG_DIR = Path(__file__).resolve().parent / "lang"
@@ -274,18 +275,10 @@ LEGEND_ROWS_EN = [
     ["Estimated effects", "HEV oxidative stress", "estimated weighted irradiance + spectral relevance 0–100", "The 0–100 scale indicates relative spectral weighting; it is neither a damage percentage nor a safety threshold"],
 ]
 
-EXPORT_COLUMNS = (
-    EXPORT_COLUMNS_IT
-    if LANGUAGE == "it"
-    else EXPORT_COLUMNS_EN
-)
-LEGEND_ROWS = (
-    LEGEND_ROWS_IT
-    if LANGUAGE == "it"
-    else LEGEND_ROWS_EN
-)
-MEASUREMENTS_SHEET = "Misure" if LANGUAGE == "it" else "Measurements"
-LEGEND_SHEET = "Legenda" if LANGUAGE == "it" else "Legend"
+EXPORT_COLUMNS = EXPORT_COLUMNS_EN
+LEGEND_ROWS = LEGEND_ROWS_EN
+MEASUREMENTS_SHEET = "Measurements"
+LEGEND_SHEET = "Legend"
 
 
 @dataclass
@@ -306,6 +299,15 @@ def format_time(ms: int) -> str:
             else "%Y-%m-%d %H:%M:%S"
         )
         return datetime.fromtimestamp(ms / 1000.0).strftime(pattern)
+    except Exception:
+        return str(ms)
+
+
+def format_export_time(ms: int) -> str:
+    try:
+        return datetime.fromtimestamp(
+            ms / 1000.0
+        ).strftime("%Y-%m-%d %H:%M:%S")
     except Exception:
         return str(ms)
 
@@ -335,6 +337,14 @@ def optional_int(row: sqlite3.Row, key: str) -> int | None:
 
 def acquisition_type(row: sqlite3.Row) -> str:
     return tr("automatic") if is_automatic(row) else tr("manual")
+
+
+def export_acquisition_type(row: sqlite3.Row) -> str:
+    key = "automatic" if is_automatic(row) else "manual"
+    return tr(
+        key,
+        language=DATA_EXPORT_LANGUAGE
+    )
 
 
 def automatic_session_id(row: sqlite3.Row) -> int | None:
@@ -465,9 +475,9 @@ def export_row(row: sqlite3.Row) -> list:
     return [
         row["id"],
         optional_int(row, "automatic_session_id"),
-        format_time(row["timestamp"]),
+        format_export_time(row["timestamp"]),
         row["timestamp"],
-        acquisition_type(row),
+        export_acquisition_type(row),
         automatic,
         row["note"] or "",
         optional_int(row, "automatic_sequence"),

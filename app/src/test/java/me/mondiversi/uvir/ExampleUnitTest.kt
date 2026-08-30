@@ -58,6 +58,16 @@ class ExampleUnitTest {
     @Test
     fun measurementExportSchemasStayAligned() {
         assertEquals(
+            "en",
+            DATA_EXPORT_LANGUAGE
+        )
+        assertEquals(
+            MEASUREMENT_EXPORT_COLUMNS_EN,
+            measurementExportColumns(
+                DATA_EXPORT_LANGUAGE
+            )
+        )
+        assertEquals(
             31,
             MEASUREMENT_EXPORT_COLUMNS_IT.size
         )

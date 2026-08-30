@@ -2677,6 +2677,8 @@ enum class MeasurementShareFormat {
     BOTH
 }
 
+internal const val DATA_EXPORT_LANGUAGE = "en"
+
 private fun csvCell(value: String): String =
     if (
         value.contains(';') ||
@@ -2787,12 +2789,7 @@ private fun csvDateTime(
 private fun measurementCsv(
     records: List<SavedRecordDetail>
 ): String = buildString {
-    val language =
-        if (Locale.getDefault().language == "it") {
-            "it"
-        } else {
-            "en"
-        }
+    val language = DATA_EXPORT_LANGUAGE
 
     appendLine(
         measurementExportColumns(
@@ -2901,7 +2898,10 @@ private fun readableMeasurementTable(
 
         appendLine(
             "${context.getString(R.string.share_date_label)}: " +
-                formatDateTime(record.timestamp)
+                csvDateTime(
+                    record.timestamp,
+                    DATA_EXPORT_LANGUAGE
+                )
         )
         appendLine(
             "${context.getString(R.string.share_acquisition_label)}: " +
@@ -2938,10 +2938,10 @@ private fun readableMeasurementTable(
         ).forEach { (name, value) ->
             appendLine(
                 "%-8s  %s µW/cm²".format(
-                    Locale.getDefault(),
+                    Locale.US,
                     name,
                     "%.3f".format(
-                        Locale.getDefault(),
+                        Locale.US,
                         value
                     )
                 )
@@ -3011,14 +3011,27 @@ private fun shareMeasurements(
         return
     }
 
+    val exportConfiguration =
+        android.content.res.Configuration(
+            context.resources.configuration
+        ).apply {
+            setLocale(Locale.ENGLISH)
+            setLayoutDirection(Locale.ENGLISH)
+        }
+
+    val exportContext =
+        context.createConfigurationContext(
+            exportConfiguration
+        )
+
     val subject =
-        context.getString(
+        exportContext.getString(
             R.string.share_subject
         )
 
     val readableText =
         readableMeasurementTable(
-            context,
+            exportContext,
             records
         )
 
