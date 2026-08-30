@@ -977,18 +977,20 @@ class App:
 
         self.tree = ttk.Treeview(
             left,
-            columns=("id", "time", "auto", "note"),
+            columns=("id", "session_id", "time", "auto", "note"),
             show="headings",
             selectmode="browse"
         )
-        self.tree.heading("id", text="ID")
+        self.tree.heading("id", text="ID misurazione")
+        self.tree.heading("session_id", text="ID sessione")
         self.tree.heading("time", text="Data / ora")
         self.tree.heading("auto", text="A")
         self.tree.heading("note", text="Nota")
-        self.tree.column("id", width=55, stretch=False, anchor="center")
-        self.tree.column("time", width=165, stretch=False)
+        self.tree.column("id", width=100, stretch=False, anchor="center")
+        self.tree.column("session_id", width=85, stretch=False, anchor="center")
+        self.tree.column("time", width=145, stretch=False)
         self.tree.column("auto", width=35, stretch=False, anchor="center")
-        self.tree.column("note", width=280)
+        self.tree.column("note", width=220)
         self.tree.grid(row=1, column=0, sticky="nsew")
         self.tree.tag_configure(
             "session_header",
@@ -2317,6 +2319,7 @@ class App:
                         iid=f"session:{session_id}",
                         values=(
                             "",
+                            session_id,
                             format_time(session_start),
                             "A",
                             f"Sessione automatica #{session_id} · {label}"
@@ -2346,6 +2349,7 @@ class App:
                         iid=str(r["id"]),
                         values=(
                             r["id"],
+                            r["automatic_session_id"] or "",
                             format_time(r["timestamp"]),
                             auto_badge,
                             note

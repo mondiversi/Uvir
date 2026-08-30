@@ -6251,34 +6251,41 @@ if (showParametersDialog) {
                     )
                 )
             },
-            dismissButton = {
-                HoldToConfirmDeleteButton(
-                    label =
-                        stringResource(
-                            R.string.reset_counters_action
-                        ),
-                    onConfirmed = {
-                        onResetCounters()
-                        showResetCountersConfirmation = false
-                        Toast.makeText(
-                            context,
-                            countersResetCompleteMessage,
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                )
-            },
             confirmButton = {
-                TextButton(
-                    onClick = {
-                        showResetCountersConfirmation = false
-                    }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement =
+                        Arrangement.SpaceBetween,
+                    verticalAlignment =
+                        Alignment.CenterVertically
                 ) {
-                    Text(
-                        stringResource(
-                            R.string.cancel
-                        )
+                    HoldToConfirmDeleteButton(
+                        label =
+                            stringResource(
+                                R.string.reset_counters_action
+                            ),
+                        onConfirmed = {
+                            onResetCounters()
+                            showResetCountersConfirmation = false
+                            Toast.makeText(
+                                context,
+                                countersResetCompleteMessage,
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
                     )
+
+                    TextButton(
+                        onClick = {
+                            showResetCountersConfirmation = false
+                        }
+                    ) {
+                        Text(
+                            stringResource(
+                                R.string.cancel
+                            )
+                        )
+                    }
                 }
             },
             containerColor = cardColor,

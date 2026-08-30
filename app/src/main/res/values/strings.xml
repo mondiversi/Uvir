@@ -92,7 +92,7 @@
     <string name="reset_counters_data_warning">This operation also permanently deletes all saved measurements.</string>
     <string name="reset_counters_action">RESET COUNTERS</string>
     <string name="reset_counters_confirmation_title">Reset all counters?</string>
-    <string name="reset_counters_confirmation_message">All saved measurements will be permanently deleted. The next measurement and automatic session will start from ID 1. Press and hold RESET COUNTERS for 2 seconds.</string>
+    <string name="reset_counters_confirmation_message">All saved measurements will be permanently deleted. The next measurement and automatic session will start from ID 1. To confirm, press and hold RESET COUNTERS continuously for 2 seconds.</string>
     <string name="reset_counters_stop_auto">Stop automatic acquisition before resetting the counters.</string>
     <string name="counters_reset_complete">Counters reset</string>
 

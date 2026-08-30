@@ -92,7 +92,7 @@
     <string name="reset_counters_data_warning">Questa operazione elimina definitivamente anche tutte le misurazioni salvate.</string>
     <string name="reset_counters_action">AZZERA CONTATORI</string>
     <string name="reset_counters_confirmation_title">Azzerare tutti i contatori?</string>
-    <string name="reset_counters_confirmation_message">Tutte le misurazioni salvate verranno eliminate definitivamente. La prossima misurazione e la prossima sessione automatica partiranno dall’ID 1. Tieni premuto AZZERA CONTATORI per 2 secondi.</string>
+    <string name="reset_counters_confirmation_message">Tutte le misurazioni salvate verranno eliminate definitivamente. La prossima misurazione e la prossima sessione automatica partiranno dall’ID 1. Per confermare, tieni premuto AZZERA CONTATORI senza rilasciare per 2 secondi.</string>
     <string name="reset_counters_stop_auto">Ferma l’acquisizione automatica prima di azzerare i contatori.</string>
     <string name="counters_reset_complete">Contatori azzerati</string>
 
