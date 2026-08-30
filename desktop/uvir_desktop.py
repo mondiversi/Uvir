@@ -49,6 +49,7 @@ DB_FILENAME = "uvir.db"
 DEFAULT_PACKAGE = "me.mondiversi.uvir"
 REMOTE_PORT = 45871
 WINDOWS_APP_ID = "Uvir.Desktop.2026.1"
+SESSION_COUNTER_NAME = "automatic_session_id"
 
 
 def resource_path(filename: str) -> Path:
@@ -331,6 +332,76 @@ def ensure_schema(path: Path) -> None:
         missing = EXPECTED_COLUMNS - cols
         if missing:
             raise RuntimeError("Database non compatibile. Colonne mancanti: " + ", ".join(sorted(missing)))
+
+        con.execute(
+            """
+            CREATE TABLE IF NOT EXISTS uvir_counters (
+                name TEXT PRIMARY KEY,
+                value INTEGER NOT NULL
+            )
+            """
+        )
+        session_counter = con.execute(
+            "SELECT value FROM uvir_counters WHERE name = ?",
+            (SESSION_COUNTER_NAME,)
+        ).fetchone()
+        if session_counter is None:
+            session_ids = [
+                int(row[0])
+                for row in con.execute(
+                    """
+                    SELECT automatic_session_id
+                    FROM measurements
+                    WHERE automatic_session_id IS NOT NULL
+                    GROUP BY automatic_session_id
+                    ORDER BY MIN(timestamp), automatic_session_id
+                    """
+                ).fetchall()
+            ] if "automatic_session_id" in cols else []
+
+            for new_id, old_id in enumerate(session_ids, 1):
+                con.execute(
+                    """
+                    UPDATE measurements
+                    SET automatic_session_id = ?
+                    WHERE automatic_session_id = ?
+                    """,
+                    (-new_id, old_id)
+                )
+            if session_ids:
+                con.execute(
+                    """
+                    UPDATE measurements
+                    SET automatic_session_id = -automatic_session_id
+                    WHERE automatic_session_id < 0
+                    """
+                )
+
+            con.execute(
+                "INSERT INTO uvir_counters(name, value) VALUES (?, ?)",
+                (SESSION_COUNTER_NAME, len(session_ids))
+            )
+        con.commit()
+    finally:
+        con.close()
+
+
+def database_counters(path: Path) -> tuple[int, int]:
+    ensure_schema(path)
+    con = sqlite3.connect(path)
+    try:
+        measurement_row = con.execute(
+            "SELECT seq FROM sqlite_sequence WHERE name = ?",
+            ("measurements",)
+        ).fetchone()
+        session_row = con.execute(
+            "SELECT value FROM uvir_counters WHERE name = ?",
+            (SESSION_COUNTER_NAME,)
+        ).fetchone()
+        return (
+            int(measurement_row[0] or 0) if measurement_row else 0,
+            int(session_row[0] or 0) if session_row else 0,
+        )
     finally:
         con.close()
 
@@ -502,13 +573,19 @@ def record_to_remote_dict(row: sqlite3.Row) -> dict:
     }
 
 
-def create_database_from_remote(path: Path, records: list[dict]) -> None:
+def create_database_from_remote(
+    path: Path,
+    records: list[dict],
+    measurement_counter: int | None = None,
+    session_counter: int | None = None,
+) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(path.suffix + ".tmp")
     if temporary.exists():
         temporary.unlink()
 
     previous_sequence = 0
+    previous_session_counter = 0
     if path.exists():
         previous = sqlite3.connect(path)
         try:
@@ -518,6 +595,15 @@ def create_database_from_remote(path: Path, records: list[dict]) -> None:
             ).fetchone()
             if sequence_row:
                 previous_sequence = int(sequence_row[0] or 0)
+        except sqlite3.DatabaseError:
+            pass
+        try:
+            session_row = previous.execute(
+                "SELECT value FROM uvir_counters WHERE name = ?",
+                (SESSION_COUNTER_NAME,)
+            ).fetchone()
+            if session_row:
+                previous_session_counter = int(session_row[0] or 0)
         except sqlite3.DatabaseError:
             pass
         finally:
@@ -545,6 +631,14 @@ def create_database_from_remote(path: Path, records: list[dict]) -> None:
                 rosso REAL NOT NULL,
                 f8 REAL NOT NULL,
                 nir REAL NOT NULL
+            )
+            """
+        )
+        con.execute(
+            """
+            CREATE TABLE uvir_counters (
+                name TEXT PRIMARY KEY,
+                value INTEGER NOT NULL
             )
             """
         )
@@ -584,7 +678,11 @@ def create_database_from_remote(path: Path, records: list[dict]) -> None:
             default=0
         )
         preserved_sequence = max(
-            previous_sequence,
+            (
+                previous_sequence
+                if measurement_counter is None
+                else int(measurement_counter)
+            ),
             imported_sequence
         )
         if preserved_sequence > 0:
@@ -596,6 +694,29 @@ def create_database_from_remote(path: Path, records: list[dict]) -> None:
                 "INSERT INTO sqlite_sequence(name, seq) VALUES (?, ?)",
                 ("measurements", preserved_sequence)
             )
+
+        imported_session_counter = max(
+            (
+                int(record.get("automatic_session_id") or 0)
+                for record in records
+            ),
+            default=0
+        )
+        preserved_session_counter = max(
+            (
+                previous_session_counter
+                if session_counter is None
+                else int(session_counter)
+            ),
+            imported_session_counter
+        )
+        con.execute(
+            "INSERT INTO uvir_counters(name, value) VALUES (?, ?)",
+            (
+                SESSION_COUNTER_NAME,
+                preserved_session_counter
+            )
+        )
         con.commit()
     finally:
         con.close()
@@ -829,6 +950,11 @@ class App:
             text="LibreOffice",
             command=lambda: self.do_export("ods"),
         ).pack(side=LEFT, padx=2)
+        ttk.Button(
+            export_bar,
+            text="Azzera contatori…",
+            command=self.reset_counters,
+        ).pack(side="right", padx=(8, 0))
 
         paned = ttk.Panedwindow(self.root, orient="horizontal")
         paned.grid(row=1, column=0, sticky="nsew", padx=10, pady=(0, 6))
@@ -1984,7 +2110,14 @@ class App:
                     backup_db(db)
                 except Exception:
                     pass
-            create_database_from_remote(db, records)
+            create_database_from_remote(
+                db,
+                records,
+                measurement_counter=
+                    data.get("measurement_counter"),
+                session_counter=
+                    data.get("session_counter"),
+            )
             ensure_schema(db)
             self.db_path = db
             self.refresh()
@@ -2014,7 +2147,17 @@ class App:
             ensure_schema(self.db_path)
             local_backup = backup_db(self.db_path)
             records = [record_to_remote_dict(row) for row in self.rows()]
-            result = self._remote("replace_measurements", {"records": records})
+            measurement_counter, session_counter = database_counters(
+                self.db_path
+            )
+            result = self._remote(
+                "replace_measurements",
+                {
+                    "records": records,
+                    "measurement_counter": measurement_counter,
+                    "session_counter": session_counter,
+                }
+            )
             self.pull_remote_database(show_message=False)
             messagebox.showinfo(
                 APP_TITLE,
@@ -2159,6 +2302,10 @@ class App:
             for session_id, block_rows in grouped_measurement_rows(rows):
                 if session_id is not None:
                     count = len(block_rows)
+                    session_start = min(
+                        int(row["timestamp"])
+                        for row in block_rows
+                    )
                     label = (
                         "1 misurazione"
                         if count == 1
@@ -2170,9 +2317,9 @@ class App:
                         iid=f"session:{session_id}",
                         values=(
                             "",
-                            format_time(session_id),
+                            format_time(session_start),
                             "A",
-                            f"Sessione automatica · {label}"
+                            f"Sessione automatica #{session_id} · {label}"
                         ),
                         tags=("session_header",)
                     )
@@ -2386,6 +2533,76 @@ class App:
             (),
             delete_all_records=True
         )
+
+    def reset_counters(self):
+        if not self.db_path and not self.remote_link:
+            messagebox.showinfo(
+                APP_TITLE,
+                "Apri un database oppure collega prima il telefono."
+            )
+            return
+
+        if not messagebox.askyesno(
+            APP_TITLE,
+            "Azzerare i contatori?\n\n"
+            "Questa operazione elimina definitivamente tutte le misurazioni. "
+            "La prossima misurazione e la prossima sessione automatica "
+            "partiranno dall'ID 1."
+        ):
+            return
+
+        try:
+            if self.remote_link:
+                self._remote("reset_counters")
+                self.pull_remote_database(show_message=False)
+                self.status.set(
+                    "Contatori azzerati sul telefono e nella copia locale."
+                )
+                messagebox.showinfo(
+                    APP_TITLE,
+                    "Contatori azzerati. Tutte le misurazioni sono state "
+                    "eliminate dal telefono e dalla copia locale."
+                )
+                return
+
+            if not self.db_path:
+                return
+
+            ensure_schema(self.db_path)
+            local_backup = backup_db(self.db_path)
+            con = self.connect()
+            try:
+                con.execute("DELETE FROM measurements")
+                con.execute(
+                    "DELETE FROM sqlite_sequence WHERE name = ?",
+                    ("measurements",)
+                )
+                con.execute(
+                    """
+                    UPDATE uvir_counters
+                    SET value = 0
+                    WHERE name = ?
+                    """,
+                    (SESSION_COUNTER_NAME,)
+                )
+                con.commit()
+            finally:
+                con.close()
+
+            self.refresh()
+            self.status.set(
+                f"Contatori azzerati. Backup: {local_backup}"
+            )
+            messagebox.showinfo(
+                APP_TITLE,
+                "Contatori azzerati e misurazioni eliminate.\n\n"
+                f"Backup: {local_backup}"
+            )
+        except Exception as exc:
+            messagebox.showerror(
+                APP_TITLE,
+                f"Azzeramento non riuscito:\n{exc}"
+            )
 
     def delete_sql(
         self,

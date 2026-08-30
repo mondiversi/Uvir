@@ -1702,6 +1702,8 @@ private const val KEY_SETTINGS_WIFI_EXPANDED =
     "settings_wifi_expanded"
 private const val KEY_SETTINGS_MOBILE_EXPANDED =
     "settings_mobile_expanded"
+private const val KEY_SETTINGS_COUNTERS_EXPANDED =
+    "settings_counters_expanded"
 private const val LIVE_UI_REFRESH_MS = 250L
 
 private fun loadSettingsSectionExpanded(
@@ -1910,11 +1912,130 @@ fun loadBiologicalEffectExpanded(
 class UvirDatabaseHelper(
     context: Context
 ) : SQLiteOpenHelper(
-    context,
+    context.applicationContext,
     "uvir.db",
     null,
-    3
+    4
 ) {
+
+    private val appContext =
+        context.applicationContext
+
+    private fun createCountersTable(
+        db: SQLiteDatabase
+    ) {
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS uvir_counters (
+                name TEXT PRIMARY KEY,
+                value INTEGER NOT NULL
+            )
+            """.trimIndent()
+        )
+        db.execSQL(
+            """
+            INSERT OR IGNORE INTO uvir_counters(name, value)
+            VALUES ('automatic_session_id', 0)
+            """.trimIndent()
+        )
+    }
+
+    private fun migrateAutomaticSessionIds(
+        db: SQLiteDatabase
+    ) {
+        createCountersTable(db)
+
+        val mappings =
+            mutableListOf<Pair<Long, Long>>()
+
+        db.rawQuery(
+            """
+            SELECT automatic_session_id
+            FROM measurements
+            WHERE automatic_session_id IS NOT NULL
+            GROUP BY automatic_session_id
+            ORDER BY MIN(timestamp) ASC, automatic_session_id ASC
+            """.trimIndent(),
+            null
+        ).use { cursor ->
+            var nextId = 1L
+            while (cursor.moveToNext()) {
+                mappings.add(
+                    cursor.getLong(0) to nextId
+                )
+                nextId += 1L
+            }
+        }
+
+        mappings.forEach { (oldId, newId) ->
+            db.execSQL(
+                """
+                UPDATE measurements
+                SET automatic_session_id = ?
+                WHERE automatic_session_id = ?
+                """.trimIndent(),
+                arrayOf(-newId, oldId)
+            )
+        }
+
+        db.execSQL(
+            """
+            UPDATE measurements
+            SET automatic_session_id = -automatic_session_id
+            WHERE automatic_session_id < 0
+            """.trimIndent()
+        )
+
+        val preferences =
+            appContext.getSharedPreferences(
+                PREFS_NAME,
+                Context.MODE_PRIVATE
+            )
+        val oldActiveSessionId =
+            preferences.getLong(
+                KEY_AUTO_SESSION_ID,
+                0L
+            )
+        val autoWasActive =
+            preferences.getBoolean(
+                KEY_AUTO_ENABLED,
+                false
+            )
+        var counter =
+            mappings.size.toLong()
+        var migratedActiveSessionId =
+            mappings
+                .firstOrNull {
+                    it.first == oldActiveSessionId
+                }
+                ?.second
+                ?: 0L
+
+        if (
+            autoWasActive &&
+            oldActiveSessionId > 0L &&
+            migratedActiveSessionId == 0L
+        ) {
+            counter += 1L
+            migratedActiveSessionId = counter
+        }
+
+        db.execSQL(
+            """
+            UPDATE uvir_counters
+            SET value = ?
+            WHERE name = 'automatic_session_id'
+            """.trimIndent(),
+            arrayOf(counter)
+        )
+
+        preferences.edit()
+            .putLong(
+                KEY_AUTO_SESSION_ID,
+                migratedActiveSessionId
+            )
+            .apply()
+    }
 
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL(
@@ -1943,6 +2064,8 @@ class UvirDatabaseHelper(
             )
             """.trimIndent()
         )
+
+        createCountersTable(db)
     }
 
     override fun onUpgrade(
@@ -1974,7 +2097,86 @@ class UvirDatabaseHelper(
                 """.trimIndent()
             )
         }
+
+        if (oldVersion < 4) {
+            migrateAutomaticSessionIds(db)
+        }
     }
+
+    fun nextAutomaticSessionId(): Long {
+        val database = writableDatabase
+        var nextId = 0L
+
+        database.beginTransaction()
+        try {
+            createCountersTable(database)
+            database.execSQL(
+                """
+                UPDATE uvir_counters
+                SET value = value + 1
+                WHERE name = 'automatic_session_id'
+                """.trimIndent()
+            )
+            database.rawQuery(
+                """
+                SELECT value
+                FROM uvir_counters
+                WHERE name = 'automatic_session_id'
+                """.trimIndent(),
+                null
+            ).use {
+                if (it.moveToFirst()) {
+                    nextId = it.getLong(0)
+                }
+            }
+            database.setTransactionSuccessful()
+        } finally {
+            database.endTransaction()
+        }
+
+        return nextId
+    }
+
+    fun currentAutomaticSessionCounter(): Long {
+        val database = readableDatabase
+        createCountersTable(database)
+        return database.rawQuery(
+            """
+            SELECT value
+            FROM uvir_counters
+            WHERE name = 'automatic_session_id'
+            """.trimIndent(),
+            null
+        ).use {
+            if (it.moveToFirst()) {
+                it.getLong(0)
+            } else {
+                0L
+            }
+        }
+    }
+
+    private fun measurementCounter(
+        database: SQLiteDatabase
+    ): Long {
+        return database.rawQuery(
+            """
+            SELECT seq
+            FROM sqlite_sequence
+            WHERE name = 'measurements'
+            """.trimIndent(),
+            null
+        ).use {
+            if (it.moveToFirst()) {
+                it.getLong(0)
+            } else {
+                0L
+            }
+        }
+    }
+
+    fun currentMeasurementCounter(): Long =
+        measurementCounter(readableDatabase)
 
     fun saveMeasurement(
         sample: SensorSample,
@@ -2213,6 +2415,36 @@ class UvirDatabaseHelper(
         return deletedRows
     }
 
+    fun resetAllCounters(): Int {
+        val database = writableDatabase
+        var deletedRows = 0
+
+        database.beginTransaction()
+        try {
+            deletedRows = database.delete(
+                "measurements",
+                null,
+                null
+            )
+            database.execSQL(
+                "DELETE FROM sqlite_sequence WHERE name = 'measurements'"
+            )
+            createCountersTable(database)
+            database.execSQL(
+                """
+                UPDATE uvir_counters
+                SET value = 0
+                WHERE name = 'automatic_session_id'
+                """.trimIndent()
+            )
+            database.setTransactionSuccessful()
+        } finally {
+            database.endTransaction()
+        }
+
+        return deletedRows
+    }
+
     fun readAllRecords():
             List<SavedRecordDetail> {
         return readSavedRecords()
@@ -2263,7 +2495,9 @@ class UvirDatabaseHelper(
     }
 
     fun replaceAllMeasurements(
-        records: List<SavedRecordDetail>
+        records: List<SavedRecordDetail>,
+        measurementCounter: Long? = null,
+        sessionCounter: Long? = null
     ): Int {
         val database = writableDatabase
 
@@ -2312,6 +2546,64 @@ class UvirDatabaseHelper(
                     null,
                     values
                 )
+            }
+
+            val importedSessionCounter =
+                maxOf(
+                    sessionCounter ?: 0L,
+                    records
+                        .mapNotNull {
+                            it.automaticSessionId
+                        }
+                        .maxOrNull()
+                        ?: 0L
+                )
+            createCountersTable(database)
+            database.execSQL(
+                """
+                UPDATE uvir_counters
+                SET value = MAX(value, ?)
+                WHERE name = 'automatic_session_id'
+                """.trimIndent(),
+                arrayOf(importedSessionCounter)
+            )
+
+            val importedMeasurementCounter =
+                maxOf(
+                    measurementCounter ?: 0L,
+                    records.maxOfOrNull {
+                        it.id
+                    } ?: 0L
+                )
+            if (
+                importedMeasurementCounter >
+                measurementCounter(database)
+            ) {
+                val sequenceValues =
+                    ContentValues().apply {
+                        put(
+                            "seq",
+                            importedMeasurementCounter
+                        )
+                    }
+                val updated =
+                    database.update(
+                        "sqlite_sequence",
+                        sequenceValues,
+                        "name = ?",
+                        arrayOf("measurements")
+                    )
+                if (updated == 0) {
+                    sequenceValues.put(
+                        "name",
+                        "measurements"
+                    )
+                    database.insertOrThrow(
+                        "sqlite_sequence",
+                        null,
+                        sequenceValues
+                    )
+                }
             }
 
             database.setTransactionSuccessful()
@@ -2454,15 +2746,6 @@ private fun readableMeasurementTable(
     appendLine()
 
     records.forEachIndexed { index, record ->
-        if (records.size > 1) {
-            appendLine(
-                context.getString(
-                    R.string.shared_measurement_heading,
-                    index + 1
-                )
-            )
-        }
-
         appendLine(
             "${context.getString(R.string.share_measurement_id_label)}: " +
                 record.id
@@ -3523,10 +3806,7 @@ fun UvirApp(
             }
 
         val newSessionId =
-            maxOf(
-                startAt,
-                autoSessionId + 1L
-            )
+            database.nextAutomaticSessionId()
 
         val durationMs =
             request.durationSeconds
@@ -3795,6 +4075,16 @@ fun UvirApp(
                                     database
                                         .readAllRecords()
                                 )
+                                    .put(
+                                        "measurement_counter",
+                                        database
+                                            .currentMeasurementCounter()
+                                    )
+                                    .put(
+                                        "session_counter",
+                                        database
+                                            .currentAutomaticSessionCounter()
+                                    )
                             )
                         }
 
@@ -3867,6 +4157,36 @@ fun UvirApp(
                             )
                         }
 
+                        "reset_counters" -> {
+                            if (autoEnabled) {
+                                throw IllegalStateException(
+                                    "Ferma prima l'acquisizione automatica."
+                                )
+                            }
+
+                            val deleted =
+                                database.resetAllCounters()
+                            autoSessionId = 0L
+                            autoCompletedCount = 0
+                            preferences.edit()
+                                .putLong(
+                                    KEY_AUTO_SESSION_ID,
+                                    0L
+                                )
+                                .putInt(
+                                    KEY_AUTO_COMPLETED_COUNT,
+                                    0
+                                )
+                                .apply()
+
+                            remoteOk(
+                                JSONObject()
+                                    .put("deleted", deleted)
+                                    .put("measurement_counter", 0)
+                                    .put("session_counter", 0)
+                            )
+                        }
+
                         "replace_measurements" -> {
                             val recordsJson =
                                 payload.getJSONArray(
@@ -3899,7 +4219,17 @@ fun UvirApp(
                             val replaced =
                                 database
                                     .replaceAllMeasurements(
-                                        records
+                                        records,
+                                        measurementCounter =
+                                            payload.optLong(
+                                                "measurement_counter",
+                                                0L
+                                            ),
+                                        sessionCounter =
+                                            payload.optLong(
+                                                "session_counter",
+                                                0L
+                                            )
                                     )
 
                             remoteOk(
@@ -4213,6 +4543,25 @@ fun UvirApp(
                     stopAutomaticAcquisition()
                 },
 
+                onResetCounters = {
+                    if (!autoEnabled) {
+                        database.resetAllCounters()
+                        autoSessionId = 0L
+                        autoCompletedCount = 0
+                        selectedRecordId = null
+                        preferences.edit()
+                            .putLong(
+                                KEY_AUTO_SESSION_ID,
+                                0L
+                            )
+                            .putInt(
+                                KEY_AUTO_COMPLETED_COUNT,
+                                0
+                            )
+                            .apply()
+                    }
+                },
+
                 remoteNetworkEnabled =
                     remoteNetworkEnabled,
 
@@ -4359,6 +4708,9 @@ fun LiveScreen(
     onStopAutomaticAcquisition:
         () -> Unit,
 
+    onResetCounters:
+        () -> Unit,
+
     remoteNetworkEnabled: Boolean,
 
     backgroundColor: Color,
@@ -4430,6 +4782,10 @@ fun LiveScreen(
     }
 
     var showParametersDialog by rememberSaveable {
+        mutableStateOf(false)
+    }
+
+    var showResetCountersConfirmation by rememberSaveable {
         mutableStateOf(false)
     }
 
@@ -4582,6 +4938,16 @@ fun LiveScreen(
             loadSettingsSectionExpanded(
                 context,
                 KEY_SETTINGS_MOBILE_EXPANDED,
+                false
+            )
+        )
+    }
+
+    var countersSectionExpanded by rememberSaveable {
+        mutableStateOf(
+            loadSettingsSectionExpanded(
+                context,
+                KEY_SETTINGS_COUNTERS_EXPANDED,
                 false
             )
         )
@@ -5859,6 +6225,72 @@ if (showVersionInfoDialog) {
 
 if (showParametersDialog) {
 
+    if (showResetCountersConfirmation) {
+        val countersResetCompleteMessage =
+            stringResource(
+                R.string.counters_reset_complete
+            )
+
+        AlertDialog(
+            onDismissRequest = {
+                showResetCountersConfirmation = false
+            },
+            title = {
+                Text(
+                    stringResource(
+                        R.string.reset_counters_confirmation_title
+                    )
+                )
+            },
+            text = {
+                Text(
+                    stringResource(
+                        R.string.reset_counters_confirmation_message
+                    )
+                )
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showResetCountersConfirmation = false
+                    }
+                ) {
+                    Text(
+                        stringResource(
+                            R.string.cancel
+                        )
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        onResetCounters()
+                        showResetCountersConfirmation = false
+                        Toast.makeText(
+                            context,
+                            countersResetCompleteMessage,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    },
+                    colors =
+                        ButtonDefaults.buttonColors(
+                            containerColor =
+                                MaterialTheme.colorScheme.error,
+                            contentColor =
+                                MaterialTheme.colorScheme.onError
+                        )
+                ) {
+                    Text(
+                        stringResource(
+                            R.string.reset_counters_action
+                        )
+                    )
+                }
+            }
+        )
+    }
+
     UvirFullScreenPage(
         onDismissRequest = {
 
@@ -6448,6 +6880,83 @@ if (showParametersDialog) {
                                 ),
                             color =
                                 MaterialTheme.colorScheme.error,
+                            fontSize = 11.sp
+                        )
+                    }
+                }
+
+                SettingsSection(
+                    title =
+                        stringResource(
+                            R.string.reset_counters_title
+                        ),
+                    titleIcon =
+                        ConnectivityIconType.COUNTERS,
+                    expanded =
+                        countersSectionExpanded,
+                    onExpandedChange = { expanded ->
+                        countersSectionExpanded = expanded
+                        saveSettingsSectionExpanded(
+                            context,
+                            KEY_SETTINGS_COUNTERS_EXPANDED,
+                            expanded
+                        )
+                    },
+                    containerColor = cardColor,
+                    titleColor = primaryText,
+                    dividerColor =
+                        secondaryText.copy(
+                            alpha = 0.28f
+                        )
+                ) {
+                    Text(
+                        text =
+                            stringResource(
+                                R.string.reset_counters_description
+                            ),
+                        color = secondaryText,
+                        fontSize = 12.sp
+                    )
+
+                    Text(
+                        text =
+                            stringResource(
+                                R.string.reset_counters_data_warning
+                            ),
+                        color =
+                            MaterialTheme.colorScheme.error,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+
+                    Button(
+                        onClick = {
+                            showResetCountersConfirmation = true
+                        },
+                        enabled = !autoEnabled,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors =
+                            ButtonDefaults.buttonColors(
+                                containerColor =
+                                    MaterialTheme.colorScheme.error,
+                                contentColor =
+                                    MaterialTheme.colorScheme.onError
+                            )
+                    ) {
+                        Text(
+                            stringResource(
+                                R.string.reset_counters_action
+                            )
+                        )
+                    }
+
+                    if (autoEnabled) {
+                        Text(
+                            text =
+                                stringResource(
+                                    R.string.reset_counters_stop_auto
+                                ),
+                            color = secondaryText,
                             fontSize = 11.sp
                         )
                     }
@@ -7105,6 +7614,26 @@ fun HistoryScreen(
                 .eachCount()
         }
 
+    val automaticSessionStartTimestamps =
+        remember(records) {
+            records
+                .asSequence()
+                .filter {
+                    it.automatic &&
+                            it.automaticSessionId != null
+                }
+                .groupBy {
+                    requireNotNull(
+                        it.automaticSessionId
+                    )
+                }
+                .mapValues { (_, sessionRecords) ->
+                    sessionRecords.minOf {
+                        it.timestamp
+                    }
+                }
+        }
+
     val automaticSessionFirstRecordIds =
         remember(records) {
             mutableMapOf<Long, Long>()
@@ -7747,8 +8276,11 @@ fun HistoryScreen(
                                                 automaticSessionCounts[
                                                     headerSessionId
                                                 ] ?: 1,
+                                                headerSessionId,
                                                 formatAutomaticSessionDateTime(
-                                                    headerSessionId
+                                                    automaticSessionStartTimestamps[
+                                                        headerSessionId
+                                                    ] ?: record.timestamp
                                                 ),
                                                 automaticSessionCounts[
                                                     headerSessionId
@@ -9233,7 +9765,8 @@ enum class ConnectivityIconType {
     USB,
     BLUETOOTH,
     WIFI,
-    MOBILE
+    MOBILE,
+    COUNTERS
 }
 
 @Composable
@@ -9400,6 +9933,56 @@ fun ConnectivitySectionIcon(
                             )
                         )
                     }
+            }
+
+            ConnectivityIconType.COUNTERS -> {
+                drawArc(
+                    color = tint,
+                    startAngle = 205f,
+                    sweepAngle = 235f,
+                    useCenter = false,
+                    topLeft = Offset(
+                        size.width * 0.14f,
+                        size.height * 0.14f
+                    ),
+                    size = Size(
+                        size.width * 0.72f,
+                        size.height * 0.72f
+                    ),
+                    style = Stroke(
+                        width = strokeWidth,
+                        cap = StrokeCap.Round
+                    )
+                )
+
+                val arrow = Path().apply {
+                    moveTo(
+                        size.width * 0.16f,
+                        size.height * 0.26f
+                    )
+                    lineTo(
+                        size.width * 0.16f,
+                        size.height * 0.49f
+                    )
+                    lineTo(
+                        size.width * 0.37f,
+                        size.height * 0.38f
+                    )
+                    close()
+                }
+                drawPath(
+                    path = arrow,
+                    color = tint
+                )
+
+                drawCircle(
+                    color = tint,
+                    radius = strokeWidth * 1.25f,
+                    center = Offset(
+                        size.width * 0.50f,
+                        size.height * 0.50f
+                    )
+                )
             }
         }
     }

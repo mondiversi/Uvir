@@ -18,8 +18,8 @@
     <string name="auto_waiting">AUTO • 0 salvate • parte tra %1$s</string>
     <string name="automatic_completed_count">%1$d acquisizioni automatiche salvate</string>
     <plurals name="automatic_session_summary">
-        <item quantity="one">AUTO · %1$s · %2$d misurazione</item>
-        <item quantity="other">AUTO · %1$s · %2$d misurazioni</item>
+        <item quantity="one">AUTO #%1$d · %2$s · %3$d misurazione</item>
+        <item quantity="other">AUTO #%1$d · %2$s · %3$d misurazioni</item>
     </plurals>
 
     <string name="saved_measurements">Misurazioni</string>
@@ -41,7 +41,6 @@
         <item quantity="one">La misurazione selezionata verrà cancellata definitivamente.</item>
         <item quantity="other">Le %1$d misurazioni selezionate verranno cancellate definitivamente.</item>
     </plurals>
-    <string name="shared_measurement_heading">Misurazione %1$d</string>
     <string name="share_measurement_id_label">ID misurazione</string>
     <string name="share_session_id_label">ID sessione</string>
     <string name="share_date_label">Data e ora</string>
@@ -88,6 +87,14 @@
     <string name="parameters_hint">Intervallo: 1–21 campioni e 20–5000 ms. Lo scarto degli estremi viene applicato solo con almeno 3 campioni.</string>
     <string name="invalid_acquisition_parameters">Usa 1–21 campioni e un intervallo tra 20 e 5000 ms.</string>
     <string name="parameters_saved">Parametri di acquisizione salvati</string>
+    <string name="reset_counters_title">Azzera i contatori</string>
+    <string name="reset_counters_description">Fa ripartire da 1 gli ID delle misurazioni e delle sessioni automatiche.</string>
+    <string name="reset_counters_data_warning">Questa operazione elimina definitivamente anche tutte le misurazioni salvate.</string>
+    <string name="reset_counters_action">AZZERA CONTATORI</string>
+    <string name="reset_counters_confirmation_title">Azzerare tutti i contatori?</string>
+    <string name="reset_counters_confirmation_message">Tutte le misurazioni salvate verranno eliminate definitivamente. La prossima misurazione e la prossima sessione automatica partiranno dall’ID 1.</string>
+    <string name="reset_counters_stop_auto">Ferma l’acquisizione automatica prima di azzerare i contatori.</string>
+    <string name="counters_reset_complete">Contatori azzerati</string>
 
     <string name="irradiance_view">Irradianza</string>
     <string name="biological_effects_view">Effetti biologici stimati</string>

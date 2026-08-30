@@ -67,14 +67,19 @@ class UvirDesktopTests(unittest.TestCase):
             "timestamp": 1_234_567_890_000,
             "note": "test",
             "automatic": True,
-            "automatic_session_id": 1_234_567_800_000,
+            "automatic_session_id": 3,
             "automatic_sequence": 3,
             "sample": sample,
         }
 
         with tempfile.TemporaryDirectory() as folder:
             path = Path(folder) / "uvir.db"
-            uvir.create_database_from_remote(path, [record])
+            uvir.create_database_from_remote(
+                path,
+                [record],
+                measurement_counter=9,
+                session_counter=4,
+            )
             uvir.ensure_schema(path)
 
             connection = sqlite3.connect(path)
@@ -99,7 +104,7 @@ class UvirDesktopTests(unittest.TestCase):
                     1,
                     "test",
                     1,
-                    1_234_567_800_000,
+                    3,
                     3,
                     1.25
                 )
@@ -108,7 +113,7 @@ class UvirDesktopTests(unittest.TestCase):
             round_trip = uvir.record_to_remote_dict(saved)
             self.assertEqual(
                 round_trip["automatic_session_id"],
-                1_234_567_800_000
+                3
             )
             self.assertEqual(
                 round_trip["automatic_sequence"],
@@ -120,7 +125,11 @@ class UvirDesktopTests(unittest.TestCase):
             )
             self.assertEqual(
                 uvir.export_row(saved)[:2],
-                [1, 1_234_567_800_000]
+                [1, 3]
+            )
+            self.assertEqual(
+                uvir.database_counters(path),
+                (9, 4)
             )
 
     def test_empty_refresh_preserves_measurement_sequence(self):
@@ -143,7 +152,9 @@ class UvirDesktopTests(unittest.TestCase):
                         "automatic": False,
                         "sample": sample,
                     }
-                ]
+                ],
+                measurement_counter=27,
+                session_counter=8,
             )
 
             uvir.create_database_from_remote(path, [])
@@ -158,6 +169,80 @@ class UvirDesktopTests(unittest.TestCase):
                 connection.close()
 
             self.assertEqual(sequence, (27,))
+            self.assertEqual(
+                uvir.database_counters(path),
+                (27, 8)
+            )
+
+            uvir.create_database_from_remote(
+                path,
+                [],
+                measurement_counter=0,
+                session_counter=0,
+            )
+            self.assertEqual(
+                uvir.database_counters(path),
+                (0, 0)
+            )
+
+    def test_legacy_session_ids_are_migrated_to_sequence(self):
+        sample = {
+            key: 0.0
+            for key in (
+                "uvc", "uvb", "uva", "violetto", "blu", "verde",
+                "giallo", "arancione", "rosso", "f8", "nir"
+            )
+        }
+        records = [
+            {
+                "id": 1,
+                "timestamp": 100,
+                "note": "",
+                "automatic": True,
+                "automatic_session_id": 1_700_000_000_000,
+                "automatic_sequence": 1,
+                "sample": sample,
+            },
+            {
+                "id": 2,
+                "timestamp": 200,
+                "note": "",
+                "automatic": True,
+                "automatic_session_id": 1_800_000_000_000,
+                "automatic_sequence": 1,
+                "sample": sample,
+            },
+        ]
+
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "legacy.db"
+            uvir.create_database_from_remote(path, records)
+            connection = sqlite3.connect(path)
+            try:
+                connection.execute("DROP TABLE uvir_counters")
+                connection.commit()
+            finally:
+                connection.close()
+
+            uvir.ensure_schema(path)
+
+            connection = sqlite3.connect(path)
+            try:
+                session_ids = connection.execute(
+                    """
+                    SELECT automatic_session_id
+                    FROM measurements
+                    ORDER BY timestamp
+                    """
+                ).fetchall()
+            finally:
+                connection.close()
+
+            self.assertEqual(session_ids, [(1,), (2,)])
+            self.assertEqual(
+                uvir.database_counters(path),
+                (2, 2)
+            )
 
     def test_remote_json_request(self):
         server = socket.socket()

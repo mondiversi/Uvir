@@ -18,8 +18,8 @@
     <string name="auto_waiting">AUTO • 0 saved • starts in %1$s</string>
     <string name="automatic_completed_count">%1$d automatic acquisitions saved</string>
     <plurals name="automatic_session_summary">
-        <item quantity="one">AUTO · %1$s · %2$d measurement</item>
-        <item quantity="other">AUTO · %1$s · %2$d measurements</item>
+        <item quantity="one">AUTO #%1$d · %2$s · %3$d measurement</item>
+        <item quantity="other">AUTO #%1$d · %2$s · %3$d measurements</item>
     </plurals>
 
     <string name="saved_measurements">Measurements</string>
@@ -41,7 +41,6 @@
         <item quantity="one">%1$d selected measurement will be permanently deleted.</item>
         <item quantity="other">%1$d selected measurements will be permanently deleted.</item>
     </plurals>
-    <string name="shared_measurement_heading">Measurement %1$d</string>
     <string name="share_measurement_id_label">Measurement ID</string>
     <string name="share_session_id_label">Session ID</string>
     <string name="share_date_label">Date and time</string>
@@ -88,6 +87,14 @@
     <string name="parameters_hint">Range: 1–21 samples and 20–5000 ms. Extreme-value trimming is applied only when at least 3 samples are available.</string>
     <string name="invalid_acquisition_parameters">Use 1–21 samples and a spacing between 20 and 5000 ms.</string>
     <string name="parameters_saved">Acquisition parameters saved</string>
+    <string name="reset_counters_title">Reset counters</string>
+    <string name="reset_counters_description">Restarts measurement IDs and automatic session IDs from 1.</string>
+    <string name="reset_counters_data_warning">This operation also permanently deletes all saved measurements.</string>
+    <string name="reset_counters_action">RESET COUNTERS</string>
+    <string name="reset_counters_confirmation_title">Reset all counters?</string>
+    <string name="reset_counters_confirmation_message">All saved measurements will be permanently deleted. The next measurement and automatic session will start from ID 1.</string>
+    <string name="reset_counters_stop_auto">Stop automatic acquisition before resetting the counters.</string>
+    <string name="counters_reset_complete">Counters reset</string>
 
     <string name="irradiance_view">Irradiance</string>
     <string name="biological_effects_view">Estimated biological effects</string>

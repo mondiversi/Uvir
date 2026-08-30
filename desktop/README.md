@@ -81,7 +81,13 @@ informazioni che raggruppano le misurazioni della stessa sessione automatica
 vengono conservate nelle copie, nelle esportazioni e durante la sincronizzazione.
 L'ID della sessione è riportato subito dopo l'ID della misurazione nei file CSV,
 Excel e LibreOffice. Dopo una cancellazione totale, gli ID già utilizzati non
-vengono assegnati nuovamente.
+vengono assegnati nuovamente. Gli ID delle sessioni automatiche sono progressivi
+(`1`, `2`, `3`...) e indipendenti dagli ID delle singole misurazioni.
+
+Il comando **Azzera contatori…** elimina tutte le misurazioni e riporta a zero
+entrambi i contatori; la misurazione e la sessione successive ripartono quindi
+dall'ID 1. Prima dell'operazione viene sempre richiesta una conferma e, per i
+database locali, viene creato un backup.
 
 Package Android previsto:
 
