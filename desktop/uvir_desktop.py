@@ -55,155 +55,40 @@ SETTINGS_FILE = Path(__file__).resolve().parent / "desktop_settings.json"
 BIOLOGICAL_MODEL_VERSION = "v1"
 
 
-TEXT = {
-    "initial_status": ("Apri il database oppure importa i dati dal telefono.", "Open a database or import data from the phone."),
-    "not_connected": ("Non collegato", "Not connected"),
-    "live_connect_hint": ("Collega il telefono per vedere i dati LIVE.", "Connect the phone to view LIVE data."),
-    "auto_stopped": ("AUTO fermo", "AUTO stopped"),
-    "open_database": ("Apri database…", "Open database…"),
-    "connect_phone": ("Collega telefono…", "Connect phone…"),
-    "open_live": ("Apri LIVE", "Open LIVE"),
-    "refresh_data": ("Aggiorna dati", "Refresh data"),
-    "export": ("Esporta:", "Export:"),
-    "reset_counters": ("Azzera contatori…", "Reset counters…"),
-    "measurements_count": ("Misure: {count}", "Measurements: {count}"),
-    "edit_note": ("Modifica nota", "Edit note"),
-    "delete_selected": ("Elimina selezionato", "Delete selected"),
-    "delete_all": ("Elimina tutto", "Delete all"),
-    "measurement_id": ("ID misurazione", "Measurement ID"),
-    "session_id": ("ID sessione", "Session ID"),
-    "date_time": ("Data / ora", "Date / time"),
-    "automatic_short": ("A", "A"),
-    "note": ("Nota", "Note"),
-    "select_measurement": ("Seleziona una misura", "Select a measurement"),
-    "no_measurement": ("Nessuna misura", "No measurement"),
-    "irradiance": ("Irradianza", "Irradiance"),
-    "estimated_biological_effects": ("Effetti biologici stimati", "Estimated biological effects"),
-    "local": ("Locale", "Local"),
-    "local_database": ("Database locale", "Local database"),
-    "visible": ("VISIBILE", "VISIBLE"),
-    "violet": ("Violetto", "Violet"),
-    "blue": ("Blu", "Blue"),
-    "green": ("Verde", "Green"),
-    "yellow": ("Giallo", "Yellow"),
-    "orange": ("Arancione", "Orange"),
-    "red": ("Rosso", "Red"),
-    "energetic_visible": ("Visibile energetico", "Energetic visible"),
-    "energetic_blue_violet": ("Blu-viola energetico", "Energetic blue-violet"),
-    "bio_disclaimer": ("Stime sperimentali a banda larga derivate dai canali misurati. Ogni barra usa una scala relativa 0–100: 100 non significa 100% di danno e non rappresenta una soglia di sicurezza. Non sono valutazioni mediche, diagnostiche o di sicurezza.", "Experimental broadband estimates derived from the measured channels. Each bar uses a relative 0–100 scale: 100 does not mean 100% damage and is not a safety threshold. These are not medical, diagnostic, or safety assessments."),
-    "dna_title": ("UV effetto-DNA", "UV DNA effect"),
-    "photoaging_title": ("Fotoinvecchiamento UVA", "UVA photoaging"),
-    "oxidative_title": ("Stress ossidativo HEV", "HEV oxidative stress"),
-    "dna_description": ("Stima sperimentale pesata verso le bande UV più corte.", "Experimental estimate weighted toward shorter UV bands."),
-    "photoaging_description": ("Stima sperimentale dominata dall'esposizione UVA.", "Experimental estimate dominated by UVA exposure."),
-    "oxidative_description": ("Stima sperimentale basata sulla banda HEV 400–500 nm.", "Experimental estimate based on the 400–500 nm HEV band."),
-    "relative_scale": ("Scala relativa 0–100: non è una percentuale di danno né una soglia di sicurezza.", "Relative 0–100 scale: it is neither a damage percentage nor a safety threshold."),
-    "weighted_irradiance": ("Irradianza pesata stimata", "Estimated weighted irradiance"),
-    "spectral_relevance": ("Rilevanza spettrale", "Spectral relevance"),
-    "live_window_title": ("Uvir LIVE · dati dal telefono", "Uvir LIVE · phone data"),
-    "connect": ("COLLEGA", "CONNECT"),
-    "acquisition": ("ACQUISIZIONE…", "ACQUISITION…"),
-    "live_irradiance": ("Irradianza in tempo reale", "Real-time irradiance"),
-    "visible_spectrum": ("Spettro visibile", "Visible spectrum"),
-    "uv_total": ("UV totale", "Total UV"),
-    "visible_total": ("Visibile totale", "Total visible"),
-    "far_nir_total": ("Far-red / NIR totale", "Total far-red / NIR"),
-    "live_bio_disclaimer": ("Stime sperimentali a banda larga calcolate in tempo reale. La scala 0–100 indica soltanto la rilevanza spettrale: non è una percentuale di danno né una soglia di sicurezza.", "Experimental broadband estimates calculated in real time. The 0–100 scale indicates spectral relevance only: it is neither a damage percentage nor a safety threshold."),
-    "automatic_update": ("Aggiornamento automatico ogni 0,5 secondi", "Automatic refresh every 0.5 seconds"),
-    "phone_not_connected": ("Telefono non collegato · usa COLLEGA", "Phone not connected · use CONNECT"),
-    "live_unavailable": ("Collegamento LIVE temporaneamente non disponibile · {error}", "LIVE connection temporarily unavailable · {error}"),
-    "sensors_initializing": ("Inizializzazione sensori", "Initializing sensors"),
-    "last_update": ("ultimo aggiornamento {time}", "last update {time}"),
-    "auto_active": ("AUTO attivo · {completed}{limit} salvate · ogni {interval} s · prossima tra {remaining} s", "AUTO active · {completed}{limit} saved · every {interval} s · next in {remaining} s"),
-    "control_acquisition": ("Controlla acquisizione", "Control acquisition"),
-    "manual_measurement": ("Misurazione manuale", "Manual measurement"),
-    "optional_note": ("Nota (facoltativa)", "Note (optional)"),
-    "save_measurement": ("Salva misurazione", "Save measurement"),
-    "automatic_acquisition": ("Acquisizione automatica", "Automatic acquisition"),
-    "interval_seconds": ("Intervallo (secondi)", "Interval (seconds)"),
-    "maximum_acquisitions": ("Acquisizioni massime", "Maximum acquisitions"),
-    "start_automatic": ("Avvia automatico", "Start automatic"),
-    "stop": ("Ferma", "Stop"),
-    "connect_phone_title": ("Collega il telefono", "Connect the phone"),
-    "advanced": ("Avanzate", "Advanced"),
-    "usb_instructions": ("Metodo consigliato per iniziare.\n\n1. Collega il telefono con il cavo USB.\n2. Lascia aperta Uvir sul telefono.\n3. Se Android lo chiede, autorizza il computer.\n4. Premi Collega.", "Recommended method to get started.\n\n1. Connect the phone with the USB cable.\n2. Keep Uvir open on the phone.\n3. Authorize the computer if Android asks.\n4. Press Connect."),
-    "connect_usb": ("Collega via USB", "Connect via USB"),
-    "wifi_instructions": ("1. Collega telefono e computer alla stessa rete Wi-Fi privata.\n2. In Uvir apri Impostazioni → Collega con Wi-Fi.\n3. Copia qui indirizzo Wi-Fi e codice mostrati.", "1. Connect the phone and computer to the same private Wi-Fi network.\n2. In Uvir open Settings → Connect with Wi-Fi.\n3. Copy the displayed Wi-Fi address and connection code here."),
-    "wifi_address": ("Indirizzo Wi-Fi", "Wi-Fi address"),
-    "connection_code": ("Codice di collegamento", "Connection code"),
-    "connect_wifi": ("Collega via Wi-Fi", "Connect via Wi-Fi"),
-    "bluetooth_instructions": ("1. Abbina telefono e computer dalle impostazioni Bluetooth.\n2. Telefono: Impostazioni → Connessioni → Router Wi-Fi e tethering → attiva Tethering Bluetooth.\n3. PC: Impostazioni → Bluetooth e dispositivi → Dispositivi; espandi il telefono e premi Partecipa accanto a Rete PAN.\n4. Scegli Punto di accesso e premi Connetti.\n5. In Uvir apri Impostazioni → Collega con Bluetooth.\n6. Copia qui indirizzo Bluetooth e codice mostrati.", "1. Pair the phone and computer in Bluetooth settings.\n2. Phone: Settings → Connections → Mobile Hotspot and Tethering → enable Bluetooth tethering.\n3. PC: Settings → Bluetooth & devices → Devices; expand the phone and select Join next to PAN network.\n4. Choose Access point and connect.\n5. In Uvir open Settings → Connect with Bluetooth.\n6. Copy the displayed Bluetooth address and connection code here."),
-    "bluetooth_address": ("Indirizzo Bluetooth", "Bluetooth address"),
-    "connect_bluetooth": ("Collega via Bluetooth", "Connect via Bluetooth"),
-    "wireless_debug_description": ("Collegamento Wi-Fi tramite Debug wireless di Android. È una modalità tecnica alternativa: per l’uso normale scegli la scheda Wi-Fi.", "Wi-Fi connection through Android Wireless debugging. This is an alternative technical mode; use the Wi-Fi tab for normal operation."),
-    "pairing_address": ("Indirizzo di abbinamento", "Pairing address"),
-    "pair": ("Abbina", "Pair"),
-    "connection_address": ("Indirizzo di connessione", "Connection address"),
-    "connect_wireless_debug": ("Collega con Debug wireless", "Connect with Wireless debugging"),
-    "unexpected_package": ("Package inatteso: {actual}. Atteso: {expected}.", "Unexpected package: {actual}. Expected: {expected}."),
-    "connected": ("Collegato: {label} · Uvir {version}", "Connected: {label} · Uvir {version}"),
-    "remote_unresponsive": ("Uvir non risponde sul canale remoto.\n\n{error}", "Uvir is not responding on the remote channel.\n\n{error}"),
-    "adb_not_found": ("ADB non trovato nell'Android SDK.", "ADB was not found in the Android SDK."),
-    "enter_address": ("Inserisci l’indirizzo {method} mostrato da Uvir.", "Enter the {method} address shown by Uvir."),
-    "enter_connection_code": ("Inserisci il codice di collegamento mostrato da Uvir.", "Enter the connection code shown by Uvir."),
-    "connect_desktop_first": ("Collega prima Uvir Desktop al telefono.", "Connect Uvir Desktop to the phone first."),
-    "live_ready": ("LIVE pronto", "LIVE ready"),
-    "live_initializing": ("LIVE in inizializzazione", "LIVE initializing"),
-    "saved_count": ("AUTO attivo · {count} salvate", "AUTO active · {count} saved"),
-    "screen_status": ("{ready} · {auto} · schermata {screen}", "{ready} · {auto} · screen {screen}"),
-    "measurement_saved": ("Misurazione #{id} salvata sul telefono e copiata sul PC.", "Measurement #{id} saved on the phone and copied to the PC."),
-    "positive_interval": ("L'intervallo deve essere maggiore di zero.", "The interval must be greater than zero."),
-    "positive_limit": ("Il limite deve essere maggiore di zero.", "The limit must be greater than zero."),
-    "auto_started": ("Acquisizione automatica avviata.", "Automatic acquisition started."),
-    "auto_stopped_message": ("Acquisizione automatica fermata.", "Automatic acquisition stopped."),
-    "local_copy_updated": ("Copia locale aggiornata: {count} misurazioni → {path}", "Local copy updated: {count} measurements → {path}"),
-    "local_copy_updated_dialog": ("Copia locale aggiornata.\n\n{path}", "Local copy updated.\n\n{path}"),
-    "open_local_first": ("Apri prima un database locale.", "Open a local database first."),
-    "connect_phone_first": ("Collega prima il telefono.", "Connect the phone first."),
-    "replace_phone_database": ("Sostituire l'elenco delle misurazioni sul telefono con il database locale?\n\nPrima verrà mantenuta una copia locale di sicurezza.", "Replace the phone's measurement list with the local database?\n\nA local safety copy will be kept first."),
-    "synced_measurements": ("Sincronizzate {count} misurazioni.\nBackup: {backup}", "Synchronized {count} measurements.\nBackup: {backup}"),
-    "sync_failed": ("Sincronizzazione non riuscita:\n{error}", "Synchronization failed:\n{error}"),
-    "select_a_measurement": ("Seleziona una misurazione.", "Select a measurement."),
-    "measurement_note": ("Nota della misurazione #{id}", "Note for measurement #{id}"),
-    "note_updated": ("Nota aggiornata. Backup: {backup}", "Note updated. Backup: {backup}"),
-    "edit_failed": ("Modifica non riuscita:\n{error}", "Edit failed:\n{error}"),
-    "no_database_open": ("Nessun database aperto.", "No database is open."),
-    "open_database_title": ("Apri uvir.db", "Open uvir.db"),
-    "all_files": ("Tutti i file", "All files"),
-    "database_read_error": ("Errore lettura database:\n{error}", "Database read error:\n{error}"),
-    "automatic_session": ("Sessione automatica #{id} · ({count})", "Automatic session #{id} · ({count})"),
-    "measurement_title": ("Misura #{id}  •  {time}", "Measurement #{id}  •  {time}"),
-    "acquisition_label": ("Acquisizione: {type}", "Acquisition: {type}"),
-    "note_label": ("Nota: {note}", "Note: {note}"),
-    "no_note": ("Nessuna nota", "No note"),
-    "manual": ("Manuale", "Manual"),
-    "automatic": ("Automatica", "Automatic"),
-    "open_database_first": ("Apri prima un database.", "Open a database first."),
-    "nothing_to_export": ("Nessuna misura da esportare.", "There are no measurements to export."),
-    "exported": ("Esportate {count} misure → {path}", "Exported {count} measurements → {path}"),
-    "export_complete": ("Esportazione completata:\n{path}", "Export completed:\n{path}"),
-    "export_error": ("Errore esportazione:\n{error}", "Export error:\n{error}"),
-    "select_measurement_short": ("Seleziona una misura.", "Select a measurement."),
-    "delete_one_question": ("Eliminare definitivamente la misura #{id}?", "Permanently delete measurement #{id}?"),
-    "delete_all_question": ("Eliminare TUTTE le {count} misure?\nVerrà creato un backup.", "Delete ALL {count} measurements?\nA backup will be created."),
-    "delete_all_final": ("Conferma finale: svuotare completamente lo storico?", "Final confirmation: completely clear the history?"),
-    "open_or_connect": ("Apri un database oppure collega prima il telefono.", "Open a database or connect the phone first."),
-    "reset_question": ("Azzerare i contatori?\n\nQuesta operazione elimina definitivamente tutte le misurazioni. La prossima misurazione e la prossima sessione automatica partiranno dall'ID 1.", "Reset the counters?\n\nThis operation permanently deletes all measurements. The next measurement and automatic session will start from ID 1."),
-    "counters_reset_remote": ("Contatori azzerati sul telefono e nella copia locale.", "Counters reset on the phone and in the local copy."),
-    "counters_reset_remote_dialog": ("Contatori azzerati. Tutte le misurazioni sono state eliminate dal telefono e dalla copia locale.", "Counters reset. All measurements were deleted from the phone and the local copy."),
-    "counters_reset_backup": ("Contatori azzerati. Backup: {backup}", "Counters reset. Backup: {backup}"),
-    "counters_reset_local_dialog": ("Contatori azzerati e misurazioni eliminate.\n\nBackup: {backup}", "Counters reset and measurements deleted.\n\nBackup: {backup}"),
-    "reset_failed": ("Azzeramento non riuscito:\n{error}", "Reset failed:\n{error}"),
-    "nothing_deleted": ("Nessuna misura è stata cancellata: la misura selezionata non risulta più presente nel database.", "No measurement was deleted: the selected measurement is no longer in the database."),
-    "deletion_synced": ("Cancellazione completata sul PC e sul telefono. Backup: {backup}", "Deletion completed on the PC and phone. Backup: {backup}"),
-    "measurement_deleted_remote": ("Misurazione eliminata correttamente.\n\nLa modifica è stata applicata anche a Uvir sul telefono.", "Measurement deleted successfully.\n\nThe change was also applied to Uvir on the phone."),
-    "deletion_sync_failed_status": ("Misurazione eliminata sul PC, ma sincronizzazione telefono non riuscita.", "Measurement deleted on the PC, but phone synchronization failed."),
-    "deletion_sync_failed": ("La modifica locale è riuscita, ma il telefono non è stato aggiornato.\n\nDettaglio:\n{error}\n\nBackup locale:\n{backup}", "The local change succeeded, but the phone was not updated.\n\nDetails:\n{error}\n\nLocal backup:\n{backup}"),
-    "deletion_local_status": ("Cancellazione completata sul database locale. Backup: {backup}", "Deletion completed in the local database. Backup: {backup}"),
-    "measurement_deleted_local": ("Misura cancellata correttamente dal database locale.", "Measurement deleted successfully from the local database."),
-    "deletion_error": ("Errore durante la cancellazione:\n{error}", "Error during deletion:\n{error}"),
-    "settings_saved_error": ("Impossibile salvare la memoria locale: {error}", "Unable to save local memory: {error}"),
+LANG_DIR = Path(__file__).resolve().parent / "lang"
+
+
+def load_language_catalog(
+    language: str,
+    directory: Path = LANG_DIR,
+) -> dict[str, str]:
+    path = directory / f"{language}.json"
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError, TypeError) as error:
+        raise RuntimeError(
+            f"Unable to load language file: {path}"
+        ) from error
+
+    if not isinstance(data, dict) or any(
+        not isinstance(key, str) or not isinstance(value, str)
+        for key, value in data.items()
+    ):
+        raise RuntimeError(
+            f"Invalid language file: {path}"
+        )
+    return data
+
+
+TRANSLATIONS = {
+    language: load_language_catalog(language)
+    for language in ("it", "en")
 }
+
+if TRANSLATIONS["it"].keys() != TRANSLATIONS["en"].keys():
+    raise RuntimeError(
+        "Italian and English language files contain different keys."
+    )
 
 
 def detect_system_language(locale_name: str | None = None) -> str:
@@ -220,8 +105,15 @@ LANGUAGE = detect_system_language()
 
 def tr(key: str, language: str | None = None, **values) -> str:
     selected = language or LANGUAGE
-    italian, english = TEXT[key]
-    return (italian if selected == "it" else english).format(**values)
+    catalog = TRANSLATIONS.get(
+        selected,
+        TRANSLATIONS["en"]
+    )
+    template = catalog.get(
+        key,
+        TRANSLATIONS["en"][key]
+    )
+    return template.format(**values)
 
 
 def load_local_settings(path: Path = SETTINGS_FILE) -> dict:
@@ -449,6 +341,18 @@ def automatic_session_id(row: sqlite3.Row) -> int | None:
     if not is_automatic(row):
         return None
     return optional_int(row, "automatic_session_id")
+
+
+def automatic_session_note_name(row: sqlite3.Row) -> str:
+    note = str(row["note"] or "").strip()
+    sequence = optional_int(row, "automatic_sequence")
+    if sequence is not None:
+        suffix = f" #{sequence}"
+        if note.endswith(suffix):
+            note = note[:-len(suffix)].strip()
+        elif note == f"#{sequence}":
+            note = ""
+    return note or tr("automatic_session_fallback")
 
 
 def grouped_measurement_rows(
@@ -2780,9 +2684,17 @@ class App:
             for session_id, block_rows in grouped_measurement_rows(rows):
                 if session_id is not None:
                     count = len(block_rows)
-                    session_start = min(
-                        int(row["timestamp"])
-                        for row in block_rows
+                    session_first_record = min(
+                        block_rows,
+                        key=lambda row: int(row["timestamp"])
+                    )
+                    session_start = int(
+                        session_first_record["timestamp"]
+                    )
+                    session_note = (
+                        automatic_session_note_name(
+                            session_first_record
+                        )
                     )
                     self.tree.insert(
                         "",
@@ -2795,6 +2707,7 @@ class App:
                             "A",
                             tr(
                                 "automatic_session",
+                                note=session_note,
                                 id=session_id,
                                 count=count,
                             )

@@ -1554,6 +1554,33 @@ internal fun formatAutomaticMeasurementNote(
     }
 }
 
+internal fun automaticSessionNoteName(
+    measurementNote: String,
+    automaticSequence: Int?
+): String {
+    val trimmedNote = measurementNote.trim()
+    val suffix =
+        automaticSequence
+            ?.let { " #$it" }
+            .orEmpty()
+
+    return if (
+        suffix.isNotEmpty() &&
+        trimmedNote.endsWith(suffix)
+    ) {
+        trimmedNote
+            .removeSuffix(suffix)
+            .trim()
+    } else if (
+        automaticSequence != null &&
+        trimmedNote == "#${automaticSequence}"
+    ) {
+        ""
+    } else {
+        trimmedNote
+    }
+}
+
 data class BiologicalEffectEstimate(
     val dnaUvProxy: Double,
     val dnaUvScore: Float,
@@ -8398,6 +8425,16 @@ fun HistoryScreen(
                                 )
                         ) {
                             if (headerSessionId != null) {
+                                val sessionNoteName =
+                                    automaticSessionNoteName(
+                                        record.note,
+                                        record.automaticSequence
+                                    ).ifBlank {
+                                        stringResource(
+                                            R.string.automatic_session_unnamed
+                                        )
+                                    }
+
                                 Row(
                                     modifier =
                                         Modifier
@@ -8435,6 +8472,7 @@ fun HistoryScreen(
                                                 automaticSessionCounts[
                                                     headerSessionId
                                                 ] ?: 1,
+                                                sessionNoteName,
                                                 headerSessionId,
                                                 formatAutomaticSessionDateTime(
                                                     automaticSessionStartTimestamps[

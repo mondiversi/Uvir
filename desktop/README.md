@@ -1,9 +1,15 @@
 # Uvir Desktop
 
-Avvio:
+Avvio su Windows:
 
 ```powershell
 py uvir_desktop.py
+```
+
+Avvio su Linux o macOS:
+
+```bash
+python3 uvir_desktop.py
 ```
 
 Non è necessario creare un file EXE. Lo script usa soltanto moduli inclusi in
@@ -13,7 +19,9 @@ nella scheda **Avanzate**.
 L’interfaccia rileva automaticamente la lingua del sistema: usa l’italiano sui
 sistemi configurati in italiano e l’inglese in tutti gli altri casi. Anche le
 intestazioni e la legenda dei file CSV, Excel e LibreOffice seguono la lingua
-rilevata.
+rilevata. Le traduzioni si trovano nei file `lang/it.json` e `lang/en.json`,
+accanto allo script, così è possibile aggiornarle senza modificare il codice
+Python.
 
 ## Memoria locale
 

@@ -58,6 +58,26 @@ class UvirDesktopTests(unittest.TestCase):
             ]
         )
 
+    def test_automatic_session_uses_note_without_sequence(self):
+        self.assertEqual(
+            uvir.automatic_session_note_name(
+                {
+                    "note": "Outdoor test #12",
+                    "automatic_sequence": 12,
+                }
+            ),
+            "Outdoor test",
+        )
+        self.assertEqual(
+            uvir.automatic_session_note_name(
+                {
+                    "note": "#1",
+                    "automatic_sequence": 1,
+                }
+            ),
+            uvir.tr("automatic_session_fallback"),
+        )
+
     def test_remote_records_create_compatible_database(self):
         sample = {
             key: 1.25
@@ -364,7 +384,18 @@ class UvirDesktopTests(unittest.TestCase):
 
     def test_translation_catalog_and_export_variants_match(self):
         formatter = string.Formatter()
-        for italian, english in uvir.TEXT.values():
+        self.assertEqual(
+            set(uvir.TRANSLATIONS),
+            {"it", "en"}
+        )
+        self.assertEqual(
+            set(uvir.TRANSLATIONS["it"]),
+            set(uvir.TRANSLATIONS["en"])
+        )
+
+        for key in uvir.TRANSLATIONS["it"]:
+            italian = uvir.TRANSLATIONS["it"][key]
+            english = uvir.TRANSLATIONS["en"][key]
             italian_fields = {
                 name
                 for _, name, _, _ in formatter.parse(italian)
@@ -404,7 +435,18 @@ class UvirDesktopTests(unittest.TestCase):
             )
         }
         self.assertTrue(used_keys)
-        self.assertFalse(used_keys - set(uvir.TEXT))
+        self.assertFalse(
+            used_keys - set(uvir.TRANSLATIONS["en"])
+        )
+
+        self.assertEqual(
+            uvir.load_language_catalog("it"),
+            uvir.TRANSLATIONS["it"]
+        )
+        self.assertEqual(
+            uvir.load_language_catalog("en"),
+            uvir.TRANSLATIONS["en"]
+        )
 
         android_source = (
             Path(uvir.__file__).resolve().parent.parent

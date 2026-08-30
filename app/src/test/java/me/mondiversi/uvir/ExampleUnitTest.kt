@@ -38,6 +38,24 @@ class ExampleUnitTest {
     }
 
     @Test
+    fun automaticSessionNameRemovesMeasurementSequence() {
+        assertEquals(
+            "Outdoor test",
+            automaticSessionNoteName(
+                "Outdoor test #12",
+                12
+            )
+        )
+        assertEquals(
+            "",
+            automaticSessionNoteName(
+                "#1",
+                1
+            )
+        )
+    }
+
+    @Test
     fun measurementExportSchemasStayAligned() {
         assertEquals(
             31,
