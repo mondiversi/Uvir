@@ -1,10 +1,13 @@
+import ast
 import json
 import socket
 import sqlite3
+import string
 import sys
 import tempfile
 import threading
 import unittest
+import zipfile
 from pathlib import Path
 
 sys.path.insert(
@@ -121,7 +124,11 @@ class UvirDesktopTests(unittest.TestCase):
             )
             self.assertEqual(
                 uvir.EXPORT_COLUMNS[:3],
-                ["ID_misurazione", "ID_sessione", "Data/Ora"]
+                (
+                    ["ID_misurazione", "ID_sessione", "Data/Ora"]
+                    if uvir.LANGUAGE == "it"
+                    else ["Measurement_ID", "Session_ID", "Date/Time"]
+                )
             )
             self.assertEqual(
                 uvir.export_row(saved)[:2],
@@ -290,6 +297,118 @@ class UvirDesktopTests(unittest.TestCase):
             response["package"],
             "me.mondiversi.uvir"
         )
+
+    def test_language_detection_and_translation_fallback(self):
+        self.assertEqual(
+            uvir.detect_system_language("it_IT"),
+            "it"
+        )
+        self.assertEqual(
+            uvir.detect_system_language("Italian_Italy"),
+            "it"
+        )
+        self.assertEqual(
+            uvir.detect_system_language("en_US"),
+            "en"
+        )
+        self.assertEqual(
+            uvir.detect_system_language("fr_FR"),
+            "en"
+        )
+        self.assertEqual(
+            uvir.tr("open_database", language="it"),
+            "Apri database…"
+        )
+        self.assertEqual(
+            uvir.tr("open_database", language="en"),
+            "Open database…"
+        )
+
+    def test_local_settings_round_trip_and_invalid_file(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "desktop_settings.json"
+            expected = {
+                "wifi_address": "192.168.1.20",
+                "wifi_code": "12345678",
+                "bluetooth_address": "192.168.44.1",
+                "last_connection_method": "wifi",
+                "automatic_limit_enabled": True,
+            }
+
+            uvir.save_local_settings(expected, path)
+            self.assertEqual(
+                uvir.load_local_settings(path),
+                expected
+            )
+
+            path.write_text("not-json", encoding="utf-8")
+            self.assertEqual(
+                uvir.load_local_settings(path),
+                {}
+            )
+
+    def test_translation_catalog_and_export_variants_match(self):
+        formatter = string.Formatter()
+        for italian, english in uvir.TEXT.values():
+            italian_fields = {
+                name
+                for _, name, _, _ in formatter.parse(italian)
+                if name
+            }
+            english_fields = {
+                name
+                for _, name, _, _ in formatter.parse(english)
+                if name
+            }
+            self.assertEqual(italian_fields, english_fields)
+            self.assertTrue(italian)
+            self.assertTrue(english)
+
+        self.assertEqual(
+            len(uvir.EXPORT_COLUMNS_IT),
+            len(uvir.EXPORT_COLUMNS_EN)
+        )
+        self.assertEqual(
+            len(uvir.LEGEND_ROWS_IT),
+            len(uvir.LEGEND_ROWS_EN)
+        )
+
+        source = Path(uvir.__file__).read_text(encoding="utf-8")
+        tree = ast.parse(source)
+        used_keys = {
+            node.args[0].value
+            for node in ast.walk(tree)
+            if (
+                isinstance(node, ast.Call)
+                and isinstance(node.func, ast.Name)
+                and node.func.id == "tr"
+                and node.args
+                and isinstance(node.args[0], ast.Constant)
+                and isinstance(node.args[0].value, str)
+            )
+        }
+        self.assertTrue(used_keys)
+        self.assertFalse(used_keys - set(uvir.TEXT))
+
+        with tempfile.TemporaryDirectory() as folder:
+            xlsx = Path(folder) / "test.xlsx"
+            ods = Path(folder) / "test.ods"
+            uvir.write_xlsx(xlsx, [])
+            uvir.write_ods(ods, [])
+
+            with zipfile.ZipFile(xlsx) as archive:
+                workbook = archive.read(
+                    "xl/workbook.xml"
+                ).decode("utf-8")
+            self.assertIn(uvir.MEASUREMENTS_SHEET, workbook)
+            self.assertIn(uvir.LEGEND_SHEET, workbook)
+
+            with zipfile.ZipFile(ods) as archive:
+                content = archive.read(
+                    "content.xml"
+                ).decode("utf-8")
+            self.assertIn(uvir.MEASUREMENTS_SHEET, content)
+            self.assertIn(uvir.LEGEND_SHEET, content)
 
 
 if __name__ == "__main__":

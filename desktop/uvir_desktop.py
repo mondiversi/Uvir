@@ -25,6 +25,7 @@ from __future__ import annotations
 import csv
 import sys
 import json
+import locale
 import os
 import queue
 import shutil
@@ -50,6 +51,198 @@ DEFAULT_PACKAGE = "me.mondiversi.uvir"
 REMOTE_PORT = 45871
 WINDOWS_APP_ID = "Uvir.Desktop.2026.1"
 SESSION_COUNTER_NAME = "automatic_session_id"
+SETTINGS_FILE = Path.home() / "UvirDesktop" / "desktop_settings.json"
+
+
+TEXT = {
+    "initial_status": ("Apri il database oppure importa i dati dal telefono.", "Open a database or import data from the phone."),
+    "not_connected": ("Non collegato", "Not connected"),
+    "live_connect_hint": ("Collega il telefono per vedere i dati LIVE.", "Connect the phone to view LIVE data."),
+    "auto_stopped": ("AUTO fermo", "AUTO stopped"),
+    "open_database": ("Apri database…", "Open database…"),
+    "connect_phone": ("Collega telefono…", "Connect phone…"),
+    "open_live": ("Apri LIVE", "Open LIVE"),
+    "refresh_data": ("Aggiorna dati", "Refresh data"),
+    "export": ("Esporta:", "Export:"),
+    "reset_counters": ("Azzera contatori…", "Reset counters…"),
+    "measurements_count": ("Misure: {count}", "Measurements: {count}"),
+    "edit_note": ("Modifica nota", "Edit note"),
+    "delete_selected": ("Elimina selezionato", "Delete selected"),
+    "delete_all": ("Elimina tutto", "Delete all"),
+    "measurement_id": ("ID misurazione", "Measurement ID"),
+    "session_id": ("ID sessione", "Session ID"),
+    "date_time": ("Data / ora", "Date / time"),
+    "automatic_short": ("A", "A"),
+    "note": ("Nota", "Note"),
+    "select_measurement": ("Seleziona una misura", "Select a measurement"),
+    "no_measurement": ("Nessuna misura", "No measurement"),
+    "irradiance": ("Irradianza", "Irradiance"),
+    "estimated_biological_effects": ("Effetti biologici stimati", "Estimated biological effects"),
+    "local": ("Locale", "Local"),
+    "local_database": ("Database locale", "Local database"),
+    "visible": ("VISIBILE", "VISIBLE"),
+    "violet": ("Violetto", "Violet"),
+    "blue": ("Blu", "Blue"),
+    "green": ("Verde", "Green"),
+    "yellow": ("Giallo", "Yellow"),
+    "orange": ("Arancione", "Orange"),
+    "red": ("Rosso", "Red"),
+    "energetic_visible": ("Visibile energetico", "Energetic visible"),
+    "energetic_blue_violet": ("Blu-viola energetico", "Energetic blue-violet"),
+    "bio_disclaimer": ("Stime sperimentali a banda larga derivate dai canali misurati. Ogni barra usa una scala relativa 0–100: 100 non significa 100% di danno e non rappresenta una soglia di sicurezza. Non sono valutazioni mediche, diagnostiche o di sicurezza.", "Experimental broadband estimates derived from the measured channels. Each bar uses a relative 0–100 scale: 100 does not mean 100% damage and is not a safety threshold. These are not medical, diagnostic, or safety assessments."),
+    "dna_title": ("UV effetto-DNA", "UV DNA effect"),
+    "photoaging_title": ("Fotoinvecchiamento UVA", "UVA photoaging"),
+    "oxidative_title": ("Stress ossidativo HEV", "HEV oxidative stress"),
+    "dna_description": ("Stima sperimentale pesata verso le bande UV più corte.", "Experimental estimate weighted toward shorter UV bands."),
+    "photoaging_description": ("Stima sperimentale dominata dall'esposizione UVA.", "Experimental estimate dominated by UVA exposure."),
+    "oxidative_description": ("Stima sperimentale basata sulla banda HEV 400–500 nm.", "Experimental estimate based on the 400–500 nm HEV band."),
+    "relative_scale": ("Scala relativa 0–100: non è una percentuale di danno né una soglia di sicurezza.", "Relative 0–100 scale: it is neither a damage percentage nor a safety threshold."),
+    "weighted_irradiance": ("Irradianza pesata stimata", "Estimated weighted irradiance"),
+    "spectral_relevance": ("Rilevanza spettrale", "Spectral relevance"),
+    "live_window_title": ("Uvir LIVE · dati dal telefono", "Uvir LIVE · phone data"),
+    "connect": ("COLLEGA", "CONNECT"),
+    "acquisition": ("ACQUISIZIONE…", "ACQUISITION…"),
+    "live_irradiance": ("Irradianza in tempo reale", "Real-time irradiance"),
+    "visible_spectrum": ("Spettro visibile", "Visible spectrum"),
+    "uv_total": ("UV totale", "Total UV"),
+    "visible_total": ("Visibile totale", "Total visible"),
+    "far_nir_total": ("Far-red / NIR totale", "Total far-red / NIR"),
+    "live_bio_disclaimer": ("Stime sperimentali a banda larga calcolate in tempo reale. La scala 0–100 indica soltanto la rilevanza spettrale: non è una percentuale di danno né una soglia di sicurezza.", "Experimental broadband estimates calculated in real time. The 0–100 scale indicates spectral relevance only: it is neither a damage percentage nor a safety threshold."),
+    "automatic_update": ("Aggiornamento automatico ogni 0,5 secondi", "Automatic refresh every 0.5 seconds"),
+    "phone_not_connected": ("Telefono non collegato · usa COLLEGA", "Phone not connected · use CONNECT"),
+    "live_unavailable": ("Collegamento LIVE temporaneamente non disponibile · {error}", "LIVE connection temporarily unavailable · {error}"),
+    "sensors_initializing": ("Inizializzazione sensori", "Initializing sensors"),
+    "last_update": ("ultimo aggiornamento {time}", "last update {time}"),
+    "auto_active": ("AUTO attivo · {completed}{limit} salvate · ogni {interval} s · prossima tra {remaining} s", "AUTO active · {completed}{limit} saved · every {interval} s · next in {remaining} s"),
+    "control_acquisition": ("Controlla acquisizione", "Control acquisition"),
+    "manual_measurement": ("Misurazione manuale", "Manual measurement"),
+    "optional_note": ("Nota (facoltativa)", "Note (optional)"),
+    "save_measurement": ("Salva misurazione", "Save measurement"),
+    "automatic_acquisition": ("Acquisizione automatica", "Automatic acquisition"),
+    "interval_seconds": ("Intervallo (secondi)", "Interval (seconds)"),
+    "maximum_acquisitions": ("Acquisizioni massime", "Maximum acquisitions"),
+    "start_automatic": ("Avvia automatico", "Start automatic"),
+    "stop": ("Ferma", "Stop"),
+    "connect_phone_title": ("Collega il telefono", "Connect the phone"),
+    "advanced": ("Avanzate", "Advanced"),
+    "usb_instructions": ("Metodo consigliato per iniziare.\n\n1. Collega il telefono con il cavo USB.\n2. Lascia aperta Uvir sul telefono.\n3. Se Android lo chiede, autorizza il computer.\n4. Premi Collega.", "Recommended method to get started.\n\n1. Connect the phone with the USB cable.\n2. Keep Uvir open on the phone.\n3. Authorize the computer if Android asks.\n4. Press Connect."),
+    "connect_usb": ("Collega via USB", "Connect via USB"),
+    "wifi_instructions": ("1. Collega telefono e computer alla stessa rete Wi-Fi privata.\n2. In Uvir apri Impostazioni → Collega con Wi-Fi.\n3. Copia qui indirizzo Wi-Fi e codice mostrati.", "1. Connect the phone and computer to the same private Wi-Fi network.\n2. In Uvir open Settings → Connect with Wi-Fi.\n3. Copy the displayed Wi-Fi address and connection code here."),
+    "wifi_address": ("Indirizzo Wi-Fi", "Wi-Fi address"),
+    "connection_code": ("Codice di collegamento", "Connection code"),
+    "connect_wifi": ("Collega via Wi-Fi", "Connect via Wi-Fi"),
+    "bluetooth_instructions": ("1. Abbina telefono e computer dalle impostazioni Bluetooth.\n2. Telefono: Impostazioni → Connessioni → Router Wi-Fi e tethering → attiva Tethering Bluetooth.\n3. PC: Impostazioni → Bluetooth e dispositivi → Dispositivi; espandi il telefono e premi Partecipa accanto a Rete PAN.\n4. Scegli Punto di accesso e premi Connetti.\n5. In Uvir apri Impostazioni → Collega con Bluetooth.\n6. Copia qui indirizzo Bluetooth e codice mostrati.", "1. Pair the phone and computer in Bluetooth settings.\n2. Phone: Settings → Connections → Mobile Hotspot and Tethering → enable Bluetooth tethering.\n3. PC: Settings → Bluetooth & devices → Devices; expand the phone and select Join next to PAN network.\n4. Choose Access point and connect.\n5. In Uvir open Settings → Connect with Bluetooth.\n6. Copy the displayed Bluetooth address and connection code here."),
+    "bluetooth_address": ("Indirizzo Bluetooth", "Bluetooth address"),
+    "connect_bluetooth": ("Collega via Bluetooth", "Connect via Bluetooth"),
+    "wireless_debug_description": ("Collegamento Wi-Fi tramite Debug wireless di Android. È una modalità tecnica alternativa: per l’uso normale scegli la scheda Wi-Fi.", "Wi-Fi connection through Android Wireless debugging. This is an alternative technical mode; use the Wi-Fi tab for normal operation."),
+    "pairing_address": ("Indirizzo di abbinamento", "Pairing address"),
+    "pair": ("Abbina", "Pair"),
+    "connection_address": ("Indirizzo di connessione", "Connection address"),
+    "connect_wireless_debug": ("Collega con Debug wireless", "Connect with Wireless debugging"),
+    "unexpected_package": ("Package inatteso: {actual}. Atteso: {expected}.", "Unexpected package: {actual}. Expected: {expected}."),
+    "connected": ("Collegato: {label} · Uvir {version}", "Connected: {label} · Uvir {version}"),
+    "remote_unresponsive": ("Uvir non risponde sul canale remoto.\n\n{error}", "Uvir is not responding on the remote channel.\n\n{error}"),
+    "adb_not_found": ("ADB non trovato nell'Android SDK.", "ADB was not found in the Android SDK."),
+    "enter_address": ("Inserisci l’indirizzo {method} mostrato da Uvir.", "Enter the {method} address shown by Uvir."),
+    "enter_connection_code": ("Inserisci il codice di collegamento mostrato da Uvir.", "Enter the connection code shown by Uvir."),
+    "connect_desktop_first": ("Collega prima Uvir Desktop al telefono.", "Connect Uvir Desktop to the phone first."),
+    "live_ready": ("LIVE pronto", "LIVE ready"),
+    "live_initializing": ("LIVE in inizializzazione", "LIVE initializing"),
+    "saved_count": ("AUTO attivo · {count} salvate", "AUTO active · {count} saved"),
+    "screen_status": ("{ready} · {auto} · schermata {screen}", "{ready} · {auto} · screen {screen}"),
+    "measurement_saved": ("Misurazione #{id} salvata sul telefono e copiata sul PC.", "Measurement #{id} saved on the phone and copied to the PC."),
+    "positive_interval": ("L'intervallo deve essere maggiore di zero.", "The interval must be greater than zero."),
+    "positive_limit": ("Il limite deve essere maggiore di zero.", "The limit must be greater than zero."),
+    "auto_started": ("Acquisizione automatica avviata.", "Automatic acquisition started."),
+    "auto_stopped_message": ("Acquisizione automatica fermata.", "Automatic acquisition stopped."),
+    "local_copy_updated": ("Copia locale aggiornata: {count} misurazioni → {path}", "Local copy updated: {count} measurements → {path}"),
+    "local_copy_updated_dialog": ("Copia locale aggiornata.\n\n{path}", "Local copy updated.\n\n{path}"),
+    "open_local_first": ("Apri prima un database locale.", "Open a local database first."),
+    "connect_phone_first": ("Collega prima il telefono.", "Connect the phone first."),
+    "replace_phone_database": ("Sostituire l'elenco delle misurazioni sul telefono con il database locale?\n\nPrima verrà mantenuta una copia locale di sicurezza.", "Replace the phone's measurement list with the local database?\n\nA local safety copy will be kept first."),
+    "synced_measurements": ("Sincronizzate {count} misurazioni.\nBackup: {backup}", "Synchronized {count} measurements.\nBackup: {backup}"),
+    "sync_failed": ("Sincronizzazione non riuscita:\n{error}", "Synchronization failed:\n{error}"),
+    "select_a_measurement": ("Seleziona una misurazione.", "Select a measurement."),
+    "measurement_note": ("Nota della misurazione #{id}", "Note for measurement #{id}"),
+    "note_updated": ("Nota aggiornata. Backup: {backup}", "Note updated. Backup: {backup}"),
+    "edit_failed": ("Modifica non riuscita:\n{error}", "Edit failed:\n{error}"),
+    "no_database_open": ("Nessun database aperto.", "No database is open."),
+    "open_database_title": ("Apri uvir.db", "Open uvir.db"),
+    "all_files": ("Tutti i file", "All files"),
+    "database_read_error": ("Errore lettura database:\n{error}", "Database read error:\n{error}"),
+    "session_one": ("1 misurazione", "1 measurement"),
+    "session_many": ("{count} misurazioni", "{count} measurements"),
+    "automatic_session": ("Sessione automatica #{id} · {label}", "Automatic session #{id} · {label}"),
+    "measurement_title": ("Misura #{id}  •  {time}", "Measurement #{id}  •  {time}"),
+    "acquisition_label": ("Acquisizione: {type}", "Acquisition: {type}"),
+    "note_label": ("Nota: {note}", "Note: {note}"),
+    "no_note": ("Nessuna nota", "No note"),
+    "manual": ("Manuale", "Manual"),
+    "automatic": ("Automatica", "Automatic"),
+    "open_database_first": ("Apri prima un database.", "Open a database first."),
+    "nothing_to_export": ("Nessuna misura da esportare.", "There are no measurements to export."),
+    "exported": ("Esportate {count} misure → {path}", "Exported {count} measurements → {path}"),
+    "export_complete": ("Esportazione completata:\n{path}", "Export completed:\n{path}"),
+    "export_error": ("Errore esportazione:\n{error}", "Export error:\n{error}"),
+    "select_measurement_short": ("Seleziona una misura.", "Select a measurement."),
+    "delete_one_question": ("Eliminare definitivamente la misura #{id}?", "Permanently delete measurement #{id}?"),
+    "delete_all_question": ("Eliminare TUTTE le {count} misure?\nVerrà creato un backup.", "Delete ALL {count} measurements?\nA backup will be created."),
+    "delete_all_final": ("Conferma finale: svuotare completamente lo storico?", "Final confirmation: completely clear the history?"),
+    "open_or_connect": ("Apri un database oppure collega prima il telefono.", "Open a database or connect the phone first."),
+    "reset_question": ("Azzerare i contatori?\n\nQuesta operazione elimina definitivamente tutte le misurazioni. La prossima misurazione e la prossima sessione automatica partiranno dall'ID 1.", "Reset the counters?\n\nThis operation permanently deletes all measurements. The next measurement and automatic session will start from ID 1."),
+    "counters_reset_remote": ("Contatori azzerati sul telefono e nella copia locale.", "Counters reset on the phone and in the local copy."),
+    "counters_reset_remote_dialog": ("Contatori azzerati. Tutte le misurazioni sono state eliminate dal telefono e dalla copia locale.", "Counters reset. All measurements were deleted from the phone and the local copy."),
+    "counters_reset_backup": ("Contatori azzerati. Backup: {backup}", "Counters reset. Backup: {backup}"),
+    "counters_reset_local_dialog": ("Contatori azzerati e misurazioni eliminate.\n\nBackup: {backup}", "Counters reset and measurements deleted.\n\nBackup: {backup}"),
+    "reset_failed": ("Azzeramento non riuscito:\n{error}", "Reset failed:\n{error}"),
+    "nothing_deleted": ("Nessuna misura è stata cancellata: la misura selezionata non risulta più presente nel database.", "No measurement was deleted: the selected measurement is no longer in the database."),
+    "deletion_synced": ("Cancellazione completata sul PC e sul telefono. Backup: {backup}", "Deletion completed on the PC and phone. Backup: {backup}"),
+    "measurement_deleted_remote": ("Misurazione eliminata correttamente.\n\nLa modifica è stata applicata anche a Uvir sul telefono.", "Measurement deleted successfully.\n\nThe change was also applied to Uvir on the phone."),
+    "deletion_sync_failed_status": ("Misurazione eliminata sul PC, ma sincronizzazione telefono non riuscita.", "Measurement deleted on the PC, but phone synchronization failed."),
+    "deletion_sync_failed": ("La modifica locale è riuscita, ma il telefono non è stato aggiornato.\n\nDettaglio:\n{error}\n\nBackup locale:\n{backup}", "The local change succeeded, but the phone was not updated.\n\nDetails:\n{error}\n\nLocal backup:\n{backup}"),
+    "deletion_local_status": ("Cancellazione completata sul database locale. Backup: {backup}", "Deletion completed in the local database. Backup: {backup}"),
+    "measurement_deleted_local": ("Misura cancellata correttamente dal database locale.", "Measurement deleted successfully from the local database."),
+    "deletion_error": ("Errore durante la cancellazione:\n{error}", "Error during deletion:\n{error}"),
+    "settings_saved_error": ("Impossibile salvare la memoria locale: {error}", "Unable to save local memory: {error}"),
+}
+
+
+def detect_system_language(locale_name: str | None = None) -> str:
+    if locale_name is None:
+        locale_name = locale.getlocale()[0]
+        if not locale_name:
+            locale_name = os.environ.get("LANG", "")
+    normalized = str(locale_name or "").lower()
+    return "it" if normalized.startswith("it") or "italian" in normalized else "en"
+
+
+LANGUAGE = detect_system_language()
+
+
+def tr(key: str, language: str | None = None, **values) -> str:
+    selected = language or LANGUAGE
+    italian, english = TEXT[key]
+    return (italian if selected == "it" else english).format(**values)
+
+
+def load_local_settings(path: Path = SETTINGS_FILE) -> dict:
+    try:
+        if not path.exists():
+            return {}
+        data = json.loads(path.read_text(encoding="utf-8"))
+        return data if isinstance(data, dict) else {}
+    except (OSError, ValueError, TypeError):
+        return {}
+
+
+def save_local_settings(data: dict, path: Path = SETTINGS_FILE) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    temporary.write_text(
+        json.dumps(data, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+    temporary.replace(path)
 
 
 def resource_path(filename: str) -> Path:
@@ -104,7 +297,7 @@ EXPECTED_COLUMNS = {
     "f8", "nir"
 }
 
-EXPORT_COLUMNS = [
+EXPORT_COLUMNS_IT = [
     "ID_misurazione", "ID_sessione", "Data/Ora", "Timestamp_ms",
     "Tipo_acquisizione", "Automatico", "Nota", "Progressivo_sessione",
     "UVC_100_280_nm_uW_cm2", "UVB_280_315_nm_uW_cm2", "UVA_315_400_nm_uW_cm2",
@@ -122,7 +315,25 @@ EXPORT_COLUMNS = [
     "Indice_spettrale_stress_ossidativo_HEV_0_100"
 ]
 
-LEGEND_ROWS = [
+EXPORT_COLUMNS_EN = [
+    "Measurement_ID", "Session_ID", "Date/Time", "Timestamp_ms",
+    "Acquisition_type", "Automatic", "Note", "Session_sequence",
+    "UVC_100_280_nm_uW_cm2", "UVB_280_315_nm_uW_cm2", "UVA_315_400_nm_uW_cm2",
+    "Total_UV_uW_cm2", "HEV_400_500_nm_uW_cm2", "HEB_400_450_nm_uW_cm2",
+    "Violet_400_450_nm_uW_cm2", "Blue_450_495_nm_uW_cm2",
+    "Green_495_570_nm_uW_cm2", "Yellow_570_590_nm_uW_cm2",
+    "Orange_590_620_nm_uW_cm2", "Red_620_700_nm_uW_cm2",
+    "Total_visible_uW_cm2", "FarRed_peak_745_nm_uW_cm2",
+    "NIR_peak_855_nm_uW_cm2", "Total_FarRed_NIR_uW_cm2",
+    "Estimated_weighted_irradiance_UV_DNA_effect_uW_cm2_eq",
+    "Spectral_index_UV_DNA_effect_0_100",
+    "Estimated_weighted_irradiance_UVA_photoaging_uW_cm2_eq",
+    "Spectral_index_UVA_photoaging_0_100",
+    "Estimated_weighted_irradiance_HEV_oxidative_stress_uW_cm2_eq",
+    "Spectral_index_HEV_oxidative_stress_0_100"
+]
+
+LEGEND_ROWS_IT = [
     ["Gruppo", "Canale", "Banda / picco", "Nota"],
     ["Acquisizione", "Automatico", "0 / 1", "0 = manuale; 1 = automatica"],
     ["Acquisizione", "ID sessione", "Intero univoco", "Identifica le misurazioni appartenenti alla stessa sessione automatica"],
@@ -145,6 +356,42 @@ LEGEND_ROWS = [
     ["Effetti stimati", "Stress ossidativo HEV", "irradianza pesata stimata + rilevanza spettrale 0–100", "La scala 0–100 indica ponderazione spettrale relativa; non percentuale di danno né soglia di sicurezza"],
 ]
 
+LEGEND_ROWS_EN = [
+    ["Group", "Channel", "Band / peak", "Note"],
+    ["Acquisition", "Automatic", "0 / 1", "0 = manual; 1 = automatic"],
+    ["Acquisition", "Session ID", "Unique integer", "Identifies measurements belonging to the same automatic session"],
+    ["Acquisition", "Session sequence", "1, 2, 3…", "Measurement position within the automatic session"],
+    ["UV", "UVC", "100–280 nm", "Higher photon energy"],
+    ["UV", "UVB", "280–315 nm", ""],
+    ["UV", "UVA", "315–400 nm", ""],
+    ["Visible / derived", "HEV", "400–500 nm", "Derived: includes HEB; do not add it again to the total"],
+    ["Visible / derived", "HEB", "400–450 nm", "Derived: HEV subset; do not add it again to the total"],
+    ["Visible", "Violet", "400–450 nm", ""],
+    ["Visible", "Blue", "450–495 nm", ""],
+    ["Visible", "Green", "495–570 nm", ""],
+    ["Visible", "Yellow", "570–590 nm", ""],
+    ["Visible", "Orange", "590–620 nm", ""],
+    ["Visible", "Red", "620–700 nm", ""],
+    ["Far red / NIR", "FAR-RED", "745 nm peak", "AS7343 channel"],
+    ["Far red / NIR", "NIR", "855 nm peak", "AS7343 channel"],
+    ["Estimated effects", "UV DNA effect", "estimated weighted irradiance + spectral relevance 0–100", "The 0–100 scale indicates relative spectral weighting; it is neither a damage percentage nor a safety threshold"],
+    ["Estimated effects", "UVA photoaging", "estimated weighted irradiance + spectral relevance 0–100", "The 0–100 scale indicates relative spectral weighting; it is neither a damage percentage nor a safety threshold"],
+    ["Estimated effects", "HEV oxidative stress", "estimated weighted irradiance + spectral relevance 0–100", "The 0–100 scale indicates relative spectral weighting; it is neither a damage percentage nor a safety threshold"],
+]
+
+EXPORT_COLUMNS = (
+    EXPORT_COLUMNS_IT
+    if LANGUAGE == "it"
+    else EXPORT_COLUMNS_EN
+)
+LEGEND_ROWS = (
+    LEGEND_ROWS_IT
+    if LANGUAGE == "it"
+    else LEGEND_ROWS_EN
+)
+MEASUREMENTS_SHEET = "Misure" if LANGUAGE == "it" else "Measurements"
+LEGEND_SHEET = "Legenda" if LANGUAGE == "it" else "Legend"
+
 
 @dataclass
 class RemoteLink:
@@ -158,7 +405,12 @@ class RemoteLink:
 
 def format_time(ms: int) -> str:
     try:
-        return datetime.fromtimestamp(ms / 1000.0).strftime("%d/%m/%Y %H:%M:%S")
+        pattern = (
+            "%d/%m/%Y %H:%M:%S"
+            if LANGUAGE == "it"
+            else "%Y-%m-%d %H:%M:%S"
+        )
+        return datetime.fromtimestamp(ms / 1000.0).strftime(pattern)
     except Exception:
         return str(ms)
 
@@ -187,7 +439,7 @@ def optional_int(row: sqlite3.Row, key: str) -> int | None:
 
 
 def acquisition_type(row: sqlite3.Row) -> str:
-    return "Automatica" if is_automatic(row) else "Manuale"
+    return tr("automatic") if is_automatic(row) else tr("manual")
 
 
 def automatic_session_id(row: sqlite3.Row) -> int | None:
@@ -331,7 +583,11 @@ def ensure_schema(path: Path) -> None:
         cols = {r[1] for r in con.execute("PRAGMA table_info(measurements)").fetchall()}
         missing = EXPECTED_COLUMNS - cols
         if missing:
-            raise RuntimeError("Database non compatibile. Colonne mancanti: " + ", ".join(sorted(missing)))
+            if LANGUAGE == "it":
+                message = "Database non compatibile. Colonne mancanti: "
+            else:
+                message = "Incompatible database. Missing columns: "
+            raise RuntimeError(message + ", ".join(sorted(missing)))
 
         con.execute(
             """
@@ -455,29 +711,55 @@ def adb_device(adb: str) -> str:
         parts = line.strip().split()
         if len(parts) >= 2 and parts[1] == "device":
             return parts[0]
-    raise RuntimeError("Nessun telefono autorizzato rilevato da ADB.")
+    raise RuntimeError(
+        "Nessun telefono autorizzato rilevato da ADB."
+        if LANGUAGE == "it"
+        else "No ADB-authorized phone was detected."
+    )
 
 
 # ------------------------ REMOTE API ------------------------
 
 def adb_pair(adb: str, address: str, code: str) -> str:
     if not address.strip() or not code.strip():
-        raise RuntimeError("Inserisci indirizzo di abbinamento e codice ADB.")
+        raise RuntimeError(
+            "Inserisci indirizzo di abbinamento e codice ADB."
+            if LANGUAGE == "it"
+            else "Enter the pairing address and ADB code."
+        )
     p = adb_run(adb, ["pair", address.strip(), code.strip()], timeout=45)
     detail = (p.stdout + p.stderr).decode(errors="replace").strip()
     if p.returncode != 0 or "success" not in detail.lower():
-        raise RuntimeError("Abbinamento ADB non riuscito.\n\n" + detail)
+        raise RuntimeError(
+            (
+                "Abbinamento ADB non riuscito.\n\n"
+                if LANGUAGE == "it"
+                else "ADB pairing failed.\n\n"
+            )
+            + detail
+        )
     return detail
 
 
 def adb_connect_wireless(adb: str, address: str) -> str:
     if not address.strip():
-        raise RuntimeError("Inserisci l'indirizzo IP:porta del debug wireless.")
+        raise RuntimeError(
+            "Inserisci l'indirizzo IP:porta del debug wireless."
+            if LANGUAGE == "it"
+            else "Enter the Wireless debugging IP address and port."
+        )
     p = adb_run(adb, ["connect", address.strip()], timeout=30)
     detail = (p.stdout + p.stderr).decode(errors="replace").strip()
     low = detail.lower()
     if p.returncode != 0 or not ("connected" in low or "already" in low):
-        raise RuntimeError("Connessione ADB wireless non riuscita.\n\n" + detail)
+        raise RuntimeError(
+            (
+                "Connessione ADB wireless non riuscita.\n\n"
+                if LANGUAGE == "it"
+                else "Wireless ADB connection failed.\n\n"
+            )
+            + detail
+        )
     return address.strip()
 
 
@@ -490,7 +772,11 @@ def adb_start_app(adb: str, device: str, package: str) -> None:
     if p.returncode != 0:
         detail = (p.stdout + p.stderr).decode(errors="replace").strip()
         raise RuntimeError(
-            f"Non riesco ad avviare {package} sul telefono.\n\n{detail}"
+            (
+                f"Non riesco ad avviare {package} sul telefono.\n\n{detail}"
+                if LANGUAGE == "it"
+                else f"Unable to start {package} on the phone.\n\n{detail}"
+            )
         )
 
 
@@ -503,7 +789,14 @@ def adb_prepare_remote(adb: str, device: str, package: str) -> RemoteLink:
     )
     if p.returncode != 0:
         detail = (p.stdout + p.stderr).decode(errors="replace").strip()
-        raise RuntimeError("Port forwarding ADB non riuscito.\n\n" + detail)
+        raise RuntimeError(
+            (
+                "Port forwarding ADB non riuscito.\n\n"
+                if LANGUAGE == "it"
+                else "ADB port forwarding failed.\n\n"
+            )
+            + detail
+        )
     return RemoteLink(
         mode="adb",
         host="127.0.0.1",
@@ -535,17 +828,34 @@ def remote_request(
         line = source.readline(8 * 1024 * 1024 + 1)
 
     if not line:
-        raise RuntimeError("Uvir non ha restituito alcuna risposta.")
+        raise RuntimeError(
+            "Uvir non ha restituito alcuna risposta."
+            if LANGUAGE == "it"
+            else "Uvir returned no response."
+        )
     if len(line) > 8 * 1024 * 1024:
-        raise RuntimeError("Risposta remota troppo grande.")
+        raise RuntimeError(
+            "Risposta remota troppo grande."
+            if LANGUAGE == "it"
+            else "The remote response is too large."
+        )
 
     try:
         response = json.loads(line.decode("utf-8"))
     except Exception as exc:
-        raise RuntimeError("Risposta remota non valida.") from exc
+        raise RuntimeError(
+            "Risposta remota non valida."
+            if LANGUAGE == "it"
+            else "Invalid remote response."
+        ) from exc
 
     if not response.get("ok"):
-        raise RuntimeError(str(response.get("error") or "Operazione remota fallita."))
+        fallback = (
+            "Operazione remota fallita."
+            if LANGUAGE == "it"
+            else "Remote operation failed."
+        )
+        raise RuntimeError(str(response.get("error") or fallback))
     return response.get("data") or {}
 
 
@@ -792,9 +1102,9 @@ def write_xlsx(path: Path, records: list[sqlite3.Row]) -> None:
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
 <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
 </Relationships>'''
-    workbook = '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+    workbook = f'''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
-<sheets><sheet name="Misure" sheetId="1" r:id="rId1"/><sheet name="Legenda" sheetId="2" r:id="rId2"/></sheets>
+<sheets><sheet name="{escape(MEASUREMENTS_SHEET)}" sheetId="1" r:id="rId1"/><sheet name="{escape(LEGEND_SHEET)}" sheetId="2" r:id="rId2"/></sheets>
 </workbook>'''
     wb_rels = '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
@@ -844,7 +1154,7 @@ def write_ods(path: Path, records: list[sqlite3.Row]) -> None:
     content = f'''<?xml version="1.0" encoding="UTF-8"?>
 <office:document-content xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0" xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0" office:version="1.2">
 <office:automatic-styles><style:style style:name="Header" style:family="table-cell"><style:table-cell-properties fo:background-color="#263238"/><style:text-properties fo:color="#ffffff" fo:font-weight="bold"/></style:style></office:automatic-styles>
-<office:body><office:spreadsheet>{ods_table("Misure", measurements)}{ods_table("Legenda", LEGEND_ROWS)}</office:spreadsheet></office:body>
+<office:body><office:spreadsheet>{ods_table(MEASUREMENTS_SHEET, measurements)}{ods_table(LEGEND_SHEET, LEGEND_ROWS)}</office:spreadsheet></office:body>
 </office:document-content>'''
     styles = '''<?xml version="1.0" encoding="UTF-8"?><office:document-styles xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" office:version="1.2"><office:styles/></office:document-styles>'''
     manifest = '''<?xml version="1.0" encoding="UTF-8"?><manifest:manifest xmlns:manifest="urn:oasis:names:tc:opendocument:xmlns:manifest:1.0" manifest:version="1.2"><manifest:file-entry manifest:full-path="/" manifest:media-type="application/vnd.oasis.opendocument.spreadsheet"/><manifest:file-entry manifest:full-path="content.xml" manifest:media-type="text/xml"/><manifest:file-entry manifest:full-path="styles.xml" manifest:media-type="text/xml"/></manifest:manifest>'''
@@ -860,6 +1170,11 @@ def write_ods(path: Path, records: list[sqlite3.Row]) -> None:
 class App:
     def __init__(self, root: Tk):
         self.root = root
+        self.settings = load_local_settings()
+        self._settings_save_job: str | None = None
+        self.last_connection_method = str(
+            self.settings.get("last_connection_method") or "usb"
+        )
         root.title(APP_TITLE)
         root.minsize(1050, 650)
         root.columnconfigure(0, weight=1)
@@ -868,23 +1183,47 @@ class App:
         self.db_path: Path | None = None
         self.remote_link: RemoteLink | None = None
         self.row_map: dict[int, sqlite3.Row] = {}
-        self.package = StringVar(value=DEFAULT_PACKAGE)
-        self.status = StringVar(value="Apri il database oppure importa i dati dal telefono.")
+        self.package = StringVar(
+            value=str(self.settings.get("package") or DEFAULT_PACKAGE)
+        )
+        self.status = StringVar(value=tr("initial_status"))
 
-        self.wireless_address = StringVar(value="")
-        self.pairing_address = StringVar(value="")
-        self.pairing_code = StringVar(value="")
-        self.direct_host = StringVar(value="")
-        self.direct_pin = StringVar(value="")
-        self.bluetooth_host = StringVar(value="")
-        self.bluetooth_pin = StringVar(value="")
-        self.remote_state = StringVar(value="Non collegato")
+        self.wireless_address = StringVar(
+            value=str(self.settings.get("wireless_address") or "")
+        )
+        self.pairing_address = StringVar(
+            value=str(self.settings.get("pairing_address") or "")
+        )
+        self.pairing_code = StringVar(
+            value=str(self.settings.get("pairing_code") or "")
+        )
+        self.direct_host = StringVar(
+            value=str(self.settings.get("wifi_address") or "")
+        )
+        self.direct_pin = StringVar(
+            value=str(self.settings.get("wifi_code") or "")
+        )
+        self.bluetooth_host = StringVar(
+            value=str(self.settings.get("bluetooth_address") or "")
+        )
+        self.bluetooth_pin = StringVar(
+            value=str(self.settings.get("bluetooth_code") or "")
+        )
+        self.remote_state = StringVar(value=tr("not_connected"))
 
         self.remote_note = StringVar(value="")
-        self.remote_interval = StringVar(value="60")
-        self.remote_auto_note = StringVar(value="")
-        self.remote_limit_enabled = BooleanVar(value=False)
-        self.remote_max_count = StringVar(value="10")
+        self.remote_interval = StringVar(
+            value=str(self.settings.get("automatic_interval") or "60")
+        )
+        self.remote_auto_note = StringVar(
+            value=str(self.settings.get("automatic_note") or "")
+        )
+        self.remote_limit_enabled = BooleanVar(
+            value=bool(self.settings.get("automatic_limit_enabled", False))
+        )
+        self.remote_max_count = StringVar(
+            value=str(self.settings.get("automatic_max_count") or "10")
+        )
 
         self.live_window: Toplevel | None = None
         self.connection_window: Toplevel | None = None
@@ -892,13 +1231,88 @@ class App:
         self.live_poll_generation = 0
         self.live_poll_inflight: int | None = None
         self.live_results: queue.SimpleQueue = queue.SimpleQueue()
-        self.live_header = StringVar(value="Collega il telefono per vedere i dati LIVE.")
-        self.live_auto_state = StringVar(value="AUTO fermo")
+        self.live_header = StringVar(value=tr("live_connect_hint"))
+        self.live_auto_state = StringVar(value=tr("auto_stopped"))
         self.live_value_vars: dict[str, StringVar] = {}
         self.live_bio_vars: dict[str, StringVar] = {}
         self.live_bio_bars: dict[str, ttk.Progressbar] = {}
 
         self.build_ui()
+        self._install_settings_memory()
+        self._restore_last_database()
+        root.protocol("WM_DELETE_WINDOW", self._close_app)
+
+    def _persistent_variables(self):
+        return {
+            "package": self.package,
+            "wireless_address": self.wireless_address,
+            "pairing_address": self.pairing_address,
+            "pairing_code": self.pairing_code,
+            "wifi_address": self.direct_host,
+            "wifi_code": self.direct_pin,
+            "bluetooth_address": self.bluetooth_host,
+            "bluetooth_code": self.bluetooth_pin,
+            "automatic_interval": self.remote_interval,
+            "automatic_note": self.remote_auto_note,
+            "automatic_limit_enabled": self.remote_limit_enabled,
+            "automatic_max_count": self.remote_max_count,
+        }
+
+    def _install_settings_memory(self):
+        for variable in self._persistent_variables().values():
+            variable.trace_add(
+                "write",
+                lambda *_args: self._schedule_settings_save(),
+            )
+
+    def _settings_snapshot(self) -> dict:
+        data = {
+            key: variable.get()
+            for key, variable in self._persistent_variables().items()
+        }
+        data["last_connection_method"] = self.last_connection_method
+        data["last_database"] = str(self.db_path) if self.db_path else ""
+        return data
+
+    def _schedule_settings_save(self):
+        if self._settings_save_job is not None:
+            self.root.after_cancel(self._settings_save_job)
+        self._settings_save_job = self.root.after(
+            350,
+            self._save_settings_memory,
+        )
+
+    def _save_settings_memory(self):
+        self._settings_save_job = None
+        try:
+            save_local_settings(self._settings_snapshot())
+        except OSError as error:
+            self.status.set(
+                tr("settings_saved_error", error=error)
+            )
+
+    def _restore_last_database(self):
+        saved_path = str(self.settings.get("last_database") or "").strip()
+        if not saved_path:
+            return
+        path = Path(saved_path)
+        if not path.is_file():
+            return
+        try:
+            ensure_schema(path)
+            self.db_path = path
+            self.mode.config(text=tr("local_database"))
+            self.status.set(str(path))
+            self.refresh()
+        except (OSError, sqlite3.DatabaseError, RuntimeError):
+            self.db_path = None
+
+    def _close_app(self):
+        if self._settings_save_job is not None:
+            self.root.after_cancel(self._settings_save_job)
+            self._settings_save_job = None
+        self._save_settings_memory()
+        self.root.destroy()
 
     def build_ui(self):
         bar = ttk.Frame(self.root, padding=10)
@@ -907,22 +1321,22 @@ class App:
 
         ttk.Button(
             bar,
-            text="Apri database…",
+            text=tr("open_database"),
             command=self.open_db,
         ).grid(row=0, column=0, padx=(0, 4))
         ttk.Button(
             bar,
-            text="Collega telefono…",
+            text=tr("connect_phone"),
             command=self.open_remote_window,
         ).grid(row=0, column=1, padx=4)
         ttk.Button(
             bar,
-            text="Apri LIVE",
+            text=tr("open_live"),
             command=self.open_live_window,
         ).grid(row=0, column=2, padx=4)
         ttk.Button(
             bar,
-            text="Aggiorna dati",
+            text=tr("refresh_data"),
             command=self.smart_refresh,
         ).grid(row=0, column=4, padx=(4, 0))
 
@@ -934,7 +1348,7 @@ class App:
             sticky="ew",
             pady=(8, 0),
         )
-        ttk.Label(export_bar, text="Esporta:").pack(side=LEFT, padx=(0, 4))
+        ttk.Label(export_bar, text=tr("export")).pack(side=LEFT, padx=(0, 4))
         ttk.Button(
             export_bar,
             text="CSV",
@@ -952,7 +1366,7 @@ class App:
         ).pack(side=LEFT, padx=2)
         ttk.Button(
             export_bar,
-            text="Azzera contatori…",
+            text=tr("reset_counters"),
             command=self.reset_counters,
         ).pack(side="right", padx=(8, 0))
 
@@ -967,13 +1381,13 @@ class App:
         lh = ttk.Frame(left)
         lh.grid(row=0, column=0, sticky="ew", pady=(0, 5))
         lh.columnconfigure(0, weight=1)
-        self.count = ttk.Label(lh, text="Misure: 0")
+        self.count = ttk.Label(lh, text=tr("measurements_count", count=0))
         self.count.grid(row=0, column=0, sticky="w")
         actions = ttk.Frame(lh)
         actions.grid(row=0, column=1, sticky="e")
-        ttk.Button(actions, text="Modifica nota", command=self.edit_note).pack(side=LEFT, padx=3)
-        ttk.Button(actions, text="Elimina selezionato", command=self.delete_one).pack(side=LEFT, padx=3)
-        ttk.Button(actions, text="Elimina tutto", command=self.delete_all).pack(side=LEFT, padx=3)
+        ttk.Button(actions, text=tr("edit_note"), command=self.edit_note).pack(side=LEFT, padx=3)
+        ttk.Button(actions, text=tr("delete_selected"), command=self.delete_one).pack(side=LEFT, padx=3)
+        ttk.Button(actions, text=tr("delete_all"), command=self.delete_all).pack(side=LEFT, padx=3)
 
         self.tree = ttk.Treeview(
             left,
@@ -981,11 +1395,11 @@ class App:
             show="headings",
             selectmode="browse"
         )
-        self.tree.heading("id", text="ID misurazione")
-        self.tree.heading("session_id", text="ID sessione")
-        self.tree.heading("time", text="Data / ora")
-        self.tree.heading("auto", text="A")
-        self.tree.heading("note", text="Nota")
+        self.tree.heading("id", text=tr("measurement_id"))
+        self.tree.heading("session_id", text=tr("session_id"))
+        self.tree.heading("time", text=tr("date_time"))
+        self.tree.heading("auto", text=tr("automatic_short"))
+        self.tree.heading("note", text=tr("note"))
         self.tree.column("id", width=100, stretch=False, anchor="center")
         self.tree.column("session_id", width=85, stretch=False, anchor="center")
         self.tree.column("time", width=145, stretch=False)
@@ -1012,7 +1426,7 @@ class App:
 
         self.detail_title = ttk.Label(
             right,
-            text="Seleziona una misura",
+            text=tr("select_measurement"),
             font=("Segoe UI", 15, "bold")
         )
         self.detail_title.grid(
@@ -1071,12 +1485,12 @@ class App:
 
         self.detail_notebook.add(
             self.irradiance_tab,
-            text="Irradianza"
+            text=tr("irradiance")
         )
 
         self.detail_notebook.add(
             self.biological_tab,
-            text="Effetti biologici stimati"
+            text=tr("estimated_biological_effects")
         )
 
         self.irradiance_tab.columnconfigure(
@@ -1101,19 +1515,19 @@ class App:
             (
                 "HEV / HEB",
                 [
-                    "HEV 400–500 nm\nVisibile energetico",
-                    "HEB 400–450 nm\nBlu-viola energetico"
+                    f"HEV 400–500 nm\n{tr('energetic_visible')}",
+                    f"HEB 400–450 nm\n{tr('energetic_blue_violet')}"
                 ]
             ),
             (
-                "VISIBILE",
+                tr("visible"),
                 [
-                    "Violetto 400–450 nm",
-                    "Blu 450–495 nm",
-                    "Verde 495–570 nm",
-                    "Giallo 570–590 nm",
-                    "Arancione 590–620 nm",
-                    "Rosso 620–700 nm"
+                    f"{tr('violet')} 400–450 nm",
+                    f"{tr('blue')} 450–495 nm",
+                    f"{tr('green')} 495–570 nm",
+                    f"{tr('yellow')} 570–590 nm",
+                    f"{tr('orange')} 590–620 nm",
+                    f"{tr('red')} 620–700 nm"
                 ]
             ),
             (
@@ -1199,12 +1613,7 @@ class App:
             weight=1
         )
 
-        disclaimer = (
-            "Stime sperimentali a banda larga derivate dai canali misurati. "
-            "Ogni barra usa una scala relativa 0–100: 100 non significa "
-            "100% di danno e non rappresenta una soglia di sicurezza. "
-            "Non sono valutazioni mediche, diagnostiche o di sicurezza."
-        )
+        disclaimer = tr("bio_disclaimer")
 
         ttk.Label(
             self.biological_tab,
@@ -1230,22 +1639,22 @@ class App:
 
         bio_rows = [
             (
-                "Indice UV effetto-DNA",
+                tr("dna_title"),
                 "dna_uv",
                 "dna_uv_score",
-                "Stima sperimentale pesata verso le bande UV più corte."
+                tr("dna_description")
             ),
             (
-                "Indice fotoinvecchiamento UVA",
+                tr("photoaging_title"),
                 "uva_photoaging",
                 "uva_photoaging_score",
-                "Stima sperimentale dominata dall'esposizione UVA."
+                tr("photoaging_description")
             ),
             (
-                "Indice stress ossidativo HEV",
+                tr("oxidative_title"),
                 "hev_oxidative",
                 "hev_oxidative_score",
-                "Stima sperimentale basata sulla banda HEV 400–500 nm."
+                tr("oxidative_description")
             ),
         ]
 
@@ -1316,10 +1725,7 @@ class App:
 
             ttk.Label(
                 frame,
-                text=(
-                    "Scala relativa 0–100: non è una percentuale "
-                    "di danno né una soglia di sicurezza."
-                ),
+                text=tr("relative_scale"),
                 wraplength=590
             ).grid(
                 row=4,
@@ -1331,7 +1737,7 @@ class App:
         status.grid(row=2, column=0, sticky="ew")
         status.columnconfigure(0, weight=1)
         ttk.Label(status, textvariable=self.status).grid(row=0, column=0, sticky="w")
-        self.mode = ttk.Label(status, text="Locale")
+        self.mode = ttk.Label(status, text=tr("local"))
         self.mode.grid(row=0, column=1, sticky="e")
 
     # --------------------- COLLEGAMENTO REMOTO ---------------------
@@ -1348,7 +1754,7 @@ class App:
         self.live_poll_generation += 1
         generation = self.live_poll_generation
 
-        window.title("Uvir LIVE · dati dal telefono")
+        window.title(tr("live_window_title"))
         window.minsize(820, 650)
         window.geometry("920x720")
         window.columnconfigure(0, weight=1)
@@ -1378,12 +1784,12 @@ class App:
         actions.grid(row=0, column=1, rowspan=2, sticky="e")
         ttk.Button(
             actions,
-            text="COLLEGA",
+            text=tr("connect"),
             command=self.open_remote_window,
         ).pack(side=LEFT, padx=3)
         ttk.Button(
             actions,
-            text="ACQUISIZIONE…",
+            text=tr("acquisition"),
             command=self.open_acquisition_window,
         ).pack(side=LEFT, padx=3)
 
@@ -1392,8 +1798,8 @@ class App:
 
         irradiance = ttk.Frame(notebook, padding=10)
         effects = ttk.Frame(notebook, padding=10)
-        notebook.add(irradiance, text="Irradianza in tempo reale")
-        notebook.add(effects, text="Effetti biologici stimati")
+        notebook.add(irradiance, text=tr("live_irradiance"))
+        notebook.add(effects, text=tr("estimated_biological_effects"))
 
         irradiance.columnconfigure(0, weight=1)
         irradiance.columnconfigure(1, weight=1)
@@ -1406,7 +1812,7 @@ class App:
                     ("UVC · 100–280 nm", "uvc"),
                     ("UVB · 280–315 nm", "uvb"),
                     ("UVA · 315–400 nm", "uva"),
-                    ("UV totale", "uv_total"),
+                    (tr("uv_total"), "uv_total"),
                 ],
                 0,
                 0,
@@ -1423,15 +1829,15 @@ class App:
                 1,
             ),
             (
-                "Spettro visibile",
+                tr("visible_spectrum"),
                 [
-                    ("Violetto", "violetto"),
-                    ("Blu", "blu"),
-                    ("Verde", "verde"),
-                    ("Giallo", "giallo"),
-                    ("Arancione", "arancione"),
-                    ("Rosso", "rosso"),
-                    ("Visibile totale", "vis_total"),
+                    (tr("violet"), "violetto"),
+                    (tr("blue"), "blu"),
+                    (tr("green"), "verde"),
+                    (tr("yellow"), "giallo"),
+                    (tr("orange"), "arancione"),
+                    (tr("red"), "rosso"),
+                    (tr("visible_total"), "vis_total"),
                 ],
                 1,
                 0,
@@ -1442,7 +1848,7 @@ class App:
                 [
                     ("Far-red · picco 745 nm", "f8"),
                     ("NIR · picco 855 nm", "nir"),
-                    ("Far-red / NIR totale", "nir_total"),
+                    (tr("far_nir_total"), "nir_total"),
                 ],
                 2,
                 0,
@@ -1486,20 +1892,16 @@ class App:
         effects.columnconfigure(0, weight=1)
         ttk.Label(
             effects,
-            text=(
-                "Stime sperimentali a banda larga calcolate in tempo reale. "
-                "La scala 0–100 indica soltanto la rilevanza spettrale: non è "
-                "una percentuale di danno né una soglia di sicurezza."
-            ),
+            text=tr("live_bio_disclaimer"),
             wraplength=820,
         ).grid(row=0, column=0, sticky="ew", pady=(0, 8))
 
         self.live_bio_vars = {}
         self.live_bio_bars = {}
         biological_rows = [
-            ("UV effetto-DNA", "dna_uv", "dna_uv_score"),
-            ("Fotoinvecchiamento UVA", "uva_photoaging", "uva_photoaging_score"),
-            ("Stress ossidativo HEV", "hev_oxidative", "hev_oxidative_score"),
+            (tr("dna_title"), "dna_uv", "dna_uv_score"),
+            (tr("photoaging_title"), "uva_photoaging", "uva_photoaging_score"),
+            (tr("oxidative_title"), "hev_oxidative", "hev_oxidative_score"),
         ]
 
         for row, (title, value_key, score_key) in enumerate(
@@ -1545,7 +1947,7 @@ class App:
         ).grid(row=0, column=0, sticky="w")
         ttk.Label(
             footer,
-            text="Aggiornamento automatico ogni 0,5 secondi",
+            text=tr("automatic_update"),
         ).grid(row=0, column=1, sticky="e")
 
         self._schedule_live_poll(generation, 0)
@@ -1578,7 +1980,7 @@ class App:
 
         link = self.remote_link
         if link is None:
-            self.live_header.set("Telefono non collegato · usa COLLEGA")
+            self.live_header.set(tr("phone_not_connected"))
             self.live_auto_state.set("AUTO —")
             self._schedule_live_poll(generation, 750)
             return
@@ -1630,7 +2032,7 @@ class App:
 
         if error:
             self.live_header.set(
-                f"Collegamento LIVE temporaneamente non disponibile · {error}"
+                tr("live_unavailable", error=error)
             )
             self._schedule_live_poll(generation, 1200)
             return
@@ -1659,18 +2061,19 @@ class App:
             ("hev_oxidative", "hev_oxidative_score"),
         ):
             self.live_bio_vars[value_key].set(
-                f"Irradianza pesata stimata: {effects[value_key]:,.2f} µW/cm² eq."
+                f"{tr('weighted_irradiance')}: {effects[value_key]:,.2f} µW/cm² eq."
             )
             self.live_bio_vars[score_key].set(
-                f"Rilevanza spettrale: {effects[score_key]:.0f} / 100"
+                f"{tr('spectral_relevance')}: {effects[score_key]:.0f} / 100"
             )
             self.live_bio_bars[score_key]["value"] = effects[score_key]
 
         ready = bool(data.get("live_ready"))
         timestamp = datetime.now().strftime("%H:%M:%S")
         self.live_header.set(
-            ("● LIVE" if ready else "Inizializzazione sensori")
-            + f" · ultimo aggiornamento {timestamp}"
+            ("● LIVE" if ready else tr("sensors_initializing"))
+            + " · "
+            + tr("last_update", time=timestamp)
         )
 
         if data.get("auto_enabled"):
@@ -1683,11 +2086,16 @@ class App:
             if data.get("auto_limit_enabled"):
                 limit = f" / {int(data.get('auto_max_count') or 0)}"
             self.live_auto_state.set(
-                f"AUTO attivo · {completed}{limit} salvate · "
-                f"ogni {interval} s · prossima tra {remaining_seconds} s"
+                tr(
+                    "auto_active",
+                    completed=completed,
+                    limit=limit,
+                    interval=interval,
+                    remaining=remaining_seconds,
+                )
             )
         else:
-            self.live_auto_state.set("AUTO fermo")
+            self.live_auto_state.set(tr("auto_stopped"))
 
     def open_acquisition_window(self):
         if (
@@ -1701,7 +2109,7 @@ class App:
 
         window = Toplevel(self.root)
         self.acquisition_window = window
-        window.title("Controlla acquisizione")
+        window.title(tr("control_acquisition"))
         window.minsize(560, 430)
         window.geometry("620x500")
         window.columnconfigure(0, weight=1)
@@ -1723,12 +2131,12 @@ class App:
 
         manual = ttk.LabelFrame(
             body,
-            text="Misurazione manuale",
+            text=tr("manual_measurement"),
             padding=12,
         )
         manual.grid(row=0, column=0, sticky="ew", pady=(0, 12))
         manual.columnconfigure(0, weight=1)
-        ttk.Label(manual, text="Nota (facoltativa)").grid(
+        ttk.Label(manual, text=tr("optional_note")).grid(
             row=0, column=0, sticky="w"
         )
         ttk.Entry(manual, textvariable=self.remote_note).grid(
@@ -1736,19 +2144,19 @@ class App:
         )
         ttk.Button(
             manual,
-            text="Salva misurazione",
+            text=tr("save_measurement"),
             command=self.remote_save_current,
         ).grid(row=2, column=0, sticky="w")
 
         automatic = ttk.LabelFrame(
             body,
-            text="Acquisizione automatica",
+            text=tr("automatic_acquisition"),
             padding=12,
         )
         automatic.grid(row=1, column=0, sticky="ew")
         automatic.columnconfigure(1, weight=1)
 
-        ttk.Label(automatic, text="Intervallo (secondi)").grid(
+        ttk.Label(automatic, text=tr("interval_seconds")).grid(
             row=0, column=0, sticky="w", pady=4
         )
         ttk.Entry(
@@ -1757,7 +2165,7 @@ class App:
             width=10,
         ).grid(row=0, column=1, sticky="w", padx=(10, 0), pady=4)
 
-        ttk.Label(automatic, text="Nota (facoltativa)").grid(
+        ttk.Label(automatic, text=tr("optional_note")).grid(
             row=1, column=0, sticky="w", pady=4
         )
         ttk.Entry(
@@ -1769,7 +2177,7 @@ class App:
         limit.grid(row=2, column=1, sticky="w", padx=(10, 0), pady=4)
         ttk.Checkbutton(
             limit,
-            text="Acquisizioni massime",
+            text=tr("maximum_acquisitions"),
             variable=self.remote_limit_enabled,
         ).pack(side=LEFT)
         ttk.Entry(
@@ -1782,12 +2190,12 @@ class App:
         actions.grid(row=3, column=1, sticky="w", padx=(10, 0), pady=(10, 0))
         ttk.Button(
             actions,
-            text="Avvia automatico",
+            text=tr("start_automatic"),
             command=self.remote_start_auto,
         ).pack(side=LEFT, padx=(0, 6))
         ttk.Button(
             actions,
-            text="Ferma",
+            text=tr("stop"),
             command=self.remote_stop_auto,
         ).pack(side=LEFT)
 
@@ -1809,7 +2217,7 @@ class App:
 
         window = Toplevel(self.root)
         self.connection_window = window
-        window.title("Collega il telefono")
+        window.title(tr("connect_phone_title"))
         window.minsize(760, 420)
         window.geometry("860x500")
         window.columnconfigure(0, weight=1)
@@ -1843,108 +2251,95 @@ class App:
         notebook.add(usb, text="USB")
         notebook.add(wifi, text="Wi-Fi")
         notebook.add(bluetooth, text="Bluetooth")
-        notebook.add(advanced, text="Avanzate")
+        notebook.add(advanced, text=tr("advanced"))
+
+        remembered_tab = {
+            "usb": usb,
+            "wifi": wifi,
+            "bluetooth": bluetooth,
+            "wireless_adb": advanced,
+        }.get(self.last_connection_method)
+        if remembered_tab is not None:
+            notebook.select(remembered_tab)
 
         ttk.Label(
             usb,
-            text=(
-                "Metodo consigliato per iniziare.\n\n"
-                "1. Collega il telefono con il cavo USB.\n"
-                "2. Lascia aperta Uvir sul telefono.\n"
-                "3. Se Android lo chiede, autorizza il computer.\n"
-                "4. Premi Collega."
-            ),
+            text=tr("usb_instructions"),
             justify="left",
             wraplength=760,
         ).grid(row=0, column=0, sticky="w", pady=(0, 16))
         ttk.Button(
             usb,
-            text="Collega via USB",
+            text=tr("connect_usb"),
             command=self.connect_usb_remote,
         ).grid(row=1, column=0, sticky="w")
 
         wifi.columnconfigure(1, weight=1)
         ttk.Label(
             wifi,
-            text=(
-                "1. Collega telefono e computer alla stessa rete Wi-Fi privata.\n"
-                "2. In Uvir apri Impostazioni → Collega con Wi-Fi.\n"
-                "3. Copia qui indirizzo Wi-Fi e codice mostrati."
-            ),
+            text=tr("wifi_instructions"),
             justify="left",
             wraplength=760,
         ).grid(row=0, column=0, columnspan=2, sticky="w", pady=(0, 16))
-        ttk.Label(wifi, text="Indirizzo Wi-Fi").grid(row=1, column=0, sticky="w", pady=5)
+        ttk.Label(wifi, text=tr("wifi_address")).grid(row=1, column=0, sticky="w", pady=5)
         ttk.Entry(wifi, textvariable=self.direct_host).grid(
             row=1, column=1, sticky="ew", padx=(10, 0), pady=5
         )
-        ttk.Label(wifi, text="Codice di collegamento").grid(row=2, column=0, sticky="w", pady=5)
+        ttk.Label(wifi, text=tr("connection_code")).grid(row=2, column=0, sticky="w", pady=5)
         ttk.Entry(wifi, textvariable=self.direct_pin, width=18, show="•").grid(
             row=2, column=1, sticky="w", padx=(10, 0), pady=5
         )
         ttk.Button(
             wifi,
-            text="Collega via Wi-Fi",
-            command=lambda: self.connect_direct_remote("Wi-Fi"),
+            text=tr("connect_wifi"),
+            command=lambda: self.connect_direct_remote("wifi"),
         ).grid(row=3, column=1, sticky="w", padx=(10, 0), pady=(12, 0))
 
         bluetooth.columnconfigure(1, weight=1)
         ttk.Label(
             bluetooth,
-            text=(
-                "1. Abbina telefono e computer dalle impostazioni Bluetooth.\n"
-                "2. Telefono: Impostazioni → Connessioni → Router Wi-Fi e tethering "
-                "→ attiva Tethering Bluetooth.\n"
-                "3. PC: Impostazioni → Bluetooth e dispositivi → Dispositivi; "
-                "espandi il telefono e premi Partecipa accanto a Rete PAN.\n"
-                "4. Scegli Punto di accesso e premi Connetti.\n"
-                "5. In Uvir apri Impostazioni → Collega con Bluetooth.\n"
-                "6. Copia qui indirizzo Bluetooth e codice mostrati."
-            ),
+            text=tr("bluetooth_instructions"),
             justify="left",
             wraplength=760,
         ).grid(row=0, column=0, columnspan=2, sticky="w", pady=(0, 16))
-        ttk.Label(bluetooth, text="Indirizzo Bluetooth").grid(row=1, column=0, sticky="w", pady=5)
+        ttk.Label(bluetooth, text=tr("bluetooth_address")).grid(row=1, column=0, sticky="w", pady=5)
         ttk.Entry(bluetooth, textvariable=self.bluetooth_host).grid(
             row=1, column=1, sticky="ew", padx=(10, 0), pady=5
         )
-        ttk.Label(bluetooth, text="Codice di collegamento").grid(row=2, column=0, sticky="w", pady=5)
+        ttk.Label(bluetooth, text=tr("connection_code")).grid(row=2, column=0, sticky="w", pady=5)
         ttk.Entry(bluetooth, textvariable=self.bluetooth_pin, width=18, show="•").grid(
             row=2, column=1, sticky="w", padx=(10, 0), pady=5
         )
         ttk.Button(
             bluetooth,
-            text="Collega via Bluetooth",
-            command=lambda: self.connect_direct_remote("Bluetooth"),
+            text=tr("connect_bluetooth"),
+            command=lambda: self.connect_direct_remote("bluetooth"),
         ).grid(row=3, column=1, sticky="w", padx=(10, 0), pady=(12, 0))
 
         advanced.columnconfigure(1, weight=1)
         ttk.Label(
             advanced,
-            text=(
-                "Collegamento Wi-Fi tramite Debug wireless di Android. "
-                "È una modalità tecnica alternativa: per l’uso normale scegli la scheda Wi-Fi."
-            ),
+            text=tr("wireless_debug_description"),
             wraplength=760,
         ).grid(row=0, column=0, columnspan=3, sticky="w", pady=(0, 14))
-        ttk.Label(advanced, text="Indirizzo di abbinamento").grid(row=1, column=0, sticky="w", pady=4)
+        ttk.Label(advanced, text=tr("pairing_address")).grid(row=1, column=0, sticky="w", pady=4)
         ttk.Entry(advanced, textvariable=self.pairing_address).grid(
             row=1, column=1, sticky="ew", padx=8, pady=4
         )
         ttk.Entry(advanced, textvariable=self.pairing_code, width=10).grid(row=1, column=2, sticky="w", pady=4)
         ttk.Button(
             advanced,
-            text="Abbina",
+            text=tr("pair"),
             command=self.pair_wireless_adb,
         ).grid(row=2, column=2, sticky="e", pady=(4, 12))
         ttk.Separator(advanced).grid(row=3, column=0, columnspan=3, sticky="ew", pady=6)
-        ttk.Label(advanced, text="Indirizzo di connessione").grid(row=4, column=0, sticky="w", pady=4)
+        ttk.Label(advanced, text=tr("connection_address")).grid(row=4, column=0, sticky="w", pady=4)
         ttk.Entry(advanced, textvariable=self.wireless_address).grid(
             row=4, column=1, sticky="ew", padx=8, pady=4
         )
         ttk.Button(
             advanced,
-            text="Collega con Debug wireless",
+            text=tr("connect_wireless_debug"),
             command=self.connect_wireless_remote,
         ).grid(row=4, column=2, sticky="e", pady=4)
 
@@ -1954,17 +2349,34 @@ class App:
         if window is not None and window.winfo_exists():
             window.destroy()
 
-    def _finish_remote_connection(self, link: RemoteLink, label: str):
+    def _finish_remote_connection(
+        self,
+        link: RemoteLink,
+        label: str,
+        method_key: str,
+    ):
         last_error = None
         for _ in range(20):
             try:
                 info = remote_request(link, "ping", timeout=3.0)
                 if info.get("package") != DEFAULT_PACKAGE:
                     raise RuntimeError(
-                        f"Package inatteso: {info.get('package')}. Atteso: {DEFAULT_PACKAGE}."
+                        tr(
+                            "unexpected_package",
+                            actual=info.get("package"),
+                            expected=DEFAULT_PACKAGE,
+                        )
                     )
                 self.remote_link = link
-                self.remote_state.set(f"Collegato: {label} · Uvir {info.get('version', '')}")
+                self.last_connection_method = method_key
+                self._schedule_settings_save()
+                self.remote_state.set(
+                    tr(
+                        "connected",
+                        label=label,
+                        version=info.get("version", ""),
+                    )
+                )
                 self.mode.config(text=label)
                 self.pull_remote_database(show_message=False)
                 self.refresh_remote_status(show_message=False)
@@ -1974,16 +2386,22 @@ class App:
             except Exception as exc:
                 last_error = exc
                 time.sleep(0.25)
-        raise RuntimeError(f"Uvir non risponde sul canale remoto.\n\n{last_error}")
+        raise RuntimeError(
+            tr("remote_unresponsive", error=last_error)
+        )
 
     def connect_usb_remote(self):
         try:
             adb = find_adb()
             if not adb:
-                raise RuntimeError("ADB non trovato nell'Android SDK.")
+                raise RuntimeError(tr("adb_not_found"))
             device = adb_device(adb)
             link = adb_prepare_remote(adb, device, DEFAULT_PACKAGE)
-            self._finish_remote_connection(link, f"USB ADB · {device}")
+            self._finish_remote_connection(
+                link,
+                f"USB ADB · {device}",
+                "usb",
+            )
         except Exception as exc:
             messagebox.showerror(APP_TITLE, str(exc))
 
@@ -1991,8 +2409,10 @@ class App:
         try:
             adb = find_adb()
             if not adb:
-                raise RuntimeError("ADB non trovato nell'Android SDK.")
+                raise RuntimeError(tr("adb_not_found"))
             detail = adb_pair(adb, self.pairing_address.get(), self.pairing_code.get())
+            self.last_connection_method = "wireless_adb"
+            self._schedule_settings_save()
             messagebox.showinfo(APP_TITLE, detail)
         except Exception as exc:
             messagebox.showerror(APP_TITLE, str(exc))
@@ -2001,50 +2421,74 @@ class App:
         try:
             adb = find_adb()
             if not adb:
-                raise RuntimeError("ADB non trovato nell'Android SDK.")
+                raise RuntimeError(tr("adb_not_found"))
             device = adb_connect_wireless(adb, self.wireless_address.get())
             link = adb_prepare_remote(adb, device, DEFAULT_PACKAGE)
-            self._finish_remote_connection(link, f"ADB wireless · {device}")
+            self._finish_remote_connection(
+                link,
+                f"ADB wireless · {device}",
+                "wireless_adb",
+            )
         except Exception as exc:
             messagebox.showerror(APP_TITLE, str(exc))
 
-    def connect_direct_remote(self, method: str = "Wi-Fi"):
+    def connect_direct_remote(self, method_key: str = "wifi"):
         try:
-            if method == "Bluetooth":
+            if method_key == "bluetooth":
                 host = self.bluetooth_host.get().strip()
                 pin = self.bluetooth_pin.get().strip()
+                method = "Bluetooth"
             else:
                 host = self.direct_host.get().strip()
                 pin = self.direct_pin.get().strip()
+                method = "Wi-Fi"
 
             port = REMOTE_PORT
             if not host:
                 raise RuntimeError(
-                    f"Inserisci l’indirizzo {method} mostrato da Uvir."
+                    tr("enter_address", method=method)
                 )
             if not pin:
                 raise RuntimeError(
-                    "Inserisci il codice di collegamento mostrato da Uvir."
+                    tr("enter_connection_code")
                 )
             link = RemoteLink(mode="direct", host=host, port=port, pin=pin)
-            self._finish_remote_connection(link, f"{method} · {host}")
+            self._finish_remote_connection(
+                link,
+                f"{method} · {host}",
+                method_key,
+            )
         except Exception as exc:
             messagebox.showerror(APP_TITLE, str(exc))
 
     def _remote(self, action: str, payload: dict | None = None) -> dict:
         if not self.remote_link:
-            raise RuntimeError("Collega prima Uvir Desktop al telefono.")
+            raise RuntimeError(tr("connect_desktop_first"))
         return remote_request(self.remote_link, action, payload)
 
     def refresh_remote_status(self, show_message: bool = True):
         try:
             data = self._remote("status")
-            ready = "LIVE pronto" if data.get("live_ready") else "LIVE in inizializzazione"
+            ready = (
+                tr("live_ready")
+                if data.get("live_ready")
+                else tr("live_initializing")
+            )
             if data.get("auto_enabled"):
-                auto = f"AUTO attivo · {data.get('auto_completed_count', 0)} salvate"
+                auto = tr(
+                    "saved_count",
+                    count=data.get("auto_completed_count", 0),
+                )
             else:
-                auto = "AUTO fermo"
-            self.remote_state.set(f"{ready} · {auto} · schermata {data.get('screen', 'live')}")
+                auto = tr("auto_stopped")
+            self.remote_state.set(
+                tr(
+                    "screen_status",
+                    ready=ready,
+                    auto=auto,
+                    screen=data.get("screen", "live"),
+                )
+            )
             self.status.set(self.remote_state.get())
             if show_message:
                 messagebox.showinfo(APP_TITLE, self.remote_state.get())
@@ -2063,7 +2507,10 @@ class App:
             result = self._remote("save_measurement", {"note": self.remote_note.get().strip()})
             self.remote_note.set("")
             self.pull_remote_database(show_message=False)
-            messagebox.showinfo(APP_TITLE, f"Misurazione #{result.get('id')} salvata sul telefono e copiata sul PC.")
+            messagebox.showinfo(
+                APP_TITLE,
+                tr("measurement_saved", id=result.get("id")),
+            )
         except Exception as exc:
             messagebox.showerror(APP_TITLE, str(exc))
 
@@ -2072,9 +2519,9 @@ class App:
             interval = int(self.remote_interval.get().strip())
             maximum = int(self.remote_max_count.get().strip() or "1")
             if interval <= 0:
-                raise RuntimeError("L'intervallo deve essere maggiore di zero.")
+                raise RuntimeError(tr("positive_interval"))
             if self.remote_limit_enabled.get() and maximum <= 0:
-                raise RuntimeError("Il limite deve essere maggiore di zero.")
+                raise RuntimeError(tr("positive_limit"))
             self._remote(
                 "start_auto",
                 {
@@ -2089,7 +2536,7 @@ class App:
                 },
             )
             self.refresh_remote_status(show_message=False)
-            messagebox.showinfo(APP_TITLE, "Acquisizione automatica avviata.")
+            messagebox.showinfo(APP_TITLE, tr("auto_started"))
         except Exception as exc:
             messagebox.showerror(APP_TITLE, str(exc))
 
@@ -2097,7 +2544,7 @@ class App:
         try:
             self._remote("stop_auto")
             self.refresh_remote_status(show_message=False)
-            messagebox.showinfo(APP_TITLE, "Acquisizione automatica fermata.")
+            messagebox.showinfo(APP_TITLE, tr("auto_stopped_message"))
         except Exception as exc:
             messagebox.showerror(APP_TITLE, str(exc))
 
@@ -2122,10 +2569,20 @@ class App:
             )
             ensure_schema(db)
             self.db_path = db
+            self._schedule_settings_save()
             self.refresh()
-            self.status.set(f"Copia locale aggiornata: {len(records)} misurazioni → {db}")
+            self.status.set(
+                tr(
+                    "local_copy_updated",
+                    count=len(records),
+                    path=db,
+                )
+            )
             if show_message:
-                messagebox.showinfo(APP_TITLE, f"Copia locale aggiornata.\n\n{db}")
+                messagebox.showinfo(
+                    APP_TITLE,
+                    tr("local_copy_updated_dialog", path=db),
+                )
         except Exception as exc:
             if show_message:
                 messagebox.showerror(APP_TITLE, str(exc))
@@ -2134,15 +2591,14 @@ class App:
 
     def sync_local_to_remote(self):
         if not self.db_path:
-            messagebox.showinfo(APP_TITLE, "Apri prima un database locale.")
+            messagebox.showinfo(APP_TITLE, tr("open_local_first"))
             return
         if not self.remote_link:
-            messagebox.showinfo(APP_TITLE, "Collega prima il telefono.")
+            messagebox.showinfo(APP_TITLE, tr("connect_phone_first"))
             return
         if not messagebox.askyesno(
             APP_TITLE,
-            "Sostituire l'elenco delle misurazioni sul telefono con il database locale?\n\n"
-            "Prima verrà mantenuta una copia locale di sicurezza.",
+            tr("replace_phone_database"),
         ):
             return
         try:
@@ -2163,10 +2619,17 @@ class App:
             self.pull_remote_database(show_message=False)
             messagebox.showinfo(
                 APP_TITLE,
-                f"Sincronizzate {result.get('replaced', 0)} misurazioni.\nBackup: {local_backup}",
+                tr(
+                    "synced_measurements",
+                    count=result.get("replaced", 0),
+                    backup=local_backup,
+                ),
             )
         except Exception as exc:
-            messagebox.showerror(APP_TITLE, f"Sincronizzazione non riuscita:\n{exc}")
+            messagebox.showerror(
+                APP_TITLE,
+                tr("sync_failed", error=exc),
+            )
 
     def smart_refresh(self):
         if self.remote_link:
@@ -2178,14 +2641,14 @@ class App:
     def edit_note(self):
         record_id = self.selected_record_id()
         if not self.db_path or record_id is None:
-            messagebox.showinfo(APP_TITLE, "Seleziona una misurazione.")
+            messagebox.showinfo(APP_TITLE, tr("select_a_measurement"))
             return
         row = self.row_map.get(record_id)
         if row is None:
             return
         note = simpledialog.askstring(
             APP_TITLE,
-            f"Nota della misurazione #{record_id}",
+            tr("measurement_note", id=record_id),
             initialvalue=row["note"] or "",
             parent=self.root,
         )
@@ -2206,21 +2669,29 @@ class App:
                 self.pull_remote_database(show_message=False)
             else:
                 self.refresh()
-            self.status.set(f"Nota aggiornata. Backup: {local_backup}")
+            self.status.set(
+                tr("note_updated", backup=local_backup)
+            )
         except Exception as exc:
-            messagebox.showerror(APP_TITLE, f"Modifica non riuscita:\n{exc}")
+            messagebox.showerror(
+                APP_TITLE,
+                tr("edit_failed", error=exc),
+            )
 
     def connect(self):
         if not self.db_path:
-            raise RuntimeError("Nessun database aperto.")
+            raise RuntimeError(tr("no_database_open"))
         con = sqlite3.connect(self.db_path)
         con.row_factory = sqlite3.Row
         return con
 
     def open_db(self):
         p = filedialog.askopenfilename(
-            title="Apri uvir.db",
-            filetypes=[("SQLite", "*.db *.sqlite *.sqlite3"), ("Tutti i file", "*.*")]
+            title=tr("open_database_title"),
+            filetypes=[
+                ("SQLite", "*.db *.sqlite *.sqlite3"),
+                (tr("all_files"), "*.*"),
+            ]
         )
         if not p:
             return
@@ -2229,9 +2700,10 @@ class App:
             ensure_schema(path)
             self.db_path = path
             self.remote_link = None
-            self.mode.config(text="Database locale")
+            self.mode.config(text=tr("local_database"))
             self.status.set(str(path))
             self.refresh()
+            self._schedule_settings_save()
         except Exception as e:
             messagebox.showerror(APP_TITLE, str(e))
 
@@ -2309,9 +2781,9 @@ class App:
                         for row in block_rows
                     )
                     label = (
-                        "1 misurazione"
+                        tr("session_one")
                         if count == 1
-                        else f"{count} misurazioni"
+                        else tr("session_many", count=count)
                     )
                     self.tree.insert(
                         "",
@@ -2322,7 +2794,11 @@ class App:
                             session_id,
                             format_time(session_start),
                             "A",
-                            f"Sessione automatica #{session_id} · {label}"
+                            tr(
+                                "automatic_session",
+                                id=session_id,
+                                label=label,
+                            )
                         ),
                         tags=("session_header",)
                     )
@@ -2357,7 +2833,9 @@ class App:
                         tags=tags
                     )
 
-            self.count.config(text=f"Misure: {len(rows)}")
+            self.count.config(
+                text=tr("measurements_count", count=len(rows))
+            )
             if rows:
                 iid = str(rows[0]["id"])
                 self.tree.selection_set(iid)
@@ -2365,14 +2843,17 @@ class App:
             else:
                 self.clear_detail()
         except Exception as e:
-            messagebox.showerror(APP_TITLE, f"Errore lettura database:\n{e}")
+            messagebox.showerror(
+                APP_TITLE,
+                tr("database_read_error", error=e),
+            )
 
     @staticmethod
     def pct(v: float, total: float) -> str:
         return "0.0%" if total <= 0 else f"{100*v/total:.1f}%"
 
     def clear_detail(self):
-        self.detail_title.config(text="Nessuna misura")
+        self.detail_title.config(text=tr("no_measurement"))
         self.detail_acquisition.config(text="")
         self.detail_note.config(text="")
 
@@ -2403,16 +2884,26 @@ class App:
         d = derived(r)
 
         self.detail_title.config(
-            text=f"Misura #{r['id']}  •  {format_time(r['timestamp'])}"
+            text=tr(
+                "measurement_title",
+                id=r["id"],
+                time=format_time(r["timestamp"]),
+            )
         )
 
         self.detail_acquisition.config(
-            text="Acquisizione: " + acquisition_type(r)
+            text=tr(
+                "acquisition_label",
+                type=acquisition_type(r),
+            )
         )
 
         note = (r["note"] or "").strip()
         self.detail_note.config(
-            text="Nota: " + (note if note else "Nessuna nota")
+            text=tr(
+                "note_label",
+                note=note if note else tr("no_note"),
+            )
         )
 
         vals = {
@@ -2425,7 +2916,7 @@ class App:
                 (d["hev"], self.pct(d["hev"], d["vis_total"])),
                 (d["heb"], self.pct(d["heb"], d["vis_total"]))
             ],
-            "VISIBILE": [
+            tr("visible"): [
                 (d[k], self.pct(d[k], d["vis_total"]))
                 for k in (
                     "violetto",
@@ -2461,36 +2952,36 @@ class App:
         b = biological_effects(r)
 
         self.bio_vars["dna_uv"].set(
-            f"Irradianza pesata stimata:\n{b['dna_uv']:,.2f} µW/cm² eq."
+            f"{tr('weighted_irradiance')}:\n{b['dna_uv']:,.2f} µW/cm² eq."
         )
         self.bio_vars["dna_uv_score"].set(
-            f"Rilevanza spettrale: {b['dna_uv_score']:.0f} / 100"
+            f"{tr('spectral_relevance')}: {b['dna_uv_score']:.0f} / 100"
         )
         self.bio_bars["dna_uv_score"]["value"] = b["dna_uv_score"]
 
         self.bio_vars["uva_photoaging"].set(
-            f"Irradianza pesata stimata:\n{b['uva_photoaging']:,.2f} µW/cm² eq."
+            f"{tr('weighted_irradiance')}:\n{b['uva_photoaging']:,.2f} µW/cm² eq."
         )
         self.bio_vars["uva_photoaging_score"].set(
-            f"Rilevanza spettrale: {b['uva_photoaging_score']:.0f} / 100"
+            f"{tr('spectral_relevance')}: {b['uva_photoaging_score']:.0f} / 100"
         )
         self.bio_bars["uva_photoaging_score"]["value"] = b["uva_photoaging_score"]
 
         self.bio_vars["hev_oxidative"].set(
-            f"Irradianza pesata stimata:\n{b['hev_oxidative']:,.2f} µW/cm² eq."
+            f"{tr('weighted_irradiance')}:\n{b['hev_oxidative']:,.2f} µW/cm² eq."
         )
         self.bio_vars["hev_oxidative_score"].set(
-            f"Rilevanza spettrale: {b['hev_oxidative_score']:.0f} / 100"
+            f"{tr('spectral_relevance')}: {b['hev_oxidative_score']:.0f} / 100"
         )
         self.bio_bars["hev_oxidative_score"]["value"] = b["hev_oxidative_score"]
 
     def do_export(self, kind: str):
         if not self.db_path:
-            messagebox.showinfo(APP_TITLE, "Apri prima un database.")
+            messagebox.showinfo(APP_TITLE, tr("open_database_first"))
             return
         rows = self.rows()
         if not rows:
-            messagebox.showinfo(APP_TITLE, "Nessuna misura da esportare.")
+            messagebox.showinfo(APP_TITLE, tr("nothing_to_export"))
             return
         stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         ext, types = {
@@ -2512,25 +3003,42 @@ class App:
                 write_xlsx(out, rows)
             else:
                 write_ods(out, rows)
-            self.status.set(f"Esportate {len(rows)} misure → {out}")
-            messagebox.showinfo(APP_TITLE, f"Esportazione completata:\n{out}")
+            self.status.set(
+                tr("exported", count=len(rows), path=out)
+            )
+            messagebox.showinfo(
+                APP_TITLE,
+                tr("export_complete", path=out),
+            )
         except Exception as e:
-            messagebox.showerror(APP_TITLE, f"Errore esportazione:\n{e}")
+            messagebox.showerror(
+                APP_TITLE,
+                tr("export_error", error=e),
+            )
 
     def delete_one(self):
         rid = self.selected_record_id()
         if not self.db_path or rid is None:
-            messagebox.showinfo(APP_TITLE, "Seleziona una misura.")
+            messagebox.showinfo(APP_TITLE, tr("select_measurement_short"))
             return
-        if messagebox.askyesno(APP_TITLE, f"Eliminare definitivamente la misura #{rid}?"):
+        if messagebox.askyesno(
+            APP_TITLE,
+            tr("delete_one_question", id=rid),
+        ):
             self.delete_sql("DELETE FROM measurements WHERE id=?", (rid,))
 
     def delete_all(self):
         if not self.db_path or not self.row_map:
             return
-        if not messagebox.askyesno(APP_TITLE, f"Eliminare TUTTE le {len(self.row_map)} misure?\nVerrà creato un backup."):
+        if not messagebox.askyesno(
+            APP_TITLE,
+            tr("delete_all_question", count=len(self.row_map)),
+        ):
             return
-        if not messagebox.askyesno(APP_TITLE, "Conferma finale: svuotare completamente lo storico?"):
+        if not messagebox.askyesno(
+            APP_TITLE,
+            tr("delete_all_final"),
+        ):
             return
         self.delete_sql(
             "DELETE FROM measurements",
@@ -2542,16 +3050,13 @@ class App:
         if not self.db_path and not self.remote_link:
             messagebox.showinfo(
                 APP_TITLE,
-                "Apri un database oppure collega prima il telefono."
+                tr("open_or_connect")
             )
             return
 
         if not messagebox.askyesno(
             APP_TITLE,
-            "Azzerare i contatori?\n\n"
-            "Questa operazione elimina definitivamente tutte le misurazioni. "
-            "La prossima misurazione e la prossima sessione automatica "
-            "partiranno dall'ID 1."
+            tr("reset_question")
         ):
             return
 
@@ -2560,12 +3065,11 @@ class App:
                 self._remote("reset_counters")
                 self.pull_remote_database(show_message=False)
                 self.status.set(
-                    "Contatori azzerati sul telefono e nella copia locale."
+                    tr("counters_reset_remote")
                 )
                 messagebox.showinfo(
                     APP_TITLE,
-                    "Contatori azzerati. Tutte le misurazioni sono state "
-                    "eliminate dal telefono e dalla copia locale."
+                    tr("counters_reset_remote_dialog")
                 )
                 return
 
@@ -2595,17 +3099,19 @@ class App:
 
             self.refresh()
             self.status.set(
-                f"Contatori azzerati. Backup: {local_backup}"
+                tr("counters_reset_backup", backup=local_backup)
             )
             messagebox.showinfo(
                 APP_TITLE,
-                "Contatori azzerati e misurazioni eliminate.\n\n"
-                f"Backup: {local_backup}"
+                tr(
+                    "counters_reset_local_dialog",
+                    backup=local_backup,
+                )
             )
         except Exception as exc:
             messagebox.showerror(
                 APP_TITLE,
-                f"Azzeramento non riuscito:\n{exc}"
+                tr("reset_failed", error=exc)
             )
 
     def delete_sql(
@@ -2642,8 +3148,7 @@ class App:
             if affected == 0:
                 messagebox.showwarning(
                     APP_TITLE,
-                    "Nessuna misura è stata cancellata: la misura selezionata "
-                    "non risulta più presente nel database."
+                    tr("nothing_deleted")
                 )
                 return
 
@@ -2660,46 +3165,49 @@ class App:
                     self.pull_remote_database(show_message=False)
 
                     self.status.set(
-                        f"Cancellazione completata sul PC e sul telefono. "
-                        f"Backup: {local_backup}"
+                        tr(
+                            "deletion_synced",
+                            backup=local_backup,
+                        )
                     )
 
                     messagebox.showinfo(
                         APP_TITLE,
-                        "Misurazione eliminata correttamente.\n\n"
-                        "La modifica è stata applicata anche a Uvir sul telefono."
+                        tr("measurement_deleted_remote")
                     )
 
                 except Exception as sync_error:
                     self.status.set(
-                        "Misurazione eliminata sul PC, ma sincronizzazione "
-                        "telefono non riuscita."
+                        tr("deletion_sync_failed_status")
                     )
 
                     messagebox.showerror(
                         APP_TITLE,
-                        "La modifica locale è riuscita, ma il telefono non è "
-                        "stato aggiornato.\n\n"
-                        f"Dettaglio:\n{sync_error}\n\n"
-                        f"Backup locale:\n{local_backup}"
+                        tr(
+                            "deletion_sync_failed",
+                            error=sync_error,
+                            backup=local_backup,
+                        )
                     )
 
             else:
                 self.status.set(
-                    f"Cancellazione completata sul database locale. "
-                    f"Backup: {local_backup}"
+                    tr(
+                        "deletion_local_status",
+                        backup=local_backup,
+                    )
                 )
 
                 messagebox.showinfo(
                     APP_TITLE,
-                    "Misura cancellata correttamente dal database locale."
+                    tr("measurement_deleted_local")
                 )
 
         except Exception as e:
             self.refresh()
             messagebox.showerror(
                 APP_TITLE,
-                f"Errore durante la cancellazione:\n{e}"
+                tr("deletion_error", error=e)
             )
 
 def main():

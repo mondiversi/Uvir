@@ -10,6 +10,25 @@ Non è necessario creare un file EXE. Lo script usa soltanto moduli inclusi in
 Python. ADB è necessario soltanto per USB e per la modalità tecnica presente
 nella scheda **Avanzate**.
 
+L’interfaccia rileva automaticamente la lingua del sistema: usa l’italiano sui
+sistemi configurati in italiano e l’inglese in tutti gli altri casi. Anche le
+intestazioni e la legenda dei file CSV, Excel e LibreOffice seguono la lingua
+rilevata.
+
+## Memoria locale
+
+Indirizzi Wi-Fi e Bluetooth, codici di collegamento, dati del Debug wireless,
+ultimo metodo di connessione, parametri AUTO e ultimo database aperto vengono
+salvati automaticamente in:
+
+```text
+%USERPROFILE%\UvirDesktop\desktop_settings.json
+```
+
+Il file è locale, leggibile e separato dalle misurazioni. I codici vi sono
+salvati in chiaro per poter compilare automaticamente i campi al riavvio; non
+vengono inviati altrove dal programma.
+
 ## Dati LIVE sul computer
 
 Dopo il collegamento si apre automaticamente **Uvir LIVE**. La finestra mostra
