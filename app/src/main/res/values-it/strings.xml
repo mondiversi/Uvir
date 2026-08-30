@@ -42,6 +42,8 @@
         <item quantity="other">Le %1$d misurazioni selezionate verranno cancellate definitivamente.</item>
     </plurals>
     <string name="shared_measurement_heading">Misurazione %1$d</string>
+    <string name="share_measurement_id_label">ID misurazione</string>
+    <string name="share_session_id_label">ID sessione</string>
     <string name="share_date_label">Data e ora</string>
     <string name="share_acquisition_label">Acquisizione</string>
     <string name="share_automatic">Automatica</string>
@@ -104,7 +106,7 @@
     <string name="relative_spectral_index_explanation">La scala 0–100 indica quanto lo spettro misurato è concentrato nelle lunghezze d’onda pesate da questa stima. Descrive la composizione spettrale, non l’intensità totale. Non è una percentuale di danno né una soglia di sicurezza.</string>
 
     <string name="delete_all_measurements_question">Eliminare tutte le misurazioni?</string>
-    <string name="delete_all_measurements_warning">Tutte le misurazioni verranno eliminate definitivamente e la numerazione sarà azzerata. Per confermare, tieni premuto ELIMINA TUTTO senza rilasciare per 2 secondi.</string>
+    <string name="delete_all_measurements_warning">Tutte le misurazioni verranno eliminate definitivamente. Gli ID già utilizzati non verranno riutilizzati. Per confermare, tieni premuto ELIMINA TUTTO senza rilasciare per 2 secondi.</string>
     <string name="delete_all">ELIMINA TUTTO</string>
     <plurals name="measurement_count_since">
         <item quantity="one">%1$d salvata · dal %2$s</item>

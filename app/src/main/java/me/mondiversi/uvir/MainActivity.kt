@@ -2205,11 +2205,6 @@ class UvirDatabaseHelper(
                 null
             )
 
-            // Dopo una cancellazione totale, la prima nuova misurazione riparte da ID 1.
-            database.execSQL(
-                "DELETE FROM sqlite_sequence WHERE name = 'measurements'"
-            )
-
             database.setTransactionSuccessful()
         } finally {
             database.endTransaction()
@@ -2278,10 +2273,6 @@ class UvirDatabaseHelper(
                 "measurements",
                 null,
                 null
-            )
-
-            database.execSQL(
-                "DELETE FROM sqlite_sequence WHERE name = 'measurements'"
             )
 
             records.forEach { record ->
@@ -2385,10 +2376,10 @@ private fun measurementCsv(
 ): String = buildString {
     appendLine(
         listOf(
-            "id",
+            "measurement_id",
+            "session_id",
             "timestamp",
             "automatic",
-            "automatic_session_id",
             "automatic_sequence",
             "note",
             "UV-C (µW/cm²)",
@@ -2421,11 +2412,11 @@ private fun measurementCsv(
         appendLine(
             listOf(
                 record.id.toString(),
-                csvDateTime(record.timestamp),
-                if (record.automatic) "1" else "0",
                 record.automaticSessionId
                     ?.toString()
                     .orEmpty(),
+                csvDateTime(record.timestamp),
+                if (record.automatic) "1" else "0",
                 record.automaticSequence
                     ?.toString()
                     .orEmpty(),
@@ -2471,6 +2462,15 @@ private fun readableMeasurementTable(
                 )
             )
         }
+
+        appendLine(
+            "${context.getString(R.string.share_measurement_id_label)}: " +
+                record.id
+        )
+        appendLine(
+            "${context.getString(R.string.share_session_id_label)}: " +
+                (record.automaticSessionId?.toString() ?: "—")
+        )
 
         appendLine(
             "${context.getString(R.string.share_date_label)}: " +
@@ -5743,7 +5743,7 @@ if (showVersionInfoDialog) {
                     Column(
                         modifier = Modifier.fillMaxWidth(),
                         verticalArrangement =
-                            Arrangement.spacedBy(6.dp)
+                            Arrangement.spacedBy(2.dp)
                     ) {
                         OutlinedButton(
                             onClick = {
@@ -6750,15 +6750,19 @@ floatingActionButton = {
                     }
                 }
 
-                IconButton(
-                    onClick = {
-                        showVersionInfoDialog = true
-                    },
+                Box(
                     modifier =
-                        Modifier.semantics {
-                            contentDescription =
-                                versionInfoDescription
-                        }
+                        Modifier
+                            .size(48.dp)
+                            .semantics {
+                                contentDescription =
+                                    versionInfoDescription
+                            }
+                            .clickable {
+                                showVersionInfoDialog = true
+                            },
+                    contentAlignment =
+                        Alignment.CenterEnd
                 ) {
                     UvirMenuIcon(
                         type =

@@ -79,6 +79,9 @@ cartella `backups`. Il programma può modificare le note, eliminare misurazioni,
 svuotare lo storico e sincronizzare sul telefono l'intero database locale. Le
 informazioni che raggruppano le misurazioni della stessa sessione automatica
 vengono conservate nelle copie, nelle esportazioni e durante la sincronizzazione.
+L'ID della sessione è riportato subito dopo l'ID della misurazione nei file CSV,
+Excel e LibreOffice. Dopo una cancellazione totale, gli ID già utilizzati non
+vengono assegnati nuovamente.
 
 Package Android previsto:
 

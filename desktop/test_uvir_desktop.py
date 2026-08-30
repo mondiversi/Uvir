@@ -114,6 +114,50 @@ class UvirDesktopTests(unittest.TestCase):
                 round_trip["automatic_sequence"],
                 3
             )
+            self.assertEqual(
+                uvir.EXPORT_COLUMNS[:3],
+                ["ID_misurazione", "ID_sessione", "Data/Ora"]
+            )
+            self.assertEqual(
+                uvir.export_row(saved)[:2],
+                [1, 1_234_567_800_000]
+            )
+
+    def test_empty_refresh_preserves_measurement_sequence(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "uvir.db"
+            sample = {
+                key: 0.0
+                for key in (
+                    "uvc", "uvb", "uva", "violetto", "blu", "verde",
+                    "giallo", "arancione", "rosso", "f8", "nir"
+                )
+            }
+            uvir.create_database_from_remote(
+                path,
+                [
+                    {
+                        "id": 27,
+                        "timestamp": 1,
+                        "note": "",
+                        "automatic": False,
+                        "sample": sample,
+                    }
+                ]
+            )
+
+            uvir.create_database_from_remote(path, [])
+
+            connection = sqlite3.connect(path)
+            try:
+                sequence = connection.execute(
+                    "SELECT seq FROM sqlite_sequence WHERE name = ?",
+                    ("measurements",)
+                ).fetchone()
+            finally:
+                connection.close()
+
+            self.assertEqual(sequence, (27,))
 
     def test_remote_json_request(self):
         server = socket.socket()

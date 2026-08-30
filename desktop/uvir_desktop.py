@@ -104,8 +104,8 @@ EXPECTED_COLUMNS = {
 }
 
 EXPORT_COLUMNS = [
-    "ID", "Data/Ora", "Timestamp_ms", "Tipo_acquisizione", "Automatico", "Nota",
-    "Sessione_automatica_id", "Progressivo_sessione",
+    "ID_misurazione", "ID_sessione", "Data/Ora", "Timestamp_ms",
+    "Tipo_acquisizione", "Automatico", "Nota", "Progressivo_sessione",
     "UVC_100_280_nm_uW_cm2", "UVB_280_315_nm_uW_cm2", "UVA_315_400_nm_uW_cm2",
     "UV_totale_uW_cm2", "HEV_400_500_nm_uW_cm2", "HEB_400_450_nm_uW_cm2",
     "Violetto_400_450_nm_uW_cm2", "Blu_450_495_nm_uW_cm2",
@@ -124,7 +124,8 @@ EXPORT_COLUMNS = [
 LEGEND_ROWS = [
     ["Gruppo", "Canale", "Banda / picco", "Nota"],
     ["Acquisizione", "Automatico", "0 / 1", "0 = manuale; 1 = automatica"],
-    ["Acquisizione", "Sessione automatica", "ID + progressivo", "Identifica le misurazioni appartenenti alla stessa sessione automatica"],
+    ["Acquisizione", "ID sessione", "Intero univoco", "Identifica le misurazioni appartenenti alla stessa sessione automatica"],
+    ["Acquisizione", "Progressivo sessione", "1, 2, 3…", "Posizione della misurazione nella sessione automatica"],
     ["UV", "UVC", "100–280 nm", "Energia fotonica maggiore"],
     ["UV", "UVB", "280–315 nm", ""],
     ["UV", "UVA", "315–400 nm", ""],
@@ -303,12 +304,12 @@ def export_row(row: sqlite3.Row) -> list:
     automatic = 1 if is_automatic(row) else 0
     return [
         row["id"],
+        optional_int(row, "automatic_session_id"),
         format_time(row["timestamp"]),
         row["timestamp"],
         acquisition_type(row),
         automatic,
         row["note"] or "",
-        optional_int(row, "automatic_session_id"),
         optional_int(row, "automatic_sequence"),
         d["uvc"], d["uvb"], d["uva"], d["uv_total"],
         d["hev"], d["heb"],
@@ -507,6 +508,21 @@ def create_database_from_remote(path: Path, records: list[dict]) -> None:
     if temporary.exists():
         temporary.unlink()
 
+    previous_sequence = 0
+    if path.exists():
+        previous = sqlite3.connect(path)
+        try:
+            sequence_row = previous.execute(
+                "SELECT seq FROM sqlite_sequence WHERE name = ?",
+                ("measurements",)
+            ).fetchone()
+            if sequence_row:
+                previous_sequence = int(sequence_row[0] or 0)
+        except sqlite3.DatabaseError:
+            pass
+        finally:
+            previous.close()
+
     con = sqlite3.connect(temporary)
     try:
         con.execute(
@@ -558,6 +574,27 @@ def create_database_from_remote(path: Path, records: list[dict]) -> None:
                         )
                     ],
                 ),
+            )
+
+        imported_sequence = max(
+            (
+                int(record.get("id", 0))
+                for record in records
+            ),
+            default=0
+        )
+        preserved_sequence = max(
+            previous_sequence,
+            imported_sequence
+        )
+        if preserved_sequence > 0:
+            con.execute(
+                "DELETE FROM sqlite_sequence WHERE name = ?",
+                ("measurements",)
+            )
+            con.execute(
+                "INSERT INTO sqlite_sequence(name, seq) VALUES (?, ?)",
+                ("measurements", preserved_sequence)
             )
         con.commit()
     finally:
@@ -616,7 +653,8 @@ def write_xlsx(path: Path, records: list[sqlite3.Row]) -> None:
     measurements = [EXPORT_COLUMNS] + [export_row(r) for r in records]
     sheet1 = xlsx_sheet(
         measurements,
-        [8, 20, 17, 24, 12, 38] + [23] * (len(EXPORT_COLUMNS) - 6)
+        [16, 20, 20, 17, 24, 12, 38, 20]
+        + [23] * (len(EXPORT_COLUMNS) - 8)
     )
     sheet2 = xlsx_sheet(LEGEND_ROWS, [22, 20, 22, 62])
 
@@ -2346,14 +2384,14 @@ class App:
         self.delete_sql(
             "DELETE FROM measurements",
             (),
-            reset_measurement_sequence=True
+            delete_all_records=True
         )
 
     def delete_sql(
         self,
         sql: str,
         params: tuple,
-        reset_measurement_sequence: bool = False
+        delete_all_records: bool = False
     ):
         if not self.db_path:
             return
@@ -2366,24 +2404,6 @@ class App:
             try:
                 cur = con.execute(sql, params)
                 affected = cur.rowcount
-
-                # Dopo "Elimina tutto", la prima nuova misurazione riparte da ID 1.
-                # Se il DB non usa AUTOINCREMENT, sqlite_sequence non esiste e il
-                # normale ROWID di SQLite riparte già automaticamente dall'inizio.
-                if reset_measurement_sequence:
-                    sequence_exists = con.execute(
-                        """
-                        SELECT 1
-                        FROM sqlite_master
-                        WHERE type = 'table' AND name = 'sqlite_sequence'
-                        """
-                    ).fetchone()
-
-                    if sequence_exists:
-                        con.execute(
-                            "DELETE FROM sqlite_sequence WHERE name = ?",
-                            ("measurements",)
-                        )
 
                 con.commit()
 
@@ -2410,7 +2430,7 @@ class App:
             # API anche alle build release, senza accesso run-as al file privato.
             if self.remote_link:
                 try:
-                    if reset_measurement_sequence:
+                    if delete_all_records:
                         self._remote("delete_all")
                     else:
                         ids = [int(value) for value in params]
