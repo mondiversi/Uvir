@@ -198,6 +198,8 @@ enum class AppScreen {
     DETAIL
 }
 
+private val UvirIslandSpacing = 9.dp
+
 enum class MenuIconType {
     SAVED_MEASUREMENTS,
     AUTOMATIC_ACQUISITION,
@@ -4849,7 +4851,7 @@ fun LiveScreen(
                             .fillMaxSize(),
                     verticalArrangement =
                         Arrangement.spacedBy(
-                            12.dp
+                            UvirIslandSpacing
                         )
                 ) {
 
@@ -5463,7 +5465,7 @@ if (showVersionInfoDialog) {
 
                 verticalArrangement =
                     Arrangement.spacedBy(
-                        10.dp
+                        UvirIslandSpacing
                     )
             ) {
 
@@ -5720,7 +5722,7 @@ if (showParametersDialog) {
                         ),
                 verticalArrangement =
                     Arrangement.spacedBy(
-                        12.dp
+                        UvirIslandSpacing
                     )
             ) {
 
@@ -6460,7 +6462,7 @@ floatingActionButton = {
 
         verticalArrangement =
             Arrangement.spacedBy(
-                9.dp
+                UvirIslandSpacing
             )
     ) {
 
@@ -7440,7 +7442,9 @@ fun HistoryScreen(
                         bottom = 20.dp
                     ),
                     verticalArrangement =
-                        Arrangement.spacedBy(8.dp)
+                        Arrangement.spacedBy(
+                            UvirIslandSpacing
+                        )
                 ) {
 
                     items(
@@ -7906,7 +7910,7 @@ fun RecordDetailScreen(
 
             verticalArrangement =
                 Arrangement.spacedBy(
-                    12.dp
+                    UvirIslandSpacing
                 )
         ) {
 
@@ -9812,7 +9816,7 @@ fun BiologicalEffectsContent(
     Column(
         verticalArrangement =
             Arrangement.spacedBy(
-                9.dp
+                UvirIslandSpacing
             )
     ) {
 
