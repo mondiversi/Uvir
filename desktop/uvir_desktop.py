@@ -51,7 +51,8 @@ DEFAULT_PACKAGE = "me.mondiversi.uvir"
 REMOTE_PORT = 45871
 WINDOWS_APP_ID = "Uvir.Desktop.2026.1"
 SESSION_COUNTER_NAME = "automatic_session_id"
-SETTINGS_FILE = Path.home() / "UvirDesktop" / "desktop_settings.json"
+SETTINGS_FILE = Path(__file__).resolve().parent / "desktop_settings.json"
+BIOLOGICAL_MODEL_VERSION = "v1"
 
 
 TEXT = {
@@ -170,9 +171,7 @@ TEXT = {
     "open_database_title": ("Apri uvir.db", "Open uvir.db"),
     "all_files": ("Tutti i file", "All files"),
     "database_read_error": ("Errore lettura database:\n{error}", "Database read error:\n{error}"),
-    "session_one": ("1 misurazione", "1 measurement"),
-    "session_many": ("{count} misurazioni", "{count} measurements"),
-    "automatic_session": ("Sessione automatica #{id} · {label}", "Automatic session #{id} · {label}"),
+    "automatic_session": ("Sessione automatica #{id} · ({count})", "Automatic session #{id} · ({count})"),
     "measurement_title": ("Misura #{id}  •  {time}", "Measurement #{id}  •  {time}"),
     "acquisition_label": ("Acquisizione: {type}", "Acquisition: {type}"),
     "note_label": ("Nota: {note}", "Note: {note}"),
@@ -307,6 +306,7 @@ EXPORT_COLUMNS_IT = [
     "Arancione_590_620_nm_uW_cm2", "Rosso_620_700_nm_uW_cm2",
     "Visibile_totale_uW_cm2", "FarRed_picco_745_nm_uW_cm2",
     "NIR_picco_855_nm_uW_cm2", "FarRed_NIR_totale_uW_cm2",
+    "Modello_biologico",
     "Irradianza_pesata_stimata_UV_effetto_DNA_uW_cm2_eq",
     "Indice_spettrale_UV_effetto_DNA_0_100",
     "Irradianza_pesata_stimata_fotoinvecchiamento_UVA_uW_cm2_eq",
@@ -325,6 +325,7 @@ EXPORT_COLUMNS_EN = [
     "Orange_590_620_nm_uW_cm2", "Red_620_700_nm_uW_cm2",
     "Total_visible_uW_cm2", "FarRed_peak_745_nm_uW_cm2",
     "NIR_peak_855_nm_uW_cm2", "Total_FarRed_NIR_uW_cm2",
+    "Biological_model",
     "Estimated_weighted_irradiance_UV_DNA_effect_uW_cm2_eq",
     "Spectral_index_UV_DNA_effect_0_100",
     "Estimated_weighted_irradiance_UVA_photoaging_uW_cm2_eq",
@@ -338,6 +339,7 @@ LEGEND_ROWS_IT = [
     ["Acquisizione", "Automatico", "0 / 1", "0 = manuale; 1 = automatica"],
     ["Acquisizione", "ID sessione", "Intero univoco", "Identifica le misurazioni appartenenti alla stessa sessione automatica"],
     ["Acquisizione", "Progressivo sessione", "1, 2, 3…", "Posizione della misurazione nella sessione automatica"],
+    ["Calcolo", "Modello biologico", "Versione", "Versione del modello usato per gli effetti biologici stimati"],
     ["UV", "UVC", "100–280 nm", "Energia fotonica maggiore"],
     ["UV", "UVB", "280–315 nm", ""],
     ["UV", "UVA", "315–400 nm", ""],
@@ -361,6 +363,7 @@ LEGEND_ROWS_EN = [
     ["Acquisition", "Automatic", "0 / 1", "0 = manual; 1 = automatic"],
     ["Acquisition", "Session ID", "Unique integer", "Identifies measurements belonging to the same automatic session"],
     ["Acquisition", "Session sequence", "1, 2, 3…", "Measurement position within the automatic session"],
+    ["Calculation", "Biological model", "Version", "Version of the model used for the estimated biological effects"],
     ["UV", "UVC", "100–280 nm", "Higher photon energy"],
     ["UV", "UVB", "280–315 nm", ""],
     ["UV", "UVA", "315–400 nm", ""],
@@ -568,6 +571,7 @@ def export_row(row: sqlite3.Row) -> list:
         d["hev"], d["heb"],
         d["violetto"], d["blu"], d["verde"], d["giallo"], d["arancione"], d["rosso"],
         d["vis_total"], d["f8"], d["nir"], d["nir_total"],
+        BIOLOGICAL_MODEL_VERSION,
         b["dna_uv"],
         b["dna_uv_score"],
         b["uva_photoaging"],
@@ -2780,11 +2784,6 @@ class App:
                         int(row["timestamp"])
                         for row in block_rows
                     )
-                    label = (
-                        tr("session_one")
-                        if count == 1
-                        else tr("session_many", count=count)
-                    )
                     self.tree.insert(
                         "",
                         END,
@@ -2797,7 +2796,7 @@ class App:
                             tr(
                                 "automatic_session",
                                 id=session_id,
-                                label=label,
+                                count=count,
                             )
                         ),
                         tags=("session_header",)

@@ -1,5 +1,6 @@
 import ast
 import json
+import re
 import socket
 import sqlite3
 import string
@@ -133,6 +134,15 @@ class UvirDesktopTests(unittest.TestCase):
             self.assertEqual(
                 uvir.export_row(saved)[:2],
                 [1, 3]
+            )
+            exported = uvir.export_row(saved)
+            self.assertEqual(
+                len(exported),
+                len(uvir.EXPORT_COLUMNS)
+            )
+            self.assertEqual(
+                exported[24],
+                uvir.BIOLOGICAL_MODEL_VERSION
             )
             self.assertEqual(
                 uvir.database_counters(path),
@@ -325,6 +335,11 @@ class UvirDesktopTests(unittest.TestCase):
         )
 
     def test_local_settings_round_trip_and_invalid_file(self):
+        self.assertEqual(
+            uvir.SETTINGS_FILE.parent,
+            Path(uvir.__file__).resolve().parent
+        )
+
         with tempfile.TemporaryDirectory() as folder:
             path = Path(folder) / "desktop_settings.json"
             expected = {
@@ -368,6 +383,7 @@ class UvirDesktopTests(unittest.TestCase):
             len(uvir.EXPORT_COLUMNS_IT),
             len(uvir.EXPORT_COLUMNS_EN)
         )
+        self.assertEqual(len(uvir.EXPORT_COLUMNS_IT), 31)
         self.assertEqual(
             len(uvir.LEGEND_ROWS_IT),
             len(uvir.LEGEND_ROWS_EN)
@@ -389,6 +405,31 @@ class UvirDesktopTests(unittest.TestCase):
         }
         self.assertTrue(used_keys)
         self.assertFalse(used_keys - set(uvir.TEXT))
+
+        android_source = (
+            Path(uvir.__file__).resolve().parent.parent
+            / "app" / "src" / "main" / "java"
+            / "me" / "mondiversi" / "uvir"
+            / "MainActivity.kt"
+        ).read_text(encoding="utf-8")
+
+        def android_columns(name: str) -> list[str]:
+            match = re.search(
+                rf"internal val {name}\s*=\s*listOf\((.*?)\n\s*\)",
+                android_source,
+                re.DOTALL,
+            )
+            self.assertIsNotNone(match)
+            return re.findall(r'"([^"]+)"', match.group(1))
+
+        self.assertEqual(
+            android_columns("MEASUREMENT_EXPORT_COLUMNS_IT"),
+            uvir.EXPORT_COLUMNS_IT,
+        )
+        self.assertEqual(
+            android_columns("MEASUREMENT_EXPORT_COLUMNS_EN"),
+            uvir.EXPORT_COLUMNS_EN,
+        )
 
         with tempfile.TemporaryDirectory() as folder:
             xlsx = Path(folder) / "test.xlsx"

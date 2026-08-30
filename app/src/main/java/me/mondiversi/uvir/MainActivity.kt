@@ -2651,50 +2651,126 @@ enum class MeasurementShareFormat {
 }
 
 private fun csvCell(value: String): String =
-    "\"${value.replace("\"", "\"\"")}\""
+    if (
+        value.contains(';') ||
+        value.contains('"') ||
+        value.contains('\n') ||
+        value.contains('\r')
+    ) {
+        "\"${value.replace("\"", "\"\"")}\""
+    } else {
+        value
+    }
 
 private fun csvNumber(value: Double): String =
-    "%.6f".format(
-        Locale.US,
-        value
+    value.toString()
+
+internal val MEASUREMENT_EXPORT_COLUMNS_IT =
+    listOf(
+        "ID_misurazione",
+        "ID_sessione",
+        "Data/Ora",
+        "Timestamp_ms",
+        "Tipo_acquisizione",
+        "Automatico",
+        "Nota",
+        "Progressivo_sessione",
+        "UVC_100_280_nm_uW_cm2",
+        "UVB_280_315_nm_uW_cm2",
+        "UVA_315_400_nm_uW_cm2",
+        "UV_totale_uW_cm2",
+        "HEV_400_500_nm_uW_cm2",
+        "HEB_400_450_nm_uW_cm2",
+        "Violetto_400_450_nm_uW_cm2",
+        "Blu_450_495_nm_uW_cm2",
+        "Verde_495_570_nm_uW_cm2",
+        "Giallo_570_590_nm_uW_cm2",
+        "Arancione_590_620_nm_uW_cm2",
+        "Rosso_620_700_nm_uW_cm2",
+        "Visibile_totale_uW_cm2",
+        "FarRed_picco_745_nm_uW_cm2",
+        "NIR_picco_855_nm_uW_cm2",
+        "FarRed_NIR_totale_uW_cm2",
+        "Modello_biologico",
+        "Irradianza_pesata_stimata_UV_effetto_DNA_uW_cm2_eq",
+        "Indice_spettrale_UV_effetto_DNA_0_100",
+        "Irradianza_pesata_stimata_fotoinvecchiamento_UVA_uW_cm2_eq",
+        "Indice_spettrale_fotoinvecchiamento_UVA_0_100",
+        "Irradianza_pesata_stimata_stress_ossidativo_HEV_uW_cm2_eq",
+        "Indice_spettrale_stress_ossidativo_HEV_0_100"
     )
 
-private fun csvDateTime(timestamp: Long): String =
+internal val MEASUREMENT_EXPORT_COLUMNS_EN =
+    listOf(
+        "Measurement_ID",
+        "Session_ID",
+        "Date/Time",
+        "Timestamp_ms",
+        "Acquisition_type",
+        "Automatic",
+        "Note",
+        "Session_sequence",
+        "UVC_100_280_nm_uW_cm2",
+        "UVB_280_315_nm_uW_cm2",
+        "UVA_315_400_nm_uW_cm2",
+        "Total_UV_uW_cm2",
+        "HEV_400_500_nm_uW_cm2",
+        "HEB_400_450_nm_uW_cm2",
+        "Violet_400_450_nm_uW_cm2",
+        "Blue_450_495_nm_uW_cm2",
+        "Green_495_570_nm_uW_cm2",
+        "Yellow_570_590_nm_uW_cm2",
+        "Orange_590_620_nm_uW_cm2",
+        "Red_620_700_nm_uW_cm2",
+        "Total_visible_uW_cm2",
+        "FarRed_peak_745_nm_uW_cm2",
+        "NIR_peak_855_nm_uW_cm2",
+        "Total_FarRed_NIR_uW_cm2",
+        "Biological_model",
+        "Estimated_weighted_irradiance_UV_DNA_effect_uW_cm2_eq",
+        "Spectral_index_UV_DNA_effect_0_100",
+        "Estimated_weighted_irradiance_UVA_photoaging_uW_cm2_eq",
+        "Spectral_index_UVA_photoaging_0_100",
+        "Estimated_weighted_irradiance_HEV_oxidative_stress_uW_cm2_eq",
+        "Spectral_index_HEV_oxidative_stress_0_100"
+    )
+
+internal fun measurementExportColumns(
+    language: String
+): List<String> =
+    if (language == "it") {
+        MEASUREMENT_EXPORT_COLUMNS_IT
+    } else {
+        MEASUREMENT_EXPORT_COLUMNS_EN
+    }
+
+private fun csvDateTime(
+    timestamp: Long,
+    language: String
+): String =
     SimpleDateFormat(
-        "yyyy-MM-dd HH:mm:ss",
-        Locale.US
+        if (language == "it") {
+            "dd/MM/yyyy HH:mm:ss"
+        } else {
+            "yyyy-MM-dd HH:mm:ss"
+        },
+        Locale.getDefault()
     ).format(Date(timestamp))
 
 private fun measurementCsv(
     records: List<SavedRecordDetail>
 ): String = buildString {
+    val language =
+        if (Locale.getDefault().language == "it") {
+            "it"
+        } else {
+            "en"
+        }
+
     appendLine(
-        listOf(
-            "measurement_id",
-            "session_id",
-            "timestamp",
-            "automatic",
-            "automatic_sequence",
-            "note",
-            "UV-C (µW/cm²)",
-            "UV-B (µW/cm²)",
-            "UV-A (µW/cm²)",
-            "Violet (µW/cm²)",
-            "Blue (µW/cm²)",
-            "Green (µW/cm²)",
-            "Yellow (µW/cm²)",
-            "Orange (µW/cm²)",
-            "Red (µW/cm²)",
-            "Far-red (µW/cm²)",
-            "NIR (µW/cm²)",
-            "biological_model",
-            "DNA UV weighted irradiance (µW/cm² eq.)",
-            "DNA UV spectral relevance (/100)",
-            "UVA photoaging weighted irradiance (µW/cm² eq.)",
-            "UVA photoaging spectral relevance (/100)",
-            "HEV oxidative weighted irradiance (µW/cm² eq.)",
-            "HEV oxidative spectral relevance (/100)"
-        ).joinToString(",") {
+        measurementExportColumns(
+            language
+        ).joinToString(";") {
             csvCell(it)
         }
     )
@@ -2702,6 +2778,23 @@ private fun measurementCsv(
     records.forEach { record ->
         val sample = record.sample
         val effects = biologicalEffects(sample)
+        val uvTotal =
+            sample.uvc +
+                sample.uvb +
+                sample.uva
+        val hev =
+            sample.violetto +
+                sample.blu
+        val visibleTotal =
+            sample.violetto +
+                sample.blu +
+                sample.verde +
+                sample.giallo +
+                sample.arancione +
+                sample.rosso
+        val farRedNirTotal =
+            sample.f8 +
+                sample.nir
 
         appendLine(
             listOf(
@@ -2709,23 +2802,45 @@ private fun measurementCsv(
                 record.automaticSessionId
                     ?.toString()
                     .orEmpty(),
-                csvDateTime(record.timestamp),
+                csvDateTime(
+                    record.timestamp,
+                    language
+                ),
+                record.timestamp.toString(),
+                if (record.automatic) {
+                    if (language == "it") {
+                        "Automatica"
+                    } else {
+                        "Automatic"
+                    }
+                } else {
+                    if (language == "it") {
+                        "Manuale"
+                    } else {
+                        "Manual"
+                    }
+                },
                 if (record.automatic) "1" else "0",
+                record.note,
                 record.automaticSequence
                     ?.toString()
                     .orEmpty(),
-                record.note,
                 csvNumber(sample.uvc),
                 csvNumber(sample.uvb),
                 csvNumber(sample.uva),
+                csvNumber(uvTotal),
+                csvNumber(hev),
+                csvNumber(sample.violetto),
                 csvNumber(sample.violetto),
                 csvNumber(sample.blu),
                 csvNumber(sample.verde),
                 csvNumber(sample.giallo),
                 csvNumber(sample.arancione),
                 csvNumber(sample.rosso),
+                csvNumber(visibleTotal),
                 csvNumber(sample.f8),
                 csvNumber(sample.nir),
+                csvNumber(farRedNirTotal),
                 BIOLOGICAL_MODEL_VERSION,
                 csvNumber(effects.dnaUvProxy),
                 csvNumber(effects.dnaUvScore.toDouble() * 100.0),
@@ -2733,7 +2848,7 @@ private fun measurementCsv(
                 csvNumber(effects.uvaPhotoagingScore.toDouble() * 100.0),
                 csvNumber(effects.hevOxidativeProxy),
                 csvNumber(effects.hevOxidativeScore.toDouble() * 100.0)
-            ).joinToString(",") {
+            ).joinToString(";") {
                 csvCell(it)
             }
         )
@@ -3496,7 +3611,46 @@ fun UvirApp(
     }
 
     val liveListState =
-        rememberLazyListState()
+        rememberSaveable(
+            saver = LazyListState.Saver
+        ) {
+            LazyListState()
+        }
+
+    val automaticListState =
+        rememberSaveable(
+            saver = LazyListState.Saver
+        ) {
+            LazyListState()
+        }
+
+    val historyListState =
+        rememberSaveable(
+            saver = LazyListState.Saver
+        ) {
+            LazyListState()
+        }
+
+    val detailListState =
+        rememberSaveable(
+            saver = LazyListState.Saver
+        ) {
+            LazyListState()
+        }
+
+    val versionInfoScrollState =
+        rememberSaveable(
+            saver = ScrollState.Saver
+        ) {
+            ScrollState(0)
+        }
+
+    val parametersScrollState =
+        rememberSaveable(
+            saver = ScrollState.Saver
+        ) {
+            ScrollState(0)
+        }
 
     var viewMode by remember {
         mutableStateOf(
@@ -4470,6 +4624,12 @@ fun UvirApp(
                 measurement = measurement,
                 liveReady = liveReady,
                 liveListState = liveListState,
+                automaticListState =
+                    automaticListState,
+                versionInfoScrollState =
+                    versionInfoScrollState,
+                parametersScrollState =
+                    parametersScrollState,
 
                 viewMode = viewMode,
                 onViewModeChanged = {
@@ -4589,6 +4749,8 @@ fun UvirApp(
 
             HistoryScreen(
                 database = database,
+                historyListState =
+                    historyListState,
                 backgroundColor =
                     backgroundColor,
                 cardColor =
@@ -4631,6 +4793,8 @@ fun UvirApp(
                 RecordDetailScreen(
                     record = record,
                     database = database,
+                    detailListState =
+                        detailListState,
 
                     viewMode = viewMode,
                     onViewModeChanged = {
@@ -4682,6 +4846,9 @@ fun LiveScreen(
     measurement: SensorSample,
     liveReady: Boolean,
     liveListState: LazyListState,
+    automaticListState: LazyListState,
+    versionInfoScrollState: ScrollState,
+    parametersScrollState: ScrollState,
 
     viewMode: ViewMode,
     onViewModeChanged: (ViewMode) -> Unit,
@@ -4960,15 +5127,6 @@ fun LiveScreen(
             liveListState.firstVisibleItemIndex >= 1
         }
     }
-
-    val automaticListState =
-        rememberLazyListState()
-
-    val versionInfoScrollState =
-        rememberScrollState()
-
-    val parametersScrollState =
-        rememberScrollState()
 
     LaunchedEffect(
         showParametersDialog
@@ -7513,6 +7671,7 @@ floatingActionButton = {
 @Composable
 fun HistoryScreen(
     database: UvirDatabaseHelper,
+    historyListState: LazyListState,
     backgroundColor: Color,
     cardColor: Color,
     primaryText: Color,
@@ -7570,9 +7729,6 @@ fun HistoryScreen(
             onBack()
         }
     }
-
-    val historyListState =
-        rememberLazyListState()
 
     val deleteAllDescription =
         stringResource(
@@ -8448,6 +8604,7 @@ fun HistoryScreen(
 fun RecordDetailScreen(
     record: SavedRecordDetail,
     database: UvirDatabaseHelper,
+    detailListState: LazyListState,
 
     viewMode: ViewMode,
     onViewModeChanged: (ViewMode) -> Unit,
@@ -8477,9 +8634,6 @@ fun RecordDetailScreen(
             by rememberSaveable {
                 mutableStateOf(false)
             }
-
-    val detailListState =
-        rememberLazyListState()
 
     val deleteDescription =
         stringResource(

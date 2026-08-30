@@ -36,4 +36,24 @@ class ExampleUnitTest {
             )
         )
     }
+
+    @Test
+    fun measurementExportSchemasStayAligned() {
+        assertEquals(
+            31,
+            MEASUREMENT_EXPORT_COLUMNS_IT.size
+        )
+        assertEquals(
+            MEASUREMENT_EXPORT_COLUMNS_IT.size,
+            MEASUREMENT_EXPORT_COLUMNS_EN.size
+        )
+        assertEquals(
+            "Modello_biologico",
+            MEASUREMENT_EXPORT_COLUMNS_IT[24]
+        )
+        assertEquals(
+            "Biological_model",
+            MEASUREMENT_EXPORT_COLUMNS_EN[24]
+        )
+    }
 }

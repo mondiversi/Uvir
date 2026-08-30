@@ -18,8 +18,8 @@
     <string name="auto_waiting">AUTO • 0 salvate • parte tra %1$s</string>
     <string name="automatic_completed_count">%1$d acquisizioni automatiche salvate</string>
     <plurals name="automatic_session_summary">
-        <item quantity="one">AUTO #%1$d · %2$s · %3$d misurazione</item>
-        <item quantity="other">AUTO #%1$d · %2$s · %3$d misurazioni</item>
+        <item quantity="one">AUTO #%1$d · %2$s · (%3$d)</item>
+        <item quantity="other">AUTO #%1$d · %2$s · (%3$d)</item>
     </plurals>
 
     <string name="saved_measurements">Misurazioni</string>

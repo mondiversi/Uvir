@@ -21,9 +21,9 @@ Indirizzi Wi-Fi e Bluetooth, codici di collegamento, dati del Debug wireless,
 ultimo metodo di connessione, parametri AUTO e ultimo database aperto vengono
 salvati automaticamente in:
 
-```text
-%USERPROFILE%\UvirDesktop\desktop_settings.json
-```
+nel file `desktop_settings.json`, nella stessa cartella di
+`uvir_desktop.py`. Il percorso resta quindi portabile su Windows, Linux e
+macOS insieme allo script.
 
 Il file è locale, leggibile e separato dalle misurazioni. I codici vi sono
 salvati in chiaro per poter compilare automaticamente i campi al riavvio; non
@@ -102,6 +102,10 @@ L'ID della sessione è riportato subito dopo l'ID della misurazione nei file CSV
 Excel e LibreOffice. Dopo una cancellazione totale, gli ID già utilizzati non
 vengono assegnati nuovamente. Gli ID delle sessioni automatiche sono progressivi
 (`1`, `2`, `3`...) e indipendenti dagli ID delle singole misurazioni.
+
+CSV, Excel e LibreOffice usano lo stesso ordine di colonne e gli stessi campi.
+Anche il CSV condiviso dal telefono segue esattamente questo schema; la tabella
+leggibile resta volutamente più discorsiva.
 
 Il comando **Azzera contatori…** elimina tutte le misurazioni e riporta a zero
 entrambi i contatori; la misurazione e la sessione successive ripartono quindi

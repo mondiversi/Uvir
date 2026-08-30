@@ -11,6 +11,8 @@ local.properties
 # Python cache
 __pycache__/
 *.py[cod]
+desktop/desktop_settings.json
+desktop/desktop_settings.json.tmp
 
 # Android Studio generated files and folders
 captures/
