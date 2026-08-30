@@ -71,7 +71,9 @@ Le copie scaricate vengono salvate in:
 
 Prima di sostituzioni, modifiche o cancellazioni viene creata una copia nella
 cartella `backups`. Il programma può modificare le note, eliminare misurazioni,
-svuotare lo storico e sincronizzare sul telefono l'intero database locale.
+svuotare lo storico e sincronizzare sul telefono l'intero database locale. Le
+informazioni che raggruppano le misurazioni della stessa sessione automatica
+vengono conservate nelle copie, nelle esportazioni e durante la sincronizzazione.
 
 Package Android previsto:
 

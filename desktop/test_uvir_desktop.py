@@ -40,24 +40,23 @@ class UvirDesktopTests(unittest.TestCase):
             uvir.ensure_schema(path)
 
             connection = sqlite3.connect(path)
+            connection.row_factory = sqlite3.Row
             try:
                 saved = connection.execute(
-                    """
-                    SELECT
-                        id,
-                        note,
-                        automatic,
-                        automatic_session_id,
-                        automatic_sequence,
-                        uvc
-                    FROM measurements
-                    """
+                    "SELECT * FROM measurements"
                 ).fetchone()
             finally:
                 connection.close()
 
             self.assertEqual(
-                saved,
+                (
+                    saved["id"],
+                    saved["note"],
+                    saved["automatic"],
+                    saved["automatic_session_id"],
+                    saved["automatic_sequence"],
+                    saved["uvc"]
+                ),
                 (
                     1,
                     "test",
@@ -66,6 +65,16 @@ class UvirDesktopTests(unittest.TestCase):
                     3,
                     1.25
                 )
+            )
+
+            round_trip = uvir.record_to_remote_dict(saved)
+            self.assertEqual(
+                round_trip["automatic_session_id"],
+                1_234_567_800_000
+            )
+            self.assertEqual(
+                round_trip["automatic_sequence"],
+                3
             )
 
     def test_remote_json_request(self):

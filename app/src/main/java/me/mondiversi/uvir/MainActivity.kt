@@ -5740,59 +5740,65 @@ if (showVersionInfoDialog) {
                         fontSize = 12.sp
                     )
 
-                    OutlinedButton(
-                        onClick = {
-                            context.startActivity(
-                                Intent(
-                                    Intent.ACTION_VIEW,
-                                    Uri.parse(
-                                        githubRepositoryUrl
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement =
+                            Arrangement.spacedBy(6.dp)
+                    ) {
+                        OutlinedButton(
+                            onClick = {
+                                context.startActivity(
+                                    Intent(
+                                        Intent.ACTION_VIEW,
+                                        Uri.parse(
+                                            githubRepositoryUrl
+                                        )
                                     )
                                 )
-                            )
-                        },
-                        enabled =
-                            githubRepositoryUrl.isNotBlank(),
-                        modifier =
-                            Modifier.fillMaxWidth()
-                    ) {
-                        RepositoryIcon(
+                            },
+                            enabled =
+                                githubRepositoryUrl.isNotBlank(),
                             modifier =
-                                Modifier.size(20.dp)
-                        )
-
-                        Spacer(
-                            Modifier.width(8.dp)
-                        )
-
-                        Text(
-                            stringResource(
-                                R.string.open_github_repository
+                                Modifier.fillMaxWidth()
+                        ) {
+                            RepositoryIcon(
+                                modifier =
+                                    Modifier.size(20.dp)
                             )
-                        )
-                    }
 
-                    Button(
-                        onClick = {
-                            context.startActivity(
-                                Intent(
-                                    Intent.ACTION_VIEW,
-                                    Uri.parse(
-                                        "$githubRepositoryUrl/releases"
-                                    )
+                            Spacer(
+                                Modifier.width(8.dp)
+                            )
+
+                            Text(
+                                stringResource(
+                                    R.string.open_github_repository
                                 )
                             )
-                        },
-                        enabled =
-                            githubRepositoryUrl.isNotBlank(),
-                        modifier =
-                            Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            stringResource(
-                                R.string.check_for_updates
+                        }
+
+                        Button(
+                            onClick = {
+                                context.startActivity(
+                                    Intent(
+                                        Intent.ACTION_VIEW,
+                                        Uri.parse(
+                                            "$githubRepositoryUrl/releases"
+                                        )
+                                    )
+                                )
+                            },
+                            enabled =
+                                githubRepositoryUrl.isNotBlank(),
+                            modifier =
+                                Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                stringResource(
+                                    R.string.check_for_updates
+                                )
                             )
-                        )
+                        }
                     }
                 }
 
