@@ -1,0 +1,185 @@
+<resources>
+    <string name="app_name">Uvir</string>
+
+    <string name="save_measurement">Save measurement</string>
+    <string name="add_note_or_leave_empty">Add a note, or leave it empty.</string>
+    <string name="optional_note">Optional note</string>
+    <string name="note_example">E.g. direct sunlight, window, LED...</string>
+    <string name="measurement_saved">Measurement saved</string>
+    <string name="save_error">Save error</string>
+    <string name="save">SAVE</string>
+    <string name="cancel">CANCEL</string>
+    <string name="apply">APPLY</string>
+
+    <string name="live_status">LIVE • %1$d samples • %2$d ms</string>
+    <string name="initializing">INITIALIZING...</string>
+    <string name="auto_status">AUTO • %2$d saved • every %1$s\nNext in %3$s</string>
+    <string name="auto_status_limited">AUTO • %2$d saved • limit %3$d • every %1$s\nNext in %4$s</string>
+    <string name="auto_waiting">AUTO • 0 saved • starts in %1$s</string>
+    <string name="automatic_completed_count">%1$d automatic acquisitions saved</string>
+
+    <string name="saved_measurements">Measurements</string>
+    <string name="select_measurements">Select measurements</string>
+    <string name="exit_selection_mode">Exit selection mode</string>
+    <string name="select_all">SELECT ALL</string>
+    <string name="deselect_all">DESELECT ALL</string>
+    <string name="share_measurements">Share measurements</string>
+    <string name="share_all_measurements_question">Share all saved measurements?</string>
+    <string name="share_all_measurements_warning">No measurements are selected, so all saved measurements will be shared.</string>
+    <string name="choose_share_format">Choose a sharing format</string>
+    <string name="share_as_csv">CSV</string>
+    <string name="share_as_readable_table">Readable table</string>
+    <string name="share_as_both">Both</string>
+    <string name="share">SHARE</string>
+    <string name="delete_selected_measurements_question">Delete selected measurements?</string>
+    <plurals name="delete_selected_measurements_warning">
+        <item quantity="one">%1$d selected measurement will be permanently deleted.</item>
+        <item quantity="other">%1$d selected measurements will be permanently deleted.</item>
+    </plurals>
+    <string name="shared_measurement_heading">Measurement %1$d</string>
+    <string name="share_date_label">Date and time</string>
+    <string name="share_acquisition_label">Acquisition</string>
+    <string name="share_automatic">Automatic</string>
+    <string name="share_manual">Manual</string>
+    <string name="share_note_label">Note</string>
+    <string name="share_biological_effects_heading">Estimated biological effects · model %1$s</string>
+    <string name="share_biological_effect_values">Weighted irradiance: %1$.3f µW/cm² eq. · spectral relevance: %2$.1f/100</string>
+    <string name="share_subject">Uvir measurements</string>
+    <string name="share_error">Unable to share the measurements.</string>
+
+    <string name="automatic_acquisition">Automatic acquisition</string>
+    <string name="automatic_acquisition_title">Automatic acquisition</string>
+    <string name="interval">Interval</string>
+    <string name="hours">Hours</string>
+    <string name="minutes">Minutes</string>
+    <string name="seconds">Seconds</string>
+    <string name="hour_short">HH</string>
+    <string name="minute_short">MM</string>
+    <string name="scheduled_start">Starts in</string>
+    <string name="scheduled_end">Stops after starting</string>
+    <string name="limit_acquisitions">Maximum acquisitions</string>
+    <string name="number_of_acquisitions">Number of acquisitions</string>
+    <string name="default_note">Default note</string>
+    <string name="default_note_hint">Applied to every automatic measurement.</string>
+    <string name="start">START</string>
+    <string name="stop">STOP</string>
+    <string name="stop_with_count">(%1$d) STOP</string>
+    <string name="invalid_interval">Set a valid interval. Minutes and seconds must be between 0 and 59.</string>
+    <string name="invalid_schedule">Check start/stop durations and acquisition limit.</string>
+    <string name="automatic_started">Automatic acquisition started</string>
+    <string name="automatic_stopped">Automatic acquisition stopped</string>
+    <string name="stop_automatic_confirmation_title">Stop automatic acquisition?</string>
+    <string name="stop_automatic_confirmation_message">The current automatic acquisition will be stopped. Continue?</string>
+    <string name="continue_acquisition">KEEP RUNNING</string>
+
+    <string name="acquisition_parameters">Settings</string>
+    <string name="connectivity">Connectivity</string>
+    <string name="settings_section_acquisition">Sampling</string>
+    <string name="samples_per_measurement">Samples per measurement</string>
+    <string name="sample_spacing_ms">Time between samples (ms)</string>
+    <string name="discard_extremes">Discard highest and lowest sample</string>
+    <string name="parameters_hint">Range: 1–21 samples and 20–5000 ms. Extreme-value trimming is applied only when at least 3 samples are available.</string>
+    <string name="invalid_acquisition_parameters">Use 1–21 samples and a spacing between 20 and 5000 ms.</string>
+    <string name="parameters_saved">Acquisition parameters saved</string>
+
+    <string name="irradiance_view">Irradiance</string>
+    <string name="biological_effects_view">Estimated biological effects</string>
+    <string name="biological_effects_disclaimer">Experimental broad-band estimates derived from the measured channels. They are not medical, diagnostic, or safety assessments. The model will be refined after real-sensor calibration.</string>
+    <string name="dna_uv_proxy">UV DNA effect/damage</string>
+    <string name="dna_uv_proxy_description">Exploratory relative index weighted toward shorter UV bands.</string>
+    <string name="uva_photoaging_proxy">UVA photoaging</string>
+    <string name="uva_photoaging_proxy_description">Exploratory relative index dominated by UVA exposure.</string>
+    <string name="hev_oxidative_proxy">HEV oxidative stress</string>
+    <string name="hev_oxidative_proxy_description">Exploratory relative index based on the derived 400–500 nm HEV band.</string>
+    <string name="estimated_relative_index">Estimated relative index • prototype</string>
+    <string name="estimated_weighted_signal">Estimated weighted irradiance:</string>
+    <string name="weighted_signal_value">%1$.2f µW/cm² eq.</string>
+    <string name="biological_compact_summary">%1$.2f µW/cm² eq. · %2$.0f/100</string>
+    <string name="relative_spectral_index">Spectral relevance</string>
+    <string name="relative_spectral_index_explanation">0–100 shows how strongly the measured spectrum is concentrated in wavelengths weighted by this estimate. It describes spectral composition, not total intensity. It is not a percentage of damage and not a safety threshold.</string>
+
+    <string name="delete_all_measurements_question">Delete all saved measurements?</string>
+    <string name="delete_all_measurements_warning">All saved measurements will be permanently deleted and the measurement numbering will be reset. To confirm, press and hold DELETE ALL continuously for 2 seconds.</string>
+    <string name="delete_all">DELETE ALL</string>
+    <plurals name="measurement_count_since">
+        <item quantity="one">%1$d saved · since %2$s</item>
+        <item quantity="other">%1$d saved · since %2$s</item>
+    </plurals>
+    <string name="no_saved_measurements">No saved measurements</string>
+
+    <string name="delete_measurement_question">Delete this measurement?</string>
+    <string name="delete_measurement_warning">This measurement will be permanently deleted.</string>
+    <string name="measurement_deleted">Measurement deleted</string>
+    <string name="measurements_deleted">Measurements deleted</string>
+    <string name="delete">DELETE</string>
+    <string name="saved_measurement">SAVED MEASUREMENT</string>
+    <string name="note">NOTE</string>
+    <string name="no_note">No note</string>
+
+    <string name="automatic_badge">A</string>
+    <string name="automatic_badge_description">Automatic measurement</string>
+    <string name="acquisition_type">ACQUISITION</string>
+    <string name="automatic_measurement">Automatic</string>
+    <string name="manual_measurement">Manual</string>
+
+    <string name="uv_radiation">UV / Ultraviolet</string>
+    <string name="hev_description">High-energy visible</string>
+    <string name="heb_description">High-energy blue-violet</string>
+    <string name="visible_light">Visible light</string>
+    <string name="far_red_nir">Far-red / NIR</string>
+
+    <string name="violet">Violet</string>
+    <string name="blue">Blue</string>
+    <string name="green">Green</string>
+    <string name="yellow">Yellow</string>
+    <string name="orange">Orange</string>
+    <string name="red">Red</string>
+
+    <string name="percent_of_visible">%1$.1f%% of visible</string>
+    <string name="version_info">Version &amp; info</string>
+    <string name="version_info_title">Uvir · version %1$s</string>
+    <string name="app_version">App version: %1$s</string>
+    <string name="package_name_value">Package: %1$s</string>
+    <string name="about_whats_new_title">What’s new in version %1$s</string>
+    <string name="about_whats_new_connectivity">Connectivity is now separate from Settings, with dedicated USB, Bluetooth, Wi-Fi, and mobile network sections.</string>
+    <string name="about_whats_new_connections">Clearer addresses and connection codes, with primary mobile Internet network detection.</string>
+    <string name="about_whats_new_measurements">Improved measurement management with multiple selection, sharing, and export.</string>
+    <string name="about_whats_new_interface">Automatic acquisition and the interface have been refined for greater clarity and stability.</string>
+    <string name="about_whats_new_github">The GitHub repository and update links are now configured.</string>
+    <string name="about_description">Spectral measurement app for ultraviolet, visible, FAR-RED and NIR radiation.</string>
+    <string name="about_spectral_ranges">Spectral ranges: UV • VISIBLE • FAR-RED • NIR</string>
+    <string name="about_sensors">Supported sensors: AS7331 UV • AS7343 multispectral</string>
+    <string name="about_derived_values">HEV, HEB and estimated biological effects are derived values calculated from the measured spectral data.</string>
+    <string name="biological_model_version">Biological model: %1$s</string>
+    <string name="about_copyright">© 2026 Uvir</string>
+    <string name="github_repository_title">GitHub repository</string>
+    <string name="github_repository_pending">The GitHub repository has not been configured yet. The links will become available after the project is published.</string>
+    <string name="open_github_repository">OPEN REPOSITORY</string>
+    <string name="check_for_updates">CHECK FOR UPDATES</string>
+
+    <string name="navigate_back">Back</string>
+    <string name="remote_usb_title">Connect with USB</string>
+    <string name="remote_usb_description">Connect the cable, open Uvir and choose USB in the desktop program.</string>
+    <string name="remote_wifi_title">Connect with Wi-Fi</string>
+    <string name="remote_wifi_description">The phone and computer must be connected to the same private Wi-Fi network. Copy the address and code shown here into the desktop program.</string>
+    <string name="remote_wifi_not_available">Wi-Fi address not detected. Connect the phone to a Wi-Fi network.</string>
+    <string name="remote_bluetooth_title">Connect with Bluetooth</string>
+    <string name="remote_bluetooth_phone_title">On the phone</string>
+    <string name="remote_bluetooth_phone_steps">1. Open Settings → Connections.\n2. Open Mobile Hotspot and Tethering.\n3. Enable Bluetooth tethering.</string>
+    <string name="remote_bluetooth_pc_title">On the PC</string>
+    <string name="remote_bluetooth_pc_steps">1. Open Settings → Bluetooth &amp; devices → Devices.\n2. Expand the phone and select Join next to Personal Area Network.\n3. Choose Access Point and select Connect.</string>
+    <string name="remote_bluetooth_not_available">Bluetooth address not detected. Enable Bluetooth tethering; this screen refreshes automatically.</string>
+    <string name="remote_pairing_pin">Connection code: %1$s</string>
+    <string name="remote_wifi_address">Wi-Fi address: %1$s</string>
+    <string name="remote_bluetooth_address">Bluetooth address: %1$s</string>
+    <string name="remote_mobile_title">Connect with mobile network</string>
+    <string name="remote_mobile_description">Use this section when the phone is connected through its own mobile data connection, outside the Wi-Fi network.</string>
+    <string name="remote_mobile_not_available">Mobile network address not detected. Enable mobile data on the phone.</string>
+    <string name="remote_mobile_address">Mobile network address: %1$s</string>
+    <string name="remote_mobile_address_numbered">Mobile network address %1$d/%2$d: %3$s</string>
+    <string name="remote_other_address">Other detected address: %1$s — Android cannot identify its type.</string>
+    <string name="remote_external_access_hint">For access away from home, preferably use a private VPN. Router port forwarding concerns the home connection’s public address, not the mobile addresses shown here.</string>
+    <string name="remote_wireless_disabled">The connection is not active yet. Allow local network access when Android requests it.</string>
+    <string name="remote_security_hint">Use direct access only on a trusted private network. The pairing code is required for every direct connection.</string>
+    <string name="remote_permission_denied">Local network permission denied. Direct Wi-Fi and Bluetooth access remains disabled.</string>
+</resources>

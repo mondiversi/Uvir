@@ -1,0 +1,185 @@
+<resources>
+    <string name="app_name">Uvir</string>
+
+    <string name="save_measurement">Salva misurazione</string>
+    <string name="add_note_or_leave_empty">Aggiungi una nota, oppure lasciala vuota.</string>
+    <string name="optional_note">Nota facoltativa</string>
+    <string name="note_example">Es. sole diretto, finestra, LED...</string>
+    <string name="measurement_saved">Misura salvata</string>
+    <string name="save_error">Errore nel salvataggio</string>
+    <string name="save">SALVA</string>
+    <string name="cancel">ANNULLA</string>
+    <string name="apply">APPLICA</string>
+
+    <string name="live_status">LIVE • %1$d campioni • %2$d ms</string>
+    <string name="initializing">INIZIALIZZAZIONE...</string>
+    <string name="auto_status">AUTO • %2$d salvate • ogni %1$s\nProssima tra %3$s</string>
+    <string name="auto_status_limited">AUTO • %2$d salvate • limite %3$d • ogni %1$s\nProssima tra %4$s</string>
+    <string name="auto_waiting">AUTO • 0 salvate • parte tra %1$s</string>
+    <string name="automatic_completed_count">%1$d acquisizioni automatiche salvate</string>
+
+    <string name="saved_measurements">Misurazioni</string>
+    <string name="select_measurements">Seleziona misurazioni</string>
+    <string name="exit_selection_mode">Esci dalla selezione</string>
+    <string name="select_all">SELEZIONA TUTTO</string>
+    <string name="deselect_all">DESELEZIONA TUTTO</string>
+    <string name="share_measurements">Condividi misurazioni</string>
+    <string name="share_all_measurements_question">Condividere tutte le misurazioni salvate?</string>
+    <string name="share_all_measurements_warning">Non è selezionata alcuna misurazione, quindi verranno condivise tutte quelle salvate.</string>
+    <string name="choose_share_format">Scegli il formato di condivisione</string>
+    <string name="share_as_csv">CSV</string>
+    <string name="share_as_readable_table">Tabella leggibile</string>
+    <string name="share_as_both">Entrambi</string>
+    <string name="share">CONDIVIDI</string>
+    <string name="delete_selected_measurements_question">Eliminare le misurazioni selezionate?</string>
+    <plurals name="delete_selected_measurements_warning">
+        <item quantity="one">La misurazione selezionata verrà cancellata definitivamente.</item>
+        <item quantity="other">Le %1$d misurazioni selezionate verranno cancellate definitivamente.</item>
+    </plurals>
+    <string name="shared_measurement_heading">Misurazione %1$d</string>
+    <string name="share_date_label">Data e ora</string>
+    <string name="share_acquisition_label">Acquisizione</string>
+    <string name="share_automatic">Automatica</string>
+    <string name="share_manual">Manuale</string>
+    <string name="share_note_label">Nota</string>
+    <string name="share_biological_effects_heading">Effetti biologici stimati · modello %1$s</string>
+    <string name="share_biological_effect_values">Irradianza pesata: %1$.3f µW/cm² eq. · rilevanza spettrale: %2$.1f/100</string>
+    <string name="share_subject">Misurazioni Uvir</string>
+    <string name="share_error">Impossibile condividere le misurazioni.</string>
+
+    <string name="automatic_acquisition">Acquisizione automatica</string>
+    <string name="automatic_acquisition_title">Acquisizione automatica</string>
+    <string name="interval">Intervallo</string>
+    <string name="hours">Ore</string>
+    <string name="minutes">Minuti</string>
+    <string name="seconds">Secondi</string>
+    <string name="hour_short">HH</string>
+    <string name="minute_short">MM</string>
+    <string name="scheduled_start">Inizia tra</string>
+    <string name="scheduled_end">Termina dopo l’inizio</string>
+    <string name="limit_acquisitions">Acquisizioni massime</string>
+    <string name="number_of_acquisitions">Numero di acquisizioni</string>
+    <string name="default_note">Nota predefinita</string>
+    <string name="default_note_hint">Applicata a ogni misura automatica.</string>
+    <string name="start">AVVIA</string>
+    <string name="stop">FERMA</string>
+    <string name="stop_with_count">(%1$d) FERMA</string>
+    <string name="invalid_interval">Imposta un intervallo valido. Minuti e secondi devono essere compresi tra 0 e 59.</string>
+    <string name="invalid_schedule">Controlla le durate di partenza/fine e il limite delle acquisizioni.</string>
+    <string name="automatic_started">Acquisizione automatica avviata</string>
+    <string name="automatic_stopped">Acquisizione automatica fermata</string>
+    <string name="stop_automatic_confirmation_title">Fermare l’acquisizione automatica?</string>
+    <string name="stop_automatic_confirmation_message">L’acquisizione automatica in corso verrà interrotta. Vuoi davvero fermarla?</string>
+    <string name="continue_acquisition">CONTINUA</string>
+
+    <string name="acquisition_parameters">Impostazioni</string>
+    <string name="connectivity">Connettività</string>
+    <string name="settings_section_acquisition">Campionamento</string>
+    <string name="samples_per_measurement">Campioni per misura</string>
+    <string name="sample_spacing_ms">Tempo tra i campioni (ms)</string>
+    <string name="discard_extremes">Scarta il campione più alto e più basso</string>
+    <string name="parameters_hint">Intervallo: 1–21 campioni e 20–5000 ms. Lo scarto degli estremi viene applicato solo con almeno 3 campioni.</string>
+    <string name="invalid_acquisition_parameters">Usa 1–21 campioni e un intervallo tra 20 e 5000 ms.</string>
+    <string name="parameters_saved">Parametri di acquisizione salvati</string>
+
+    <string name="irradiance_view">Irradianza</string>
+    <string name="biological_effects_view">Effetti biologici stimati</string>
+    <string name="biological_effects_disclaimer">Stime sperimentali a banda larga derivate dai canali misurati. Non sono valutazioni mediche, diagnostiche o di sicurezza. Il modello verrà affinato dopo la calibrazione dei sensori reali.</string>
+    <string name="dna_uv_proxy">UV effetto/danno DNA</string>
+    <string name="dna_uv_proxy_description">Indice relativo sperimentale che dà maggior peso alle bande UV più corte.</string>
+    <string name="uva_photoaging_proxy">Fotoinvecchiamento UVA</string>
+    <string name="uva_photoaging_proxy_description">Indice relativo sperimentale dominato dall’esposizione UVA.</string>
+    <string name="hev_oxidative_proxy">Stress ossidativo HEV</string>
+    <string name="hev_oxidative_proxy_description">Indice relativo sperimentale basato sulla banda HEV derivata 400–500 nm.</string>
+    <string name="estimated_relative_index">Indice relativo stimato • prototipo</string>
+    <string name="estimated_weighted_signal">Irradianza pesata stimata:</string>
+    <string name="weighted_signal_value">%1$.2f µW/cm² eq.</string>
+    <string name="biological_compact_summary">%1$.2f µW/cm² eq. · %2$.0f/100</string>
+    <string name="relative_spectral_index">Rilevanza spettrale</string>
+    <string name="relative_spectral_index_explanation">La scala 0–100 indica quanto lo spettro misurato è concentrato nelle lunghezze d’onda pesate da questa stima. Descrive la composizione spettrale, non l’intensità totale. Non è una percentuale di danno né una soglia di sicurezza.</string>
+
+    <string name="delete_all_measurements_question">Eliminare tutte le misurazioni?</string>
+    <string name="delete_all_measurements_warning">Tutte le misurazioni verranno eliminate definitivamente e la numerazione sarà azzerata. Per confermare, tieni premuto ELIMINA TUTTO senza rilasciare per 2 secondi.</string>
+    <string name="delete_all">ELIMINA TUTTO</string>
+    <plurals name="measurement_count_since">
+        <item quantity="one">%1$d salvata · dal %2$s</item>
+        <item quantity="other">%1$d salvate · dal %2$s</item>
+    </plurals>
+    <string name="no_saved_measurements">Nessuna misurazione salvata</string>
+
+    <string name="delete_measurement_question">Eliminare la misurazione?</string>
+    <string name="delete_measurement_warning">Questa misurazione verrà cancellata definitivamente.</string>
+    <string name="measurement_deleted">Misurazione eliminata</string>
+    <string name="measurements_deleted">Misurazioni eliminate</string>
+    <string name="delete">ELIMINA</string>
+    <string name="saved_measurement">MISURA SALVATA</string>
+    <string name="note">NOTA</string>
+    <string name="no_note">Nessuna nota</string>
+
+    <string name="automatic_badge">A</string>
+    <string name="automatic_badge_description">Misura automatica</string>
+    <string name="acquisition_type">ACQUISIZIONE</string>
+    <string name="automatic_measurement">Automatica</string>
+    <string name="manual_measurement">Manuale</string>
+
+    <string name="uv_radiation">UV / Ultravioletti</string>
+    <string name="hev_description">Visibile energetico</string>
+    <string name="heb_description">Blu-viola energetico</string>
+    <string name="visible_light">Luce visibile</string>
+    <string name="far_red_nir">Far-red / NIR</string>
+
+    <string name="violet">Violetto</string>
+    <string name="blue">Blu</string>
+    <string name="green">Verde</string>
+    <string name="yellow">Giallo</string>
+    <string name="orange">Arancione</string>
+    <string name="red">Rosso</string>
+
+    <string name="percent_of_visible">%1$.1f%% del visibile</string>
+    <string name="version_info">Versione e info</string>
+    <string name="version_info_title">Uvir · versione %1$s</string>
+    <string name="app_version">Versione app: %1$s</string>
+    <string name="package_name_value">Package: %1$s</string>
+    <string name="about_whats_new_title">Novità della versione %1$s</string>
+    <string name="about_whats_new_connectivity">Connettività separata dalle Impostazioni, con sezioni dedicate a USB, Bluetooth, Wi-Fi e rete mobile.</string>
+    <string name="about_whats_new_connections">Indirizzi e codici di collegamento più chiari, con rilevamento della rete mobile Internet principale.</string>
+    <string name="about_whats_new_measurements">Gestione delle misurazioni migliorata con selezione multipla, condivisione ed esportazione.</string>
+    <string name="about_whats_new_interface">Acquisizione automatica e interfaccia perfezionate per offrire maggiore chiarezza e stabilità.</string>
+    <string name="about_whats_new_github">La repository GitHub e i collegamenti per gli aggiornamenti sono ora configurati.</string>
+    <string name="about_description">App per la misurazione spettrale della radiazione ultravioletta, visibile, FAR-RED e NIR.</string>
+    <string name="about_spectral_ranges">Bande spettrali: UV • VISIBILE • FAR-RED • NIR</string>
+    <string name="about_sensors">Sensori supportati: AS7331 UV • AS7343 multispettrale</string>
+    <string name="about_derived_values">HEV, HEB ed effetti biologici stimati sono valori derivati calcolati dai dati spettrali misurati.</string>
+    <string name="biological_model_version">Modello biologico: %1$s</string>
+    <string name="about_copyright">© 2026 Uvir</string>
+    <string name="github_repository_title">Repository GitHub</string>
+    <string name="github_repository_pending">La repository GitHub non è ancora configurata. I collegamenti saranno disponibili dopo la pubblicazione del progetto.</string>
+    <string name="open_github_repository">APRI REPOSITORY</string>
+    <string name="check_for_updates">CERCA AGGIORNAMENTI</string>
+
+    <string name="navigate_back">Indietro</string>
+    <string name="remote_usb_title">Collega con USB</string>
+    <string name="remote_usb_description">Collega il cavo, apri Uvir e scegli USB nel programma desktop.</string>
+    <string name="remote_wifi_title">Collega con Wi-Fi</string>
+    <string name="remote_wifi_description">Telefono e computer devono essere collegati alla stessa rete Wi-Fi privata. Copia nel programma desktop l’indirizzo e il codice mostrati qui.</string>
+    <string name="remote_wifi_not_available">Indirizzo Wi-Fi non rilevato. Collega il telefono a una rete Wi-Fi.</string>
+    <string name="remote_bluetooth_title">Collega con Bluetooth</string>
+    <string name="remote_bluetooth_phone_title">Sul telefono</string>
+    <string name="remote_bluetooth_phone_steps">1. Apri Impostazioni → Connessioni.\n2. Apri Router Wi-Fi e tethering.\n3. Attiva Tethering Bluetooth.</string>
+    <string name="remote_bluetooth_pc_title">Sul PC</string>
+    <string name="remote_bluetooth_pc_steps">1. Apri Impostazioni → Bluetooth e dispositivi → Dispositivi.\n2. Espandi il telefono e premi Partecipa accanto a Rete PAN.\n3. Scegli Punto di accesso e premi Connetti.</string>
+    <string name="remote_bluetooth_not_available">Indirizzo Bluetooth non rilevato. Attiva il tethering Bluetooth: questa schermata si aggiorna automaticamente.</string>
+    <string name="remote_pairing_pin">Codice di collegamento: %1$s</string>
+    <string name="remote_wifi_address">Indirizzo Wi-Fi: %1$s</string>
+    <string name="remote_bluetooth_address">Indirizzo Bluetooth: %1$s</string>
+    <string name="remote_mobile_title">Collega con rete mobile</string>
+    <string name="remote_mobile_description">Usa questa sezione quando il telefono è collegato tramite la propria connessione dati, fuori dalla rete Wi-Fi.</string>
+    <string name="remote_mobile_not_available">Indirizzo della rete mobile non rilevato. Attiva la connessione dati del telefono.</string>
+    <string name="remote_mobile_address">Indirizzo rete mobile: %1$s</string>
+    <string name="remote_mobile_address_numbered">Indirizzo rete mobile %1$d/%2$d: %3$s</string>
+    <string name="remote_other_address">Altro indirizzo rilevato: %1$s — Android non ne identifica il tipo.</string>
+    <string name="remote_external_access_hint">Per collegarti da fuori casa usa preferibilmente una VPN privata. L’inoltro porte del router riguarda l’indirizzo pubblico della connessione di casa, non gli indirizzi mobili mostrati qui.</string>
+    <string name="remote_wireless_disabled">Il collegamento non è ancora attivo: autorizza l’accesso alla rete locale quando Android lo richiede.</string>
+    <string name="remote_security_hint">Usa l’accesso diretto soltanto su una rete privata affidabile. Il codice di abbinamento è richiesto per ogni collegamento diretto.</string>
+    <string name="remote_permission_denied">Permesso per la rete locale negato. L’accesso diretto Wi-Fi e Bluetooth rimane disattivato.</string>
+</resources>
