@@ -3100,12 +3100,27 @@ private fun shareMeasurements(
             }
 
             MeasurementShareFormat.READABLE_TABLE -> {
+                val readableFile =
+                    writeSharedFile(
+                        "txt",
+                        readableText
+                    )
+
+                val uri =
+                    sharedUri(readableFile)
+
                 Intent(Intent.ACTION_SEND).apply {
                     type = "text/plain"
                     putExtra(Intent.EXTRA_SUBJECT, subject)
-                    putExtra(
-                        Intent.EXTRA_TEXT,
-                        readableText
+                    putExtra(Intent.EXTRA_STREAM, uri)
+                    clipData =
+                        ClipData.newUri(
+                            context.contentResolver,
+                            readableFile.name,
+                            uri
+                        )
+                    addFlags(
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION
                     )
                 }
             }
@@ -3138,7 +3153,6 @@ private fun shareMeasurements(
                 Intent(Intent.ACTION_SEND_MULTIPLE).apply {
                     type = "text/*"
                     putExtra(Intent.EXTRA_SUBJECT, subject)
-                    putExtra(Intent.EXTRA_TEXT, readableText)
                     putParcelableArrayListExtra(
                         Intent.EXTRA_STREAM,
                         uris

@@ -116,7 +116,9 @@ CSV, Excel e LibreOffice usano lo stesso ordine di colonne e gli stessi campi.
 Anche il CSV condiviso dal telefono segue esattamente questo schema; la tabella
 leggibile resta volutamente più discorsiva. Tutti i file esportati e la tabella
 leggibile Android sono sempre in inglese, indipendentemente dalla lingua
-dell’interfaccia.
+dell’interfaccia. La tabella leggibile viene condivisa come allegato `.txt`,
+anziché come corpo del messaggio, per evitare i limiti di lunghezza di WhatsApp
+e di altre applicazioni.
 
 Il comando **Azzera contatori…** elimina tutte le misurazioni e riporta a zero
 entrambi i contatori; la misurazione e la sessione successive ripartono quindi
