@@ -16,6 +16,44 @@ import uvir_desktop as uvir
 
 
 class UvirDesktopTests(unittest.TestCase):
+    def test_automatic_measurements_are_grouped_by_session(self):
+        records = [
+            {
+                "id": 5,
+                "automatic": 1,
+                "automatic_session_id": 2_000
+            },
+            {
+                "id": 4,
+                "automatic": 0,
+                "automatic_session_id": None
+            },
+            {
+                "id": 3,
+                "automatic": 1,
+                "automatic_session_id": 2_000
+            },
+            {
+                "id": 2,
+                "automatic": 1,
+                "automatic_session_id": None
+            },
+        ]
+
+        groups = uvir.grouped_measurement_rows(records)
+
+        self.assertEqual(
+            [
+                (session_id, [row["id"] for row in rows])
+                for session_id, rows in groups
+            ],
+            [
+                (2_000, [5, 3]),
+                (None, [4]),
+                (None, [2]),
+            ]
+        )
+
     def test_remote_records_create_compatible_database(self):
         sample = {
             key: 1.25

@@ -20,6 +20,11 @@ barra principale del programma. I comandi di salvataggio e acquisizione
 automatica si trovano soltanto in **Acquisizione…** dentro la finestra LIVE;
 non sono duplicati nella finestra di collegamento.
 
+Nell'elenco principale, le misurazioni della stessa acquisizione automatica
+sono raccolte sotto un'unica intestazione con data di inizio e quantità. Le
+misurazioni manuali e i vecchi dati senza identificativo di sessione restano
+visualizzati singolarmente.
+
 ## Modalità di collegamento
 
 ### USB

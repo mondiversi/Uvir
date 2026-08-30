@@ -11,7 +11,8 @@ Funzioni:
 - mostra sul PC i canali dei sensori e gli effetti stimati in tempo reale;
 - controlla da remoto salvataggio, acquisizione automatica e schermata aperta;
 - scarica una copia SQLite locale anche dalle build Android release;
-- mostra elenco, data/ora, nota, dettaglio di irradianza ed effetti biologici stimati;
+- raggruppa nell'elenco le misurazioni appartenenti alla stessa sessione automatica;
+- mostra data/ora, nota, dettaglio di irradianza ed effetti biologici stimati;
 - esporta CSV, XLSX e ODS senza librerie Python esterne;
 - modifica note, elimina record e sincronizza il database sul telefono;
 - crea backup prima delle operazioni distruttive.
@@ -185,6 +186,34 @@ def optional_int(row: sqlite3.Row, key: str) -> int | None:
 
 def acquisition_type(row: sqlite3.Row) -> str:
     return "Automatica" if is_automatic(row) else "Manuale"
+
+
+def automatic_session_id(row: sqlite3.Row) -> int | None:
+    if not is_automatic(row):
+        return None
+    return optional_int(row, "automatic_session_id")
+
+
+def grouped_measurement_rows(
+    records: list[sqlite3.Row]
+) -> list[tuple[int | None, list[sqlite3.Row]]]:
+    """Raggruppa le sessioni AUTO alla prima posizione in cui compaiono."""
+    sessions: dict[int, list[sqlite3.Row]] = {}
+    for record in records:
+        session_id = automatic_session_id(record)
+        if session_id is not None:
+            sessions.setdefault(session_id, []).append(record)
+
+    blocks: list[tuple[int | None, list[sqlite3.Row]]] = []
+    emitted_sessions: set[int] = set()
+    for record in records:
+        session_id = automatic_session_id(record)
+        if session_id is None:
+            blocks.append((None, [record]))
+        elif session_id not in emitted_sessions:
+            blocks.append((session_id, sessions[session_id]))
+            emitted_sessions.add(session_id)
+    return blocks
 
 
 def derived(row: sqlite3.Row) -> dict[str, float]:
@@ -797,6 +826,16 @@ class App:
         self.tree.column("auto", width=35, stretch=False, anchor="center")
         self.tree.column("note", width=280)
         self.tree.grid(row=1, column=0, sticky="nsew")
+        self.tree.tag_configure(
+            "session_header",
+            background="#EDE7F6",
+            foreground="#4B1F78",
+            font=("Segoe UI", 9, "bold")
+        )
+        self.tree.tag_configure(
+            "session_member",
+            background="#FAF8FF"
+        )
         sb = ttk.Scrollbar(left, orient="vertical", command=self.tree.yview)
         sb.grid(row=1, column=1, sticky="ns")
         self.tree.configure(yscrollcommand=sb.set)
@@ -1954,11 +1993,10 @@ class App:
             self.refresh()
 
     def edit_note(self):
-        selected = self.tree.selection()
-        if not self.db_path or not selected:
+        record_id = self.selected_record_id()
+        if not self.db_path or record_id is None:
             messagebox.showinfo(APP_TITLE, "Seleziona una misurazione.")
             return
-        record_id = int(selected[0])
         row = self.row_map.get(record_id)
         if row is None:
             return
@@ -2080,24 +2118,55 @@ class App:
             self.row_map = {int(r["id"]): r for r in rows}
             for x in self.tree.get_children():
                 self.tree.delete(x)
-            for r in rows:
-                note = (r["note"] or "").replace("\n", " ").strip()
-                if len(note) > 80:
-                    note = note[:77] + "..."
-
-                auto_badge = "A" if is_automatic(r) else ""
-
-                self.tree.insert(
-                    "",
-                    END,
-                    iid=str(r["id"]),
-                    values=(
-                        r["id"],
-                        format_time(r["timestamp"]),
-                        auto_badge,
-                        note
+            for session_id, block_rows in grouped_measurement_rows(rows):
+                if session_id is not None:
+                    count = len(block_rows)
+                    label = (
+                        "1 misurazione"
+                        if count == 1
+                        else f"{count} misurazioni"
                     )
-                )
+                    self.tree.insert(
+                        "",
+                        END,
+                        iid=f"session:{session_id}",
+                        values=(
+                            "",
+                            format_time(session_id),
+                            "A",
+                            f"Sessione automatica · {label}"
+                        ),
+                        tags=("session_header",)
+                    )
+
+                for r in block_rows:
+                    note = (r["note"] or "").replace("\n", " ").strip()
+                    if len(note) > 80:
+                        note = note[:77] + "..."
+
+                    auto_badge = (
+                        ""
+                        if session_id is not None
+                        else ("A" if is_automatic(r) else "")
+                    )
+                    tags = (
+                        ("session_member",)
+                        if session_id is not None
+                        else ()
+                    )
+
+                    self.tree.insert(
+                        "",
+                        END,
+                        iid=str(r["id"]),
+                        values=(
+                            r["id"],
+                            format_time(r["timestamp"]),
+                            auto_badge,
+                            note
+                        ),
+                        tags=tags
+                    )
 
             self.count.config(text=f"Misure: {len(rows)}")
             if rows:
@@ -2126,12 +2195,20 @@ class App:
         for value in self.bio_vars.values():
             value.set("—")
 
+    def selected_record_id(self) -> int | None:
+        selected = self.tree.selection()
+        if not selected:
+            return None
+        try:
+            record_id = int(selected[0])
+        except (TypeError, ValueError):
+            return None
+        return record_id if record_id in self.row_map else None
+
     def selection_changed(self, _event=None):
-        sel = self.tree.selection()
-        if sel:
-            r = self.row_map.get(int(sel[0]))
-            if r:
-                self.show_detail(r)
+        record_id = self.selected_record_id()
+        if record_id is not None:
+            self.show_detail(self.row_map[record_id])
 
     def show_detail(self, r: sqlite3.Row):
         d = derived(r)
@@ -2252,11 +2329,10 @@ class App:
             messagebox.showerror(APP_TITLE, f"Errore esportazione:\n{e}")
 
     def delete_one(self):
-        sel = self.tree.selection()
-        if not self.db_path or not sel:
+        rid = self.selected_record_id()
+        if not self.db_path or rid is None:
             messagebox.showinfo(APP_TITLE, "Seleziona una misura.")
             return
-        rid = int(sel[0])
         if messagebox.askyesno(APP_TITLE, f"Eliminare definitivamente la misura #{rid}?"):
             self.delete_sql("DELETE FROM measurements WHERE id=?", (rid,))
 
