@@ -45,6 +45,8 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
@@ -6250,6 +6252,23 @@ if (showParametersDialog) {
                 )
             },
             dismissButton = {
+                HoldToConfirmDeleteButton(
+                    label =
+                        stringResource(
+                            R.string.reset_counters_action
+                        ),
+                    onConfirmed = {
+                        onResetCounters()
+                        showResetCountersConfirmation = false
+                        Toast.makeText(
+                            context,
+                            countersResetCompleteMessage,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                )
+            },
+            confirmButton = {
                 TextButton(
                     onClick = {
                         showResetCountersConfirmation = false
@@ -6262,32 +6281,9 @@ if (showParametersDialog) {
                     )
                 }
             },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        onResetCounters()
-                        showResetCountersConfirmation = false
-                        Toast.makeText(
-                            context,
-                            countersResetCompleteMessage,
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    },
-                    colors =
-                        ButtonDefaults.buttonColors(
-                            containerColor =
-                                MaterialTheme.colorScheme.error,
-                            contentColor =
-                                MaterialTheme.colorScheme.onError
-                        )
-                ) {
-                    Text(
-                        stringResource(
-                            R.string.reset_counters_action
-                        )
-                    )
-                }
-            }
+            containerColor = cardColor,
+            titleContentColor = primaryText,
+            textContentColor = secondaryText
         )
     }
 
@@ -10056,9 +10052,35 @@ fun SettingsSection(
     content: @Composable ColumnScope.() -> Unit
 ) {
 
+    val bringIntoViewRequester =
+        remember {
+            BringIntoViewRequester()
+        }
+
+    var wasExpanded by remember {
+        mutableStateOf(expanded)
+    }
+
+    LaunchedEffect(expanded) {
+        val openedByUser =
+            expanded && !wasExpanded
+
+        wasExpanded = expanded
+
+        if (openedByUser) {
+            withFrameNanos { }
+            bringIntoViewRequester
+                .bringIntoView()
+        }
+    }
+
     Surface(
         modifier =
-            Modifier.fillMaxWidth(),
+            Modifier
+                .fillMaxWidth()
+                .bringIntoViewRequester(
+                    bringIntoViewRequester
+                ),
         shape =
             RoundedCornerShape(16.dp),
         color =
