@@ -3084,6 +3084,9 @@ fun UvirApp(
         mutableStateOf<Long?>(null)
     }
 
+    val liveListState =
+        rememberLazyListState()
+
     var viewMode by remember {
         mutableStateOf(
             runCatching {
@@ -3969,6 +3972,7 @@ fun UvirApp(
                 database = database,
                 measurement = measurement,
                 liveReady = liveReady,
+                liveListState = liveListState,
 
                 viewMode = viewMode,
                 onViewModeChanged = {
@@ -4161,6 +4165,7 @@ fun LiveScreen(
     database: UvirDatabaseHelper,
     measurement: SensorSample,
     liveReady: Boolean,
+    liveListState: LazyListState,
 
     viewMode: ViewMode,
     onViewModeChanged: (ViewMode) -> Unit,
@@ -4416,9 +4421,6 @@ fun LiveScreen(
             )
         )
     }
-
-    val liveListState =
-        rememberLazyListState()
 
     val homeMenuPinned by remember {
         derivedStateOf {
