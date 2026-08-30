@@ -106,7 +106,7 @@
     <string name="relative_spectral_index_explanation">La scala 0–100 indica quanto lo spettro misurato è concentrato nelle lunghezze d’onda pesate da questa stima. Descrive la composizione spettrale, non l’intensità totale. Non è una percentuale di danno né una soglia di sicurezza.</string>
 
     <string name="delete_all_measurements_question">Eliminare tutte le misurazioni?</string>
-    <string name="delete_all_measurements_warning">Tutte le misurazioni verranno eliminate definitivamente. Gli ID già utilizzati non verranno riutilizzati. Per confermare, tieni premuto ELIMINA TUTTO senza rilasciare per 2 secondi.</string>
+    <string name="delete_all_measurements_warning">Tutte le misurazioni verranno eliminate definitivamente. Per confermare, tieni premuto ELIMINA TUTTO senza rilasciare per 2 secondi.</string>
     <string name="delete_all">ELIMINA TUTTO</string>
     <plurals name="measurement_count_since">
         <item quantity="one">%1$d salvata · dal %2$s</item>

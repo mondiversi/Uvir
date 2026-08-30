@@ -106,7 +106,7 @@
     <string name="relative_spectral_index_explanation">0–100 shows how strongly the measured spectrum is concentrated in wavelengths weighted by this estimate. It describes spectral composition, not total intensity. It is not a percentage of damage and not a safety threshold.</string>
 
     <string name="delete_all_measurements_question">Delete all saved measurements?</string>
-    <string name="delete_all_measurements_warning">All saved measurements will be permanently deleted. Previously used IDs will not be reused. To confirm, press and hold DELETE ALL continuously for 2 seconds.</string>
+    <string name="delete_all_measurements_warning">All saved measurements will be permanently deleted. To confirm, press and hold DELETE ALL continuously for 2 seconds.</string>
     <string name="delete_all">DELETE ALL</string>
     <plurals name="measurement_count_since">
         <item quantity="one">%1$d saved · since %2$s</item>

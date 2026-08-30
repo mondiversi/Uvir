@@ -6753,7 +6753,7 @@ floatingActionButton = {
                 Box(
                     modifier =
                         Modifier
-                            .size(48.dp)
+                            .size(42.dp)
                             .semantics {
                                 contentDescription =
                                     versionInfoDescription
@@ -6762,13 +6762,13 @@ floatingActionButton = {
                                 showVersionInfoDialog = true
                             },
                     contentAlignment =
-                        Alignment.CenterEnd
+                        Alignment.Center
                 ) {
                     UvirMenuIcon(
                         type =
                             MenuIconType.VERSION_INFO,
                         modifier =
-                            Modifier.size(24.dp),
+                            Modifier.size(22.dp),
                         tint = primaryText
                     )
                 }
