@@ -31,6 +31,7 @@
     <string name="share_as_readable_table">Tabella leggibile</string>
     <string name="share_as_both">Entrambi</string>
     <string name="share">CONDIVIDI</string>
+    <string name="share_all">CONDIVIDI TUTTE</string>
     <string name="delete_selected_measurements_question">Eliminare le misurazioni selezionate?</string>
     <plurals name="delete_selected_measurements_warning">
         <item quantity="one">La misurazione selezionata verrà cancellata definitivamente.</item>

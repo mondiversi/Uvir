@@ -7107,7 +7107,7 @@ fun HistoryScreen(
                 ) {
                     Text(
                         stringResource(
-                            R.string.share
+                            R.string.share_all
                         )
                     )
                 }

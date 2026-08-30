@@ -31,6 +31,7 @@
     <string name="share_as_readable_table">Readable table</string>
     <string name="share_as_both">Both</string>
     <string name="share">SHARE</string>
+    <string name="share_all">SHARE ALL</string>
     <string name="delete_selected_measurements_question">Delete selected measurements?</string>
     <plurals name="delete_selected_measurements_warning">
         <item quantity="one">%1$d selected measurement will be permanently deleted.</item>
