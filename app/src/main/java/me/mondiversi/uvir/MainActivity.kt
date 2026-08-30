@@ -1649,7 +1649,9 @@ data class SavedRecordSummary(
     val id: Long,
     val timestamp: Long,
     val note: String,
-    val automatic: Boolean
+    val automatic: Boolean,
+    val automaticSessionId: Long? = null,
+    val automaticSequence: Int? = null
 )
 
 data class SavedRecordDetail(
@@ -1657,7 +1659,9 @@ data class SavedRecordDetail(
     val timestamp: Long,
     val note: String,
     val automatic: Boolean,
-    val sample: SensorSample
+    val sample: SensorSample,
+    val automaticSessionId: Long? = null,
+    val automaticSequence: Int? = null
 )
 
 // =====================================================
@@ -1679,6 +1683,7 @@ private const val KEY_AUTO_END_MS = "auto_end_ms"
 private const val KEY_AUTO_LIMIT_ENABLED = "auto_limit_enabled"
 private const val KEY_AUTO_MAX_COUNT = "auto_max_count"
 private const val KEY_AUTO_COMPLETED_COUNT = "auto_completed_count"
+private const val KEY_AUTO_SESSION_ID = "auto_session_id"
 
 // Used only to preserve the stop deadline of a session started by an older build.
 private const val LEGACY_KEY_AUTO_USE_END = "auto_use_end"
@@ -1908,7 +1913,7 @@ class UvirDatabaseHelper(
     context,
     "uvir.db",
     null,
-    2
+    3
 ) {
 
     override fun onCreate(db: SQLiteDatabase) {
@@ -1919,6 +1924,8 @@ class UvirDatabaseHelper(
                 timestamp INTEGER NOT NULL,
                 note TEXT NOT NULL,
                 automatic INTEGER NOT NULL DEFAULT 0,
+                automatic_session_id INTEGER,
+                automatic_sequence INTEGER,
 
                 uvc REAL NOT NULL,
                 uvb REAL NOT NULL,
@@ -1951,18 +1958,50 @@ class UvirDatabaseHelper(
                 """.trimIndent()
             )
         }
+
+        if (oldVersion < 3) {
+            db.execSQL(
+                """
+                ALTER TABLE measurements
+                ADD COLUMN automatic_session_id INTEGER
+                """.trimIndent()
+            )
+
+            db.execSQL(
+                """
+                ALTER TABLE measurements
+                ADD COLUMN automatic_sequence INTEGER
+                """.trimIndent()
+            )
+        }
     }
 
     fun saveMeasurement(
         sample: SensorSample,
         note: String,
-        automatic: Boolean = false
+        automatic: Boolean = false,
+        automaticSessionId: Long? = null,
+        automaticSequence: Int? = null
     ): Long {
 
         val values = ContentValues().apply {
             put("timestamp", System.currentTimeMillis())
             put("note", note)
             put("automatic", if (automatic) 1 else 0)
+
+            if (automaticSessionId != null) {
+                put(
+                    "automatic_session_id",
+                    automaticSessionId
+                )
+            }
+
+            if (automaticSequence != null) {
+                put(
+                    "automatic_sequence",
+                    automaticSequence
+                )
+            }
 
             put("uvc", sample.uvc)
             put("uvb", sample.uvb)
@@ -1996,7 +2035,9 @@ class UvirDatabaseHelper(
                 "id",
                 "timestamp",
                 "note",
-                "automatic"
+                "automatic",
+                "automatic_session_id",
+                "automatic_sequence"
             ),
             null,
             null,
@@ -2010,6 +2051,14 @@ class UvirDatabaseHelper(
             val timestampIndex = it.getColumnIndexOrThrow("timestamp")
             val noteIndex = it.getColumnIndexOrThrow("note")
             val automaticIndex = it.getColumnIndexOrThrow("automatic")
+            val automaticSessionIndex =
+                it.getColumnIndexOrThrow(
+                    "automatic_session_id"
+                )
+            val automaticSequenceIndex =
+                it.getColumnIndexOrThrow(
+                    "automatic_sequence"
+                )
 
             while (it.moveToNext()) {
                 list.add(
@@ -2017,7 +2066,31 @@ class UvirDatabaseHelper(
                         id = it.getLong(idIndex),
                         timestamp = it.getLong(timestampIndex),
                         note = it.getString(noteIndex),
-                        automatic = it.getInt(automaticIndex) != 0
+                        automatic = it.getInt(automaticIndex) != 0,
+                        automaticSessionId =
+                            if (
+                                it.isNull(
+                                    automaticSessionIndex
+                                )
+                            ) {
+                                null
+                            } else {
+                                it.getLong(
+                                    automaticSessionIndex
+                                )
+                            },
+                        automaticSequence =
+                            if (
+                                it.isNull(
+                                    automaticSequenceIndex
+                                )
+                            ) {
+                                null
+                            } else {
+                                it.getInt(
+                                    automaticSequenceIndex
+                                )
+                            }
                     )
                 )
             }
@@ -2071,7 +2144,27 @@ class UvirDatabaseHelper(
 
                     f8 = d("f8"),
                     nir = d("nir")
-                )
+                ),
+                automaticSessionId =
+                    it.getColumnIndexOrThrow(
+                        "automatic_session_id"
+                    ).let { index ->
+                        if (it.isNull(index)) {
+                            null
+                        } else {
+                            it.getLong(index)
+                        }
+                    },
+                automaticSequence =
+                    it.getColumnIndexOrThrow(
+                        "automatic_sequence"
+                    ).let { index ->
+                        if (it.isNull(index)) {
+                            null
+                        } else {
+                            it.getInt(index)
+                        }
+                    }
             )
         }
     }
@@ -2145,6 +2238,14 @@ class UvirDatabaseHelper(
                     if (record.automatic) 1 else 0
                 )
 
+                record.automaticSessionId?.let {
+                    put("automatic_session_id", it)
+                } ?: putNull("automatic_session_id")
+
+                record.automaticSequence?.let {
+                    put("automatic_sequence", it)
+                } ?: putNull("automatic_sequence")
+
                 put("uvc", record.sample.uvc)
                 put("uvb", record.sample.uvb)
                 put("uva", record.sample.uva)
@@ -2194,6 +2295,14 @@ class UvirDatabaseHelper(
                             if (record.automatic) 1 else 0
                         )
 
+                        record.automaticSessionId?.let {
+                            put("automatic_session_id", it)
+                        } ?: putNull("automatic_session_id")
+
+                        record.automaticSequence?.let {
+                            put("automatic_sequence", it)
+                        } ?: putNull("automatic_sequence")
+
                         put("uvc", record.sample.uvc)
                         put("uvb", record.sample.uvb)
                         put("uva", record.sample.uva)
@@ -2241,6 +2350,15 @@ fun formatDetailDateTime(timestamp: Long): String {
     ).format(Date(timestamp))
 }
 
+fun formatAutomaticSessionDateTime(
+    timestamp: Long
+): String {
+    return SimpleDateFormat(
+        "dd/MM/yyyy  HH:mm",
+        Locale.getDefault()
+    ).format(Date(timestamp))
+}
+
 enum class MeasurementShareFormat {
     CSV,
     READABLE_TABLE,
@@ -2270,6 +2388,8 @@ private fun measurementCsv(
             "id",
             "timestamp",
             "automatic",
+            "automatic_session_id",
+            "automatic_sequence",
             "note",
             "UV-C (µW/cm²)",
             "UV-B (µW/cm²)",
@@ -2303,6 +2423,12 @@ private fun measurementCsv(
                 record.id.toString(),
                 csvDateTime(record.timestamp),
                 if (record.automatic) "1" else "0",
+                record.automaticSessionId
+                    ?.toString()
+                    .orEmpty(),
+                record.automaticSequence
+                    ?.toString()
+                    .orEmpty(),
                 record.note,
                 csvNumber(sample.uvc),
                 csvNumber(sample.uvb),
@@ -3330,6 +3456,15 @@ fun UvirApp(
         )
     }
 
+    var autoSessionId by remember {
+        mutableLongStateOf(
+            preferences.getLong(
+                KEY_AUTO_SESSION_ID,
+                0L
+            ).coerceAtLeast(0L)
+        )
+    }
+
     var autoNextSaveMs by remember {
         mutableLongStateOf(
             preferences.getLong(
@@ -3387,6 +3522,12 @@ fun UvirApp(
                 now
             }
 
+        val newSessionId =
+            maxOf(
+                startAt,
+                autoSessionId + 1L
+            )
+
         val durationMs =
             request.durationSeconds
                 .coerceAtLeast(0L)
@@ -3427,6 +3568,7 @@ fun UvirApp(
                 .coerceAtLeast(1)
 
         autoCompletedCount = 0
+        autoSessionId = newSessionId
         autoNextSaveMs = startAt
         autoEndMs = endAt
         autoEnabled = true
@@ -3476,6 +3618,10 @@ fun UvirApp(
             .putInt(
                 KEY_AUTO_COMPLETED_COUNT,
                 0
+            )
+            .putLong(
+                KEY_AUTO_SESSION_ID,
+                newSessionId
             )
             .putLong(
                 KEY_AUTO_NEXT_SAVE_MS,
@@ -3911,6 +4057,21 @@ fun UvirApp(
                     acquisitionNumber
                 )
 
+            val measurementSessionId =
+                autoSessionId
+                    .takeIf { it > 0L }
+                    ?: System.currentTimeMillis()
+                        .also { generatedId ->
+                            autoSessionId = generatedId
+
+                            preferences.edit()
+                                .putLong(
+                                    KEY_AUTO_SESSION_ID,
+                                    generatedId
+                                )
+                                .apply()
+                        }
+
             val result =
                 database.saveMeasurement(
                     sample =
@@ -3918,7 +4079,11 @@ fun UvirApp(
                     note =
                         automaticMeasurementNote,
                     automatic =
-                        true
+                        true,
+                    automaticSessionId =
+                        measurementSessionId,
+                    automaticSequence =
+                        acquisitionNumber
                 )
 
             if (result != -1L) {
@@ -6916,6 +7081,40 @@ fun HistoryScreen(
             R.string.measurements_deleted
         )
 
+    val automaticSessionCounts =
+        remember(records) {
+            records
+                .mapNotNull {
+                    if (it.automatic) {
+                        it.automaticSessionId
+                    } else {
+                        null
+                    }
+                }
+                .groupingBy { it }
+                .eachCount()
+        }
+
+    val automaticSessionFirstRecordIds =
+        remember(records) {
+            mutableMapOf<Long, Long>()
+                .apply {
+                    records.forEach { record ->
+                        if (record.automatic) {
+                            record.automaticSessionId
+                        } else {
+                            null
+                        }
+                            ?.let { sessionId ->
+                                putIfAbsent(
+                                    sessionId,
+                                    record.id
+                                )
+                            }
+                    }
+                }
+        }
+
     fun openShareFormat(ids: List<Long>) {
         pendingShareIds = ids
         showShareFormatDialog = true
@@ -7452,22 +7651,111 @@ fun HistoryScreen(
                         bottom = 20.dp
                     ),
                     verticalArrangement =
-                        Arrangement.spacedBy(
-                            UvirIslandSpacing
-                        )
+                        Arrangement.spacedBy(5.dp)
                 ) {
 
-                    items(
+                    itemsIndexed(
                         items = records,
-                        key = { it.id }
-                    ) { record ->
+                        key = { _, record ->
+                            record.id
+                        }
+                    ) { index, record ->
                         val selected =
                             record.id in selectedRecordIds
 
-                        Card(
+                        val sessionId =
+                            if (record.automatic) {
+                                record.automaticSessionId
+                            } else {
+                                null
+                            }
+
+                        val continuesSession =
+                            index > 0 &&
+                                    sessionId != null &&
+                                    records[index - 1]
+                                        .automaticSessionId ==
+                                    sessionId
+
+                        val headerSessionId =
+                            sessionId?.takeIf {
+                                automaticSessionFirstRecordIds[
+                                    it
+                                ] == record.id
+                            }
+
+                        Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .combinedClickable(
+                                .padding(
+                                    top =
+                                        if (
+                                            index == 0 ||
+                                            continuesSession
+                                        ) {
+                                            0.dp
+                                        } else {
+                                            4.dp
+                                        }
+                                )
+                        ) {
+                            if (headerSessionId != null) {
+                                Row(
+                                    modifier =
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .padding(
+                                                start = 4.dp,
+                                                bottom = 6.dp
+                                            ),
+                                    verticalAlignment =
+                                        Alignment.CenterVertically
+                                ) {
+                                    Box(
+                                        modifier =
+                                            Modifier
+                                                .width(3.dp)
+                                                .height(18.dp)
+                                                .background(
+                                                    MaterialTheme
+                                                        .colorScheme
+                                                        .primary,
+                                                    RoundedCornerShape(
+                                                        50
+                                                    )
+                                                )
+                                    )
+
+                                    Spacer(
+                                        Modifier.width(8.dp)
+                                    )
+
+                                    Text(
+                                        text =
+                                            pluralStringResource(
+                                                R.plurals.automatic_session_summary,
+                                                automaticSessionCounts[
+                                                    headerSessionId
+                                                ] ?: 1,
+                                                formatAutomaticSessionDateTime(
+                                                    headerSessionId
+                                                ),
+                                                automaticSessionCounts[
+                                                    headerSessionId
+                                                ] ?: 1
+                                            ),
+                                        color = secondaryText,
+                                        fontSize = 12.sp,
+                                        fontWeight =
+                                            FontWeight.SemiBold
+                                    )
+                                }
+                            }
+
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .combinedClickable(
                                     onClick = {
                                         if (selectionMode) {
                                             selectedRecordIds =
@@ -7491,24 +7779,24 @@ fun HistoryScreen(
                                                 selectedRecordIds + record.id
                                         }
                                     }
-                                ),
-                            shape = RoundedCornerShape(16.dp),
-                            colors = CardDefaults.cardColors(
-                                containerColor =
-                                    if (selected) {
-                                        MaterialTheme.colorScheme.primary
-                                            .copy(alpha = 0.14f)
-                                    } else {
-                                        cardColor
-                                    }
-                            )
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                verticalAlignment = Alignment.CenterVertically
+                                    ),
+                                shape = RoundedCornerShape(16.dp),
+                                colors = CardDefaults.cardColors(
+                                    containerColor =
+                                        if (selected) {
+                                            MaterialTheme.colorScheme.primary
+                                                .copy(alpha = 0.14f)
+                                        } else {
+                                            cardColor
+                                        }
+                                )
                             ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
                                 if (selectionMode) {
                                     CompositionLocalProvider(
                                         LocalMinimumInteractiveComponentSize provides 0.dp
@@ -7534,6 +7822,30 @@ fun HistoryScreen(
                                     )
                                 }
 
+                                if (sessionId != null) {
+                                    Box(
+                                        modifier =
+                                            Modifier
+                                                .width(3.dp)
+                                                .height(42.dp)
+                                                .background(
+                                                    MaterialTheme
+                                                        .colorScheme
+                                                        .primary
+                                                        .copy(
+                                                            alpha = 0.58f
+                                                        ),
+                                                    RoundedCornerShape(
+                                                        50
+                                                    )
+                                                )
+                                    )
+
+                                    Spacer(
+                                        Modifier.width(11.dp)
+                                    )
+                                }
+
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
                                         text = formatDateTime(record.timestamp),
@@ -7555,7 +7867,10 @@ fun HistoryScreen(
                                     )
                                 }
 
-                                if (record.automatic) {
+                                if (
+                                    record.automatic &&
+                                    sessionId == null
+                                ) {
                                     AutomaticBadge(
                                         primaryText = primaryText,
                                         secondaryText = secondaryText
@@ -7571,6 +7886,7 @@ fun HistoryScreen(
                                     )
                                 }
                             }
+                        }
                         }
                     }
                 }

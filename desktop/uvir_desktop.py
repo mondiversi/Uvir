@@ -104,6 +104,7 @@ EXPECTED_COLUMNS = {
 
 EXPORT_COLUMNS = [
     "ID", "Data/Ora", "Timestamp_ms", "Tipo_acquisizione", "Automatico", "Nota",
+    "Sessione_automatica_id", "Progressivo_sessione",
     "UVC_100_280_nm_uW_cm2", "UVB_280_315_nm_uW_cm2", "UVA_315_400_nm_uW_cm2",
     "UV_totale_uW_cm2", "HEV_400_500_nm_uW_cm2", "HEB_400_450_nm_uW_cm2",
     "Violetto_400_450_nm_uW_cm2", "Blu_450_495_nm_uW_cm2",
@@ -122,6 +123,7 @@ EXPORT_COLUMNS = [
 LEGEND_ROWS = [
     ["Gruppo", "Canale", "Banda / picco", "Nota"],
     ["Acquisizione", "Automatico", "0 / 1", "0 = manuale; 1 = automatica"],
+    ["Acquisizione", "Sessione automatica", "ID + progressivo", "Identifica le misurazioni appartenenti alla stessa sessione automatica"],
     ["UV", "UVC", "100–280 nm", "Energia fotonica maggiore"],
     ["UV", "UVB", "280–315 nm", ""],
     ["UV", "UVA", "315–400 nm", ""],
@@ -170,6 +172,15 @@ def is_automatic(row: sqlite3.Row) -> bool:
         return "automatic" in row.keys() and int(row["automatic"] or 0) != 0
     except Exception:
         return False
+
+
+def optional_int(row: sqlite3.Row, key: str) -> int | None:
+    try:
+        if key in row.keys() and row[key] is not None:
+            return int(row[key])
+    except Exception:
+        pass
+    return None
 
 
 def acquisition_type(row: sqlite3.Row) -> str:
@@ -268,6 +279,8 @@ def export_row(row: sqlite3.Row) -> list:
         acquisition_type(row),
         automatic,
         row["note"] or "",
+        optional_int(row, "automatic_session_id"),
+        optional_int(row, "automatic_sequence"),
         d["uvc"], d["uvb"], d["uva"], d["uv_total"],
         d["hev"], d["heb"],
         d["violetto"], d["blu"], d["verde"], d["giallo"], d["arancione"], d["rosso"],
@@ -441,6 +454,14 @@ def record_to_remote_dict(row: sqlite3.Row) -> dict:
         "timestamp": int(row["timestamp"]),
         "note": row["note"] or "",
         "automatic": is_automatic(row),
+        "automatic_session_id": optional_int(
+            row,
+            "automatic_session_id"
+        ),
+        "automatic_sequence": optional_int(
+            row,
+            "automatic_sequence"
+        ),
         "sample": {
             key: fnum(row[key])
             for key in (
@@ -466,6 +487,8 @@ def create_database_from_remote(path: Path, records: list[dict]) -> None:
                 timestamp INTEGER NOT NULL,
                 note TEXT NOT NULL,
                 automatic INTEGER NOT NULL DEFAULT 0,
+                automatic_session_id INTEGER,
+                automatic_sequence INTEGER,
                 uvc REAL NOT NULL,
                 uvb REAL NOT NULL,
                 uva REAL NOT NULL,
@@ -486,15 +509,18 @@ def create_database_from_remote(path: Path, records: list[dict]) -> None:
                 """
                 INSERT INTO measurements (
                     id, timestamp, note, automatic,
+                    automatic_session_id, automatic_sequence,
                     uvc, uvb, uva, violetto, blu, verde,
                     giallo, arancione, rosso, f8, nir
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     int(record.get("id", 0)),
                     int(record.get("timestamp", 0)),
                     str(record.get("note") or ""),
                     1 if record.get("automatic") else 0,
+                    record.get("automatic_session_id"),
+                    record.get("automatic_sequence"),
                     *[
                         fnum(sample.get(key, 0.0))
                         for key in (
@@ -2007,6 +2033,18 @@ class App:
                 else "0 AS automatic"
             )
 
+            automatic_session_sql = (
+                "automatic_session_id"
+                if "automatic_session_id" in columns
+                else "NULL AS automatic_session_id"
+            )
+
+            automatic_sequence_sql = (
+                "automatic_sequence"
+                if "automatic_sequence" in columns
+                else "NULL AS automatic_sequence"
+            )
+
             return con.execute(
                 f"""
                 SELECT
@@ -2014,6 +2052,8 @@ class App:
                     timestamp,
                     note,
                     {automatic_sql},
+                    {automatic_session_sql},
+                    {automatic_sequence_sql},
                     uvc,
                     uvb,
                     uva,

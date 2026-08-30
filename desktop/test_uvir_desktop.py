@@ -28,7 +28,9 @@ class UvirDesktopTests(unittest.TestCase):
             "id": 1,
             "timestamp": 1_234_567_890_000,
             "note": "test",
-            "automatic": False,
+            "automatic": True,
+            "automatic_session_id": 1_234_567_800_000,
+            "automatic_sequence": 3,
             "sample": sample,
         }
 
@@ -40,12 +42,31 @@ class UvirDesktopTests(unittest.TestCase):
             connection = sqlite3.connect(path)
             try:
                 saved = connection.execute(
-                    "SELECT id, note, automatic, uvc FROM measurements"
+                    """
+                    SELECT
+                        id,
+                        note,
+                        automatic,
+                        automatic_session_id,
+                        automatic_sequence,
+                        uvc
+                    FROM measurements
+                    """
                 ).fetchone()
             finally:
                 connection.close()
 
-            self.assertEqual(saved, (1, "test", 0, 1.25))
+            self.assertEqual(
+                saved,
+                (
+                    1,
+                    "test",
+                    1,
+                    1_234_567_800_000,
+                    3,
+                    1.25
+                )
+            )
 
     def test_remote_json_request(self):
         server = socket.socket()

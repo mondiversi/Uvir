@@ -605,6 +605,16 @@ internal fun savedRecordToJson(
         .put("note", record.note)
         .put("automatic", record.automatic)
         .put(
+            "automatic_session_id",
+            record.automaticSessionId
+                ?: JSONObject.NULL
+        )
+        .put(
+            "automatic_sequence",
+            record.automaticSequence
+                ?: JSONObject.NULL
+        )
+        .put(
             "sample",
             sensorSampleToJson(
                 record.sample
@@ -633,7 +643,17 @@ internal fun JSONObject.toSavedRecordDetail(): SavedRecordDetail {
         sample =
             optJSONObject("sample")
                 ?.toSensorSample()
-                ?: SensorSample()
+                ?: SensorSample(),
+        automaticSessionId =
+            optLong(
+                "automatic_session_id",
+                0L
+            ).takeIf { it > 0L },
+        automaticSequence =
+            optInt(
+                "automatic_sequence",
+                0
+            ).takeIf { it > 0 }
     )
 }
 

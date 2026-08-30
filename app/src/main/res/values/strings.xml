@@ -17,6 +17,10 @@
     <string name="auto_status_limited">AUTO • %2$d saved • limit %3$d • every %1$s\nNext in %4$s</string>
     <string name="auto_waiting">AUTO • 0 saved • starts in %1$s</string>
     <string name="automatic_completed_count">%1$d automatic acquisitions saved</string>
+    <plurals name="automatic_session_summary">
+        <item quantity="one">AUTO · %1$s · %2$d measurement</item>
+        <item quantity="other">AUTO · %1$s · %2$d measurements</item>
+    </plurals>
 
     <string name="saved_measurements">Measurements</string>
     <string name="select_measurements">Select measurements</string>
@@ -144,7 +148,7 @@
     <string name="about_whats_new_title">What’s new in version %1$s</string>
     <string name="about_whats_new_connectivity">Connectivity is now separate from Settings, with dedicated USB, Bluetooth, Wi-Fi, and mobile network sections.</string>
     <string name="about_whats_new_connections">Clearer addresses and connection codes, with primary mobile Internet network detection.</string>
-    <string name="about_whats_new_measurements">Improved measurement management with multiple selection, sharing, and export.</string>
+    <string name="about_whats_new_measurements">Improved measurement management with multiple selection, sharing, export, and automatic series grouped by session.</string>
     <string name="about_whats_new_interface">Automatic acquisition and the interface have been refined for greater clarity and stability.</string>
     <string name="about_whats_new_github">The GitHub repository and update links are now configured.</string>
     <string name="about_description">Spectral measurement app for ultraviolet, visible, FAR-RED and NIR radiation.</string>
