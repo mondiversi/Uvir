@@ -96,6 +96,10 @@ telefono; con USB o ADB wireless lo script può avviare automaticamente l'app.
 
 ## Database e backup
 
+Lo schema corrente usa la tabella interna `acquisitions`. Quando viene aperto
+un vecchio database desktop con la tabella `measurements`, il programma la
+rinomina automaticamente conservando i record.
+
 Le copie scaricate vengono salvate in:
 
 ```text

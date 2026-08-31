@@ -277,7 +277,7 @@ LEGEND_ROWS_EN = [
 
 EXPORT_COLUMNS = EXPORT_COLUMNS_EN
 LEGEND_ROWS = LEGEND_ROWS_EN
-MEASUREMENTS_SHEET = "Acquisitions"
+ACQUISITIONS_SHEET = "Acquisitions"
 LEGEND_SHEET = "Legend"
 
 
@@ -326,6 +326,10 @@ def is_automatic(row: sqlite3.Row) -> bool:
         return False
 
 
+def acquisition_badge(row: sqlite3.Row) -> str:
+    return "A" if is_automatic(row) else ""
+
+
 def optional_int(row: sqlite3.Row, key: str) -> int | None:
     try:
         if key in row.keys() and row[key] is not None:
@@ -353,7 +357,7 @@ def automatic_session_id(row: sqlite3.Row) -> int | None:
     return optional_int(row, "automatic_session_id")
 
 
-def grouped_measurement_rows(
+def grouped_acquisition_rows(
     records: list[sqlite3.Row]
 ) -> list[tuple[int | None, list[sqlite3.Row]]]:
     """Raggruppa le sessioni AUTO alla prima posizione in cui compaiono."""
@@ -486,7 +490,30 @@ def export_row(row: sqlite3.Row) -> list:
 def ensure_schema(path: Path) -> None:
     con = sqlite3.connect(path)
     try:
-        cols = {r[1] for r in con.execute("PRAGMA table_info(measurements)").fetchall()}
+        tables = {
+            row[0]
+            for row in con.execute(
+                "SELECT name FROM sqlite_master WHERE type = 'table'"
+            ).fetchall()
+        }
+        if "acquisitions" not in tables and "measurements" in tables:
+            con.execute(
+                "ALTER TABLE measurements RENAME TO acquisitions"
+            )
+            con.execute(
+                """
+                UPDATE sqlite_sequence
+                SET name = 'acquisitions'
+                WHERE name = 'measurements'
+                """
+            )
+
+        cols = {
+            r[1]
+            for r in con.execute(
+                "PRAGMA table_info(acquisitions)"
+            ).fetchall()
+        }
         missing = EXPECTED_COLUMNS - cols
         if missing:
             if LANGUAGE == "it":
@@ -513,7 +540,7 @@ def ensure_schema(path: Path) -> None:
                 for row in con.execute(
                     """
                     SELECT automatic_session_id
-                    FROM measurements
+                    FROM acquisitions
                     WHERE automatic_session_id IS NOT NULL
                     GROUP BY automatic_session_id
                     ORDER BY MIN(timestamp), automatic_session_id
@@ -524,7 +551,7 @@ def ensure_schema(path: Path) -> None:
             for new_id, old_id in enumerate(session_ids, 1):
                 con.execute(
                     """
-                    UPDATE measurements
+                    UPDATE acquisitions
                     SET automatic_session_id = ?
                     WHERE automatic_session_id = ?
                     """,
@@ -533,7 +560,7 @@ def ensure_schema(path: Path) -> None:
             if session_ids:
                 con.execute(
                     """
-                    UPDATE measurements
+                    UPDATE acquisitions
                     SET automatic_session_id = -automatic_session_id
                     WHERE automatic_session_id < 0
                     """
@@ -552,16 +579,16 @@ def database_counters(path: Path) -> tuple[int, int]:
     ensure_schema(path)
     con = sqlite3.connect(path)
     try:
-        measurement_row = con.execute(
+        acquisition_row = con.execute(
             "SELECT seq FROM sqlite_sequence WHERE name = ?",
-            ("measurements",)
+            ("acquisitions",)
         ).fetchone()
         session_row = con.execute(
             "SELECT value FROM uvir_counters WHERE name = ?",
             (SESSION_COUNTER_NAME,)
         ).fetchone()
         return (
-            int(measurement_row[0] or 0) if measurement_row else 0,
+            int(acquisition_row[0] or 0) if acquisition_row else 0,
             int(session_row[0] or 0) if session_row else 0,
         )
     finally:
@@ -792,7 +819,7 @@ def record_to_remote_dict(row: sqlite3.Row) -> dict:
 def create_database_from_remote(
     path: Path,
     records: list[dict],
-    measurement_counter: int | None = None,
+    acquisition_counter: int | None = None,
     session_counter: int | None = None,
 ) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -807,7 +834,7 @@ def create_database_from_remote(
         try:
             sequence_row = previous.execute(
                 "SELECT seq FROM sqlite_sequence WHERE name = ?",
-                ("measurements",)
+                ("acquisitions",)
             ).fetchone()
             if sequence_row:
                 previous_sequence = int(sequence_row[0] or 0)
@@ -829,7 +856,7 @@ def create_database_from_remote(
     try:
         con.execute(
             """
-            CREATE TABLE measurements (
+            CREATE TABLE acquisitions (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 timestamp INTEGER NOT NULL,
                 note TEXT NOT NULL,
@@ -862,7 +889,7 @@ def create_database_from_remote(
             sample = record.get("sample") or {}
             con.execute(
                 """
-                INSERT INTO measurements (
+                INSERT INTO acquisitions (
                     id, timestamp, note, automatic,
                     automatic_session_id, automatic_sequence,
                     uvc, uvb, uva, violetto, blu, verde,
@@ -896,19 +923,19 @@ def create_database_from_remote(
         preserved_sequence = max(
             (
                 previous_sequence
-                if measurement_counter is None
-                else int(measurement_counter)
+                if acquisition_counter is None
+                else int(acquisition_counter)
             ),
             imported_sequence
         )
         if preserved_sequence > 0:
             con.execute(
                 "DELETE FROM sqlite_sequence WHERE name = ?",
-                ("measurements",)
+                ("acquisitions",)
             )
             con.execute(
                 "INSERT INTO sqlite_sequence(name, seq) VALUES (?, ?)",
-                ("measurements", preserved_sequence)
+                ("acquisitions", preserved_sequence)
             )
 
         imported_session_counter = max(
@@ -987,9 +1014,9 @@ def xlsx_sheet(rows: list[list], widths: list[float]) -> str:
 
 
 def write_xlsx(path: Path, records: list[sqlite3.Row]) -> None:
-    measurements = [EXPORT_COLUMNS] + [export_row(r) for r in records]
+    acquisitions = [EXPORT_COLUMNS] + [export_row(r) for r in records]
     sheet1 = xlsx_sheet(
-        measurements,
+        acquisitions,
         [16, 20, 20, 17, 24, 12, 38, 20]
         + [23] * (len(EXPORT_COLUMNS) - 8)
     )
@@ -1010,7 +1037,7 @@ def write_xlsx(path: Path, records: list[sqlite3.Row]) -> None:
 </Relationships>'''
     workbook = f'''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
-<sheets><sheet name="{escape(MEASUREMENTS_SHEET)}" sheetId="1" r:id="rId1"/><sheet name="{escape(LEGEND_SHEET)}" sheetId="2" r:id="rId2"/></sheets>
+<sheets><sheet name="{escape(ACQUISITIONS_SHEET)}" sheetId="1" r:id="rId1"/><sheet name="{escape(LEGEND_SHEET)}" sheetId="2" r:id="rId2"/></sheets>
 </workbook>'''
     wb_rels = '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
@@ -1056,11 +1083,11 @@ def ods_table(name: str, rows: list[list]) -> str:
 
 
 def write_ods(path: Path, records: list[sqlite3.Row]) -> None:
-    measurements = [EXPORT_COLUMNS] + [export_row(r) for r in records]
+    acquisitions = [EXPORT_COLUMNS] + [export_row(r) for r in records]
     content = f'''<?xml version="1.0" encoding="UTF-8"?>
 <office:document-content xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0" xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0" office:version="1.2">
 <office:automatic-styles><style:style style:name="Header" style:family="table-cell"><style:table-cell-properties fo:background-color="#263238"/><style:text-properties fo:color="#ffffff" fo:font-weight="bold"/></style:style></office:automatic-styles>
-<office:body><office:spreadsheet>{ods_table(MEASUREMENTS_SHEET, measurements)}{ods_table(LEGEND_SHEET, LEGEND_ROWS)}</office:spreadsheet></office:body>
+<office:body><office:spreadsheet>{ods_table(ACQUISITIONS_SHEET, acquisitions)}{ods_table(LEGEND_SHEET, LEGEND_ROWS)}</office:spreadsheet></office:body>
 </office:document-content>'''
     styles = '''<?xml version="1.0" encoding="UTF-8"?><office:document-styles xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" office:version="1.2"><office:styles/></office:document-styles>'''
     manifest = '''<?xml version="1.0" encoding="UTF-8"?><manifest:manifest xmlns:manifest="urn:oasis:names:tc:opendocument:xmlns:manifest:1.0" manifest:version="1.2"><manifest:file-entry manifest:full-path="/" manifest:media-type="application/vnd.oasis.opendocument.spreadsheet"/><manifest:file-entry manifest:full-path="content.xml" manifest:media-type="text/xml"/><manifest:file-entry manifest:full-path="styles.xml" manifest:media-type="text/xml"/></manifest:manifest>'''
@@ -1947,7 +1974,7 @@ class App:
         self._schedule_live_poll(generation, 500)
 
     def _apply_live_snapshot(self, data: dict):
-        sample_source = data.get("measurement") or {}
+        sample_source = data.get("acquisition") or {}
         sample = {
             key: fnum(sample_source.get(key, 0.0))
             for key in (
@@ -2410,7 +2437,7 @@ class App:
 
     def remote_save_current(self):
         try:
-            result = self._remote("save_measurement", {"note": self.remote_note.get().strip()})
+            result = self._remote("save_acquisition", {"note": self.remote_note.get().strip()})
             self.remote_note.set("")
             self.pull_remote_database(show_message=False)
             messagebox.showinfo(
@@ -2456,7 +2483,7 @@ class App:
 
     def pull_remote_database(self, show_message: bool = True):
         try:
-            data = self._remote("list_measurements")
+            data = self._remote("list_acquisitions")
             records = data.get("records") or []
             db = phone_database_path()
             if db.exists():
@@ -2468,8 +2495,8 @@ class App:
             create_database_from_remote(
                 db,
                 records,
-                measurement_counter=
-                    data.get("measurement_counter"),
+                acquisition_counter=
+                    data.get("acquisition_counter"),
                 session_counter=
                     data.get("session_counter"),
             )
@@ -2511,14 +2538,14 @@ class App:
             ensure_schema(self.db_path)
             local_backup = backup_db(self.db_path)
             records = [record_to_remote_dict(row) for row in self.rows()]
-            measurement_counter, session_counter = database_counters(
+            acquisition_counter, session_counter = database_counters(
                 self.db_path
             )
             result = self._remote(
-                "replace_measurements",
+                "replace_acquisitions",
                 {
                     "records": records,
-                    "measurement_counter": measurement_counter,
+                    "acquisition_counter": acquisition_counter,
                     "session_counter": session_counter,
                 }
             )
@@ -2564,14 +2591,14 @@ class App:
             local_backup = backup_db(self.db_path)
             con = self.connect()
             try:
-                con.execute("UPDATE measurements SET note=? WHERE id=?", (note.strip(), record_id))
+                con.execute("UPDATE acquisitions SET note=? WHERE id=?", (note.strip(), record_id))
                 con.commit()
             finally:
                 con.close()
             if self.remote_link:
                 updated = dict(record_to_remote_dict(row))
                 updated["note"] = note.strip()
-                self._remote("update_measurement", {"record": updated})
+                self._remote("update_acquisition", {"record": updated})
                 self.pull_remote_database(show_message=False)
             else:
                 self.refresh()
@@ -2622,7 +2649,7 @@ class App:
             columns = {
                 r[1]
                 for r in con.execute(
-                    "PRAGMA table_info(measurements)"
+                    "PRAGMA table_info(acquisitions)"
                 ).fetchall()
             }
 
@@ -2664,7 +2691,7 @@ class App:
                     rosso,
                     f8,
                     nir
-                FROM measurements
+                FROM acquisitions
                 ORDER BY timestamp DESC, id DESC
                 """
             ).fetchall()
@@ -2679,7 +2706,7 @@ class App:
             self.row_map = {int(r["id"]): r for r in rows}
             for x in self.tree.get_children():
                 self.tree.delete(x)
-            for session_id, block_rows in grouped_measurement_rows(rows):
+            for session_id, block_rows in grouped_acquisition_rows(rows):
                 if session_id is not None:
                     count = len(block_rows)
                     session_first_record = min(
@@ -2712,11 +2739,7 @@ class App:
                     if len(note) > 80:
                         note = note[:77] + "..."
 
-                    auto_badge = (
-                        ""
-                        if session_id is not None
-                        else ("A" if is_automatic(r) else "")
-                    )
+                    auto_badge = acquisition_badge(r)
                     tags = (
                         ("session_member",)
                         if session_id is not None
@@ -2929,7 +2952,7 @@ class App:
             APP_TITLE,
             tr("delete_one_question", id=rid),
         ):
-            self.delete_sql("DELETE FROM measurements WHERE id=?", (rid,))
+            self.delete_sql("DELETE FROM acquisitions WHERE id=?", (rid,))
 
     def delete_all(self):
         if not self.db_path or not self.row_map:
@@ -2945,7 +2968,7 @@ class App:
         ):
             return
         self.delete_sql(
-            "DELETE FROM measurements",
+            "DELETE FROM acquisitions",
             (),
             delete_all_records=True
         )
@@ -2984,10 +3007,10 @@ class App:
             local_backup = backup_db(self.db_path)
             con = self.connect()
             try:
-                con.execute("DELETE FROM measurements")
+                con.execute("DELETE FROM acquisitions")
                 con.execute(
                     "DELETE FROM sqlite_sequence WHERE name = ?",
-                    ("measurements",)
+                    ("acquisitions",)
                 )
                 con.execute(
                     """
@@ -3064,7 +3087,7 @@ class App:
                         self._remote("delete_all")
                     else:
                         ids = [int(value) for value in params]
-                        self._remote("delete_measurements", {"ids": ids})
+                        self._remote("delete_acquisitions", {"ids": ids})
 
                     self.pull_remote_database(show_message=False)
 

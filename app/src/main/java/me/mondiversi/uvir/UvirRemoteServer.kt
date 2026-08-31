@@ -32,7 +32,7 @@ private const val UVIR_REMOTE_PIN = "pairing_pin"
 private const val MAX_REQUEST_CHARS = 8 * 1024 * 1024
 
 internal data class UvirRemoteSnapshot(
-    val measurement: SensorSample = SensorSample(),
+    val acquisition: SensorSample = SensorSample(),
     val liveReady: Boolean = false,
     val autoEnabled: Boolean = false,
     val autoIntervalSeconds: Long = 0L,
@@ -537,9 +537,9 @@ internal fun remoteStatusJson(): JSONObject {
         .put("live_ready", snapshot.liveReady)
         .put("screen", snapshot.screen.name.lowercase())
         .put(
-            "measurement",
+            "acquisition",
             sensorSampleToJson(
-                snapshot.measurement
+                snapshot.acquisition
             )
         )
         .put("auto_enabled", snapshot.autoEnabled)
@@ -627,7 +627,7 @@ internal fun JSONObject.toSavedRecordDetail(): SavedRecordDetail {
 
     if (id <= 0L) {
         throw IllegalArgumentException(
-            "ID misurazione non valido."
+            "ID acquisizione non valido."
         )
     }
 

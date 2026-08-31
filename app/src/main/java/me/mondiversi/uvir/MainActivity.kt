@@ -2192,7 +2192,7 @@ class UvirDatabaseHelper(
     context.applicationContext,
     "uvir.db",
     null,
-    4
+    5
 ) {
 
     private val appContext =
@@ -2217,107 +2217,12 @@ class UvirDatabaseHelper(
         )
     }
 
-    private fun migrateAutomaticSessionIds(
+    private fun createAcquisitionsTable(
         db: SQLiteDatabase
     ) {
-        createCountersTable(db)
-
-        val mappings =
-            mutableListOf<Pair<Long, Long>>()
-
-        db.rawQuery(
-            """
-            SELECT automatic_session_id
-            FROM measurements
-            WHERE automatic_session_id IS NOT NULL
-            GROUP BY automatic_session_id
-            ORDER BY MIN(timestamp) ASC, automatic_session_id ASC
-            """.trimIndent(),
-            null
-        ).use { cursor ->
-            var nextId = 1L
-            while (cursor.moveToNext()) {
-                mappings.add(
-                    cursor.getLong(0) to nextId
-                )
-                nextId += 1L
-            }
-        }
-
-        mappings.forEach { (oldId, newId) ->
-            db.execSQL(
-                """
-                UPDATE measurements
-                SET automatic_session_id = ?
-                WHERE automatic_session_id = ?
-                """.trimIndent(),
-                arrayOf(-newId, oldId)
-            )
-        }
-
         db.execSQL(
             """
-            UPDATE measurements
-            SET automatic_session_id = -automatic_session_id
-            WHERE automatic_session_id < 0
-            """.trimIndent()
-        )
-
-        val preferences =
-            appContext.getSharedPreferences(
-                PREFS_NAME,
-                Context.MODE_PRIVATE
-            )
-        val oldActiveSessionId =
-            preferences.getLong(
-                KEY_AUTO_SESSION_ID,
-                0L
-            )
-        val autoWasActive =
-            preferences.getBoolean(
-                KEY_AUTO_ENABLED,
-                false
-            )
-        var counter =
-            mappings.size.toLong()
-        var migratedActiveSessionId =
-            mappings
-                .firstOrNull {
-                    it.first == oldActiveSessionId
-                }
-                ?.second
-                ?: 0L
-
-        if (
-            autoWasActive &&
-            oldActiveSessionId > 0L &&
-            migratedActiveSessionId == 0L
-        ) {
-            counter += 1L
-            migratedActiveSessionId = counter
-        }
-
-        db.execSQL(
-            """
-            UPDATE uvir_counters
-            SET value = ?
-            WHERE name = 'automatic_session_id'
-            """.trimIndent(),
-            arrayOf(counter)
-        )
-
-        preferences.edit()
-            .putLong(
-                KEY_AUTO_SESSION_ID,
-                migratedActiveSessionId
-            )
-            .apply()
-    }
-
-    override fun onCreate(db: SQLiteDatabase) {
-        db.execSQL(
-            """
-            CREATE TABLE measurements (
+            CREATE TABLE acquisitions (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 timestamp INTEGER NOT NULL,
                 note TEXT NOT NULL,
@@ -2341,7 +2246,10 @@ class UvirDatabaseHelper(
             )
             """.trimIndent()
         )
+    }
 
+    override fun onCreate(db: SQLiteDatabase) {
+        createAcquisitionsTable(db)
         createCountersTable(db)
     }
 
@@ -2350,33 +2258,33 @@ class UvirDatabaseHelper(
         oldVersion: Int,
         newVersion: Int
     ) {
-        if (oldVersion < 2) {
+        if (oldVersion < 5) {
+            db.execSQL("DROP TABLE IF EXISTS measurements")
+            db.execSQL("DROP TABLE IF EXISTS acquisitions")
+            db.execSQL(
+                "DELETE FROM sqlite_sequence " +
+                    "WHERE name IN ('measurements', 'acquisitions')"
+            )
+            createAcquisitionsTable(db)
+            createCountersTable(db)
             db.execSQL(
                 """
-                ALTER TABLE measurements
-                ADD COLUMN automatic INTEGER NOT NULL DEFAULT 0
-                """.trimIndent()
-            )
-        }
-
-        if (oldVersion < 3) {
-            db.execSQL(
-                """
-                ALTER TABLE measurements
-                ADD COLUMN automatic_session_id INTEGER
+                UPDATE uvir_counters
+                SET value = 0
+                WHERE name = 'automatic_session_id'
                 """.trimIndent()
             )
 
-            db.execSQL(
-                """
-                ALTER TABLE measurements
-                ADD COLUMN automatic_sequence INTEGER
-                """.trimIndent()
-            )
-        }
-
-        if (oldVersion < 4) {
-            migrateAutomaticSessionIds(db)
+            appContext
+                .getSharedPreferences(
+                    PREFS_NAME,
+                    Context.MODE_PRIVATE
+                )
+                .edit()
+                .putBoolean(KEY_AUTO_ENABLED, false)
+                .putLong(KEY_AUTO_SESSION_ID, 0L)
+                .putInt(KEY_AUTO_COMPLETED_COUNT, 0)
+                .apply()
         }
     }
 
@@ -2433,14 +2341,14 @@ class UvirDatabaseHelper(
         }
     }
 
-    private fun measurementCounter(
+    private fun acquisitionCounter(
         database: SQLiteDatabase
     ): Long {
         return database.rawQuery(
             """
             SELECT seq
             FROM sqlite_sequence
-            WHERE name = 'measurements'
+            WHERE name = 'acquisitions'
             """.trimIndent(),
             null
         ).use {
@@ -2452,10 +2360,10 @@ class UvirDatabaseHelper(
         }
     }
 
-    fun currentMeasurementCounter(): Long =
-        measurementCounter(readableDatabase)
+    fun currentAcquisitionCounter(): Long =
+        acquisitionCounter(readableDatabase)
 
-    fun saveMeasurement(
+    fun saveAcquisition(
         sample: SensorSample,
         note: String,
         automatic: Boolean = false,
@@ -2498,7 +2406,7 @@ class UvirDatabaseHelper(
         }
 
         return writableDatabase.insert(
-            "measurements",
+            "acquisitions",
             null,
             values
         )
@@ -2509,7 +2417,7 @@ class UvirDatabaseHelper(
         val list = mutableListOf<SavedRecordSummary>()
 
         val cursor = readableDatabase.query(
-            "measurements",
+            "acquisitions",
             arrayOf(
                 "id",
                 "timestamp",
@@ -2581,7 +2489,7 @@ class UvirDatabaseHelper(
     fun readRecord(id: Long): SavedRecordDetail? {
 
         val cursor = readableDatabase.query(
-            "measurements",
+            "acquisitions",
             null,
             "id = ?",
             arrayOf(id.toString()),
@@ -2650,7 +2558,7 @@ class UvirDatabaseHelper(
 
     fun deleteRecord(id: Long): Int {
         return writableDatabase.delete(
-            "measurements",
+            "acquisitions",
             "id = ?",
             arrayOf(id.toString())
         )
@@ -2665,21 +2573,21 @@ class UvirDatabaseHelper(
             ids.joinToString(",") { "?" }
 
         return writableDatabase.delete(
-            "measurements",
+            "acquisitions",
             "id IN ($placeholders)",
             ids.map { it.toString() }
                 .toTypedArray()
         )
     }
 
-    fun deleteAllMeasurements(): Int {
+    fun deleteAllAcquisitions(): Int {
         val database = writableDatabase
         var deletedRows = 0
 
         database.beginTransaction()
         try {
             deletedRows = database.delete(
-                "measurements",
+                "acquisitions",
                 null,
                 null
             )
@@ -2699,12 +2607,12 @@ class UvirDatabaseHelper(
         database.beginTransaction()
         try {
             deletedRows = database.delete(
-                "measurements",
+                "acquisitions",
                 null,
                 null
             )
             database.execSQL(
-                "DELETE FROM sqlite_sequence WHERE name = 'measurements'"
+                "DELETE FROM sqlite_sequence WHERE name = 'acquisitions'"
             )
             createCountersTable(database)
             database.execSQL(
@@ -2730,7 +2638,7 @@ class UvirDatabaseHelper(
             }
     }
 
-    fun updateMeasurement(
+    fun updateAcquisition(
         record: SavedRecordDetail
     ): Int {
         val values =
@@ -2764,16 +2672,16 @@ class UvirDatabaseHelper(
             }
 
         return writableDatabase.update(
-            "measurements",
+            "acquisitions",
             values,
             "id = ?",
             arrayOf(record.id.toString())
         )
     }
 
-    fun replaceAllMeasurements(
+    fun replaceAllAcquisitions(
         records: List<SavedRecordDetail>,
-        measurementCounter: Long? = null,
+        acquisitionCounter: Long? = null,
         sessionCounter: Long? = null
     ): Int {
         val database = writableDatabase
@@ -2781,7 +2689,7 @@ class UvirDatabaseHelper(
         database.beginTransaction()
         try {
             database.delete(
-                "measurements",
+                "acquisitions",
                 null,
                 null
             )
@@ -2819,7 +2727,7 @@ class UvirDatabaseHelper(
                     }
 
                 database.insertOrThrow(
-                    "measurements",
+                    "acquisitions",
                     null,
                     values
                 )
@@ -2845,22 +2753,22 @@ class UvirDatabaseHelper(
                 arrayOf(importedSessionCounter)
             )
 
-            val importedMeasurementCounter =
+            val importedAcquisitionCounter =
                 maxOf(
-                    measurementCounter ?: 0L,
+                    acquisitionCounter ?: 0L,
                     records.maxOfOrNull {
                         it.id
                     } ?: 0L
                 )
             if (
-                importedMeasurementCounter >
-                measurementCounter(database)
+                importedAcquisitionCounter >
+                acquisitionCounter(database)
             ) {
                 val sequenceValues =
                     ContentValues().apply {
                         put(
                             "seq",
-                            importedMeasurementCounter
+                            importedAcquisitionCounter
                         )
                     }
                 val updated =
@@ -2868,12 +2776,12 @@ class UvirDatabaseHelper(
                         "sqlite_sequence",
                         sequenceValues,
                         "name = ?",
-                        arrayOf("measurements")
+                        arrayOf("acquisitions")
                     )
                 if (updated == 0) {
                     sequenceValues.put(
                         "name",
-                        "measurements"
+                        "acquisitions"
                     )
                     database.insertOrThrow(
                         "sqlite_sequence",
@@ -3840,7 +3748,13 @@ fun UvirApp(
     val context = LocalContext.current
 
     val database = remember {
-        UvirDatabaseHelper(context.applicationContext)
+        UvirDatabaseHelper(
+            context.applicationContext
+        ).also { helper ->
+            // Open immediately so a schema reset also clears stale AUTO state
+            // before the related Compose state is restored below.
+            helper.writableDatabase
+        }
     }
 
     DisposableEffect(Unit) {
@@ -4371,7 +4285,7 @@ fun UvirApp(
     SideEffect {
         UvirRemoteRuntime.snapshot.set(
             UvirRemoteSnapshot(
-                measurement =
+                acquisition =
                     latestMeasurement.get(),
                 liveReady = liveReady,
                 autoEnabled = autoEnabled,
@@ -4404,7 +4318,7 @@ fun UvirApp(
                             ) ?: JSONObject()
 
                     when (command.action) {
-                        "save_measurement" -> {
+                        "save_acquisition" -> {
                             if (!liveReady) {
                                 throw IllegalStateException(
                                     "Acquisizione non ancora pronta."
@@ -4412,7 +4326,7 @@ fun UvirApp(
                             }
 
                             val id =
-                                database.saveMeasurement(
+                                database.saveAcquisition(
                                     sample =
                                         latestMeasurement.get(),
                                     note =
@@ -4527,16 +4441,16 @@ fun UvirApp(
                             )
                         }
 
-                        "list_measurements" -> {
+                        "list_acquisitions" -> {
                             remoteOk(
                                 recordsToJson(
                                     database
                                         .readAllRecords()
                                 )
                                     .put(
-                                        "measurement_counter",
+                                        "acquisition_counter",
                                         database
-                                            .currentMeasurementCounter()
+                                            .currentAcquisitionCounter()
                                     )
                                     .put(
                                         "session_counter",
@@ -4546,7 +4460,7 @@ fun UvirApp(
                             )
                         }
 
-                        "update_measurement" -> {
+                        "update_acquisition" -> {
                             val record =
                                 payload
                                     .getJSONObject(
@@ -4555,7 +4469,7 @@ fun UvirApp(
                                     .toSavedRecordDetail()
 
                             val updated =
-                                database.updateMeasurement(
+                                database.updateAcquisition(
                                     record
                                 )
 
@@ -4568,7 +4482,7 @@ fun UvirApp(
                             )
                         }
 
-                        "delete_measurements" -> {
+                        "delete_acquisitions" -> {
                             val idsJson =
                                 payload.getJSONArray(
                                     "ids"
@@ -4604,7 +4518,7 @@ fun UvirApp(
                         "delete_all" -> {
                             val deleted =
                                 database
-                                    .deleteAllMeasurements()
+                                    .deleteAllAcquisitions()
 
                             remoteOk(
                                 JSONObject()
@@ -4640,12 +4554,12 @@ fun UvirApp(
                             remoteOk(
                                 JSONObject()
                                     .put("deleted", deleted)
-                                    .put("measurement_counter", 0)
+                                    .put("acquisition_counter", 0)
                                     .put("session_counter", 0)
                             )
                         }
 
-                        "replace_measurements" -> {
+                        "replace_acquisitions" -> {
                             val recordsJson =
                                 payload.getJSONArray(
                                     "records"
@@ -4676,11 +4590,11 @@ fun UvirApp(
 
                             val replaced =
                                 database
-                                    .replaceAllMeasurements(
+                                    .replaceAllAcquisitions(
                                         records,
-                                        measurementCounter =
+                                        acquisitionCounter =
                                             payload.optLong(
-                                                "measurement_counter",
+                                                "acquisition_counter",
                                                 0L
                                             ),
                                         sessionCounter =
@@ -4711,7 +4625,7 @@ fun UvirApp(
                                     screen = AppScreen.LIVE
                                 }
 
-                                "measurements",
+                                "acquisitions",
                                 "history" -> {
                                     selectedRecordId = null
                                     screen = AppScreen.HISTORY
@@ -4861,7 +4775,7 @@ fun UvirApp(
                         }
 
             val result =
-                database.saveMeasurement(
+                database.saveAcquisition(
                     sample =
                         latestMeasurement.get(),
                     note =
@@ -5672,7 +5586,7 @@ fun LiveScreen(
                     onClick = {
 
                         val result =
-                            database.saveMeasurement(
+                            database.saveAcquisition(
                                 sample =
                                     measurement,
                                 note =
@@ -8213,7 +8127,7 @@ fun HistoryScreen(
                             R.string.delete_all
                         ),
                     onConfirmed = {
-                        database.deleteAllMeasurements()
+                        database.deleteAllAcquisitions()
                         records = database.readSavedRecords()
                         showDeleteAllConfirmation = false
                     }

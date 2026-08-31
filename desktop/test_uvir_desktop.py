@@ -20,7 +20,7 @@ import uvir_desktop as uvir
 
 
 class UvirDesktopTests(unittest.TestCase):
-    def test_automatic_measurements_are_grouped_by_session(self):
+    def test_automatic_acquisitions_are_grouped_by_session(self):
         records = [
             {
                 "id": 5,
@@ -44,7 +44,7 @@ class UvirDesktopTests(unittest.TestCase):
             },
         ]
 
-        groups = uvir.grouped_measurement_rows(records)
+        groups = uvir.grouped_acquisition_rows(records)
 
         self.assertEqual(
             [
@@ -57,6 +57,64 @@ class UvirDesktopTests(unittest.TestCase):
                 (None, [2]),
             ]
         )
+
+    def test_every_automatic_acquisition_has_a_badge(self):
+        self.assertEqual(
+            uvir.acquisition_badge({"automatic": 1}),
+            "A",
+        )
+        self.assertEqual(
+            uvir.acquisition_badge({"automatic": 0}),
+            "",
+        )
+
+    def test_legacy_measurements_table_is_renamed(self):
+        sample = {
+            key: 0.0
+            for key in (
+                "uvc", "uvb", "uva", "violetto", "blu", "verde",
+                "giallo", "arancione", "rosso", "f8", "nir"
+            )
+        }
+        record = {
+            "id": 7,
+            "timestamp": 100,
+            "note": "legacy",
+            "automatic": True,
+            "sample": sample,
+        }
+
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "legacy.db"
+            uvir.create_database_from_remote(path, [record])
+            connection = sqlite3.connect(path)
+            try:
+                connection.execute(
+                    "ALTER TABLE acquisitions RENAME TO measurements"
+                )
+                connection.commit()
+            finally:
+                connection.close()
+
+            uvir.ensure_schema(path)
+
+            connection = sqlite3.connect(path)
+            try:
+                tables = {
+                    row[0]
+                    for row in connection.execute(
+                        "SELECT name FROM sqlite_master WHERE type = 'table'"
+                    )
+                }
+                row = connection.execute(
+                    "SELECT id, note, automatic FROM acquisitions"
+                ).fetchone()
+            finally:
+                connection.close()
+
+            self.assertIn("acquisitions", tables)
+            self.assertNotIn("measurements", tables)
+            self.assertEqual(row, (7, "legacy", 1))
 
     def test_automatic_session_uses_compact_auto_label(self):
         for language in ("it", "en"):
@@ -93,7 +151,7 @@ class UvirDesktopTests(unittest.TestCase):
             uvir.create_database_from_remote(
                 path,
                 [record],
-                measurement_counter=9,
+                acquisition_counter=9,
                 session_counter=4,
             )
             uvir.ensure_schema(path)
@@ -102,7 +160,7 @@ class UvirDesktopTests(unittest.TestCase):
             connection.row_factory = sqlite3.Row
             try:
                 saved = connection.execute(
-                    "SELECT * FROM measurements"
+                    "SELECT * FROM acquisitions"
                 ).fetchone()
             finally:
                 connection.close()
@@ -162,7 +220,7 @@ class UvirDesktopTests(unittest.TestCase):
                 (9, 4)
             )
 
-    def test_empty_refresh_preserves_measurement_sequence(self):
+    def test_empty_refresh_preserves_acquisition_sequence(self):
         with tempfile.TemporaryDirectory() as folder:
             path = Path(folder) / "uvir.db"
             sample = {
@@ -183,7 +241,7 @@ class UvirDesktopTests(unittest.TestCase):
                         "sample": sample,
                     }
                 ],
-                measurement_counter=27,
+                acquisition_counter=27,
                 session_counter=8,
             )
 
@@ -193,7 +251,7 @@ class UvirDesktopTests(unittest.TestCase):
             try:
                 sequence = connection.execute(
                     "SELECT seq FROM sqlite_sequence WHERE name = ?",
-                    ("measurements",)
+                    ("acquisitions",)
                 ).fetchone()
             finally:
                 connection.close()
@@ -207,7 +265,7 @@ class UvirDesktopTests(unittest.TestCase):
             uvir.create_database_from_remote(
                 path,
                 [],
-                measurement_counter=0,
+                acquisition_counter=0,
                 session_counter=0,
             )
             self.assertEqual(
@@ -261,7 +319,7 @@ class UvirDesktopTests(unittest.TestCase):
                 session_ids = connection.execute(
                     """
                     SELECT automatic_session_id
-                    FROM measurements
+                    FROM acquisitions
                     ORDER BY timestamp
                     """
                 ).fetchall()
@@ -418,7 +476,7 @@ class UvirDesktopTests(unittest.TestCase):
             uvir.LEGEND_ROWS_EN
         )
         self.assertEqual(
-            (uvir.MEASUREMENTS_SHEET, uvir.LEGEND_SHEET),
+            (uvir.ACQUISITIONS_SHEET, uvir.LEGEND_SHEET),
             ("Acquisitions", "Legend")
         )
         self.assertEqual(
@@ -489,14 +547,14 @@ class UvirDesktopTests(unittest.TestCase):
                 workbook = archive.read(
                     "xl/workbook.xml"
                 ).decode("utf-8")
-            self.assertIn(uvir.MEASUREMENTS_SHEET, workbook)
+            self.assertIn(uvir.ACQUISITIONS_SHEET, workbook)
             self.assertIn(uvir.LEGEND_SHEET, workbook)
 
             with zipfile.ZipFile(ods) as archive:
                 content = archive.read(
                     "content.xml"
                 ).decode("utf-8")
-            self.assertIn(uvir.MEASUREMENTS_SHEET, content)
+            self.assertIn(uvir.ACQUISITIONS_SHEET, content)
             self.assertIn(uvir.LEGEND_SHEET, content)
 
 
