@@ -5283,7 +5283,7 @@ fun LiveScreen(
             loadSettingsSectionExpanded(
                 context,
                 KEY_SETTINGS_SAMPLING_EXPANDED,
-                true
+                false
             )
         )
     }
@@ -5786,10 +5786,7 @@ fun LiveScreen(
                                 AutomaticSettingIcon(
                                     type =
                                         AutomaticSettingIconType.INTERVAL,
-                                    tint =
-                                        MaterialTheme
-                                            .colorScheme
-                                            .primary
+                                    tint = primaryText
                                 )
 
                                 Spacer(
@@ -6456,10 +6453,7 @@ if (showVersionInfoDialog) {
                         ),
                     titleIconContent = {
                         WhatsNewIcon(
-                            tint =
-                                MaterialTheme
-                                    .colorScheme
-                                    .primary
+                            tint = primaryText
                         )
                     }
                 ) {
@@ -6501,10 +6495,7 @@ if (showVersionInfoDialog) {
                         ),
                     titleIconContent = {
                         GitHubIcon(
-                            tint =
-                                MaterialTheme
-                                    .colorScheme
-                                    .primary
+                            tint = primaryText
                         )
                     }
                 ) {
@@ -6544,7 +6535,8 @@ if (showVersionInfoDialog) {
                         ) {
                             GitHubIcon(
                                 modifier =
-                                    Modifier.size(20.dp)
+                                    Modifier.size(20.dp),
+                                tint = primaryText
                             )
 
                             Spacer(
@@ -10633,7 +10625,7 @@ fun CheckSettingRow(
             AutomaticSettingIcon(
                 type = icon,
                 modifier = Modifier.size(20.dp),
-                tint = MaterialTheme.colorScheme.primary
+                tint = LocalContentColor.current
             )
 
             Spacer(
