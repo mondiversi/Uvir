@@ -8882,12 +8882,11 @@ fun HistoryScreen(
 
                                 AcquisitionIdBadge(
                                     id = record.id,
-                                    primaryText = primaryText,
-                                    secondaryText = secondaryText
+                                    primaryText = primaryText
                                 )
 
                                 Spacer(
-                                    Modifier.width(11.dp)
+                                    Modifier.width(9.dp)
                                 )
 
                                 Column(modifier = Modifier.weight(1f)) {
@@ -12123,8 +12122,7 @@ fun RecordIdentifier(
 @Composable
 fun AcquisitionIdBadge(
     id: Long,
-    primaryText: Color,
-    secondaryText: Color
+    primaryText: Color
 ) {
     val idText = id.toString()
     val description =
@@ -12132,28 +12130,22 @@ fun AcquisitionIdBadge(
 
     val fontSize =
         when {
-            idText.length >= 7 -> 7.sp
-            idText.length >= 5 -> 9.sp
-            idText.length >= 4 -> 10.sp
-            else -> 12.sp
+            idText.length >= 7 -> 6.sp
+            idText.length >= 5 -> 7.sp
+            idText.length >= 4 -> 8.sp
+            else -> 10.sp
         }
 
     Surface(
         modifier =
             Modifier
-                .size(36.dp)
+                .size(30.dp)
                 .semantics {
                     contentDescription = description
                 },
         shape = RoundedCornerShape(50),
-        color = secondaryText.copy(alpha = 0.12f),
-        contentColor = primaryText,
-        border =
-            BorderStroke(
-                width = 1.2.dp,
-                color =
-                    secondaryText.copy(alpha = 0.42f)
-            )
+        color = primaryText.copy(alpha = 0.08f),
+        contentColor = primaryText
     ) {
         Box(
             contentAlignment = Alignment.Center
