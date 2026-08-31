@@ -200,6 +200,31 @@ enum class AppScreen {
     DETAIL
 }
 
+enum class ListEdgeAnchor {
+    START,
+    MIDDLE,
+    END
+}
+
+internal fun resolveListEdgeAnchor(
+    firstVisibleItemIndex: Int,
+    firstVisibleItemScrollOffset: Int,
+    totalItemsCount: Int,
+    canScrollForward: Boolean
+): ListEdgeAnchor {
+    return when {
+        firstVisibleItemIndex == 0 &&
+                firstVisibleItemScrollOffset == 0 ->
+            ListEdgeAnchor.START
+
+        totalItemsCount > 0 &&
+                !canScrollForward ->
+            ListEdgeAnchor.END
+
+        else -> ListEdgeAnchor.MIDDLE
+    }
+}
+
 private val UvirIslandSpacing = 9.dp
 
 enum class MenuIconType {
@@ -1817,16 +1842,9 @@ data class AcquisitionParameters(
 )
 
 internal fun formatAutomaticMeasurementNote(
-    defaultNote: String,
-    acquisitionNumber: Int
+    defaultNote: String
 ): String {
-    val trimmedNote = defaultNote.trim()
-
-    return if (trimmedNote.isBlank()) {
-        "#$acquisitionNumber"
-    } else {
-        "$trimmedNote #$acquisitionNumber"
-    }
+    return defaultNote.trim()
 }
 
 data class BiologicalEffectEstimate(
@@ -3847,6 +3865,19 @@ fun UvirApp(
             LazyListState()
         }
 
+    var historyScrollAnchor by rememberSaveable {
+        mutableStateOf(
+            if (
+                historyListState.firstVisibleItemIndex == 0 &&
+                historyListState.firstVisibleItemScrollOffset == 0
+            ) {
+                ListEdgeAnchor.START
+            } else {
+                ListEdgeAnchor.MIDDLE
+            }
+        )
+    }
+
     val detailListState =
         rememberSaveable(
             saver = LazyListState.Saver
@@ -4755,8 +4786,7 @@ fun UvirApp(
 
             val automaticMeasurementNote =
                 formatAutomaticMeasurementNote(
-                    autoNote,
-                    acquisitionNumber
+                    autoNote
                 )
 
             val measurementSessionId =
@@ -4967,6 +4997,11 @@ fun UvirApp(
                 database = database,
                 historyListState =
                     historyListState,
+                historyScrollAnchor =
+                    historyScrollAnchor,
+                onHistoryScrollAnchorChange = {
+                    historyScrollAnchor = it
+                },
                 backgroundColor =
                     backgroundColor,
                 cardColor =
@@ -7935,6 +7970,8 @@ floatingActionButton = {
 fun HistoryScreen(
     database: UvirDatabaseHelper,
     historyListState: LazyListState,
+    historyScrollAnchor: ListEdgeAnchor,
+    onHistoryScrollAnchorChange: (ListEdgeAnchor) -> Unit,
     backgroundColor: Color,
     cardColor: Color,
     primaryText: Color,
@@ -7950,6 +7987,39 @@ fun HistoryScreen(
         mutableStateOf(
             database.readSavedRecords()
         )
+    }
+
+    LaunchedEffect(records.size) {
+        if (records.isNotEmpty()) {
+            when (historyScrollAnchor) {
+                ListEdgeAnchor.START ->
+                    historyListState.scrollToItem(0)
+
+                ListEdgeAnchor.END ->
+                    historyListState.scrollToItem(
+                        records.lastIndex
+                    )
+
+                ListEdgeAnchor.MIDDLE -> Unit
+            }
+        }
+    }
+
+    LaunchedEffect(historyListState) {
+        snapshotFlow {
+            resolveListEdgeAnchor(
+                firstVisibleItemIndex =
+                    historyListState.firstVisibleItemIndex,
+                firstVisibleItemScrollOffset =
+                    historyListState.firstVisibleItemScrollOffset,
+                totalItemsCount =
+                    historyListState.layoutInfo.totalItemsCount,
+                canScrollForward =
+                    historyListState.canScrollForward
+            )
+        }.collect { anchor ->
+            onHistoryScrollAnchorChange(anchor)
+        }
     }
 
     var showDeleteAllConfirmation by rememberSaveable {
@@ -8810,6 +8880,16 @@ fun HistoryScreen(
                                     )
                                 }
 
+                                AcquisitionIdBadge(
+                                    id = record.id,
+                                    primaryText = primaryText,
+                                    secondaryText = secondaryText
+                                )
+
+                                Spacer(
+                                    Modifier.width(11.dp)
+                                )
+
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
                                         text = formatDateTime(record.timestamp),
@@ -8835,7 +8915,8 @@ fun HistoryScreen(
                                     record.automatic &&
                                     sessionId == null
                                 ) {
-                                    AutomaticBadge(
+                                    AcquisitionTypeBadge(
+                                        automatic = true,
                                         primaryText = primaryText,
                                         secondaryText = secondaryText
                                     )
@@ -9233,39 +9314,66 @@ fun RecordDetailScreen(
                             )
                     ) {
 
-                        Text(
-                            text =
-                                stringResource(
-                                    R.string.note
-                                ),
-
-                            color =
-                                secondaryText,
-
-                            fontSize =
-                                12.sp,
-
-                            fontWeight =
-                                FontWeight.Bold
-                        )
-
-                        Text(
-                            text =
-                                if (
-                                    record.note.isBlank()
-                                )
+                        Row(
+                            modifier =
+                                Modifier.fillMaxWidth(),
+                            verticalAlignment =
+                                Alignment.Top
+                        ) {
+                            RecordIdentifier(
+                                label =
                                     stringResource(
-                                        R.string.no_note
-                                    )
-                                else
-                                    record.note,
+                                        R.string.share_measurement_id_label
+                                    ),
+                                value =
+                                    record.id.toString(),
+                                primaryText =
+                                    primaryText,
+                                secondaryText =
+                                    secondaryText
+                            )
 
-                            color =
-                                primaryText,
+                            Spacer(
+                                Modifier.width(12.dp)
+                            )
 
-                            fontSize =
-                                15.sp
-                        )
+                            Column(
+                                modifier =
+                                    Modifier.weight(1f),
+                                verticalArrangement =
+                                    Arrangement.spacedBy(7.dp)
+                            ) {
+                                Text(
+                                    text =
+                                        stringResource(
+                                            R.string.note
+                                        ),
+                                    color =
+                                        secondaryText,
+                                    fontSize =
+                                        12.sp,
+                                    fontWeight =
+                                        FontWeight.Bold
+                                )
+
+                                Text(
+                                    text =
+                                        if (
+                                            record.note.isBlank()
+                                        ) {
+                                            stringResource(
+                                                R.string.no_note
+                                            )
+                                        } else {
+                                            record.note
+                                        },
+                                    color =
+                                        primaryText,
+                                    fontSize =
+                                        15.sp
+                                )
+                            }
+                        }
 
                         Spacer(
                             Modifier.height(
@@ -9273,63 +9381,87 @@ fun RecordDetailScreen(
                             )
                         )
 
-                        Text(
-                            text =
-                                stringResource(
-                                    R.string.acquisition_type
-                                ),
-
-                            color =
-                                secondaryText,
-
-                            fontSize =
-                                12.sp,
-
-                            fontWeight =
-                                FontWeight.Bold
-                        )
-
                         Row(
+                            modifier =
+                                Modifier.fillMaxWidth(),
                             verticalAlignment =
-                                Alignment.CenterVertically
+                                Alignment.Top
                         ) {
-
-                            if (record.automatic) {
-
-                                AutomaticBadge(
-                                    primaryText =
-                                        primaryText,
-
-                                    secondaryText =
-                                        secondaryText
-                                )
-
-                                Spacer(
-                                    Modifier.width(
-                                        8.dp
-                                    )
-                                )
-                            }
-
-                            Text(
-                                text =
-                                    if (
-                                        record.automatic
-                                    )
-                                        stringResource(
-                                            R.string.automatic_measurement
-                                        )
-                                    else
-                                        stringResource(
-                                            R.string.manual_measurement
-                                        ),
-
-                                color =
+                            RecordIdentifier(
+                                label =
+                                    stringResource(
+                                        R.string.share_session_id_label
+                                    ),
+                                value =
+                                    record.automaticSessionId
+                                        ?.toString()
+                                        ?: "—",
+                                primaryText =
                                     primaryText,
-
-                                fontSize =
-                                    14.sp
+                                secondaryText =
+                                    secondaryText
                             )
+
+                            Spacer(
+                                Modifier.width(12.dp)
+                            )
+
+                            Column(
+                                modifier =
+                                    Modifier.weight(1f),
+                                verticalArrangement =
+                                    Arrangement.spacedBy(7.dp)
+                            ) {
+                                Text(
+                                    text =
+                                        stringResource(
+                                            R.string.acquisition_type
+                                        ),
+                                    color =
+                                        secondaryText,
+                                    fontSize =
+                                        12.sp,
+                                    fontWeight =
+                                        FontWeight.Bold
+                                )
+
+                                Row(
+                                    verticalAlignment =
+                                        Alignment.CenterVertically
+                                ) {
+                                    AcquisitionTypeBadge(
+                                        automatic =
+                                            record.automatic,
+                                        primaryText =
+                                            primaryText,
+                                        secondaryText =
+                                            secondaryText
+                                    )
+
+                                    Spacer(
+                                        Modifier.width(8.dp)
+                                    )
+
+                                    Text(
+                                        text =
+                                            if (
+                                                record.automatic
+                                            ) {
+                                                stringResource(
+                                                    R.string.automatic_measurement
+                                                )
+                                            } else {
+                                                stringResource(
+                                                    R.string.manual_measurement
+                                                )
+                                            },
+                                        color =
+                                            primaryText,
+                                        fontSize =
+                                            14.sp
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -11958,18 +12090,119 @@ fun SensorGroupContent(
 }
 
 @Composable
-fun AutomaticBadge(
+fun RecordIdentifier(
+    label: String,
+    value: String,
     primaryText: Color,
     secondaryText: Color
 ) {
+    Column(
+        modifier =
+            Modifier.width(104.dp),
+        verticalArrangement =
+            Arrangement.spacedBy(7.dp)
+    ) {
+        Text(
+            text = label,
+            color = secondaryText,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Bold,
+            maxLines = 1
+        )
+
+        Text(
+            text = value,
+            color = primaryText,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Medium,
+            maxLines = 1
+        )
+    }
+}
+
+@Composable
+fun AcquisitionIdBadge(
+    id: Long,
+    primaryText: Color,
+    secondaryText: Color
+) {
+    val idText = id.toString()
+    val description =
+        "${stringResource(R.string.share_measurement_id_label)} $idText"
+
+    val fontSize =
+        when {
+            idText.length >= 7 -> 7.sp
+            idText.length >= 5 -> 9.sp
+            idText.length >= 4 -> 10.sp
+            else -> 12.sp
+        }
+
     Surface(
-        modifier = Modifier.size(28.dp),
+        modifier =
+            Modifier
+                .size(36.dp)
+                .semantics {
+                    contentDescription = description
+                },
+        shape = RoundedCornerShape(50),
+        color = secondaryText.copy(alpha = 0.12f),
+        contentColor = primaryText,
+        border =
+            BorderStroke(
+                width = 1.2.dp,
+                color =
+                    secondaryText.copy(alpha = 0.42f)
+            )
+    ) {
+        Box(
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = idText,
+                fontSize = fontSize,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1
+            )
+        }
+    }
+}
+
+@Composable
+fun AcquisitionTypeBadge(
+    automatic: Boolean,
+    primaryText: Color,
+    secondaryText: Color
+) {
+    val description =
+        stringResource(
+            if (automatic) {
+                R.string.automatic_badge_description
+            } else {
+                R.string.manual_measurement
+            }
+        )
+
+    Surface(
+        modifier =
+            Modifier
+                .size(28.dp)
+                .semantics {
+                    contentDescription = description
+                },
         shape = RoundedCornerShape(50),
         color = secondaryText.copy(alpha = 0.18f)
     ) {
         Box(contentAlignment = Alignment.Center) {
             Text(
-                text = stringResource(R.string.automatic_badge),
+                text =
+                    stringResource(
+                        if (automatic) {
+                            R.string.automatic_badge
+                        } else {
+                            R.string.manual_badge
+                        }
+                    ),
                 color = primaryText,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold

@@ -51,7 +51,8 @@ non sono duplicati nella finestra di collegamento.
 Nell'elenco principale, le acquisizioni della stessa sessione automatica
 sono raccolte sotto un'unica intestazione con data di inizio e quantità. Le
 acquisizioni manuali e i vecchi dati senza identificativo di sessione restano
-visualizzati singolarmente.
+visualizzati singolarmente. La colonna **Tipo** mostra `A` per le acquisizioni
+automatiche e `M` per quelle manuali.
 
 ## Modalità di collegamento
 

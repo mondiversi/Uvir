@@ -16,7 +16,7 @@
   "measurement_id": "Acquisition ID",
   "session_id": "Session ID",
   "date_time": "Date / time",
-  "automatic_short": "A",
+  "acquisition_mode": "Type",
   "note": "Note",
   "select_measurement": "Select an acquisition",
   "no_measurement": "No acquisition",

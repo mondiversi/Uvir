@@ -58,14 +58,14 @@ class UvirDesktopTests(unittest.TestCase):
             ]
         )
 
-    def test_every_automatic_acquisition_has_a_badge(self):
+    def test_every_acquisition_has_a_mode_badge(self):
         self.assertEqual(
             uvir.acquisition_badge({"automatic": 1}),
             "A",
         )
         self.assertEqual(
             uvir.acquisition_badge({"automatic": 0}),
-            "",
+            "M",
         )
 
     def test_legacy_measurements_table_is_renamed(self):

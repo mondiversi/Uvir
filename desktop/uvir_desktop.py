@@ -327,7 +327,7 @@ def is_automatic(row: sqlite3.Row) -> bool:
 
 
 def acquisition_badge(row: sqlite3.Row) -> str:
-    return "A" if is_automatic(row) else ""
+    return "A" if is_automatic(row) else "M"
 
 
 def optional_int(row: sqlite3.Row, key: str) -> int | None:
@@ -1324,19 +1324,19 @@ class App:
 
         self.tree = ttk.Treeview(
             left,
-            columns=("id", "session_id", "time", "auto", "note"),
+            columns=("id", "session_id", "time", "mode", "note"),
             show="headings",
             selectmode="browse"
         )
         self.tree.heading("id", text=tr("measurement_id"))
         self.tree.heading("session_id", text=tr("session_id"))
         self.tree.heading("time", text=tr("date_time"))
-        self.tree.heading("auto", text=tr("automatic_short"))
+        self.tree.heading("mode", text=tr("acquisition_mode"))
         self.tree.heading("note", text=tr("note"))
         self.tree.column("id", width=100, stretch=False, anchor="center")
         self.tree.column("session_id", width=85, stretch=False, anchor="center")
         self.tree.column("time", width=145, stretch=False)
-        self.tree.column("auto", width=35, stretch=False, anchor="center")
+        self.tree.column("mode", width=45, stretch=False, anchor="center")
         self.tree.column("note", width=220)
         self.tree.grid(row=1, column=0, sticky="nsew")
         self.tree.tag_configure(

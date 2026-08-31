@@ -16,23 +16,60 @@ class ExampleUnitTest {
     }
 
     @Test
-    fun automaticMeasurementNumberIsAppendedToDefaultNote() {
+    fun automaticMeasurementKeepsOnlyTheDefaultNote() {
         assertEquals(
-            "Outdoor test #12",
+            "Outdoor test",
             formatAutomaticMeasurementNote(
-                "  Outdoor test  ",
-                12
+                "  Outdoor test  "
             )
         )
     }
 
     @Test
-    fun automaticMeasurementWithoutDefaultNoteContainsOnlyNumber() {
+    fun automaticMeasurementWithoutDefaultNoteStaysBlank() {
         assertEquals(
-            "#1",
+            "",
             formatAutomaticMeasurementNote(
-                "   ",
-                1
+                "   "
+            )
+        )
+    }
+
+    @Test
+    fun listStartIsStoredAsAnEdgeAnchor() {
+        assertEquals(
+            ListEdgeAnchor.START,
+            resolveListEdgeAnchor(
+                firstVisibleItemIndex = 0,
+                firstVisibleItemScrollOffset = 0,
+                totalItemsCount = 12,
+                canScrollForward = true
+            )
+        )
+    }
+
+    @Test
+    fun listEndIsStoredAsAnEdgeAnchor() {
+        assertEquals(
+            ListEdgeAnchor.END,
+            resolveListEdgeAnchor(
+                firstVisibleItemIndex = 8,
+                firstVisibleItemScrollOffset = 14,
+                totalItemsCount = 12,
+                canScrollForward = false
+            )
+        )
+    }
+
+    @Test
+    fun intermediateListPositionRemainsExact() {
+        assertEquals(
+            ListEdgeAnchor.MIDDLE,
+            resolveListEdgeAnchor(
+                firstVisibleItemIndex = 4,
+                firstVisibleItemScrollOffset = 14,
+                totalItemsCount = 12,
+                canScrollForward = true
             )
         )
     }

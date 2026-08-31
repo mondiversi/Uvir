@@ -131,6 +131,7 @@
     <string name="no_note">Nessuna nota</string>
 
     <string name="automatic_badge">A</string>
+    <string name="manual_badge">M</string>
     <string name="automatic_badge_description">Acquisizione automatica</string>
     <string name="acquisition_type">ACQUISIZIONE</string>
     <string name="automatic_measurement">Automatica</string>
