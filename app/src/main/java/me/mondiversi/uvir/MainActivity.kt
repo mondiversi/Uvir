@@ -8763,12 +8763,38 @@ fun HistoryScreen(
 
                                     Text(
                                         text =
+                                            stringResource(
+                                                R.string.session_label
+                                            ),
+                                        color = secondaryText,
+                                        fontSize = 12.sp,
+                                        fontWeight =
+                                            FontWeight.SemiBold
+                                    )
+
+                                    Spacer(
+                                        Modifier.width(6.dp)
+                                    )
+
+                                    SessionIdBadge(
+                                        id = headerSessionId,
+                                        accentColor =
+                                            MaterialTheme
+                                                .colorScheme
+                                                .primary
+                                    )
+
+                                    Spacer(
+                                        Modifier.width(6.dp)
+                                    )
+
+                                    Text(
+                                        text =
                                             pluralStringResource(
-                                                R.plurals.automatic_session_summary,
+                                                R.plurals.automatic_session_details,
                                                 automaticSessionCounts[
                                                     headerSessionId
                                                 ] ?: 1,
-                                                headerSessionId,
                                                 formatAutomaticSessionDateTime(
                                                     automaticSessionStartTimestamps[
                                                         headerSessionId
@@ -8778,6 +8804,8 @@ fun HistoryScreen(
                                                     headerSessionId
                                                 ] ?: 1
                                             ),
+                                        modifier =
+                                            Modifier.weight(1f),
                                         color = secondaryText,
                                         fontSize = 12.sp,
                                         fontWeight =
@@ -8880,15 +8908,6 @@ fun HistoryScreen(
                                     )
                                 }
 
-                                AcquisitionIdBadge(
-                                    id = record.id,
-                                    primaryText = primaryText
-                                )
-
-                                Spacer(
-                                    Modifier.width(9.dp)
-                                )
-
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
                                         text = formatDateTime(record.timestamp),
@@ -8922,7 +8941,16 @@ fun HistoryScreen(
                                     Spacer(Modifier.width(8.dp))
                                 }
 
+                                AcquisitionIdBadge(
+                                    id = record.id,
+                                    primaryText = primaryText
+                                )
+
                                 if (!selectionMode) {
+                                    Spacer(
+                                        Modifier.width(6.dp)
+                                    )
+
                                     Text(
                                         text = "›",
                                         color = secondaryText,
@@ -12116,6 +12144,47 @@ fun RecordIdentifier(
             fontWeight = FontWeight.Medium,
             maxLines = 1
         )
+    }
+}
+
+@Composable
+fun SessionIdBadge(
+    id: Long,
+    accentColor: Color
+) {
+    val idText = id.toString()
+    val description =
+        "${stringResource(R.string.share_session_id_label)} $idText"
+
+    val fontSize =
+        when {
+            idText.length >= 5 -> 6.sp
+            idText.length >= 4 -> 7.sp
+            idText.length >= 3 -> 8.sp
+            else -> 10.sp
+        }
+
+    Surface(
+        modifier =
+            Modifier
+                .size(24.dp)
+                .semantics {
+                    contentDescription = description
+                },
+        shape = RoundedCornerShape(50),
+        color = accentColor.copy(alpha = 0.14f),
+        contentColor = accentColor
+    ) {
+        Box(
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = idText,
+                fontSize = fontSize,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1
+            )
+        }
     }
 }
 
