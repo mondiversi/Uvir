@@ -230,8 +230,8 @@ fun UvirMenuIcon(
         val iconHeight = size.height
         val strokeWidth =
             maxOf(
-                1.5.dp.toPx(),
-                size.minDimension * 0.075f
+                1.6.dp.toPx(),
+                size.minDimension * 0.08f
             )
 
         when (type) {
@@ -288,7 +288,7 @@ fun UvirMenuIcon(
             MenuIconType.AUTOMATIC_ACQUISITION -> {
                 // A clear camera-style "A" for automatic mode.
                 val automaticStrokeWidth =
-                    2.2.dp.toPx()
+                    strokeWidth
 
                 drawLine(
                     color = tint,
@@ -777,8 +777,8 @@ fun CaptureMeasurementIcon(
 
         val strokeWidth =
             maxOf(
-                1.7.dp.toPx(),
-                size.minDimension * 0.072f
+                1.6.dp.toPx(),
+                size.minDimension * 0.08f
             )
 
         val center =
@@ -871,12 +871,12 @@ fun GitHubIcon(
     tint: Color = LocalContentColor.current
 ) {
     Canvas(
-        modifier = modifier.size(22.dp)
+        modifier = modifier.size(20.dp)
     ) {
         val strokeWidth =
             maxOf(
-                1.5.dp.toPx(),
-                size.minDimension * 0.075f
+                1.6.dp.toPx(),
+                size.minDimension * 0.08f
             )
 
         val head = Path().apply {
@@ -1012,7 +1012,7 @@ fun AutomaticSettingIcon(
     ) {
         val strokeWidth =
             maxOf(
-                1.5.dp.toPx(),
+                1.6.dp.toPx(),
                 size.minDimension * 0.08f
             )
 
@@ -1179,8 +1179,8 @@ fun WhatsNewIcon(
     ) {
         val strokeWidth =
             maxOf(
-                1.4.dp.toPx(),
-                size.minDimension * 0.075f
+                1.6.dp.toPx(),
+                size.minDimension * 0.08f
             )
 
         fun sparkle(
@@ -6768,6 +6768,8 @@ if (showParametersDialog) {
                         cardColor,
                     titleColor =
                         primaryText,
+                    chevronColor =
+                        secondaryText,
                     dividerColor =
                         secondaryText.copy(
                             alpha = 0.28f
@@ -6880,6 +6882,7 @@ if (showParametersDialog) {
                     },
                     containerColor = cardColor,
                     titleColor = primaryText,
+                    chevronColor = secondaryText,
                     dividerColor =
                         secondaryText.copy(
                             alpha = 0.28f
@@ -6915,6 +6918,7 @@ if (showParametersDialog) {
                     },
                     containerColor = cardColor,
                     titleColor = primaryText,
+                    chevronColor = secondaryText,
                     dividerColor =
                         secondaryText.copy(
                             alpha = 0.28f
@@ -7063,6 +7067,7 @@ if (showParametersDialog) {
                     },
                     containerColor = cardColor,
                     titleColor = primaryText,
+                    chevronColor = secondaryText,
                     dividerColor =
                         secondaryText.copy(
                             alpha = 0.28f
@@ -7176,6 +7181,7 @@ if (showParametersDialog) {
                     },
                     containerColor = cardColor,
                     titleColor = primaryText,
+                    chevronColor = secondaryText,
                     dividerColor =
                         secondaryText.copy(
                             alpha = 0.28f
@@ -7312,6 +7318,7 @@ if (showParametersDialog) {
                     },
                     containerColor = cardColor,
                     titleColor = primaryText,
+                    chevronColor = secondaryText,
                     dividerColor =
                         secondaryText.copy(
                             alpha = 0.28f
@@ -10184,7 +10191,7 @@ fun ConnectivitySectionIcon(
     ) {
         val strokeWidth =
             maxOf(
-                1.5.dp.toPx(),
+                1.6.dp.toPx(),
                 size.minDimension * 0.08f
             )
 
@@ -10402,7 +10409,10 @@ fun ExpansionChevron(
         modifier = modifier.size(20.dp)
     ) {
         val strokeWidth =
-            2.dp.toPx()
+            maxOf(
+                1.6.dp.toPx(),
+                size.minDimension * 0.08f
+            )
         val left =
             Offset(
                 size.width * 0.27f,
@@ -10454,6 +10464,7 @@ fun SettingsSection(
     containerColor: Color,
     titleColor: Color,
     dividerColor: Color,
+    chevronColor: Color = titleColor,
     titleIcon: ConnectivityIconType? = null,
     titleIconContent: (@Composable () -> Unit)? = null,
     expanded: Boolean = true,
@@ -10551,7 +10562,7 @@ fun SettingsSection(
                 if (onExpandedChange != null) {
                     ExpansionChevron(
                         expanded = expanded,
-                        tint = titleColor,
+                        tint = chevronColor,
                         modifier =
                             Modifier.size(20.dp)
                     )
