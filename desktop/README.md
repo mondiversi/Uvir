@@ -34,7 +34,7 @@ nel file `desktop_settings.json`, nella stessa cartella di
 `uvir_desktop.py`. Il percorso resta quindi portabile su Windows, Linux e
 macOS insieme allo script.
 
-Il file è locale, leggibile e separato dalle misurazioni. I codici vi sono
+Il file è locale, leggibile e separato dalle acquisizioni. I codici vi sono
 salvati in chiaro per poter compilare automaticamente i campi al riavvio; non
 vengono inviati altrove dal programma.
 
@@ -48,9 +48,9 @@ barra principale del programma. I comandi di salvataggio e acquisizione
 automatica si trovano soltanto in **Acquisizione…** dentro la finestra LIVE;
 non sono duplicati nella finestra di collegamento.
 
-Nell'elenco principale, le misurazioni della stessa acquisizione automatica
+Nell'elenco principale, le acquisizioni della stessa sessione automatica
 sono raccolte sotto un'unica intestazione con data di inizio e quantità. Le
-misurazioni manuali e i vecchi dati senza identificativo di sessione restano
+acquisizioni manuali e i vecchi dati senza identificativo di sessione restano
 visualizzati singolarmente.
 
 ## Modalità di collegamento
@@ -103,14 +103,14 @@ Le copie scaricate vengono salvate in:
 ```
 
 Prima di sostituzioni, modifiche o cancellazioni viene creata una copia nella
-cartella `backups`. Il programma può modificare le note, eliminare misurazioni,
+cartella `backups`. Il programma può modificare le note, eliminare acquisizioni,
 svuotare lo storico e sincronizzare sul telefono l'intero database locale. Le
-informazioni che raggruppano le misurazioni della stessa sessione automatica
+informazioni che raggruppano le acquisizioni della stessa sessione automatica
 vengono conservate nelle copie, nelle esportazioni e durante la sincronizzazione.
-L'ID della sessione è riportato subito dopo l'ID della misurazione nei file CSV,
+L'ID della sessione è riportato subito dopo l'ID dell'acquisizione nei file CSV,
 Excel e LibreOffice. Dopo una cancellazione totale, gli ID già utilizzati non
 vengono assegnati nuovamente. Gli ID delle sessioni automatiche sono progressivi
-(`1`, `2`, `3`...) e indipendenti dagli ID delle singole misurazioni.
+(`1`, `2`, `3`...) e indipendenti dagli ID delle singole acquisizioni.
 
 CSV, Excel e LibreOffice usano lo stesso ordine di colonne e gli stessi campi.
 Anche il CSV condiviso dal telefono segue esattamente questo schema; la tabella
@@ -120,8 +120,8 @@ dell’interfaccia. La tabella leggibile viene condivisa come allegato `.txt`,
 anziché come corpo del messaggio, per evitare i limiti di lunghezza di WhatsApp
 e di altre applicazioni.
 
-Il comando **Azzera contatori…** elimina tutte le misurazioni e riporta a zero
-entrambi i contatori; la misurazione e la sessione successive ripartono quindi
+Il comando **Azzera contatori…** elimina tutte le acquisizioni e riporta a zero
+entrambi i contatori; l'acquisizione e la sessione successive ripartono quindi
 dall'ID 1. Prima dell'operazione viene sempre richiesta una conferma e, per i
 database locali, viene creato un backup.
 

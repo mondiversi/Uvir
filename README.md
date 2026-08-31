@@ -1,6 +1,6 @@
 # Uvir
 
-Android app for spectral irradiance measurement and estimated biological effects.
+Android app for spectral irradiance acquisition and estimated biological effects.
 
 ## Status
 
@@ -10,7 +10,7 @@ Uvir is under active development. Real-sensor calibration and hardware validatio
 
 - Package: `me.mondiversi.uvir`
 - Current version: `1.1.0`
-- Spectral measurements, automatic acquisition, saved measurements, sharing and export, and estimated biological effects.
+- Spectral acquisitions, automatic acquisition, saved acquisitions, sharing and export, and estimated biological effects.
 
 ## License
 

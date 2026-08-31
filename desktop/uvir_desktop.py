@@ -11,7 +11,7 @@ Funzioni:
 - mostra sul PC i canali dei sensori e gli effetti stimati in tempo reale;
 - controlla da remoto salvataggio, acquisizione automatica e schermata aperta;
 - scarica una copia SQLite locale anche dalle build Android release;
-- raggruppa nell'elenco le misurazioni appartenenti alla stessa sessione automatica;
+- raggruppa nell'elenco le acquisizioni appartenenti alla stessa sessione automatica;
 - mostra data/ora, nota, dettaglio di irradianza ed effetti biologici stimati;
 - esporta CSV, XLSX e ODS senza librerie Python esterne;
 - modifica note, elimina record e sincronizza il database sul telefono;
@@ -190,7 +190,7 @@ EXPECTED_COLUMNS = {
 }
 
 EXPORT_COLUMNS_IT = [
-    "ID_misurazione", "ID_sessione", "Data/Ora", "Timestamp_ms",
+    "ID_acquisizione", "ID_sessione", "Data/Ora", "Timestamp_ms",
     "Tipo_acquisizione", "Automatico", "Nota", "Progressivo_sessione",
     "UVC_100_280_nm_uW_cm2", "UVB_280_315_nm_uW_cm2", "UVA_315_400_nm_uW_cm2",
     "UV_totale_uW_cm2", "HEV_400_500_nm_uW_cm2", "HEB_400_450_nm_uW_cm2",
@@ -209,7 +209,7 @@ EXPORT_COLUMNS_IT = [
 ]
 
 EXPORT_COLUMNS_EN = [
-    "Measurement_ID", "Session_ID", "Date/Time", "Timestamp_ms",
+    "Acquisition_ID", "Session_ID", "Date/Time", "Timestamp_ms",
     "Acquisition_type", "Automatic", "Note", "Session_sequence",
     "UVC_100_280_nm_uW_cm2", "UVB_280_315_nm_uW_cm2", "UVA_315_400_nm_uW_cm2",
     "Total_UV_uW_cm2", "HEV_400_500_nm_uW_cm2", "HEB_400_450_nm_uW_cm2",
@@ -230,8 +230,8 @@ EXPORT_COLUMNS_EN = [
 LEGEND_ROWS_IT = [
     ["Gruppo", "Canale", "Banda / picco", "Nota"],
     ["Acquisizione", "Automatico", "0 / 1", "0 = manuale; 1 = automatica"],
-    ["Acquisizione", "ID sessione", "Intero univoco", "Identifica le misurazioni appartenenti alla stessa sessione automatica"],
-    ["Acquisizione", "Progressivo sessione", "1, 2, 3…", "Posizione della misurazione nella sessione automatica"],
+    ["Acquisizione", "ID sessione", "Intero univoco", "Identifica le acquisizioni appartenenti alla stessa sessione automatica"],
+    ["Acquisizione", "Progressivo sessione", "1, 2, 3…", "Posizione dell’acquisizione nella sessione automatica"],
     ["Calcolo", "Modello biologico", "Versione", "Versione del modello usato per gli effetti biologici stimati"],
     ["UV", "UVC", "100–280 nm", "Energia fotonica maggiore"],
     ["UV", "UVB", "280–315 nm", ""],
@@ -254,8 +254,8 @@ LEGEND_ROWS_IT = [
 LEGEND_ROWS_EN = [
     ["Group", "Channel", "Band / peak", "Note"],
     ["Acquisition", "Automatic", "0 / 1", "0 = manual; 1 = automatic"],
-    ["Acquisition", "Session ID", "Unique integer", "Identifies measurements belonging to the same automatic session"],
-    ["Acquisition", "Session sequence", "1, 2, 3…", "Measurement position within the automatic session"],
+    ["Acquisition", "Session ID", "Unique integer", "Identifies acquisitions belonging to the same automatic session"],
+    ["Acquisition", "Session sequence", "1, 2, 3…", "Acquisition position within the automatic session"],
     ["Calculation", "Biological model", "Version", "Version of the model used for the estimated biological effects"],
     ["UV", "UVC", "100–280 nm", "Higher photon energy"],
     ["UV", "UVB", "280–315 nm", ""],
@@ -277,7 +277,7 @@ LEGEND_ROWS_EN = [
 
 EXPORT_COLUMNS = EXPORT_COLUMNS_EN
 LEGEND_ROWS = LEGEND_ROWS_EN
-MEASUREMENTS_SHEET = "Measurements"
+MEASUREMENTS_SHEET = "Acquisitions"
 LEGEND_SHEET = "Legend"
 
 
@@ -351,18 +351,6 @@ def automatic_session_id(row: sqlite3.Row) -> int | None:
     if not is_automatic(row):
         return None
     return optional_int(row, "automatic_session_id")
-
-
-def automatic_session_note_name(row: sqlite3.Row) -> str:
-    note = str(row["note"] or "").strip()
-    sequence = optional_int(row, "automatic_sequence")
-    if sequence is not None:
-        suffix = f" #{sequence}"
-        if note.endswith(suffix):
-            note = note[:-len(suffix)].strip()
-        elif note == f"#{sequence}":
-            note = ""
-    return note or tr("automatic_session_fallback")
 
 
 def grouped_measurement_rows(
@@ -2701,11 +2689,6 @@ class App:
                     session_start = int(
                         session_first_record["timestamp"]
                     )
-                    session_note = (
-                        automatic_session_note_name(
-                            session_first_record
-                        )
-                    )
                     self.tree.insert(
                         "",
                         END,
@@ -2717,7 +2700,6 @@ class App:
                             "A",
                             tr(
                                 "automatic_session",
-                                note=session_note,
                                 id=session_id,
                                 count=count,
                             )

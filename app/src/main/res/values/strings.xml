@@ -1,11 +1,11 @@
 <resources>
     <string name="app_name">Uvir</string>
 
-    <string name="save_measurement">Save measurement</string>
+    <string name="save_measurement">Save acquisition</string>
     <string name="add_note_or_leave_empty">Add a note, or leave it empty.</string>
     <string name="optional_note">Optional note</string>
     <string name="note_example">E.g. direct sunlight, window, LED...</string>
-    <string name="measurement_saved">Measurement saved</string>
+    <string name="measurement_saved">Acquisition saved</string>
     <string name="save_error">Save error</string>
     <string name="save">SAVE</string>
     <string name="cancel">CANCEL</string>
@@ -17,32 +17,31 @@
     <string name="auto_status_limited">AUTO • %2$d saved • limit %3$d • every %1$s\nNext in %4$s</string>
     <string name="auto_waiting">AUTO • 0 saved • starts in %1$s</string>
     <string name="automatic_completed_count">%1$d automatic acquisitions saved</string>
-    <string name="automatic_session_unnamed">Session</string>
     <plurals name="automatic_session_summary">
-        <item quantity="one">%1$s #%2$d · %3$s · (%4$d)</item>
-        <item quantity="other">%1$s #%2$d · %3$s · (%4$d)</item>
+        <item quantity="one">AUTO #%1$d · %2$s · (%3$d)</item>
+        <item quantity="other">AUTO #%1$d · %2$s · (%3$d)</item>
     </plurals>
 
-    <string name="saved_measurements">Measurements</string>
-    <string name="select_measurements">Select measurements</string>
+    <string name="saved_measurements">Acquisitions</string>
+    <string name="select_measurements">Select acquisitions</string>
     <string name="exit_selection_mode">Exit selection mode</string>
     <string name="select_all">SELECT ALL</string>
     <string name="deselect_all">DESELECT ALL</string>
-    <string name="share_measurements">Share measurements</string>
-    <string name="share_all_measurements_question">Share all saved measurements?</string>
-    <string name="share_all_measurements_warning">No measurements are selected, so all saved measurements will be shared.</string>
+    <string name="share_measurements">Share acquisitions</string>
+    <string name="share_all_measurements_question">Share all saved acquisitions?</string>
+    <string name="share_all_measurements_warning">No acquisitions are selected, so all saved acquisitions will be shared.</string>
     <string name="choose_share_format">Choose a sharing format</string>
     <string name="share_as_csv">CSV</string>
     <string name="share_as_readable_table">Readable table</string>
     <string name="share_as_both">Both</string>
     <string name="share">SHARE</string>
     <string name="share_all">SHARE ALL</string>
-    <string name="delete_selected_measurements_question">Delete selected measurements?</string>
+    <string name="delete_selected_measurements_question">Delete selected acquisitions?</string>
     <plurals name="delete_selected_measurements_warning">
-        <item quantity="one">%1$d selected measurement will be permanently deleted.</item>
-        <item quantity="other">%1$d selected measurements will be permanently deleted.</item>
+        <item quantity="one">%1$d selected acquisition will be permanently deleted.</item>
+        <item quantity="other">%1$d selected acquisitions will be permanently deleted.</item>
     </plurals>
-    <string name="share_measurement_id_label">Measurement ID</string>
+    <string name="share_measurement_id_label">Acquisition ID</string>
     <string name="share_session_id_label">Session ID</string>
     <string name="share_date_label">Date and time</string>
     <string name="share_acquisition_label">Acquisition</string>
@@ -51,8 +50,8 @@
     <string name="share_note_label">Note</string>
     <string name="share_biological_effects_heading">Estimated biological effects · model %1$s</string>
     <string name="share_biological_effect_values">Weighted irradiance: %1$.3f µW/cm² eq. · spectral relevance: %2$.1f/100</string>
-    <string name="share_subject">Uvir measurements</string>
-    <string name="share_error">Unable to share the measurements.</string>
+    <string name="share_subject">Uvir acquisitions</string>
+    <string name="share_error">Unable to share the acquisitions.</string>
 
     <string name="automatic_acquisition">Automatic acquisition</string>
     <string name="automatic_acquisition_title">Automatic acquisition</string>
@@ -67,7 +66,7 @@
     <string name="limit_acquisitions">Maximum acquisitions</string>
     <string name="number_of_acquisitions">Number of acquisitions</string>
     <string name="default_note">Default note</string>
-    <string name="default_note_hint">Applied to every automatic measurement.</string>
+    <string name="default_note_hint">Applied to every automatic acquisition.</string>
     <string name="start">START</string>
     <string name="stop">STOP</string>
     <string name="stop_with_count">(%1$d) STOP</string>
@@ -82,24 +81,24 @@
     <string name="acquisition_parameters">Settings</string>
     <string name="connectivity">Connectivity</string>
     <string name="settings_section_acquisition">Sampling</string>
-    <string name="samples_per_measurement">Samples per measurement</string>
+    <string name="samples_per_measurement">Samples per acquisition</string>
     <string name="sample_spacing_ms">Time between samples (ms)</string>
     <string name="discard_extremes">Discard highest and lowest sample</string>
     <string name="parameters_hint">Range: 1–21 samples and 20–5000 ms. Extreme-value trimming is applied only when at least 3 samples are available.</string>
     <string name="invalid_acquisition_parameters">Use 1–21 samples and a spacing between 20 and 5000 ms.</string>
     <string name="parameters_saved">Acquisition parameters saved</string>
     <string name="reset_counters_title">Reset counters</string>
-    <string name="reset_counters_description">Restarts measurement IDs and automatic session IDs from 1.</string>
-    <string name="reset_counters_data_warning">This operation also permanently deletes all saved measurements.</string>
+    <string name="reset_counters_description">Restarts acquisition IDs and automatic session IDs from 1.</string>
+    <string name="reset_counters_data_warning">This operation also permanently deletes all saved acquisitions.</string>
     <string name="reset_counters_action">RESET COUNTERS</string>
     <string name="reset_counters_confirmation_title">Reset all counters?</string>
-    <string name="reset_counters_confirmation_message">All saved measurements will be permanently deleted. The next measurement and automatic session will start from ID 1. To confirm, press and hold RESET COUNTERS continuously for 2 seconds.</string>
+    <string name="reset_counters_confirmation_message">All saved acquisitions will be permanently deleted. The next acquisition and automatic session will start from ID 1. To confirm, press and hold RESET COUNTERS continuously for 2 seconds.</string>
     <string name="reset_counters_stop_auto">Stop automatic acquisition before resetting the counters.</string>
     <string name="counters_reset_complete">Counters reset</string>
 
     <string name="irradiance_view">Irradiance</string>
     <string name="biological_effects_view">Estimated biological effects</string>
-    <string name="biological_effects_disclaimer">Experimental broad-band estimates derived from the measured channels. They are not medical, diagnostic, or safety assessments. The model will be refined after real-sensor calibration.</string>
+    <string name="biological_effects_disclaimer">Experimental broad-band estimates derived from the acquired channels. They are not medical, diagnostic, or safety assessments. The model will be refined after real-sensor calibration.</string>
     <string name="dna_uv_proxy">UV DNA effect/damage</string>
     <string name="dna_uv_proxy_description">Exploratory relative index weighted toward shorter UV bands.</string>
     <string name="uva_photoaging_proxy">UVA photoaging</string>
@@ -111,28 +110,28 @@
     <string name="weighted_signal_value">%1$.2f µW/cm² eq.</string>
     <string name="biological_compact_summary">%1$.2f µW/cm² eq. · %2$.0f/100</string>
     <string name="relative_spectral_index">Spectral relevance</string>
-    <string name="relative_spectral_index_explanation">0–100 shows how strongly the measured spectrum is concentrated in wavelengths weighted by this estimate. It describes spectral composition, not total intensity. It is not a percentage of damage and not a safety threshold.</string>
+    <string name="relative_spectral_index_explanation">0–100 shows how strongly the acquired spectrum is concentrated in wavelengths weighted by this estimate. It describes spectral composition, not total intensity. It is not a percentage of damage and not a safety threshold.</string>
 
-    <string name="delete_all_measurements_question">Delete all saved measurements?</string>
-    <string name="delete_all_measurements_warning">All saved measurements will be permanently deleted. To confirm, press and hold DELETE ALL continuously for 2 seconds.</string>
+    <string name="delete_all_measurements_question">Delete all saved acquisitions?</string>
+    <string name="delete_all_measurements_warning">All saved acquisitions will be permanently deleted. To confirm, press and hold DELETE ALL continuously for 2 seconds.</string>
     <string name="delete_all">DELETE ALL</string>
     <plurals name="measurement_count_since">
         <item quantity="one">%1$d saved · since %2$s</item>
         <item quantity="other">%1$d saved · since %2$s</item>
     </plurals>
-    <string name="no_saved_measurements">No saved measurements</string>
+    <string name="no_saved_measurements">No saved acquisitions</string>
 
-    <string name="delete_measurement_question">Delete this measurement?</string>
-    <string name="delete_measurement_warning">This measurement will be permanently deleted.</string>
-    <string name="measurement_deleted">Measurement deleted</string>
-    <string name="measurements_deleted">Measurements deleted</string>
+    <string name="delete_measurement_question">Delete this acquisition?</string>
+    <string name="delete_measurement_warning">This acquisition will be permanently deleted.</string>
+    <string name="measurement_deleted">Acquisition deleted</string>
+    <string name="measurements_deleted">Acquisitions deleted</string>
     <string name="delete">DELETE</string>
-    <string name="saved_measurement">SAVED MEASUREMENT</string>
+    <string name="saved_measurement">SAVED ACQUISITION</string>
     <string name="note">NOTE</string>
     <string name="no_note">No note</string>
 
     <string name="automatic_badge">A</string>
-    <string name="automatic_badge_description">Automatic measurement</string>
+    <string name="automatic_badge_description">Automatic acquisition</string>
     <string name="acquisition_type">ACQUISITION</string>
     <string name="automatic_measurement">Automatic</string>
     <string name="manual_measurement">Manual</string>
@@ -158,13 +157,13 @@
     <string name="about_whats_new_title">What’s new in version %1$s</string>
     <string name="about_whats_new_connectivity">Connectivity is now separate from Settings, with dedicated USB, Bluetooth, Wi-Fi, and mobile network sections.</string>
     <string name="about_whats_new_connections">Clearer addresses and connection codes, with primary mobile Internet network detection.</string>
-    <string name="about_whats_new_measurements">Improved measurement management with multiple selection, sharing, export, and automatic series grouped by session.</string>
+    <string name="about_whats_new_measurements">Improved acquisition management with multiple selection, sharing, export, and automatic series grouped by session.</string>
     <string name="about_whats_new_interface">Automatic acquisition and the interface have been refined for greater clarity and stability.</string>
     <string name="about_whats_new_github">The GitHub repository and update links are now configured.</string>
-    <string name="about_description">Spectral measurement app for ultraviolet, visible, FAR-RED and NIR radiation.</string>
+    <string name="about_description">Spectral acquisition app for ultraviolet, visible, FAR-RED and NIR radiation.</string>
     <string name="about_spectral_ranges">Spectral ranges: UV • VISIBLE • FAR-RED • NIR</string>
     <string name="about_sensors">Supported sensors: AS7331 UV • AS7343 multispectral</string>
-    <string name="about_derived_values">HEV, HEB and estimated biological effects are derived values calculated from the measured spectral data.</string>
+    <string name="about_derived_values">HEV, HEB and estimated biological effects are derived values calculated from the acquired spectral data.</string>
     <string name="biological_model_version">Biological model: %1$s</string>
     <string name="about_copyright">© 2026 Uvir</string>
     <string name="github_repository_title">GitHub repository</string>

@@ -866,7 +866,7 @@ fun CaptureMeasurementIcon(
 }
 
 @Composable
-fun RepositoryIcon(
+fun GitHubIcon(
     modifier: Modifier = Modifier,
     tint: Color = LocalContentColor.current
 ) {
@@ -879,69 +879,344 @@ fun RepositoryIcon(
                 size.minDimension * 0.075f
             )
 
-        drawRoundRect(
-            color = tint,
-            topLeft =
-                Offset(
-                    size.width * 0.14f,
-                    size.height * 0.10f
-                ),
-            size =
-                Size(
-                    size.width * 0.72f,
-                    size.height * 0.80f
-                ),
-            cornerRadius =
-                CornerRadius(
-                    size.width * 0.08f,
-                    size.width * 0.08f
-                ),
-            style =
-                Stroke(width = strokeWidth)
+        val head = Path().apply {
+            moveTo(
+                size.width * 0.20f,
+                size.height * 0.38f
+            )
+            lineTo(
+                size.width * 0.24f,
+                size.height * 0.14f
+            )
+            lineTo(
+                size.width * 0.39f,
+                size.height * 0.25f
+            )
+            cubicTo(
+                size.width * 0.46f,
+                size.height * 0.22f,
+                size.width * 0.54f,
+                size.height * 0.22f,
+                size.width * 0.61f,
+                size.height * 0.25f
+            )
+            lineTo(
+                size.width * 0.76f,
+                size.height * 0.14f
+            )
+            lineTo(
+                size.width * 0.80f,
+                size.height * 0.38f
+            )
+            cubicTo(
+                size.width * 0.88f,
+                size.height * 0.46f,
+                size.width * 0.88f,
+                size.height * 0.61f,
+                size.width * 0.82f,
+                size.height * 0.70f
+            )
+            cubicTo(
+                size.width * 0.77f,
+                size.height * 0.79f,
+                size.width * 0.67f,
+                size.height * 0.83f,
+                size.width * 0.58f,
+                size.height * 0.84f
+            )
+            lineTo(
+                size.width * 0.58f,
+                size.height * 0.94f
+            )
+            lineTo(
+                size.width * 0.42f,
+                size.height * 0.94f
+            )
+            lineTo(
+                size.width * 0.42f,
+                size.height * 0.84f
+            )
+            cubicTo(
+                size.width * 0.30f,
+                size.height * 0.82f,
+                size.width * 0.20f,
+                size.height * 0.77f,
+                size.width * 0.16f,
+                size.height * 0.67f
+            )
+            cubicTo(
+                size.width * 0.11f,
+                size.height * 0.56f,
+                size.width * 0.13f,
+                size.height * 0.45f,
+                size.width * 0.20f,
+                size.height * 0.38f
+            )
+            close()
+        }
+
+        drawPath(
+            path = head,
+            color = tint
         )
 
-        val upper =
-            Offset(
-                size.width * 0.38f,
-                size.height * 0.34f
+        val tail = Path().apply {
+            moveTo(
+                size.width * 0.43f,
+                size.height * 0.87f
             )
-        val lower =
-            Offset(
-                size.width * 0.38f,
-                size.height * 0.68f
+            cubicTo(
+                size.width * 0.30f,
+                size.height * 0.89f,
+                size.width * 0.32f,
+                size.height * 0.70f,
+                size.width * 0.17f,
+                size.height * 0.71f
             )
-        val branch =
-            Offset(
-                size.width * 0.66f,
-                size.height * 0.50f
-            )
-
-        drawLine(
-            color = tint,
-            start = upper,
-            end = lower,
-            strokeWidth = strokeWidth,
-            cap = StrokeCap.Round
-        )
-        drawLine(
-            color = tint,
-            start = upper,
-            end = branch,
-            strokeWidth = strokeWidth,
-            cap = StrokeCap.Round
-        )
-
-        listOf(
-            upper,
-            lower,
-            branch
-        ).forEach { center ->
-            drawCircle(
-                color = tint,
-                radius = strokeWidth * 1.35f,
-                center = center
+            cubicTo(
+                size.width * 0.10f,
+                size.height * 0.71f,
+                size.width * 0.08f,
+                size.height * 0.66f,
+                size.width * 0.06f,
+                size.height * 0.61f
             )
         }
+
+        drawPath(
+            path = tail,
+            color = tint,
+            style = Stroke(
+                width = strokeWidth,
+                cap = StrokeCap.Round
+            )
+        )
+    }
+}
+
+enum class AutomaticSettingIconType {
+    INTERVAL,
+    START_DELAY,
+    DURATION,
+    MAXIMUM
+}
+
+@Composable
+fun AutomaticSettingIcon(
+    type: AutomaticSettingIconType,
+    modifier: Modifier = Modifier,
+    tint: Color = LocalContentColor.current
+) {
+    Canvas(
+        modifier = modifier.size(20.dp)
+    ) {
+        val strokeWidth =
+            maxOf(
+                1.5.dp.toPx(),
+                size.minDimension * 0.08f
+            )
+
+        when (type) {
+            AutomaticSettingIconType.INTERVAL -> {
+                val center =
+                    Offset(
+                        size.width * 0.50f,
+                        size.height * 0.53f
+                    )
+
+                drawCircle(
+                    color = tint,
+                    radius = size.minDimension * 0.34f,
+                    center = center,
+                    style = Stroke(width = strokeWidth)
+                )
+                drawLine(
+                    color = tint,
+                    start = center,
+                    end = Offset(
+                        size.width * 0.50f,
+                        size.height * 0.31f
+                    ),
+                    strokeWidth = strokeWidth,
+                    cap = StrokeCap.Round
+                )
+                drawLine(
+                    color = tint,
+                    start = center,
+                    end = Offset(
+                        size.width * 0.68f,
+                        size.height * 0.62f
+                    ),
+                    strokeWidth = strokeWidth,
+                    cap = StrokeCap.Round
+                )
+            }
+
+            AutomaticSettingIconType.START_DELAY -> {
+                val play = Path().apply {
+                    moveTo(
+                        size.width * 0.31f,
+                        size.height * 0.22f
+                    )
+                    lineTo(
+                        size.width * 0.31f,
+                        size.height * 0.78f
+                    )
+                    lineTo(
+                        size.width * 0.75f,
+                        size.height * 0.50f
+                    )
+                    close()
+                }
+                drawPath(
+                    path = play,
+                    color = tint,
+                    style = Stroke(
+                        width = strokeWidth,
+                        join = androidx.compose.ui.graphics.StrokeJoin.Round
+                    )
+                )
+            }
+
+            AutomaticSettingIconType.DURATION -> {
+                drawLine(
+                    color = tint,
+                    start = Offset(
+                        size.width * 0.25f,
+                        size.height * 0.16f
+                    ),
+                    end = Offset(
+                        size.width * 0.75f,
+                        size.height * 0.16f
+                    ),
+                    strokeWidth = strokeWidth,
+                    cap = StrokeCap.Round
+                )
+                drawLine(
+                    color = tint,
+                    start = Offset(
+                        size.width * 0.25f,
+                        size.height * 0.84f
+                    ),
+                    end = Offset(
+                        size.width * 0.75f,
+                        size.height * 0.84f
+                    ),
+                    strokeWidth = strokeWidth,
+                    cap = StrokeCap.Round
+                )
+                drawLine(
+                    color = tint,
+                    start = Offset(
+                        size.width * 0.31f,
+                        size.height * 0.23f
+                    ),
+                    end = Offset(
+                        size.width * 0.69f,
+                        size.height * 0.77f
+                    ),
+                    strokeWidth = strokeWidth,
+                    cap = StrokeCap.Round
+                )
+                drawLine(
+                    color = tint,
+                    start = Offset(
+                        size.width * 0.69f,
+                        size.height * 0.23f
+                    ),
+                    end = Offset(
+                        size.width * 0.31f,
+                        size.height * 0.77f
+                    ),
+                    strokeWidth = strokeWidth,
+                    cap = StrokeCap.Round
+                )
+            }
+
+            AutomaticSettingIconType.MAXIMUM -> {
+                listOf(0.38f, 0.62f).forEach { x ->
+                    drawLine(
+                        color = tint,
+                        start = Offset(
+                            size.width * x,
+                            size.height * 0.18f
+                        ),
+                        end = Offset(
+                            size.width * x,
+                            size.height * 0.82f
+                        ),
+                        strokeWidth = strokeWidth,
+                        cap = StrokeCap.Round
+                    )
+                }
+                listOf(0.39f, 0.63f).forEach { y ->
+                    drawLine(
+                        color = tint,
+                        start = Offset(
+                            size.width * 0.20f,
+                            size.height * y
+                        ),
+                        end = Offset(
+                            size.width * 0.80f,
+                            size.height * y
+                        ),
+                        strokeWidth = strokeWidth,
+                        cap = StrokeCap.Round
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun WhatsNewIcon(
+    modifier: Modifier = Modifier,
+    tint: Color = LocalContentColor.current
+) {
+    Canvas(
+        modifier = modifier.size(20.dp)
+    ) {
+        val strokeWidth =
+            maxOf(
+                1.4.dp.toPx(),
+                size.minDimension * 0.075f
+            )
+
+        fun sparkle(
+            center: Offset,
+            radius: Float
+        ) {
+            drawLine(
+                color = tint,
+                start = Offset(center.x, center.y - radius),
+                end = Offset(center.x, center.y + radius),
+                strokeWidth = strokeWidth,
+                cap = StrokeCap.Round
+            )
+            drawLine(
+                color = tint,
+                start = Offset(center.x - radius, center.y),
+                end = Offset(center.x + radius, center.y),
+                strokeWidth = strokeWidth,
+                cap = StrokeCap.Round
+            )
+        }
+
+        sparkle(
+            center = Offset(
+                size.width * 0.42f,
+                size.height * 0.42f
+            ),
+            radius = size.minDimension * 0.27f
+        )
+        sparkle(
+            center = Offset(
+                size.width * 0.73f,
+                size.height * 0.72f
+            ),
+            radius = size.minDimension * 0.12f
+        )
     }
 }
 
@@ -1551,33 +1826,6 @@ internal fun formatAutomaticMeasurementNote(
         "#$acquisitionNumber"
     } else {
         "$trimmedNote #$acquisitionNumber"
-    }
-}
-
-internal fun automaticSessionNoteName(
-    measurementNote: String,
-    automaticSequence: Int?
-): String {
-    val trimmedNote = measurementNote.trim()
-    val suffix =
-        automaticSequence
-            ?.let { " #$it" }
-            .orEmpty()
-
-    return if (
-        suffix.isNotEmpty() &&
-        trimmedNote.endsWith(suffix)
-    ) {
-        trimmedNote
-            .removeSuffix(suffix)
-            .trim()
-    } else if (
-        automaticSequence != null &&
-        trimmedNote == "#${automaticSequence}"
-    ) {
-        ""
-    } else {
-        trimmedNote
     }
 }
 
@@ -2696,7 +2944,7 @@ private fun csvNumber(value: Double): String =
 
 internal val MEASUREMENT_EXPORT_COLUMNS_IT =
     listOf(
-        "ID_misurazione",
+        "ID_acquisizione",
         "ID_sessione",
         "Data/Ora",
         "Timestamp_ms",
@@ -2731,7 +2979,7 @@ internal val MEASUREMENT_EXPORT_COLUMNS_IT =
 
 internal val MEASUREMENT_EXPORT_COLUMNS_EN =
     listOf(
-        "Measurement_ID",
+        "Acquisition_ID",
         "Session_ID",
         "Date/Time",
         "Timestamp_ms",
@@ -3045,9 +3293,9 @@ private fun shareMeasurements(
 
     val sharedBaseName =
         if (records.size == 1) {
-            "uvir_measurement_${records.first().id}"
+            "uvir_acquisition_${records.first().id}"
         } else {
-            "uvir_measurements_${System.currentTimeMillis()}"
+            "uvir_acquisitions_${System.currentTimeMillis()}"
         }
 
     fun writeSharedFile(
@@ -4159,7 +4407,7 @@ fun UvirApp(
                         "save_measurement" -> {
                             if (!liveReady) {
                                 throw IllegalStateException(
-                                    "Misurazione non ancora pronta."
+                                    "Acquisizione non ancora pronta."
                                 )
                             }
 
@@ -4408,7 +4656,7 @@ fun UvirApp(
                                 100_000
                             ) {
                                 throw IllegalArgumentException(
-                                    "Troppe misurazioni."
+                                    "Troppe acquisizioni."
                                 )
                             }
 
@@ -4481,7 +4729,7 @@ fun UvirApp(
                                         database.readRecord(id) == null
                                     ) {
                                         throw IllegalArgumentException(
-                                            "Misurazione non trovata."
+                                            "Acquisizione non trovata."
                                         )
                                     }
 
@@ -5617,15 +5865,32 @@ fun LiveScreen(
                             contentColor = primaryText
                         ) {
 
-                            Text(
-                                text =
-                                    stringResource(
-                                        R.string.interval
-                                    ),
+                            Row(
+                                verticalAlignment =
+                                    Alignment.CenterVertically
+                            ) {
+                                AutomaticSettingIcon(
+                                    type =
+                                        AutomaticSettingIconType.INTERVAL,
+                                    tint =
+                                        MaterialTheme
+                                            .colorScheme
+                                            .primary
+                                )
 
-                                fontWeight =
-                                    FontWeight.Bold
-                            )
+                                Spacer(
+                                    Modifier.width(8.dp)
+                                )
+
+                                Text(
+                                    text =
+                                        stringResource(
+                                            R.string.interval
+                                        ),
+                                    fontWeight =
+                                        FontWeight.Bold
+                                )
+                            }
 
                             HorizontalDivider(
                                 color =
@@ -5709,6 +5974,8 @@ fun LiveScreen(
                                     stringResource(
                                         R.string.scheduled_start
                                     ),
+                                leadingIcon =
+                                    AutomaticSettingIconType.START_DELAY,
                                 emphasized = useStartDelay,
                                 compact = true
                             )
@@ -5760,6 +6027,8 @@ fun LiveScreen(
                                     stringResource(
                                         R.string.scheduled_end
                                     ),
+                                leadingIcon =
+                                    AutomaticSettingIconType.DURATION,
                                 emphasized = useDuration,
                                 compact = true
                             )
@@ -5811,6 +6080,8 @@ fun LiveScreen(
                                     stringResource(
                                         R.string.limit_acquisitions
                                     ),
+                                leadingIcon =
+                                    AutomaticSettingIconType.MAXIMUM,
                                 emphasized = limitEnabled,
                                 compact = true
                             )
@@ -6268,7 +6539,15 @@ if (showVersionInfoDialog) {
                     dividerColor =
                         secondaryText.copy(
                             alpha = 0.28f
+                        ),
+                    titleIconContent = {
+                        WhatsNewIcon(
+                            tint =
+                                MaterialTheme
+                                    .colorScheme
+                                    .primary
                         )
+                    }
                 ) {
                     listOf(
                         stringResource(
@@ -6305,7 +6584,15 @@ if (showVersionInfoDialog) {
                     dividerColor =
                         secondaryText.copy(
                             alpha = 0.28f
+                        ),
+                    titleIconContent = {
+                        GitHubIcon(
+                            tint =
+                                MaterialTheme
+                                    .colorScheme
+                                    .primary
                         )
+                    }
                 ) {
                     Text(
                         text =
@@ -6341,7 +6628,7 @@ if (showVersionInfoDialog) {
                             modifier =
                                 Modifier.fillMaxWidth()
                         ) {
-                            RepositoryIcon(
+                            GitHubIcon(
                                 modifier =
                                     Modifier.size(20.dp)
                             )
@@ -8452,16 +8739,6 @@ fun HistoryScreen(
                                 )
                         ) {
                             if (headerSessionId != null) {
-                                val sessionNoteName =
-                                    automaticSessionNoteName(
-                                        record.note,
-                                        record.automaticSequence
-                                    ).ifBlank {
-                                        stringResource(
-                                            R.string.automatic_session_unnamed
-                                        )
-                                    }
-
                                 Row(
                                     modifier =
                                         Modifier
@@ -8499,7 +8776,6 @@ fun HistoryScreen(
                                                 automaticSessionCounts[
                                                     headerSessionId
                                                 ] ?: 1,
-                                                sessionNoteName,
                                                 headerSessionId,
                                                 formatAutomaticSessionDateTime(
                                                     automaticSessionStartTimestamps[
@@ -10273,6 +10549,7 @@ fun SettingsSection(
     titleColor: Color,
     dividerColor: Color,
     titleIcon: ConnectivityIconType? = null,
+    titleIconContent: (@Composable () -> Unit)? = null,
     expanded: Boolean = true,
     onExpandedChange: ((Boolean) -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit
@@ -10339,7 +10616,13 @@ fun SettingsSection(
                         ),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                titleIcon?.let { icon ->
+                titleIconContent?.let { iconContent ->
+                    iconContent()
+
+                    Spacer(
+                        Modifier.width(8.dp)
+                    )
+                } ?: titleIcon?.let { icon ->
                     ConnectivitySectionIcon(
                         type = icon,
                         modifier = Modifier.size(20.dp),
@@ -10413,6 +10696,7 @@ fun CheckSettingRow(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
     title: String,
+    leadingIcon: AutomaticSettingIconType? = null,
     emphasized: Boolean = false,
     compact: Boolean = false
 ) {
@@ -10430,6 +10714,18 @@ fun CheckSettingRow(
         verticalAlignment =
             Alignment.CenterVertically
     ) {
+
+        leadingIcon?.let { icon ->
+            AutomaticSettingIcon(
+                type = icon,
+                modifier = Modifier.size(20.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+
+            Spacer(
+                Modifier.width(8.dp)
+            )
+        }
 
         if (compact) {
 

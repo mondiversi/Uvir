@@ -58,25 +58,17 @@ class UvirDesktopTests(unittest.TestCase):
             ]
         )
 
-    def test_automatic_session_uses_note_without_sequence(self):
-        self.assertEqual(
-            uvir.automatic_session_note_name(
-                {
-                    "note": "Outdoor test #12",
-                    "automatic_sequence": 12,
-                }
-            ),
-            "Outdoor test",
-        )
-        self.assertEqual(
-            uvir.automatic_session_note_name(
-                {
-                    "note": "#1",
-                    "automatic_sequence": 1,
-                }
-            ),
-            uvir.tr("automatic_session_fallback"),
-        )
+    def test_automatic_session_uses_compact_auto_label(self):
+        for language in ("it", "en"):
+            self.assertEqual(
+                uvir.tr(
+                    "automatic_session",
+                    language=language,
+                    id=2,
+                    count=3,
+                ),
+                "AUTO #2 · (3)",
+            )
 
     def test_remote_records_create_compatible_database(self):
         sample = {
@@ -145,7 +137,7 @@ class UvirDesktopTests(unittest.TestCase):
             )
             self.assertEqual(
                 uvir.EXPORT_COLUMNS[:3],
-                ["Measurement_ID", "Session_ID", "Date/Time"]
+                ["Acquisition_ID", "Session_ID", "Date/Time"]
             )
             self.assertEqual(
                 uvir.export_row(saved)[:2],
@@ -427,7 +419,7 @@ class UvirDesktopTests(unittest.TestCase):
         )
         self.assertEqual(
             (uvir.MEASUREMENTS_SHEET, uvir.LEGEND_SHEET),
-            ("Measurements", "Legend")
+            ("Acquisitions", "Legend")
         )
         self.assertEqual(
             len(uvir.LEGEND_ROWS_IT),

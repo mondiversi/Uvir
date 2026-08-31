@@ -38,24 +38,6 @@ class ExampleUnitTest {
     }
 
     @Test
-    fun automaticSessionNameRemovesMeasurementSequence() {
-        assertEquals(
-            "Outdoor test",
-            automaticSessionNoteName(
-                "Outdoor test #12",
-                12
-            )
-        )
-        assertEquals(
-            "",
-            automaticSessionNoteName(
-                "#1",
-                1
-            )
-        )
-    }
-
-    @Test
     fun measurementExportSchemasStayAligned() {
         assertEquals(
             "en",
@@ -82,6 +64,14 @@ class ExampleUnitTest {
         assertEquals(
             "Biological_model",
             MEASUREMENT_EXPORT_COLUMNS_EN[24]
+        )
+        assertEquals(
+            "ID_acquisizione",
+            MEASUREMENT_EXPORT_COLUMNS_IT.first()
+        )
+        assertEquals(
+            "Acquisition_ID",
+            MEASUREMENT_EXPORT_COLUMNS_EN.first()
         )
     }
 }

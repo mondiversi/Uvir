@@ -1,11 +1,11 @@
 <resources>
     <string name="app_name">Uvir</string>
 
-    <string name="save_measurement">Salva misurazione</string>
+    <string name="save_measurement">Salva acquisizione</string>
     <string name="add_note_or_leave_empty">Aggiungi una nota, oppure lasciala vuota.</string>
     <string name="optional_note">Nota facoltativa</string>
     <string name="note_example">Es. sole diretto, finestra, LED...</string>
-    <string name="measurement_saved">Misura salvata</string>
+    <string name="measurement_saved">Acquisizione salvata</string>
     <string name="save_error">Errore nel salvataggio</string>
     <string name="save">SALVA</string>
     <string name="cancel">ANNULLA</string>
@@ -17,32 +17,31 @@
     <string name="auto_status_limited">AUTO • %2$d salvate • limite %3$d • ogni %1$s\nProssima tra %4$s</string>
     <string name="auto_waiting">AUTO • 0 salvate • parte tra %1$s</string>
     <string name="automatic_completed_count">%1$d acquisizioni automatiche salvate</string>
-    <string name="automatic_session_unnamed">Sessione</string>
     <plurals name="automatic_session_summary">
-        <item quantity="one">%1$s #%2$d · %3$s · (%4$d)</item>
-        <item quantity="other">%1$s #%2$d · %3$s · (%4$d)</item>
+        <item quantity="one">AUTO #%1$d · %2$s · (%3$d)</item>
+        <item quantity="other">AUTO #%1$d · %2$s · (%3$d)</item>
     </plurals>
 
-    <string name="saved_measurements">Misurazioni</string>
-    <string name="select_measurements">Seleziona misurazioni</string>
+    <string name="saved_measurements">Acquisizioni</string>
+    <string name="select_measurements">Seleziona acquisizioni</string>
     <string name="exit_selection_mode">Esci dalla selezione</string>
     <string name="select_all">SELEZIONA TUTTO</string>
     <string name="deselect_all">DESELEZIONA TUTTO</string>
-    <string name="share_measurements">Condividi misurazioni</string>
-    <string name="share_all_measurements_question">Condividere tutte le misurazioni salvate?</string>
-    <string name="share_all_measurements_warning">Non è selezionata alcuna misurazione, quindi verranno condivise tutte quelle salvate.</string>
+    <string name="share_measurements">Condividi acquisizioni</string>
+    <string name="share_all_measurements_question">Condividere tutte le acquisizioni salvate?</string>
+    <string name="share_all_measurements_warning">Non è selezionata alcuna acquisizione, quindi verranno condivise tutte quelle salvate.</string>
     <string name="choose_share_format">Scegli il formato di condivisione</string>
     <string name="share_as_csv">CSV</string>
     <string name="share_as_readable_table">Tabella leggibile</string>
     <string name="share_as_both">Entrambi</string>
     <string name="share">CONDIVIDI</string>
     <string name="share_all">CONDIVIDI TUTTE</string>
-    <string name="delete_selected_measurements_question">Eliminare le misurazioni selezionate?</string>
+    <string name="delete_selected_measurements_question">Eliminare le acquisizioni selezionate?</string>
     <plurals name="delete_selected_measurements_warning">
-        <item quantity="one">La misurazione selezionata verrà cancellata definitivamente.</item>
-        <item quantity="other">Le %1$d misurazioni selezionate verranno cancellate definitivamente.</item>
+        <item quantity="one">L’acquisizione selezionata verrà cancellata definitivamente.</item>
+        <item quantity="other">Le %1$d acquisizioni selezionate verranno cancellate definitivamente.</item>
     </plurals>
-    <string name="share_measurement_id_label">ID misurazione</string>
+    <string name="share_measurement_id_label">ID acquisizione</string>
     <string name="share_session_id_label">ID sessione</string>
     <string name="share_date_label">Data e ora</string>
     <string name="share_acquisition_label">Acquisizione</string>
@@ -51,8 +50,8 @@
     <string name="share_note_label">Nota</string>
     <string name="share_biological_effects_heading">Effetti biologici stimati · modello %1$s</string>
     <string name="share_biological_effect_values">Irradianza pesata: %1$.3f µW/cm² eq. · rilevanza spettrale: %2$.1f/100</string>
-    <string name="share_subject">Misurazioni Uvir</string>
-    <string name="share_error">Impossibile condividere le misurazioni.</string>
+    <string name="share_subject">Acquisizioni Uvir</string>
+    <string name="share_error">Impossibile condividere le acquisizioni.</string>
 
     <string name="automatic_acquisition">Acquisizione automatica</string>
     <string name="automatic_acquisition_title">Acquisizione automatica</string>
@@ -67,7 +66,7 @@
     <string name="limit_acquisitions">Acquisizioni massime</string>
     <string name="number_of_acquisitions">Numero di acquisizioni</string>
     <string name="default_note">Nota predefinita</string>
-    <string name="default_note_hint">Applicata a ogni misura automatica.</string>
+    <string name="default_note_hint">Applicata a ogni acquisizione automatica.</string>
     <string name="start">AVVIA</string>
     <string name="stop">FERMA</string>
     <string name="stop_with_count">(%1$d) FERMA</string>
@@ -82,24 +81,24 @@
     <string name="acquisition_parameters">Impostazioni</string>
     <string name="connectivity">Connettività</string>
     <string name="settings_section_acquisition">Campionamento</string>
-    <string name="samples_per_measurement">Campioni per misura</string>
+    <string name="samples_per_measurement">Campioni per acquisizione</string>
     <string name="sample_spacing_ms">Tempo tra i campioni (ms)</string>
     <string name="discard_extremes">Scarta il campione più alto e più basso</string>
     <string name="parameters_hint">Intervallo: 1–21 campioni e 20–5000 ms. Lo scarto degli estremi viene applicato solo con almeno 3 campioni.</string>
     <string name="invalid_acquisition_parameters">Usa 1–21 campioni e un intervallo tra 20 e 5000 ms.</string>
     <string name="parameters_saved">Parametri di acquisizione salvati</string>
     <string name="reset_counters_title">Azzera i contatori</string>
-    <string name="reset_counters_description">Fa ripartire da 1 gli ID delle misurazioni e delle sessioni automatiche.</string>
-    <string name="reset_counters_data_warning">Questa operazione elimina definitivamente anche tutte le misurazioni salvate.</string>
+    <string name="reset_counters_description">Fa ripartire da 1 gli ID delle acquisizioni e delle sessioni automatiche.</string>
+    <string name="reset_counters_data_warning">Questa operazione elimina definitivamente anche tutte le acquisizioni salvate.</string>
     <string name="reset_counters_action">AZZERA CONTATORI</string>
     <string name="reset_counters_confirmation_title">Azzerare tutti i contatori?</string>
-    <string name="reset_counters_confirmation_message">Tutte le misurazioni salvate verranno eliminate definitivamente. La prossima misurazione e la prossima sessione automatica partiranno dall’ID 1. Per confermare, tieni premuto AZZERA CONTATORI senza rilasciare per 2 secondi.</string>
+    <string name="reset_counters_confirmation_message">Tutte le acquisizioni salvate verranno eliminate definitivamente. La prossima acquisizione e la prossima sessione automatica partiranno dall’ID 1. Per confermare, tieni premuto AZZERA CONTATORI senza rilasciare per 2 secondi.</string>
     <string name="reset_counters_stop_auto">Ferma l’acquisizione automatica prima di azzerare i contatori.</string>
     <string name="counters_reset_complete">Contatori azzerati</string>
 
     <string name="irradiance_view">Irradianza</string>
     <string name="biological_effects_view">Effetti biologici stimati</string>
-    <string name="biological_effects_disclaimer">Stime sperimentali a banda larga derivate dai canali misurati. Non sono valutazioni mediche, diagnostiche o di sicurezza. Il modello verrà affinato dopo la calibrazione dei sensori reali.</string>
+    <string name="biological_effects_disclaimer">Stime sperimentali a banda larga derivate dai canali acquisiti. Non sono valutazioni mediche, diagnostiche o di sicurezza. Il modello verrà affinato dopo la calibrazione dei sensori reali.</string>
     <string name="dna_uv_proxy">UV effetto/danno DNA</string>
     <string name="dna_uv_proxy_description">Indice relativo sperimentale che dà maggior peso alle bande UV più corte.</string>
     <string name="uva_photoaging_proxy">Fotoinvecchiamento UVA</string>
@@ -111,28 +110,28 @@
     <string name="weighted_signal_value">%1$.2f µW/cm² eq.</string>
     <string name="biological_compact_summary">%1$.2f µW/cm² eq. · %2$.0f/100</string>
     <string name="relative_spectral_index">Rilevanza spettrale</string>
-    <string name="relative_spectral_index_explanation">La scala 0–100 indica quanto lo spettro misurato è concentrato nelle lunghezze d’onda pesate da questa stima. Descrive la composizione spettrale, non l’intensità totale. Non è una percentuale di danno né una soglia di sicurezza.</string>
+    <string name="relative_spectral_index_explanation">La scala 0–100 indica quanto lo spettro acquisito è concentrato nelle lunghezze d’onda pesate da questa stima. Descrive la composizione spettrale, non l’intensità totale. Non è una percentuale di danno né una soglia di sicurezza.</string>
 
-    <string name="delete_all_measurements_question">Eliminare tutte le misurazioni?</string>
-    <string name="delete_all_measurements_warning">Tutte le misurazioni verranno eliminate definitivamente. Per confermare, tieni premuto ELIMINA TUTTO senza rilasciare per 2 secondi.</string>
+    <string name="delete_all_measurements_question">Eliminare tutte le acquisizioni?</string>
+    <string name="delete_all_measurements_warning">Tutte le acquisizioni verranno eliminate definitivamente. Per confermare, tieni premuto ELIMINA TUTTO senza rilasciare per 2 secondi.</string>
     <string name="delete_all">ELIMINA TUTTO</string>
     <plurals name="measurement_count_since">
         <item quantity="one">%1$d salvata · dal %2$s</item>
         <item quantity="other">%1$d salvate · dal %2$s</item>
     </plurals>
-    <string name="no_saved_measurements">Nessuna misurazione salvata</string>
+    <string name="no_saved_measurements">Nessuna acquisizione salvata</string>
 
-    <string name="delete_measurement_question">Eliminare la misurazione?</string>
-    <string name="delete_measurement_warning">Questa misurazione verrà cancellata definitivamente.</string>
-    <string name="measurement_deleted">Misurazione eliminata</string>
-    <string name="measurements_deleted">Misurazioni eliminate</string>
+    <string name="delete_measurement_question">Eliminare l’acquisizione?</string>
+    <string name="delete_measurement_warning">Questa acquisizione verrà cancellata definitivamente.</string>
+    <string name="measurement_deleted">Acquisizione eliminata</string>
+    <string name="measurements_deleted">Acquisizioni eliminate</string>
     <string name="delete">ELIMINA</string>
-    <string name="saved_measurement">MISURA SALVATA</string>
+    <string name="saved_measurement">ACQUISIZIONE SALVATA</string>
     <string name="note">NOTA</string>
     <string name="no_note">Nessuna nota</string>
 
     <string name="automatic_badge">A</string>
-    <string name="automatic_badge_description">Misura automatica</string>
+    <string name="automatic_badge_description">Acquisizione automatica</string>
     <string name="acquisition_type">ACQUISIZIONE</string>
     <string name="automatic_measurement">Automatica</string>
     <string name="manual_measurement">Manuale</string>
@@ -158,13 +157,13 @@
     <string name="about_whats_new_title">Novità della versione %1$s</string>
     <string name="about_whats_new_connectivity">Connettività separata dalle Impostazioni, con sezioni dedicate a USB, Bluetooth, Wi-Fi e rete mobile.</string>
     <string name="about_whats_new_connections">Indirizzi e codici di collegamento più chiari, con rilevamento della rete mobile Internet principale.</string>
-    <string name="about_whats_new_measurements">Gestione delle misurazioni migliorata con selezione multipla, condivisione, esportazione e serie automatiche raggruppate per sessione.</string>
+    <string name="about_whats_new_measurements">Gestione delle acquisizioni migliorata con selezione multipla, condivisione, esportazione e serie automatiche raggruppate per sessione.</string>
     <string name="about_whats_new_interface">Acquisizione automatica e interfaccia perfezionate per offrire maggiore chiarezza e stabilità.</string>
     <string name="about_whats_new_github">La repository GitHub e i collegamenti per gli aggiornamenti sono ora configurati.</string>
-    <string name="about_description">App per la misurazione spettrale della radiazione ultravioletta, visibile, FAR-RED e NIR.</string>
+    <string name="about_description">App per l’acquisizione spettrale della radiazione ultravioletta, visibile, FAR-RED e NIR.</string>
     <string name="about_spectral_ranges">Bande spettrali: UV • VISIBILE • FAR-RED • NIR</string>
     <string name="about_sensors">Sensori supportati: AS7331 UV • AS7343 multispettrale</string>
-    <string name="about_derived_values">HEV, HEB ed effetti biologici stimati sono valori derivati calcolati dai dati spettrali misurati.</string>
+    <string name="about_derived_values">HEV, HEB ed effetti biologici stimati sono valori derivati calcolati dai dati spettrali acquisiti.</string>
     <string name="biological_model_version">Modello biologico: %1$s</string>
     <string name="about_copyright">© 2026 Uvir</string>
     <string name="github_repository_title">Repository GitHub</string>
