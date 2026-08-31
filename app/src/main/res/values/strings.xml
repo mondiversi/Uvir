@@ -165,7 +165,8 @@
     <string name="about_sensors">Supported sensors: AS7331 UV • AS7343 multispectral</string>
     <string name="about_derived_values">HEV, HEB and estimated biological effects are derived values calculated from the acquired spectral data.</string>
     <string name="biological_model_version">Biological model: %1$s</string>
-    <string name="about_copyright">© 2026 Uvir</string>
+    <string name="about_copyright">Copyright © 2026 Mondiversi</string>
+    <string name="about_license">License: GNU General Public License v3.0</string>
     <string name="github_repository_title">GitHub repository</string>
     <string name="github_repository_pending">The GitHub repository has not been configured yet. The links will become available after the project is published.</string>
     <string name="open_github_repository">OPEN REPOSITORY</string>

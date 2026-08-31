@@ -6612,6 +6612,15 @@ if (showVersionInfoDialog) {
                         Text(
                             text =
                                 stringResource(
+                                    R.string.about_license
+                                ),
+                            color = secondaryText,
+                            fontSize = 11.sp
+                        )
+
+                        Text(
+                            text =
+                                stringResource(
                                     R.string.package_name_value,
                                     context.packageName
                                 ),
