@@ -11,8 +11,9 @@ local.properties
 # Python cache
 __pycache__/
 *.py[cod]
-desktop/desktop_settings.json
-desktop/desktop_settings.json.tmp
+
+# Desktop prototype discontinued; keep any local copy outside the repository
+desktop/
 
 # Android Studio generated files and folders
 captures/
