@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="1450" viewBox="0 0 760 1450">
+  <defs>
+    <style>
+      .bg { fill: #ffffff; }
+      .board { fill: #e9f7ee; stroke: #1d5634; stroke-width: 5; }
+      .esp { fill: #efe9ff; stroke: #6242a2; stroke-width: 4; }
+      .visible { fill: #e7f3ff; stroke: #1769aa; stroke-width: 4; }
+      .uv { fill: #fff0dc; stroke: #c76a00; stroke-width: 4; }
+      .keepout { fill: #fff8d9; stroke: #ad8200; stroke-width: 4; stroke-dasharray: 14 10; }
+      .part { fill: #eeeeee; stroke: #333333; stroke-width: 3; }
+      .barrier { stroke: #202020; stroke-width: 10; }
+      .guide { fill: none; stroke: #555555; stroke-width: 2; }
+      .dim { fill: none; stroke: #777777; stroke-width: 2; stroke-dasharray: 7 5; }
+      text { font-family: Arial, sans-serif; fill: #202020; font-size: 24px; }
+      .title { font-size: 34px; font-weight: 700; }
+      .label { font-weight: 700; }
+      .small { font-size: 20px; fill: #555555; }
+    </style>
+  </defs>
+  <rect class="bg" width="760" height="1450" />
+  <text class="title" x="380" y="55" text-anchor="middle">Uvir Carrier PCB R0 — layout preliminare</text>
+  <text class="small" x="380" y="90" text-anchor="middle">40 × 125 mm · componenti e ingombri da verificare prima dell'ordine</text>
+
+  <path class="dim" d="M155 150 H95 M155 1325 H95 M110 150 V1325" />
+  <path class="guide" d="M100 165 L110 150 L120 165 M100 1310 L110 1325 L120 1310" />
+  <text class="small" x="75" y="740" text-anchor="middle" transform="rotate(-90 75 740)">125 mm provvisori</text>
+
+  <path class="dim" d="M180 1360 V1405 M580 1360 V1405 M180 1390 H580" />
+  <path class="guide" d="M195 1380 L180 1390 L195 1400 M565 1380 L580 1390 L565 1400" />
+  <text class="small" x="380" y="1430" text-anchor="middle">40 mm provvisori</text>
+
+  <rect class="board" x="180" y="150" width="400" height="1175" rx="30" />
+  <text class="small" x="380" y="130" text-anchor="middle">FACCIA SUPERIORE DEL DISPOSITIVO</text>
+
+  <circle class="part" cx="245" cy="205" r="27" />
+  <text class="small" x="245" y="250" text-anchor="middle">LED blu 90°</text>
+  <circle cx="330" cy="205" r="27" fill="#47a85a" stroke="#bc2837" stroke-width="8" />
+  <text class="small" x="330" y="250" text-anchor="middle">RGB 90°</text>
+  <circle class="part" cx="490" cy="210" r="52" />
+  <circle class="guide" cx="490" cy="210" r="34" />
+  <circle class="guide" cx="490" cy="210" r="15" />
+  <text class="small" x="490" y="285" text-anchor="middle">buzzer + condotto</text>
+
+  <path class="barrier" d="M205 310 H555" />
+  <text class="small" x="380" y="345" text-anchor="middle">setto ottico opaco</text>
+
+  <rect class="uv" x="250" y="385" width="260" height="230" rx="16" />
+  <circle class="part" cx="380" cy="495" r="22" />
+  <text class="label" x="380" y="445" text-anchor="middle">AS7331 / SEN-23517</text>
+  <text class="small" x="380" y="545" text-anchor="middle">UV · orizzontale · finestra frontale</text>
+  <text class="small" x="380" y="580" text-anchor="middle">25.4 × 25.4 mm da confermare</text>
+
+  <rect class="visible" x="260" y="655" width="240" height="205" rx="16" />
+  <circle class="part" cx="380" cy="750" r="22" />
+  <text class="label" x="380" y="710" text-anchor="middle">GY-AS7343</text>
+  <text class="small" x="380" y="800" text-anchor="middle">luce / NIR · orizzontale</text>
+  <text class="small" x="380" y="833" text-anchor="middle">footprint reale da misurare</text>
+
+  <rect class="keepout" x="220" y="885" width="320" height="140" rx="16" />
+  <text class="label" x="380" y="945" text-anchor="middle">ANTENNA KEEP-OUT</text>
+  <text class="small" x="380" y="985" text-anchor="middle">nessun rame, massa o componente</text>
+
+  <rect class="esp" x="240" y="1000" width="280" height="285" rx="16" />
+  <rect class="part" x="285" y="1025" width="190" height="105" rx="10" />
+  <text class="label" x="380" y="1175" text-anchor="middle">ESP32 Dev Module</text>
+  <text class="small" x="380" y="1215" text-anchor="middle">38 pin · proporzioni indicative</text>
+  <rect class="part" x="330" y="1265" width="100" height="55" rx="8" />
+  <text class="small" x="380" y="1350" text-anchor="middle">USB accessibile dal bordo inferiore</text>
+
+  <circle class="guide" cx="205" cy="175" r="10" />
+  <circle class="guide" cx="555" cy="175" r="10" />
+  <circle class="guide" cx="205" cy="1300" r="10" />
+  <circle class="guide" cx="555" cy="1300" r="10" />
+</svg>

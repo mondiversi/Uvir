@@ -1,0 +1,13 @@
+Designator,Mid_X_mm,Mid_Y_mm,Layer,Rotation_deg,Comment,Status
+U1,20.0,95.0,Top,0,ESP32 USB toward lower edge,PROVISIONAL
+U2,20.0,50.0,Top,0,GY-AS7343 horizontal and front-facing,PROVISIONAL
+U3,20.0,25.0,Top,0,AS7331 horizontal and front-facing,PROVISIONAL
+D1,13.0,5.0,Top,90,RGB output toward top enclosure face,PROVISIONAL
+D2,7.0,5.0,Top,90,Blue output toward top enclosure face,PROVISIONAL
+BZ1,29.5,7.0,Top,0,Acoustic duct toward top enclosure face,PROVISIONAL
+R1,12.0,13.0,Top,0,RGB red resistor,PROVISIONAL
+R2,16.0,13.0,Top,0,RGB green resistor,PROVISIONAL
+R3,7.0,13.0,Top,0,Blue LED resistor,PROVISIONAL
+C1,13.0,48.0,Top,0,AS7343 local bypass,PROVISIONAL
+C2,13.0,27.0,Top,0,AS7331 local bypass,PROVISIONAL
+C3,20.0,65.0,Top,0,3V3 bulk bypass,PROVISIONAL

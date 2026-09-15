@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900">
+  <defs>
+    <style>
+      .bg { fill: #ffffff; }
+      .block { fill: #f7f7fa; stroke: #20242a; stroke-width: 2; }
+      .sensor { fill: #eef7ff; stroke: #1769aa; stroke-width: 2; }
+      .uv { fill: #fff5e8; stroke: #c76a00; stroke-width: 2; }
+      .part { fill: #f4f0ff; stroke: #6446a8; stroke-width: 2; }
+      .wire { fill: none; stroke: #20242a; stroke-width: 2; }
+      .power { fill: none; stroke: #a31d2d; stroke-width: 2.5; }
+      .ground { fill: none; stroke: #37474f; stroke-width: 2.5; }
+      .bus { fill: none; stroke: #1769aa; stroke-width: 3; }
+      .nc { fill: none; stroke: #777777; stroke-width: 1.5; stroke-dasharray: 7 5; }
+      text { font-family: Arial, sans-serif; fill: #20242a; font-size: 17px; }
+      .title { font-size: 28px; font-weight: 700; }
+      .subtitle { font-size: 18px; fill: #555b66; }
+      .label { font-weight: 700; }
+      .small { font-size: 14px; fill: #555b66; }
+    </style>
+  </defs>
+  <rect class="bg" width="1400" height="900" />
+  <text class="title" x="55" y="55">Uvir Carrier PCB R0 — schema elettrico</text>
+  <text class="subtitle" x="55" y="85">Pin logici verificati dal firmware · footprint meccanici ancora da misurare</text>
+
+  <rect class="block" x="70" y="145" width="310" height="610" rx="12" />
+  <text class="label" x="225" y="180" text-anchor="middle">U1 · ESP32 Dev Module 38 pin</text>
+  <text class="small" x="225" y="204" text-anchor="middle">USB orientata verso il bordo inferiore</text>
+
+  <text x="105" y="275">3V3</text>
+  <text x="105" y="335">GND</text>
+  <text x="105" y="420">GPIO21 · SDA</text>
+  <text x="105" y="470">GPIO22 · SCL</text>
+  <text x="105" y="555">GPIO25 · RGB R</text>
+  <text x="105" y="600">GPIO26 · RGB G</text>
+  <text x="105" y="645">GPIO27 · LED blu</text>
+  <text x="105" y="690">GPIO32 · buzzer</text>
+
+  <path class="power" d="M380 270 H1190" />
+  <text class="label" x="1160" y="258">3V3</text>
+  <path class="ground" d="M380 330 H1190" />
+  <text class="label" x="1150" y="321">GND</text>
+
+  <path class="bus" d="M380 415 H455 V520 H1185" />
+  <path class="bus" d="M380 465 H435 V570 H1185" />
+  <text class="label" x="465" y="509">I2C SDA</text>
+  <text class="label" x="465" y="559">I2C SCL</text>
+
+  <rect class="sensor" x="520" y="145" width="310" height="255" rx="12" />
+  <text class="label" x="675" y="180" text-anchor="middle">U2 · GY-AS7343</text>
+  <text class="small" x="675" y="205" text-anchor="middle">luce visibile / far-red / NIR · I2C 0x39</text>
+  <text x="555" y="270">VCC / VIN</text>
+  <text x="555" y="320">GND</text>
+  <text x="555" y="350">SDA</text>
+  <text x="555" y="380">SCL</text>
+  <text class="small" x="715" y="350">INT: non collegato</text>
+  <text class="small" x="715" y="380">GPIO: non collegato</text>
+  <path class="power" d="M520 265 H470 V270" />
+  <path class="ground" d="M520 315 H450 V330" />
+  <path class="bus" d="M650 400 V520" />
+  <path class="bus" d="M700 400 V570" />
+
+  <rect class="uv" x="900" y="145" width="310" height="255" rx="12" />
+  <text class="label" x="1055" y="180" text-anchor="middle">U3 · AS7331 / SEN-23517</text>
+  <text class="small" x="1055" y="205" text-anchor="middle">UVA / UVB / UVC · I2C 0x74</text>
+  <text x="935" y="270">3V3</text>
+  <text x="935" y="320">GND</text>
+  <text x="935" y="350">SDA</text>
+  <text x="935" y="380">SCL</text>
+  <text class="small" x="1080" y="350">INT: non collegato</text>
+  <text class="small" x="1080" y="380">SYN: non collegato</text>
+  <path class="power" d="M900 265 H850 V270" />
+  <path class="ground" d="M900 315 H870 V330" />
+  <path class="bus" d="M1025 400 V520" />
+  <path class="bus" d="M1075 400 V570" />
+
+  <rect class="part" x="520" y="620" width="210" height="150" rx="12" />
+  <text class="label" x="625" y="650" text-anchor="middle">D1 · RGB comune catodo</text>
+  <text x="555" y="690">R: GPIO25 → 330 Ω</text>
+  <text x="555" y="720">G: GPIO26 → 330 Ω</text>
+  <text x="555" y="750">COM: GND · B: NC</text>
+  <path class="wire" d="M380 550 H470 V685 H520" />
+  <path class="wire" d="M380 595 H455 V715 H520" />
+  <path class="ground" d="M730 745 H760 V330" />
+
+  <rect class="part" x="790" y="620" width="210" height="150" rx="12" />
+  <text class="label" x="895" y="650" text-anchor="middle">D2 · LED blu</text>
+  <text x="825" y="700">GPIO27 → 330 Ω → A</text>
+  <text x="825" y="735">K → GND</text>
+  <path class="wire" d="M380 640 H770 V695 H790" />
+  <path class="ground" d="M1000 730 H1020 V330" />
+
+  <rect class="part" x="1060" y="620" width="210" height="150" rx="12" />
+  <text class="label" x="1165" y="650" text-anchor="middle">BZ1 · piezo passivo</text>
+  <text x="1095" y="700">+ → GPIO32</text>
+  <text x="1095" y="735">− → GND</text>
+  <path class="wire" d="M380 685 H1030 V695 H1060" />
+  <path class="ground" d="M1270 730 H1300 V330 H1190" />
+
+  <text class="small" x="70" y="830">R4/R5: piazzole opzionali 4.7 kΩ per pull-up I2C, non montare se i breakout hanno già i propri pull-up.</text>
+  <text class="small" x="70" y="855">C1/C2: 100 nF vicino ai moduli; C3: 10 µF sul ramo 3V3. Verificare sempre alimentazione e level shifting del GY-AS7343 reale.</text>
+</svg>

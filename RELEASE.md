@@ -24,19 +24,6 @@ stato alterato o danneggiato.
 Il file può essere allegato a una GitHub Release oppure distribuito da un sito.
 Non è necessario pubblicare il progetto sorgente per distribuire l'APK.
 
-## Uvir Desktop
-
-Lo script Python aggiornato si trova in:
-
-```text
-desktop\uvir_desktop.py
-```
-
-Non viene generato alcun EXE. Lo script supporta USB ADB, ADB wireless e
-collegamento diretto tramite Wi-Fi o rete Bluetooth PAN; permette inoltre di
-controllare l'app, conservare copie SQLite locali e sincronizzare le modifiche
-con il telefono. Le istruzioni sono in `desktop\README.md`.
-
 ## Firma e aggiornamenti
 
 La chiave privata è conservata fuori dal progetto in:
@@ -63,6 +50,12 @@ Per pubblicare un aggiornamento occorre:
 2. aggiornare `versionName`;
 3. usare sempre la stessa chiave release;
 4. ricreare l'APK con `CREA_APK_RELEASE.bat`.
+
+Sul computer di sviluppo, anche la variante `debug` avviata da Android Studio
+usa la stessa chiave quando `keystore.properties` è presente. In questo modo
+**Run** e **Debug** possono aggiornare l'app già installata senza conflitti di
+certificato. Sugli altri computer, dove la configurazione privata non esiste,
+Gradle torna automaticamente alla normale chiave debug locale.
 
 Se la chiave release o la sua password vengono perse, gli APK futuri non
 potranno aggiornare l'app già installata.

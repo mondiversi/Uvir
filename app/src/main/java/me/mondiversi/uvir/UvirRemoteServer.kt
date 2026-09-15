@@ -338,6 +338,11 @@ internal class UvirRemoteServer(
                 currentGeneration ==
                 generation.get()
             ) {
+                UvirErrorLog.record(
+                    context.applicationContext,
+                    "remote_server",
+                    error
+                )
                 UvirRemoteRuntime
                     .serverError
                     .set(
@@ -606,12 +611,12 @@ internal fun savedRecordToJson(
         .put("automatic", record.automatic)
         .put(
             "automatic_session_id",
-            record.automaticSessionId
+            record.sessionId
                 ?: JSONObject.NULL
         )
         .put(
             "automatic_sequence",
-            record.automaticSequence
+            record.sessionSequence
                 ?: JSONObject.NULL
         )
         .put(
@@ -644,12 +649,12 @@ internal fun JSONObject.toSavedRecordDetail(): SavedRecordDetail {
             optJSONObject("sample")
                 ?.toSensorSample()
                 ?: SensorSample(),
-        automaticSessionId =
+        sessionId =
             optLong(
                 "automatic_session_id",
                 0L
             ).takeIf { it > 0L },
-        automaticSequence =
+        sessionSequence =
             optInt(
                 "automatic_sequence",
                 0

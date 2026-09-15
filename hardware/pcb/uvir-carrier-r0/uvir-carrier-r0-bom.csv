@@ -1,0 +1,14 @@
+Designator,Quantity,Description,Value_or_part,Footprint,Assembly,Verification
+U1,1,ESP32 development board 38 pin,ESP-WROOM-32 Dev Module,Two rows 1x19 P2.54 mm,Hand fitted,MEASURE EXACT BOARD
+U2,1,Visible and NIR spectral sensor module,GY-AS7343,Module footprint TBD,Hand fitted,MEASURE MODULE AND PIN ORDER
+U3,1,UV spectral sensor breakout,SparkFun SEN-23517 AS7331,25.4 x 25.4 mm module footprint,Hand fitted,CONFIRM STANDARD VERSION
+D1,1,Right-angle common-cathode RGB LED,Red and green channels used,Package TBD,Hand fitted,MEASURE PACKAGE
+D2,1,Right-angle blue operation LED,Blue,Package TBD,Hand fitted,MEASURE PACKAGE
+R1 R2 R3,3,LED series resistor,330 ohm 1 percent,0805,SMD,Verified electrical value
+BZ1,1,Low-current passive piezo buzzer,3.3 V PWM compatible,Diameter and pitch TBD,Hand fitted,MEASURE AND VERIFY CURRENT
+C1 C2,2,Local ceramic bypass capacitor,100 nF 16 V X7R,0805,SMD,Recommended
+C3,1,Bulk ceramic capacitor,10 uF 10 V X7R,0805,SMD,Recommended
+R4 R5,2,Optional I2C pull-up,DNP 4.7 kohm,0805,SMD,DNP because sensor modules normally include pull-ups
+J1 J2,2,ESP32 low-profile socket,1x19 P2.54 mm,PinSocket 1x19 vertical,Hand fitted,ROW SPACING TBD
+J3,1,AS7343 removable header,1x6 P2.54 mm,PinSocket 1x6 vertical,Hand fitted,PIN ORDER TBD
+J4,1,AS7331 removable header,1x6 P2.54 mm,PinSocket 1x6 vertical,Hand fitted,PIN ORDER TBD

@@ -1,6 +1,10 @@
 # Gradle files
 .gradle/
 build/
+.gradle-task-*/
+.gradle-user-home/
+.arduino-build*/
+firmware/.build/
 
 # Local configuration file (sdk path, etc)
 local.properties

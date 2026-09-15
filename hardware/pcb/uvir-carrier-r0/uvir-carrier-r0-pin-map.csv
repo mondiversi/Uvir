@@ -1,0 +1,32 @@
+Reference,Pin,Net,Destination,Status,Notes
+ESP32-L,1,3V3,Sensor supply and decoupling,verified,Top pin with USB facing down
+ESP32-L,7,GPIO32,BZ1 positive,verified,Low-current passive piezo only
+ESP32-L,9,GPIO25,R1 to RGB red anode,verified,330 ohm
+ESP32-L,10,GPIO26,R2 to RGB green anode,verified,330 ohm
+ESP32-L,11,GPIO27,R3 to blue LED anode,verified,330 ohm
+ESP32-L,14,GND,Ground plane,verified,
+ESP32-L,19,5V,Reserved,verified,Do not join to a second power source
+ESP32-R,1,GND,Ground plane,verified,Top pin with USB facing down
+ESP32-R,3,GPIO22,I2C_SCL,verified,Shared by AS7343 and AS7331
+ESP32-R,6,GPIO21,I2C_SDA,verified,Shared by AS7343 and AS7331
+ESP32-R,7,GND,Ground plane,verified,
+AS7343,TBD,3V3,ESP32 3V3,mechanical-check,Exact module pin order must be measured
+AS7343,TBD,GND,Ground plane,mechanical-check,Exact module pin order must be measured
+AS7343,TBD,SDA,I2C_SDA,mechanical-check,Address 0x39
+AS7343,TBD,SCL,I2C_SCL,mechanical-check,Address 0x39
+AS7343,TBD,INT,NC,verified-logical,Leave unconnected
+AS7343,TBD,GPIO,NC,verified-logical,Leave unconnected
+AS7331,TBD,3V3,ESP32 3V3,mechanical-check,SEN-23517 PTH order must be checked
+AS7331,TBD,GND,Ground plane,mechanical-check,SEN-23517 PTH order must be checked
+AS7331,TBD,SDA,I2C_SDA,mechanical-check,Address 0x74
+AS7331,TBD,SCL,I2C_SCL,mechanical-check,Address 0x74
+AS7331,TBD,INT,NC,verified-logical,Leave unconnected
+AS7331,TBD,SYN,NC,verified-logical,Leave unconnected
+RGB,RED,GPIO25 via R1,ESP32,verified,Common-cathode LED
+RGB,GREEN,GPIO26 via R2,ESP32,verified,Common-cathode LED
+RGB,COMMON,GND,Ground plane,verified,
+RGB,BLUE,NC,None,verified,Leave unconnected
+BLUE_LED,ANODE,GPIO27 via R3,ESP32,verified,
+BLUE_LED,CATHODE,GND,Ground plane,verified,
+BZ1,POSITIVE,GPIO32,ESP32,verified,Direct connection only for low-current passive piezo
+BZ1,NEGATIVE,GND,Ground plane,verified,

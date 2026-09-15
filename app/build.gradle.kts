@@ -60,6 +60,16 @@ android {
     }
 
     buildTypes {
+        debug {
+            // Keep Android Studio Run/Debug compatible with the locally
+            // installed release APK. The private key stays outside Git and
+            // this falls back to Android's debug key on other computers.
+            if (releaseKeystorePropertiesFile.exists()) {
+                signingConfig =
+                    signingConfigs.getByName("release")
+            }
+        }
+
         release {
             if (releaseKeystorePropertiesFile.exists()) {
                 signingConfig =
@@ -89,6 +99,10 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(
+        "com.github.mik3y:usb-serial-for-android:3.11.0"
+    )
+    implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5")
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
