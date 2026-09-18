@@ -17,13 +17,17 @@ import androidx.compose.ui.unit.dp
 enum class ConnectivityIconType {
     SENSOR_CONNECTION,
     SENSOR,
+    MANAGEMENT,
+    PHONE,
     CALIBRATION,
     SAMPLING,
     ALERT,
+    SOUND,
     NUMERIC_FORMAT,
     LANGUAGE,
     DEBUG,
     EXPORT,
+    SECURITY,
     USB,
     BLUETOOTH,
     WIFI,
@@ -48,6 +52,33 @@ fun ConnectivitySectionIcon(
             ) * strokeScale
 
         when (type) {
+            ConnectivityIconType.SECURITY -> {
+                drawRoundRect(
+                    color = tint,
+                    topLeft = Offset(size.width * 0.22f, size.height * 0.43f),
+                    size = Size(size.width * 0.56f, size.height * 0.45f),
+                    cornerRadius = CornerRadius(
+                        size.minDimension * 0.08f,
+                        size.minDimension * 0.08f
+                    ),
+                    style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+                )
+                drawArc(
+                    color = tint,
+                    startAngle = 180f,
+                    sweepAngle = 180f,
+                    useCenter = false,
+                    topLeft = Offset(size.width * 0.32f, size.height * 0.12f),
+                    size = Size(size.width * 0.36f, size.height * 0.52f),
+                    style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+                )
+                drawCircle(
+                    color = tint,
+                    radius = strokeWidth * 0.92f,
+                    center = Offset(size.width * 0.50f, size.height * 0.64f)
+                )
+            }
+
             ConnectivityIconType.SENSOR_CONNECTION -> {
                 drawRoundRect(
                     color = tint,
@@ -196,6 +227,58 @@ fun ConnectivitySectionIcon(
                 )
             }
 
+            ConnectivityIconType.MANAGEMENT -> {
+                drawCircle(
+                    color = tint,
+                    radius = size.minDimension * 0.105f,
+                    center = Offset(size.width * 0.24f, size.height * 0.76f),
+                    style = Stroke(width = strokeWidth)
+                )
+                drawLine(
+                    color = tint,
+                    start = Offset(size.width * 0.31f, size.height * 0.69f),
+                    end = Offset(size.width * 0.67f, size.height * 0.33f),
+                    strokeWidth = strokeWidth * 1.35f,
+                    cap = StrokeCap.Round
+                )
+                drawLine(
+                    color = tint,
+                    start = Offset(size.width * 0.67f, size.height * 0.33f),
+                    end = Offset(size.width * 0.65f, size.height * 0.12f),
+                    strokeWidth = strokeWidth,
+                    cap = StrokeCap.Round
+                )
+                drawLine(
+                    color = tint,
+                    start = Offset(size.width * 0.67f, size.height * 0.33f),
+                    end = Offset(size.width * 0.88f, size.height * 0.35f),
+                    strokeWidth = strokeWidth,
+                    cap = StrokeCap.Round
+                )
+            }
+
+            ConnectivityIconType.PHONE -> {
+                drawRoundRect(
+                    color = tint,
+                    topLeft = Offset(size.width * 0.27f, size.height * 0.08f),
+                    size = Size(size.width * 0.46f, size.height * 0.84f),
+                    cornerRadius = CornerRadius(size.minDimension * 0.10f),
+                    style = Stroke(width = strokeWidth)
+                )
+                drawLine(
+                    color = tint,
+                    start = Offset(size.width * 0.43f, size.height * 0.18f),
+                    end = Offset(size.width * 0.57f, size.height * 0.18f),
+                    strokeWidth = strokeWidth,
+                    cap = StrokeCap.Round
+                )
+                drawCircle(
+                    color = tint,
+                    radius = strokeWidth * 0.65f,
+                    center = Offset(size.width * 0.50f, size.height * 0.82f)
+                )
+            }
+
             ConnectivityIconType.CALIBRATION -> {
                 drawCircle(
                     color = tint,
@@ -341,6 +424,44 @@ fun ConnectivitySectionIcon(
                         size.width * 0.50f,
                         size.height * 0.16f
                     )
+                )
+            }
+
+            ConnectivityIconType.SOUND -> {
+                val speaker = Path().apply {
+                    moveTo(size.width * 0.12f, size.height * 0.40f)
+                    lineTo(size.width * 0.31f, size.height * 0.40f)
+                    lineTo(size.width * 0.53f, size.height * 0.20f)
+                    lineTo(size.width * 0.53f, size.height * 0.80f)
+                    lineTo(size.width * 0.31f, size.height * 0.60f)
+                    lineTo(size.width * 0.12f, size.height * 0.60f)
+                    close()
+                }
+                drawPath(
+                    path = speaker,
+                    color = tint,
+                    style = Stroke(
+                        width = strokeWidth,
+                        join = androidx.compose.ui.graphics.StrokeJoin.Round
+                    )
+                )
+                drawArc(
+                    color = tint,
+                    startAngle = -50f,
+                    sweepAngle = 100f,
+                    useCenter = false,
+                    topLeft = Offset(size.width * 0.47f, size.height * 0.29f),
+                    size = Size(size.width * 0.27f, size.height * 0.42f),
+                    style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+                )
+                drawArc(
+                    color = tint,
+                    startAngle = -50f,
+                    sweepAngle = 100f,
+                    useCenter = false,
+                    topLeft = Offset(size.width * 0.42f, size.height * 0.16f),
+                    size = Size(size.width * 0.48f, size.height * 0.68f),
+                    style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
                 )
             }
 

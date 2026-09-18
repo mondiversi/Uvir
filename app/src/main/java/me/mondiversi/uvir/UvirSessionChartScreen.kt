@@ -36,6 +36,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -119,7 +120,9 @@ fun SessionChartScreen(
     onDeleteSession: () -> Unit,
     onBack: () -> Unit
 ) {
+    val irradianceUnit = LocalUvirIrradianceUnit.current
     val context = LocalContext.current
+    val resources = androidx.compose.ui.platform.LocalResources.current
     val sortedRecords =
         remember(records) {
             records.sortedBy { it.timestamp }
@@ -134,6 +137,25 @@ fun SessionChartScreen(
     var showDeleteConfirmation by rememberSaveable {
         mutableStateOf(false)
     }
+    var currentNote by rememberSaveable(sessionId) {
+        mutableStateOf(
+            database.readAcquisitionSessionNote(sessionId).ifBlank {
+                sessionChartNote(sortedRecords, "")
+            }
+        )
+    }
+    var showNoteEditor by rememberSaveable(sessionId) {
+        mutableStateOf(false)
+    }
+    var showSequenceFilterPanel by rememberSaveable {
+        mutableStateOf(false)
+    }
+    var sequenceFilterCycleSize by remember(sessionId, database) {
+        mutableIntStateOf(database.readAcquisitionSessionVariantsPerPosition(sessionId))
+    }
+    var sequenceFilterPosition by rememberSaveable(sessionId) {
+        mutableIntStateOf(1)
+    }
     var showChart by rememberSaveable(sessionId) {
         mutableStateOf(false)
     }
@@ -146,8 +168,75 @@ fun SessionChartScreen(
         )
     val detailSensorName =
         rememberDetailSensorName(sortedRecords.firstOrNull()?.sensorId, database)
+    val availableSequenceCycleSizes = remember(sortedRecords.size) {
+        sessionSequenceCycleSizes(sortedRecords.size)
+    }
+    val sequenceFilterActive =
+        sequenceFilterCycleSize >= 2 &&
+            sequenceFilterCycleSize in availableSequenceCycleSizes
+    val variantAwareRecords =
+        remember(sortedRecords, sequenceFilterCycleSize) {
+            recordsWithAcquisitionVariantMetadata(
+                records = sortedRecords,
+                variantsPerPosition = sequenceFilterCycleSize
+            )
+        }
+    val noteAwareRecords =
+        remember(variantAwareRecords, currentNote) {
+            variantAwareRecords.map { it.copy(note = currentNote) }
+        }
+    LaunchedEffect(sortedRecords.size) {
+        if (sequenceFilterCycleSize !in availableSequenceCycleSizes) {
+            sequenceFilterCycleSize = 1
+            sequenceFilterPosition = 1
+            database.updateAcquisitionSessionVariantsPerPosition(sessionId, 1)
+        } else if (sequenceFilterPosition !in 1..sequenceFilterCycleSize) {
+            sequenceFilterPosition = 1
+        }
+    }
 
-    BackHandler(onBack = onBack)
+    val displayedRecords =
+        remember(
+            sortedRecords,
+            sequenceFilterCycleSize,
+            sequenceFilterPosition
+        ) {
+            filterSessionRecordsBySequence(
+                records = variantAwareRecords,
+                cycleSize = sequenceFilterCycleSize,
+                cyclePosition = sequenceFilterPosition
+            )
+        }
+
+    val handleBack = {
+        if (showSequenceFilterPanel) {
+            showSequenceFilterPanel = false
+        } else {
+            onBack()
+        }
+    }
+
+    BackHandler(onBack = handleBack)
+
+    if (showSequenceFilterPanel) {
+        UvirSessionSequenceFilterPanel(
+            records = sortedRecords,
+            cycleSize = sequenceFilterCycleSize,
+            backgroundColor = cardColor,
+            primaryText = primaryText,
+            secondaryText = secondaryText,
+            onSave = { cycleSize ->
+                if (database.updateAcquisitionSessionVariantsPerPosition(sessionId, cycleSize)) {
+                    sequenceFilterCycleSize = cycleSize
+                    sequenceFilterPosition = 1
+                }
+                showSequenceFilterPanel = false
+            },
+            onDismiss = {
+                showSequenceFilterPanel = false
+            }
+        )
+    }
 
     if (showDeleteConfirmation) {
         AlertDialog(
@@ -174,7 +263,7 @@ fun SessionChartScreen(
                         showDeleteConfirmation = false
                         showUvirBottomMessage(
                             context,
-                            context.getString(R.string.acquisition_session_deleted),
+                            resources.getString(R.string.acquisition_session_deleted),
                             longDuration = false
                         )
                         onDeleteSession()
@@ -207,16 +296,27 @@ fun SessionChartScreen(
             cardColor = cardColor,
             primaryText = primaryText,
             secondaryText = secondaryText,
+            combinedChartFileCount =
+                acquisitionSessionChartFileCount(
+                    noteAwareRecords,
+                    UvirChartExportMode.COMBINED
+                ),
+            separateChartFileCount =
+                acquisitionSessionChartFileCount(
+                    noteAwareRecords,
+                    UvirChartExportMode.SEPARATE
+                ),
             onDismiss = {
                 showShareDialog = false
             },
-            onSelectionConfirmed = { selection ->
+            onSelectionConfirmed = { selection, destination ->
                 runCatching {
                     shareAcquisitionSessionDetail(
                         context = context,
                         sessionId = sessionId,
-                        records = sortedRecords,
-                        selection = selection
+                        records = noteAwareRecords,
+                        selection = selection,
+                        destination = destination
                     )
                 }.onFailure { error ->
                     UvirErrorLog.record(
@@ -226,13 +326,31 @@ fun SessionChartScreen(
                     )
                     showUvirBottomMessage(
                         context,
-                        context.getString(
+                        resources.getString(
                             R.string.session_chart_share_error
                         ),
                         longDuration = false
                     )
                 }
                 showShareDialog = false
+            }
+        )
+    }
+
+    if (showNoteEditor) {
+        UvirNoteEditDialog(
+            initialNote = currentNote,
+            cardColor = cardColor,
+            primaryText = primaryText,
+            secondaryText = secondaryText,
+            onSave = { updatedNote ->
+                if (database.updateAcquisitionSessionNote(sessionId, updatedNote)) {
+                    currentNote = updatedNote
+                    showNoteEditor = false
+                }
+            },
+            onDismiss = {
+                showNoteEditor = false
             }
         )
     }
@@ -255,12 +373,20 @@ fun SessionChartScreen(
                             .padding(UvirTitleBarContentPadding),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    UvirBackButton(onClick = onBack)
+                    UvirBackButton(onClick = handleBack)
 
                     UvirMenuTitle(
                         text = stringResource(R.string.session_chart_title),
                         modifier = Modifier.weight(1f),
                         color = primaryText
+                    )
+
+                    UvirSessionCycleFilterButton(
+                        active = sequenceFilterActive,
+                        enabled = sortedRecords.size >= 2,
+                        onClick = {
+                            showSequenceFilterPanel = true
+                        }
                     )
 
                     IconButton(
@@ -276,7 +402,7 @@ fun SessionChartScreen(
                                 }
                     ) {
                         UvirTitleActionIcon(
-                            type = MenuIconType.SHARE,
+                            type = MenuIconType.EXPORT,
                             modifier = Modifier.size(24.dp),
                             tint =
                                 if (sortedRecords.isNotEmpty()) {
@@ -297,7 +423,7 @@ fun SessionChartScreen(
                                 .size(40.dp)
                                 .semantics {
                                     contentDescription =
-                                        context.getString(R.string.delete)
+                                        resources.getString(R.string.delete)
                                 }
                     ) {
                         UvirTitleActionIcon(
@@ -316,25 +442,30 @@ fun SessionChartScreen(
             }
         }
     ) { paddingValues ->
-        LazyColumn(
-            state = listState,
+        Column(
             modifier =
                 Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
-                    .lazyScrollbarOverlay(
-                        state = listState,
-                        color = secondaryText.copy(alpha = 0.46f)
-                    ),
-            contentPadding =
-                PaddingValues(
-                    start = 20.dp,
-                    end = 20.dp,
-                    top = 4.dp,
-                    bottom = 40.dp
-                ),
-            verticalArrangement = Arrangement.spacedBy(UvirIslandSpacing)
         ) {
+            LazyColumn(
+                state = listState,
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .lazyScrollbarOverlay(
+                            state = listState,
+                            color = secondaryText.copy(alpha = 0.46f)
+                        ),
+                contentPadding =
+                    PaddingValues(
+                        start = 20.dp,
+                        end = 20.dp,
+                        top = 4.dp,
+                        bottom = 40.dp
+                    ),
+                verticalArrangement = Arrangement.spacedBy(UvirIslandSpacing)
+            ) {
             item {
                 UvirDetailIdentityCard(
                     primaryId = null,
@@ -345,11 +476,19 @@ fun SessionChartScreen(
                         stringResource(R.string.session_date_duration_events_label),
                     dateText =
                         sortedRecords.firstOrNull()?.let { record ->
-                            formatDetailDateTime(record.timestamp)
+                            formatDetailDateTime(
+                                record.timestamp,
+                                LocalUvirDateFormat.current,
+                                LocalUvirTimeFormat.current
+                            )
                         } ?: "—",
                     endDateText =
                         sortedRecords.lastOrNull()?.let { record ->
-                            formatDetailDateTime(record.timestamp)
+                            formatDetailDateTime(
+                                record.timestamp,
+                                LocalUvirDateFormat.current,
+                                LocalUvirTimeFormat.current
+                            )
                         } ?: "—",
                     durationText =
                         formatInterval(
@@ -369,11 +508,15 @@ fun SessionChartScreen(
             item {
                 UvirDetailContextCard(
                     automatic = sortedRecords.firstOrNull()?.automatic,
+                    externalCommand = sortedRecords.any { it.externalCommand },
                     sensorName = detailSensorName,
-                    note = sessionChartNote(sortedRecords),
+                    note = currentNote.ifBlank { stringResource(R.string.no_note) },
                     cardColor = cardColor,
                     primaryText = primaryText,
-                    secondaryText = secondaryText
+                    secondaryText = secondaryText,
+                    onEditNote = {
+                        showNoteEditor = true
+                    }
                 )
             }
 
@@ -387,7 +530,30 @@ fun SessionChartScreen(
                     cardColor = cardColor,
                     primaryText = primaryText,
                     secondaryText = secondaryText,
-                    modifier = Modifier.padding(bottom = UvirPinnedSelectorBottomSpacing)
+                    middleContent = {
+                        UvirSessionCyclePositionSelector(
+                            cycleSize = sequenceFilterCycleSize,
+                            position = sequenceFilterPosition,
+                            cardColor = cardColor,
+                            primaryText = primaryText,
+                            secondaryText = secondaryText,
+                            onPositionChange = { newPosition ->
+                                sequenceFilterPosition =
+                                    newPosition.coerceIn(
+                                        1,
+                                        sequenceFilterCycleSize.coerceAtLeast(1)
+                                    )
+                            }
+                        )
+                    },
+                    modifier = Modifier.padding(
+                        bottom =
+                            if (uvirDetailSelectorPinned(listState)) {
+                                UvirPinnedSelectorBottomSpacing
+                            } else {
+                                0.dp
+                            }
+                    )
                     )
                 }
             }
@@ -405,8 +571,8 @@ fun SessionChartScreen(
                     key = { "chart_${it.name}" }
                 ) { group ->
                     val series =
-                        remember(sortedRecords, group) {
-                            sessionChartSeries(sortedRecords, group)
+                        remember(displayedRecords, group) {
+                            sessionChartSeries(displayedRecords, group)
                         }
                     val expanded =
                         expandedChartGroups[group] ?: true
@@ -421,7 +587,7 @@ fun SessionChartScreen(
                                 } else {
                                     R.string.session_chart_unit
                                 }
-                            ),
+                            ).withUvirIrradianceUnit(irradianceUnit),
                         expanded = expanded,
                         onToggle = {
                             expandedChartGroups[group] = !expanded
@@ -430,7 +596,7 @@ fun SessionChartScreen(
                         primaryText = primaryText,
                         secondaryText = secondaryText
                     ) {
-                        if (sortedRecords.isEmpty()) {
+                        if (displayedRecords.isEmpty()) {
                             Text(
                                 text = stringResource(R.string.session_chart_empty),
                                 modifier =
@@ -442,9 +608,16 @@ fun SessionChartScreen(
                             )
                         } else {
                             SessionLineChart(
-                                records = sortedRecords,
+                                records = displayedRecords,
                                 series = series,
-                                unit = if (group.biological) "µW/cm² equiv." else "µW/cm²",
+                                unit = stringResource(
+                                    if (group.biological) {
+                                        R.string.session_chart_unit_biological
+                                    } else {
+                                        R.string.session_chart_unit
+                                    }
+                                ).withUvirIrradianceUnit(irradianceUnit),
+                                valueScale = irradianceUnit::fromCanonicalUwCm2,
                                 primaryText = primaryText,
                                 secondaryText = secondaryText
                             )
@@ -460,7 +633,7 @@ fun SessionChartScreen(
                         expandedChartGroups[group] ?: true
 
                     SessionAcquisitionValuesCard(
-                        records = sortedRecords,
+                        records = displayedRecords,
                         group = group,
                         showRelativeBreakdown = true,
                         expanded = expanded,
@@ -472,6 +645,7 @@ fun SessionChartScreen(
                         secondaryText = secondaryText
                     )
                 }
+            }
             }
         }
     }
@@ -545,12 +719,16 @@ private fun SessionLineChart(
     records: List<SavedRecordDetail>,
     series: List<SessionChartSeries>,
     unit: String,
+    valueScale: (Double) -> Double,
     primaryText: Color,
     secondaryText: Color
 ) {
     val maximum =
         series
-            .flatMap { it.values }
+            .flatMap { item ->
+                item.values.filterIndexed { index, _ -> item.outOfRange.getOrNull(index) != true }
+            }
+            .map(valueScale)
             .maxOrNull()
             ?.coerceAtLeast(1.0)
             ?: 1.0
@@ -558,25 +736,34 @@ private fun SessionLineChart(
     val endTime = records.last().timestamp
     val timeSpan =
         (endTime - startTime).coerceAtLeast(1L)
-    val timeFormat = remember {
-        SimpleDateFormat(
-            "HH:mm:ss",
-            Locale.getDefault()
-        )
-    }
+    val timeFormat = LocalUvirTimeFormat.current
     val numericFormat = LocalUvirNumericFormat.current
-    val inspectionDateFormat = remember { SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault()) }
+    val irradianceUnit = LocalUvirIrradianceUnit.current
+    val dateFormat = LocalUvirDateFormat.current
     val inspectionPoints = series.flatMap { item ->
         val label = item.displayLabelResource?.let { stringResource(it) } ?: item.label
         item.values.mapIndexedNotNull { index, value ->
+            if (item.outOfRange.getOrNull(index) == true) return@mapIndexedNotNull null
+            val displayValue = valueScale(value)
             records.getOrNull(index)?.let { record ->
                 UvirSavedChartPoint(
                     UvirChartCoordinate(
                         if (item.values.size <= 1) 0.5f
                         else (record.timestamp - startTime).toFloat() / timeSpan.toFloat(),
-                        1f - (value.coerceAtLeast(0.0) / maximum).toFloat()),
-                    label, formatUvirNumber(value, 3, numericFormat) + " " + unit,
-                    item.color, inspectionDateFormat.format(Date(record.timestamp)))
+                        1f - (displayValue.coerceAtLeast(0.0) / maximum).toFloat()),
+                    label, formatUvirNumber(
+                        displayValue,
+                        irradianceUnit.displayFractionDigits(3),
+                        numericFormat
+                    ) + " " + unit,
+                    item.color,
+                    formatUvirDateTime(
+                        record.timestamp,
+                        dateFormat,
+                        separator = " ",
+                        timeFormat = timeFormat
+                    )
+                )
             }
         }
     }
@@ -617,7 +804,7 @@ private fun SessionLineChart(
                 ) {
                     UvirChartYAxis(
                         maximum = maximum,
-                        fractionDigits = 2,
+                        fractionDigits = irradianceUnit.displayFractionDigits(2),
                         secondaryText = secondaryText,
                         modifier = Modifier.fillMaxSize()
                     ) { chartModifier ->
@@ -663,9 +850,15 @@ private fun SessionLineChart(
 
                             series.forEach { item ->
                                 val path = Path()
+                                var hasPreviousPoint = false
                                 item.values.forEachIndexed {
                                     index,
                                     value ->
+                                if (item.outOfRange.getOrNull(index) == true) {
+                                    hasPreviousPoint = false
+                                    return@forEachIndexed
+                                }
+                                val displayValue = valueScale(value)
                                 val x =
                                     if (
                                         item.values.size <= 1
@@ -683,17 +876,18 @@ private fun SessionLineChart(
                                 val y =
                                     size.height -
                                         (
-                                            value.coerceAtLeast(
+                                            displayValue.coerceAtLeast(
                                                 0.0
                                             ) / maximum
                                             ).toFloat() *
                                         size.height
 
-                                if (index == 0) {
+                                if (!hasPreviousPoint) {
                                     path.moveTo(x, y)
                                 } else {
                                     path.lineTo(x, y)
                                 }
+                                hasPreviousPoint = true
 
                                 if (
                                     item.values.size == 1
@@ -727,6 +921,7 @@ private fun SessionLineChart(
                     startTimestamp = startTime,
                     endTimestamp = endTime,
                     fractions = timeTickFractions,
+                    dateFormat = dateFormat,
                     timeFormat = timeFormat,
                     secondaryText = secondaryText
                 )
@@ -783,30 +978,35 @@ internal fun SessionChartTimeAxis(
     startTimestamp: Long,
     endTimestamp: Long,
     fractions: List<Float>,
-    timeFormat: SimpleDateFormat,
+    dateFormat: UvirDateFormat,
+    timeFormat: UvirTimeFormat,
     secondaryText: Color,
     modifier: Modifier = Modifier
 ) {
+    val showDate = sessionChartSpansMultipleDays(startTimestamp, endTimestamp)
     Layout(
         modifier = modifier.fillMaxWidth(),
         content = {
             fractions.forEach { fraction ->
+                val timestamp =
+                    sessionChartTimestampAt(
+                        startTimestamp = startTimestamp,
+                        endTimestamp = endTimestamp,
+                        fraction = fraction
+                    )
                 Text(
                     text =
-                        timeFormat.format(
-                            Date(
-                                sessionChartTimestampAt(
-                                    startTimestamp =
-                                        startTimestamp,
-                                    endTimestamp =
-                                        endTimestamp,
-                                    fraction = fraction
-                                )
-                            )
-                        ),
+                        if (showDate) {
+                            formatUvirDateOnly(timestamp, dateFormat) + "\n" +
+                                formatUvirTimeOnly(timestamp, timeFormat)
+                        } else {
+                            formatUvirTimeOnly(timestamp, timeFormat)
+                        },
                     color = secondaryText,
                     fontSize = 11.sp,
-                    maxLines = 1
+                    lineHeight = 12.sp,
+                    textAlign = TextAlign.Center,
+                    maxLines = if (showDate) 2 else 1
                 )
             }
         }

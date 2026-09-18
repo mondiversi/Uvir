@@ -164,7 +164,18 @@ fun HistoryScreen(
             id.filterSensorKey() to detailSensorDisplayName(sensorProfiles[id])
         }
     }
-    val filterModes = remember(allRecords) { allRecords.map { it.automatic }.toSet() }
+    val filterModes = remember(allRecords) {
+        allRecords.filterNot { it.externalCommand }.map { it.automatic }.toSet()
+    }
+    val filterExternalModeAvailable = remember(allRecords) {
+        allRecords.any { it.externalCommand }
+    }
+    val filterRecordIds = remember(allRecords) { allRecords.map { it.id }.distinct() }
+    val filterSessionIds = remember(allRecords) { allRecords.mapNotNull { it.sessionId }.distinct() }
+    val filterNotes = remember(allRecords) {
+        allRecords.map { it.note.trim() }.filter { it.isNotEmpty() }.distinct()
+    }
+    val filterDays = remember(allRecords) { uvirAvailableFilterDays(allRecords.map { it.timestamp }) }
     val filterScope = rememberCoroutineScope()
 
     LaunchedEffect(records.size) {
@@ -387,14 +398,16 @@ fun HistoryScreen(
     }
 
     fun sharePendingRecords(
-        selection: MeasurementDetailShareSelection
+        selection: MeasurementDetailShareSelection,
+        destination: UvirExportDestination
     ) {
         pendingSharePlan?.let { plan ->
             runCatching {
                 shareAcquisitionExportPlan(
                     context,
                     plan,
-                    selection
+                    selection,
+                    destination
                 )
             }.onFailure { error ->
                 UvirErrorLog.record(
@@ -552,14 +565,14 @@ fun HistoryScreen(
             title = {
                 Text(
                     stringResource(
-                        if (filters.isActive) R.string.list_filter_share_question else R.string.share_all_measurements_question
+                        if (filters.isActive) R.string.list_filter_export_question else R.string.export_all_measurements_question
                     )
                 )
             },
             text = {
                 Text(
                     stringResource(
-                        if (filters.isActive) R.string.list_filter_share_warning else R.string.share_all_measurements_warning
+                        if (filters.isActive) R.string.list_filter_export_warning else R.string.export_all_measurements_warning
                     )
                 )
             },
@@ -574,7 +587,7 @@ fun HistoryScreen(
                 ) {
                     Text(
                         stringResource(
-                            R.string.share_all
+                            R.string.export_all
                         )
                     )
                 }
@@ -607,19 +620,28 @@ fun HistoryScreen(
             cardColor = cardColor,
             primaryText = primaryText,
             secondaryText = secondaryText,
-            chartsDescription =
-                stringResource(
-                    R.string.share_acquisition_list_charts_description
-                ),
             partialSessionWarning =
                 pendingSharePlan?.hasPartialSessions == true,
+            combinedChartFileCount =
+                pendingSharePlan?.let { plan ->
+                    acquisitionExportChartFileCount(
+                        plan,
+                        UvirChartExportMode.COMBINED
+                    )
+                },
+            separateChartFileCount =
+                pendingSharePlan?.let { plan ->
+                    acquisitionExportChartFileCount(
+                        plan,
+                        UvirChartExportMode.SEPARATE
+                    )
+                },
             onDismiss = {
                 showShareFormatDialog = false
                 pendingSharePlan = null
             },
-            onSelectionConfirmed = {
-                selection ->
-                sharePendingRecords(selection)
+            onSelectionConfirmed = { selection, destination ->
+                sharePendingRecords(selection, destination)
             }
         )
     }
@@ -675,7 +697,7 @@ fun HistoryScreen(
                     ) {
                         UvirTitleActionIcon(
                             type =
-                                MenuIconType.SHARE,
+                                MenuIconType.EXPORT,
                             modifier =
                                 Modifier.size(UvirTitleActionIconSize),
                             tint =
@@ -746,7 +768,13 @@ fun HistoryScreen(
                                     records.size,
                                     records.size,
                                     formatDateTime(
-                                        records.last().timestamp
+                                        records.asSequence()
+                                            .map { it.timestamp }
+                                            .filter { it > 0L }
+                                            .minOrNull()
+                                            ?: records.minOf { it.timestamp },
+                                        LocalUvirDateFormat.current,
+                                        LocalUvirTimeFormat.current
                                     )
                                 ),
                             modifier =
@@ -788,7 +816,14 @@ fun HistoryScreen(
             ) {
                 UvirVerticalReveal(showFilters) {
                     UvirRecordListFilterPanel(
-                        filters = filters, sensorNames = filterSensorNames, modes = filterModes,
+                        filters = filters,
+                        recordIds = filterRecordIds,
+                        sessionIds = filterSessionIds,
+                        notes = filterNotes,
+                        dates = filterDays,
+                        sensorNames = filterSensorNames,
+                        modes = filterModes,
+                        externalModeAvailable = filterExternalModeAvailable,
                         backgroundColor = backgroundColor,
                         onChange = {
                             filters = it
@@ -1116,7 +1151,9 @@ fun HistoryScreen(
                                                 formatAutomaticSessionDateTime(
                                                     sessionStartTimestamps[
                                                         headerSessionId
-                                                    ] ?: record.timestamp
+                                                    ] ?: record.timestamp,
+                                                    LocalUvirDateFormat.current,
+                                                    LocalUvirTimeFormat.current
                                                 ),
                                                 sessionCounts[
                                                     headerSessionId
@@ -1236,8 +1273,10 @@ fun HistoryScreen(
                                         Text(
                                             text =
                                                 formatDateTime(
-                                                    record.timestamp
-                                            ),
+                                                    record.timestamp,
+                                                    LocalUvirDateFormat.current,
+                                                    LocalUvirTimeFormat.current
+                                                ),
                                             color = primaryText,
                                             fontSize = 13.sp,
                                             fontWeight =
@@ -1258,6 +1297,7 @@ fun HistoryScreen(
 
                                 AcquisitionTypeBadge(
                                     automatic = record.automatic,
+                                    externalCommand = record.externalCommand,
                                     primaryText = primaryText,
                                     compact = true
                                 )

@@ -1,133 +1,17 @@
 package me.mondiversi.uvir
 
-import android.Manifest
-import android.app.Activity
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.content.ClipData
-import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
-import android.content.res.Configuration
-import android.content.pm.PackageManager
-import android.database.sqlite.SQLiteDatabase
-import android.database.sqlite.SQLiteOpenHelper
-import android.graphics.BitmapFactory
-import android.media.AudioManager
-import android.media.ToneGenerator
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
 import android.net.Uri
-import android.net.wifi.WifiInfo
-import android.net.wifi.WifiManager
-import android.os.Build
-import android.os.Bundle
 import android.os.PowerManager
-import android.os.VibrationEffect
-import android.os.Vibrator
-import android.os.VibratorManager
 import android.provider.Settings
-import android.widget.Toast
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.BackHandler
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.gestures.drag
-import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.relocation.BringIntoViewRequester
-import androidx.compose.foundation.relocation.bringIntoViewRequester
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.listSaver
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalResources
-import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.pluralStringResource
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.rememberTextMeasurer
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.core.content.FileProvider
-import androidx.core.content.ContextCompat
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
-import androidx.core.view.WindowCompat
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.time.Instant
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
 import java.util.Date
 import java.util.Locale
-import java.util.concurrent.atomic.AtomicReference
-import java.io.File
-import org.json.JSONObject
-import kotlin.math.roundToInt
 import kotlin.random.Random
 
 fun formatInterval(totalSeconds: Long): String {
@@ -145,7 +29,19 @@ fun formatInterval(totalSeconds: Long): String {
     )
 }
 
-fun generateRandomSample(): SensorSample {
+fun generateRandomSample(
+    simulateOutOfRange: Boolean = false
+): SensorSample {
+    val qualityFlags =
+        if (simulateOutOfRange && Random.nextInt(8) == 0) {
+            if (Random.nextBoolean()) {
+                UVIR_QUALITY_UV_OUT_OF_RANGE
+            } else {
+                UVIR_QUALITY_VISIBLE_NIR_OUT_OF_RANGE
+            }
+        } else {
+            0
+        }
     return SensorSample(
         uvc = Random.nextDouble(0.0, 80.0),
         uvb = Random.nextDouble(10.0, 500.0),
@@ -159,7 +55,8 @@ fun generateRandomSample(): SensorSample {
         rosso = Random.nextDouble(80.0, 600.0),
 
         f8 = Random.nextDouble(50.0, 700.0),
-        nir = Random.nextDouble(50.0, 900.0)
+        nir = Random.nextDouble(50.0, 900.0),
+        qualityFlags = qualityFlags
     )
 }
 
@@ -202,7 +99,8 @@ fun combineSamples(
         rosso = averageValues(samples.map { it.rosso }, discardExtremes),
 
         f8 = averageValues(samples.map { it.f8 }, discardExtremes),
-        nir = averageValues(samples.map { it.nir }, discardExtremes)
+        nir = averageValues(samples.map { it.nir }, discardExtremes),
+        qualityFlags = samples.fold(0) { flags, sample -> flags or sample.qualityFlags }
     )
 }
 
@@ -259,6 +157,7 @@ fun occurrenceAtOrAfterMillis(
 }
 
 fun formatClockTime(timestamp: Long): String {
+    if (timestamp <= 0L) return "—"
     return SimpleDateFormat(
         "HH:mm",
         Locale.getDefault()

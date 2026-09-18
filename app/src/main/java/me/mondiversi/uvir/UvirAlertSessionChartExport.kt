@@ -3,7 +3,6 @@ package me.mondiversi.uvir
 import android.content.ClipData
 import android.content.Context
 import android.content.Intent
-import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
@@ -15,8 +14,6 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.core.content.FileProvider
 import java.io.File
 import java.io.FileOutputStream
-import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Locale
 
 internal fun createAlertSessionChartFile(
@@ -25,29 +22,25 @@ internal fun createAlertSessionChartFile(
     entries: List<ThresholdAlertLogEntry>,
     metric: ThresholdAlertMetric
 ): File {
+    val exportFormatting = uvirExportFormatting(context)
+    val exportContext = exportFormatting.context
+    val irradianceUnit = exportFormatting.irradianceUnit
     val sortedEntries = entries.sortedBy { it.timestamp }
     val series =
         alertSessionChartSeries(sortedEntries)
             .first { it.metric == metric }
     val percentageScale = series.usesPercentageScale()
-    val exportContext =
-        context.createConfigurationContext(
-            Configuration(context.resources.configuration).apply {
-                setLocale(Locale.ENGLISH)
-                setLayoutDirection(Locale.ENGLISH)
-            }
-        )
     val metricLabel =
         exportContext.getString(
             thresholdAlertMetricLabelResource(metric)
         )
-    val unit =
-        if (metric.isBiologicalEffect()) {
-            "µW/cm² equiv."
-        } else {
-            "µW/cm²"
-        }
+    val unit = irradianceUnit.symbol + if (metric.isBiologicalEffect()) " eq." else ""
     val chartUnit = if (percentageScale) "%" else unit
+    val valueScale: (Double) -> Double = if (percentageScale) {
+        { value: Double -> value }
+    } else {
+        irradianceUnit::fromCanonicalUwCm2
+    }
 
     val width = 1600
     val titlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -77,7 +70,9 @@ internal fun createAlertSessionChartFile(
         text = chartExportContextText(
             note = sortedEntries.firstOrNull()?.note.orEmpty(),
             sensorName = exportSensorNames(sortedEntries.map { it.sensorDisplayName }),
-            noteLabel = "Session note"
+            noteLabel = exportContext.getString(R.string.share_note_label),
+            sensorLabel = exportContext.getString(R.string.sensor_selector_label),
+            emptyNote = exportContext.getString(R.string.no_note)
         ),
         paint = textPaint,
         maxWidth = 1420f
@@ -88,13 +83,24 @@ internal fun createAlertSessionChartFile(
     val canvas = Canvas(bitmap)
     canvas.drawColor(Color.WHITE)
 
-    canvas.drawText("Uvir alert session chart", 90f, 85f, titlePaint)
+    canvas.drawText(
+        "Uvir ${exportContext.getString(R.string.alert_session_chart_title)}",
+        90f,
+        85f,
+        titlePaint
+    )
     canvas.drawText(
         chartExportIdentifierLine(
-            recordLabel = "Alert",
+            recordLabel = exportContext.getString(R.string.alert_chart_id_label),
             recordId = null,
-            sessionId = sessionId
-        ) + " · $metricLabel · ${series.points.size} alerts",
+            sessionId = sessionId,
+            sessionLabel = exportContext.getString(R.string.share_session_id_label)
+        ) + " · $metricLabel · " +
+            exportContext.resources.getQuantityString(
+                R.plurals.alert_session_chart_alert_count,
+                series.points.size,
+                series.points.size
+            ),
         90f,
         130f,
         textPaint
@@ -103,7 +109,12 @@ internal fun createAlertSessionChartFile(
         canvas.drawText(line, 90f, 170f + index * 30f, textPaint)
     }
     canvas.translate(0f, headerOffset)
-    canvas.drawText("Value ($chartUnit)", 90f, 210f, textPaint)
+    canvas.drawText(
+        exportContext.getString(R.string.alert_session_chart_unit, chartUnit),
+        90f,
+        210f,
+        textPaint
+    )
 
     val left = 130f
     val top = 250f
@@ -114,10 +125,11 @@ internal fun createAlertSessionChartFile(
     val timeSpan = (endTimestamp - startTimestamp).coerceAtLeast(1L)
     val maximum =
         series.points
+            .filterNot { it.outOfRange }
             .flatMap { point ->
                 listOf(
-                    point.chartValue(percentageScale),
-                    point.chartThreshold(percentageScale)
+                    valueScale(point.chartValue(percentageScale)),
+                    valueScale(point.chartThreshold(percentageScale))
                 )
             }
             .maxOrNull()
@@ -126,7 +138,7 @@ internal fun createAlertSessionChartFile(
     val logExtent =
         if (percentageScale) {
             alertThresholdCenteredLogExtent(
-                series.points.map { point -> point.chartValue(true) }
+                series.points.filterNot { it.outOfRange }.map { point -> point.chartValue(true) }
             )
         } else {
             1.0
@@ -159,17 +171,17 @@ internal fun createAlertSessionChartFile(
             }
         canvas.drawText(
             if (percentageScale) {
-                String.format(
-                    Locale.US,
-                    when (alertThresholdAxisFractionDigits(value)) {
-                        0 -> "%.0f%%"
-                        1 -> "%.1f%%"
-                        else -> "%.2f%%"
-                    },
-                    value
-                )
+                formatUvirNumber(
+                    value,
+                    alertThresholdAxisFractionDigits(value),
+                    exportFormatting.numericFormat
+                ) + "%"
             } else {
-                String.format(Locale.US, "%.2f", value)
+                formatUvirNumber(
+                    value,
+                    2,
+                    exportFormatting.numericFormat
+                )
             },
             24f,
             y + 9f,
@@ -184,7 +196,12 @@ internal fun createAlertSessionChartFile(
     val threshold =
         series.points.first().chartThreshold(percentageScale)
     val thresholdPath = Path()
+    var hasPreviousThreshold = false
     series.points.forEachIndexed { index, point ->
+        if (point.outOfRange) {
+            hasPreviousThreshold = false
+            return@forEachIndexed
+        }
         val x =
             if (startTimestamp == endTimestamp) {
                 (left + right) / 2f
@@ -199,17 +216,18 @@ internal fun createAlertSessionChartFile(
                 (top + bottom) / 2f
             } else {
                 bottom -
-                    (point.chartThreshold(false) / maximum).toFloat() *
+                    (valueScale(point.chartThreshold(false)) / maximum).toFloat() *
                     (bottom - top)
             }
         if (series.points.size == 1) {
             thresholdPath.moveTo(left, y)
             thresholdPath.lineTo(right, y)
-        } else if (index == 0) {
+        } else if (!hasPreviousThreshold) {
             thresholdPath.moveTo(x, y)
         } else {
             thresholdPath.lineTo(x, y)
         }
+        hasPreviousThreshold = true
     }
     canvas.drawPath(thresholdPath, thresholdPaint)
 
@@ -220,7 +238,12 @@ internal fun createAlertSessionChartFile(
         strokeCap = Paint.Cap.ROUND
     }
     val valuePath = Path()
+    var hasPreviousValue = false
     series.points.forEachIndexed { index, point ->
+        if (point.outOfRange) {
+            hasPreviousValue = false
+            return@forEachIndexed
+        }
         val x =
             if (startTimestamp == endTimestamp) {
                 (left + right) / 2f
@@ -239,15 +262,16 @@ internal fun createAlertSessionChartFile(
                     ) * (bottom - top)
             } else {
                 bottom -
-                    (point.chartValue(false).coerceAtLeast(0.0) / maximum)
+                    (valueScale(point.chartValue(false)).coerceAtLeast(0.0) / maximum)
                         .toFloat() *
                     (bottom - top)
             }
-        if (index == 0) valuePath.moveTo(x, y) else valuePath.lineTo(x, y)
+        if (!hasPreviousValue) valuePath.moveTo(x, y) else valuePath.lineTo(x, y)
+        hasPreviousValue = true
     }
     canvas.drawPath(valuePath, seriesPaint)
     seriesPaint.style = Paint.Style.FILL
-    series.points.forEach { point ->
+    series.points.filterNot { it.outOfRange }.forEach { point ->
         val x =
             if (startTimestamp == endTimestamp) {
                 (left + right) / 2f
@@ -266,25 +290,24 @@ internal fun createAlertSessionChartFile(
                     ) * (bottom - top)
             } else {
                 bottom -
-                    (point.chartValue(false).coerceAtLeast(0.0) / maximum)
+                    (valueScale(point.chartValue(false)).coerceAtLeast(0.0) / maximum)
                         .toFloat() *
                     (bottom - top)
             }
         canvas.drawCircle(x, y, 9f, seriesPaint)
     }
 
-    val dateFormat =
-        SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
     tickFractions.forEach { fraction ->
         val label =
-            dateFormat.format(
-                Date(
-                    sessionChartTimestampAt(
-                        startTimestamp,
-                        endTimestamp,
-                        fraction
-                    )
-                )
+            csvDateTime(
+                sessionChartTimestampAt(
+                    startTimestamp,
+                    endTimestamp,
+                    fraction
+                ),
+                exportFormatting.dateFormat,
+                exportContext.resources.configuration.locales[0],
+                exportFormatting.timeFormat
             )
         val tickX = left + (right - left) * fraction
         val labelWidth = textPaint.measureText(label)
@@ -300,11 +323,20 @@ internal fun createAlertSessionChartFile(
     canvas.drawText(metricLabel, left + 20f, 947f, textPaint)
     val thresholdLabel =
         if (percentageScale) {
-            "Threshold · 100%"
+            exportContext.getString(R.string.alert_chart_threshold_reference)
         } else {
             val direction =
                 if (series.direction == ThresholdAlertDirection.ABOVE) "≥" else "≤"
-            "Threshold $direction ${String.format(Locale.US, "%.3f", threshold)} $chartUnit"
+            exportContext.getString(
+                R.string.alert_session_chart_threshold,
+                direction,
+                formatUvirNumber(
+                    threshold,
+                    3,
+                    exportFormatting.numericFormat
+                ),
+                chartUnit
+            )
         }
     canvas.drawText(
         thresholdLabel,
@@ -334,62 +366,26 @@ internal fun shareAlertSessionCharts(
     entries: List<ThresholdAlertLogEntry>,
     metrics: List<ThresholdAlertMetric>
 ) {
-    require(entries.isNotEmpty())
-    val availableMetrics =
-        alertSessionChartSeries(entries).map { it.metric }.toSet()
-    val selectedMetrics =
-        metrics.distinct().filter { it in availableMetrics }
-    require(selectedMetrics.isNotEmpty())
-
-    val files =
-        selectedMetrics.map { metric ->
-            createAlertSessionChartFile(
-                context = context,
-                sessionId = sessionId,
-                entries = entries,
-                metric = metric
-            )
-        }
-    val uris =
-        ArrayList(
-            files.map { file ->
-                FileProvider.getUriForFile(
-                    context,
-                    "${context.packageName}.fileprovider",
-                    file
-                )
-            }
+    val file =
+        createAlertSessionCombinedChartFile(
+            context = context,
+            sessionId = sessionId,
+            entries = entries,
+            metrics = metrics
         )
-    val shareIntent =
-        Intent(
-            if (uris.size == 1) {
-                Intent.ACTION_SEND
-            } else {
-                Intent.ACTION_SEND_MULTIPLE
-            }
-        ).apply {
-            type = "image/png"
-            putExtra(
-                Intent.EXTRA_SUBJECT,
-                "Uvir alert session $sessionId chart"
-            )
-            if (uris.size == 1) {
-                putExtra(Intent.EXTRA_STREAM, uris.first())
-            } else {
-                putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris)
-            }
-            clipData =
-                ClipData.newUri(
-                    context.contentResolver,
-                    files.first().name,
-                    uris.first()
-                ).apply {
-                    uris.drop(1).forEach { uri ->
-                        addItem(ClipData.Item(uri))
-                    }
-                }
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        }
+    val uri =
+        FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.fileprovider",
+            file
+        )
+    val shareIntent = Intent(Intent.ACTION_SEND).apply {
+        type = "image/png"
+        putExtra(Intent.EXTRA_SUBJECT, "Uvir alert session $sessionId charts")
+        putExtra(Intent.EXTRA_STREAM, uri)
+        clipData = ClipData.newUri(context.contentResolver, file.name, uri)
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
 
     context.startActivity(
         Intent.createChooser(

@@ -55,6 +55,9 @@ internal fun firmwareSupportsConditionalAcquisition(version: String): Boolean =
 internal fun firmwareSupportsImmediateConditionalAcquisition(version: String): Boolean =
     compareFirmwareVersions(version, "0.5.75") >= 0
 
+internal fun firmwareSupportsExternalCommand(version: String): Boolean =
+    compareFirmwareVersions(version, "0.5.76") >= 0
+
 internal fun evaluateAcquisitionCondition(
     plan: ConditionalAcquisitionPlan,
     sample: SensorSample,

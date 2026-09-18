@@ -17,7 +17,7 @@ import kotlin.math.roundToInt
 internal fun showUvirBottomMessage(
     context: Context,
     text: CharSequence,
-    longDuration: Boolean = true
+    longDuration: Boolean = false
 ) {
     val appContext = context.applicationContext
     val density = appContext.resources.displayMetrics.density

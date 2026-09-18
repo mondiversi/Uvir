@@ -1,6 +1,7 @@
 package me.mondiversi.uvir
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -68,6 +69,7 @@ internal fun UvirSensorSourceDialog(
     onDismissRequest: () -> Unit
 ) {
     var sensorMenuExpanded by remember { mutableStateOf(false) }
+    val sensorMenuScrollState = rememberScrollState()
     val selectorEnabled = sensorSelectionEnabled && sensorProfiles.isNotEmpty()
     val sensorFieldColors = UvirOutlinedTextFieldColors()
     val nightMode = isSystemInDarkTheme()
@@ -165,9 +167,18 @@ internal fun UvirSensorSourceDialog(
                     ExposedDropdownMenu(
                         expanded = sensorMenuExpanded && selectorEnabled,
                         onDismissRequest = { sensorMenuExpanded = false },
-                        modifier = Modifier.testTag("sensor_profile_menu"),
-                        containerColor = if (nightMode) Color(0xFF27323B) else MenuDefaults.containerColor,
-                        tonalElevation = if (nightMode) 0.dp else MenuDefaults.TonalElevation
+                        scrollState = sensorMenuScrollState,
+                        modifier =
+                            Modifier
+                                .testTag("sensor_profile_menu")
+                                .scrollbarOverlay(
+                                    sensorMenuScrollState,
+                                    secondaryText.copy(alpha = 0.45f)
+                                ),
+                        containerColor =
+                            if (nightMode) UvirDropdownNightContainerColor
+                            else UvirDropdownDayContainerColor,
+                        tonalElevation = UvirDropdownTonalElevation
                     ) {
                         sensorProfiles.sortedBy { it.displayName.lowercase() }.forEach { profile ->
                             DropdownMenuItem(
@@ -180,7 +191,11 @@ internal fun UvirSensorSourceDialog(
                                 },
                                 trailingIcon = {
                                     Text(
-                                        text = formatSensorListLastActivity(profile.lastSeenAt),
+                                        text = formatSensorListLastActivity(
+                                            profile.lastSeenAt,
+                                            LocalUvirDateFormat.current,
+                                            LocalUvirTimeFormat.current
+                                        ),
                                         color = secondaryText,
                                         fontSize = 11.sp,
                                         lineHeight = 12.sp,

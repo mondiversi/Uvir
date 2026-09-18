@@ -11,15 +11,22 @@ import java.util.Locale
 internal fun shareAlertDetail(
     context: Context,
     entry: ThresholdAlertLogEntry,
-    selection: MeasurementDetailShareSelection
+    selection: MeasurementDetailShareSelection,
+    destination: UvirExportDestination = UvirExportDestination.SHARE
 ) {
     shareAlertDetails(
         context = context,
         entries = listOf(entry),
         baseName = uvirAlertExportBaseName(entry),
         selection = selection,
-        chartFiles = {
-            listOf(createAlertChartFile(context, entry))
+        destination = destination,
+        chartFiles = { mode ->
+            when (mode) {
+                UvirChartExportMode.COMBINED ->
+                    listOf(createAlertChartFile(context, entry))
+                UvirChartExportMode.SEPARATE ->
+                    createAlertSeparateChartFiles(context, entry)
+            }
         }
     )
 }
@@ -28,7 +35,8 @@ internal fun shareAlertSessionDetail(
     context: Context,
     sessionId: Long,
     entries: List<ThresholdAlertLogEntry>,
-    selection: MeasurementDetailShareSelection
+    selection: MeasurementDetailShareSelection,
+    destination: UvirExportDestination = UvirExportDestination.SHARE
 ) {
     require(entries.isNotEmpty())
     shareAlertDetails(
@@ -36,14 +44,23 @@ internal fun shareAlertSessionDetail(
         entries = entries,
         baseName = uvirAlertSessionExportBaseName(sessionId, entries),
         selection = selection,
-        chartFiles = {
-            alertSessionChartSeries(entries).map { series ->
-                createAlertSessionChartFile(
-                    context = context,
-                    sessionId = sessionId,
-                    entries = entries,
-                    metric = series.metric
-                )
+        destination = destination,
+        chartFiles = { mode ->
+            when (mode) {
+                UvirChartExportMode.COMBINED ->
+                    listOf(
+                        createAlertSessionCombinedChartFile(
+                            context = context,
+                            sessionId = sessionId,
+                            entries = entries
+                        )
+                    )
+                UvirChartExportMode.SEPARATE ->
+                    createAlertSessionSeparateChartFiles(
+                        context = context,
+                        sessionId = sessionId,
+                        entries = entries
+                    )
             }
         }
     )
@@ -54,20 +71,14 @@ private fun shareAlertDetails(
     entries: List<ThresholdAlertLogEntry>,
     baseName: String,
     selection: MeasurementDetailShareSelection,
-    chartFiles: () -> List<File>
+    destination: UvirExportDestination,
+    chartFiles: (UvirChartExportMode) -> List<File>
 ) {
     require(entries.isNotEmpty())
     require(selection.dataFormat != null || selection.includeCharts)
 
-    val exportConfiguration =
-        android.content.res.Configuration(
-            context.resources.configuration
-        ).apply {
-            setLocale(Locale.ENGLISH)
-            setLayoutDirection(Locale.ENGLISH)
-        }
-    val exportContext =
-        context.createConfigurationContext(exportConfiguration)
+    val exportFormatting = uvirExportFormatting(context)
+    val exportContext = exportFormatting.context
     val sharedDirectory =
         File(context.cacheDir, "shared").apply {
             mkdirs()
@@ -91,7 +102,10 @@ private fun shareAlertDetails(
                         thresholdAlertLogCsv(
                             exportContext,
                             entries,
-                            UvirNumericFormat.INTERNATIONAL
+                            exportFormatting.numericFormat,
+                            exportFormatting.dateFormat,
+                            exportFormatting.timeFormat,
+                            exportFormatting.irradianceUnit
                         )
                 )
         }
@@ -104,7 +118,10 @@ private fun shareAlertDetails(
                         readableThresholdAlertLog(
                             exportContext,
                             entries,
-                            UvirNumericFormat.INTERNATIONAL
+                            exportFormatting.numericFormat,
+                            exportFormatting.dateFormat,
+                            exportFormatting.timeFormat,
+                            exportFormatting.irradianceUnit
                         )
                 )
         }
@@ -117,7 +134,10 @@ private fun shareAlertDetails(
                         thresholdAlertLogCsv(
                             exportContext,
                             entries,
-                            UvirNumericFormat.INTERNATIONAL
+                            exportFormatting.numericFormat,
+                            exportFormatting.dateFormat,
+                            exportFormatting.timeFormat,
+                            exportFormatting.irradianceUnit
                         )
                 )
             files +=
@@ -127,7 +147,10 @@ private fun shareAlertDetails(
                         readableThresholdAlertLog(
                             exportContext,
                             entries,
-                            UvirNumericFormat.INTERNATIONAL
+                            exportFormatting.numericFormat,
+                            exportFormatting.dateFormat,
+                            exportFormatting.timeFormat,
+                            exportFormatting.irradianceUnit
                         )
                 )
         }
@@ -136,7 +159,12 @@ private fun shareAlertDetails(
     }
 
     if (selection.includeCharts) {
-        files += chartFiles()
+        files += chartFiles(selection.chartExportMode)
+    }
+
+    if (destination == UvirExportDestination.SAVE) {
+        requestUvirExportSave(context, files)
+        return
     }
 
     val uris =

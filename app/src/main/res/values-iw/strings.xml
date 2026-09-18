@@ -45,11 +45,13 @@
     <string name="automatic_completed_count">רכישות אוטומטיות של %1$d נשמרו</string>
     <plurals name="automatic_session_details">
         <item quantity="one">%1$s · (%2$d)</item>
+        <item quantity="two">%1$s · (%2$d)</item>
         <item quantity="other">%1$s · (%2$d)</item>
     </plurals>
     <string name="session_label">הפעלה</string>
     <plurals name="alert_session_details">
         <item quantity="one">%1$s · (%2$d)</item>
+        <item quantity="two">%1$s · (%2$d)</item>
         <item quantity="other">%1$s · (%2$d)</item>
     </plurals>
     <string name="saved_measurements">רכישות</string>
@@ -60,14 +62,18 @@
     <string name="share_measurements">שתף רכישות</string>
     <string name="share_all_measurements_question">לשתף את כל הרכישות שנשמרו?</string>
     <string name="share_all_measurements_warning">לא נבחרו רכישות, לכן כל הרכישות שנשמרו ישותפו.</string>
-    <string name="choose_share_format">בחר פורמט שיתוף</string>
-    <string name="share_as_csv">CSV</string>
-    <string name="share_as_readable_table">טבלה קריאה</string>
-    <string name="share_as_charts">תרשימים</string>
+    <string name="choose_share_format">בחר תבנית ייצוא</string>
+    <string name="share_as_csv">גיליון אלקטרוני (CSV)</string>
+    <string name="share_as_readable_table">טבלה קריאה (TXT)</string>
+    <string name="acquisition_position_label">מיקום</string>
+    <string name="session_variant_heading">וריאציה %1$d/%2$d</string>
+    <string name="session_variant_chart_files_info">ייווצרו %1$d קובצי PNG, אחד לכל וריאציה.</string>
+    <string name="export_total_label">סך הכול</string>
+    <string name="share_as_charts">תרשים (PNG)</string>
     <string name="share_as_charts_description">מייצא שלושה תרשימי קרינה ותרשים אפקטים ביולוגיים אחד כארבע תמונות PNG נפרדות.</string>
     <string name="share_acquisition_list_charts_description">מייצא שלושה גרפי קרינה וגרף אחד של השפעות ביולוגיות כארבע תמונות PNG נפרדות עבור כל רכישה בודדת או הפעלה שנבחרה.</string>
     <string name="share_alert_list_charts_description">מייצא שלושה גרפי קרינה וגרף אחד של השפעות ביולוגיות כארבע תמונות PNG נפרדות עבור כל התראת ערך בודדת או הפעלה שנבחרה.</string>
-    <string name="share_partial_session_warning">בחירה חלקית מתוך הפעלה מיוצאת כרכישות בודדות: לכל רכישה נוצרים תרשימי קרינה והשפעות ביולוגיות משלה, במקום תרשימי ההפעלה המלאים.</string>
+    <string name="share_partial_session_warning">הפעלות שנבחרו חלקית מיוצאות כרכישות בודדות: כל רכישה מפיקה תרשים קרינה והשפעות ביולוגיות משלה, במקום התרשים הכולל של ההפעלה.</string>
     <string name="share_partial_alert_session_warning">בחירות לא שלמות של הפעלת התראת ערך מיוצאות כהתראות בודדות, עם תרשים נפרד לכל התראה.</string>
     <string name="share_as_both">שניהם</string>
     <string name="share">שתף</string>
@@ -75,6 +81,7 @@
     <string name="delete_selected_measurements_question">למחוק את הרכישות שנבחרו?</string>
     <plurals name="delete_selected_measurements_warning">
         <item quantity="one">הרכישה שנבחרה ב-%1$d תימחק לצמיתות.</item>
+        <item quantity="two">%1$d רכישות שנבחרו יימחקו לצמיתות.</item>
         <item quantity="other">%1$d רכישות שנבחרו יימחקו לצמיתות.</item>
     </plurals>
     <string name="share_measurement_id_label">מזהה רכישה</string>
@@ -102,14 +109,16 @@
     <string name="automatic_notification_title">רכישה אוטומטית מתבצעת</string>
     <plurals name="automatic_notification_saved">
         <item quantity="one">רכישת %1$d נשמרה</item>
+        <item quantity="two">רכישות %1$d נשמרו</item>
         <item quantity="other">רכישות %1$d נשמרו</item>
     </plurals>
     <string name="threshold_notification_channel_name">התראות ערך</string>
     <string name="threshold_notification_channel_description">התראות פעילות עבור הערכים המוגדרים.</string>
     <string name="threshold_notification_title">התראה בעיצומה</string>
-    <string name="threshold_notification_value">ערך התראה: %1$.3f %2$s</string>
+    <string name="threshold_notification_value">ערך התראה: %1$s %2$s</string>
     <string name="threshold_notification_last_measurement">מדידה אחרונה: %1$s</string>
     <string name="interval">הַפסָקָה</string>
+    <string name="execution_interval">מרווח ביצוע</string>
     <string name="hours">שעות</string>
     <string name="minutes">דקות</string>
     <string name="seconds">שניות</string>
@@ -140,14 +149,16 @@
     <string name="continue_acquisition">המשך בהפעלה</string>
     <string name="acquisition_parameters">הגדרות</string>
     <string name="connectivity">קישוריות</string>
-    <string name="settings_section_sensor_connection">חיבור חיישן</string>
-    <string name="settings_section_sensor_parameters">ניהול חיישן</string>
+    <string name="settings_section_sensor_connection">חיבור</string>
+    <string name="settings_section_sensor_parameters">ניהול</string>
+    <string name="settings_category_sensor">חיישן</string>
+    <string name="settings_category_phone">טלפון</string>
     <string name="sensor_settings_connection_required">חבר את החיישן כדי לשנות הגדרות אלה.</string>
     <string name="sensor_parameters_description">הגדר את פעולת החיישן והתנהגותו.</string>
     <string name="home_sensor_disconnected_title">חיישן לא מחובר</string>
     <string name="home_sensor_disconnected_description">חבר את החיישן כדי לבצע רכישות, לרשום התראות או לשנות את הגדרות החיישן.</string>
     <string name="home_sensor_disconnected_hint">פתח את הגדרות › חיבור חיישן כדי לבחור USB, Wi-Fi או Bluetooth וצפה בהוראות החיבור.</string>
-    <string name="sensor_connection_provisioning_reminder">כדי להשתמש ב-Wi-Fi או Bluetooth, חבר את החיישן פיזית באמצעות USB לפחות פעם אחת. Uvir תשמור באופן מאובטח את הזהות הייחודית ואת פרטי הגישה שלו.</string>
+    <string name="sensor_connection_provisioning_reminder">כדי להשתמש ב-Wi-Fi או Bluetooth, חבר את החיישן באמצעות USB לפחות פעם אחת. היישום יקבל באופן מאובטח את הזהות הייחודית ואת פרטי הגישה של החיישן.</string>
     <string name="sensor_connection_usb">USB</string>
     <string name="sensor_connection_wifi">Wi-Fi</string>
     <string name="sensor_connection_bluetooth">Bluetooth</string>
@@ -156,7 +167,7 @@
     <string name="sensor_radio_usb_control_description">ניתן לשנות הגדרה זו באמצעות USB או דרך חיבור אלחוטי פעיל אחר. אם שני החיבורים האלחוטיים מושבתים, יש להשתמש ב-USB כדי להפעיל אחד מהם מחדש.</string>
     <string name="sensor_radio_setting_updated">הגדרות רדיו חיישן עודכנו</string>
     <string name="sensor_radio_setting_usb_required">חיישן לא מחובר. השתמש ב-USB, Wi-Fi או Bluetooth ונסה שוב.</string>
-    <string name="sensor_usb_priority_description">ברירת מחדל וחיבור עדיפות כאשר הכבל מוכנס. אתה עדיין יכול לבחור Wi-Fi או Bluetooth באופן ידני מתפריט המקור.</string>
+    <string name="sensor_usb_priority_description">חיבור ברירת המחדל והעדיפות כאשר הכבל מחובר.</string>
     <string name="sensor_source_title">מקור חיישן</string>
     <string name="sensor_source_accessibility">מקור חיישן: %1$s</string>
     <string name="sensor_source_debug_accessibility">עקיפת נתונים מדומים פעילה</string>
@@ -244,8 +255,9 @@
     <string name="sensor_info_peak_power">הספק שיא</string>
     <string name="sensor_info_reference_voltage">מתח התייחסות</string>
     <string name="sensor_info_power_estimate_note">הערכת תוכנה מבוססת על החיבור הפעיל, הדגימה והאינדיקטורים. הצריכה בפועל דורשת מד חשמל חיצוני.</string>
-    <string name="sensor_wifi_esp32_description">הטלפון והחיישן חייבים להשתמש באותה רשת Wi-Fi. ניתן לשמור או לשנות את הרשת דרך USB או דרך חיבור Wi-Fi או Bluetooth כבר פעיל ומאומת. אם אין חיבור אלחוטי זמין, השתמש ב-USB.</string>
-    <string name="sensor_bluetooth_esp32_description">חיבור ה-USB הראשון מקשר בצורה מאובטחת את החיישן לטלפון זה. בחר Bluetooth כמקור בזמן שהכבל מחובר, ולאחר מכן חבר את התקן Uvir המוצג בהגדרות Android. החיבור ישיר ומאומת.</string>
+    <string name="sensor_wifi_esp32_description">היישום מתקשר עם החיישן כאשר שניהם משתמשים באותה רשת Wi-Fi.</string>
+    <string name="sensor_connection_configuration_paths_description">ניתן לשמור או לשנות רשתות אלחוטיות דרך USB או דרך חיבור אלחוטי שכבר פעיל ומאומת. אם אין חיבור אלחוטי זמין, השתמש ב-USB.</string>
+    <string name="sensor_bluetooth_esp32_description">יש לצמד את החיישן דרך הגדרות ה-Bluetooth של Android; החיבור שלו עם היישום ישיר ומאומת.</string>
     <string name="sensor_calibration_estimate_description">ערכי VIS/NIR הם אומדנים ב-µW/cm² הנגזרים מתגובתיות טיפוסית של גליון נתונים של AS7343. כיול מוחלט של מודול פיזי זה עדיין דורש התייחסות אופטית מכוילת.</string>
     <string name="sensor_provisioning_hint">חבר את החיישן הזה פעם אחת על ידי USB כדי לקבל בצורה מאובטחת את השם הייחודי שלו ואת אישורי הגישה שלו.</string>
     <string name="sensor_associated_value">מזהה חיישן משויך: %1$s</string>
@@ -283,7 +295,7 @@
     <string name="invalid_acquisition_parameters">השתמש ב-1–21 דגימות ובמרווח של 150–5000 אלפיות השנייה.</string>
     <string name="parameters_saved">ההגדרות נשמרו</string>
     <string name="threshold_alerts_title">התראת ערך</string>
-    <string name="threshold_alerts_description">השתמש בפעמון על כל קבוצה במסך הראשי, ולאחר מכן בחר את הערך ואת המגבלה שלו. כאן אתה יכול להגדיר חזרה וצליל.</string>
+    <string name="threshold_alerts_description">השתמש בפעמון של כל קבוצה במסך הראשי כדי להגדיר ערכים וגבולות. כאן ניתן לבחור את צליל ההתראה.</string>
     <string name="threshold_alerts_select_values">ערכים וגבולות</string>
     <string name="threshold_alerts_value">ערך למעקב</string>
     <string name="threshold_channel_uv_total">אוּלְטרָה סָגוֹל</string>
@@ -306,7 +318,7 @@
     <string name="threshold_rule_below_summary">מופעל כאשר הערך שווה או מתחת לגבול.</string>
     <string name="threshold_value_label">סף (µW/cm²)</string>
     <string name="threshold_value_biological_label">סף (שווי µW/cm²)</string>
-    <string name="threshold_repeat_label">חזור על התראה כל פעם</string>
+    <string name="threshold_repeat_label">מרווח בדיקה</string>
     <string name="threshold_duration_label">משך צליל (שניות)</string>
     <string name="threshold_sound_label">צליל</string>
     <string name="threshold_sound_silent">שָׁקֶט</string>
@@ -357,11 +369,13 @@
     <string name="delete_selected_alerts_question">למחוק את ההתראות שנבחרו?</string>
     <plurals name="delete_selected_alerts_warning">
         <item quantity="one">ההתראה שנבחרה תימחק לצמיתות.</item>
+        <item quantity="two">ההתראות שנבחרו ב-%1$d יימחקו לצמיתות.</item>
         <item quantity="other">ההתראות שנבחרו ב-%1$d יימחקו לצמיתות.</item>
     </plurals>
     <string name="threshold_alerts_deleted">התראות נמחקו</string>
     <plurals name="threshold_alert_count_since">
         <item quantity="one">%1$d נשמר · מאז %2$s</item>
+        <item quantity="two">%1$d נשמר · מאז %2$s</item>
         <item quantity="other">%1$d נשמר · מאז %2$s</item>
     </plurals>
     <string name="threshold_alert_export_subject">יומן התראות ערך Uvir</string>
@@ -373,15 +387,27 @@
     <string name="threshold_log_violation_below">%1$s: %2$s µW/cm² ≤ %3$s µW/cm²</string>
     <string name="threshold_log_biological_violation_above">%1$s: %2$s µW/cm² eq. ≥ %3$s µW/cm² eq.</string>
     <string name="threshold_log_biological_violation_below">%1$s: %2$s µW/cm² eq. ≤ %3$s µW/cm² eq.</string>
-    <string name="settings_section_numeric_format">פורמט מספרי</string>
-    <string name="numeric_format_description">בחר כיצד המספרים יוצגו באפליקציה. תוכן מיוצא או משותף משתמש תמיד בפורמט הנומרי הבינלאומי.</string>
+    <string name="settings_section_numeric_format">תבניות אזוריות</string>
+    <string name="numeric_format_description">בחר את תבנית המספרים.</string>
+    <string name="format_numbers_heading">מספרים</string>
+    <string name="format_date_time_heading">תאריך</string>
+    <string name="format_time_heading">שעה</string>
+    <string name="time_format_description">בחר את תבנית השעה.</string>
+    <string name="time_format_system">ברירת מחדל</string>
+    <string name="time_format_24_hours">24 שעות</string>
+    <string name="time_format_12_hours">12 שעות</string>
+    <string name="date_format_description">בחר את תבנית התאריך.</string>
+    <string name="date_format_system">ברירת מחדל</string>
+    <string name="date_format_international">בינלאומי</string>
+    <string name="date_format_european">אירופי</string>
+    <string name="date_format_american">אמריקאי</string>
     <string name="numeric_format_system">בְּרִירַת מֶחדָל</string>
     <string name="numeric_format_international">בינלאומי</string>
-    <string name="numeric_format_international_example">1,000.23</string>
+    <string name="numeric_format_international_example">1 000.23</string>
     <string name="numeric_format_european">אֵירוֹפִּי</string>
     <string name="numeric_format_european_example">1.000,23</string>
     <string name="settings_section_language">שָׂפָה</string>
-    <string name="language_description">בחר את שפת ממשק האפליקציה. תוכן מיוצא או משותף משתמש תמיד באנגלית.</string>
+    <string name="language_description">בחר את שפת הממשק.</string>
     <string name="language_system">ברירת מחדל</string>
     <string name="language_italian">Italiano</string>
     <string name="language_english">English</string>
@@ -443,6 +469,7 @@
     <string name="delete_all">מחק הכל</string>
     <plurals name="measurement_count_since">
         <item quantity="one">%1$d נשמר · מאז %2$s</item>
+        <item quantity="two">%1$d נשמר · מאז %2$s</item>
         <item quantity="other">%1$d נשמר · מאז %2$s</item>
     </plurals>
     <string name="no_saved_measurements">לא נשמרו רכישות.</string>
@@ -453,6 +480,7 @@
     <string name="delete">מחק</string>
     <string name="saved_measurement">רכישה שמורה</string>
     <string name="note">הערה</string>
+    <string name="edit_note">עריכת הערה</string>
     <string name="no_note">אין הערה</string>
     <string name="automatic_badge">A</string>
     <string name="manual_badge">M</string>
@@ -460,6 +488,7 @@
     <string name="acquisition_type">סוג רכישה</string>
     <string name="automatic_measurement">אוֹטוֹמָטִי</string>
     <string name="manual_measurement">יָדָנִי</string>
+    <string name="external_measurement">חיצונית</string>
     <string name="uv_radiation">אוּלְטרָה סָגוֹל</string>
     <string name="hev_description">אנרגיה גבוהה גלויה</string>
     <string name="high_energy_visible_total_label">גלוי באנרגיה גבוהה / HEV</string>
@@ -489,7 +518,7 @@
     <string name="about_description">אפליקציה לאיסוף נתונים ספקטרליים של קרינה על־סגולה, נראית ותת־אדומה.</string>
     <string name="about_spectral_ranges">תחומים ספקטרליים: על־סגול • אור נראה • תת־אדום</string>
     <string name="about_sensors">חיישנים נתמכים: AS7331 UV • AS7343 multispectral</string>
-    <string name="about_derived_values">HEV, HEB והשפעות ביולוגיות משוערות הם ערכים נגזרים המחושבים מהנתונים הספקטרליים הנרכשים.</string>
+    <string name="about_derived_values">השפעות ביולוגיות משוערות הן ערכים נגזרים המחושבים מהנתונים הספקטרליים שנרכשו.</string>
     <string name="biological_model_version">דגם ביולוגי: %1$s</string>
     <string name="about_copyright">זכויות יוצרים © 2026 Mondiversi</string>
     <string name="about_license">רישיון: GNU General Public License v3.0</string>
@@ -532,7 +561,7 @@
     <string name="acquisition_chart_share_current">סעיף נוכחי</string>
     <string name="acquisition_chart_share_current_description">משתף את התרשימים במקטע %1$s.</string>
     <string name="acquisition_chart_share_all">כל התרשימים</string>
-    <string name="acquisition_chart_share_all_description">משתף שלושה תרשימי קרינה ותרשים השפעות ביולוגיות אחד כארבעה קובצי PNG נפרדים.</string>
+    <string name="acquisition_chart_share_all_description">משתף את כל חלקי התרשים בתמונת PNG אחת.</string>
     <string name="acquisition_chart_share_error">לא ניתן היה לשתף את תרשים הרכישה.</string>
     <string name="acquisition_chart_date">נרכש: %1$s</string>
     <string name="acquisition_chart_note">הערת רכישה</string>
@@ -541,6 +570,7 @@
     <string name="chart_biological_unit">µW/cm² equiv.</string>
     <plurals name="session_chart_acquisition_count">
         <item quantity="one">רכישת %1$d</item>
+        <item quantity="two">רכישות %1$d</item>
         <item quantity="other">רכישות %1$d</item>
     </plurals>
     <string name="alert_session_chart_title">הפעלת התראת ערך</string>
@@ -564,6 +594,7 @@
     <string name="alert_session_chart_threshold">סף %1$s %2$s %3$s</string>
     <plurals name="alert_session_chart_alert_count">
         <item quantity="one">התראת ערך %1$d</item>
+        <item quantity="two">התראות ערך %1$d</item>
         <item quantity="other">התראות ערך %1$d</item>
     </plurals>
     <string name="alert_chart_title">התראת ערך</string>
@@ -644,7 +675,7 @@
     <string name="sensor_automatic_shutdown">כיבוי אוטומטי</string>
     <string name="sensor_automatic_shutdown_description">כאשר אין פעולה או סנכרון פעילים והיישום נשאר מנותק, החיישן נכנס לכיבוי חסכוני לאחר הזמן שנבחר. לאחר מכן יש להפעיל אותו מחדש באופן פיזי.</string>
     <string name="sensor_automatic_shutdown_after">כיבוי לאחר</string>
-    <string name="sensor_status_led">נורית מצב החיישן</string>
+    <string name="sensor_status_led">נורית מצב</string>
     <string name="sensor_status_led_description">משתמש בנורית RGB למצב החיבור והסנכרון ובנורית הכחולה הנפרדת לפעולות פעילות ולאירועים שנרשמו.</string>
     <string name="sensor_led_info_title">אותות נוריות החיישן</string>
     <string name="sensor_led_info_action">הסבר על אותות נוריות החיישן</string>
@@ -663,10 +694,12 @@
     <string name="sensor_led_signal_operation_active_description">הפעלה, סנכרון או פעולה אחרת מתבצעים.</string>
     <string name="sensor_led_signal_recorded">LED כחול · 3 הבהובים</string>
     <string name="sensor_led_signal_recorded_description">רכישה/התראת ערכים.</string>
+    <string name="sensor_led_signal_time_unavailable">LED כחול · 5 הבהובים מהירים</string>
+    <string name="sensor_led_signal_time_unavailable_description">הרכישה לא נשמרה: התאריך והשעה אינם זמינים.</string>
     <string name="sensor_connection_toast_connected">חיישן מחובר</string>
     <string name="sensor_connection_toast_disconnected">חיישן לא מחובר</string>
     <string name="sensor_led_brightness">בהירות LED</string>
-    <string name="sensor_status_buzzer">זמזם מצב החיישן</string>
+    <string name="sensor_status_buzzer">זמזם מצב</string>
     <string name="sensor_status_buzzer_description">משמיע צלילי סטטוס לחיבור, התחלת או הפסקת פעילות והקלטות חדשות.</string>
     <string name="sensor_buzzer_volume">עוצמת זמזם</string>
     <string name="sensor_buzzer_info_title">האותות הקוליים של החיישן</string>
@@ -690,7 +723,7 @@
     <string name="threshold_repeat_connection_required">חבר את החיישן כדי לשנות את מרווח ההתראה.</string>
     <string name="threshold_rules_connection_required">חבר את החיישן כדי לשנות התראות אלו.</string>
     <string name="threshold_repeat_sensor_description">מרווח זה נשמר בחיישן ומגביל גם התראות המוקלטות בזמן שהאפליקציה מנותקת.</string>
-    <string name="sensor_calibration_title">כיול חיישן</string>
+    <string name="sensor_calibration_title">כיול</string>
     <string name="sensor_calibration_description">החל גורמי תיקון שהושגו בהשוואה למכשיר ייחוס מכויל. פקטור של 1,000 שומר על אומדן ברירת המחדל של גליון הנתונים.</string>
     <string name="sensor_calibration_visible_factor">מקדם תיקון VIS/NIR · AS7343</string>
     <string name="sensor_calibration_uv_factor">מקדם תיקון UV · AS7331</string>
@@ -710,16 +743,16 @@
     <string name="language_russian">Русский</string>
     <string name="language_turkish">Türkçe</string>
     <string name="sensor_connection_internet">אינטרנט</string>
-    <string name="sensor_internet_description">התחברות מרחוק לחיישן דרך מתווך MQTT מאובטח. אין צורך לפתוח יציאה בנתב.</string>
+    <string name="sensor_internet_description">היישום מתחבר מרחוק לחיישן דרך מתווך MQTT מאובטח. אין צורך לפתוח יציאה בנתב. היישום והחיישן יוצרים חיבורים יוצאים, ולכן הדבר פועל גם עם נתבים סלולריים ו-CGNAT.</string>
     <string name="sensor_internet_enabled">הפעלת חיבור לאינטרנט</string>
     <string name="sensor_internet_enabled_description">משאיר את החיישן נגיש דרך מתווך ה-MQTT שהוגדר.</string>
     <string name="sensor_internet_use_primary_wifi">שימוש באותה רשת Wi-Fi</string>
     <string name="sensor_internet_use_primary_wifi_description">משתמש ברשת שכבר הוגדרה באזור ה-Wi-Fi.</string>
     <string name="sensor_internet_relay_host_label">כתובת מתווך MQTT</string>
+    <string name="sensor_internet_relay_host_supporting">שם מארח בלבד: ללא פרוטוקול, יציאה או נתיב.</string>
     <string name="sensor_internet_relay_port_label">יציאת TLS</string>
     <string name="sensor_internet_mqtt_username_label">שם משתמש MQTT</string>
     <string name="sensor_internet_mqtt_password_label">סיסמת MQTT</string>
-    <string name="sensor_internet_relay_hint">יש להזין את כתובת מתווך ה-MQTT, יציאת TLS ופרטי ההתחברות. החיישן והיישום יוצרים חיבורים יוצאים, ולכן הדבר פועל גם עם נתבים סלולריים ו-CGNAT.</string>
     <string name="sensor_internet_invalid">יש לבדוק את הגדרות החיבור לאינטרנט.</string>
     <string name="sensor_selector_label">חיישן</string>
     <string name="sensor_name_label">שם החיישן</string>
@@ -789,6 +822,8 @@
     <string name="diagnostic_failed">לא ניתן להשלים את בדיקת האבחון.</string>
     <string name="debug_secret_melody_found">מצאת את המנגינה הסודית</string>
     <string name="conditional_acquisition">רכישה אם</string>
+    <string name="external_command">פקודה חיצונית</string>
+    <string name="external_command_description">מדידה נשמרת רק כאשר החיישן מזהה פקודה בכניסה החיצונית. הערת ההפעלה נשמרת; המרווח, ההתחלה המתוזמנת, הסיום, המגבלה ותנאי המדידה אינם בשימוש.</string>
     <string name="conditional_waiting">ממתין לתנאי…</string>
     <string name="conditional_description">יש להגדיר את הערכים והספים למדידה. התנאים מועתקים לחיישן בתחילת ההפעלה.</string>
     <string name="conditional_when">תנאי</string>
@@ -802,6 +837,8 @@
     <string name="conditional_no_rules">יש להגדיר לפחות תנאי אחד לפני ההתחלה.</string>
     <string name="sensor_buzzer_signal_alert_saved">שלושה צפצופים קצרים ברצף</string>
     <string name="sensor_buzzer_signal_alert_saved_description">רישום התראת ערכים.</string>
+    <string name="sensor_buzzer_signal_time_unavailable">צפצוף ממושך אחד</string>
+    <string name="sensor_buzzer_signal_time_unavailable_description">הרכישה לא נשמרה: התאריך והשעה אינם זמינים.</string>
     <string name="conditional_configure">הגדרת תנאים</string>
     <string name="conditional_editor_title">תנאי מדידה</string>
     <string name="conditional_start_description">בודק כל דגימה. כשהתנאי מתקיים, איסוף המדידה מתחיל מיד ומתחיל מרווח הרכישה.</string>
@@ -811,6 +848,8 @@
     <string name="list_filters">מסננים</string>
     <string name="list_filter_all">הכול</string>
     <string name="list_filter_all_modes">הכול</string>
+    <string name="list_filter_all_notes">הכול</string>
+    <string name="list_filter_all_dates">הכול</string>
     <string name="list_filter_from">מתאריך</string>
     <string name="list_filter_until">עד תאריך</string>
     <string name="list_filter_reset">איפוס מסננים</string>
@@ -819,4 +858,98 @@
     <string name="list_filter_count">מוצגים %1$d מתוך %2$d</string>
     <string name="list_filter_share_question">לשתף את כל התוצאות המוצגות?</string>
     <string name="list_filter_share_warning">לא נבחרו רשומות. כל הרשומות התואמות למסננים הנוכחיים ישותפו.</string>
+    <string name="settings_section_language_formats">יחידות ותבניות</string>
+    <string name="settings_section_sharing_export">ייצוא</string>
+    <string name="export">ייצוא</string><string name="import_settings">ייבוא</string>
+    <string name="export_saved_successfully">הקבצים נשמרו.</string><string name="export_save_failed">לא ניתן לשמור את הקבצים.</string>
+    <string name="export_destination_description">שמור את הקבצים במכשיר או שתף אותם עם יישום אחר.</string>
+    <string name="export_settings_title">ייצוא הגדרות</string><string name="export_app_settings">הגדרות יישום</string>
+    <string name="export_app_settings_description">ממשק, תבניות והעדפות טלפון. הרשומות אינן נכללות.</string>
+    <string name="export_sensor_settings">הגדרות חיישן</string><string name="export_sensor_settings_description">כיול, דגימה ואפשרויות פעולה. פרטי גישה וכתובות רשת אינם נכללים.</string>
+    <string name="settings_export_failed">לא ניתן לייצא את ההגדרות.</string><string name="settings_import_failed">קובץ ההגדרות שנבחר אינו תקין או שלא ניתן לייבא אותו.</string>
+    <plurals name="settings_imported_count"><item quantity="one">יובא קובץ הגדרות אחד.</item><item quantity="two">יובאו שני קובצי הגדרות.</item><item quantity="many">יובאו %d קובצי הגדרות.</item><item quantity="other">יובאו %d קובצי הגדרות.</item></plurals>
+    <string name="language_formats_description">בחר כיצד הנתונים יוצגו ויעוצבו באפליקציה.</string>
+    <string name="export_format_heading">ייצוא</string>
+    <string name="irradiance_measurement_heading">מדידת עוצמת קרינה</string>
+    <string name="irradiance_measurement_description">בחר את היחידה להצגת עוצמת הקרינה. הערכים השמורים שומרים על הדיוק המקורי של החיישן.</string>
+    <string name="export_format_description">בחר אם קובצי CSV, טבלאות קריאות וגרפים ישתמשו בהגדרות שנבחרו או בפרופיל המדעי הבינלאומי.</string>
+    <string name="export_profile_heading">פורמט</string>
+    <string name="export_format_selected">שפה ותבניות שנבחרו</string>
+    <string name="export_format_international">מדעי בינלאומי</string>
+    <string name="export_format_preview_heading">תצוגה מקדימה</string>
+    <string name="export_format_profile_summary">שפה: %1$s · מספרים: %2$s · תאריך: %3$s · שעה: %4$s · עוצמת קרינה: %5$s</string>
+    <string name="out_of_range_short">OL - מחוץ לטווח</string>
+    <string name="out_of_range_csv_header">ערך_מחוץ_לטווח</string>
+    <string name="debug_fake_out_of_range">ערכים מחוץ לטווח</string>
+    <string name="debug_fake_out_of_range_description">מדמה מדי פעם ערכים מחוץ לטווח.</string>
+    <string name="language_english_localized">אנגלית</string>
+    <string name="sensor_info_scale_sensitivity">טווח ורגישות</string>
+    <string name="sensor_info_display_scale">סולם תצוגה</string>
+    <string name="sensor_info_selected_unit">יחידה שנבחרה</string>
+    <string name="sensor_info_scale_equivalence">שקילות סולמות</string>
+    <string name="sensor_info_scale_levels">רמות טווח</string>
+    <string name="sensor_info_as7343_scale_levels">הגבר אוטומטי: 16×, 32×, 64×, 128×, 256×, 512× או 1024×; המדידה מתחילה ב־256×. זמן האינטגרציה נשאר 27.8 אלפיות שנייה למחזור SMUX, עם שלושה מחזורים לספקטרום מלא.</string>
+    <string name="sensor_info_range_control">בקרת טווח</string>
+    <string name="sensor_info_as7343_range_control">ההגבר עולה מתחת ל־250 ספירות גולמיות ויורד החל מ־9,200. עד שלוש קריאות בוחרות טווח מתאים.</string>
+    <string name="sensor_info_precision">דיוק</string>
+    <string name="sensor_info_precision_note">כל הכפלה של ההגבר מכפילה את התגובה הגולמית לאור חלש, אך מקטינה בערך בחצי את המרווח לרוויה. הדבר משפר רגישות ורזולוציה, לא את דיוק הכיול; יחידת התצוגה אינה משפיעה.</string>
+    <string name="sensor_info_status">מצב</string>
+    <string name="sensor_info_as7331_scale_pending">הקושחה הנוכחית משתמשת בפרופיל המדידה הקבוע של מנהל ההתקן; התאמת טווח אוטומטית עדיין אינה פעילה.</string>
+    <string name="sensor_info_as7331_precision_note">הגבר או זמן המרה גבוהים יותר ישפרו רזולוציה של UV חלש אך יקטינו את המרווח לרוויה. הרמות האוטומטיות המדויקות יוצגו לאחר אימות עם חומרת AS7331.</string>
+    <string name="settings_section_sounds_and_alerts">צלילים והתראות</string>
+    <string name="export_database_dialog_title">ייצוא מסד הנתונים כולו</string>
+    <string name="export_database_dialog_description">כל מסד הנתונים של האפליקציה השמור בטלפון זה ייוצא, כולל מדידות והתראות ערכים שמורות.</string>
+    <string name="export_error_log_dialog_title">ייצוא יומן השגיאות</string>
+    <string name="export_error_log_dialog_description">יומן השגיאות של האפליקציה השמור בטלפון זה ייוצא כקובץ טכני. מדידות שמורות ופרטי גישה אינם נכללים.</string>
+    <string name="export_diagnostic_dialog_title">ייצוא דוח האבחון</string>
+    <string name="export_diagnostic_dialog_description">דוח האבחון של החיישן ייוצא. הוא מכיל תוצאות בדיקה טכניות, אך לא סיסמאות או פרטי גישה.</string>
+    <string name="acquisition_feedback_description">בחר את המשוב שהיישום משמיע כאשר מדידה ידנית או אוטומטית נשמרת.</string>
+    <string name="acquisition_feedback_preview_hint">הקש על אפשרות כדי לנסות אותה. העוצמה הסופית תלויה גם בעוצמת השעון המעורר בטלפון.</string>
+    <string name="confirmation_question_suffix">?</string>
+    <string name="threshold_alerts_sound_description_v2">בחר את המשוב שהיישום משמיע כאשר התראת ערך נרשמת.</string>
+    <string name="export_all_measurements_question">לייצא את כל המדידות השמורות?</string>
+    <string name="export_all_measurements_warning">לא נבחרו מדידות, ולכן כל המדידות השמורות ייוצאו.</string>
+    <string name="export_all_alerts_question">לייצא את כל התראות הערכים שנרשמו?</string>
+    <string name="export_all_alerts_warning">לא נבחרו התראות ערכים, ולכן כל התראות הערכים שנרשמו ייוצאו.</string>
+    <string name="list_filter_export_question">לייצא את כל התוצאות המוצגות?</string>
+    <string name="list_filter_export_warning">לא נבחרו רשומות. כל הרשומות המתאימות למסננים הנוכחיים ייוצאו.</string>
+    <string name="export_all">ייצוא הכול</string>
+    <string name="settings_include_sensitive_information">כלול נתונים רגישים</string>
+    <string name="settings_include_sensitive_information_description">כולל פרטי התחברות. תתבקש סיסמת הצפנה.</string>
+    <string name="settings_encryption_password_title">סיסמת הצפנה</string>
+    <string name="settings_encryption_password_description">בחר סיסמה בת שמונה תווים לפחות להצפנת קובץ הגדרות החיישן. אותה סיסמה תידרש כדי לייבא אותו מאוחר יותר.</string>
+    <string name="settings_encryption_password">סיסמת הצפנה</string>
+    <string name="settings_encryption_password_confirm">אישור סיסמה</string>
+    <string name="settings_encryption_password_too_short">יש להשתמש ב-%1$d תווים לפחות.</string>
+    <string name="settings_encryption_password_mismatch">הסיסמאות אינן תואמות.</string>
+    <string name="settings_encrypt">הצפן</string>
+    <string name="settings_decryption_password_title">לפתוח את הגיבוי?</string>
+    <string name="settings_decryption_password_description">הגיבוי מוצפן. הזן את הסיסמה ששימשה לייצוא.</string>
+    <string name="settings_decryption_password_incorrect">סיסמה שגויה או קובץ פגום.</string>
+    <string name="settings_decrypt">פתח</string>
+    <string name="export_sensor_settings_description_complete">כיול, דגימה, אפשרויות הפעלה והגדרות חיבור.</string>
+    <string name="sensor_external_command_description">מציג כיצד החיישן מגיב לפקודות מהקלט החיצוני.</string>
+    <string name="sensor_external_command_info_action">הסבר על פקודות הקלט החיצוני</string>
+    <string name="sensor_external_command_info_description">אפשר להפעיל את הקלט באמצעות לחצן, מגע יבש או ממסר. נדרשים תאריך ושעה תקינים לצורך הפעולה.</string>
+    <string name="sensor_external_command_short">לחיצה קצרה</string>
+    <string name="sensor_external_command_short_description">שומר מדידה יחידה או את המדידה הבאה בהפעלה חיצונית פעילה.</string>
+    <string name="sensor_external_command_triple">שלוש לחיצות קצרות</string>
+    <string name="sensor_external_command_triple_description">מתחיל הפעלה חיצונית. שלוש הלחיצות עצמן אינן שומרות מדידות.</string>
+    <string name="sensor_external_command_long">לחיצה ממושכת</string>
+    <string name="sensor_external_command_long_description">עוצר את הפעלת הרכישה או התראת הערכים הפעילה.</string>
+    <string name="sensor_external_command_active">הפעלה כבר פעילה</string>
+    <string name="sensor_external_command_active_description">שלוש לחיצות אינן משפיעות. לחיצות קצרות שומרות רק כשההפעלה הפעילה חיצונית.</string>
+    <string name="sensor_external_command_no_time">התאריך והשעה אינם זמינים</string>
+    <string name="sensor_external_command_no_time_description">דבר אינו נשמר או מתחיל; הנורית הכחולה מהבהבת במהירות חמש פעמים והזמזם משמיע צפצוף ממושך.</string>
+    <string name="session_sequence_filter_title">הגדרת וריאציות</string>
+    <string name="session_sequence_filter_description">כל מיקום צילום יכול לכלול כמה וריאציות, למשל מזוויות שונות. בחר כמה וריאציות מרכיבות כל מיקום.</string>
+    <string name="session_sequence_filter_settings_title">הגדרות וריאציות</string>
+    <string name="session_sequence_filter_cycle_size">וריאציות לכל מיקום</string>
+    <string name="session_sequence_filter_position">וריאציה</string>
+    <string name="session_sequence_filter_preview">רכישות מוצגות: %1$d מתוך %2$d</string>
+    <string name="session_sequence_filter_preview_total">סך הכול %1$d רכישות</string>
+    <string name="session_sequence_filter_example">רכישות מוצגות: %1$d, %2$d, %3$d…</string>
+    <string name="share_charts_combined_groups">קובץ אחד לכל הקבוצות</string>
+    <string name="share_charts_separate_groups">קובץ אחד לכל קבוצה</string>
+    <string name="share_chart_file_count">קובצי PNG: %1$d</string>
 </resources>

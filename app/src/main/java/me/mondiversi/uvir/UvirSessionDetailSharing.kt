@@ -12,20 +12,14 @@ internal fun shareAcquisitionSessionDetail(
     context: Context,
     sessionId: Long,
     records: List<SavedRecordDetail>,
-    selection: MeasurementDetailShareSelection
+    selection: MeasurementDetailShareSelection,
+    destination: UvirExportDestination = UvirExportDestination.SHARE
 ) {
     require(records.isNotEmpty())
     require(selection.dataFormat != null || selection.includeCharts)
 
-    val exportConfiguration =
-        android.content.res.Configuration(
-            context.resources.configuration
-        ).apply {
-            setLocale(Locale.ENGLISH)
-            setLayoutDirection(Locale.ENGLISH)
-        }
-    val exportContext =
-        context.createConfigurationContext(exportConfiguration)
+    val exportFormatting = uvirExportFormatting(context)
+    val exportContext = exportFormatting.context
     val sharedDirectory =
         File(context.cacheDir, "shared").apply {
             mkdirs()
@@ -55,8 +49,14 @@ internal fun shareAcquisitionSessionDetail(
                     extension = "csv",
                     content =
                         measurementCsv(
-                            records,
-                            UvirNumericFormat.INTERNATIONAL
+                            recordsInVariantExportOrder(records),
+                            exportFormatting.numericFormat,
+                            exportFormatting.dateFormat,
+                            exportFormatting.language,
+                            exportContext.resources.configuration.locales[0],
+                            exportContext,
+                            exportFormatting.timeFormat,
+                            exportFormatting.irradianceUnit
                         )
                 )
         }
@@ -69,7 +69,11 @@ internal fun shareAcquisitionSessionDetail(
                         readableMeasurementTable(
                             exportContext,
                             records,
-                            UvirNumericFormat.INTERNATIONAL
+                            exportFormatting.numericFormat,
+                            exportFormatting.dateFormat,
+                            exportFormatting.timeFormat,
+                            exportFormatting.irradianceUnit,
+                            groupByVariant = true
                         )
                 )
         }
@@ -80,8 +84,14 @@ internal fun shareAcquisitionSessionDetail(
                     extension = "csv",
                     content =
                         measurementCsv(
-                            records,
-                            UvirNumericFormat.INTERNATIONAL
+                            recordsInVariantExportOrder(records),
+                            exportFormatting.numericFormat,
+                            exportFormatting.dateFormat,
+                            exportFormatting.language,
+                            exportContext.resources.configuration.locales[0],
+                            exportContext,
+                            exportFormatting.timeFormat,
+                            exportFormatting.irradianceUnit
                         )
                 )
             files +=
@@ -91,7 +101,11 @@ internal fun shareAcquisitionSessionDetail(
                         readableMeasurementTable(
                             exportContext,
                             records,
-                            UvirNumericFormat.INTERNATIONAL
+                            exportFormatting.numericFormat,
+                            exportFormatting.dateFormat,
+                            exportFormatting.timeFormat,
+                            exportFormatting.irradianceUnit,
+                            groupByVariant = true
                         )
                 )
         }
@@ -101,14 +115,17 @@ internal fun shareAcquisitionSessionDetail(
 
     if (selection.includeCharts) {
         files +=
-            SessionChartGroup.entries.map { group ->
-                createSessionChartFile(
-                    context = context,
-                    sessionId = sessionId,
-                    records = records,
-                    group = group
-                )
-            }
+            createSessionVariantChartFiles(
+                context = context,
+                sessionId = sessionId,
+                records = records,
+                mode = selection.chartExportMode
+            )
+    }
+
+    if (destination == UvirExportDestination.SAVE) {
+        requestUvirExportSave(context, files)
+        return
     }
 
     val uris =

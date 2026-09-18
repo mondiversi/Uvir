@@ -62,14 +62,14 @@ class UvirDetailMetadataTest {
 
     @Test
     fun emptyListNoteUsesTheLocalizedPlaceholderBeforeTheSensor() {
-        assertEquals("Nessuna nota · Sensore", sensorAndNoteDisplayText("Sensore", "", "Nessuna nota"))
+        assertEquals("— · Sensore", sensorAndNoteDisplayText("Sensore", "", "—"))
     }
 
     @Test
     fun emptySessionNoteStillKeepsSequenceBeforeSensor() {
         assertEquals(
-            "#3 · Garden sensor",
-            sensorAndNoteDisplayText("Garden sensor", "", "No note", sessionSequence = 3)
+            "#3 · — · Garden sensor",
+            sensorAndNoteDisplayText("Garden sensor", "", "—", sessionSequence = 3)
         )
     }
 

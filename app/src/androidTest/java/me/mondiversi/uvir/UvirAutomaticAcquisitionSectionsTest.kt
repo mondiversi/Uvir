@@ -41,7 +41,8 @@ class UvirAutomaticAcquisitionSectionsTest {
                     state = rememberLazyListState()) {
                     item { Spacer(Modifier.height(260.dp)) }
                     item {
-                        UvirAutomaticAcquisitionSection("Option", AutomaticSettingIconType.DURATION,
+                        UvirAutomaticAcquisitionSection("Option",
+                            AutomaticSettingIconType.INTERVAL,
                             expanded.value, { expanded.value = it; changes++ },
                             MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.onSurface,
                             MaterialTheme.colorScheme.onSurfaceVariant) {
@@ -86,7 +87,8 @@ class UvirAutomaticAcquisitionSectionsTest {
                     expected = surface
                     expectedText = MaterialTheme.colorScheme.onSurface
                     Box(Modifier.width(320.dp).testTag("card")) {
-                        UvirAutomaticAcquisitionSection("Option", AutomaticSettingIconType.DURATION,
+                        UvirAutomaticAcquisitionSection("Option",
+                            AutomaticSettingIconType.INTERVAL,
                             expanded.value, { expanded.value = it }, surface,
                             MaterialTheme.colorScheme.onSurface, MaterialTheme.colorScheme.onSurfaceVariant) {
                             Text("Details")
@@ -125,7 +127,8 @@ class UvirAutomaticAcquisitionSectionsTest {
         val expanded = mutableStateOf(false)
         compose.setContent {
             MaterialTheme {
-                UvirAutomaticAcquisitionSection("Option", AutomaticSettingIconType.CONDITIONAL,
+                UvirAutomaticAcquisitionSection("Option",
+                    AutomaticSettingIconType.INTERVAL,
                     expanded.value, { expanded.value = it }, MaterialTheme.colorScheme.surface,
                     MaterialTheme.colorScheme.onSurface, MaterialTheme.colorScheme.onSurfaceVariant) {
                     Text("Details")

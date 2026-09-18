@@ -423,13 +423,16 @@ private fun UvirDetailDurationRow(
 @Composable
 fun AcquisitionTypeBadge(
     automatic: Boolean,
+    externalCommand: Boolean = false,
     primaryText: Color,
     compact: Boolean = false,
     large: Boolean = false
 ) {
     val description =
         stringResource(
-            if (automatic) {
+            if (externalCommand) {
+                R.string.external_measurement
+            } else if (automatic) {
                 R.string.automatic_badge_description
             } else {
                 R.string.manual_measurement
@@ -455,6 +458,7 @@ fun AcquisitionTypeBadge(
         Box(contentAlignment = Alignment.Center) {
             AcquisitionTypeGlyph(
                 automatic = automatic,
+                externalCommand = externalCommand,
                 modifier =
                     Modifier.size(
                         when {
@@ -472,6 +476,7 @@ fun AcquisitionTypeBadge(
 @Composable
 private fun AcquisitionTypeGlyph(
     automatic: Boolean,
+    externalCommand: Boolean = false,
     modifier: Modifier = Modifier,
     tint: Color = LocalContentColor.current
 ) {
@@ -487,7 +492,27 @@ private fun AcquisitionTypeGlyph(
                 size.minDimension * 0.08f
             )
 
-        if (automatic) {
+        if (externalCommand) {
+            drawLine(
+                color = tint,
+                start = Offset(iconWidth * 0.28f, iconHeight * 0.18f),
+                end = Offset(iconWidth * 0.28f, iconHeight * 0.84f),
+                strokeWidth = strokeWidth,
+                cap = StrokeCap.Round
+            )
+            listOf(0.18f, 0.51f, 0.84f).forEach { y ->
+                drawLine(
+                    color = tint,
+                    start = Offset(iconWidth * 0.28f, iconHeight * y),
+                    end = Offset(
+                        iconWidth * if (y == 0.51f) 0.68f else 0.74f,
+                        iconHeight * y
+                    ),
+                    strokeWidth = strokeWidth,
+                    cap = StrokeCap.Round
+                )
+            }
+        } else if (automatic) {
             drawLine(
                 color = tint,
                 start = Offset(

@@ -280,7 +280,11 @@ internal fun UvirDebugPerformanceContent(
                     modifier = Modifier.weight(1f),
                     colors = uvirDestructiveButtonColors()
                 ) {
-                    Text(stringResource(R.string.debug_performance_stop))
+                    UvirLabeledButtonContent(
+                        text = stringResource(R.string.debug_performance_stop)
+                    ) {
+                        UvirButtonGlyphIcon(UvirButtonGlyph.STOP)
+                    }
                 }
             } else {
                 Button(
@@ -289,7 +293,11 @@ internal fun UvirDebugPerformanceContent(
                     modifier = Modifier.weight(1f),
                     colors = uvirPrimaryButtonColors()
                 ) {
-                    Text(stringResource(R.string.debug_performance_play))
+                    UvirLabeledButtonContent(
+                        text = stringResource(R.string.debug_performance_play)
+                    ) {
+                        UvirButtonGlyphIcon(UvirButtonGlyph.PLAY)
+                    }
                 }
             }
         }

@@ -62,7 +62,8 @@ internal fun wrapChartExportText(
 }
 
 internal fun sessionChartNote(
-    records: List<SavedRecordDetail>
+    records: List<SavedRecordDetail>,
+    emptyNote: String = "No note"
 ): String {
     val notes =
         records
@@ -71,7 +72,7 @@ internal fun sessionChartNote(
             .distinct()
 
     return if (notes.isEmpty()) {
-        "—"
+        emptyNote
     } else {
         notes.joinToString(" · ")
     }
@@ -80,9 +81,10 @@ internal fun sessionChartNote(
 internal fun chartExportIdentifierLine(
     recordLabel: String,
     recordId: Long?,
-    sessionId: Long?
+    sessionId: Long?,
+    sessionLabel: String = "session ID"
 ): String {
     val recordValue = recordId?.toString() ?: "—"
     val sessionValue = sessionId?.toString() ?: "—"
-    return "$recordLabel / session ID: $recordValue / $sessionValue"
+    return "$recordLabel / $sessionLabel: $recordValue / $sessionValue"
 }

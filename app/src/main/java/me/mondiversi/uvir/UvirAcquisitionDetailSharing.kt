@@ -10,25 +10,25 @@ import java.util.Locale
 
 internal data class MeasurementDetailShareSelection(
     val dataFormat: MeasurementShareFormat?,
-    val includeCharts: Boolean
+    val includeCharts: Boolean,
+    val chartExportMode: UvirChartExportMode = UvirChartExportMode.COMBINED
 )
+
+internal enum class UvirChartExportMode {
+    COMBINED,
+    SEPARATE
+}
 
 internal fun shareAcquisitionDetail(
     context: Context,
     record: SavedRecordDetail,
-    selection: MeasurementDetailShareSelection
+    selection: MeasurementDetailShareSelection,
+    destination: UvirExportDestination = UvirExportDestination.SHARE
 ) {
     require(selection.dataFormat != null || selection.includeCharts)
 
-    val exportConfiguration =
-        android.content.res.Configuration(
-            context.resources.configuration
-        ).apply {
-            setLocale(Locale.ENGLISH)
-            setLayoutDirection(Locale.ENGLISH)
-        }
-    val exportContext =
-        context.createConfigurationContext(exportConfiguration)
+    val exportFormatting = uvirExportFormatting(context)
+    val exportContext = exportFormatting.context
     val sharedDirectory =
         File(context.cacheDir, "shared").apply {
             mkdirs()
@@ -55,7 +55,13 @@ internal fun shareAcquisitionDetail(
                     "csv",
                     measurementCsv(
                         listOf(record),
-                        UvirNumericFormat.INTERNATIONAL
+                        exportFormatting.numericFormat,
+                        exportFormatting.dateFormat,
+                        exportFormatting.language,
+                        exportContext.resources.configuration.locales[0],
+                        exportContext,
+                        exportFormatting.timeFormat,
+                        exportFormatting.irradianceUnit
                     )
                 )
         }
@@ -67,7 +73,10 @@ internal fun shareAcquisitionDetail(
                     readableMeasurementTable(
                         exportContext,
                         listOf(record),
-                        UvirNumericFormat.INTERNATIONAL
+                        exportFormatting.numericFormat,
+                        exportFormatting.dateFormat,
+                        exportFormatting.timeFormat,
+                        exportFormatting.irradianceUnit
                     )
                 )
         }
@@ -78,7 +87,13 @@ internal fun shareAcquisitionDetail(
                     "csv",
                     measurementCsv(
                         listOf(record),
-                        UvirNumericFormat.INTERNATIONAL
+                        exportFormatting.numericFormat,
+                        exportFormatting.dateFormat,
+                        exportFormatting.language,
+                        exportContext.resources.configuration.locales[0],
+                        exportContext,
+                        exportFormatting.timeFormat,
+                        exportFormatting.irradianceUnit
                     )
                 )
             files +=
@@ -87,7 +102,10 @@ internal fun shareAcquisitionDetail(
                     readableMeasurementTable(
                         exportContext,
                         listOf(record),
-                        UvirNumericFormat.INTERNATIONAL
+                        exportFormatting.numericFormat,
+                        exportFormatting.dateFormat,
+                        exportFormatting.timeFormat,
+                        exportFormatting.irradianceUnit
                     )
                 )
         }
@@ -97,13 +115,17 @@ internal fun shareAcquisitionDetail(
 
     if (selection.includeCharts) {
         files +=
-            AcquisitionChartGroup.entries.flatMap { group ->
-                createAcquisitionChartFiles(
-                    context = context,
-                    record = record,
-                    group = group
-                )
+            when (selection.chartExportMode) {
+                UvirChartExportMode.COMBINED ->
+                    listOf(createAcquisitionCombinedChartFile(context, record))
+                UvirChartExportMode.SEPARATE ->
+                    createAcquisitionSeparateChartFiles(context, record)
             }
+    }
+
+    if (destination == UvirExportDestination.SAVE) {
+        requestUvirExportSave(context, files)
+        return
     }
 
     val uris =

@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
@@ -18,6 +19,7 @@ internal fun UvirConditionalAcquisitionCard(
     rules: List<ThresholdAlertRule>,
     waiting: Boolean,
     locked: Boolean,
+    controlsEnabled: Boolean = true,
     cardColor: Color,
     primaryText: Color,
     secondaryText: Color,
@@ -29,17 +31,28 @@ internal fun UvirConditionalAcquisitionCard(
 ) {
     val rulesAvailable = rules.any { it.enabled }
     // Expansion is always available; it does not change an already running plan.
-    var lockedExpanded by rememberSaveable(locked, enabled) { mutableStateOf(enabled) }
+    var lockedExpanded by rememberSaveable(locked, enabled) {
+        mutableStateOf(enabled)
+    }
     val expanded = if (locked) lockedExpanded else enabled
-    val choicesEnabled = rulesAvailable && !locked
+    val choicesEnabled = rulesAvailable && !locked && controlsEnabled
     val choicesText = primaryText.copy(alpha = if (choicesEnabled) 1f else 0.62f)
     val descriptionText = if (choicesEnabled) secondaryText else choicesText
     UvirAutomaticAcquisitionSection(
         title = stringResource(R.string.conditional_acquisition),
         icon = AutomaticSettingIconType.CONDITIONAL,
         expanded = expanded,
-        onExpandedChange = { if (locked) lockedExpanded = it else onEnabled(it) },
-        cardColor = cardColor, primaryText = primaryText, secondaryText = secondaryText
+        onExpandedChange = {
+            if (locked) {
+                lockedExpanded = it
+            } else if (it) {
+                onEnabled(true)
+            } else {
+                onEnabled(false)
+            }
+        },
+        cardColor = cardColor, primaryText = primaryText, secondaryText = secondaryText,
+        controlsEnabled = controlsEnabled
     ) {
         OutlinedButton(
             onClick = onConfigure, enabled = !locked,
@@ -47,7 +60,14 @@ internal fun UvirConditionalAcquisitionCard(
             colors = uvirOutlinedActionColors(primaryText),
             border = uvirOutlinedActionBorder(!locked, secondaryText)
         ) {
-            Text(stringResource(R.string.conditional_configure))
+            UvirLabeledButtonContent(
+                text = stringResource(R.string.conditional_configure)
+            ) {
+                AutomaticSettingIcon(
+                    type = AutomaticSettingIconType.CONFIGURE,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
         }
         if (waiting) {
             Text(stringResource(R.string.conditional_waiting),
@@ -103,5 +123,36 @@ internal fun UvirConditionalAcquisitionCard(
         }
         Text(stringResource(R.string.conditional_limits_description),
             fontSize = 12.sp, color = if (locked) secondaryText else descriptionText)
+    }
+}
+
+@Composable
+internal fun UvirExternalCommandCard(
+    enabled: Boolean,
+    locked: Boolean,
+    cardColor: Color,
+    primaryText: Color,
+    secondaryText: Color,
+    onEnabled: (Boolean) -> Unit
+) {
+    var lockedExpanded by rememberSaveable(locked, enabled) {
+        mutableStateOf(enabled)
+    }
+    UvirAutomaticAcquisitionSection(
+        title = stringResource(R.string.external_command),
+        icon = AutomaticSettingIconType.EXTERNAL_COMMAND,
+        expanded = if (locked) lockedExpanded else enabled,
+        onExpandedChange = {
+            if (locked) lockedExpanded = it else onEnabled(it)
+        },
+        cardColor = cardColor,
+        primaryText = primaryText,
+        secondaryText = secondaryText
+    ) {
+        Text(
+            text = stringResource(R.string.external_command_description),
+            fontSize = 12.sp,
+            color = secondaryText
+        )
     }
 }

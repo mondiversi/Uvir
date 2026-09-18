@@ -1,6 +1,5 @@
 package me.mondiversi.uvir
 
-import android.content.Context
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
@@ -19,15 +18,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 
 @Composable
 internal fun UvirSensorInternetSettings(
-    context: Context,
-    expanded: Boolean,
-    onExpandedChange: (Boolean) -> Unit,
     sensorSettingsEnabled: Boolean,
-    settingsApplyInProgress: Boolean,
     enabled: Boolean,
     onEnabledChange: (Boolean) -> Unit,
     usePrimaryWifi: Boolean,
@@ -44,160 +38,145 @@ internal fun UvirSensorInternetSettings(
     onMqttUsernameChange: (String) -> Unit,
     mqttPassword: String,
     onMqttPasswordChange: (String) -> Unit,
+    cardColor: Color,
     primaryText: Color,
     secondaryText: Color
 ) {
     val controlsEnabled = sensorSettingsEnabled
+    val commit = LocalSettingsCommit.current
     val mqttPasswordVisible = rememberSaveable { mutableStateOf(false) }
     val revealMqttPassword = controlsEnabled && mqttPasswordVisible.value
     SettingsSection(
         title = stringResource(R.string.sensor_connection_internet),
         titleIcon = ConnectivityIconType.INTERNET,
-        expanded = expanded,
+        expanded = enabled,
         enabled = sensorSettingsEnabled,
+        headerEnabled = sensorSettingsEnabled,
+        headerControl = UvirSettingsHeaderControl.CHECKBOX,
+        highlightExpandedHeader = false,
+        showExpandedDivider = true,
         onExpandedChange = { value ->
-            onExpandedChange(value)
-            saveSettingsSectionExpanded(
-                context,
-                KEY_SETTINGS_INTERNET_EXPANDED,
-                value
-            )
+            onEnabledChange(value)
+            commit?.commit()
         },
-        containerColor = secondaryText.copy(alpha = 0.08f),
+        containerColor = cardColor,
         titleColor = primaryText,
         chevronColor = secondaryText,
-        dividerColor = secondaryText.copy(alpha = 0.18f),
+        dividerColor = secondaryText.copy(alpha = 0.28f),
         contentSpacing = UvirSettingsControlGap
     ) {
-        Text(
+        SettingsPageDescription(
             text = stringResource(R.string.sensor_internet_description),
-            color = secondaryText,
-            fontSize = 11.sp,
-            lineHeight = 14.sp
+            color = secondaryText
         )
 
         SettingsCheckboxWithDescription(
-            checked = enabled,
-            onCheckedChange = onEnabledChange,
-            title = stringResource(R.string.sensor_internet_enabled),
-            description = stringResource(R.string.sensor_internet_enabled_description),
+            checked = usePrimaryWifi,
+            onCheckedChange = onUsePrimaryWifiChange,
+            title = stringResource(R.string.sensor_internet_use_primary_wifi),
+            description =
+                stringResource(R.string.sensor_internet_use_primary_wifi_description),
             primaryText = primaryText,
             secondaryText = secondaryText,
             enabled = controlsEnabled
         )
 
-        if (enabled) {
-            SettingsCheckboxWithDescription(
-                checked = usePrimaryWifi,
-                onCheckedChange = onUsePrimaryWifiChange,
-                title = stringResource(R.string.sensor_internet_use_primary_wifi),
-                description =
-                    stringResource(R.string.sensor_internet_use_primary_wifi_description),
-                primaryText = primaryText,
-                secondaryText = secondaryText,
-                enabled = controlsEnabled
-            )
-
-            if (!usePrimaryWifi) {
-                OutlinedTextField(
-                    value = wifiSsid,
-                    onValueChange = onWifiSsidChange,
-                    modifier = Modifier.fillMaxWidth().settingsCommitOnBlur(),
-                    enabled = controlsEnabled,
-                    label = { Text(stringResource(R.string.sensor_wifi_network_label)) },
-                    singleLine = true,
-                    colors = UvirOutlinedTextFieldColors()
-                )
-                OutlinedTextField(
-                    value = wifiPassword,
-                    onValueChange = onWifiPasswordChange,
-                    modifier = Modifier.fillMaxWidth().settingsCommitOnBlur(),
-                    enabled = controlsEnabled,
-                    label = { Text(stringResource(R.string.sensor_wifi_password_label)) },
-                    singleLine = true,
-                    visualTransformation = PasswordVisualTransformation(),
-                    colors = UvirOutlinedTextFieldColors()
-                )
-            }
-
+        if (!usePrimaryWifi) {
             OutlinedTextField(
-                value = relayHost,
-                onValueChange = onRelayHostChange,
+                value = wifiSsid,
+                onValueChange = onWifiSsidChange,
                 modifier = Modifier.fillMaxWidth().settingsCommitOnBlur(),
                 enabled = controlsEnabled,
-                label = { Text(stringResource(R.string.sensor_internet_relay_host_label)) },
+                label = { Text(stringResource(R.string.sensor_wifi_network_label)) },
                 singleLine = true,
                 colors = UvirOutlinedTextFieldColors()
             )
             OutlinedTextField(
-                value = relayPort,
-                onValueChange = { value ->
-                    onRelayPortChange(value.filter(Char::isDigit).take(5))
-                },
+                value = wifiPassword,
+                onValueChange = onWifiPasswordChange,
                 modifier = Modifier.fillMaxWidth().settingsCommitOnBlur(),
                 enabled = controlsEnabled,
-                label = { Text(stringResource(R.string.sensor_internet_relay_port_label)) },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                label = { Text(stringResource(R.string.sensor_wifi_password_label)) },
                 singleLine = true,
+                visualTransformation = PasswordVisualTransformation(),
                 colors = UvirOutlinedTextFieldColors()
-            )
-            OutlinedTextField(
-                value = mqttUsername,
-                onValueChange = onMqttUsernameChange,
-                modifier = Modifier.fillMaxWidth().settingsCommitOnBlur(),
-                enabled = controlsEnabled,
-                label = { Text(stringResource(R.string.sensor_internet_mqtt_username_label)) },
-                singleLine = true,
-                colors = UvirOutlinedTextFieldColors()
-            )
-            OutlinedTextField(
-                value = mqttPassword,
-                onValueChange = onMqttPasswordChange,
-                modifier = Modifier.fillMaxWidth().settingsCommitOnBlur(),
-                enabled = controlsEnabled,
-                label = { Text(stringResource(R.string.sensor_internet_mqtt_password_label)) },
-                singleLine = true,
-                visualTransformation =
-                    if (revealMqttPassword) {
-                        VisualTransformation.None
-                    } else {
-                        PasswordVisualTransformation()
-                    },
-                trailingIcon = {
-                    val visibilityDescription =
-                        stringResource(
-                            if (revealMqttPassword) {
-                                R.string.hide_password
-                            } else {
-                                R.string.show_password
-                            }
-                        )
-                    IconButton(
-                        onClick = {
-                            mqttPasswordVisible.value = !mqttPasswordVisible.value
-                        },
-                        enabled = controlsEnabled
-                    ) {
-                        UvirPasswordVisibilityIcon(
-                            visible = revealMqttPassword,
-                            modifier =
-                                Modifier
-                                    .size(22.dp)
-                                    .semantics {
-                                        contentDescription = visibilityDescription
-                                    },
-                            tint = if (controlsEnabled) primaryText else secondaryText
-                        )
-                    }
-                },
-                colors = UvirOutlinedTextFieldColors()
-            )
-            Text(
-                text = stringResource(R.string.sensor_internet_relay_hint),
-                color = secondaryText,
-                fontSize = 11.sp,
-                lineHeight = 14.sp
             )
         }
+
+        OutlinedTextField(
+            value = relayHost,
+            onValueChange = onRelayHostChange,
+            modifier = Modifier.fillMaxWidth().settingsCommitOnBlur(),
+            enabled = controlsEnabled,
+            label = { Text(stringResource(R.string.sensor_internet_relay_host_label)) },
+            supportingText = {
+                Text(stringResource(R.string.sensor_internet_relay_host_supporting))
+            },
+            singleLine = true,
+            colors = UvirOutlinedTextFieldColors()
+        )
+        OutlinedTextField(
+            value = relayPort,
+            onValueChange = { value ->
+                onRelayPortChange(value.filter(Char::isDigit).take(5))
+            },
+            modifier = Modifier.fillMaxWidth().settingsCommitOnBlur(),
+            enabled = controlsEnabled,
+            label = { Text(stringResource(R.string.sensor_internet_relay_port_label)) },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            singleLine = true,
+            colors = UvirOutlinedTextFieldColors()
+        )
+        OutlinedTextField(
+            value = mqttUsername,
+            onValueChange = onMqttUsernameChange,
+            modifier = Modifier.fillMaxWidth().settingsCommitOnBlur(),
+            enabled = controlsEnabled,
+            label = { Text(stringResource(R.string.sensor_internet_mqtt_username_label)) },
+            singleLine = true,
+            colors = UvirOutlinedTextFieldColors()
+        )
+        OutlinedTextField(
+            value = mqttPassword,
+            onValueChange = onMqttPasswordChange,
+            modifier = Modifier.fillMaxWidth().settingsCommitOnBlur(),
+            enabled = controlsEnabled,
+            label = { Text(stringResource(R.string.sensor_internet_mqtt_password_label)) },
+            singleLine = true,
+            visualTransformation =
+                if (revealMqttPassword) {
+                    VisualTransformation.None
+                } else {
+                    PasswordVisualTransformation()
+                },
+            trailingIcon = {
+                val visibilityDescription =
+                    stringResource(
+                        if (revealMqttPassword) {
+                            R.string.hide_password
+                        } else {
+                            R.string.show_password
+                        }
+                    )
+                IconButton(
+                    onClick = {
+                        mqttPasswordVisible.value = !mqttPasswordVisible.value
+                    },
+                    enabled = controlsEnabled
+                ) {
+                    UvirPasswordVisibilityIcon(
+                        visible = revealMqttPassword,
+                        modifier =
+                            Modifier
+                                .size(22.dp)
+                                .semantics {
+                                    contentDescription = visibilityDescription
+                                },
+                        tint = if (controlsEnabled) primaryText else secondaryText
+                    )
+                }
+            },
+            colors = UvirOutlinedTextFieldColors()
+        )
     }
 }

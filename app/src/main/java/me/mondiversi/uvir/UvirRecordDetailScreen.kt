@@ -166,6 +166,16 @@ fun RecordDetailScreen(
                 mutableStateOf(false)
             }
 
+    var currentNote
+            by rememberSaveable(record.id) {
+                mutableStateOf(record.note)
+            }
+
+    var showNoteEditor
+            by rememberSaveable(record.id) {
+                mutableStateOf(false)
+            }
+
     var showChart
             by rememberSaveable(record.id) {
                 mutableStateOf(false)
@@ -199,6 +209,11 @@ fun RecordDetailScreen(
             SessionChartGroup.BIOLOGICAL to true
         )
     }
+
+    val currentRecord =
+        remember(record, currentNote) {
+            record.copy(note = currentNote)
+        }
 
     val measurement =
         record.sample
@@ -318,15 +333,18 @@ fun RecordDetailScreen(
             cardColor = cardColor,
             primaryText = primaryText,
             secondaryText = secondaryText,
+            combinedChartFileCount = 1,
+            separateChartFileCount = acquisitionChartGroupCount(record),
             onDismiss = {
                 showShareFormatDialog = false
             },
-            onSelectionConfirmed = { selection ->
+            onSelectionConfirmed = { selection, destination ->
                 runCatching {
                     shareAcquisitionDetail(
                         context = context,
-                        record = record,
-                        selection = selection
+                        record = currentRecord,
+                        selection = selection,
+                        destination = destination
                     )
                 }.onFailure { error ->
                     UvirErrorLog.record(
@@ -341,6 +359,24 @@ fun RecordDetailScreen(
                     )
                 }
                 showShareFormatDialog = false
+            }
+        )
+    }
+
+    if (showNoteEditor) {
+        UvirNoteEditDialog(
+            initialNote = currentNote,
+            cardColor = cardColor,
+            primaryText = primaryText,
+            secondaryText = secondaryText,
+            onSave = { updatedNote ->
+                if (database.updateAcquisitionNote(record.id, updatedNote)) {
+                    currentNote = updatedNote
+                    showNoteEditor = false
+                }
+            },
+            onDismiss = {
+                showNoteEditor = false
             }
         )
     }
@@ -390,7 +426,7 @@ fun RecordDetailScreen(
                     ) {
                         UvirTitleActionIcon(
                             type =
-                                MenuIconType.SHARE,
+                                MenuIconType.EXPORT,
                             modifier =
                                 Modifier.size(24.dp),
                             tint =
@@ -469,7 +505,11 @@ fun RecordDetailScreen(
                         "ID / ${stringResource(R.string.session_label)}",
                     dateLabel =
                         stringResource(R.string.share_date_label),
-                    dateText = formatDetailDateTime(record.timestamp),
+                    dateText = formatDetailDateTime(
+                        record.timestamp,
+                        LocalUvirDateFormat.current,
+                        LocalUvirTimeFormat.current
+                    ),
                     cardColor = cardColor,
                     primaryText = primaryText,
                     secondaryText = secondaryText
@@ -479,17 +519,21 @@ fun RecordDetailScreen(
             item {
                 UvirDetailContextCard(
                     automatic = record.automatic,
+                    externalCommand = record.externalCommand,
                     sensorName = detailSensorName,
                     note =
                         acquisitionDisplayNote(
-                            note = record.note,
+                            note = currentNote,
                             automatic = record.automatic,
                             sessionSequence = record.sessionSequence,
                             emptyNote = stringResource(R.string.no_note)
                         ),
                     cardColor = cardColor,
                     primaryText = primaryText,
-                    secondaryText = secondaryText
+                    secondaryText = secondaryText,
+                    onEditNote = {
+                        showNoteEditor = true
+                    }
                 )
             }
 
@@ -518,7 +562,14 @@ fun RecordDetailScreen(
                         secondaryText,
 
                     modifier =
-                        Modifier.padding(bottom = UvirPinnedSelectorBottomSpacing)
+                        Modifier.padding(
+                            bottom =
+                                if (uvirDetailSelectorPinned(detailListState)) {
+                                    UvirPinnedSelectorBottomSpacing
+                                } else {
+                                    0.dp
+                                }
+                        )
                     )
                 }
             }

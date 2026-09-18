@@ -65,6 +65,25 @@ active buzzer, magnetic transducer, or three-pin module may require a series
 resistor or a transistor driver according to its electrical specifications.
 The firmware generates the tones by PWM and starts at 10% volume.
 
+External acquisition command (active low):
+
+| Command contact | ESP32 Dev Module |
+|---|---|
+| Input | GPIO 33 (`INPUT_PULLUP`) |
+| Return | GND |
+
+A dry pushbutton or open-collector/open-drain output closes GPIO 33 to GND.
+The input is enabled by default and its state is stored persistently by the
+sensor; it can be disabled from **Settings > Management** in the Uvir app.
+One short press records a standalone acquisition, or the next acquisition in
+an external session. Three consecutive short presses start an external session;
+the gesture itself does not create three records. A triple press is ignored
+while any session is already active. Holding for two seconds stops the active
+automatic or value-alert session. All gestures require a valid sensor clock;
+otherwise the blue LED flashes rapidly five times and the buzzer emits one
+prolonged beep. Never apply 5 V directly to GPIO 33: use an optocoupler or a
+properly designed level-shifting/protection stage for an industrial 5 V command.
+
 The bare AS7343 operates at 1.8 V. Only connect the module to the ESP32 3.3 V
 pin if the exact GY-AS7343 board includes a regulator and I2C level shifting.
 Check the markings/schematic of the purchased module first. Never feed a bare
@@ -81,18 +100,29 @@ indicator because it stays nearly constant until the power bank shuts down.
 
 1. Open `UvirSensor.ino` from this folder.
 2. Select the board **ESP32 Dev Module**.
-3. Under **Tools → Partition Scheme**, select **Custom**. The included
-   `partitions.csv` gives the combined Wi-Fi/Bluetooth firmware enough space.
+3. Under **Tools → Partition Scheme**, select **Huge APP (3MB No OTA/1MB
+   SPIFFS)**. The included `partitions.csv` mirrors this 3 MB application
+   layout and gives the combined Wi-Fi/Bluetooth firmware enough space.
 4. Select the ESP32 serial port.
 5. Install **SparkFun AS7343 Arduino Library**, **SparkFun AS7331 Arduino
    Library**, and **SparkFun Toolkit** from the Library Manager if Arduino
    reports a missing library.
 6. Upload the sketch.
 
+The equivalent command-line build is:
+
+```text
+arduino-cli compile --fqbn esp32:esp32:esp32:PartitionScheme=huge_app firmware/esp32/UvirSensor
+```
+
 The repository copy is the working source: open and save this file directly
 from this folder, so later changes stay under version control.
 
 ## USB protocol
+
+For the standalone integration guide, including the recommended handshake,
+measurement schema, automatic jobs and acknowledgement-safe offline recovery,
+see [USB serial integration](../../../docs/USB_SERIAL_PROTOCOL.md).
 
 The serial port uses 115200 baud, 8 data bits, no parity and one stop bit. Each
 message is one JSON object followed by a newline. Protocol name:
@@ -161,8 +191,9 @@ Commands accepted by the ESP32:
   at startup before any normal radio is enabled. Android may still retain its
   own old pairing entry, which must be forgotten/repaired on the phone. This
   does not change Uvir's app-only disassociation or revoke broker/router secrets;
-- `STOP` or `SLEEP`: stop sampling and leave both spectral sensors powered
-  down.
+- `STOP` or `SLEEP`: close the active app stream. The rolling measurement
+  window continues in RAM so physical commands remain immediately usable;
+  both spectral sensors still return to power-down between individual reads.
 - `WIRELESS OFF`, `WIRELESS WIFI`, `WIRELESS BLUETOOTH`, or `WIRELESS INTERNET`: select and persist
   the only radio that should remain available after USB is disconnected.
 - `RADIO WIFI ON/OFF` and `RADIO BLUETOOTH ON/OFF`: enable or disable each
@@ -182,9 +213,11 @@ Commands accepted by the ESP32:
   command is accepted only through an already authenticated Wi-Fi connection;
   Wi-Fi must then be re-enabled through USB.
 
-The ESP32 stops streaming automatically if it does not hear from the Android
-host for 12 seconds. Without an active stream the AS7343 stays powered down,
-the sensor LED stays off, and the loop yields. The default/recommended live
+The ESP32 stops sending frames automatically if it does not hear from the
+Android host for 12 seconds. Measurement continues at the configured cadence
+even without an active stream, keeping the latest averaged result ready in
+RAM for autonomous and external commands. The sensor LED stays off and both
+spectral devices return to power-down between reads. The default/recommended
 interval is 150 ms; the safe range is 150–5000 ms. A capture that takes longer
 still finishes before another sample is taken. Existing saved intervals are
 preserved; the default applies to an unconfigured or factory-reset sensor.
@@ -207,8 +240,8 @@ After this first secure provisioning, Uvir can switch between the two radios
 through whichever authenticated wireless connection is currently active.
 Selecting USB as the measurement source does not turn off the last wireless
 radio, so disconnecting the data cable never strands the sensor offline. The
-sensor remains powered down between requests; use the explicit Wi-Fi disconnect
-control when the radio itself must be disabled.
+spectral devices remain powered down between individual conversions; use the
+explicit Wi-Fi disconnect control when the radio itself must be disabled.
 The ESP32 persists the chosen radio and keeps only that radio enabled. At
 startup it tries the last successfully authenticated mode first. If Uvir does
 not authenticate within 20 seconds, the sensor switches to the other configured
@@ -242,7 +275,11 @@ samples are kept only in RAM, the optional highest and lowest values are
 removed independently for each band, and only the averaged result is sent to
 Android. Android therefore does not average real frames a second time. The
 same processing is used through USB, Wi-Fi and Bluetooth and while the phone
-is absent. Each raw sampling step performs one matching AS7331 one-shot
+is absent. A transport-independent rolling window keeps the newest completed
+average ready even when no app is connected. A physical external command
+snapshots that value; only immediately after startup or a sampling/calibration
+change does it wait for the replacement window to become valid. Each raw
+sampling step performs one matching AS7331 one-shot
 conversion; the UV sensor immediately returns to power-down before the next
 step. Mock data remains generated and averaged by Android because no physical
 sensor exists in that mode.
@@ -291,11 +328,15 @@ that an app connection is in progress, steady green means connected, and
 flashing green means connected while stored records are being synchronized.
 The separate blue LED is reserved for operations: steady blue means an
 automatic session or value-alert monitor is active, while three blue flashes
-report a newly recorded acquisition or alert. The connection, synchronization,
-and operation indicators work independently.
+report a newly recorded acquisition or alert. Five much faster blue flashes
+report that an explicit acquisition was rejected because date and time were not
+available. The connection, synchronization, and operation indicators work
+independently.
 LED use and brightness can be changed in Uvir under **Sensor parameters**.
 The same section controls the optional status buzzer. It distinguishes app
 connection, disconnection, activity start, activity stop and a saved record.
+One prolonged tone reports the same missing-date rejection as the five rapid
+blue flashes.
 All sounds run in a dedicated task so they do not delay sampling or connectivity.
 
 For Wi-Fi, leave the phone connected to the same local network. Uvir finds only

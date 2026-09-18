@@ -44,7 +44,8 @@ private const val STATUS_BUZZER_TEST_ACTIVITY_STARTED_DURATION_MS = 340L
 private const val STATUS_BUZZER_TEST_ACTIVITY_STOPPED_DURATION_MS = 340L
 private const val STATUS_BUZZER_TEST_SAVED_DURATION_MS = 90L
 private const val STATUS_BUZZER_TEST_ALERT_SAVED_DURATION_MS = 290L
-private val STATUS_BUZZER_TEST_MINIMUM_FIRMWARE = listOf(0, 5, 74)
+private const val STATUS_BUZZER_TEST_TIME_UNAVAILABLE_DURATION_MS = 800L
+private val STATUS_BUZZER_TEST_MINIMUM_FIRMWARE = listOf(0, 5, 81)
 
 internal enum class StatusBuzzerGraphic {
     TWO_ASCENDING,
@@ -52,7 +53,8 @@ internal enum class StatusBuzzerGraphic {
     THREE_ASCENDING,
     THREE_DESCENDING,
     SHORT_BEEP,
-    TRIPLE_BEEP
+    TRIPLE_BEEP,
+    LONG_BEEP
 }
 
 internal data class StatusBuzzerSignal(
@@ -98,6 +100,12 @@ internal val statusBuzzerSignals = listOf(
             R.string.sensor_buzzer_signal_alert_saved_description,
             StatusBuzzerGraphic.TRIPLE_BEEP,
             STATUS_BUZZER_TEST_ALERT_SAVED_DURATION_MS
+        ),
+        StatusBuzzerSignal(
+            R.string.sensor_buzzer_signal_time_unavailable,
+            R.string.sensor_buzzer_signal_time_unavailable_description,
+            StatusBuzzerGraphic.LONG_BEEP,
+            STATUS_BUZZER_TEST_TIME_UNAVAILABLE_DURATION_MS
         )
     )
 
@@ -242,6 +250,16 @@ private fun StatusBuzzerSignalGraphic(
                         center = Offset(firstX + index * spacing, size.height / 2f)
                     )
                 }
+            }
+
+            StatusBuzzerGraphic.LONG_BEEP -> {
+                drawLine(
+                    color = color,
+                    start = Offset(8.dp.toPx(), size.height / 2f),
+                    end = Offset(size.width - 8.dp.toPx(), size.height / 2f),
+                    strokeWidth = 4.dp.toPx(),
+                    cap = StrokeCap.Round
+                )
             }
 
             else -> {

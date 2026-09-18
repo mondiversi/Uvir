@@ -4,6 +4,95 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class UvirSensorSelectionStateTest {
+    @Test fun transferProfileCoversAcquisitionAndAlertConfigurationOnly() {
+        val expected =
+            setOf(
+                KEY_SENSOR_CONNECTION_MODE,
+                KEY_LAST_WIRELESS_SENSOR_CONNECTION_MODE,
+                KEY_SAMPLES_PER_MEASUREMENT,
+                KEY_SAMPLE_SPACING_MS,
+                KEY_DISCARD_EXTREMES,
+                KEY_SENSOR_AUTONOMOUS_RECORDING,
+                KEY_SENSOR_AUTOMATIC_SHUTDOWN_ENABLED,
+                KEY_SENSOR_AUTOMATIC_SHUTDOWN_SECONDS,
+                KEY_SENSOR_STATUS_LED_ENABLED,
+                KEY_SENSOR_STATUS_LED_BRIGHTNESS,
+                KEY_SENSOR_STATUS_BUZZER_ENABLED,
+                KEY_SENSOR_STATUS_BUZZER_VOLUME,
+                KEY_SENSOR_EXTERNAL_COMMAND_ENABLED,
+                KEY_SENSOR_VISIBLE_CALIBRATION_FACTOR,
+                KEY_SENSOR_UV_CALIBRATION_FACTOR,
+                KEY_MANUAL_SAVE_MODE,
+                KEY_MANUAL_ACQUISITION_NOTE,
+                KEY_AUTO_INTERVAL_SECONDS,
+                KEY_AUTO_NOTE,
+                KEY_AUTO_USE_START_DELAY,
+                KEY_AUTO_START_DELAY_SECONDS,
+                KEY_AUTO_USE_DURATION,
+                KEY_AUTO_DURATION_SECONDS,
+                KEY_AUTO_LIMIT_ENABLED,
+                KEY_AUTO_MAX_COUNT,
+                KEY_AUTO_EXTERNAL_COMMAND,
+                KEY_AUTO_CONDITIONAL_ENABLED,
+                KEY_AUTO_CONDITIONAL_MATCH,
+                KEY_AUTO_CONDITIONAL_ACTION,
+                KEY_AUTO_CONDITIONAL_RULES,
+                KEY_THRESHOLD_ALERT_NOTE,
+                KEY_THRESHOLD_ALERT_REPEAT_SECONDS,
+                KEY_THRESHOLD_ALERT_DURATION_SECONDS,
+                KEY_THRESHOLD_ALERT_SOUND,
+                KEY_THRESHOLD_ALERT_VOLUME,
+                KEY_THRESHOLD_ALERT_CHANNEL,
+                KEY_THRESHOLD_ALERT_DIRECTION,
+                KEY_THRESHOLD_ALERT_VALUE
+            )
+        assertTrue(sensorConfigurationPreferenceKeys.containsAll(expected))
+        ThresholdAlertMetric.entries.forEach { metric ->
+            assertTrue(
+                thresholdRulePreferenceKey(metric, "enabled") in
+                    sensorConfigurationPreferenceKeys
+            )
+            assertTrue(
+                thresholdRulePreferenceKey(metric, "direction") in
+                    sensorConfigurationPreferenceKeys
+            )
+            assertTrue(
+                thresholdRulePreferenceKey(metric, "value") in
+                    sensorConfigurationPreferenceKeys
+            )
+        }
+
+        assertFalse(KEY_AUTO_ENABLED in sensorConfigurationPreferenceKeys)
+        assertFalse(KEY_AUTO_SESSION_ID in sensorConfigurationPreferenceKeys)
+        assertFalse(KEY_AUTO_COMPLETED_COUNT in sensorConfigurationPreferenceKeys)
+        assertFalse(KEY_AUTO_FIRST_ALLOWED_MS in sensorConfigurationPreferenceKeys)
+        assertFalse(KEY_THRESHOLD_ALERT_ENABLED in sensorConfigurationPreferenceKeys)
+        assertFalse(KEY_THRESHOLD_ALERT_SESSION_ID in sensorConfigurationPreferenceKeys)
+    }
+
+    @Test fun settingsTransferSeparatesAppSensorAndRuntimeValues() {
+        val appSettings =
+            setOf(
+                KEY_APP_LANGUAGE,
+                UVIR_NUMERIC_FORMAT_KEY,
+                UVIR_DATE_FORMAT_KEY,
+                UVIR_TIME_FORMAT_KEY,
+                UVIR_EXPORT_MODE_KEY,
+                UVIR_IRRADIANCE_UNIT_KEY,
+                KEY_VIEW_MODE,
+                KEY_USE_FAKE_SENSOR_DATA,
+                KEY_FAKE_SENSOR_OUT_OF_RANGE,
+                KEY_ACQUISITION_FEEDBACK_SOUND,
+                KEY_ACQUISITION_FEEDBACK_VOLUME
+            )
+        assertTrue(appSettings.all(::isTransferableAppPreference))
+        assertTrue(sensorConfigurationPreferenceKeys.none(::isTransferableAppPreference))
+        assertTrue(sensorOperationalPreferenceKeys.none(::isTransferableAppPreference))
+        assertFalse(isTransferableAppPreference(KEY_UNREAD_ACQUISITION_COUNT))
+        assertFalse(isTransferableAppPreference(KEY_UNREAD_ALERT_COUNT))
+        assertFalse(isTransferableAppPreference("selected_sensor_context.sensor-a.$KEY_AUTO_NOTE"))
+    }
+
     @Test fun migrationEnrollsOnlyCurrentSensorNotHistoricalProfiles() {
         val values = mutableMapOf<String, Any?>(
             "active_device_id" to " SENSOR-A ",
@@ -32,6 +121,7 @@ class UvirSensorSelectionStateTest {
             KEY_MANUAL_ACQUISITION_NOTE to "manual A",
             KEY_AUTO_NOTE to "automatic A",
             KEY_THRESHOLD_ALERT_NOTE to "alert A",
+            KEY_THRESHOLD_ALERT_REPEAT_SECONDS to 45,
             KEY_SAMPLE_SPACING_MS to 150L,
             KEY_SENSOR_STATUS_LED_BRIGHTNESS to 10,
             KEY_SENSOR_VISIBLE_CALIBRATION_FACTOR to 2f,
@@ -42,17 +132,20 @@ class UvirSensorSelectionStateTest {
         assertTrue(restoreSelectedSensorContext(preferences, "sensor-B"))
         preferences.edit().putString(KEY_MANUAL_ACQUISITION_NOTE, "manual B")
             .putString(KEY_AUTO_NOTE, "automatic B").putString(KEY_THRESHOLD_ALERT_NOTE, "alert B")
+            .putInt(KEY_THRESHOLD_ALERT_REPEAT_SECONDS, 90)
             .putLong(KEY_SAMPLE_SPACING_MS, 500L).putFloat(KEY_SENSOR_VISIBLE_CALIBRATION_FACTOR, 5f).commit()
         assertTrue(saveSelectedSensorContext(preferences, "sensor-B"))
         assertTrue(restoreSelectedSensorContext(preferences, " SENSOR-A "))
         assertEquals("manual A", preferences.getString(KEY_MANUAL_ACQUISITION_NOTE, ""))
         assertEquals("automatic A", preferences.getString(KEY_AUTO_NOTE, ""))
         assertEquals("alert A", preferences.getString(KEY_THRESHOLD_ALERT_NOTE, ""))
+        assertEquals(45, preferences.getInt(KEY_THRESHOLD_ALERT_REPEAT_SECONDS, 0))
         assertEquals(150L, preferences.getLong(KEY_SAMPLE_SPACING_MS, 0))
         assertEquals(2f, preferences.getFloat(KEY_SENSOR_VISIBLE_CALIBRATION_FACTOR, 0f))
         assertEquals("BLUETOOTH", preferences.getString(KEY_SENSOR_CONNECTION_MODE, ""))
         restoreSelectedSensorContext(preferences, "sensor-B")
         assertEquals("alert B", preferences.getString(KEY_THRESHOLD_ALERT_NOTE, ""))
+        assertEquals(90, preferences.getInt(KEY_THRESHOLD_ALERT_REPEAT_SECONDS, 0))
         assertEquals(500L, preferences.getLong(KEY_SAMPLE_SPACING_MS, 0))
     }
 

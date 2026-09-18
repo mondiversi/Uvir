@@ -1,5 +1,6 @@
 package me.mondiversi.uvir
 
+import android.annotation.SuppressLint
 import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -98,14 +99,11 @@ internal fun updateAutomaticAcquisitionNotification(
             .setAutoCancel(false)
             .build()
 
-    runCatching {
-        NotificationManagerCompat
-            .from(context)
-            .notify(
-                AUTOMATIC_NOTIFICATION_ID,
-                notification
-            )
-    }
+    postNotificationIfAllowed(
+        context = context,
+        notificationId = AUTOMATIC_NOTIFICATION_ID,
+        notification = notification
+    )
 }
 
 internal fun cancelAutomaticAcquisitionNotification(
@@ -159,22 +157,32 @@ internal fun updateThresholdAlertNotification(
             )
         )
     val alertDate =
-        SimpleDateFormat(
-            "dd/MM/yyyy HH:mm:ss",
-            Locale.getDefault()
-        ).format(
-            Date(alert.timestamp)
+        formatUvirDateTime(
+            timestamp = alert.timestamp,
+            format = loadUvirDateFormat(context),
+            separator = " ",
+            timeFormat =
+                resolveUvirTimeFormat(
+                    context,
+                    loadUvirTimeFormat(context)
+                )
         )
+    val irradianceUnit = loadUvirIrradianceUnit(context)
     val unit =
         if (alert.metric.isBiologicalEffect()) {
-            "µW/cm² equiv."
+            irradianceUnit.symbol + " eq."
         } else {
-            "µW/cm²"
+            irradianceUnit.symbol
         }
     val alertValueText =
         context.getString(
             R.string.threshold_notification_value,
-            alert.value,
+            formatUvirIrradianceNumber(
+                canonicalUwCm2 = alert.value,
+                fractionDigits = 3,
+                numericFormat = loadUvirNumericFormat(context),
+                unit = irradianceUnit
+            ),
             unit
         )
     val alertDateText =
@@ -227,14 +235,11 @@ internal fun updateThresholdAlertNotification(
             .setAutoCancel(false)
             .build()
 
-    runCatching {
-        NotificationManagerCompat
-            .from(context)
-            .notify(
-                THRESHOLD_ALERT_NOTIFICATION_ID,
-                notification
-            )
-    }
+    postNotificationIfAllowed(
+        context = context,
+        notificationId = THRESHOLD_ALERT_NOTIFICATION_ID,
+        notification = notification
+    )
 }
 
 internal fun cancelThresholdAlertNotification(
@@ -338,14 +343,11 @@ internal fun showOfflineDisconnectionNotification(
             .setAutoCancel(true)
             .build()
 
-    runCatching {
-        NotificationManagerCompat
-            .from(context)
-            .notify(
-                OFFLINE_AUTONOMY_NOTIFICATION_ID,
-                notification
-            )
-    }
+    postNotificationIfAllowed(
+        context = context,
+        notificationId = OFFLINE_AUTONOMY_NOTIFICATION_ID,
+        notification = notification
+    )
 }
 
 internal fun cancelOfflineDisconnectionNotification(
@@ -427,14 +429,11 @@ internal fun showSensorSyncCompleteNotification(
             .setAutoCancel(true)
             .build()
 
-    runCatching {
-        NotificationManagerCompat
-            .from(context)
-            .notify(
-                SENSOR_SYNC_NOTIFICATION_ID,
-                notification
-            )
-    }
+    postNotificationIfAllowed(
+        context = context,
+        notificationId = SENSOR_SYNC_NOTIFICATION_ID,
+        notification = notification
+    )
 }
 
 private fun createSensorStorageNotificationChannel(
@@ -464,6 +463,25 @@ private fun canPostNotifications(context: Context): Boolean =
             context,
             Manifest.permission.POST_NOTIFICATIONS
         ) == PackageManager.PERMISSION_GRANTED
+
+/**
+ * Single permission boundary for every notification emitted by the app.
+ * The explicit check handles Android 13+, while runCatching also protects
+ * older/vendor implementations that may still reject a notification.
+ */
+@SuppressLint("MissingPermission")
+private fun postNotificationIfAllowed(
+    context: Context,
+    notificationId: Int,
+    notification: android.app.Notification
+) {
+    if (!canPostNotifications(context)) return
+    runCatching {
+        NotificationManagerCompat
+            .from(context)
+            .notify(notificationId, notification)
+    }
+}
 
 private fun compactOfflineDuration(
     context: Context,

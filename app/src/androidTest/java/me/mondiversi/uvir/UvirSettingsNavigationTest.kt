@@ -38,9 +38,9 @@ class UvirSettingsNavigationTest {
                             content = "Sampling content"
                         )
                         TestSettingsPage(
-                            page = UvirSettingsPage.LANGUAGE,
-                            title = "Language",
-                            content = "Language content"
+                            page = UvirSettingsPage.LANGUAGE_AND_FORMATS,
+                            title = "Language and formats",
+                            content = "Language and formats content"
                         )
                     }
                 }
@@ -48,15 +48,15 @@ class UvirSettingsNavigationTest {
         }
 
         compose.onNodeWithText("Sampling").assertIsDisplayed()
-        compose.onNodeWithText("Language").assertIsDisplayed()
+        compose.onNodeWithText("Language and formats").assertIsDisplayed()
         compose.onNodeWithText("Sampling content").assertDoesNotExist()
 
         compose.onNodeWithText("Sampling").performClick()
         compose.waitForIdle()
 
         compose.onNodeWithText("Sampling content").assertIsDisplayed()
-        compose.onNodeWithText("Language").assertDoesNotExist()
-        compose.onNodeWithText("Language content").assertDoesNotExist()
+        compose.onNodeWithText("Language and formats").assertDoesNotExist()
+        compose.onNodeWithText("Language and formats content").assertDoesNotExist()
     }
 
     @Test

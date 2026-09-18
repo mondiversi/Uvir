@@ -17,10 +17,8 @@ internal fun listNoteDisplayText(
     if (sessionSequence != null) {
         append('#')
         append(sessionSequence)
-        if (note.isNotBlank()) {
-            append(" · ")
-            append(note)
-        }
+        append(" · ")
+        append(note.ifBlank { emptyNote })
     } else {
         append(note.ifBlank { emptyNote })
     }
@@ -40,10 +38,8 @@ internal fun acquisitionDisplayNote(
         buildString {
             append('#')
             append(sessionSequence)
-            if (note.isNotBlank()) {
-                append(" · ")
-                append(note)
-            }
+            append(" · ")
+            append(note.ifBlank { emptyNote })
         }
     } else {
         note.ifBlank { emptyNote }
@@ -58,10 +54,8 @@ internal fun alertDisplayNote(
         buildString {
             append('#')
             append(sessionSequence)
-            if (note.isNotBlank()) {
-                append(" · ")
-                append(note)
-            }
+            append(" · ")
+            append(note.ifBlank { emptyNote })
         }
     } else {
         note.ifBlank { emptyNote }

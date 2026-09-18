@@ -121,4 +121,30 @@ class UvirInterruptedAutomaticSessionTest {
             assertTrue(it.moveToFirst()); assertTrue(it.isNull(0))
         }
     }
+
+    @Test fun sensorOriginatedSessionTokensMapStablyPerSensor() = isolatedDatabase { database ->
+        val remoteToken = (1L shl 62) or 1_789_000_000_000L
+        val first = database.resolveSensorOriginatedAcquisitionSession(
+            sensorDeviceId = "A",
+            sensorSessionId = remoteToken,
+            startedAt = 1_000L
+        )
+        val repeated = database.resolveSensorOriginatedAcquisitionSession(
+            sensorDeviceId = "A",
+            sensorSessionId = remoteToken,
+            startedAt = 9_000L
+        )
+        val otherSensor = database.resolveSensorOriginatedAcquisitionSession(
+            sensorDeviceId = "B",
+            sensorSessionId = remoteToken,
+            startedAt = 2_000L
+        )
+
+        assertTrue(first > 0L)
+        assertEquals(first, repeated)
+        assertTrue(otherSensor > 0L)
+        assertTrue(first != otherSensor)
+        assertTrue(first < (1L shl 62))
+        assertTrue(otherSensor < (1L shl 62))
+    }
 }

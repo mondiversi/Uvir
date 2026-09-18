@@ -3,19 +3,18 @@ package me.mondiversi.uvir
 import android.content.Context
 import android.content.Intent
 import android.provider.Settings
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.Alignment
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
 @Composable
 internal fun UvirSensorConnectionSettings(
@@ -24,16 +23,9 @@ internal fun UvirSensorConnectionSettings(
     sensorConnectionSectionExpanded: Boolean,
     onSensorConnectionSectionExpandedChange: (Boolean) -> Unit,
     sensorSettingsEnabled: Boolean,
-    usbSectionExpanded: Boolean,
-    onUsbSectionExpandedChange: (Boolean) -> Unit,
-    wifiSectionExpanded: Boolean,
-    onWifiSectionExpandedChange: (Boolean) -> Unit,
-    bluetoothSectionExpanded: Boolean,
-    onBluetoothSectionExpandedChange: (Boolean) -> Unit,
-    internetSectionExpanded: Boolean,
-    onInternetSectionExpandedChange: (Boolean) -> Unit,
     sensorWifiRadioEnabled: Boolean,
     onSensorWifiRadioEnabledChange: (Boolean) -> Unit,
+    onRequestCurrentWifiSsid: () -> Unit,
     sensorBluetoothRadioEnabled: Boolean,
     onSensorBluetoothRadioEnabledChange: (Boolean) -> Unit,
     sensorWifiSsid: String,
@@ -56,31 +48,21 @@ internal fun UvirSensorConnectionSettings(
     onSensorInternetMqttUsernameChange: (String) -> Unit,
     sensorInternetMqttPassword: String,
     onSensorInternetMqttPasswordChange: (String) -> Unit,
-    wifiConfigurationInProgress: Boolean,
-    onWifiConfigurationInProgressChange: (Boolean) -> Unit,
-    settingsApplyInProgress: Boolean,
-    settingsApplyScope: CoroutineScope,
-    sensorFirmwareCurrent: Boolean,
-    onFirmwareUpdateRequired: () -> Unit,
-    onConfigureSensorWifi: suspend (String, String) -> Boolean,
     onSensorConnectionModeChanged: (SensorConnectionMode) -> Unit,
     cardColor: Color,
     primaryText: Color,
     secondaryText: Color
 ) {
-    val resources = context.resources
+    val radioCommit = LocalSettingsCommit.current
+    val wirelessControlsEnabled =
+        sensorSettingsEnabled && sensorCredentials.isProvisioned
 
     SettingsSection(
         settingsPage = UvirSettingsPage.SENSOR_CONNECTION,
-        title =
-            stringResource(
-                R.string.settings_section_sensor_connection
-            ),
-        titleIcon =
-            ConnectivityIconType.SENSOR_CONNECTION,
-        expanded =
-            sensorConnectionSectionExpanded,
-        enabled = sensorSettingsEnabled,
+        title = stringResource(R.string.settings_section_sensor_connection),
+        titleIcon = ConnectivityIconType.SENSOR_CONNECTION,
+        expanded = sensorConnectionSectionExpanded,
+        enabled = true,
         dimContentWhenDisabled = false,
         onExpandedChange = { expanded ->
             onSensorConnectionSectionExpandedChange(expanded)
@@ -93,343 +75,223 @@ internal fun UvirSensorConnectionSettings(
         containerColor = cardColor,
         titleColor = primaryText,
         chevronColor = secondaryText,
-        dividerColor =
-            secondaryText.copy(
-                alpha = 0.28f
-            )
+        dividerColor = secondaryText.copy(alpha = 0.28f),
+        contentSpacing = UvirIslandSpacing,
+        wrapDetailContent = false
     ) {
-        Column(
-            verticalArrangement =
-                Arrangement.spacedBy(UvirSettingsGroupGap)
-        ) {
-        Text(
-            text =
-                stringResource(
-                    R.string.sensor_connection_provisioning_reminder
-                ),
-            color = secondaryText,
-            fontSize = 11.sp,
-            lineHeight = 14.sp
-        )
-
         SettingsSection(
-            title =
-                stringResource(
-                    R.string.sensor_connection_usb
-            ),
+            title = stringResource(R.string.sensor_connection_usb),
             titleIcon = ConnectivityIconType.USB,
-            expanded = usbSectionExpanded,
-            enabled = sensorSettingsEnabled,
-            onExpandedChange = { expanded ->
-                onUsbSectionExpandedChange(expanded)
-                saveSettingsSectionExpanded(
-                    context,
-                    KEY_SETTINGS_USB_EXPANDED,
-                    expanded
-                )
-            },
-            containerColor =
-                secondaryText.copy(alpha = 0.08f),
+            expanded = true,
+            enabled = true,
+            onExpandedChange = null,
+            highlightExpandedHeader = false,
+            showExpandedDivider = true,
+            containerColor = cardColor,
             titleColor = primaryText,
             chevronColor = secondaryText,
-            dividerColor =
-                secondaryText.copy(alpha = 0.18f),
+            dividerColor = secondaryText.copy(alpha = 0.28f),
             contentSpacing = UvirSettingsControlGap
         ) {
-            Text(
-                text =
-                    stringResource(
-                        R.string.sensor_usb_priority_description
-                    ),
-                color = secondaryText,
-                fontSize = 11.sp,
-                lineHeight = 14.sp
+            SettingsPageDescription(
+                text = stringResource(R.string.sensor_usb_priority_description),
+                color = secondaryText
+            )
+
+            SettingsPageDescription(
+                text = stringResource(R.string.sensor_connection_provisioning_reminder),
+                color = secondaryText
+            )
+
+            SettingsPageDescription(
+                text = stringResource(R.string.sensor_connection_configuration_paths_description),
+                color = secondaryText
             )
         }
 
         SettingsSection(
-            title =
-                stringResource(
-                    R.string.sensor_connection_wifi
-                ),
+            title = stringResource(R.string.sensor_connection_wifi),
             titleIcon = ConnectivityIconType.WIFI,
-            expanded = wifiSectionExpanded,
+            expanded = sensorWifiRadioEnabled,
             enabled = sensorSettingsEnabled,
-            onExpandedChange = { expanded ->
-                onWifiSectionExpandedChange(expanded)
-                saveSettingsSectionExpanded(
-                    context,
-                    KEY_SETTINGS_WIFI_EXPANDED,
-                    expanded
-                )
+            headerEnabled = wirelessControlsEnabled,
+            onExpandedChange = { enabled ->
+                if (enabled) {
+                    onRequestCurrentWifiSsid()
+                }
+                onSensorWifiRadioEnabledChange(enabled)
+                if (!enabled && sensorInternetEnabled) {
+                    onSensorInternetEnabledChange(false)
+                    radioCommit?.copy(group = SettingsSaveGroup.INTERNET)?.commit()
+                }
+                radioCommit?.commit()
             },
-            containerColor =
-                secondaryText.copy(alpha = 0.08f),
+            headerControl = UvirSettingsHeaderControl.CHECKBOX,
+            highlightExpandedHeader = false,
+            showExpandedDivider = true,
+            containerColor = cardColor,
             titleColor = primaryText,
             chevronColor = secondaryText,
-            dividerColor =
-                secondaryText.copy(alpha = 0.18f),
+            dividerColor = secondaryText.copy(alpha = 0.28f),
             contentSpacing = UvirSettingsControlGap
         ) {
-            if (sensorCredentials.isProvisioned) {
-                SettingsCheckboxWithDescription(
-                    checked = sensorWifiRadioEnabled,
-                    onCheckedChange = { enabled ->
-                        onSensorWifiRadioEnabledChange(enabled)
-                    },
-                    title =
-                        stringResource(
-                            R.string.sensor_wifi_enabled
-                        ),
-                    description =
-                        stringResource(
-                            R.string.sensor_radio_usb_control_description
-                        ),
-                    primaryText = primaryText,
-                    secondaryText = secondaryText,
-                    enabled = sensorSettingsEnabled
-                )
-            }
-
-            if (
-                !sensorCredentials.isProvisioned ||
-                sensorWifiRadioEnabled
-            ) {
-
-            Text(
-                text =
-                    stringResource(
-                        R.string.sensor_wifi_esp32_description
-                    ),
-                color = secondaryText,
-                fontSize = 11.sp,
-                lineHeight = 14.sp
+            SettingsPageDescription(
+                text = stringResource(R.string.sensor_wifi_esp32_description),
+                color = secondaryText
             )
-
-            if (sensorCredentials.isProvisioned) {
+            Text(
+                text = stringResource(
+                    R.string.sensor_associated_value,
+                    sensorCredentials.deviceId
+                ),
+                color = secondaryText,
+                fontSize = 12.sp
+            )
+            OutlinedTextField(
+                value = sensorWifiSsid,
+                onValueChange = onSensorWifiSsidChange,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .settingsCommitOnBlur(SettingsSaveGroup.WIFI),
+                enabled = sensorSettingsEnabled,
+                label = { Text(stringResource(R.string.sensor_wifi_network_label)) },
+                singleLine = true,
+                colors = UvirOutlinedTextFieldColors()
+            )
+            OutlinedTextField(
+                value = sensorWifiPassword,
+                onValueChange = onSensorWifiPasswordChange,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .settingsCommitOnBlur(SettingsSaveGroup.WIFI),
+                enabled = sensorSettingsEnabled,
+                label = { Text(stringResource(R.string.sensor_wifi_password_label)) },
+                singleLine = true,
+                visualTransformation = PasswordVisualTransformation(),
+                colors = UvirOutlinedTextFieldColors()
+            )
+            if (sensorCredentials.wifiHost.isNotBlank()) {
                 Text(
                     text = stringResource(
-                        R.string.sensor_associated_value,
-                        sensorCredentials.deviceId
+                        R.string.sensor_wifi_address_value,
+                        sensorCredentials.wifiHost,
+                        sensorCredentials.wifiPort
                     ),
                     color = secondaryText,
-                    fontSize = 11.sp
+                    fontSize = 12.sp
                 )
-
-                OutlinedTextField(
-                    value = sensorWifiSsid,
-                    onValueChange = {
-                        onSensorWifiSsidChange(it)
-                    },
-                    modifier = Modifier.fillMaxWidth().settingsCommitOnBlur(SettingsSaveGroup.WIFI),
-                    enabled = sensorSettingsEnabled,
-                    label = {
-                        Text(
-                            stringResource(
-                                R.string.sensor_wifi_network_label
-                            )
-                        )
-                    },
-                    singleLine = true,
-                    colors = UvirOutlinedTextFieldColors()
-                )
-
-                OutlinedTextField(
-                    value = sensorWifiPassword,
-                    onValueChange = {
-                        onSensorWifiPasswordChange(it)
-                    },
-                    modifier = Modifier.fillMaxWidth().settingsCommitOnBlur(SettingsSaveGroup.WIFI),
-                    enabled = sensorSettingsEnabled,
-                    label = {
-                        Text(
-                            stringResource(
-                                R.string.sensor_wifi_password_label
-                            )
-                        )
-                    },
-                    singleLine = true,
-                    visualTransformation =
-                        PasswordVisualTransformation(),
-                    colors = UvirOutlinedTextFieldColors()
-                )
-
-                if (sensorCredentials.wifiHost.isNotBlank()) {
-                    Text(
-                        text = stringResource(
-                            R.string.sensor_wifi_address_value,
-                            sensorCredentials.wifiHost,
-                            sensorCredentials.wifiPort
-                        ),
-                        color = secondaryText,
-                        fontSize = 11.sp
-                    )
-                }
-
-                OutlinedButton(
-                    onClick = {
-                        runCatching {
-                            context.startActivity(
-                                Intent(
-                                    Settings.ACTION_WIFI_SETTINGS
-                                )
-                            )
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = sensorSettingsEnabled,
-                    colors = uvirOutlinedActionColors(primaryText),
-                    border =
-                        uvirOutlinedActionBorder(
-                            sensorSettingsEnabled,
-                            secondaryText
-                        )
-                ) {
-                    AdaptiveSingleLineButtonText(
-                        stringResource(
-                            R.string.open_wifi_settings
-                        )
-                    )
-                }
             }
+            OutlinedButton(
+                onClick = {
+                    runCatching {
+                        context.startActivity(Intent(Settings.ACTION_WIFI_SETTINGS))
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = sensorSettingsEnabled,
+                colors = uvirOutlinedActionColors(primaryText),
+                border = uvirOutlinedActionBorder(sensorSettingsEnabled, secondaryText)
+            ) {
+                UvirLabeledButtonContent(text = stringResource(R.string.open_wifi_settings)) {
+                    ConnectivitySectionIcon(
+                        type = ConnectivityIconType.WIFI,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
             }
         }
 
         SettingsSection(
-            title =
-                stringResource(
-                    R.string.sensor_connection_bluetooth
-                ),
+            title = stringResource(R.string.sensor_connection_bluetooth),
             titleIcon = ConnectivityIconType.BLUETOOTH,
-            expanded = bluetoothSectionExpanded,
+            expanded = sensorBluetoothRadioEnabled,
             enabled = sensorSettingsEnabled,
-            onExpandedChange = { expanded ->
-                onBluetoothSectionExpandedChange(expanded)
-                saveSettingsSectionExpanded(
-                    context,
-                    KEY_SETTINGS_BLUETOOTH_EXPANDED,
-                    expanded
-                )
+            headerEnabled = wirelessControlsEnabled,
+            onExpandedChange = { enabled ->
+                onSensorBluetoothRadioEnabledChange(enabled)
+                radioCommit?.commit()
             },
-            containerColor =
-                secondaryText.copy(alpha = 0.08f),
+            headerControl = UvirSettingsHeaderControl.CHECKBOX,
+            highlightExpandedHeader = false,
+            showExpandedDivider = true,
+            containerColor = cardColor,
             titleColor = primaryText,
             chevronColor = secondaryText,
-            dividerColor =
-                secondaryText.copy(alpha = 0.18f),
+            dividerColor = secondaryText.copy(alpha = 0.28f),
             contentSpacing = UvirSettingsControlGap
         ) {
-            if (sensorCredentials.isProvisioned) {
-                SettingsCheckboxWithDescription(
-                    checked = sensorBluetoothRadioEnabled,
-                    onCheckedChange = { enabled ->
-                        onSensorBluetoothRadioEnabledChange(enabled)
-                    },
-                    title =
-                        stringResource(
-                            R.string.sensor_bluetooth_enabled
-                        ),
-                    description =
-                        stringResource(
-                            R.string.sensor_radio_usb_control_description
-                        ),
-                    primaryText = primaryText,
-                    secondaryText = secondaryText,
-                    enabled = sensorSettingsEnabled
-                )
-            }
-
-            if (
-                !sensorCredentials.isProvisioned ||
-                sensorBluetoothRadioEnabled
-            ) {
-            Text(
-                text =
-                    stringResource(
-                        R.string.sensor_bluetooth_esp32_description
-                    ),
-                color = secondaryText,
-                fontSize = 11.sp,
-                lineHeight = 14.sp
+            SettingsPageDescription(
+                text = stringResource(R.string.sensor_bluetooth_esp32_description),
+                color = secondaryText
             )
-
-            if (sensorCredentials.isProvisioned) {
-                Text(
-                    text = stringResource(
-                        R.string.sensor_bluetooth_name_value,
-                        sensorCredentials.bluetoothName
-                    ),
-                    color = primaryText,
-                    fontSize = 12.sp
-                )
-                Text(
-                    text = stringResource(
-                        R.string.sensor_bluetooth_pin_value,
-                        sensorCredentials.bluetoothPin
-                    ),
-                    color = primaryText,
-                    fontSize = 12.sp
-                )
-                OutlinedButton(
-                    onClick = {
-                        onSensorConnectionModeChanged(
-                            SensorConnectionMode.BLUETOOTH
-                        )
-                        runCatching {
-                            context.startActivity(
-                                Intent(
-                                    Settings.ACTION_BLUETOOTH_SETTINGS
-                                )
-                            )
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = sensorSettingsEnabled,
-                    colors = uvirOutlinedActionColors(primaryText),
-                    border =
-                        uvirOutlinedActionBorder(
-                            sensorSettingsEnabled,
-                            secondaryText
-                        )
+            Text(
+                text = stringResource(
+                    R.string.sensor_bluetooth_name_value,
+                    sensorCredentials.bluetoothName
+                ),
+                color = secondaryText,
+                fontSize = 12.sp
+            )
+            Text(
+                text = stringResource(
+                    R.string.sensor_bluetooth_pin_value,
+                    sensorCredentials.bluetoothPin
+                ),
+                color = secondaryText,
+                fontSize = 12.sp
+            )
+            OutlinedButton(
+                onClick = {
+                    onSensorConnectionModeChanged(SensorConnectionMode.BLUETOOTH)
+                    runCatching {
+                        context.startActivity(Intent(Settings.ACTION_BLUETOOTH_SETTINGS))
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = sensorSettingsEnabled,
+                colors = uvirOutlinedActionColors(primaryText),
+                border = uvirOutlinedActionBorder(sensorSettingsEnabled, secondaryText)
+            ) {
+                UvirLabeledButtonContent(
+                    text = stringResource(R.string.open_bluetooth_settings)
                 ) {
-                    AdaptiveSingleLineButtonText(
-                        stringResource(
-                            R.string.open_bluetooth_settings
-                        )
+                    ConnectivitySectionIcon(
+                        type = ConnectivityIconType.BLUETOOTH,
+                        modifier = Modifier.size(20.dp)
                     )
                 }
-            }
             }
         }
 
         SettingsAutoSaveGroup(SettingsSaveGroup.INTERNET) {
-        UvirSensorInternetSettings(
-            context = context,
-            expanded = internetSectionExpanded,
-            onExpandedChange = onInternetSectionExpandedChange,
-            sensorSettingsEnabled = sensorSettingsEnabled,
-            settingsApplyInProgress = settingsApplyInProgress,
-            enabled = sensorInternetEnabled,
-            onEnabledChange = onSensorInternetEnabledChange,
-            usePrimaryWifi = sensorInternetUsePrimaryWifi,
-            onUsePrimaryWifiChange = onSensorInternetUsePrimaryWifiChange,
-            wifiSsid = sensorInternetWifiSsid,
-            onWifiSsidChange = onSensorInternetWifiSsidChange,
-            wifiPassword = sensorInternetWifiPassword,
-            onWifiPasswordChange = onSensorInternetWifiPasswordChange,
-            relayHost = sensorInternetRelayHost,
-            onRelayHostChange = onSensorInternetRelayHostChange,
-            relayPort = sensorInternetRelayPort,
-            onRelayPortChange = onSensorInternetRelayPortChange,
-            mqttUsername = sensorInternetMqttUsername,
-            onMqttUsernameChange = onSensorInternetMqttUsernameChange,
-            mqttPassword = sensorInternetMqttPassword,
-            onMqttPasswordChange = onSensorInternetMqttPasswordChange,
-            primaryText = primaryText,
-            secondaryText = secondaryText
-        )
+            UvirSensorInternetSettings(
+                sensorSettingsEnabled = wirelessControlsEnabled,
+                enabled = sensorInternetEnabled,
+                onEnabledChange = { enabled ->
+                    if (enabled && !sensorWifiRadioEnabled) {
+                        onSensorWifiRadioEnabledChange(true)
+                        radioCommit?.commit()
+                    }
+                    onSensorInternetEnabledChange(enabled)
+                },
+                usePrimaryWifi = sensorInternetUsePrimaryWifi,
+                onUsePrimaryWifiChange = onSensorInternetUsePrimaryWifiChange,
+                wifiSsid = sensorInternetWifiSsid,
+                onWifiSsidChange = onSensorInternetWifiSsidChange,
+                wifiPassword = sensorInternetWifiPassword,
+                onWifiPasswordChange = onSensorInternetWifiPasswordChange,
+                relayHost = sensorInternetRelayHost,
+                onRelayHostChange = onSensorInternetRelayHostChange,
+                relayPort = sensorInternetRelayPort,
+                onRelayPortChange = onSensorInternetRelayPortChange,
+                mqttUsername = sensorInternetMqttUsername,
+                onMqttUsernameChange = onSensorInternetMqttUsernameChange,
+                mqttPassword = sensorInternetMqttPassword,
+                onMqttPasswordChange = onSensorInternetMqttPasswordChange,
+                cardColor = cardColor,
+                primaryText = primaryText,
+                secondaryText = secondaryText
+            )
         }
     }
-    }
-
 }

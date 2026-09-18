@@ -358,11 +358,12 @@ internal fun MeasurementDetailViewSelector(
     cardColor: Color,
     primaryText: Color,
     secondaryText: Color,
+    middleContent: (@Composable () -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         Box(modifier = Modifier.weight(1f)) {
             MeasurementViewSelector(
@@ -372,6 +373,12 @@ internal fun MeasurementDetailViewSelector(
                 primaryText = primaryText,
                 secondaryText = secondaryText
             )
+        }
+
+        middleContent?.let { content ->
+            Box(modifier = Modifier.width(UvirSessionCyclePositionSelectorWidth)) {
+                content()
+            }
         }
 
         MeasurementDataChartSelector(

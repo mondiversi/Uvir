@@ -356,6 +356,26 @@ internal fun UvirSensorInfoDialog(
                     )
 
                     SensorInfoGroupedSection(
+                        title = stringResource(R.string.sensor_info_scale_sensitivity),
+                        primaryText = primaryText,
+                        secondaryText = secondaryText,
+                        nestedColor = cardColor,
+                        groups =
+                            listOf(
+                                SensorInfoGroup(
+                                    title = stringResource(R.string.sensor_info_display_scale),
+                                    rows =
+                                        listOf(
+                                            stringResource(R.string.sensor_info_selected_unit) to
+                                                LocalUvirIrradianceUnit.current.symbol,
+                                            stringResource(R.string.sensor_info_scale_equivalence) to
+                                                "1 W/m² = 0.1 mW/cm² = 100 µW/cm²"
+                                        )
+                                )
+                            )
+                    )
+
+                    SensorInfoGroupedSection(
                         title = stringResource(R.string.sensor_info_memory),
                         primaryText = primaryText,
                         secondaryText = secondaryText,
@@ -536,7 +556,8 @@ internal fun UvirSensorInfoDialog(
 
 private data class SensorInfoGroup(
     val title: String,
-    val rows: List<Pair<String, String>>
+    val rows: List<Pair<String, String>>,
+    val paragraphLayout: Boolean = false
 )
 
 @Composable
@@ -591,7 +612,8 @@ private fun SensorInfoGroupedSection(
                         SensorInfoRows(
                             rows = group.rows,
                             primaryText = primaryText,
-                            secondaryText = secondaryText
+                            secondaryText = secondaryText,
+                            paragraphLayout = group.paragraphLayout
                         )
                     }
                 }
@@ -649,13 +671,36 @@ private fun SensorInfoSection(
 private fun SensorInfoRows(
     rows: List<Pair<String, String>>,
     primaryText: Color,
-    secondaryText: Color
+    secondaryText: Color,
+    paragraphLayout: Boolean = false
 ) {
     rows.forEach { (label, value) ->
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        if (paragraphLayout) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                Text(
+                    text = label,
+                    modifier = Modifier.fillMaxWidth(),
+                    color = secondaryText,
+                    fontSize = 11.sp,
+                    lineHeight = 14.sp
+                )
+                Text(
+                    text = value,
+                    modifier = Modifier.fillMaxWidth(),
+                    color = primaryText,
+                    fontSize = 12.sp,
+                    lineHeight = 16.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+        } else {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
             Text(
                 text = label,
                 modifier = Modifier.weight(0.60f),
@@ -674,6 +719,7 @@ private fun SensorInfoRows(
                     fontWeight = FontWeight.Medium,
                     textAlign = TextAlign.End
                 )
+            }
             }
         }
     }

@@ -20,10 +20,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 @Composable
 internal fun UvirStartAllAlertsFloatingButton(
@@ -121,14 +124,40 @@ internal fun UvirStopAllAlertsFloatingButton(
 @Composable
 internal fun UvirStartAllAlertsDialog(
     note: String,
+    repeatHoursText: String,
+    repeatMinutesText: String,
+    repeatSecondsText: String,
     cardColor: Color,
     primaryText: Color,
     secondaryText: Color,
     onNoteChanged: (String) -> Unit,
-    onStart: (String) -> Unit,
+    onRepeatHoursChanged: (String) -> Unit,
+    onRepeatMinutesChanged: (String) -> Unit,
+    onRepeatSecondsChanged: (String) -> Unit,
+    onStart: (String, Int) -> Unit,
     onCancel: () -> Unit,
     onDismissRequest: () -> Unit
 ) {
+    val context = LocalContext.current
+    val correctedText = stringResource(R.string.value_out_of_limits_corrected)
+    fun normalizedRepeat() =
+        normalizeDuration(
+            hoursText = repeatHoursText,
+            minutesText = repeatMinutesText,
+            secondsText = repeatSecondsText,
+            minimumTotalSeconds = 1L,
+            maximumTotalSeconds = MAX_ALERT_REPEAT_SECONDS
+        )
+    fun applyNormalizedRepeat(showCorrection: Boolean): NormalizedDurationInput {
+        val normalized = normalizedRepeat()
+        onRepeatHoursChanged(normalized.hoursText)
+        onRepeatMinutesChanged(normalized.minutesText)
+        onRepeatSecondsChanged(normalized.secondsText)
+        if (showCorrection && normalized.corrected) {
+            showUvirBottomMessage(context, correctedText)
+        }
+        return normalized
+    }
     val dialogScrollbar =
         rememberUvirDialogScrollbar(
             color = secondaryText.copy(alpha = 0.58f)
@@ -156,6 +185,30 @@ internal fun UvirStartAllAlertsDialog(
                         androidx.compose.foundation.layout.Arrangement.spacedBy(12.dp)
                 ) {
                     Text(stringResource(R.string.start_value_alert_session_message))
+                    Column(
+                        verticalArrangement =
+                            androidx.compose.foundation.layout.Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.threshold_repeat_label),
+                            color = primaryText,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                        DurationFields(
+                            hoursText = repeatHoursText,
+                            minutesText = repeatMinutesText,
+                            secondsText = repeatSecondsText,
+                            onHoursChange = onRepeatHoursChanged,
+                            onMinutesChange = onRepeatMinutesChanged,
+                            onSecondsChange = onRepeatSecondsChanged,
+                            enabled = true,
+                            maxHours = 24,
+                            onEditingComplete = {
+                                applyNormalizedRepeat(showCorrection = true)
+                            }
+                        )
+                    }
                     UvirLimitedNoteField(
                         value = note,
                         onValueChange = onNoteChanged,
@@ -181,7 +234,15 @@ internal fun UvirStartAllAlertsDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = { onStart(limitUvirNote(note).trim()) }) {
+            TextButton(
+                onClick = {
+                    val normalized = applyNormalizedRepeat(showCorrection = true)
+                    onStart(
+                        limitUvirNote(note).trim(),
+                        normalized.totalSeconds.toInt()
+                    )
+                }
+            ) {
                 Text(stringResource(R.string.start_value_alert_session_action))
             }
         },

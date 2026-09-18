@@ -23,9 +23,18 @@ internal fun UvirTitleActionIcon(
     modifier: Modifier = Modifier,
     tint: Color = LocalContentColor.current
 ) {
+    val visualVerticalOffset =
+        if (type == MenuIconType.EXPORT || type == MenuIconType.IMPORT) {
+            (-1.5).dp
+        } else {
+            0.dp
+        }
     UvirMenuIcon(
         type = type,
-        modifier = modifier.size(UvirTitleActionIconSize),
+        modifier =
+            modifier
+                .size(UvirTitleActionIconSize)
+                .offset(y = visualVerticalOffset),
         tint = tint,
         uniformStrokeWidth = UvirTitleActionIconStrokeWidth
     )
@@ -82,6 +91,59 @@ internal fun UvirTitleSaveIcon(
                 join = StrokeJoin.Round
             )
         )
+    }
+}
+
+internal enum class UvirButtonGlyph {
+    PLAY,
+    STOP,
+    REFRESH
+}
+
+@Composable
+internal fun UvirButtonGlyphIcon(
+    glyph: UvirButtonGlyph,
+    modifier: Modifier = Modifier,
+    tint: Color = LocalContentColor.current
+) {
+    Canvas(modifier = modifier.size(20.dp)) {
+        val stroke = maxOf(1.7.dp.toPx(), size.minDimension * 0.085f)
+        when (glyph) {
+            UvirButtonGlyph.PLAY -> {
+                val path = Path().apply {
+                    moveTo(size.width * 0.32f, size.height * 0.22f)
+                    lineTo(size.width * 0.78f, size.height * 0.50f)
+                    lineTo(size.width * 0.32f, size.height * 0.78f)
+                    close()
+                }
+                drawPath(path, tint)
+            }
+            UvirButtonGlyph.STOP ->
+                drawRoundRect(
+                    color = tint,
+                    topLeft = Offset(size.width * 0.27f, size.height * 0.27f),
+                    size = Size(size.width * 0.46f, size.height * 0.46f),
+                    cornerRadius = CornerRadius(size.minDimension * 0.07f)
+                )
+            UvirButtonGlyph.REFRESH -> {
+                drawArc(
+                    color = tint,
+                    startAngle = -50f,
+                    sweepAngle = 285f,
+                    useCenter = false,
+                    topLeft = Offset(size.width * 0.18f, size.height * 0.18f),
+                    size = Size(size.width * 0.64f, size.height * 0.64f),
+                    style = Stroke(stroke, cap = StrokeCap.Round)
+                )
+                val head = Path().apply {
+                    moveTo(size.width * 0.76f, size.height * 0.16f)
+                    lineTo(size.width * 0.82f, size.height * 0.36f)
+                    lineTo(size.width * 0.62f, size.height * 0.31f)
+                    close()
+                }
+                drawPath(head, tint)
+            }
+        }
     }
 }
 
@@ -603,6 +665,63 @@ fun UvirMenuIcon(
                 )
             }
 
+            MenuIconType.EXPORT,
+            MenuIconType.IMPORT -> {
+                val exporting = type == MenuIconType.EXPORT
+                val centerX = iconWidth * 0.50f
+                val trayY = iconHeight * 0.72f
+                val shaftStartY =
+                    if (exporting) iconHeight * 0.63f else iconHeight * 0.27f
+                val shaftEndY =
+                    if (exporting) iconHeight * 0.25f else iconHeight * 0.65f
+                val arrowY = shaftEndY
+                val arrowWingY =
+                    if (exporting) iconHeight * 0.39f else iconHeight * 0.51f
+
+                drawLine(
+                    color = tint,
+                    start = Offset(iconWidth * 0.20f, trayY),
+                    end = Offset(iconWidth * 0.20f, iconHeight * 0.88f),
+                    strokeWidth = strokeWidth,
+                    cap = StrokeCap.Round
+                )
+                drawLine(
+                    color = tint,
+                    start = Offset(iconWidth * 0.20f, iconHeight * 0.88f),
+                    end = Offset(iconWidth * 0.80f, iconHeight * 0.88f),
+                    strokeWidth = strokeWidth,
+                    cap = StrokeCap.Round
+                )
+                drawLine(
+                    color = tint,
+                    start = Offset(iconWidth * 0.80f, iconHeight * 0.88f),
+                    end = Offset(iconWidth * 0.80f, trayY),
+                    strokeWidth = strokeWidth,
+                    cap = StrokeCap.Round
+                )
+                drawLine(
+                    color = tint,
+                    start = Offset(centerX, shaftStartY),
+                    end = Offset(centerX, shaftEndY),
+                    strokeWidth = strokeWidth,
+                    cap = StrokeCap.Round
+                )
+                drawLine(
+                    color = tint,
+                    start = Offset(centerX, arrowY),
+                    end = Offset(iconWidth * 0.35f, arrowWingY),
+                    strokeWidth = strokeWidth,
+                    cap = StrokeCap.Round
+                )
+                drawLine(
+                    color = tint,
+                    start = Offset(centerX, arrowY),
+                    end = Offset(iconWidth * 0.65f, arrowWingY),
+                    strokeWidth = strokeWidth,
+                    cap = StrokeCap.Round
+                )
+            }
+
             MenuIconType.SHARE -> {
 
                 val leftCenter =
@@ -970,7 +1089,9 @@ enum class AutomaticSettingIconType {
     START_DELAY,
     DURATION,
     MAXIMUM,
-    CONDITIONAL
+    CONDITIONAL,
+    CONFIGURE,
+    EXTERNAL_COMMAND
 }
 
 @Composable
@@ -1118,6 +1239,63 @@ fun AutomaticSettingIcon(
                     decision, tint,
                     style = Stroke(width = strokeWidth,
                         join = androidx.compose.ui.graphics.StrokeJoin.Round)
+                )
+            }
+
+            AutomaticSettingIconType.CONFIGURE -> {
+                // Three compact sliders distinguish the action from the
+                // decision diamond used by the parent condition section.
+                val rows = listOf(
+                    Triple(0.28f, 0.72f, 0.38f),
+                    Triple(0.28f, 0.72f, 0.62f),
+                    Triple(0.28f, 0.72f, 0.50f)
+                )
+                rows.forEachIndexed { index, (startX, endX, knobX) ->
+                    val y = size.height * (0.26f + index * 0.24f)
+                    drawLine(
+                        color = tint,
+                        start = Offset(size.width * startX, y),
+                        end = Offset(size.width * endX, y),
+                        strokeWidth = strokeWidth,
+                        cap = StrokeCap.Round
+                    )
+                    drawCircle(
+                        color = tint,
+                        radius = strokeWidth * 1.15f,
+                        center = Offset(size.width * knobX, y)
+                    )
+                }
+            }
+
+            AutomaticSettingIconType.EXTERNAL_COMMAND -> {
+                // An arrow entering a contact: a physical input commanding the sensor.
+                drawLine(
+                    color = tint,
+                    start = Offset(size.width * 0.16f, size.height * 0.50f),
+                    end = Offset(size.width * 0.62f, size.height * 0.50f),
+                    strokeWidth = strokeWidth,
+                    cap = StrokeCap.Round
+                )
+                val arrow = Path().apply {
+                    moveTo(size.width * 0.47f, size.height * 0.34f)
+                    lineTo(size.width * 0.64f, size.height * 0.50f)
+                    lineTo(size.width * 0.47f, size.height * 0.66f)
+                }
+                drawPath(
+                    arrow,
+                    tint,
+                    style = Stroke(
+                        width = strokeWidth,
+                        cap = StrokeCap.Round,
+                        join = StrokeJoin.Round
+                    )
+                )
+                drawLine(
+                    color = tint,
+                    start = Offset(size.width * 0.78f, size.height * 0.25f),
+                    end = Offset(size.width * 0.78f, size.height * 0.75f),
+                    strokeWidth = strokeWidth,
+                    cap = StrokeCap.Round
                 )
             }
 

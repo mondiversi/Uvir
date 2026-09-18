@@ -43,9 +43,9 @@ class UvirNumericFormattingTest {
     }
 
     @Test
-    fun internationalFormatUsesCommaGroupingAndDotDecimal() {
+    fun internationalFormatUsesNarrowSpaceGroupingAndDotDecimal() {
         assertEquals(
-            "1,000.23",
+            "1\u202F000.23",
             formatUvirNumber(
                 value = 1000.23,
                 fractionDigits = 2,
@@ -67,12 +67,35 @@ class UvirNumericFormattingTest {
     }
 
     @Test
-    fun exportKeepsUsefulPrecision() {
+    fun americanFormatUsesCommaGroupingAndDotDecimal() {
         assertEquals(
-            "13,000.125",
+            "1,000.23",
+            formatUvirNumber(
+                value = 1000.23,
+                fractionDigits = 2,
+                format = UvirNumericFormat.AMERICAN
+            )
+        )
+    }
+
+    @Test
+    fun csvExportKeepsUsefulPrecisionWithoutGrouping() {
+        assertEquals(
+            "13000.125",
             formatUvirExportNumber(
                 value = 13000.125,
                 format = UvirNumericFormat.INTERNATIONAL
+            )
+        )
+    }
+
+    @Test
+    fun europeanCsvExportAlsoOmitsGrouping() {
+        assertEquals(
+            "13000,125",
+            formatUvirExportNumber(
+                value = 13000.125,
+                format = UvirNumericFormat.EUROPEAN
             )
         )
     }

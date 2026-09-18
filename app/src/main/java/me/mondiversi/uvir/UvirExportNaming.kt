@@ -16,10 +16,14 @@ internal enum class UvirExportContent(
 internal fun uvirExportTimestamp(
     timestamp: Long
 ): String =
-    SimpleDateFormat(
-        "yyyyMMdd_HHmmss",
-        Locale.US
-    ).format(Date(timestamp))
+    if (timestamp <= 0L) {
+        "unknown_time"
+    } else {
+        SimpleDateFormat(
+            "yyyyMMdd_HHmmss",
+            Locale.US
+        ).format(Date(timestamp))
+    }
 
 internal fun uvirAcquisitionExportBaseName(
     record: SavedRecordDetail

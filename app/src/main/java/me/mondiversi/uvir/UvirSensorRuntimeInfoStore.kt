@@ -182,7 +182,8 @@ private fun UvirSensorRuntimeInfo.stableDiagnosticFingerprint(): String =
         statusLedEnabled,
         statusLedBrightness,
         statusBuzzerEnabled,
-        statusBuzzerVolume
+        statusBuzzerVolume,
+        externalCommandEnabled
     ).joinToString("|")
 
 private fun UvirSensorRuntimeInfo.toStoredJson(): JSONObject =
@@ -240,6 +241,7 @@ private fun UvirSensorRuntimeInfo.toStoredJson(): JSONObject =
         )
         .putIfNotNull("offline_errors", offlineErrors)
         .putIfNotNull("offline_recording", offlineRecording)
+        .putIfNotNull("offline_external_command", offlineExternalCommand)
         .put("offline_condition_plan", offlineConditionPlan?.encode() ?: "")
         .putIfNotNull("offline_condition_waiting", offlineConditionWaiting)
         .putIfNotNull("offline_end_ms", offlineEndAtMs)
@@ -260,6 +262,7 @@ private fun UvirSensorRuntimeInfo.toStoredJson(): JSONObject =
         .putIfNotNull("status_led_brightness", statusLedBrightness)
         .putIfNotNull("status_buzzer_enabled", statusBuzzerEnabled)
         .putIfNotNull("status_buzzer_volume", statusBuzzerVolume)
+        .putIfNotNull("external_command_enabled", externalCommandEnabled)
 
 private fun JSONObject.putIfNotNull(
     key: String,

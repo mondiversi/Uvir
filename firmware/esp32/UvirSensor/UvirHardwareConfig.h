@@ -19,5 +19,8 @@ constexpr uint8_t kStatusLedRedPin = 25;
 constexpr uint8_t kStatusLedGreenPin = 26;
 constexpr uint8_t kOperationLedBluePin = 27;
 constexpr uint8_t kStatusBuzzerPin = 32;
+// Active-low external command input. A dry contact connects GPIO33 to GND;
+// never connect a 5 V signal directly to an ESP32 GPIO.
+constexpr uint8_t kExternalCommandPin = 33;
 
 }  // namespace UvirHardware

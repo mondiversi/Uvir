@@ -8,8 +8,9 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -40,10 +41,12 @@ internal fun UvirAutomaticAcquisitionForm(
     conditionalRules: List<ThresholdAlertRule>,
     conditionalWaiting: Boolean,
     conditionalLocked: Boolean,
+    externalCommand: Boolean,
     numericFormat: UvirNumericFormat,
     onConditionalEnabled: (Boolean) -> Unit,
     onConditionalMatch: (AcquisitionConditionMatch) -> Unit,
     onConditionalAction: (AcquisitionConditionAction) -> Unit,
+    onExternalCommandChanged: (Boolean) -> Unit,
     onConfigureConditions: () -> Unit,
     cardColor: Color,
     primaryText: Color,
@@ -67,6 +70,7 @@ internal fun UvirAutomaticAcquisitionForm(
     onMaxCountEditingComplete: () -> Unit,
     onNoteChanged: (String) -> Unit
 ) {
+    val scheduleControlsEnabled = !externalCommand && !conditionalLocked
     LazyColumn(
         state = listState,
         modifier = Modifier.fillMaxSize(),
@@ -74,10 +78,11 @@ internal fun UvirAutomaticAcquisitionForm(
         verticalArrangement = Arrangement.spacedBy(UvirIslandSpacing)
     ) {
         item {
-            SettingsIsland(
-                containerColor = cardColor,
-                contentColor = primaryText
-            ) {
+            Box(Modifier.alpha(if (scheduleControlsEnabled) 1f else 0.48f)) {
+                SettingsIsland(
+                    containerColor = cardColor,
+                    contentColor = primaryText
+                ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     AutomaticSettingIcon(
                         type = AutomaticSettingIconType.INTERVAL,
@@ -85,7 +90,7 @@ internal fun UvirAutomaticAcquisitionForm(
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(
-                        text = stringResource(R.string.interval),
+                        text = stringResource(R.string.execution_interval),
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -104,6 +109,7 @@ internal fun UvirAutomaticAcquisitionForm(
                         label = stringResource(R.string.hours),
                         modifier = Modifier.weight(1f),
                         maxChars = 5,
+                        enabled = scheduleControlsEnabled,
                         onEditingComplete = onIntervalEditingComplete
                     )
                     NumberField(
@@ -112,6 +118,7 @@ internal fun UvirAutomaticAcquisitionForm(
                         label = stringResource(R.string.minutes),
                         modifier = Modifier.weight(1f),
                         maxChars = 5,
+                        enabled = scheduleControlsEnabled,
                         onEditingComplete = onIntervalEditingComplete
                     )
                     NumberField(
@@ -120,10 +127,12 @@ internal fun UvirAutomaticAcquisitionForm(
                         label = stringResource(R.string.seconds),
                         modifier = Modifier.weight(1f),
                         maxChars = 5,
+                        enabled = scheduleControlsEnabled,
                         onEditingComplete = onIntervalEditingComplete
                     )
                 }
             }
+        }
         }
 
         item {
@@ -131,6 +140,7 @@ internal fun UvirAutomaticAcquisitionForm(
                 title = stringResource(R.string.scheduled_start),
                 icon = AutomaticSettingIconType.START_DELAY,
                 expanded = useStartDelay, onExpandedChange = onUseStartDelayChanged,
+                controlsEnabled = scheduleControlsEnabled,
                 cardColor = cardColor, primaryText = primaryText, secondaryText = secondaryText
             ) {
                 DurationFields(
@@ -140,6 +150,7 @@ internal fun UvirAutomaticAcquisitionForm(
                     onHoursChange = onStartDelayHoursChanged,
                     onMinutesChange = onStartDelayMinutesChanged,
                     onSecondsChange = onStartDelaySecondsChanged,
+                    enabled = scheduleControlsEnabled,
                     onEditingComplete = onStartDelayEditingComplete
                 )
             }
@@ -150,6 +161,7 @@ internal fun UvirAutomaticAcquisitionForm(
                 title = stringResource(R.string.scheduled_end),
                 icon = AutomaticSettingIconType.DURATION,
                 expanded = useDuration, onExpandedChange = onUseDurationChanged,
+                controlsEnabled = scheduleControlsEnabled,
                 cardColor = cardColor, primaryText = primaryText, secondaryText = secondaryText
             ) {
                 DurationFields(
@@ -159,6 +171,7 @@ internal fun UvirAutomaticAcquisitionForm(
                     onHoursChange = onDurationHoursChanged,
                     onMinutesChange = onDurationMinutesChanged,
                     onSecondsChange = onDurationSecondsChanged,
+                    enabled = scheduleControlsEnabled,
                     onEditingComplete = onDurationEditingComplete
                 )
             }
@@ -169,6 +182,7 @@ internal fun UvirAutomaticAcquisitionForm(
                 title = stringResource(R.string.limit_acquisitions),
                 icon = AutomaticSettingIconType.MAXIMUM,
                 expanded = limitEnabled, onExpandedChange = onLimitEnabledChanged,
+                controlsEnabled = scheduleControlsEnabled,
                 cardColor = cardColor, primaryText = primaryText, secondaryText = secondaryText
             ) {
                 NumberField(
@@ -179,6 +193,7 @@ internal fun UvirAutomaticAcquisitionForm(
                     ),
                     modifier = Modifier.fillMaxWidth(),
                     maxChars = 6,
+                    enabled = scheduleControlsEnabled,
                     onEditingComplete = onMaxCountEditingComplete
                 )
             }
@@ -186,12 +201,25 @@ internal fun UvirAutomaticAcquisitionForm(
 
         item {
             UvirConditionalAcquisitionCard(
-                enabled = conditionalEnabled, match = conditionalMatch, action = conditionalAction,
+                enabled = conditionalEnabled,
+                match = conditionalMatch, action = conditionalAction,
                 rules = conditionalRules, waiting = conditionalWaiting, locked = conditionalLocked,
+                controlsEnabled = !externalCommand,
                 cardColor = cardColor, primaryText = primaryText, secondaryText = secondaryText,
                 numericFormat = numericFormat, onEnabled = onConditionalEnabled,
                 onMatch = onConditionalMatch, onAction = onConditionalAction,
                 onConfigure = onConfigureConditions)
+        }
+
+        item {
+            UvirExternalCommandCard(
+                enabled = externalCommand,
+                locked = conditionalLocked,
+                cardColor = cardColor,
+                primaryText = primaryText,
+                secondaryText = secondaryText,
+                onEnabled = onExternalCommandChanged
+            )
         }
 
         item {

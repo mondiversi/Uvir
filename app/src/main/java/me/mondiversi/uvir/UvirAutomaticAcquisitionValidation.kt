@@ -14,7 +14,8 @@ internal data class AutomaticAcquisitionInput(
     val durationMinutes: String,
     val durationSeconds: String,
     val limitEnabled: Boolean,
-    val maxAcquisitions: String
+    val maxAcquisitions: String,
+    val externalCommand: Boolean = false
 )
 
 internal sealed interface AutomaticAcquisitionValidation {
@@ -30,6 +31,32 @@ internal sealed interface AutomaticAcquisitionValidation {
 internal fun validateAutomaticAcquisitionInput(
     input: AutomaticAcquisitionInput
 ): AutomaticAcquisitionValidation {
+    if (input.externalCommand) {
+        val interval = parseAutomaticDuration(
+            input.intervalHours, input.intervalMinutes, input.intervalSeconds
+        )
+        val startDelay = parseAutomaticDuration(
+            input.startDelayHours, input.startDelayMinutes, input.startDelaySeconds
+        )
+        val duration = parseAutomaticDuration(
+            input.durationHours, input.durationMinutes, input.durationSeconds
+        )
+        return AutomaticAcquisitionValidation.Valid(
+            AutomaticAcquisitionRequest(
+                intervalSeconds = interval.totalSeconds.coerceAtLeast(1L),
+                note = input.note.trim(),
+                useStartDelay = input.useStartDelay,
+                startDelaySeconds = startDelay.totalSeconds.coerceAtLeast(0L),
+                useDuration = input.useDuration,
+                durationSeconds = duration.totalSeconds.coerceAtLeast(0L),
+                limitEnabled = input.limitEnabled,
+                maxAcquisitions =
+                    (input.maxAcquisitions.toIntOrNull() ?: 1).coerceAtLeast(1),
+                conditionalPlan = null,
+                externalCommand = true
+            )
+        )
+    }
     val interval =
         parseAutomaticDuration(
             hoursText = input.intervalHours,

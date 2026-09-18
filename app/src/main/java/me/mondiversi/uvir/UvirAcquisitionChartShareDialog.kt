@@ -3,6 +3,7 @@ package me.mondiversi.uvir
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
@@ -13,6 +14,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -86,49 +88,60 @@ internal fun AcquisitionChartShareDialog(
                 )
             }
         },
-        dismissButton = {
-            TextButton(
-                onClick = onDismiss,
-                colors =
-                    ButtonDefaults.textButtonColors(
+        confirmButton = {
+            fun export(destination: UvirExportDestination) {
+                runCatching {
+                    shareAcquisitionCharts(
+                        context = context,
+                        record = record,
+                        groups =
+                            if (shareScope == AcquisitionChartShareScope.ALL) {
+                                AcquisitionChartGroup.entries
+                            } else {
+                                listOf(selectedGroup)
+                            },
+                        destination = destination
+                    )
+                }.onFailure { error ->
+                    UvirErrorLog.record(
+                        context,
+                        "share_acquisition_chart",
+                        error
+                    )
+                    showUvirBottomMessage(
+                        context,
+                        shareErrorText,
+                        longDuration = false
+                    )
+                }
+                onDismiss()
+            }
+
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.End),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    TextButton(onClick = { export(UvirExportDestination.SAVE) }) {
+                        Text(stringResource(R.string.save))
+                    }
+                    TextButton(onClick = { export(UvirExportDestination.SHARE) }) {
+                        Text(stringResource(R.string.share))
+                    }
+                }
+                TextButton(
+                    onClick = onDismiss,
+                    modifier = Modifier.align(Alignment.End),
+                    colors = ButtonDefaults.textButtonColors(
                         contentColor = UvirDestructiveActionColor
                     )
-            ) {
-                Text(stringResource(R.string.cancel))
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    runCatching {
-                        shareAcquisitionCharts(
-                            context = context,
-                            record = record,
-                            groups =
-                                if (
-                                    shareScope == AcquisitionChartShareScope.ALL
-                                ) {
-                                    AcquisitionChartGroup.entries
-                                } else {
-                                    listOf(selectedGroup)
-                                }
-                        )
-                    }.onFailure { error ->
-                        UvirErrorLog.record(
-                            context,
-                            "share_acquisition_chart",
-                            error
-                        )
-                        showUvirBottomMessage(
-                            context,
-                            shareErrorText,
-                            longDuration = false
-                        )
-                    }
-                    onDismiss()
+                ) {
+                    Text(stringResource(R.string.cancel))
                 }
-            ) {
-                Text(stringResource(R.string.share))
             }
         },
         containerColor = cardColor,

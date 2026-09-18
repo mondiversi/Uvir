@@ -75,7 +75,7 @@ internal fun AlertSessionValuesCard(
                 } else {
                     R.string.session_chart_unit
                 }
-            ),
+            ).withUvirIrradianceUnit(LocalUvirIrradianceUnit.current),
         expanded = expanded,
         onToggle = onToggle,
         cardColor = cardColor,
@@ -102,7 +102,11 @@ internal fun AlertSessionValuesCard(
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = formatDateTime(event.entry.timestamp),
+                        text = formatDateTime(
+                            event.entry.timestamp,
+                            LocalUvirDateFormat.current,
+                            LocalUvirTimeFormat.current
+                        ),
                         color = secondaryText,
                         fontSize = 11.sp,
                         maxLines = 1
@@ -114,6 +118,7 @@ internal fun AlertSessionValuesCard(
                     .forEach { violation ->
                         AlertViolationDataRow(
                             violation = violation,
+                            qualityFlags = event.entry.qualityFlags,
                             primaryText = primaryText,
                             secondaryText = secondaryText
                         )
@@ -133,6 +138,7 @@ internal fun AlertSessionValuesCard(
 internal fun AlertViolationDataCard(
     biologicalEffects: Boolean,
     violations: List<ThresholdAlertViolation>,
+    qualityFlags: Int = 0,
     expanded: Boolean,
     onToggle: () -> Unit,
     cardColor: Color,
@@ -156,7 +162,7 @@ internal fun AlertViolationDataCard(
                 } else {
                     R.string.session_chart_unit
                 }
-            ),
+            ).withUvirIrradianceUnit(LocalUvirIrradianceUnit.current),
         expanded = expanded,
         onToggle = onToggle,
         cardColor = cardColor,
@@ -172,6 +178,7 @@ internal fun AlertViolationDataCard(
                 .forEach { violation ->
                     AlertViolationDataRow(
                         violation = violation,
+                        qualityFlags = qualityFlags,
                         primaryText = primaryText,
                         secondaryText = secondaryText
                     )
@@ -183,6 +190,7 @@ internal fun AlertViolationDataCard(
 @Composable
 private fun AlertViolationDataRow(
     violation: ThresholdAlertViolation,
+    qualityFlags: Int,
     primaryText: Color,
     secondaryText: Color
 ) {
@@ -199,14 +207,26 @@ private fun AlertViolationDataRow(
             "≤"
         }
     val numericFormat = LocalUvirNumericFormat.current
+    val irradianceUnit = LocalUvirIrradianceUnit.current
+    val outOfRange = qualityFlags.isOutOfRange(violation.rule.metric)
     val recordedValue =
-        formatUvirNumber(violation.value, 3, numericFormat)
+        if (outOfRange) {
+            stringResource(R.string.out_of_range_short)
+        } else {
+            formatUvirIrradianceNumber(
+                violation.value,
+                3,
+                numericFormat,
+                irradianceUnit
+            )
+        }
     val thresholdValue =
         "$symbol " +
-            formatUvirNumber(
+            formatUvirIrradianceNumber(
                 violation.rule.threshold.toDouble(),
                 3,
-                numericFormat
+                numericFormat,
+                irradianceUnit
             )
     val delta =
         alertThresholdDeltaPercent(
@@ -214,7 +234,9 @@ private fun AlertViolationDataRow(
             threshold = violation.rule.threshold.toDouble()
         )
     val deltaText =
-        delta?.let { value ->
+        if (outOfRange) {
+            "—"
+        } else delta?.let { value ->
             val sign =
                 when {
                     value > 0.0 -> "+"

@@ -161,16 +161,14 @@ internal fun UvirVersionInfoScreen(
                                     secondaryText
                                 )
                         ) {
-                            GitHubIcon(
-                                modifier = Modifier.size(20.dp),
-                                tint = LocalContentColor.current
-                            )
-                            Spacer(Modifier.width(8.dp))
-                            Text(
-                                stringResource(
-                                    R.string.open_github_repository
+                            UvirLabeledButtonContent(
+                                text = stringResource(R.string.open_github_repository)
+                            ) {
+                                GitHubIcon(
+                                    modifier = Modifier.size(20.dp),
+                                    tint = LocalContentColor.current
                                 )
-                            )
+                            }
                         }
 
                         Button(
@@ -186,7 +184,11 @@ internal fun UvirVersionInfoScreen(
                             modifier = Modifier.fillMaxWidth(),
                             colors = uvirPrimaryButtonColors()
                         ) {
-                            Text(stringResource(R.string.check_for_updates))
+                            UvirLabeledButtonContent(
+                                text = stringResource(R.string.check_for_updates)
+                            ) {
+                                UvirButtonGlyphIcon(UvirButtonGlyph.REFRESH)
+                            }
                         }
                     }
                 }

@@ -3,7 +3,10 @@ package me.mondiversi.uvir
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -98,7 +101,14 @@ internal fun UvirDataAndRestoreContent(
                 modifier = Modifier.fillMaxWidth(),
                 colors = uvirDestructiveButtonColors()
             ) {
-                Text(stringResource(R.string.reset_all_records_action))
+                UvirLabeledButtonContent(
+                    text = stringResource(R.string.reset_all_records_action)
+                ) {
+                    UvirMenuIcon(
+                        type = MenuIconType.DELETE,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
             }
 
             if (autoEnabled) {
@@ -115,7 +125,14 @@ internal fun UvirDataAndRestoreContent(
             modifier = Modifier.fillMaxWidth(),
             colors = uvirDestructiveButtonColors()
         ) {
-            Text(stringResource(R.string.restore_app_settings_action))
+            UvirLabeledButtonContent(
+                text = stringResource(R.string.restore_app_settings_action)
+            ) {
+                UvirRestoreDefaultsIcon(
+                    modifier = Modifier.size(20.dp),
+                    tint = androidx.compose.material3.LocalContentColor.current
+                )
+            }
         }
     }
 }

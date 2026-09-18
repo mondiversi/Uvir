@@ -9,7 +9,8 @@ import java.io.File
 
 internal fun shareDatabase(
     context: Context,
-    database: UvirDatabaseHelper
+    database: UvirDatabaseHelper,
+    destination: UvirExportDestination = UvirExportDestination.SHARE
 ) {
     val sqliteDatabase =
         database.writableDatabase
@@ -48,6 +49,11 @@ internal fun shareDatabase(
         exportedFile,
         overwrite = true
     )
+
+    if (destination == UvirExportDestination.SAVE) {
+        requestUvirExportSave(context, listOf(exportedFile))
+        return
+    }
 
     val uri =
         FileProvider.getUriForFile(

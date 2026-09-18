@@ -149,6 +149,8 @@ internal fun LiveRollingChart(
     history: List<LiveSamplePoint>,
     series: List<LiveChartSeries>,
     unit: String,
+    valueScale: (Double) -> Double = { it },
+    outOfRange: (SensorSample) -> Boolean = { false },
     primaryText: Color,
     secondaryText: Color
 ) {
@@ -164,8 +166,9 @@ internal fun LiveRollingChart(
             visiblePoints
                 .asSequence()
                 .flatMap { point ->
-                    series.asSequence().map { item ->
-                        item.value(point.sample).coerceAtLeast(0.0)
+                    series.asSequence().mapNotNull { item ->
+                        if (outOfRange(point.sample)) null
+                        else valueScale(item.value(point.sample)).coerceAtLeast(0.0)
                     }
                 }
                 .maxOrNull()
@@ -236,6 +239,10 @@ internal fun LiveRollingChart(
                         var hasPoint = false
 
                         visiblePoints.forEach { point ->
+                            if (outOfRange(point.sample)) {
+                                hasPoint = false
+                                return@forEach
+                            }
                             val elapsed =
                                 (point.timestamp - windowStart)
                                     .coerceIn(0L, LIVE_CHART_WINDOW_MILLIS)
@@ -244,7 +251,7 @@ internal fun LiveRollingChart(
                                         elapsed.toFloat() /
                                         LIVE_CHART_WINDOW_MILLIS.toFloat()
                             val normalized =
-                                (item.value(point.sample)
+                                (valueScale(item.value(point.sample))
                                     .coerceAtLeast(0.0) / maxValue)
                                     .toFloat()
                                     .coerceIn(0f, 1f)

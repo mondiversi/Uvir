@@ -9,7 +9,10 @@ class UvirAcquisitionExportPlanTest {
     private fun record(
         id: Long,
         timestamp: Long = id,
-        sessionId: Long? = null
+        sessionId: Long? = null,
+        sessionSequence: Int? = sessionId?.let { id.toInt() },
+        positionIndex: Int? = null,
+        variantIndex: Int? = null
     ) =
         SavedRecordDetail(
             id = id,
@@ -18,7 +21,9 @@ class UvirAcquisitionExportPlanTest {
             automatic = sessionId != null,
             sample = SensorSample(),
             sessionId = sessionId,
-            sessionSequence = sessionId?.let { id.toInt() }
+            sessionSequence = sessionSequence,
+            positionIndex = positionIndex,
+            variantIndex = variantIndex
         )
 
     @Test
@@ -70,6 +75,75 @@ class UvirAcquisitionExportPlanTest {
                 it is AcquisitionExportItem.CompleteSession &&
                     it.sessionId == 20L
             }
+        )
+    }
+
+    @Test
+    fun chartCountCombinesVariantSessionAndStandaloneAcquisition() {
+        val sessionRecords =
+            (1..6).map { sequence ->
+                record(
+                    id = sequence.toLong(),
+                    sessionId = 10,
+                    sessionSequence = sequence,
+                    positionIndex = ((sequence - 1) / 2) + 1,
+                    variantIndex = ((sequence - 1) % 2) + 1
+                )
+            }
+        val standalone = record(id = 20)
+        val plan =
+            buildAcquisitionExportPlan(
+                selectedRecords = sessionRecords + standalone,
+                allRecords = sessionRecords + standalone
+            )
+
+        val combined =
+            acquisitionExportChartFileBreakdown(
+                plan,
+                UvirChartExportMode.COMBINED
+            )
+        val separate =
+            acquisitionExportChartFileBreakdown(
+                plan,
+                UvirChartExportMode.SEPARATE
+            )
+
+        assertEquals(2, combined.completeSessionFiles)
+        assertEquals(1, combined.individualAcquisitionFiles)
+        assertEquals(3, combined.totalFiles)
+        assertEquals(8, separate.completeSessionFiles)
+        assertEquals(4, separate.individualAcquisitionFiles)
+        assertEquals(12, separate.totalFiles)
+    }
+
+    @Test
+    fun partialVariantSessionCountsEverySelectedRecordAsIndividual() {
+        val all =
+            (1..6).map { sequence ->
+                record(
+                    id = sequence.toLong(),
+                    sessionId = 10,
+                    sessionSequence = sequence,
+                    positionIndex = ((sequence - 1) / 2) + 1,
+                    variantIndex = ((sequence - 1) % 2) + 1
+                )
+            }
+        val plan = buildAcquisitionExportPlan(all.take(3), all)
+
+        assertTrue(plan.hasPartialSessions)
+        assertEquals(
+            3,
+            acquisitionExportChartFileCount(
+                plan,
+                UvirChartExportMode.COMBINED
+            )
+        )
+        assertEquals(
+            12,
+            acquisitionExportChartFileCount(
+                plan,
+                UvirChartExportMode.SEPARATE
+            )
         )
     }
 }

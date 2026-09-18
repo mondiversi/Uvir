@@ -79,11 +79,9 @@ internal fun UvirSensorCalibrationSettings(
         chevronColor = secondaryText,
         dividerColor = secondaryText.copy(alpha = 0.28f)
     ) {
-        androidx.compose.material3.Text(
+        SettingsPageDescription(
             text = stringResource(R.string.sensor_calibration_description),
-            color = secondaryText,
-            fontSize = 12.sp,
-            lineHeight = 16.sp
+            color = secondaryText
         )
 
         Column(
@@ -114,6 +112,9 @@ internal fun UvirSensorCalibrationSettings(
                 fontSize = 11.sp
             )
         }
+
+
+        SettingsGroupDivider(secondaryText)
 
         Column(
             verticalArrangement = Arrangement.spacedBy(UvirSettingsRelatedGap)

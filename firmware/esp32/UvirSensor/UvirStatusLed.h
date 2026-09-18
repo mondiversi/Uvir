@@ -11,6 +11,7 @@ enum class UvirLedBaseState : uint8_t {
 enum class UvirLedPulse : uint8_t {
   None,
   SavedEvent,
+  TimeUnavailable,
 };
 
 class UvirStatusLed {
@@ -40,6 +41,7 @@ class UvirStatusLed {
     if (!enabled_) {
       portENTER_CRITICAL(&requestMux_);
       savedPulseRequested_ = false;
+      timeUnavailablePulseRequested_ = false;
       debugFrameActive_ = false;
       portEXIT_CRITICAL(&requestMux_);
       writeRaw(0, 0, 0);
@@ -129,8 +131,9 @@ class UvirStatusLed {
   bool savedEventActive() {
     portENTER_CRITICAL(&requestMux_);
     const bool active = enabled_ && (savedPulseRequested_ ||
+        timeUnavailablePulseRequested_ ||
         (pulse_ != UvirLedPulse::None &&
-         millis() - pulseStartedAtMs_ < kSavedEventDurationMs));
+         millis() - pulseStartedAtMs_ < pulseDurationMs(pulse_)));
     portEXIT_CRITICAL(&requestMux_);
     return active;
   }
@@ -150,6 +153,13 @@ class UvirStatusLed {
 
   void signalAlertSaved(bool disconnected = false) {
     signalAcquisitionSaved(disconnected);
+  }
+
+  void signalTimeUnavailable() {
+    if (!enabled_) return;
+    portENTER_CRITICAL(&requestMux_);
+    timeUnavailablePulseRequested_ = true;
+    portEXIT_CRITICAL(&requestMux_);
   }
 
   void update() {
@@ -176,7 +186,7 @@ class UvirStatusLed {
     }
 
     const UvirLedPulse requested = takeRequestedPulse();
-    if (requested == UvirLedPulse::SavedEvent) {
+    if (requested != UvirLedPulse::None) {
       startPulse(requested);
     }
 
@@ -207,14 +217,18 @@ class UvirStatusLed {
     bool operationBlueOn = operationActive_ || commandActivityActive();
     if (pulse_ != UvirLedPulse::None) {
       const uint32_t elapsed = millis() - pulseStartedAtMs_;
-      if (elapsed >= kSavedEventDurationMs) {
+      if (elapsed >= pulseDurationMs(pulse_)) {
         pulse_ = UvirLedPulse::None;
       } else {
-        // When the operation LED is already steady, make the event visible as
-        // three brief OFF pulses. Otherwise show three ordinary ON pulses.
+        // When the operation LED is already steady, make either event visible
+        // as OFF pulses. Otherwise show ordinary blue ON pulses.
+        const uint32_t halfPeriodMs =
+            pulse_ == UvirLedPulse::TimeUnavailable
+                ? kTimeUnavailableHalfPeriodMs
+                : kBlinkHalfPeriodMs;
         operationBlueOn = pulseBaselineBlueOn_
-            ? !isBlinkOn(elapsed)
-            : isBlinkOn(elapsed);
+            ? !isBlinkOn(elapsed, halfPeriodMs)
+            : isBlinkOn(elapsed, halfPeriodMs);
       }
     }
     write(red, green, operationBlueOn ? 255 : 0);
@@ -225,15 +239,27 @@ class UvirStatusLed {
   static constexpr uint32_t kCommandActivityHoldMs = 350;
   static constexpr uint32_t kSavedEventDurationMs =
       kBlinkHalfPeriodMs * 6;
+  static constexpr uint32_t kTimeUnavailableHalfPeriodMs = 75;
+  static constexpr uint32_t kTimeUnavailableDurationMs =
+      kTimeUnavailableHalfPeriodMs * 10;
   static constexpr uint32_t kSelfTestFixedDurationMs = 1500;
   static constexpr uint32_t kSelfTestBlinkDurationMs =
       kBlinkHalfPeriodMs * 6;
   static constexpr uint32_t kSelfTestDurationMs =
-      kSelfTestFixedDurationMs * 3 + kSelfTestBlinkDurationMs * 4;
+      kSelfTestFixedDurationMs * 3 + kSelfTestBlinkDurationMs * 4 +
+      kTimeUnavailableDurationMs;
   static constexpr uint8_t kYellowGreenLevel = 180;
 
-  static bool isBlinkOn(uint32_t elapsedMs) {
-    return (elapsedMs / kBlinkHalfPeriodMs) % 2 == 0;
+  static bool isBlinkOn(
+      uint32_t elapsedMs,
+      uint32_t halfPeriodMs = kBlinkHalfPeriodMs) {
+    return (elapsedMs / halfPeriodMs) % 2 == 0;
+  }
+
+  static uint32_t pulseDurationMs(UvirLedPulse pulse) {
+    return pulse == UvirLedPulse::TimeUnavailable
+        ? kTimeUnavailableDurationMs
+        : kSavedEventDurationMs;
   }
 
   static void ledTaskEntry(void *context) {
@@ -247,7 +273,9 @@ class UvirStatusLed {
   UvirLedPulse takeRequestedPulse() {
     UvirLedPulse requested = UvirLedPulse::None;
     portENTER_CRITICAL(&requestMux_);
-    if (savedPulseRequested_) {
+    if (timeUnavailablePulseRequested_) {
+      requested = UvirLedPulse::TimeUnavailable;
+    } else if (savedPulseRequested_) {
       requested = UvirLedPulse::SavedEvent;
     }
     portEXIT_CRITICAL(&requestMux_);
@@ -260,6 +288,7 @@ class UvirStatusLed {
     if (selfTestRequested_) {
       selfTestRequested_ = false;
       savedPulseRequested_ = false;
+      timeUnavailablePulseRequested_ = false;
       requested = true;
     }
     portEXIT_CRITICAL(&requestMux_);
@@ -313,9 +342,16 @@ class UvirStatusLed {
       }
     } else if (elapsed < blueFixedEnd) {
       write(0, 0, 255);
-    } else if (!isBlinkOn(elapsed - blueFixedEnd)) {
+    } else if (elapsed < blueFixedEnd + kSelfTestBlinkDurationMs &&
+               !isBlinkOn(elapsed - blueFixedEnd)) {
       // Begin with an OFF half-period so the preceding steady-blue stage is
       // visually separated from all three test flashes.
+      write(0, 0, 255);
+    } else if (elapsed < blueFixedEnd + kSelfTestBlinkDurationMs) {
+      write(0, 0, 0);
+    } else if (isBlinkOn(
+                   elapsed - blueFixedEnd - kSelfTestBlinkDurationMs,
+                   kTimeUnavailableHalfPeriodMs)) {
       write(0, 0, 255);
     } else {
       write(0, 0, 0);
@@ -355,6 +391,7 @@ class UvirStatusLed {
     pulseStartedAtMs_ = millis();
     pulse_ = pulse;
     savedPulseRequested_ = false;
+    timeUnavailablePulseRequested_ = false;
     portEXIT_CRITICAL(&requestMux_);
   }
 
@@ -390,6 +427,7 @@ class UvirStatusLed {
   volatile uint32_t pulseStartedAtMs_ = 0;
   bool pulseBaselineBlueOn_ = false;
   volatile bool savedPulseRequested_ = false;
+  volatile bool timeUnavailablePulseRequested_ = false;
   volatile bool selfTestRequested_ = false;
   volatile bool selfTestActive_ = false;
   uint32_t selfTestStartedAtMs_ = 0;

@@ -24,7 +24,8 @@ enum class UvirNumericFormat(
 ) {
     SYSTEM("system"),
     INTERNATIONAL("international"),
-    EUROPEAN("european");
+    EUROPEAN("european"),
+    AMERICAN("american");
 
     companion object {
         fun fromStoredValue(value: String?): UvirNumericFormat =
@@ -77,12 +78,7 @@ internal fun formatUvirNumber(
         return value.toString()
     }
 
-    val locale =
-        when (format) {
-            UvirNumericFormat.SYSTEM -> Locale.getDefault()
-            UvirNumericFormat.INTERNATIONAL -> Locale.US
-            UvirNumericFormat.EUROPEAN -> Locale.GERMANY
-        }
+    val symbols = numericFormatSymbols(format)
     val pattern =
         buildString {
             append(if (grouping) "#,##0" else "0")
@@ -96,7 +92,7 @@ internal fun formatUvirNumber(
 
     return DecimalFormat(
         pattern,
-        DecimalFormatSymbols.getInstance(locale)
+        symbols
     ).apply {
         isGroupingUsed = grouping
         minimumFractionDigits = fractionDigits
@@ -113,21 +109,33 @@ internal fun formatUvirExportNumber(
         return value.toString()
     }
 
-    val locale =
-        when (format) {
-            UvirNumericFormat.SYSTEM -> Locale.getDefault()
-            UvirNumericFormat.INTERNATIONAL -> Locale.US
-            UvirNumericFormat.EUROPEAN -> Locale.GERMANY
-        }
-
     return DecimalFormat(
-        "#,##0.#########",
-        DecimalFormatSymbols.getInstance(locale)
+        "0.#########",
+        numericFormatSymbols(format)
     ).apply {
-        isGroupingUsed = true
+        isGroupingUsed = false
         roundingMode = RoundingMode.HALF_UP
     }.format(value)
 }
+
+private fun numericFormatSymbols(
+    format: UvirNumericFormat
+): DecimalFormatSymbols =
+    when (format) {
+        UvirNumericFormat.SYSTEM ->
+            DecimalFormatSymbols.getInstance(Locale.getDefault())
+
+        UvirNumericFormat.INTERNATIONAL ->
+            DecimalFormatSymbols.getInstance(Locale.US).apply {
+                groupingSeparator = '\u202F'
+            }
+
+        UvirNumericFormat.EUROPEAN ->
+            DecimalFormatSymbols.getInstance(Locale.GERMANY)
+
+        UvirNumericFormat.AMERICAN ->
+            DecimalFormatSymbols.getInstance(Locale.US)
+    }
 
 @Composable
 internal fun NumericFormatOptionRow(

@@ -82,6 +82,8 @@ enum class MenuIconType {
     ACQUISITION_PARAMETERS,
     MEASUREMENT_DATE,
     SELECT,
+    EXPORT,
+    IMPORT,
     SHARE,
     DELETE,
     VERSION_INFO,

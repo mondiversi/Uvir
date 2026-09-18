@@ -68,6 +68,7 @@ internal fun AlertChartScreen(
     onDeleted: () -> Unit
 ) {
     val context = LocalContext.current
+    val resources = androidx.compose.ui.platform.LocalResources.current
     val detailSensorName = rememberDetailSensorName(entry.sensorId, database)
     val allBars = remember(entry) { alertChartBars(entry) }
     val allViolations =
@@ -92,6 +93,16 @@ internal fun AlertChartScreen(
     var showShareDialog by rememberSaveable(entry.id) {
         mutableStateOf(false)
     }
+    var currentNote by rememberSaveable(entry.id) {
+        mutableStateOf(entry.note)
+    }
+    var showNoteEditor by rememberSaveable(entry.id) {
+        mutableStateOf(false)
+    }
+    val currentEntry =
+        remember(entry, currentNote) {
+            entry.copy(note = currentNote)
+        }
     val showBiological = viewMode == ViewMode.BIOLOGICAL_EFFECTS
     val bars =
         allBars.filter {
@@ -115,15 +126,18 @@ internal fun AlertChartScreen(
             cardColor = cardColor,
             primaryText = primaryText,
             secondaryText = secondaryText,
+            combinedChartFileCount = 1,
+            separateChartFileCount = alertChartGroupCount(entry),
             onDismiss = {
                 showShareDialog = false
             },
-            onSelectionConfirmed = { selection ->
+            onSelectionConfirmed = { selection, destination ->
                 runCatching {
                     shareAlertDetail(
                         context = context,
-                        entry = entry,
-                        selection = selection
+                        entry = currentEntry,
+                        selection = selection,
+                        destination = destination
                     )
                 }.onFailure { error ->
                     UvirErrorLog.record(
@@ -138,6 +152,24 @@ internal fun AlertChartScreen(
                     )
                 }
                 showShareDialog = false
+            }
+        )
+    }
+
+    if (showNoteEditor) {
+        UvirNoteEditDialog(
+            initialNote = currentNote,
+            cardColor = cardColor,
+            primaryText = primaryText,
+            secondaryText = secondaryText,
+            onSave = { updatedNote ->
+                if (database.updateAlertNote(entry.id, updatedNote)) {
+                    currentNote = updatedNote
+                    showNoteEditor = false
+                }
+            },
+            onDismiss = {
+                showNoteEditor = false
             }
         )
     }
@@ -164,7 +196,7 @@ internal fun AlertChartScreen(
                         if (deleted > 0) {
                             showUvirBottomMessage(
                                 context,
-                                context.getString(R.string.alert_deleted),
+                                resources.getString(R.string.alert_deleted),
                                 longDuration = false
                             )
                             onDeleted()
@@ -225,7 +257,7 @@ internal fun AlertChartScreen(
                                 }
                     ) {
                         UvirTitleActionIcon(
-                            type = MenuIconType.SHARE,
+                            type = MenuIconType.EXPORT,
                             modifier = Modifier.size(UvirTitleActionIconSize),
                             tint =
                                 if (allBars.isNotEmpty()) {
@@ -277,7 +309,11 @@ internal fun AlertChartScreen(
                 idLabel =
                     "ID / ${stringResource(R.string.session_label)}",
                 dateLabel = stringResource(R.string.share_date_label),
-                dateText = formatDetailDateTime(entry.timestamp),
+                dateText = formatDetailDateTime(
+                    entry.timestamp,
+                    LocalUvirDateFormat.current,
+                    LocalUvirTimeFormat.current
+                ),
                 cardColor = cardColor,
                 primaryText = primaryText,
                 secondaryText = secondaryText,
@@ -295,13 +331,16 @@ internal fun AlertChartScreen(
                 sensorName = detailSensorName,
                 note =
                     alertDisplayNote(
-                        note = entry.note,
+                        note = currentNote,
                         sessionSequence = entry.sessionSequence,
                         emptyNote = stringResource(R.string.no_note)
                     ),
                 cardColor = cardColor,
                 primaryText = primaryText,
-                secondaryText = secondaryText
+                secondaryText = secondaryText,
+                onEditNote = {
+                    showNoteEditor = true
+                }
             ) }
 
             stickyHeader(key = "detail_view_selector") {
@@ -314,7 +353,14 @@ internal fun AlertChartScreen(
                         cardColor = cardColor,
                         primaryText = primaryText,
                         secondaryText = secondaryText,
-                        modifier = Modifier.padding(bottom = UvirPinnedSelectorBottomSpacing)
+                        modifier = Modifier.padding(
+                            bottom =
+                                if (uvirDetailSelectorPinned(scrollState)) {
+                                    UvirPinnedSelectorBottomSpacing
+                                } else {
+                                    0.dp
+                                }
+                        )
                     )
                 }
             }
@@ -355,6 +401,7 @@ internal fun AlertChartScreen(
                 item { AlertViolationDataCard(
                     biologicalEffects = showBiological,
                     violations = violations,
+                    qualityFlags = entry.qualityFlags,
                     expanded = dataExpanded,
                     onToggle = {
                         dataExpanded = !dataExpanded
@@ -377,7 +424,7 @@ private fun AlertVerticalBarChart(
     val numericFormat = LocalUvirNumericFormat.current
     val logExtent =
         alertThresholdCenteredLogExtent(
-            bars.map { it.thresholdPercent }
+            bars.filterNot { it.outOfRange }.map { it.thresholdPercent }
         )
     val axisLabels =
         alertThresholdCenteredLogTicks(logExtent).map { value ->
@@ -388,7 +435,8 @@ private fun AlertVerticalBarChart(
             ) + "%"
         }
 
-    val inspectionPoints = bars.mapIndexed { index, bar ->
+    val inspectionPoints = bars.mapIndexedNotNull { index, bar ->
+        if (bar.outOfRange) return@mapIndexedNotNull null
         val delta = bar.thresholdDeltaPercent
         UvirSavedChartPoint(
             UvirChartCoordinate((index + 0.5f) / bars.size.coerceAtLeast(1),
@@ -457,6 +505,7 @@ private fun AlertVerticalBarChart(
                         (slotWidth * 0.48f)
                             .coerceAtMost(42.dp.toPx())
                     bars.forEachIndexed { index, bar ->
+                        if (bar.outOfRange) return@forEachIndexed
                         val normalized =
                             alertThresholdCenteredLogFraction(
                                 bar.thresholdPercent,
@@ -513,8 +562,12 @@ private fun AlertVerticalBarChart(
                 rowBars.forEach { bar ->
                     val delta = bar.thresholdDeltaPercent
                     val deltaText =
-                        (if (delta < 0.0) "−" else "+") +
-                            formatUvirNumber(abs(delta), 1, numericFormat) + "%"
+                        if (bar.outOfRange) {
+                            stringResource(R.string.out_of_range_short)
+                        } else {
+                            (if (delta < 0.0) "−" else "+") +
+                                formatUvirNumber(abs(delta), 1, numericFormat) + "%"
+                        }
                     Row(
                         modifier = Modifier.weight(1f),
                         verticalAlignment = Alignment.CenterVertically

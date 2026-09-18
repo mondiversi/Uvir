@@ -181,17 +181,17 @@ internal fun loadThresholdAlertSettings(
                 ThresholdAlertSound.SILENT.name ->
                     ThresholdAlertSound.SILENT
                 ThresholdAlertSound.SINGLE_BEEP.name ->
-                    ThresholdAlertSound.SINGLE_BEEP
+                    ThresholdAlertSound.TRIPLE_BEEP
                 ThresholdAlertSound.VIBRATION.name ->
                     ThresholdAlertSound.VIBRATION
                 ThresholdAlertSound.DOUBLE_BEEP.name ->
-                    ThresholdAlertSound.DOUBLE_BEEP
+                    ThresholdAlertSound.TRIPLE_BEEP
                 ThresholdAlertSound.TRIPLE_BEEP.name ->
                     ThresholdAlertSound.TRIPLE_BEEP
                 ThresholdAlertSound.LONG_BEEP.name ->
                     ThresholdAlertSound.LONG_BEEP
                 "BEEP" ->
-                    ThresholdAlertSound.SINGLE_BEEP
+                    ThresholdAlertSound.TRIPLE_BEEP
                 "ALARM" ->
                     ThresholdAlertSound.TRIPLE_BEEP
                 "SIREN", "VOICE" ->
@@ -410,6 +410,7 @@ internal fun thresholdAlertViolations(
     return settings.rules
         .asSequence()
         .filter { it.enabled }
+        .filterNot { sample.isOutOfRange(it.metric) }
         .map { rule ->
             ThresholdAlertViolation(
                 rule = rule,
@@ -435,7 +436,8 @@ internal fun thresholdAlertViolations(
 internal suspend fun playThresholdAlertTone(
     context: Context,
     sound: ThresholdAlertSound,
-    volume: Int
+    volume: Int,
+    vibrationPulses: Int = 3
 ) {
     if (sound == ThresholdAlertSound.SILENT) {
         return
@@ -454,13 +456,14 @@ internal suspend fun playThresholdAlertTone(
                 ) as? Vibrator)
             }
 
-        val pattern =
-            longArrayOf(
-                0L,
-                320L,
-                140L,
-                320L
-            )
+        val pulseCount = vibrationPulses.coerceIn(1, 3)
+        val pattern = LongArray(pulseCount * 2) { index ->
+            when {
+                index == 0 -> 0L
+                index % 2 == 1 -> 140L
+                else -> 80L
+            }
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             vibrator?.vibrate(

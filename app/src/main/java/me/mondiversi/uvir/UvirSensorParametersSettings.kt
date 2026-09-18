@@ -4,8 +4,10 @@ import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.IconButton
@@ -60,6 +62,8 @@ internal fun UvirSensorParametersSettings(
     onStatusBuzzerEnabledChange: (Boolean) -> Unit,
     statusBuzzerVolume: Float,
     onStatusBuzzerVolumeChange: (Float) -> Unit,
+    externalCommandEnabled: Boolean,
+    onExternalCommandEnabledChange: (Boolean) -> Unit,
     statusLedTestEnabled: Boolean,
     onTestStatusLed: suspend () -> Boolean,
     statusBuzzerTestEnabled: Boolean,
@@ -76,6 +80,7 @@ internal fun UvirSensorParametersSettings(
     val coroutineScope = rememberCoroutineScope()
     var showStatusLedInfo by rememberSaveable { mutableStateOf(false) }
     var showStatusBuzzerInfo by rememberSaveable { mutableStateOf(false) }
+    var showExternalCommandInfo by rememberSaveable { mutableStateOf(false) }
     var showSensorDisassociateConfirmation by rememberSaveable {
         mutableStateOf(false)
     }
@@ -110,7 +115,7 @@ internal fun UvirSensorParametersSettings(
     SettingsSection(
         settingsPage = UvirSettingsPage.SENSOR_PARAMETERS,
         title = stringResource(R.string.settings_section_sensor_parameters),
-        titleIcon = ConnectivityIconType.SENSOR,
+        titleIcon = ConnectivityIconType.MANAGEMENT,
         expanded = expanded,
         enabled = sensorSettingsEnabled,
         dimContentWhenDisabled = false,
@@ -130,11 +135,9 @@ internal fun UvirSensorParametersSettings(
         Column(
             verticalArrangement = Arrangement.spacedBy(UvirSettingsGroupGap)
         ) {
-            Text(
+            SettingsPageDescription(
                 text = stringResource(R.string.sensor_parameters_description),
-                color = secondaryText,
-                fontSize = 12.sp,
-                lineHeight = 16.sp
+                color = secondaryText
             )
 
             Column(
@@ -164,6 +167,8 @@ internal fun UvirSensorParametersSettings(
                     lineHeight = 14.sp
                 )
             }
+
+            SettingsGroupDivider(secondaryText)
 
             SettingsCheckboxWithDescription(
                 checked = autonomousRecordingEnabled,
@@ -225,6 +230,8 @@ internal fun UvirSensorParametersSettings(
                 }
             }
 
+            SettingsGroupDivider(secondaryText)
+
             SettingsCheckboxWithDescription(
                 checked = statusLedEnabled,
                 onCheckedChange = onStatusLedEnabledChange,
@@ -252,6 +259,8 @@ internal fun UvirSensorParametersSettings(
                 secondaryText = secondaryText,
                 onValueChange = onStatusLedBrightnessChange
             )
+
+            SettingsGroupDivider(secondaryText)
 
             SettingsCheckboxWithDescription(
                 checked = statusBuzzerEnabled,
@@ -283,6 +292,31 @@ internal fun UvirSensorParametersSettings(
                 onValueChange = onStatusBuzzerVolumeChange
             )
 
+            SettingsGroupDivider(secondaryText)
+
+            SettingsCheckboxWithDescription(
+                checked = externalCommandEnabled,
+                onCheckedChange = onExternalCommandEnabledChange,
+                title = stringResource(R.string.external_command),
+                description = stringResource(
+                    R.string.sensor_external_command_info_description
+                ),
+                enabled = sensorSettingsEnabled,
+                primaryText = primaryText,
+                secondaryText = secondaryText,
+                trailingContent = {
+                    ParameterInfoButton(
+                        contentDescription = resources.getString(
+                            R.string.sensor_external_command_info_action
+                        ),
+                        tint = primaryText,
+                        onClick = { showExternalCommandInfo = true }
+                    )
+                }
+            )
+
+            SettingsGroupDivider(secondaryText)
+
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(UvirSettingsControlGap)
@@ -295,9 +329,14 @@ internal fun UvirSensorParametersSettings(
                     modifier = Modifier.fillMaxWidth(),
                     colors = uvirDestructiveButtonColors()
                 ) {
-                    AdaptiveSingleLineButtonText(
-                        stringResource(R.string.sensor_disassociate_action)
-                    )
+                    UvirLabeledButtonContent(
+                        text = stringResource(R.string.sensor_disassociate_action)
+                    ) {
+                        ConnectivitySectionIcon(
+                            type = ConnectivityIconType.SENSOR_CONNECTION,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
 
                 Button(
@@ -306,9 +345,14 @@ internal fun UvirSensorParametersSettings(
                     modifier = Modifier.fillMaxWidth(),
                     colors = uvirDestructiveButtonColors()
                 ) {
-                    AdaptiveSingleLineButtonText(
-                        stringResource(R.string.sensor_restore_action)
-                    )
+                    UvirLabeledButtonContent(
+                        text = stringResource(R.string.sensor_restore_action)
+                    ) {
+                        UvirRestoreDefaultsIcon(
+                            modifier = Modifier.size(20.dp),
+                            tint = androidx.compose.material3.LocalContentColor.current
+                        )
+                    }
                 }
 
             }
@@ -334,6 +378,15 @@ internal fun UvirSensorParametersSettings(
             testEnabled = statusBuzzerTestEnabled,
             onTestBuzzer = onTestStatusBuzzer,
             onDismissRequest = { showStatusBuzzerInfo = false }
+        )
+    }
+
+    if (showExternalCommandInfo) {
+        UvirExternalCommandInfoDialog(
+            primaryText = primaryText,
+            secondaryText = secondaryText,
+            cardColor = cardColor,
+            onDismissRequest = { showExternalCommandInfo = false }
         )
     }
 
@@ -398,6 +451,7 @@ internal fun SensorParameterSlider(
     onValueChange: (Float) -> Unit
 ) {
     val commit = LocalSettingsCommit.current
+    val sliderValue = if (value <= 1f) 0f else value.coerceIn(0f, 100f)
     Column(verticalArrangement = Arrangement.spacedBy(UvirSettingsRelatedGap)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -407,7 +461,7 @@ internal fun SensorParameterSlider(
             Text(
                 text = title,
                 color = if (enabled) primaryText else secondaryText,
-                fontSize = 14.sp,
+                fontSize = 13.sp,
                 fontWeight = FontWeight.Medium
             )
             Text(
@@ -418,12 +472,14 @@ internal fun SensorParameterSlider(
             )
         }
         Slider(
-            value = value,
-            onValueChange = onValueChange,
+            value = sliderValue,
+            onValueChange = { sliderPosition ->
+                onValueChange(if (sliderPosition <= 0f) 1f else sliderPosition)
+            },
             onValueChangeFinished = { commit?.commit() },
             enabled = enabled,
-            valueRange = 1f..100f,
-            steps = 98
+            valueRange = 0f..100f,
+            steps = 9
         )
     }
 }

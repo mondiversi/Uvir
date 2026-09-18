@@ -72,6 +72,7 @@ internal fun AlertSessionChartScreen(
     onDeleted: () -> Unit
 ) {
     val context = LocalContext.current
+    val resources = androidx.compose.ui.platform.LocalResources.current
     val sortedEntries = remember(entries) { entries.sortedBy { it.timestamp } }
     val detailSensorName =
         rememberDetailSensorName(sortedEntries.firstOrNull()?.sensorId, database)
@@ -96,6 +97,16 @@ internal fun AlertSessionChartScreen(
     var showDeleteConfirmation by rememberSaveable(sessionId) {
         mutableStateOf(false)
     }
+    var currentNote by rememberSaveable(sessionId) {
+        mutableStateOf(
+            database.readAlertSessionNote(sessionId).ifBlank {
+                sortedEntries.firstOrNull()?.note.orEmpty()
+            }
+        )
+    }
+    var showNoteEditor by rememberSaveable(sessionId) {
+        mutableStateOf(false)
+    }
     var showChart by rememberSaveable(sessionId) {
         mutableStateOf(false)
     }
@@ -111,6 +122,10 @@ internal fun AlertSessionChartScreen(
                 biologicalEffects =
                     viewMode == ViewMode.BIOLOGICAL_EFFECTS
             )
+        }
+    val noteAwareEntries =
+        remember(sortedEntries, currentNote) {
+            sortedEntries.map { it.copy(note = currentNote) }
         }
     val darkMode = androidx.compose.foundation.isSystemInDarkTheme()
     val alertSessionColor = uvirAlertSessionIndicatorColor(darkMode)
@@ -148,7 +163,7 @@ internal fun AlertSessionChartScreen(
                         if (deleted > 0) {
                             showUvirBottomMessage(
                                 context,
-                                context.getString(R.string.alert_session_deleted),
+                                resources.getString(R.string.alert_session_deleted),
                                 longDuration = false
                             )
                             onDeleted()
@@ -182,16 +197,19 @@ internal fun AlertSessionChartScreen(
             cardColor = cardColor,
             primaryText = primaryText,
             secondaryText = secondaryText,
+            combinedChartFileCount = 1,
+            separateChartFileCount = alertSessionChartGroupCount(sortedEntries),
             onDismiss = {
                 showShareDialog = false
             },
-            onSelectionConfirmed = { selection ->
+            onSelectionConfirmed = { selection, destination ->
                 runCatching {
                     shareAlertSessionDetail(
                         context = context,
                         sessionId = sessionId,
-                        entries = sortedEntries,
-                        selection = selection
+                        entries = noteAwareEntries,
+                        selection = selection,
+                        destination = destination
                     )
                 }.onFailure { error ->
                     UvirErrorLog.record(
@@ -201,13 +219,31 @@ internal fun AlertSessionChartScreen(
                     )
                     showUvirBottomMessage(
                         context,
-                        context.getString(
+                        resources.getString(
                             R.string.alert_session_chart_share_error
                         ),
                         longDuration = false
                     )
                 }
                 showShareDialog = false
+            }
+        )
+    }
+
+    if (showNoteEditor) {
+        UvirNoteEditDialog(
+            initialNote = currentNote,
+            cardColor = cardColor,
+            primaryText = primaryText,
+            secondaryText = secondaryText,
+            onSave = { updatedNote ->
+                if (database.updateAlertSessionNote(sessionId, updatedNote)) {
+                    currentNote = updatedNote
+                    showNoteEditor = false
+                }
+            },
+            onDismiss = {
+                showNoteEditor = false
             }
         )
     }
@@ -245,7 +281,7 @@ internal fun AlertSessionChartScreen(
                                 }
                     ) {
                         UvirTitleActionIcon(
-                            type = MenuIconType.SHARE,
+                            type = MenuIconType.EXPORT,
                             modifier = Modifier.size(UvirTitleActionIconSize),
                             tint =
                                 if (availableSeries.isNotEmpty()) {
@@ -306,11 +342,19 @@ internal fun AlertSessionChartScreen(
                     stringResource(R.string.session_date_duration_events_label),
                 dateText =
                     sortedEntries.firstOrNull()?.let { entry ->
-                        formatDetailDateTime(entry.timestamp)
+                        formatDetailDateTime(
+                            entry.timestamp,
+                            LocalUvirDateFormat.current,
+                            LocalUvirTimeFormat.current
+                        )
                     } ?: "—",
                 endDateText =
                     sortedEntries.lastOrNull()?.let { entry ->
-                        formatDetailDateTime(entry.timestamp)
+                        formatDetailDateTime(
+                            entry.timestamp,
+                            LocalUvirDateFormat.current,
+                            LocalUvirTimeFormat.current
+                        )
                     } ?: "—",
                 durationText =
                     formatInterval(
@@ -333,13 +377,13 @@ internal fun AlertSessionChartScreen(
             item { UvirDetailContextCard(
                 automatic = true,
                 sensorName = detailSensorName,
-                note =
-                    sortedEntries.firstOrNull()?.note
-                        ?.ifBlank { stringResource(R.string.no_note) }
-                        ?: stringResource(R.string.no_note),
+                note = currentNote.ifBlank { stringResource(R.string.no_note) },
                 cardColor = cardColor,
                 primaryText = primaryText,
-                secondaryText = secondaryText
+                secondaryText = secondaryText,
+                onEditNote = {
+                    showNoteEditor = true
+                }
             ) }
 
             stickyHeader(key = "detail_view_selector") {
@@ -352,7 +396,14 @@ internal fun AlertSessionChartScreen(
                         cardColor = cardColor,
                         primaryText = primaryText,
                         secondaryText = secondaryText,
-                        modifier = Modifier.padding(bottom = UvirPinnedSelectorBottomSpacing)
+                        modifier = Modifier.padding(
+                            bottom =
+                                if (uvirDetailSelectorPinned(scrollState)) {
+                                    UvirPinnedSelectorBottomSpacing
+                                } else {
+                                    0.dp
+                                }
+                        )
                     )
                 }
             }
@@ -422,16 +473,22 @@ private fun AlertSessionCombinedLineChart(
     secondaryText: Color
 ) {
     val percentageScale = series.all { it.usesPercentageScale() }
+    val irradianceUnit = LocalUvirIrradianceUnit.current
+    val valueScale: (Double) -> Double = if (percentageScale) {
+        { value: Double -> value }
+    } else {
+        irradianceUnit::fromCanonicalUwCm2
+    }
     val chartValues =
         series.flatMap { item ->
-            item.points.map { point ->
-                point.chartValue(percentageScale)
+            item.points.filterNot { it.outOfRange }.map { point ->
+                valueScale(point.chartValue(percentageScale))
             }
         }
     val chartThresholds =
         series.flatMap { item ->
-            item.points.map { point ->
-                point.chartThreshold(percentageScale)
+            item.points.filterNot { it.outOfRange }.map { point ->
+                valueScale(point.chartThreshold(percentageScale))
             }
         }
     val maximum =
@@ -461,12 +518,13 @@ private fun AlertSessionCombinedLineChart(
     val startTime = entries.first().timestamp
     val endTime = entries.last().timestamp
     val timeSpan = (endTime - startTime).coerceAtLeast(1L)
-    val timeFormat = remember { SimpleDateFormat("HH:mm:ss", Locale.getDefault()) }
-    val inspectionDateFormat = remember { SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault()) }
+    val timeFormat = LocalUvirTimeFormat.current
+    val dateFormat = LocalUvirDateFormat.current
     val inspectionPoints = series.flatMap { item ->
         val label = stringResource(thresholdAlertMetricLabelResource(item.metric))
-        item.points.map { point ->
-            val value = point.chartValue(percentageScale)
+        item.points.mapNotNull { point ->
+            if (point.outOfRange) return@mapNotNull null
+            val value = valueScale(point.chartValue(percentageScale))
             UvirSavedChartPoint(
                 UvirChartCoordinate(
                     if (startTime == endTime) 0.5f
@@ -474,8 +532,15 @@ private fun AlertSessionCombinedLineChart(
                     1f - if (percentageScale) alertThresholdCenteredLogFraction(value, logExtent)
                           else (value.coerceAtLeast(0.0) / maximum).toFloat()),
                 label, formatUvirNumber(value, if (percentageScale) 1 else 3, numericFormat) +
-                    if (percentageScale) "%" else " µW/cm²",
-                item.color, inspectionDateFormat.format(Date(point.timestamp)))
+                    if (percentageScale) "%" else " ${irradianceUnit.symbol}",
+                item.color,
+                formatUvirDateTime(
+                    point.timestamp,
+                    dateFormat,
+                    separator = " ",
+                    timeFormat = timeFormat
+                )
+            )
         }
     }
 
@@ -553,7 +618,12 @@ private fun AlertSessionCombinedLineChart(
                         } else {
                             series.forEach { item ->
                                 val thresholdPath = Path()
+                                var hasPreviousThreshold = false
                                 item.points.forEachIndexed { index, point ->
+                                    if (point.outOfRange) {
+                                        hasPreviousThreshold = false
+                                        return@forEachIndexed
+                                    }
                                     val x =
                                         if (startTime == endTime) {
                                             size.width / 2f
@@ -564,16 +634,17 @@ private fun AlertSessionCombinedLineChart(
                                         }
                                     val y =
                                         size.height -
-                                            (point.threshold / maximum).toFloat() *
+                                            (valueScale(point.threshold) / maximum).toFloat() *
                                             size.height
                                     if (item.points.size == 1) {
                                         thresholdPath.moveTo(0f, y)
                                         thresholdPath.lineTo(size.width, y)
-                                    } else if (index == 0) {
+                                    } else if (!hasPreviousThreshold) {
                                         thresholdPath.moveTo(x, y)
                                     } else {
                                         thresholdPath.lineTo(x, y)
                                     }
+                                    hasPreviousThreshold = true
                                 }
                                 drawPath(
                                     path = thresholdPath,
@@ -585,7 +656,12 @@ private fun AlertSessionCombinedLineChart(
 
                         series.forEach { item ->
                             val valuePath = Path()
+                            var hasPreviousValue = false
                             item.points.forEachIndexed { index, point ->
+                                if (point.outOfRange) {
+                                    hasPreviousValue = false
+                                    return@forEachIndexed
+                                }
                                 val x =
                                     if (startTime == endTime) {
                                         size.width / 2f
@@ -603,11 +679,12 @@ private fun AlertSessionCombinedLineChart(
                                             ) * size.height
                                     } else {
                                         size.height -
-                                            (point.chartValue(false).coerceAtLeast(0.0) / maximum)
+                                            (valueScale(point.chartValue(false)).coerceAtLeast(0.0) / maximum)
                                                 .toFloat() * size.height
                                     }
-                                if (index == 0) valuePath.moveTo(x, y)
+                                if (!hasPreviousValue) valuePath.moveTo(x, y)
                                 else valuePath.lineTo(x, y)
+                                hasPreviousValue = true
                                 drawCircle(
                                     color = item.color,
                                     radius = 3.dp.toPx(),
@@ -630,6 +707,7 @@ private fun AlertSessionCombinedLineChart(
                     startTimestamp = startTime,
                     endTimestamp = endTime,
                     fractions = tickFractions,
+                    dateFormat = dateFormat,
                     timeFormat = timeFormat,
                     secondaryText = secondaryText
                 )

@@ -155,6 +155,7 @@ internal fun UvirAppContent(
 ) {
 
     val context = LocalContext.current
+    val resources = LocalResources.current
 
     val usbSensorState by
         usbSensorManager.state.collectAsState()
@@ -340,12 +341,40 @@ internal fun UvirAppContent(
         )
     }
 
+    var dateFormat by rememberSaveable {
+        mutableStateOf(
+            loadUvirDateFormat(context)
+        )
+    }
+
+    var timeFormat by rememberSaveable {
+        mutableStateOf(
+            loadUvirTimeFormat(context)
+        )
+    }
+
+    var exportMode by rememberSaveable {
+        mutableStateOf(
+            loadUvirExportMode(context)
+        )
+    }
+
+    var irradianceUnit by rememberSaveable {
+        mutableStateOf(loadUvirIrradianceUnit(context))
+    }
+
     var useFakeSensorData by rememberSaveable {
         mutableStateOf(
             preferences.getBoolean(
                 KEY_USE_FAKE_SENSOR_DATA,
                 true
             )
+        )
+    }
+
+    var fakeSensorOutOfRangeEnabled by rememberSaveable {
+        mutableStateOf(
+            preferences.getBoolean(KEY_FAKE_SENSOR_OUT_OF_RANGE, false)
         )
     }
 
@@ -408,7 +437,7 @@ internal fun UvirAppContent(
         ) {
             showUvirBottomMessage(
                 context.applicationContext,
-                context.getString(
+                resources.getString(
                     R.string.sensor_usb_identity_mismatch
                 ),
                 longDuration = true
@@ -632,7 +661,12 @@ internal fun UvirAppContent(
                     preferences.getInt(
                         KEY_SENSOR_STATUS_BUZZER_VOLUME,
                         10
-                    ).coerceIn(1, 100)
+                    ).coerceIn(1, 100),
+                externalCommandEnabled =
+                    preferences.getBoolean(
+                        KEY_SENSOR_EXTERNAL_COMMAND_ENABLED,
+                        true
+                    )
             )
         )
     }
@@ -670,6 +704,14 @@ internal fun UvirAppContent(
                 ?: loadThresholdAlertSettings(preferences)
         )
     }
+
+    var acquisitionFeedbackSettings by remember {
+        mutableStateOf(
+            loadAcquisitionFeedbackSettings(preferences)
+        )
+    }
+    val currentAcquisitionFeedbackSettings by
+        rememberUpdatedState(acquisitionFeedbackSettings)
 
     var thresholdAlertSessionId by remember {
         mutableLongStateOf(
@@ -881,6 +923,20 @@ internal fun UvirAppContent(
             }
     }
 
+    fun playAcquisitionFeedback(
+        settings: AcquisitionFeedbackSettings =
+            currentAcquisitionFeedbackSettings
+    ) {
+        thresholdPreviewScope.launch {
+            playThresholdAlertTone(
+                context = context,
+                sound = settings.sound,
+                volume = settings.volume,
+                vibrationPulses = 1
+            )
+        }
+    }
+
     // -------------------------------------------------
     // CURRENT ACQUISITION
     // Mock data can override the selected real source. USB samples arrive from
@@ -921,6 +977,7 @@ internal fun UvirAppContent(
 
     LaunchedEffect(
         useFakeSensorData,
+        fakeSensorOutOfRangeEnabled,
         samplesPerMeasurement,
         sampleSpacingMs,
         discardExtremes
@@ -944,7 +1001,7 @@ internal fun UvirAppContent(
             liveSamples =
                 (
                         liveSamples +
-                                generateRandomSample()
+                                generateRandomSample(fakeSensorOutOfRangeEnabled)
                         ).takeLast(
                     samplesPerMeasurement
                         .coerceAtLeast(1)
@@ -1160,6 +1217,7 @@ internal fun UvirAppContent(
         )
         sensorSettingsHydratedForDeviceId = deviceId
     }
+
     val selectedSensorIsConnecting =
         if (selectedSensorConnectionMode == SensorConnectionMode.USB) {
             usbSensorState.status == UsbSensorConnectionStatus.CONNECTING ||
@@ -1356,6 +1414,13 @@ internal fun UvirAppContent(
                 wirelessSensorState.sample
             }
 
+        val activeSaturated =
+            if (selectedSensorConnectionMode == SensorConnectionMode.USB) {
+                usbSensorState.saturated
+            } else {
+                wirelessSensorState.saturated
+            }
+
         val activeSequence =
             if (
                 selectedSensorConnectionMode ==
@@ -1398,7 +1463,20 @@ internal fun UvirAppContent(
 
         // Real sensor frames are already the final averaged result produced
         // by the ESP32. Only fake debug data is combined inside Android.
-        latestMeasurement.set(activeSample)
+        // Current firmware reports AS7343 saturation as one aggregate flag.
+        // Keep it separate from the numeric payload; future firmware can add
+        // the UV-family bit without changing persistence or presentation.
+        val qualitySample =
+            activeSample.copy(
+                qualityFlags =
+                    activeSample.qualityFlags or
+                        if (activeSaturated) {
+                            UVIR_QUALITY_VISIBLE_NIR_OUT_OF_RANGE
+                        } else {
+                            0
+                        }
+            )
+        latestMeasurement.set(qualitySample)
         val nextLiveReady = true
 
         val nowMs =
@@ -1412,7 +1490,7 @@ internal fun UvirAppContent(
                 LIVE_UI_REFRESH_MS ||
             (!liveReady && nextLiveReady)
         ) {
-            measurement = activeSample
+            measurement = qualitySample
             lastLiveUiRefreshMs.set(nowMs)
         }
 
@@ -1430,7 +1508,8 @@ internal fun UvirAppContent(
                 violations = violations,
                 timestamp = timestampMs,
                 sessionId = sessionId.takeIf { it > 0L },
-                sensorDeviceId = selectedSensorDeviceId
+                sensorDeviceId = selectedSensorDeviceId,
+                qualityFlags = latestMeasurement.get().qualityFlags
             )
         if (insertedAlertId != -1L) {
             incrementUnreadAlerts()
@@ -1600,6 +1679,12 @@ internal fun UvirAppContent(
         )
     }
 
+    var autoExternalCommand by remember {
+        mutableStateOf(
+            preferences.getBoolean(KEY_AUTO_EXTERNAL_COMMAND, false)
+        )
+    }
+
     var autoConditionalRules by remember { mutableStateOf(loadAcquisitionConditions(preferences)) }
     var autoConditionalEnabled by remember { mutableStateOf(preferences.getBoolean(KEY_AUTO_CONDITIONAL_ENABLED, false)) }
     var autoConditionalMatch by remember { mutableStateOf(runCatching {
@@ -1724,7 +1809,8 @@ internal fun UvirAppContent(
                     sessionId = autoSessionId,
                     note = autoNote,
                     startedAt = System.currentTimeMillis(),
-                    sensorDeviceId = selectedSensorDeviceId
+                    sensorDeviceId = selectedSensorDeviceId,
+                    externalCommand = autoExternalCommand
                 )
             }
         }
@@ -1753,7 +1839,7 @@ internal fun UvirAppContent(
                 .putBoolean(KEY_AUTO_ENABLED, false)
                 .putLong(KEY_AUTO_NEXT_SAVE_MS, 0L)
                 .apply()
-            showUvirBottomMessage(context, context.getString(messageId), longDuration = false)
+            showUvirBottomMessage(context, resources.getString(messageId), longDuration = false)
         }
 
         if (!useFakeSensorData) {
@@ -1833,6 +1919,7 @@ internal fun UvirAppContent(
                         .putLong(KEY_AUTO_NEXT_SAVE_MS, autoNextSaveMs)
                         .apply()
                     incrementUnreadAcquisitions()
+                    playAcquisitionFeedback()
                 }
             }
         }
@@ -1864,13 +1951,46 @@ internal fun UvirAppContent(
     ) {
         if (!selectedSensorIsConnected) return@LaunchedEffect
 
-        val readback = selectedRuntimeInfo.automaticJobReadback
+        val rawReportedSessionId = selectedRuntimeInfo.offlineSessionId ?: 0L
+        val shouldResolveReportedSession =
+            isSensorOriginatedSessionId(rawReportedSessionId) &&
+                (selectedRuntimeInfo.offlineRecording == true || autoEnabled)
+        val reportedSessionId =
+            if (shouldResolveReportedSession) {
+                withContext(Dispatchers.IO) {
+                    database.resolveSensorOriginatedAcquisitionSession(
+                        sensorDeviceId = selectedSensorDeviceId,
+                        sensorSessionId = rawReportedSessionId,
+                        startedAt = selectedRuntimeInfo.offlineStartedAtMs
+                            ?.takeIf { it > 0L }
+                            ?: System.currentTimeMillis()
+                    )
+                }
+            } else {
+                rawReportedSessionId
+            }
+        val readback = selectedRuntimeInfo.automaticJobReadback?.let {
+            if (isSensorOriginatedSessionId(it.sessionId) &&
+                shouldResolveReportedSession
+            ) {
+                it.copy(sessionId = reportedSessionId)
+            } else {
+                it
+            }
+        }
         if (readback?.active == true && readback.sessionId == autoSessionId &&
             readback.revision > automaticJobReadbackGuard.minimumRevision
         ) {
             automaticJobReadbackGuard = automaticJobReadbackGuard.afterActiveConfirmation()
         }
-        if (!automaticStopInProgress && shouldResolveMissingAutomaticJob(
+        val confirmedStoppedKnownSession =
+            autoEnabled && autoSessionId > 0L && readback != null &&
+                !readback.active &&
+                readback.sessionId == autoSessionId &&
+                readback.revision > automaticJobReadbackGuard.minimumRevision &&
+                automaticJobReadbackGuard.mayResolveMissingJob
+        if (!automaticStopInProgress && (
+                shouldResolveMissingAutomaticJob(
                 readback = readback,
                 guard = automaticJobReadbackGuard,
                 associatedDeviceId = UvirSensorCredentialStore.load(context).deviceId,
@@ -1878,6 +1998,7 @@ internal fun UvirAppContent(
                 simulated = useFakeSensorData || autoSessionSimulated,
                 appJobActive = autoEnabled,
                 appSessionId = autoSessionId
+                ) || confirmedStoppedKnownSession
             )
         ) {
             // No STOP command: the selected sensor has already confirmed that its RAM job is gone.
@@ -1899,7 +2020,9 @@ internal fun UvirAppContent(
         }
 
         val sensorActiveSessionId =
-            selectedRuntimeInfo.activeAutomaticSessionIdOrNull()
+            selectedRuntimeInfo.activeAutomaticSessionIdOrNull()?.let {
+                if (isSensorOriginatedSessionId(it)) reportedSessionId else it
+            }
         if (
             sensorActiveSessionId != null &&
             !automaticStopInProgress &&
@@ -1915,7 +2038,8 @@ internal fun UvirAppContent(
                 database.startAcquisitionSession(
                     sessionId = sensorActiveSessionId,
                     note = note,
-                    sensorDeviceId = selectedSensorDeviceId
+                    sensorDeviceId = selectedSensorDeviceId,
+                    externalCommand = selectedRuntimeInfo.offlineExternalCommand == true
                 )
                 note
             }
@@ -1923,6 +2047,7 @@ internal fun UvirAppContent(
             autoSessionSimulated = false
             autoEnabled = true
             autoNote = restoredNote
+            autoExternalCommand = selectedRuntimeInfo.offlineExternalCommand == true
             automaticScheduleKnown = false
             autoEndMs = 0L
             preferences.edit()
@@ -1930,6 +2055,7 @@ internal fun UvirAppContent(
                 .putBoolean(KEY_AUTO_SIMULATED, false)
                 .putBoolean(KEY_AUTO_ENABLED, true)
                 .putString(KEY_AUTO_NOTE, restoredNote)
+                .putBoolean(KEY_AUTO_EXTERNAL_COMMAND, autoExternalCommand)
                 .putBoolean(KEY_AUTO_SCHEDULE_KNOWN, false)
                 .putLong(KEY_AUTO_END_MS, 0L)
                 .commit()
@@ -1938,12 +2064,14 @@ internal fun UvirAppContent(
         if (
             !autoEnabled ||
             autoSessionId <= 0L ||
-            selectedRuntimeInfo.offlineSessionId != autoSessionId
+            reportedSessionId != autoSessionId
         ) {
             return@LaunchedEffect
         }
 
         if (firmwareSupportsConditionalAcquisition(selectedRuntimeInfo.firmwareVersion)) {
+            autoExternalCommand =
+                selectedRuntimeInfo.offlineExternalCommand == true
             autoConditionalPlan = selectedRuntimeInfo.offlineConditionPlan
             autoConditionalWaiting = selectedRuntimeInfo.offlineConditionWaiting == true
             selectedRuntimeInfo.offlineEndAtMs?.let { autoEndMs = it }
@@ -1954,7 +2082,9 @@ internal fun UvirAppContent(
                     ) }
                 }
             }
-            preferences.edit().putString(KEY_AUTO_CONDITIONAL_PLAN, autoConditionalPlan?.encode() ?: "")
+            preferences.edit()
+                .putBoolean(KEY_AUTO_EXTERNAL_COMMAND, autoExternalCommand)
+                .putString(KEY_AUTO_CONDITIONAL_PLAN, autoConditionalPlan?.encode() ?: "")
                 .putBoolean(KEY_AUTO_CONDITIONAL_WAITING, autoConditionalWaiting)
                 .putLong(KEY_AUTO_END_MS, autoEndMs).apply()
         }
@@ -2008,6 +2138,19 @@ internal fun UvirAppContent(
                         }.orEmpty()
                     if (deviceId.isBlank()) return@collect
 
+                    val resolvedSessionId =
+                        if (isSensorOriginatedSessionId(event.sessionId)) {
+                            withContext(Dispatchers.IO) {
+                                database.resolveSensorOriginatedAcquisitionSession(
+                                    sensorDeviceId = deviceId,
+                                    sensorSessionId = event.sessionId,
+                                    startedAt = event.timestamp
+                                )
+                            }
+                        } else {
+                            event.sessionId
+                        }
+
                     val wasAlreadyStored = withContext(Dispatchers.IO) {
                         database.hasSensorAcquisition(
                             sensorDeviceId = deviceId,
@@ -2030,10 +2173,12 @@ internal fun UvirAppContent(
                                     timestamp = event.timestamp,
                                     sample = event.sample,
                                     note = event.note,
-                                    sessionId = event.sessionId,
+                                    sessionId = resolvedSessionId,
                                     sequence = event.sequence,
                                     sensorDeviceId = deviceId,
-                                    sensorRecordId = event.recordId
+                                    sensorRecordId = event.recordId,
+                                    externalCommand =
+                                        isSensorOriginatedSessionId(event.sessionId)
                                 )
                             }
                         }
@@ -2058,9 +2203,10 @@ internal fun UvirAppContent(
                     }
                     if (!wasAlreadyStored) {
                         incrementUnreadAcquisitions()
+                        playAcquisitionFeedback()
                     }
 
-                    if (event.sessionId == autoSessionId) {
+                    if (resolvedSessionId > 0L && resolvedSessionId == autoSessionId) {
                         if (event.jobActive) {
                             automaticJobReadbackGuard = automaticJobReadbackGuard.afterActiveConfirmation()
                         }
@@ -2074,7 +2220,7 @@ internal fun UvirAppContent(
                                 autoEnabled = false
                                 showUvirBottomMessage(
                                     context,
-                                    context.getString(R.string.automatic_stopped),
+                                    resources.getString(R.string.automatic_stopped),
                                     longDuration = false
                                 )
                             }
@@ -2099,7 +2245,67 @@ internal fun UvirAppContent(
                 }
 
                 is SensorRuntimeEvent.AutomaticStatus -> {
-                    if (event.sessionId != autoSessionId) return@collect
+                    val deviceId =
+                        when (event.source) {
+                            SensorSyncSource.USB ->
+                                usbSensorManager.state.value.deviceId
+                            SensorSyncSource.WIRELESS ->
+                                wirelessSensorManager.state.value.deviceId
+                        }.orEmpty()
+                    if (deviceId.isBlank()) return@collect
+                    val sensorOriginated =
+                        isSensorOriginatedSessionId(event.sessionId)
+                    val resolvedSessionId =
+                        if (sensorOriginated) {
+                            withContext(Dispatchers.IO) {
+                                database.resolveSensorOriginatedAcquisitionSession(
+                                    sensorDeviceId = deviceId,
+                                    sensorSessionId = event.sessionId,
+                                    startedAt = event.startedAtMs
+                                        ?.takeIf { it > 0L }
+                                        ?: System.currentTimeMillis()
+                                )
+                            }
+                        } else {
+                            event.sessionId
+                        }
+
+                    if (sensorOriginated && event.jobActive &&
+                        resolvedSessionId > 0L &&
+                        resolvedSessionId != autoSessionId &&
+                        !automaticStopInProgress
+                    ) {
+                        withContext(Dispatchers.IO) {
+                            database.startAcquisitionSession(
+                                sessionId = resolvedSessionId,
+                                note = "",
+                                startedAt = event.startedAtMs
+                                    ?.takeIf { it > 0L }
+                                    ?: System.currentTimeMillis(),
+                                sensorDeviceId = deviceId,
+                                externalCommand = true
+                            )
+                        }
+                        autoSessionId = resolvedSessionId
+                        autoSessionSimulated = false
+                        autoEnabled = true
+                        autoNote = ""
+                        autoExternalCommand = true
+                        automaticScheduleKnown = false
+                        autoEndMs = 0L
+                        automaticJobReadbackGuard =
+                            automaticJobReadbackGuard.afterActiveConfirmation()
+                        preferences.edit()
+                            .putLong(KEY_AUTO_SESSION_ID, resolvedSessionId)
+                            .putBoolean(KEY_AUTO_SIMULATED, false)
+                            .putBoolean(KEY_AUTO_ENABLED, true)
+                            .putString(KEY_AUTO_NOTE, "")
+                            .putBoolean(KEY_AUTO_EXTERNAL_COMMAND, true)
+                            .putBoolean(KEY_AUTO_SCHEDULE_KNOWN, false)
+                            .putLong(KEY_AUTO_END_MS, 0L)
+                            .commit()
+                    }
+                    if (resolvedSessionId != autoSessionId) return@collect
                     if (event.jobActive) {
                         automaticJobReadbackGuard = automaticJobReadbackGuard.afterActiveConfirmation()
                     }
@@ -2107,6 +2313,7 @@ internal fun UvirAppContent(
                         database.acquisitionCountForSession(autoSessionId)
                     }
                     autoNextSaveMs = event.nextAtMs
+                    event.externalCommand?.let { autoExternalCommand = it }
                     event.conditionPlan?.let { autoConditionalPlan = decodeConditionalAcquisitionPlan(it) }
                     event.conditionWaiting?.let { autoConditionalWaiting = it }
                     event.endAtMs?.let { autoEndMs = it }
@@ -2117,7 +2324,9 @@ internal fun UvirAppContent(
                             ) }
                         }
                     }
-                    preferences.edit().putString(KEY_AUTO_CONDITIONAL_PLAN, autoConditionalPlan?.encode() ?: "")
+                    preferences.edit()
+                        .putBoolean(KEY_AUTO_EXTERNAL_COMMAND, autoExternalCommand)
+                        .putString(KEY_AUTO_CONDITIONAL_PLAN, autoConditionalPlan?.encode() ?: "")
                         .putBoolean(KEY_AUTO_CONDITIONAL_WAITING, autoConditionalWaiting)
                         .putLong(KEY_AUTO_END_MS, autoEndMs).apply()
                     if (automaticStopInProgress) {
@@ -2126,7 +2335,7 @@ internal fun UvirAppContent(
                             autoEnabled = false
                             showUvirBottomMessage(
                                 context,
-                                context.getString(R.string.automatic_stopped),
+                                resources.getString(R.string.automatic_stopped),
                                 longDuration = false
                             )
                         }
@@ -2239,7 +2448,7 @@ internal fun UvirAppContent(
                 if (event.acquisitions + event.alerts + event.errors > 0) {
                     showUvirBottomMessage(
                         context,
-                        context.getString(R.string.sensor_sync_in_progress),
+                        resources.getString(R.string.sensor_sync_in_progress),
                         longDuration = false
                     )
                 }
@@ -2272,28 +2481,42 @@ internal fun UvirAppContent(
                 is SensorSyncEvent.Started -> Unit
 
                 is SensorSyncEvent.Acquisition -> {
+                    val resolvedSessionId =
+                        if (isSensorOriginatedSessionId(event.sessionId)) {
+                            withContext(Dispatchers.IO) {
+                                database.resolveSensorOriginatedAcquisitionSession(
+                                    sensorDeviceId = deviceId,
+                                    sensorSessionId = event.sessionId,
+                                    startedAt = event.timestamp
+                                )
+                            }
+                        } else {
+                            event.sessionId
+                        }
                     val result = withContext(Dispatchers.IO) {
                         runCatching {
                             database.saveRecoveredAcquisition(
                                 timestamp = event.timestamp,
                                 sample = event.sample,
                                 note = event.note,
-                                sessionId = event.sessionId,
+                                sessionId = resolvedSessionId,
                                 sequence = event.sequence,
                                 sensorDeviceId = deviceId,
-                                sensorRecordId = event.recordId
+                                sensorRecordId = event.recordId,
+                                externalCommand =
+                                    isSensorOriginatedSessionId(event.sessionId)
                             )
                         }
                     }
                     if (result.getOrDefault(false)) {
                         ++processedAcquisitions
                         incrementUnreadAcquisitions()
-                        if (event.sessionId == autoSessionId && autoConditionalPlan?.action == AcquisitionConditionAction.START) {
+                        if (resolvedSessionId == autoSessionId && autoConditionalPlan?.action == AcquisitionConditionAction.START) {
                             withContext(Dispatchers.IO) { database.confirmConditionalSessionStart(
                                 autoSessionId, deviceId, event.timestamp
                             ) }
                         }
-                        if (event.sessionId == autoSessionId) {
+                        if (resolvedSessionId == autoSessionId) {
                             autoCompletedCount =
                                 withContext(Dispatchers.IO) {
                                     database.acquisitionCountForSession(
@@ -2370,7 +2593,8 @@ internal fun UvirAppContent(
                                 sensorRecordId = event.recordId,
                                 sessionId =
                                     event.sessionId.takeIf { it > 0L }
-                                        ?: thresholdAlertSessionId
+                                        ?: thresholdAlertSessionId,
+                                qualityFlags = event.qualityFlags
                             )
                         }
                     }
@@ -2472,8 +2696,20 @@ internal fun UvirAppContent(
                                 autoSessionId
                             )
                         }
+                        val completedSessionId =
+                            if (isSensorOriginatedSessionId(event.offlineSessionId)) {
+                                withContext(Dispatchers.IO) {
+                                    database.resolveSensorOriginatedAcquisitionSession(
+                                        sensorDeviceId = deviceId,
+                                        sensorSessionId = event.offlineSessionId,
+                                        startedAt = System.currentTimeMillis()
+                                    )
+                                }
+                            } else {
+                                event.offlineSessionId
+                            }
                         val sameSensorJob =
-                            event.offlineSessionId == autoSessionId
+                            completedSessionId == autoSessionId
                         autoCompletedCount = databaseCount
                         if (sameSensorJob && event.offlineNextAtMs > 0L) {
                             autoNextSaveMs = event.offlineNextAtMs
@@ -2735,7 +2971,7 @@ internal fun UvirAppContent(
 
         showUvirBottomMessage(
             context.applicationContext,
-            context.getString(
+            resources.getString(
                 if (selectedSensorIsConnected) {
                     R.string.sensor_connection_toast_connected
                 } else {
@@ -2806,7 +3042,7 @@ internal fun UvirAppContent(
                                 runtimeInfo = info,
                                 automaticIntervalSeconds =
                                     autoIntervalSeconds.takeIf {
-                                        pending.automaticActive
+                                        pending.automaticActive && !autoExternalCommand
                                     },
                                 alertsEnabled = pending.alertsActive,
                                 alertRepeatSeconds =
@@ -2924,7 +3160,7 @@ internal fun UvirAppContent(
                                     lastConnectedSensorRuntimeInfo,
                                 automaticIntervalSeconds =
                                     autoIntervalSeconds.takeIf {
-                                        autoEnabled
+                                        autoEnabled && !autoExternalCommand
                                     },
                                 alertsEnabled =
                                     thresholdNotificationsConfigured,
@@ -3098,7 +3334,7 @@ internal fun UvirAppContent(
                 .apply()
             showUvirBottomMessage(
                 context,
-                context.getString(R.string.automatic_stopped),
+                resources.getString(R.string.automatic_stopped),
                 longDuration = false
             )
             return
@@ -3134,7 +3370,7 @@ internal fun UvirAppContent(
                         automaticStopInProgress = false
                         showUvirBottomMessage(
                             context,
-                            context.getString(R.string.automatic_stop_failed)
+                            resources.getString(R.string.automatic_stop_failed)
                         )
                     }
                 }
@@ -3152,17 +3388,26 @@ internal fun UvirAppContent(
             return
         }
 
-        val plan = request.conditionalPlan?.let {
+        if (request.externalCommand && !useFakeSensorData &&
+            !firmwareSupportsExternalCommand(selectedRuntimeInfo.firmwareVersion)) {
+            showUvirBottomMessage(
+                context,
+                resources.getString(R.string.sensor_firmware_update_required)
+            )
+            return
+        }
+        val plan = request.conditionalPlan?.takeUnless { request.externalCommand }?.let {
             conditionalPlanFromRules(autoConditionalRules, it.match, it.action)
         }
         if (request.conditionalPlan != null && (plan == null ||
                 (!useFakeSensorData && !firmwareSupportsImmediateConditionalAcquisition(selectedRuntimeInfo.firmwareVersion)))) {
-            showUvirBottomMessage(context, context.getString(
+            showUvirBottomMessage(context, resources.getString(
                 if (plan == null) R.string.conditional_no_rules else R.string.sensor_firmware_update_required
             ))
             return
         }
         val effectiveRequest = request.copy(conditionalPlan = plan)
+        autoExternalCommand = request.externalCommand
         autoConditionalPlan = plan
         autoConditionalEnabled = plan != null
         autoConditionalWaiting = plan?.action == AcquisitionConditionAction.START
@@ -3185,7 +3430,9 @@ internal fun UvirAppContent(
                 ) * 1000L
 
         val startAt =
-            if (request.useStartDelay) {
+            if (request.externalCommand) {
+                now
+            } else if (request.useStartDelay) {
                 now + startDelayMs
             } else {
                 now
@@ -3202,7 +3449,7 @@ internal fun UvirAppContent(
                 ) * 1000L
 
         val endAt =
-            if (request.useDuration && !autoConditionalWaiting) {
+            if (!request.externalCommand && request.useDuration && !autoConditionalWaiting) {
                 startAt + durationMs
             } else {
                 0L
@@ -3218,7 +3465,8 @@ internal fun UvirAppContent(
             sessionId = newSessionId,
             note = normalizedSessionNote,
             startedAt = now,
-            sensorDeviceId = selectedSensorDeviceId
+            sensorDeviceId = selectedSensorDeviceId,
+            externalCommand = request.externalCommand
         )
 
         autoNote = normalizedSessionNote
@@ -3252,6 +3500,7 @@ internal fun UvirAppContent(
         automaticScheduleKnown = true
 
         preferences.edit()
+            .putBoolean(KEY_AUTO_EXTERNAL_COMMAND, request.externalCommand)
             .putString(KEY_AUTO_CONDITIONAL_PLAN, plan?.encode() ?: "")
             .putBoolean(KEY_AUTO_CONDITIONAL_ENABLED, autoConditionalEnabled)
             .putBoolean(KEY_AUTO_CONDITIONAL_WAITING, autoConditionalWaiting)
@@ -3446,6 +3695,7 @@ internal fun UvirAppContent(
                                 manualSession
                             )
                             incrementUnreadAcquisitions()
+                            playAcquisitionFeedback()
 
                             withContext(Dispatchers.IO) {
                                 sendSensorControlCommands(
@@ -3850,7 +4100,11 @@ internal fun UvirAppContent(
     }
 
     CompositionLocalProvider(
-        LocalUvirNumericFormat provides numericFormat
+        LocalUvirNumericFormat provides numericFormat,
+        LocalUvirDateFormat provides dateFormat,
+        LocalUvirTimeFormat provides
+            resolveUvirTimeFormat(context, timeFormat),
+        LocalUvirIrradianceUnit provides irradianceUnit
     ) {
     when (screen) {
 
@@ -3883,6 +4137,7 @@ internal fun UvirAppContent(
 
                 useFakeSensorData =
                     useFakeSensorData,
+                fakeSensorOutOfRangeEnabled = fakeSensorOutOfRangeEnabled,
                 usbSensorState =
                     usbSensorState,
                 wirelessSensorState =
@@ -3904,7 +4159,9 @@ internal fun UvirAppContent(
                             estimate = if (sensorParameters.autonomousRecordingEnabled)
                                 estimateOfflineAutonomy(
                                     runtimeInfo = lastConnectedSensorRuntimeInfo,
-                                    automaticIntervalSeconds = autoIntervalSeconds.takeIf { autoEnabled },
+                                    automaticIntervalSeconds = autoIntervalSeconds.takeIf {
+                                        autoEnabled && !autoExternalCommand
+                                    },
                                     alertsEnabled = thresholdNotificationsConfigured,
                                     alertRepeatSeconds = thresholdAlertSettings.repeatSeconds,
                                     startDelaySeconds = effectiveDelay,
@@ -3926,6 +4183,12 @@ internal fun UvirAppContent(
                             KEY_USE_FAKE_SENSOR_DATA,
                             enabled
                         )
+                        .apply()
+                },
+                onFakeSensorOutOfRangeChanged = { enabled ->
+                    fakeSensorOutOfRangeEnabled = enabled
+                    preferences.edit()
+                        .putBoolean(KEY_FAKE_SENSOR_OUT_OF_RANGE, enabled)
                         .apply()
                 },
                 sensorConnectionMode =
@@ -4108,6 +4371,10 @@ internal fun UvirAppContent(
                             KEY_SENSOR_STATUS_BUZZER_VOLUME,
                             parameters.statusBuzzerVolume
                         )
+                        .putBoolean(
+                            KEY_SENSOR_EXTERNAL_COMMAND_ENABLED,
+                            parameters.externalCommandEnabled
+                        )
                         .apply()
                     }
                     accepted
@@ -4288,6 +4555,10 @@ internal fun UvirAppContent(
                         appLanguageValue
                     ),
                 numericFormat = numericFormat,
+                dateFormat = dateFormat,
+                timeFormat = timeFormat,
+                exportMode = exportMode,
+                irradianceUnit = irradianceUnit,
                 onAppLanguageChanged = { language ->
                     appLanguageValue = language.storedValue
                     val savedLanguage =
@@ -4329,7 +4600,8 @@ internal fun UvirAppContent(
                         )
                         .apply()
 
-                    if (savedLanguage != appLanguageValue) {
+                    val changed = savedLanguage != appLanguageValue
+                    if (changed) {
                         context.findActivity()
                             ?.window
                             ?.decorView
@@ -4337,6 +4609,7 @@ internal fun UvirAppContent(
                                 context.findActivity()?.recreate()
                             }
                     }
+                    changed
                 },
                 onDiscardAppLanguage = {
                     if (
@@ -4363,6 +4636,31 @@ internal fun UvirAppContent(
                         context,
                         format
                     )
+                },
+                onApplyDateFormat = { format ->
+                    dateFormat = format
+                    saveUvirDateFormat(
+                        context,
+                        format
+                    )
+                },
+                onApplyTimeFormat = { format ->
+                    timeFormat = format
+                    saveUvirTimeFormat(
+                        context,
+                        format
+                    )
+                },
+                onApplyExportMode = { mode ->
+                    exportMode = mode
+                    saveUvirExportMode(
+                        context,
+                        mode
+                    )
+                },
+                onApplyIrradianceUnit = { unit ->
+                    irradianceUnit = unit
+                    saveUvirIrradianceUnit(context, unit)
                 },
 
                 onApplyAcquisitionParameters = {
@@ -4584,6 +4882,29 @@ internal fun UvirAppContent(
                         volume
                     )
                 },
+                acquisitionFeedbackSettings =
+                    acquisitionFeedbackSettings,
+                onAcquisitionFeedbackSettingsChange = { settings ->
+                    if (settings != acquisitionFeedbackSettings) {
+                        acquisitionFeedbackSettings = settings
+                        saveAcquisitionFeedbackSettings(preferences, settings)
+                        showUvirBottomMessage(
+                            context,
+                            resources.getString(R.string.parameters_saved)
+                        )
+                    }
+                },
+                onPreviewAcquisitionFeedback = { sound, volume ->
+                    thresholdPreviewJob?.cancel()
+                    thresholdPreviewJob = thresholdPreviewScope.launch {
+                        playThresholdAlertTone(
+                            context = context,
+                            sound = sound,
+                            volume = volume,
+                            vibrationPulses = 1
+                        )
+                    }
+                },
 
                 autoEnabled =
                     autoEnabled,
@@ -4612,6 +4933,7 @@ internal fun UvirAppContent(
 
                 autoConditionalPlan = autoConditionalPlan,
                 autoConditionalWaiting = autoConditionalWaiting,
+                autoExternalCommand = autoExternalCommand,
                 autoConditionalEnabled = autoConditionalEnabled,
                 autoConditionalMatch = autoConditionalMatch,
                 autoConditionalAction = autoConditionalAction,
@@ -4668,6 +4990,7 @@ internal fun UvirAppContent(
 
                 onAcquisitionSaved = {
                     incrementUnreadAcquisitions()
+                    playAcquisitionFeedback()
                     sensorConnectionScope.launch(Dispatchers.IO) {
                         sendSensorControlCommands(
                             listOf("LED_EVENT ACQUISITION")

@@ -29,9 +29,9 @@ class UvirAlertBuzzerUiTest {
         var testText = ""
         var calls = 0
         compose.setContent {
-            val context = LocalContext.current
-            titles = statusBuzzerSignals.map { context.getString(it.title) }
-            testText = context.getString(R.string.sensor_buzzer_test)
+            val resources = LocalResources.current
+            titles = statusBuzzerSignals.map { resources.getString(it.title) }
+            testText = resources.getString(R.string.sensor_buzzer_test)
             MaterialTheme(colorScheme = if (dark.value) darkColorScheme() else lightColorScheme()) {
                 UvirStatusBuzzerInfoDialog(
                     primaryText = if (dark.value) Color.White else Color.Black,
@@ -55,7 +55,7 @@ class UvirAlertBuzzerUiTest {
         var testText = ""
         var calls = 0
         compose.setContent {
-            testText = LocalContext.current.getString(R.string.sensor_buzzer_test)
+            testText = LocalResources.current.getString(R.string.sensor_buzzer_test)
             MaterialTheme {
                 UvirStatusBuzzerInfoDialog(Color.Black, Color.DarkGray, Color.White,
                     testEnabled = true, onTestBuzzer = { calls++; false }, onDismissRequest = {})
@@ -72,7 +72,7 @@ class UvirAlertBuzzerUiTest {
         var testAction = ""
         compose.setContent {
             val original = LocalContext.current
-            val config = Configuration(original.resources.configuration).apply {
+            val config = Configuration(LocalConfiguration.current).apply {
                 setLocale(Locale.FRENCH)
                 uiMode = (uiMode and Configuration.UI_MODE_NIGHT_MASK.inv()) or Configuration.UI_MODE_NIGHT_YES
             }

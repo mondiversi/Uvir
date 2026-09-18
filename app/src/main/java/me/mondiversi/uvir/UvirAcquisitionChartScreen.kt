@@ -129,7 +129,7 @@ internal fun AcquisitionChartScreen(
                                 }
                     ) {
                         UvirTitleActionIcon(
-                            type = MenuIconType.SHARE,
+                            type = MenuIconType.EXPORT,
                             modifier = Modifier.size(24.dp),
                             tint = MaterialTheme.colorScheme.primary
                         )
@@ -172,7 +172,9 @@ internal fun AcquisitionChartScreen(
                     ) {
                         val acquisitionTypeText =
                             stringResource(
-                                if (record.automatic) {
+                                if (record.externalCommand) {
+                                    R.string.external_measurement
+                                } else if (record.automatic) {
                                     R.string.automatic_measurement
                                 } else {
                                     R.string.manual_measurement
@@ -262,7 +264,11 @@ internal fun AcquisitionChartScreen(
                             text =
                                 stringResource(
                                     R.string.acquisition_chart_date,
-                                    formatDateTime(record.timestamp)
+                                    formatDateTime(
+                                        record.timestamp,
+                                        LocalUvirDateFormat.current,
+                                        LocalUvirTimeFormat.current
+                                    )
                                 ),
                             color = secondaryText,
                             fontSize = 12.sp,
@@ -319,6 +325,7 @@ internal fun AcquisitionVerticalBarChart(
     primaryText: Color,
     secondaryText: Color
 ) {
+    val irradianceUnit = LocalUvirIrradianceUnit.current
     val expandedSections =
         remember {
             mutableStateMapOf<AcquisitionChartSection, Boolean>()
@@ -339,7 +346,7 @@ internal fun AcquisitionVerticalBarChart(
 
             UvirCollapsibleChartCard(
                 title = stringResource(section.titleResource),
-                subtitle = stringResource(group.unitResource),
+                subtitle = stringResource(group.unitResource).withUvirIrradianceUnit(irradianceUnit),
                 iconGroup = section.spectrumIconGroup(),
                 expanded = expanded,
                 onToggle = {
@@ -357,7 +364,8 @@ internal fun AcquisitionVerticalBarChart(
                 ) {
                     AcquisitionBarSection(
                         bars = sectionBars,
-                        unit = group.exportUnit,
+                        unit = stringResource(group.unitResource).withUvirIrradianceUnit(irradianceUnit),
+                        valueScale = irradianceUnit::fromCanonicalUwCm2,
                         primaryText = primaryText,
                         secondaryText = secondaryText
                     )
@@ -371,22 +379,32 @@ internal fun AcquisitionVerticalBarChart(
 private fun AcquisitionBarSection(
     bars: List<AcquisitionChartBar>,
     unit: String,
+    valueScale: (Double) -> Double,
     primaryText: Color,
     secondaryText: Color
 ) {
     val maximum =
         bars
-            .maxOfOrNull { it.value.coerceAtLeast(0.0) }
+            .filterNot { it.outOfRange }
+            .maxOfOrNull { valueScale(it.value).coerceAtLeast(0.0) }
             ?.coerceAtLeast(1.0)
             ?: 1.0
     val numericFormat = LocalUvirNumericFormat.current
-    val inspectionPoints = bars.mapIndexed { index, bar ->
+    val irradianceUnit = LocalUvirIrradianceUnit.current
+    val outOfRangeText = stringResource(R.string.out_of_range_short)
+    val inspectionPoints = bars.mapIndexedNotNull { index, bar ->
+        if (bar.outOfRange) return@mapIndexedNotNull null
+        val displayValue = valueScale(bar.value)
         UvirSavedChartPoint(
             UvirChartCoordinate(
                 (index + 0.5f) / bars.size.coerceAtLeast(1),
-                1f - (bar.value.coerceAtLeast(0.0) / maximum).toFloat().coerceIn(0f, 1f)),
+                1f - (displayValue.coerceAtLeast(0.0) / maximum).toFloat().coerceIn(0f, 1f)),
             bar.displayLabelResource?.let { stringResource(it) } ?: bar.exportLabel,
-            formatUvirNumber(bar.value, 3, numericFormat) + " " + unit,
+            formatUvirNumber(
+                displayValue,
+                irradianceUnit.displayFractionDigits(3),
+                numericFormat
+            ) + " " + unit,
             bar.color)
     }
 
@@ -403,7 +421,7 @@ private fun AcquisitionBarSection(
     ) {
         UvirChartYAxis(
             maximum = maximum,
-            fractionDigits = 2,
+            fractionDigits = irradianceUnit.displayFractionDigits(2),
             secondaryText = secondaryText,
             modifier = Modifier.fillMaxSize()
         ) { chartModifier ->
@@ -427,8 +445,10 @@ private fun AcquisitionBarSection(
                         .coerceAtMost(42.dp.toPx())
 
                 bars.forEachIndexed { index, bar ->
+                    if (bar.outOfRange) return@forEachIndexed
+                    val displayValue = valueScale(bar.value)
                     val normalized =
-                        (bar.value.coerceAtLeast(0.0) / maximum)
+                        (displayValue.coerceAtLeast(0.0) / maximum)
                             .toFloat()
                             .coerceIn(0f, 1f)
                     val barHeight = size.height * normalized
@@ -499,7 +519,15 @@ private fun AcquisitionBarSection(
                             lineHeight = 13.sp
                         )
                         Text(
-                            text = formatUvirNumber(bar.value, 3, numericFormat),
+                            text = if (bar.outOfRange) {
+                                outOfRangeText
+                            } else {
+                                formatUvirNumber(
+                                    valueScale(bar.value),
+                                    irradianceUnit.displayFractionDigits(3),
+                                    numericFormat
+                                )
+                            },
                             color = primaryText,
                             fontSize = 10.sp,
                             maxLines = 1

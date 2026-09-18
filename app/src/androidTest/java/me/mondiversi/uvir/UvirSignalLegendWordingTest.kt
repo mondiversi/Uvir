@@ -20,7 +20,7 @@ class UvirSignalLegendWordingTest {
 
     @Composable private fun Localized(language: String, night: Boolean, content: @Composable () -> Unit) {
         val original = LocalContext.current
-        val config = Configuration(original.resources.configuration).apply {
+        val config = Configuration(LocalConfiguration.current).apply {
             setLocale(Locale.forLanguageTag(language))
             uiMode = (uiMode and Configuration.UI_MODE_NIGHT_MASK.inv()) or
                 (if (night) Configuration.UI_MODE_NIGHT_YES else Configuration.UI_MODE_NIGHT_NO)
@@ -71,7 +71,7 @@ class UvirSignalLegendWordingTest {
             Localized("it", dark.value) {
                 pendingDescriptions = listOf(R.string.sensor_led_signal_pending_connected_description,
                     R.string.sensor_led_signal_pending_disconnected_description)
-                    .map { LocalContext.current.getString(it) }
+                    .map { LocalResources.current.getString(it) }
                 UvirStatusLedInfoDialog(MaterialTheme.colorScheme.onSurface,
                     MaterialTheme.colorScheme.onSurfaceVariant, MaterialTheme.colorScheme.surface,
                     false, { error("No hardware tests") }, {})

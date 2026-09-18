@@ -63,7 +63,8 @@ internal data class AlertChartBar(
     val color: Color,
     val value: Double,
     val threshold: Double,
-    val thresholdPercent: Double
+    val thresholdPercent: Double,
+    val outOfRange: Boolean = false
 )
 
 internal val AlertChartBar.thresholdDeltaPercent: Double
@@ -134,6 +135,7 @@ internal fun alertChartBars(
                     ),
                 value = violation.value,
                 threshold = threshold,
-                thresholdPercent = relativePercent.coerceAtLeast(0.0)
+                thresholdPercent = relativePercent.coerceAtLeast(0.0),
+                outOfRange = entry.qualityFlags.isOutOfRange(violation.rule.metric)
             )
         }

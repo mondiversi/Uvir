@@ -1,6 +1,8 @@
 package me.mondiversi.uvir
 
 import androidx.compose.ui.graphics.Color
+import java.util.Calendar
+import java.util.TimeZone
 import kotlin.math.roundToLong
 
 internal enum class SessionChartGroup(
@@ -31,7 +33,8 @@ internal data class SessionChartSeries(
     val label: String,
     val color: Color,
     val values: List<Double>,
-    val displayLabelResource: Int? = null
+    val displayLabelResource: Int? = null,
+    val outOfRange: List<Boolean> = emptyList()
 )
 
 internal enum class SessionChartShareScope {
@@ -69,6 +72,19 @@ internal fun sessionChartTimestampAt(
                 fraction.coerceIn(0f, 1f)
             ).roundToLong()
 
+internal fun sessionChartSpansMultipleDays(
+    startTimestamp: Long,
+    endTimestamp: Long,
+    timeZone: TimeZone = TimeZone.getDefault()
+): Boolean {
+    if (startTimestamp <= 0L || endTimestamp <= 0L) return false
+    val start = Calendar.getInstance(timeZone).apply { timeInMillis = startTimestamp }
+    val end = Calendar.getInstance(timeZone).apply { timeInMillis = endTimestamp }
+    return start.get(Calendar.ERA) != end.get(Calendar.ERA) ||
+        start.get(Calendar.YEAR) != end.get(Calendar.YEAR) ||
+        start.get(Calendar.DAY_OF_YEAR) != end.get(Calendar.DAY_OF_YEAR)
+}
+
 internal fun sessionChartSeries(
     records: List<SavedRecordDetail>,
     group: SessionChartGroup
@@ -77,7 +93,7 @@ internal fun sessionChartSeries(
         selector: (SensorSample) -> Double
     ) = records.map { selector(it.sample) }
 
-    return when (group) {
+    val series = when (group) {
         SessionChartGroup.UV ->
             listOf(
                 SessionChartSeries(
@@ -208,5 +224,21 @@ internal fun sessionChartSeries(
                 )
             )
         }
+    }
+    return series.mapIndexed { index, item ->
+        val outOfRange = records.map { record ->
+            when (group) {
+                SessionChartGroup.UV -> record.sample.isOutOfRange(SensorGroup.UV)
+                SessionChartGroup.VISIBLE -> record.sample.isOutOfRange(SensorGroup.VISIBLE)
+                SessionChartGroup.FAR_RED_NIR -> record.sample.isOutOfRange(SensorGroup.NIR)
+                SessionChartGroup.BIOLOGICAL ->
+                    if (index < 2) {
+                        record.sample.isOutOfRange(SensorGroup.UV)
+                    } else {
+                        record.sample.isOutOfRange(SensorGroup.VISIBLE)
+                    }
+            }
+        }
+        item.copy(outOfRange = outOfRange)
     }
 }

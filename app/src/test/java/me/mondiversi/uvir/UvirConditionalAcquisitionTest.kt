@@ -80,4 +80,13 @@ class UvirConditionalAcquisitionTest {
         assertFalse(firmwareSupportsConditionalAcquisition("0.5.72"))
         assertTrue(firmwareSupportsConditionalAcquisition("0.5.73"))
     }
+    @Test fun externalCommandUsesDedicatedAtomicProtocol() {
+        val request=AutomaticAcquisitionRequest(5,"note",true,9,true,30,true,3,
+            externalCommand=true)
+        val command=sensorOfflineJobCommand(request,42,1000,31000,7,
+            AcquisitionParameters(5,150,true))
+        assertEquals("OFFLINE_EXTERNAL_JOB 42 7 5 150 1 -",command)
+        assertFalse(firmwareSupportsExternalCommand("0.5.75"))
+        assertTrue(firmwareSupportsExternalCommand("0.5.76"))
+    }
 }

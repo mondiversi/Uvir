@@ -5,20 +5,17 @@ import androidx.compose.ui.graphics.Color
 internal enum class AcquisitionChartGroup(
     val titleResource: Int,
     val unitResource: Int,
-    val exportTitle: String,
-    val exportUnit: String
+    val exportTitle: String
 ) {
     IRRADIANCE(
         R.string.irradiance_view,
         R.string.acquisition_chart_unit,
-        "Irradiance",
-        "µW/cm²"
+        "Irradiance"
     ),
     BIOLOGICAL(
         R.string.biological_effects_group_name,
         R.string.acquisition_chart_unit_biological,
-        "Estimated biological effects",
-        "µW/cm² equiv."
+        "Estimated biological effects"
     )
 }
 
@@ -28,7 +25,8 @@ internal data class AcquisitionChartBar(
     val displayLabelResource: Int?,
     val color: Color,
     val value: Double,
-    val section: AcquisitionChartSection
+    val section: AcquisitionChartSection,
+    val outOfRange: Boolean = false
 )
 
 internal enum class AcquisitionChartSection(
@@ -51,7 +49,10 @@ internal fun acquisitionChartBars(
     group: AcquisitionChartGroup = AcquisitionChartGroup.IRRADIANCE
 ): List<AcquisitionChartBar> =
     when (group) {
-        AcquisitionChartGroup.IRRADIANCE ->
+        AcquisitionChartGroup.IRRADIANCE -> {
+            val uvOutOfRange = sample.isOutOfRange(SensorGroup.UV)
+            val visibleOutOfRange = sample.isOutOfRange(SensorGroup.VISIBLE)
+            val infraredOutOfRange = sample.isOutOfRange(SensorGroup.NIR)
             listOf(
                 AcquisitionChartBar(
                     "UV",
@@ -59,11 +60,12 @@ internal fun acquisitionChartBars(
                     R.string.uv_radiation,
                     Color(0xFF512DA8),
                     sample.uvc + sample.uvb + sample.uva,
-                    AcquisitionChartSection.UV
+                    AcquisitionChartSection.UV,
+                    uvOutOfRange
                 ),
-                AcquisitionChartBar("UVC", "UVC", null, Color(0xFF9C27B0), sample.uvc, AcquisitionChartSection.UV),
-                AcquisitionChartBar("UVB", "UVB", null, Color(0xFF673AB7), sample.uvb, AcquisitionChartSection.UV),
-                AcquisitionChartBar("UVA", "UVA", null, Color(0xFF3F51B5), sample.uva, AcquisitionChartSection.UV),
+                AcquisitionChartBar("UVC", "UVC", null, Color(0xFF9C27B0), sample.uvc, AcquisitionChartSection.UV, uvOutOfRange),
+                AcquisitionChartBar("UVB", "UVB", null, Color(0xFF673AB7), sample.uvb, AcquisitionChartSection.UV, uvOutOfRange),
+                AcquisitionChartBar("UVA", "UVA", null, Color(0xFF3F51B5), sample.uva, AcquisitionChartSection.UV, uvOutOfRange),
                 AcquisitionChartBar(
                     "VIS",
                     "Visible light",
@@ -71,7 +73,8 @@ internal fun acquisitionChartBars(
                     Color(0xFF00897B),
                     sample.violetto + sample.blu + sample.verde +
                         sample.giallo + sample.arancione + sample.rosso,
-                    AcquisitionChartSection.VISIBLE
+                    AcquisitionChartSection.VISIBLE,
+                    visibleOutOfRange
                 ),
                 AcquisitionChartBar(
                     "HEV",
@@ -79,21 +82,23 @@ internal fun acquisitionChartBars(
                     R.string.threshold_channel_hev,
                     Color(0xFF3949AB),
                     sample.violetto + sample.blu,
-                    AcquisitionChartSection.VISIBLE
+                    AcquisitionChartSection.VISIBLE,
+                    visibleOutOfRange
                 ),
-                AcquisitionChartBar("V", "Violet", R.string.violet, Color(0xFF8E24AA), sample.violetto, AcquisitionChartSection.VISIBLE),
-                AcquisitionChartBar("B", "Blue", R.string.blue, Color(0xFF1E88E5), sample.blu, AcquisitionChartSection.VISIBLE),
-                AcquisitionChartBar("G", "Green", R.string.green, Color(0xFF43A047), sample.verde, AcquisitionChartSection.VISIBLE),
-                AcquisitionChartBar("Y", "Yellow", R.string.yellow, Color(0xFFF9A825), sample.giallo, AcquisitionChartSection.VISIBLE),
-                AcquisitionChartBar("O", "Orange", R.string.orange, Color(0xFFEF6C00), sample.arancione, AcquisitionChartSection.VISIBLE),
-                AcquisitionChartBar("R", "Red", R.string.red, Color(0xFFE53935), sample.rosso, AcquisitionChartSection.VISIBLE),
+                AcquisitionChartBar("V", "Violet", R.string.violet, Color(0xFF8E24AA), sample.violetto, AcquisitionChartSection.VISIBLE, visibleOutOfRange),
+                AcquisitionChartBar("B", "Blue", R.string.blue, Color(0xFF1E88E5), sample.blu, AcquisitionChartSection.VISIBLE, visibleOutOfRange),
+                AcquisitionChartBar("G", "Green", R.string.green, Color(0xFF43A047), sample.verde, AcquisitionChartSection.VISIBLE, visibleOutOfRange),
+                AcquisitionChartBar("Y", "Yellow", R.string.yellow, Color(0xFFF9A825), sample.giallo, AcquisitionChartSection.VISIBLE, visibleOutOfRange),
+                AcquisitionChartBar("O", "Orange", R.string.orange, Color(0xFFEF6C00), sample.arancione, AcquisitionChartSection.VISIBLE, visibleOutOfRange),
+                AcquisitionChartBar("R", "Red", R.string.red, Color(0xFFE53935), sample.rosso, AcquisitionChartSection.VISIBLE, visibleOutOfRange),
                 AcquisitionChartBar(
                     "IR",
                     "Infrared",
                     R.string.far_red_nir,
                     Color(0xFF6D4C41),
                     sample.f8 + sample.nir,
-                    AcquisitionChartSection.FAR_RED_NIR
+                    AcquisitionChartSection.FAR_RED_NIR,
+                    infraredOutOfRange
                 ),
                 AcquisitionChartBar(
                     "FR",
@@ -101,10 +106,12 @@ internal fun acquisitionChartBars(
                     R.string.session_chart_series_far_red,
                     Color(0xFFD32F2F),
                     sample.f8,
-                    AcquisitionChartSection.FAR_RED_NIR
+                    AcquisitionChartSection.FAR_RED_NIR,
+                    infraredOutOfRange
                 ),
-                AcquisitionChartBar("NIR", "NIR", null, Color(0xFF8D6E63), sample.nir, AcquisitionChartSection.FAR_RED_NIR),
+                AcquisitionChartBar("NIR", "NIR", null, Color(0xFF8D6E63), sample.nir, AcquisitionChartSection.FAR_RED_NIR, infraredOutOfRange),
             )
+        }
 
         AcquisitionChartGroup.BIOLOGICAL -> {
             val effects = biologicalEffects(sample)
@@ -115,7 +122,8 @@ internal fun acquisitionChartBars(
                     R.string.dna_uv_proxy,
                     thresholdAlertMetricDisplayColor(ThresholdAlertMetric.BIO_DNA_UV),
                     effects.dnaUvProxy,
-                    AcquisitionChartSection.BIOLOGICAL
+                    AcquisitionChartSection.BIOLOGICAL,
+                    sample.isOutOfRange(SensorGroup.UV)
                 ),
                 AcquisitionChartBar(
                     "UVA",
@@ -123,7 +131,8 @@ internal fun acquisitionChartBars(
                     R.string.uva_photoaging_proxy,
                     thresholdAlertMetricDisplayColor(ThresholdAlertMetric.BIO_UVA_PHOTOAGING),
                     effects.uvaPhotoagingProxy,
-                    AcquisitionChartSection.BIOLOGICAL
+                    AcquisitionChartSection.BIOLOGICAL,
+                    sample.isOutOfRange(SensorGroup.UV)
                 ),
                 AcquisitionChartBar(
                     "HEV",
@@ -131,7 +140,8 @@ internal fun acquisitionChartBars(
                     R.string.hev_oxidative_proxy,
                     thresholdAlertMetricDisplayColor(ThresholdAlertMetric.BIO_HEV_OXIDATIVE),
                     effects.hevOxidativeProxy,
-                    AcquisitionChartSection.BIOLOGICAL
+                    AcquisitionChartSection.BIOLOGICAL,
+                    sample.isOutOfRange(SensorGroup.VISIBLE)
                 )
             )
         }

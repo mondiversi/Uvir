@@ -11,22 +11,27 @@ import java.util.Locale
 internal fun thresholdAlertLogCsv(
     context: Context,
     entries: List<ThresholdAlertLogEntry>,
-    numericFormat: UvirNumericFormat
+    numericFormat: UvirNumericFormat,
+    dateFormat: UvirDateFormat = UvirDateFormat.INTERNATIONAL,
+    timeFormat: UvirTimeFormat = UvirTimeFormat.H24,
+    irradianceUnit: UvirIrradianceUnit = UvirIrradianceUnit.UW_CM2
 ): String {
     val rows =
         mutableListOf(
             listOf(
-                "Alert ID",
-                "Session ID",
-                "Session note",
-                "Date_Time",
+                context.getString(R.string.alert_chart_id_label),
+                context.getString(R.string.share_session_id_label),
+                context.getString(R.string.share_note_label),
+                context.getString(R.string.share_date_label),
                 "Timestamp_ms",
-                "Metric",
-                "Direction",
-                "Current_value",
-                "Threshold",
-                "Unit",
-                "Sensor_name"
+                context.getString(R.string.threshold_alerts_value),
+                context.getString(R.string.threshold_alerts_condition),
+                context.getString(R.string.threshold_use_current_value),
+                context.getString(R.string.threshold_value_label)
+                    .withUvirIrradianceUnit(irradianceUnit),
+                context.getString(R.string.sensor_info_unit),
+                context.getString(R.string.sensor_name_label),
+                context.getString(R.string.out_of_range_csv_header)
             ).joinToString(";")
         )
 
@@ -40,10 +45,12 @@ internal fun thresholdAlertLogCsv(
                     listOf(
                         entry.id.toString(),
                         entry.sessionId?.toString() ?: "—",
-                        entry.note,
+                        entry.note.ifBlank { context.getString(R.string.no_note) },
                         csvDateTime(
                             entry.timestamp,
-                            DATA_EXPORT_LANGUAGE
+                            dateFormat,
+                            context.resources.configuration.locales[0],
+                            timeFormat
                         ),
                         entry.timestamp.toString(),
                         context.getString(
@@ -55,27 +62,29 @@ internal fun thresholdAlertLogCsv(
                             violation.rule.direction ==
                             ThresholdAlertDirection.ABOVE
                         ) {
-                            "At or above"
+                            context.getString(R.string.threshold_direction_above)
                         } else {
-                            "At or below"
+                            context.getString(R.string.threshold_direction_below)
                         },
-                        csvNumber(
-                            violation.value,
-                            numericFormat
-                        ),
-                        csvNumber(
+                        if (entry.qualityFlags.isOutOfRange(violation.rule.metric)) {
+                            ""
+                        } else {
+                            formatUvirIrradianceExportNumber(
+                                violation.value,
+                                numericFormat,
+                                irradianceUnit
+                            )
+                        },
+                        formatUvirIrradianceExportNumber(
                             violation.rule.threshold.toDouble(),
-                            numericFormat
+                            numericFormat,
+                            irradianceUnit
                         ),
-                        if (
-                            violation.rule.metric
-                                .isBiologicalEffect()
-                        ) {
-                            "uW/cm2 eq."
-                        } else {
-                            "uW/cm2"
-                        },
-                        exportSensorName(entry.sensorDisplayName)
+                        irradianceUnit.unitLabel(
+                            equivalent = violation.rule.metric.isBiologicalEffect()
+                        ),
+                        exportSensorName(entry.sensorDisplayName),
+                        if (entry.qualityFlags.isOutOfRange(violation.rule.metric)) "1" else "0"
                     ).joinToString(";") {
                         csvCell(it)
                     }
@@ -88,23 +97,37 @@ internal fun thresholdAlertLogCsv(
 internal fun readableThresholdAlertLog(
     context: Context,
     entries: List<ThresholdAlertLogEntry>,
-    numericFormat: UvirNumericFormat
+    numericFormat: UvirNumericFormat,
+    dateFormat: UvirDateFormat = UvirDateFormat.INTERNATIONAL,
+    timeFormat: UvirTimeFormat = UvirTimeFormat.H24,
+    irradianceUnit: UvirIrradianceUnit = UvirIrradianceUnit.UW_CM2
 ): String = buildString {
-    appendLine("Uvir value alert log")
+    appendLine("Uvir ${context.getString(R.string.threshold_alert_log_title)}")
     appendLine()
 
     entries
         .sortedBy { it.id }
         .forEachIndexed { index, entry ->
-            appendLine("Sensor: ${exportSensorName(entry.sensorDisplayName)}")
-            appendLine("Alert ID: ${entry.id}")
-            appendLine("Session ID: ${entry.sessionId ?: "—"}")
-            appendLine("Session note: ${entry.note.ifBlank { "—" }}")
             appendLine(
-                "Date/time: " +
+                "${context.getString(R.string.sensor_selector_label)}: " +
+                    exportSensorName(entry.sensorDisplayName)
+            )
+            appendLine("${context.getString(R.string.alert_chart_id_label)}: ${entry.id}")
+            appendLine(
+                "${context.getString(R.string.share_session_id_label)}: " +
+                    (entry.sessionId ?: "—")
+            )
+            appendLine(
+                "${context.getString(R.string.share_note_label)}: " +
+                    entry.note.ifBlank { context.getString(R.string.no_note) }
+            )
+            appendLine(
+                "${context.getString(R.string.share_date_label)}: " +
                     csvDateTime(
                         entry.timestamp,
-                        DATA_EXPORT_LANGUAGE
+                        dateFormat,
+                        context.resources.configuration.locales[0],
+                        timeFormat
                     )
             )
 
@@ -126,21 +149,19 @@ internal fun readableThresholdAlertLog(
                     } else {
                         "≤"
                     }
-                val unit =
-                    if (
-                        violation.rule.metric
-                            .isBiologicalEffect()
-                    ) {
-                        "µW/cm² eq."
-                    } else {
-                        "µW/cm²"
-                    }
+                val unit = irradianceUnit.unitLabel(
+                    equivalent = violation.rule.metric.isBiologicalEffect()
+                )
 
                 appendLine(metric)
-                appendLine(
-                    "${formatUvirNumber(violation.value, 3, numericFormat)} $symbol " +
-                        "${formatUvirNumber(violation.rule.threshold.toDouble(), 3, numericFormat)} $unit"
-                )
+                if (entry.qualityFlags.isOutOfRange(violation.rule.metric)) {
+                    appendLine(context.getString(R.string.out_of_range_short))
+                } else {
+                    appendLine(
+                        "${formatUvirIrradianceNumber(violation.value, 3, numericFormat, irradianceUnit)} $symbol " +
+                            "${formatUvirIrradianceNumber(violation.rule.threshold.toDouble(), 3, numericFormat, irradianceUnit)} $unit"
+                    )
+                }
             }
 
             if (index < entries.lastIndex) {
@@ -160,22 +181,9 @@ internal fun shareThresholdAlertLog(
         return
     }
 
-    // Exports are intentionally stable and internationally exchangeable:
-    // the user's display preference must never alter shared data files.
-    val numericFormat =
-        UvirNumericFormat.INTERNATIONAL
-
-    val exportConfiguration =
-        android.content.res.Configuration(
-            context.resources.configuration
-        ).apply {
-            setLocale(Locale.ENGLISH)
-            setLayoutDirection(Locale.ENGLISH)
-        }
-    val exportContext =
-        context.createConfigurationContext(
-            exportConfiguration
-        )
+    val exportFormatting = uvirExportFormatting(context)
+    val exportContext = exportFormatting.context
+    val numericFormat = exportFormatting.numericFormat
     val sharedDirectory =
         File(
             context.cacheDir,
@@ -210,13 +218,19 @@ internal fun shareThresholdAlertLog(
         thresholdAlertLogCsv(
             exportContext,
             entries,
-            numericFormat
+            numericFormat,
+            exportFormatting.dateFormat,
+            exportFormatting.timeFormat
+            , exportFormatting.irradianceUnit
         )
     val readableContent =
         readableThresholdAlertLog(
             exportContext,
             entries,
-            numericFormat
+            numericFormat,
+            exportFormatting.dateFormat,
+            exportFormatting.timeFormat
+            , exportFormatting.irradianceUnit
         )
     val subject =
         exportContext.getString(

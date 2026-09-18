@@ -29,6 +29,18 @@ internal data class AcquisitionExportPlan(
         get() = partialSessionIds.isNotEmpty()
 }
 
+private fun acquisitionExportRecords(
+    plan: AcquisitionExportPlan
+): List<SavedRecordDetail> =
+    plan.items.flatMap { item ->
+        when (item) {
+            is AcquisitionExportItem.CompleteSession ->
+                recordsInVariantExportOrder(item.records)
+            is AcquisitionExportItem.IndividualAcquisition ->
+                listOf(item.record)
+        }
+    }
+
 internal fun buildAcquisitionExportPlan(
     selectedRecords: List<SavedRecordDetail>,
     allRecords: List<SavedRecordDetail>
@@ -101,47 +113,103 @@ internal fun buildAcquisitionExportPlan(
 private fun readableMeasurementBody(
     context: Context,
     record: SavedRecordDetail,
-    numericFormat: UvirNumericFormat
+    numericFormat: UvirNumericFormat,
+    dateFormat: UvirDateFormat,
+    timeFormat: UvirTimeFormat,
+    irradianceUnit: UvirIrradianceUnit
 ): String =
     readableMeasurementTable(
         context = context,
         records = listOf(record),
-        numericFormat = numericFormat
-    ).substringAfter("Uvir acquisition log").trim()
+        numericFormat = numericFormat,
+        dateFormat = dateFormat,
+        timeFormat = timeFormat,
+        irradianceUnit = irradianceUnit
+    ).substringAfter('\n').trim()
 
 internal fun readableAcquisitionExportTable(
     context: Context,
     plan: AcquisitionExportPlan,
-    numericFormat: UvirNumericFormat
+    numericFormat: UvirNumericFormat,
+    dateFormat: UvirDateFormat = UvirDateFormat.INTERNATIONAL,
+    timeFormat: UvirTimeFormat = UvirTimeFormat.H24,
+    irradianceUnit: UvirIrradianceUnit = UvirIrradianceUnit.UW_CM2
 ): String = buildString {
-    appendLine("Uvir acquisitions")
+    val locale = context.resources.configuration.locales[0]
+    appendLine("Uvir ${context.getString(R.string.saved_measurements)}")
 
     plan.items.forEachIndexed { index, item ->
         appendLine()
         when (item) {
             is AcquisitionExportItem.CompleteSession -> {
-                appendLine("SESSION ACQUISITIONS")
-                appendLine("Session ID: ${item.sessionId}")
-                appendLine("Sensor: ${exportSensorNames(item.records.map { it.sensorDisplayName })}")
                 appendLine(
-                    "Started: " +
+                    context.getString(R.string.session_chart_title).uppercase(locale)
+                )
+                appendLine(
+                    "${context.getString(R.string.share_session_id_label)}: ${item.sessionId}"
+                )
+                appendLine(
+                    "${context.getString(R.string.sensor_selector_label)}: " +
+                        exportSensorNames(item.records.map { it.sensorDisplayName })
+                )
+                appendLine(
+                    context.getString(
+                        R.string.session_chart_start,
                         csvDateTime(
                             item.records.minOf { it.timestamp },
-                            DATA_EXPORT_LANGUAGE
+                            dateFormat,
+                            context.resources.configuration.locales[0],
+                            timeFormat
+                        )
+                    )
+                )
+                appendLine(
+                    "${context.getString(R.string.session_chart_note)}: " +
+                        sessionChartNote(
+                            item.records,
+                            context.getString(R.string.no_note)
                         )
                 )
-                appendLine("Session note: ${sessionChartNote(item.records)}")
-                appendLine("Total acquisitions: ${item.records.size}")
+                appendLine(
+                    "${context.getString(R.string.session_chart_total_acquisitions)}: " +
+                        item.records.size
+                )
                 appendLine()
-                item.records.forEachIndexed { recordIndex, record ->
+                val variantGroups = acquisitionVariantGroups(item.records)
+                val orderedRecords =
+                    if (variantGroups.isNotEmpty()) {
+                        variantGroups.flatMap { it.records }
+                    } else {
+                        item.records
+                    }
+                val variantCount = variantGroups.maxOfOrNull { it.count } ?: 1
+                var previousVariant: Int? = null
+                orderedRecords.forEachIndexed { recordIndex, record ->
+                    if (
+                        variantGroups.isNotEmpty() &&
+                        record.variantIndex != previousVariant
+                    ) {
+                        appendLine(
+                            context.getString(
+                                R.string.session_variant_heading,
+                                record.variantIndex ?: 1,
+                                variantCount
+                            ).uppercase(locale)
+                        )
+                        appendLine()
+                        previousVariant = record.variantIndex
+                    }
                     appendLine(
                         readableMeasurementBody(
                             context,
                             record,
-                            numericFormat
+                            numericFormat,
+                            dateFormat,
+                            timeFormat,
+                            irradianceUnit
                         )
                     )
-                    if (recordIndex < item.records.lastIndex) {
+                    if (recordIndex < orderedRecords.lastIndex) {
                         appendLine()
                         appendLine("────────────────────")
                         appendLine()
@@ -150,12 +218,17 @@ internal fun readableAcquisitionExportTable(
             }
 
             is AcquisitionExportItem.IndividualAcquisition -> {
-                appendLine("ACQUISITION")
+                appendLine(
+                    context.getString(R.string.share_acquisition_label).uppercase(locale)
+                )
                 appendLine(
                     readableMeasurementBody(
                         context,
                         item.record,
-                        numericFormat
+                        numericFormat,
+                        dateFormat,
+                        timeFormat,
+                        irradianceUnit
                     )
                 )
             }
@@ -171,20 +244,14 @@ internal fun readableAcquisitionExportTable(
 internal fun shareAcquisitionExportPlan(
     context: Context,
     plan: AcquisitionExportPlan,
-    selection: MeasurementDetailShareSelection
+    selection: MeasurementDetailShareSelection,
+    destination: UvirExportDestination = UvirExportDestination.SHARE
 ) {
     require(plan.selectedRecords.isNotEmpty())
     require(selection.dataFormat != null || selection.includeCharts)
 
-    val exportConfiguration =
-        android.content.res.Configuration(
-            context.resources.configuration
-        ).apply {
-            setLocale(Locale.ENGLISH)
-            setLayoutDirection(Locale.ENGLISH)
-        }
-    val exportContext =
-        context.createConfigurationContext(exportConfiguration)
+    val exportFormatting = uvirExportFormatting(context)
+    val exportContext = exportFormatting.context
     val sharedDirectory =
         File(context.cacheDir, "shared").apply { mkdirs() }
     val sharedBaseName =
@@ -205,8 +272,14 @@ internal fun shareAcquisitionExportPlan(
                 writeSharedFile(
                     "csv",
                     measurementCsv(
-                        plan.selectedRecords,
-                        UvirNumericFormat.INTERNATIONAL
+                        acquisitionExportRecords(plan),
+                        exportFormatting.numericFormat,
+                        exportFormatting.dateFormat,
+                        exportFormatting.language,
+                        exportContext.resources.configuration.locales[0],
+                        exportContext,
+                        exportFormatting.timeFormat,
+                        exportFormatting.irradianceUnit
                     )
                 )
 
@@ -217,7 +290,10 @@ internal fun shareAcquisitionExportPlan(
                     readableAcquisitionExportTable(
                         exportContext,
                         plan,
-                        UvirNumericFormat.INTERNATIONAL
+                        exportFormatting.numericFormat,
+                        exportFormatting.dateFormat,
+                        exportFormatting.timeFormat,
+                        exportFormatting.irradianceUnit
                     )
                 )
 
@@ -226,8 +302,14 @@ internal fun shareAcquisitionExportPlan(
                 writeSharedFile(
                     "csv",
                     measurementCsv(
-                        plan.selectedRecords,
-                        UvirNumericFormat.INTERNATIONAL
+                        acquisitionExportRecords(plan),
+                        exportFormatting.numericFormat,
+                        exportFormatting.dateFormat,
+                        exportFormatting.language,
+                        exportContext.resources.configuration.locales[0],
+                        exportContext,
+                        exportFormatting.timeFormat,
+                        exportFormatting.irradianceUnit
                     )
                 )
             files +=
@@ -236,7 +318,10 @@ internal fun shareAcquisitionExportPlan(
                     readableAcquisitionExportTable(
                         exportContext,
                         plan,
-                        UvirNumericFormat.INTERNATIONAL
+                        exportFormatting.numericFormat,
+                        exportFormatting.dateFormat,
+                        exportFormatting.timeFormat,
+                        exportFormatting.irradianceUnit
                     )
                 )
         }
@@ -249,26 +334,36 @@ internal fun shareAcquisitionExportPlan(
             when (item) {
                 is AcquisitionExportItem.CompleteSession ->
                     files +=
-                        SessionChartGroup.entries.map { group ->
-                            createSessionChartFile(
-                                context = context,
-                                sessionId = item.sessionId,
-                                records = item.records,
-                                group = group
-                            )
-                        }
+                        createSessionVariantChartFiles(
+                            context = context,
+                            sessionId = item.sessionId,
+                            records = item.records,
+                            mode = selection.chartExportMode
+                        )
 
                 is AcquisitionExportItem.IndividualAcquisition ->
                     files +=
-                        AcquisitionChartGroup.entries.flatMap { group ->
-                            createAcquisitionChartFiles(
-                                context = context,
-                                record = item.record,
-                                group = group
-                            )
+                        when (selection.chartExportMode) {
+                            UvirChartExportMode.COMBINED ->
+                                listOf(
+                                    createAcquisitionCombinedChartFile(
+                                        context = context,
+                                        record = item.record
+                                    )
+                                )
+                            UvirChartExportMode.SEPARATE ->
+                                createAcquisitionSeparateChartFiles(
+                                    context = context,
+                                    record = item.record
+                                )
                         }
             }
         }
+    }
+
+    if (destination == UvirExportDestination.SAVE) {
+        requestUvirExportSave(context, files)
+        return
     }
 
     val uris =
@@ -331,3 +426,48 @@ internal fun shareAcquisitionExportPlan(
     }
     context.startActivity(chooser)
 }
+
+internal data class AcquisitionExportChartFileBreakdown(
+    val completeSessionFiles: Int,
+    val individualAcquisitionFiles: Int
+) {
+    val totalFiles: Int
+        get() = completeSessionFiles + individualAcquisitionFiles
+}
+
+/**
+ * Mirrors the actual list export rules: complete sessions retain their variant
+ * grouping, while every record from a partially selected session is exported
+ * exactly like an individual acquisition.
+ */
+internal fun acquisitionExportChartFileBreakdown(
+    plan: AcquisitionExportPlan,
+    mode: UvirChartExportMode
+): AcquisitionExportChartFileBreakdown {
+    var completeSessionFiles = 0
+    var individualAcquisitionFiles = 0
+    plan.items.forEach { item ->
+        when (item) {
+            is AcquisitionExportItem.CompleteSession ->
+                completeSessionFiles +=
+                    acquisitionSessionChartFileCount(item.records, mode)
+            is AcquisitionExportItem.IndividualAcquisition ->
+                individualAcquisitionFiles +=
+                    if (mode == UvirChartExportMode.SEPARATE) {
+                        acquisitionChartGroupCount(item.record)
+                    } else {
+                        1
+                    }
+        }
+    }
+
+    return AcquisitionExportChartFileBreakdown(
+        completeSessionFiles = completeSessionFiles,
+        individualAcquisitionFiles = individualAcquisitionFiles
+    )
+}
+
+internal fun acquisitionExportChartFileCount(
+    plan: AcquisitionExportPlan,
+    mode: UvirChartExportMode
+): Int = acquisitionExportChartFileBreakdown(plan, mode).totalFiles

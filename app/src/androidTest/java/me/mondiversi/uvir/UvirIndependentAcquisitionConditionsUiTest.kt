@@ -76,11 +76,11 @@ class UvirIndependentAcquisitionConditionsUiTest {
         var matchCalls = 0; var actionCalls = 0
         var title = ""; var configure = ""; var save = ""; var cancel = ""; var warning = ""
         compose.setContent {
-            val local = LocalContext.current
-            title = local.getString(R.string.conditional_acquisition)
-            configure = local.getString(R.string.conditional_configure)
-            save = local.getString(R.string.save); cancel = local.getString(R.string.cancel)
-            warning = local.getString(R.string.conditional_no_rules)
+            val resources = LocalResources.current
+            title = resources.getString(R.string.conditional_acquisition)
+            configure = resources.getString(R.string.conditional_configure)
+            save = resources.getString(R.string.save); cancel = resources.getString(R.string.cancel)
+            warning = resources.getString(R.string.conditional_no_rules)
             MaterialTheme(colorScheme = if (dark.value) darkColorScheme() else lightColorScheme()) {
                 Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
                     UvirConditionalAcquisitionCard(selected.value, AcquisitionConditionMatch.ANY,
@@ -138,9 +138,10 @@ class UvirIndependentAcquisitionConditionsUiTest {
         var configure = ""; var waiting = ""; var title = ""
         var enabledChanges = 0
         compose.setContent {
-            configure = LocalContext.current.getString(R.string.conditional_configure)
-            title = LocalContext.current.getString(R.string.conditional_acquisition)
-            waiting = LocalContext.current.getString(R.string.conditional_waiting)
+            val resources = LocalResources.current
+            configure = resources.getString(R.string.conditional_configure)
+            title = resources.getString(R.string.conditional_acquisition)
+            waiting = resources.getString(R.string.conditional_waiting)
             MaterialTheme {
                 Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
                     UvirConditionalAcquisitionCard(true, AcquisitionConditionMatch.ALL,
@@ -210,7 +211,7 @@ class UvirIndependentAcquisitionConditionsUiTest {
         var save = ""
         compose.setContent {
             val original = LocalContext.current
-            val config = Configuration(original.resources.configuration).apply {
+            val config = Configuration(LocalConfiguration.current).apply {
                 screenHeightDp = 320
                 setLocale(Locale.GERMAN)
             }
@@ -235,7 +236,7 @@ class UvirIndependentAcquisitionConditionsUiTest {
         var save = ""
         compose.setContent {
             val original = LocalContext.current
-            val config = Configuration(original.resources.configuration).apply {
+            val config = Configuration(LocalConfiguration.current).apply {
                 setLocale(Locale.GERMAN)
                 uiMode = (uiMode and Configuration.UI_MODE_NIGHT_MASK.inv()) or Configuration.UI_MODE_NIGHT_YES
             }

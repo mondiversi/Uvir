@@ -28,6 +28,7 @@ fun UvirApp(
     openHomeRequestId: Long = 0L
 ) {
     val context = LocalContext.current
+    val resources = androidx.compose.ui.platform.LocalResources.current
     val scope = rememberCoroutineScope()
     var epoch by rememberSaveable { mutableIntStateOf(0) }
     var switching by remember { mutableStateOf(false) }
@@ -89,8 +90,8 @@ fun UvirApp(
                     epoch++
                     contentSuspended = false
                     switching = false
-                    if (result.isFailure) showUvirBottomMessage(context, context.getString(R.string.sensor_selection_failed))
-                    else if (newAssociation) showUvirBottomMessage(context, context.getString(R.string.sensor_associate_usb_hint))
+                    if (result.isFailure) showUvirBottomMessage(context, resources.getString(R.string.sensor_selection_failed))
+                    else if (newAssociation) showUvirBottomMessage(context, resources.getString(R.string.sensor_associate_usb_hint))
                 }
             }
         )

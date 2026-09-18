@@ -121,7 +121,9 @@ fun BiologicalEffectsContent(
                     LiveRollingChart(
                         history = liveHistory,
                         series = biologicalLiveChartSeries(),
-                        unit = stringResource(R.string.chart_biological_unit),
+                        unit = LocalUvirIrradianceUnit.current.unitLabel(equivalent = true),
+                        valueScale = LocalUvirIrradianceUnit.current::fromCanonicalUwCm2,
+                        outOfRange = { it.isOutOfRange(SensorGroup.BIOLOGICAL) },
                         primaryText = primaryText,
                         secondaryText = secondaryText
                     )
@@ -130,6 +132,7 @@ fun BiologicalEffectsContent(
                         title = stringResource(R.string.dna_uv_proxy),
                         description = stringResource(R.string.dna_uv_proxy_description),
                         value = estimate.dnaUvProxy,
+                        outOfRange = sample.isOutOfRange(ThresholdAlertMetric.BIO_DNA_UV),
                         score = estimate.dnaUvScore,
                         color = thresholdAlertMetricDisplayColor(ThresholdAlertMetric.BIO_DNA_UV),
                         alerted = ThresholdAlertMetric.BIO_DNA_UV in alertedMetrics,
@@ -141,6 +144,7 @@ fun BiologicalEffectsContent(
                         title = stringResource(R.string.uva_photoaging_proxy),
                         description = stringResource(R.string.uva_photoaging_proxy_description),
                         value = estimate.uvaPhotoagingProxy,
+                        outOfRange = sample.isOutOfRange(ThresholdAlertMetric.BIO_UVA_PHOTOAGING),
                         score = estimate.uvaPhotoagingScore,
                         color = thresholdAlertMetricDisplayColor(ThresholdAlertMetric.BIO_UVA_PHOTOAGING),
                         alerted = ThresholdAlertMetric.BIO_UVA_PHOTOAGING in alertedMetrics,
@@ -152,6 +156,7 @@ fun BiologicalEffectsContent(
                         title = stringResource(R.string.hev_oxidative_proxy),
                         description = stringResource(R.string.hev_oxidative_proxy_description),
                         value = estimate.hevOxidativeProxy,
+                        outOfRange = sample.isOutOfRange(ThresholdAlertMetric.BIO_HEV_OXIDATIVE),
                         score = estimate.hevOxidativeScore,
                         color = thresholdAlertMetricDisplayColor(ThresholdAlertMetric.BIO_HEV_OXIDATIVE),
                         alerted = ThresholdAlertMetric.BIO_HEV_OXIDATIVE in alertedMetrics,
@@ -181,6 +186,7 @@ private fun BiologicalEffectRow(
     title: String,
     description: String,
     value: Double,
+    outOfRange: Boolean,
     score: Float,
     color: Color,
     alerted: Boolean,
@@ -209,14 +215,16 @@ private fun BiologicalEffectRow(
         ) {
             Text(
                 text =
-                    stringResource(
-                        R.string.weighted_signal_value,
-                        formatUvirNumber(
+                    if (outOfRange) {
+                        stringResource(R.string.out_of_range_short)
+                    } else {
+                        "${formatUvirIrradianceNumber(
                             value,
-                            2,
-                            LocalUvirNumericFormat.current
-                        )
-                    ),
+                            3,
+                            LocalUvirNumericFormat.current,
+                            LocalUvirIrradianceUnit.current
+                        )} ${LocalUvirIrradianceUnit.current.unitLabel(equivalent = true)}"
+                    },
                 color =
                     if (alerted) UvirAttentionColor else primaryText,
                 fontSize = 12.sp

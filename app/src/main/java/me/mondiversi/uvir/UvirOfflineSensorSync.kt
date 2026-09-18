@@ -5,6 +5,12 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 import org.json.JSONObject
 
+private const val SENSOR_ORIGINATED_SESSION_MARKER = 1L shl 62
+
+internal fun isSensorOriginatedSessionId(sessionId: Long): Boolean =
+    sessionId > 0L &&
+        (sessionId and SENSOR_ORIGINATED_SESSION_MARKER) != 0L
+
 internal enum class SensorSyncSource {
     USB,
     WIRELESS
@@ -33,7 +39,8 @@ data class SensorParameters(
     val statusLedEnabled: Boolean = true,
     val statusLedBrightness: Int = 10,
     val statusBuzzerEnabled: Boolean = true,
-    val statusBuzzerVolume: Int = 10
+    val statusBuzzerVolume: Int = 10,
+    val externalCommandEnabled: Boolean = true
 )
 
 internal sealed interface SensorSyncEvent {
@@ -62,7 +69,8 @@ internal sealed interface SensorSyncEvent {
         val recordId: Long,
         val timestamp: Long,
         val details: String,
-        val sessionId: Long
+        val sessionId: Long,
+        val qualityFlags: Int = 0
     ) : SensorSyncEvent
 
     data class Error(
@@ -152,6 +160,7 @@ internal sealed interface SensorRuntimeEvent {
         val completedCount: Int,
         val jobActive: Boolean,
         val nextAtMs: Long,
+        val externalCommand: Boolean? = null,
         val conditionPlan: String? = null,
         val conditionWaiting: Boolean? = null,
         val endAtMs: Long? = null,
@@ -179,7 +188,7 @@ internal fun parseSensorRuntimeFrame(
             val bands = json.optJSONObject("bands") ?: return true
             val recordId = json.optLong("record_id", -1L)
             val timestamp = json.optLong("timestamp_ms", 0L)
-            if (recordId < 0L || timestamp <= 0L) return true
+            if (recordId < 0L || timestamp < 0L) return true
             SensorRuntimeEventBus.emit(
                 SensorRuntimeEvent.Acquisition(
                     source = source,
@@ -191,7 +200,9 @@ internal fun parseSensorRuntimeFrame(
                     completedCount = json.optInt("completed_count", 0),
                     jobActive = json.optBoolean("job_active", false),
                     nextAtMs = json.optLong("next_at_ms", 0L),
-                    sample = bands.toUvirBandSample()
+                    sample = bands.toUvirBandSample().copy(
+                        qualityFlags = json.uvirQualityFlags()
+                    )
                 )
             )
             true
@@ -205,6 +216,8 @@ internal fun parseSensorRuntimeFrame(
                     completedCount = json.optInt("completed_count", 0),
                     jobActive = json.optBoolean("job_active", false),
                     nextAtMs = json.optLong("next_at_ms", 0L),
+                    externalCommand =
+                        (json.opt("offline_external_command") as? Boolean),
                     conditionPlan = json.optString("offline_condition_plan").takeIf { json.has("offline_condition_plan") },
                     conditionWaiting = (json.opt("offline_condition_waiting") as? Boolean),
                     endAtMs = json.optLong("offline_end_ms").takeIf { json.has("offline_end_ms") },
@@ -241,7 +254,8 @@ internal fun parseSensorSyncFrame(
             val kind = json.optString("record_kind")
             val recordId = json.optLong("record_id", -1L)
             val timestamp = json.optLong("timestamp_ms", 0L)
-            if (recordId < 0L || timestamp <= 0L) {
+            if (recordId < 0L || timestamp < 0L ||
+                (kind != "acquisition" && timestamp == 0L)) {
                 return true
             }
             val event = when (kind) {
@@ -254,7 +268,9 @@ internal fun parseSensorSyncFrame(
                         sessionId = json.optLong("session_id", 0L),
                         sequence = json.optInt("sequence", 0),
                         note = json.optString("note"),
-                        sample = bands.toUvirBandSample()
+                        sample = bands.toUvirBandSample().copy(
+                            qualityFlags = json.uvirQualityFlags()
+                        )
                     )
                 }
 
@@ -263,7 +279,8 @@ internal fun parseSensorSyncFrame(
                     recordId = recordId,
                     timestamp = timestamp,
                     details = json.optString("details"),
-                    sessionId = json.optLong("session_id", 0L)
+                    sessionId = json.optLong("session_id", 0L),
+                    qualityFlags = json.uvirQualityFlags()
                 )
 
                 "error" -> SensorSyncEvent.Error(
@@ -343,6 +360,8 @@ internal fun sensorParametersCommand(parameters: SensorParameters): String =
         append(if (parameters.automaticShutdownEnabled) "ON" else "OFF")
         append(' ')
         append(parameters.automaticShutdownSeconds.coerceIn(60, 86_400))
+        append(' ')
+        append(if (parameters.externalCommandEnabled) "ON" else "OFF")
     }
 
 internal fun sensorSamplingCommand(parameters: AcquisitionParameters): String =
@@ -361,6 +380,17 @@ internal fun sensorOfflineJobCommand(
     completedCount: Int,
     acquisitionParameters: AcquisitionParameters
 ): String =
+    if (request.externalCommand) {
+        listOf(
+            "OFFLINE_EXTERNAL_JOB",
+            sessionId.toString(),
+            completedCount.coerceAtLeast(0).toString(),
+            acquisitionParameters.samplesPerMeasurement.coerceIn(1, 21).toString(),
+            acquisitionParameters.sampleSpacingMs.coerceIn(0L, 10_000L).toString(),
+            if (acquisitionParameters.discardExtremes) "1" else "0",
+            "-"
+        ).joinToString(" ")
+    } else {
     listOf(
         if (request.conditionalPlan == null) "OFFLINE_JOB" else "OFFLINE_CONDITIONAL_JOB",
         sessionId.toString(),
@@ -388,6 +418,7 @@ internal fun sensorOfflineJobCommand(
                 "${it.metric.name} ${it.direction.name} ${it.threshold}"
             }
     } ?: "")
+    }
 
 internal fun sensorAlertCommands(
     settings: ThresholdAlertSettings,

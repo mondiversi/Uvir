@@ -6,11 +6,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.OutlinedButton
@@ -199,6 +201,11 @@ internal fun CurrentThresholdValueButton(
         colors = uvirOutlinedActionColors(primaryText),
         border = uvirOutlinedActionBorder(enabled, secondaryText)
     ) {
+        CaptureMeasurementIcon(
+            modifier = Modifier.size(17.dp),
+            useCompactStroke = true
+        )
+        Spacer(Modifier.width(6.dp))
         Text(
             text = stringResource(R.string.threshold_use_current_value),
             fontSize = 11.sp,

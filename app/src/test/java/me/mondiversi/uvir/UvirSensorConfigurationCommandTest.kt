@@ -6,6 +6,14 @@ import org.junit.Test
 
 class UvirSensorConfigurationCommandTest {
     @Test
+    fun externalCommandIsEnabledByDefault() {
+        val parameters = SensorParameters()
+
+        assertTrue(parameters.externalCommandEnabled)
+        assertTrue(sensorParametersCommand(parameters).endsWith(" ON"))
+    }
+
+    @Test
     fun sensorParametersIncludeAutonomousAndAutomaticShutdownSettings() {
         val command =
             sensorParametersCommand(
@@ -16,11 +24,12 @@ class UvirSensorConfigurationCommandTest {
                     statusLedEnabled = true,
                     statusLedBrightness = 25,
                     statusBuzzerEnabled = false,
-                    statusBuzzerVolume = 10
+                    statusBuzzerVolume = 10,
+                    externalCommandEnabled = false
                 )
             )
 
-        assertEquals("SENSOR_CONFIG ON 25 OFF OFF 10 ON 3661", command)
+        assertEquals("SENSOR_CONFIG ON 25 OFF OFF 10 ON 3661 OFF", command)
     }
 
     @Test

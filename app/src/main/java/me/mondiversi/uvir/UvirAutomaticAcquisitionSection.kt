@@ -16,6 +16,7 @@ internal fun UvirAutomaticAcquisitionSection(
     cardColor: Color,
     primaryText: Color,
     secondaryText: Color,
+    controlsEnabled: Boolean = true,
     content: @Composable ColumnScope.() -> Unit
 ) {
     SettingsSection(
@@ -23,8 +24,11 @@ internal fun UvirAutomaticAcquisitionSection(
         dividerColor = secondaryText.copy(alpha = 0.28f),
         titleIconContent = { tint -> AutomaticSettingIcon(type = icon, tint = tint) },
         expanded = expanded, onExpandedChange = onExpandedChange,
+        enabled = controlsEnabled,
+        headerEnabled = controlsEnabled,
         highlightExpandedHeader = false,
         headerControl = UvirSettingsHeaderControl.CHECKBOX,
+        showExpandedDivider = true,
         titleFontSize = 14.sp,
         content = content
     )

@@ -12,16 +12,73 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.core.content.FileProvider
 import java.io.File
 import java.io.FileOutputStream
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 import kotlin.math.abs
 
 internal fun createAlertChartFile(
     context: Context,
     entry: ThresholdAlertLogEntry
 ): File {
+    val allBars = alertChartBars(entry)
+    val categories =
+        listOf(false, true).filter { biological ->
+            allBars.any { it.metric.isBiologicalEffect() == biological }
+        }
+    require(categories.isNotEmpty())
+    val panels = categories.mapIndexed { index, biological ->
+        createAlertChartPanelFile(
+            context = context,
+            entry = entry,
+            biological = biological,
+            includeHeader = index == 0
+        )
+    }
+    val outputFile =
+        File(
+            File(context.cacheDir, "shared"),
+            "${uvirAlertExportBaseName(entry)}_Chart.png"
+        )
+    return combineChartExportFiles(outputFile, panels)
+}
+
+internal fun alertChartGroupCount(entry: ThresholdAlertLogEntry): Int {
     val bars = alertChartBars(entry)
+    return listOf(false, true).count { biological ->
+        bars.any { it.metric.isBiologicalEffect() == biological }
+    }
+}
+
+internal fun createAlertSeparateChartFiles(
+    context: Context,
+    entry: ThresholdAlertLogEntry
+): List<File> {
+    val bars = alertChartBars(entry)
+    return listOf(false, true).mapNotNull { biological ->
+        if (bars.any { it.metric.isBiologicalEffect() == biological }) {
+            createAlertChartPanelFile(
+                context = context,
+                entry = entry,
+                biological = biological,
+                includeHeader = true
+            )
+        } else {
+            null
+        }
+    }
+}
+
+private fun createAlertChartPanelFile(
+    context: Context,
+    entry: ThresholdAlertLogEntry,
+    biological: Boolean,
+    includeHeader: Boolean
+): File {
+    val exportFormatting = uvirExportFormatting(context)
+    val exportContext = exportFormatting.context
+    val bars =
+        alertChartBars(entry).filter {
+            it.metric.isBiologicalEffect() == biological
+        }
+    require(bars.isNotEmpty())
     val legendRows = (bars.size + 1) / 2
     val width = 1600
     val titlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -32,6 +89,11 @@ internal fun createAlertChartFile(
     val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.rgb(90, 90, 98)
         textSize = 25f
+    }
+    val sectionTitlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.rgb(48, 48, 56)
+        textSize = 34f
+        typeface = android.graphics.Typeface.DEFAULT_BOLD
     }
     val smallPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.rgb(82, 82, 90)
@@ -55,45 +117,74 @@ internal fun createAlertChartFile(
         text = chartExportContextText(
             note = entry.note,
             sensorName = entry.sensorDisplayName,
-            noteLabel = "Session note"
+            noteLabel = exportContext.getString(R.string.share_note_label),
+            sensorLabel = exportContext.getString(R.string.sensor_selector_label),
+            emptyNote = exportContext.getString(R.string.no_note)
         ),
         paint = textPaint,
         maxWidth = 1420f
     )
     val headerOffset = (contextLines.size - 1) * 30f
-    val height = 1080 + legendRows * 58 + headerOffset.toInt()
+    val height = 1125 + legendRows * 58 + headerOffset.toInt()
     val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
     val canvas = Canvas(bitmap)
     canvas.drawColor(Color.WHITE)
 
-    canvas.drawText("Uvir value alert chart", 90f, 85f, titlePaint)
-    canvas.drawText(
-        chartExportIdentifierLine(
-            recordLabel = "Alert",
-            recordId = entry.id,
-            sessionId = entry.sessionId
-        ) + " · " +
-            SimpleDateFormat(
-                "yyyy-MM-dd HH:mm:ss",
-                Locale.US
-            ).format(Date(entry.timestamp)),
-        90f,
-        130f,
-        textPaint
-    )
-    contextLines.forEachIndexed { index, line ->
-        canvas.drawText(line, 90f, 170f + index * 30f, textPaint)
+    if (includeHeader) {
+        canvas.drawText(
+            "Uvir ${exportContext.getString(R.string.alert_chart_title)}",
+            90f,
+            85f,
+            titlePaint
+        )
+        canvas.drawText(
+            chartExportIdentifierLine(
+                recordLabel = exportContext.getString(R.string.alert_chart_id_label),
+                recordId = entry.id,
+                sessionId = entry.sessionId,
+                sessionLabel = exportContext.getString(R.string.share_session_id_label)
+            ) + " · " +
+                csvDateTime(
+                    entry.timestamp,
+                    exportFormatting.dateFormat,
+                    exportContext.resources.configuration.locales[0],
+                    exportFormatting.timeFormat
+                ),
+            90f,
+            130f,
+            textPaint
+        )
+        contextLines.forEachIndexed { index, line ->
+            canvas.drawText(line, 90f, 170f + index * 30f, textPaint)
+        }
     }
     canvas.translate(0f, headerOffset)
-    canvas.drawText("Threshold comparison (%)", 90f, 210f, textPaint)
+    canvas.drawText(
+        exportContext.getString(
+            if (biological) {
+                R.string.biological_effects_group_name
+            } else {
+                R.string.irradiance_view
+            }
+        ),
+        90f,
+        210f,
+        sectionTitlePaint
+    )
+    canvas.drawText(
+        "${exportContext.getString(R.string.alert_chart_scale)} (%)",
+        90f,
+        248f,
+        textPaint
+    )
 
     val left = 130f
-    val top = 250f
+    val top = 295f
     val right = 1510f
-    val bottom = 720f
+    val bottom = 765f
     val logExtent =
         alertThresholdCenteredLogExtent(
-            bars.map { it.thresholdPercent }
+            bars.filterNot { it.outOfRange }.map { it.thresholdPercent }
         )
     val axisTicks = alertThresholdCenteredLogTicks(logExtent)
 
@@ -102,15 +193,11 @@ internal fun createAlertChartFile(
         canvas.drawLine(left, y, right, y, gridPaint)
         val value = axisTicks[index]
         canvas.drawText(
-            String.format(
-                Locale.US,
-                when (alertThresholdAxisFractionDigits(value)) {
-                    0 -> "%.0f%%"
-                    1 -> "%.1f%%"
-                    else -> "%.2f%%"
-                },
-                value
-            ),
+            formatUvirNumber(
+                value,
+                alertThresholdAxisFractionDigits(value),
+                exportFormatting.numericFormat
+            ) + "%",
             28f,
             y + 8f,
             smallPaint
@@ -120,7 +207,7 @@ internal fun createAlertChartFile(
     val thresholdY = (top + bottom) / 2f
     canvas.drawLine(left, thresholdY, right, thresholdY, thresholdPaint)
     canvas.drawText(
-        "Threshold · 100%",
+        exportContext.getString(R.string.alert_chart_threshold_reference),
         right - 195f,
         thresholdY - 10f,
         thresholdLabelPaint
@@ -130,6 +217,7 @@ internal fun createAlertChartFile(
         val slotWidth = (right - left) / bars.size
         val barWidth = (slotWidth * 0.48f).coerceAtMost(90f)
         bars.forEachIndexed { index, bar ->
+            if (bar.outOfRange) return@forEachIndexed
             val normalized =
                 alertThresholdCenteredLogFraction(
                     bar.thresholdPercent,
@@ -153,41 +241,31 @@ internal fun createAlertChartFile(
             canvas.drawText(
                 bar.shortLabel,
                 barLeft + (barWidth - labelWidth) / 2f,
-                760f,
+                805f,
                 smallPaint
             )
         }
     }
 
-    val legendTop = 830f
+    val legendTop = 875f
     val legendColumnWidth = (right - left) / 2f
     bars.forEachIndexed { index, bar ->
         val metricLabel =
-            when (bar.metric) {
-                ThresholdAlertMetric.UV_TOTAL -> "Ultraviolet"
-                ThresholdAlertMetric.UVC -> "UVC"
-                ThresholdAlertMetric.UVB -> "UVB"
-                ThresholdAlertMetric.UVA -> "UVA"
-                ThresholdAlertMetric.HEV -> "HEV"
-                ThresholdAlertMetric.HEB -> "HEB"
-                ThresholdAlertMetric.VISIBLE_TOTAL -> "Visible light"
-                ThresholdAlertMetric.VIOLET -> "Violet"
-                ThresholdAlertMetric.BLUE -> "Blue"
-                ThresholdAlertMetric.GREEN -> "Green"
-                ThresholdAlertMetric.YELLOW -> "Yellow"
-                ThresholdAlertMetric.ORANGE -> "Orange"
-                ThresholdAlertMetric.RED -> "Red"
-                ThresholdAlertMetric.NIR_TOTAL -> "Infrared"
-                ThresholdAlertMetric.FAR_RED -> "Far-red"
-                ThresholdAlertMetric.NIR -> "NIR"
-                ThresholdAlertMetric.BIO_DNA_UV -> "UV DNA damage"
-                ThresholdAlertMetric.BIO_UVA_PHOTOAGING -> "UVA photoaging"
-                ThresholdAlertMetric.BIO_HEV_OXIDATIVE -> "HEV oxidative stress"
-            }
+            exportContext.getString(
+                thresholdAlertMetricLabelResource(bar.metric)
+            )
         val delta = bar.thresholdDeltaPercent
         val deltaText =
-            (if (delta < 0.0) "−" else "+") +
-                String.format(Locale.US, "%.1f%%", abs(delta))
+            if (bar.outOfRange) {
+                exportContext.getString(R.string.out_of_range_short)
+            } else {
+                (if (delta < 0.0) "−" else "+") +
+                    formatUvirNumber(
+                        abs(delta),
+                        1,
+                        exportFormatting.numericFormat
+                    ) + "%"
+            }
         val column = index % 2
         val row = index / 2
         val legendX = left + legendColumnWidth * column
@@ -212,11 +290,17 @@ internal fun createAlertChartFile(
     val file =
         File(
             sharedDirectory,
-            "${uvirAlertExportBaseName(entry)}_Chart.png"
+            "${uvirAlertExportBaseName(entry)}_" +
+                if (biological) "Biological_Effects.png" else "Irradiance.png"
         )
+    val cropTop = (165f + headerOffset).toInt()
+    val exportBitmap =
+        if (includeHeader) bitmap
+        else Bitmap.createBitmap(bitmap, 0, cropTop, width, height - cropTop)
     FileOutputStream(file).use { output ->
-        check(bitmap.compress(Bitmap.CompressFormat.PNG, 100, output))
+        check(exportBitmap.compress(Bitmap.CompressFormat.PNG, 100, output))
     }
+    if (exportBitmap !== bitmap) exportBitmap.recycle()
     bitmap.recycle()
     return file
 }

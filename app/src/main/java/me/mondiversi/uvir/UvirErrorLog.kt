@@ -113,7 +113,8 @@ object UvirErrorLog {
     fun share(
         context: Context,
         chooserTitle: String,
-        subject: String
+        subject: String,
+        destination: UvirExportDestination = UvirExportDestination.SHARE
     ): Boolean {
         val sourceFile =
             synchronized(lock) {
@@ -150,6 +151,11 @@ object UvirErrorLog {
                 sourceFile.readText(Charsets.UTF_8),
                 Charsets.UTF_8
             )
+        }
+
+        if (destination == UvirExportDestination.SAVE) {
+            requestUvirExportSave(context, listOf(sharedFile))
+            return true
         }
 
         val uri =

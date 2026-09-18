@@ -19,12 +19,6 @@ internal class UvirSettingsSaveInput(
     val onAutomaticShutdownMinutesTextChange: (String) -> Unit,
     val automaticShutdownSecondsText: String,
     val onAutomaticShutdownSecondsTextChange: (String) -> Unit,
-    val alertRepeatHoursText: String,
-    val onAlertRepeatHoursTextChange: (String) -> Unit,
-    val alertRepeatMinutesText: String,
-    val onAlertRepeatMinutesTextChange: (String) -> Unit,
-    val alertRepeatSecondsText: String,
-    val onAlertRepeatSecondsTextChange: (String) -> Unit,
     val visibleCalibrationFactorText: String,
     val onVisibleCalibrationFactorTextChange: (String) -> Unit,
     val uvCalibrationFactorText: String,
@@ -63,7 +57,9 @@ internal class UvirSettingsSaveInput(
     val appliedSensorParameters: SensorParameters,
     val appliedAcquisitionParameters: AcquisitionParameters,
     val fakeSensorDataEnabled: Boolean,
+    val appliedFakeSensorDataEnabled: Boolean,
     val numericFormatValue: String,
+    val appliedNumericFormat: UvirNumericFormat,
     val sensorRadioConnectionRequiredText: String,
     val onFirmwareUpdateRequired: () -> Unit,
     val valueCorrectedText: String,
@@ -78,7 +74,7 @@ internal class UvirSettingsSaveInput(
     val onApplyAcquisitionParameters: suspend (AcquisitionParameters) -> Boolean,
     val onApplyThresholdAlertSettings: suspend (ThresholdAlertSettings) -> Boolean,
     val onUseFakeSensorDataChanged: (Boolean) -> Unit,
-    val onCommitAppLanguage: () -> Unit,
+    val onCommitAppLanguage: () -> Boolean,
     val onApplyNumericFormat: (UvirNumericFormat) -> Unit,
     val sensorWifiSsid: String,
     val sensorWifiPassword: String,
@@ -112,10 +108,22 @@ internal suspend fun applyUvirSettingsGroup(input: UvirSettingsSaveInput) {
                 if (sensorHardwareUid.isNotBlank() && name != appliedSensorDisplayName &&
                     send { onSaveSensorDisplayName(name) }) saved()
             }
-            SettingsSaveGroup.NUMERIC_FORMAT ->
-                onApplyNumericFormat(UvirNumericFormat.fromStoredValue(numericFormatValue))
-            SettingsSaveGroup.LANGUAGE -> onCommitAppLanguage()
-            SettingsSaveGroup.FAKE_DATA -> onUseFakeSensorDataChanged(fakeSensorDataEnabled)
+            SettingsSaveGroup.NUMERIC_FORMAT -> {
+                val target = UvirNumericFormat.fromStoredValue(numericFormatValue)
+                if (target != appliedNumericFormat) {
+                    onApplyNumericFormat(target)
+                    saved()
+                }
+            }
+            SettingsSaveGroup.LANGUAGE -> {
+                if (onCommitAppLanguage()) saved()
+            }
+            SettingsSaveGroup.FAKE_DATA -> {
+                if (fakeSensorDataEnabled != appliedFakeSensorDataEnabled) {
+                    onUseFakeSensorDataChanged(fakeSensorDataEnabled)
+                    saved()
+                }
+            }
             SettingsSaveGroup.PARAMETERS -> {
                 if (!sensorSettingsEnabled) return
                 val duration = normalizeDuration(
@@ -157,17 +165,8 @@ internal suspend fun applyUvirSettingsGroup(input: UvirSettingsSaveInput) {
                 onParametersErrorChange(null)
             }
             SettingsSaveGroup.ALERTS -> {
-                val repeat = normalizeDuration(
-                    alertRepeatHoursText, alertRepeatMinutesText, alertRepeatSecondsText,
-                    minimumTotalSeconds = 1L, maximumTotalSeconds = MAX_ALERT_REPEAT_SECONDS)
-                onAlertRepeatHoursTextChange(repeat.hoursText)
-                onAlertRepeatMinutesTextChange(repeat.minutesText)
-                onAlertRepeatSecondsTextChange(repeat.secondsText)
-                if (repeat.corrected) corrected()
                 // Rules belong to the bell editors, not this settings section.
                 val target = thresholdAlertSettings.copy(
-                    repeatSeconds = if (sensorSettingsEnabled) repeat.totalSeconds.toInt()
-                                    else thresholdAlertSettings.repeatSeconds,
                     sound = runCatching { ThresholdAlertSound.valueOf(alertSoundValue) }
                         .getOrDefault(ThresholdAlertSound.TRIPLE_BEEP),
                     volume = alertVolume.roundToInt().coerceIn(0, 100)

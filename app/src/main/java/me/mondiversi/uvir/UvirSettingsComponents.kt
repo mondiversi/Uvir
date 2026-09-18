@@ -8,6 +8,7 @@ import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
@@ -36,9 +37,32 @@ import kotlinx.coroutines.launch
 
 internal val UvirSettingsChoiceSpacing = 2.dp
 internal val UvirSettingsChoiceVerticalPadding = 6.dp
+internal val UvirSettingsListIslandGap = UvirIslandSpacing
 internal val UvirSettingsRelatedGap = 4.dp
 internal val UvirSettingsControlGap = 8.dp
 internal val UvirSettingsGroupGap = 12.dp
+
+@Composable
+internal fun SettingsPageDescription(
+    text: String,
+    color: Color,
+    modifier: Modifier = Modifier
+) {
+    Text(
+        text = text,
+        modifier = modifier,
+        color = color,
+        fontSize = 13.sp,
+        lineHeight = 18.sp
+    )
+}
+
+@Composable
+internal fun SettingsGroupDivider(
+    color: Color
+) {
+    HorizontalDivider(color = color.copy(alpha = 0.20f))
+}
 
 @Composable
 internal fun SettingsChoiceGroup(
@@ -127,8 +151,9 @@ enum class UvirSettingsPage {
     SENSOR_CALIBRATION,
     SAMPLING,
     ALERTS,
-    NUMERIC_FORMAT,
     LANGUAGE,
+    LANGUAGE_AND_FORMATS,
+    SHARING_AND_EXPORT,
     DATA_RESTORE,
     DEBUG
 }
@@ -159,8 +184,11 @@ fun SettingsSection(
     headerAccentColor: Color = MaterialTheme.colorScheme.primary,
     highlightExpandedHeader: Boolean = true,
     headerControl: UvirSettingsHeaderControl = UvirSettingsHeaderControl.CHEVRON,
+    headerEnabled: Boolean = true,
+    showExpandedDivider: Boolean = false,
     titleFontSize: TextUnit = 15.sp,
     settingsPage: UvirSettingsPage? = null,
+    wrapDetailContent: Boolean = true,
     content: @Composable ColumnScope.() -> Unit
 ) {
     val navigation = LocalUvirSettingsNavigation.current
@@ -180,16 +208,17 @@ fun SettingsSection(
             }
 
             settingsPage -> {
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    color = containerColor,
-                    contentColor = titleColor
-                ) {
+                val detailContent: @Composable () -> Unit = {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(UvirIslandContentPadding),
+                            .then(
+                                if (wrapDetailContent) {
+                                    Modifier.padding(UvirIslandContentPadding)
+                                } else {
+                                    Modifier
+                                }
+                            ),
                         verticalArrangement = Arrangement.spacedBy(contentSpacing)
                     ) {
                         if (!enabled) disabledNotice?.invoke()
@@ -203,6 +232,17 @@ fun SettingsSection(
                             )
                         }
                     }
+                }
+                if (wrapDetailContent) {
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        color = containerColor,
+                        contentColor = titleColor,
+                        content = detailContent
+                    )
+                } else {
+                    detailContent()
                 }
             }
 
@@ -233,10 +273,14 @@ fun SettingsSection(
     }
     val darkTheme = isSystemInDarkTheme()
     val expandedAccentColor = headerAccentColor
-    val displayedTitleColor =
+    val enabledTitleColor =
         if (expanded && highlightExpandedHeader) expandedAccentColor else titleColor
-    val displayedChevronColor =
+    val enabledChevronColor =
         if (expanded && highlightExpandedHeader) expandedAccentColor else chevronColor
+    val displayedTitleColor =
+        if (headerEnabled) enabledTitleColor else enabledTitleColor.copy(alpha = 0.48f)
+    val displayedChevronColor =
+        if (headerEnabled) enabledChevronColor else enabledChevronColor.copy(alpha = 0.48f)
     val displayedHeaderColor =
         if (expanded && highlightExpandedHeader) {
             headerAccentColor.copy(
@@ -266,7 +310,7 @@ fun SettingsSection(
                         .fillMaxWidth()
                         .background(displayedHeaderColor)
                         .then(
-                            if (onExpandedChange != null) {
+                            if (onExpandedChange != null && headerEnabled) {
                                 // An unavailable settings group must still be
                                 // inspectable: only its controls are disabled.
                                 Modifier.clickable { changeExpanded(!expanded) }
@@ -292,6 +336,7 @@ fun SettingsSection(
                 if (headerControl == UvirSettingsHeaderControl.CHECKBOX && onExpandedChange != null) {
                     CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 0.dp) {
                         Checkbox(checked = expanded, onCheckedChange = changeExpanded,
+                            enabled = headerEnabled,
                             modifier = Modifier.size(24.dp))
                     }
                     Spacer(Modifier.width(6.dp))
@@ -325,43 +370,84 @@ fun SettingsSection(
                 }
             ) {
                 Column(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(
-                                start = UvirIslandContentPadding,
-                                top = contentSpacing,
-                                end = UvirIslandContentPadding,
-                                bottom = UvirIslandContentPadding
-                            ),
-                    verticalArrangement =
-                        Arrangement.spacedBy(contentSpacing)
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    if (!enabled) {
-                        disabledNotice?.invoke()
+                    if (showExpandedDivider) {
+                        HorizontalDivider(
+                            modifier =
+                                Modifier.padding(
+                                    horizontal = UvirIslandContentPadding
+                                ),
+                            color = dividerColor
+                        )
                     }
-
                     Column(
                         modifier =
                             Modifier
                                 .fillMaxWidth()
-                                .alpha(
-                                    if (
-                                        enabled ||
-                                        !dimContentWhenDisabled
-                                    ) {
-                                        1f
-                                    } else {
-                                        0.48f
-                                    }
+                                .padding(
+                                    start = UvirIslandContentPadding,
+                                    top = contentSpacing,
+                                    end = UvirIslandContentPadding,
+                                    bottom = UvirIslandContentPadding
                                 ),
-                        verticalArrangement =
-                            Arrangement.spacedBy(contentSpacing),
-                        content = content
-                    )
+                        verticalArrangement = Arrangement.spacedBy(contentSpacing)
+                    ) {
+                        if (!enabled) {
+                            disabledNotice?.invoke()
+                        }
+
+                        Column(
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .alpha(
+                                        if (enabled || !dimContentWhenDisabled) {
+                                            1f
+                                        } else {
+                                            0.48f
+                                        }
+                                    ),
+                            verticalArrangement = Arrangement.spacedBy(contentSpacing),
+                            content = content
+                        )
+                    }
                 }
             }
         }
+    }
+}
+
+@Composable
+internal fun UvirSettingsListGroupHeader(
+    title: String,
+    icon: ConnectivityIconType,
+    secondaryText: Color
+) {
+    Row(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 2.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = title,
+            color = secondaryText,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.SemiBold
+        )
+        HorizontalDivider(
+            modifier = Modifier.weight(1f),
+            color = secondaryText.copy(alpha = 0.24f)
+        )
+        ConnectivitySectionIcon(
+            type = icon,
+            modifier = Modifier.size(18.dp),
+            tint = secondaryText,
+            strokeScale = 1.35f
+        )
     }
 }
 
@@ -377,9 +463,8 @@ private fun UvirSettingsPageRow(
     onClick: () -> Unit
 ) {
     Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         color = containerColor,
         contentColor = titleColor
@@ -387,7 +472,8 @@ private fun UvirSettingsPageRow(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(UvirIslandContentPadding),
+                .heightIn(min = 48.dp)
+                .padding(horizontal = UvirIslandContentPadding),
             verticalAlignment = Alignment.CenterVertically
         ) {
             titleIconContent?.let { iconContent ->

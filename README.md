@@ -42,9 +42,14 @@ calibration when the UV board arrives.
 ## Project structure
 
 - `app/`: Android application.
-- `firmware/esp32/UvirSensor/`: ESP32 firmware with separate AS7343 and optional AS7331 sensor drivers plus the versioned Uvir USB/Wi-Fi/Bluetooth protocol.
+- `firmware/esp32/UvirSensor/`: ESP32 firmware with separate AS7343 and optional AS7331 drivers plus the versioned Uvir USB/Wi-Fi/Bluetooth protocol.
 - `relay/`: legacy experimental Uvir relay retained for reference; current Internet mode uses standard MQTT/TLS.
 - `hardware/`: breadboard wiring, pinouts, schematics, bill of materials, and hardware test notes.
+
+Third-party computers, phones and embedded USB hosts can control the sensor
+without the Android app. See [USB serial integration](docs/USB_SERIAL_PROTOCOL.md)
+for connection settings, commands, JSON responses, record acknowledgements and
+safe offline synchronization.
 
 ## Remote Internet connection
 
@@ -63,9 +68,10 @@ the rules used for gradual, low-risk refactoring.
 ## First sensor test
 
 Open `firmware/esp32/UvirSensor/UvirSensor.ino` in Arduino IDE, select
-**ESP32 Dev Module**, and upload it to the ESP32. The Android app recognizes the
-current CP210x USB serial bridge and asks for USB access when the sensor is
-connected to the phone through a USB OTG data cable.
+**ESP32 Dev Module**, choose **Huge APP (3MB No OTA/1MB SPIFFS)** under
+**Tools → Partition Scheme**, and upload it to the ESP32. The Android app
+recognizes the current CP210x USB serial bridge and asks for USB access when the
+sensor is connected to the phone through a USB OTG data cable.
 
 Disable **Settings → Debug → Mock data** before testing the real sensor. AS7343
 VIS/NIR and optional AS7331 UV values remain datasheet-based estimates until

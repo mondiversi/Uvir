@@ -33,6 +33,16 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 internal const val UvirExpansionDurationMillis = 300
 private const val UvirDetailSelectorItemIndex = 2
 
+@Composable
+internal fun uvirDetailSelectorPinned(listState: LazyListState): Boolean {
+    val pinned by remember(listState) {
+        derivedStateOf {
+            listState.firstVisibleItemIndex >= UvirDetailSelectorItemIndex
+        }
+    }
+    return pinned
+}
+
 /** Exiting content stays painted briefly, but can no longer receive new actions. */
 private fun Modifier.uvirRevealInteraction(visible: Boolean): Modifier =
     if (visible) this else clearAndSetSemantics { }

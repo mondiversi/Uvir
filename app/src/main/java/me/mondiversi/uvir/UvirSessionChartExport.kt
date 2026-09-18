@@ -12,17 +12,23 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.toArgb
 import java.io.File
 import java.io.FileOutputStream
-import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Locale
 
 internal fun createSessionChartFile(
     context: Context,
     sessionId: Long,
     records: List<SavedRecordDetail>,
-    group: SessionChartGroup
+    group: SessionChartGroup,
+    includeHeader: Boolean = true,
+    variantIndex: Int? = null,
+    variantCount: Int? = null,
+    exportBaseName: String = uvirSessionAcquisitionsExportBaseName(sessionId, records)
 ): File {
     require(records.isNotEmpty())
+    val exportFormatting = uvirExportFormatting(context)
+    val exportContext = exportFormatting.context
+    val irradianceUnit = exportFormatting.irradianceUnit
+    val valueScale: (Double) -> Double = irradianceUnit::fromCanonicalUwCm2
 
     val width = 1600
     val paint = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -35,6 +41,11 @@ internal fun createSessionChartFile(
         color = AndroidColor.rgb(90, 90, 98)
         textSize = 26f
     }
+    val sectionTitlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = AndroidColor.rgb(48, 48, 56)
+        textSize = 34f
+        typeface = android.graphics.Typeface.DEFAULT_BOLD
+    }
     val notePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = AndroidColor.rgb(82, 82, 90)
         textSize = 22f
@@ -46,8 +57,14 @@ internal fun createSessionChartFile(
     val noteLines =
         wrapChartExportText(
             text = chartExportContextText(
-                note = sessionChartNote(records),
-                sensorName = exportSensorNames(records.map { it.sensorDisplayName })
+                note = sessionChartNote(
+                    records,
+                    exportContext.getString(R.string.no_note)
+                ),
+                sensorName = exportSensorNames(records.map { it.sensorDisplayName }),
+                noteLabel = exportContext.getString(R.string.share_note_label),
+                sensorLabel = exportContext.getString(R.string.sensor_selector_label),
+                emptyNote = exportContext.getString(R.string.no_note)
             ),
             paint = notePaint,
             maxWidth = 1420f
@@ -55,7 +72,10 @@ internal fun createSessionChartFile(
     val headerOffset =
         (noteLines.size * 30f + 20f - 10f)
             .coerceAtLeast(40f)
-    val height = 1060 + headerOffset.toInt()
+    val spansMultipleDays =
+        sessionChartSpansMultipleDays(records.first().timestamp, records.last().timestamp)
+    val timeAxisExtra = if (spansMultipleDays) 30 else 0
+    val height = 1145 + timeAxisExtra + headerOffset.toInt()
     val bitmap =
         Bitmap.createBitmap(
             width,
@@ -65,45 +85,93 @@ internal fun createSessionChartFile(
     val canvas = AndroidCanvas(bitmap)
     canvas.drawColor(AndroidColor.WHITE)
 
-    canvas.drawText(
-        "Uvir session acquisitions chart",
-        90f,
-        85f,
-        titlePaint
-    )
-    canvas.drawText(
-        chartExportIdentifierLine(
-            recordLabel = "Acquisition",
-            recordId = null,
-            sessionId = sessionId
-        ) + " · ${group.exportTitle} · ${records.size} acquisitions",
-        90f,
-        130f,
-        textPaint
-    )
-    noteLines.forEachIndexed { index, line ->
+    if (includeHeader) {
         canvas.drawText(
-            line,
+            "Uvir ${exportContext.getString(R.string.session_chart_title)}",
             90f,
-            170f + index * 30f,
-            notePaint
+            85f,
+            titlePaint
         )
+        val sessionDateRange =
+            csvDateTime(
+                records.first().timestamp,
+                exportFormatting.dateFormat,
+                exportContext.resources.configuration.locales[0],
+                exportFormatting.timeFormat
+            ) + " – " +
+                csvDateTime(
+                    records.last().timestamp,
+                    exportFormatting.dateFormat,
+                    exportContext.resources.configuration.locales[0],
+                    exportFormatting.timeFormat
+                )
+        canvas.drawText(
+            chartExportIdentifierLine(
+                recordLabel = exportContext.getString(R.string.share_measurement_id_label),
+                recordId = null,
+                sessionId = sessionId,
+                sessionLabel = exportContext.getString(R.string.share_session_id_label)
+            ) +
+                if (
+                    variantIndex != null &&
+                    variantCount != null &&
+                    variantCount > 1
+                ) {
+                    " · " + exportContext.getString(
+                        R.string.session_variant_heading,
+                        variantIndex,
+                        variantCount
+                    )
+                } else {
+                    ""
+                } + " · " +
+                exportContext.resources.getQuantityString(
+                    R.plurals.session_chart_acquisition_count,
+                    records.size,
+                    records.size
+                ),
+            90f,
+            130f,
+            textPaint
+        )
+        canvas.drawText(
+            sessionDateRange,
+            90f,
+            165f,
+            textPaint
+        )
+        noteLines.forEachIndexed { index, line ->
+            canvas.drawText(
+                line,
+                90f,
+                200f + index * 30f,
+                notePaint
+            )
+        }
     }
     canvas.drawText(
-        if (group.biological) {
-            "Weighted irradiance (µW/cm² equiv.)"
-        } else {
-            "Irradiance (µW/cm²)"
-        },
+        exportContext.getString(group.titleResource),
         90f,
-        180f + headerOffset,
+        240f + headerOffset,
+        sectionTitlePaint
+    )
+    canvas.drawText(
+        exportContext.getString(
+            if (group.biological) {
+                R.string.session_chart_unit_biological
+            } else {
+                R.string.session_chart_unit
+            }
+        ).withUvirIrradianceUnit(irradianceUnit),
+        90f,
+        278f + headerOffset,
         textPaint
     )
 
     val left = 130f
-    val top = 225f + headerOffset
+    val top = 310f + headerOffset
     val right = 1510f
-    val bottom = 835f + headerOffset
+    val bottom = 920f + headerOffset
     val series = sessionChartSeries(records, group)
     val startTimestamp = records.first().timestamp
     val endTimestamp = records.last().timestamp
@@ -116,14 +184,34 @@ internal fun createSessionChartFile(
             sessionChartTimeTickFractions(
                 availableWidth = right - left,
                 minimumTickSpacing =
-                    textPaint.measureText(
-                        "0000-00-00 00:00:00"
+                    maxOf(
+                        textPaint.measureText(
+                            formatUvirTimeOnly(
+                                startTimestamp,
+                                exportFormatting.timeFormat,
+                                exportContext.resources.configuration.locales[0]
+                            )
+                        ),
+                        if (spansMultipleDays) {
+                            textPaint.measureText(
+                                formatUvirDateOnly(
+                                    startTimestamp,
+                                    exportFormatting.dateFormat,
+                                    exportContext.resources.configuration.locales[0]
+                                )
+                            )
+                        } else {
+                            0f
+                        }
                     ) + 28f
             )
         }
     val maximum =
         series
-            .flatMap { it.values }
+            .flatMap { item ->
+                item.values.filterIndexed { index, _ -> item.outOfRange.getOrNull(index) != true }
+            }
+            .map(valueScale)
             .maxOrNull()
             ?.coerceAtLeast(1.0)
             ?: 1.0
@@ -133,7 +221,11 @@ internal fun createSessionChartFile(
         canvas.drawLine(left, y, right, y, gridPaint)
         val value = maximum * (4 - index) / 4.0
         canvas.drawText(
-            String.format(Locale.US, "%.2f", value),
+            formatUvirNumber(
+                value,
+                irradianceUnit.displayFractionDigits(2),
+                exportFormatting.numericFormat
+            ),
             24f,
             y + 9f,
             textPaint
@@ -162,7 +254,13 @@ internal fun createSessionChartFile(
         paint.strokeCap = Paint.Cap.ROUND
 
         val path = android.graphics.Path()
+        var hasPreviousPoint = false
         item.values.forEachIndexed { index, value ->
+            if (item.outOfRange.getOrNull(index) == true) {
+                hasPreviousPoint = false
+                return@forEachIndexed
+            }
+            val displayValue = valueScale(value)
             val x =
                 if (item.values.size <= 1) {
                     (left + right) / 2f
@@ -177,24 +275,25 @@ internal fun createSessionChartFile(
                 }
             val y =
                 bottom -
-                        (value.coerceAtLeast(0.0) / maximum)
+                        (displayValue.coerceAtLeast(0.0) / maximum)
                             .toFloat() *
                         (bottom - top)
 
-            if (index == 0) {
+            if (!hasPreviousPoint) {
                 path.moveTo(x, y)
             } else {
                 path.lineTo(x, y)
             }
+            hasPreviousPoint = true
         }
         canvas.drawPath(path, paint)
 
-        if (item.values.size == 1) {
+        if (item.values.size == 1 && item.outOfRange.firstOrNull() != true) {
             paint.style = Paint.Style.FILL
             canvas.drawCircle(
                 (left + right) / 2f,
                 bottom -
-                        (item.values.first().coerceAtLeast(0.0) /
+                        (valueScale(item.values.first()).coerceAtLeast(0.0) /
                                 maximum).toFloat() *
                         (bottom - top),
                 9f,
@@ -203,22 +302,26 @@ internal fun createSessionChartFile(
         }
     }
 
-    val dateFormat =
-        SimpleDateFormat(
-            "yyyy-MM-dd HH:mm:ss",
-            Locale.US
-        )
     timeTickFractions.forEach { fraction ->
-        val label =
-            dateFormat.format(
-                Date(
-                    sessionChartTimestampAt(
-                        startTimestamp = startTimestamp,
-                        endTimestamp = endTimestamp,
-                        fraction = fraction
-                    )
-                )
+        val timestamp =
+            sessionChartTimestampAt(
+                startTimestamp = startTimestamp,
+                endTimestamp = endTimestamp,
+                fraction = fraction
             )
+        val dateLabel =
+            formatUvirDateOnly(
+                timestamp,
+                exportFormatting.dateFormat,
+                exportContext.resources.configuration.locales[0]
+            )
+        val timeLabel =
+            formatUvirTimeOnly(
+                timestamp,
+                exportFormatting.timeFormat,
+                exportContext.resources.configuration.locales[0]
+            )
+        val label = if (spansMultipleDays) dateLabel else timeLabel
         val tickX =
             left + (right - left) * fraction
         val textX =
@@ -230,13 +333,24 @@ internal fun createSessionChartFile(
         canvas.drawText(
             label,
             textX,
-            885f + headerOffset,
+            970f + headerOffset,
             textPaint
         )
+        if (spansMultipleDays) {
+            val timeTextX =
+                (tickX - textPaint.measureText(timeLabel) / 2f)
+                    .coerceIn(left, right - textPaint.measureText(timeLabel))
+            canvas.drawText(
+                timeLabel,
+                timeTextX,
+                1000f + headerOffset,
+                textPaint
+            )
+        }
     }
 
     var legendX = left
-    var legendY = 950f + headerOffset
+    var legendY = 1035f + timeAxisExtra + headerOffset
     series.forEach { item ->
         paint.color = item.color.toArgb()
         paint.style = Paint.Style.FILL
@@ -247,13 +361,17 @@ internal fun createSessionChartFile(
             paint
         )
         canvas.drawText(
-            item.label,
+            item.displayLabelResource?.let { exportContext.getString(it) } ?: item.label,
             legendX + 20f,
             legendY,
             textPaint
         )
         legendX +=
-            40f + textPaint.measureText(item.label) + 55f
+            40f +
+                textPaint.measureText(
+                    item.displayLabelResource?.let { exportContext.getString(it) }
+                        ?: item.label
+                ) + 55f
         if (legendX > 1380f) {
             legendX = left
             legendY += 34f
@@ -267,7 +385,16 @@ internal fun createSessionChartFile(
     val file =
         File(
             sharedDirectory,
-            "${uvirSessionAcquisitionsExportBaseName(sessionId, records)}_" +
+            exportBaseName +
+                if (
+                    variantIndex != null &&
+                    variantCount != null &&
+                    variantCount > 1
+                ) {
+                    "_Var${String.format(Locale.US, "%02d", variantIndex)}"
+                } else {
+                    ""
+                } + "_" +
                 when (group) {
                     SessionChartGroup.UV -> "UV"
                     SessionChartGroup.VISIBLE -> "Visible_Light"
@@ -277,16 +404,132 @@ internal fun createSessionChartFile(
                 ".png"
         )
 
+    val cropTop = (200f + headerOffset).toInt()
+    val exportBitmap =
+        if (includeHeader) bitmap
+        else Bitmap.createBitmap(bitmap, 0, cropTop, width, height - cropTop)
     FileOutputStream(file).use { output ->
         check(
-            bitmap.compress(
+            exportBitmap.compress(
                 Bitmap.CompressFormat.PNG,
                 100,
                 output
             )
         )
     }
+    if (exportBitmap !== bitmap) exportBitmap.recycle()
     bitmap.recycle()
 
     return file
+}
+
+internal fun createSessionCombinedChartFile(
+    context: Context,
+    sessionId: Long,
+    records: List<SavedRecordDetail>,
+    groups: List<SessionChartGroup> = SessionChartGroup.entries,
+    variantIndex: Int? = null,
+    variantCount: Int? = null,
+    exportBaseName: String = uvirSessionAcquisitionsExportBaseName(sessionId, records)
+): File {
+    require(records.isNotEmpty())
+    val selectedGroups = groups.distinct()
+    require(selectedGroups.isNotEmpty())
+    val panelFiles =
+        selectedGroups.mapIndexed { index, group ->
+            createSessionChartFile(
+                context = context,
+                sessionId = sessionId,
+                records = records,
+                group = group,
+                includeHeader = index == 0,
+                variantIndex = variantIndex,
+                variantCount = variantCount,
+                exportBaseName = exportBaseName
+            )
+        }
+    val outputFile =
+        File(
+            File(context.cacheDir, "shared"),
+            exportBaseName +
+                if (
+                    variantIndex != null &&
+                    variantCount != null &&
+                    variantCount > 1
+                ) {
+                    "_Var${String.format(Locale.US, "%02d", variantIndex)}"
+                } else {
+                    ""
+                } + "_Chart.png"
+        )
+    return combineChartExportFiles(outputFile, panelFiles)
+}
+
+internal fun createSessionVariantChartFiles(
+    context: Context,
+    sessionId: Long,
+    records: List<SavedRecordDetail>,
+    mode: UvirChartExportMode = UvirChartExportMode.COMBINED
+): List<File> {
+    val variantGroups = acquisitionVariantGroups(records)
+    val exportBaseName = uvirSessionAcquisitionsExportBaseName(sessionId, records)
+    return if (variantGroups.isEmpty()) {
+        when (mode) {
+            UvirChartExportMode.COMBINED ->
+                listOf(createSessionCombinedChartFile(context, sessionId, records))
+            UvirChartExportMode.SEPARATE ->
+                SessionChartGroup.entries.map { group ->
+                    createSessionChartFile(
+                        context = context,
+                        sessionId = sessionId,
+                        records = records,
+                        group = group,
+                        includeHeader = true,
+                        exportBaseName = exportBaseName
+                    )
+                }
+        }
+    } else {
+        variantGroups.flatMap { variant ->
+            when (mode) {
+                UvirChartExportMode.COMBINED ->
+                    listOf(
+                        createSessionCombinedChartFile(
+                            context = context,
+                            sessionId = sessionId,
+                            records = variant.records,
+                            variantIndex = variant.index,
+                            variantCount = variant.count,
+                            exportBaseName = exportBaseName
+                        )
+                    )
+                UvirChartExportMode.SEPARATE ->
+                    SessionChartGroup.entries.map { group ->
+                        createSessionChartFile(
+                            context = context,
+                            sessionId = sessionId,
+                            records = variant.records,
+                            group = group,
+                            includeHeader = true,
+                            variantIndex = variant.index,
+                            variantCount = variant.count,
+                            exportBaseName = exportBaseName
+                        )
+                    }
+            }
+        }
+    }
+}
+
+internal fun acquisitionSessionChartFileCount(
+    records: List<SavedRecordDetail>,
+    mode: UvirChartExportMode
+): Int {
+    val variants = acquisitionVariantGroups(records).size.coerceAtLeast(1)
+    return variants *
+        if (mode == UvirChartExportMode.SEPARATE) {
+            SessionChartGroup.entries.size
+        } else {
+            1
+        }
 }

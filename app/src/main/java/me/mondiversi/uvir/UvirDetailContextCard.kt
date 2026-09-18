@@ -5,9 +5,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -16,7 +20,10 @@ import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -42,12 +49,16 @@ internal fun rememberDetailSensorName(sensorId: Long?, database: UvirDatabaseHel
 @Composable
 internal fun UvirDetailContextCard(
     automatic: Boolean?,
+    externalCommand: Boolean = false,
     sensorName: String,
     note: String,
     cardColor: Color,
     primaryText: Color,
-    secondaryText: Color
+    secondaryText: Color,
+    onEditNote: (() -> Unit)? = null
 ) {
+    val editNoteDescription = stringResource(R.string.edit_note)
+    val editNoteColor = MaterialTheme.colorScheme.primary
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(18.dp),
@@ -71,10 +82,11 @@ internal fun UvirDetailContextCard(
                 )
                 UvirDetailContextRow(
                     icon = null,
-                    text = when (automatic) {
-                        true -> stringResource(R.string.automatic_measurement)
-                        false -> stringResource(R.string.manual_measurement)
-                        null -> "—"
+                    text = when {
+                        externalCommand -> stringResource(R.string.external_measurement)
+                        automatic == true -> stringResource(R.string.automatic_measurement)
+                        automatic == false -> stringResource(R.string.manual_measurement)
+                        else -> "—"
                     },
                     primaryText = primaryText
                 )
@@ -93,7 +105,10 @@ internal fun UvirDetailContextCard(
                 UvirDetailContextRow(
                     icon = UvirDetailMetadataIconKind.NOTE,
                     text = note,
-                    primaryText = primaryText
+                    primaryText = primaryText,
+                    onEditNote = onEditNote,
+                    editNoteDescription = editNoteDescription,
+                    editNoteColor = editNoteColor
                 )
                 UvirDetailContextRow(
                     icon = UvirDetailMetadataIconKind.SENSOR,
@@ -111,7 +126,10 @@ private fun UvirDetailContextRow(
     icon: UvirDetailMetadataIconKind?,
     text: String,
     primaryText: Color,
-    maxLines: Int = Int.MAX_VALUE
+    maxLines: Int = Int.MAX_VALUE,
+    onEditNote: (() -> Unit)? = null,
+    editNoteDescription: String = "",
+    editNoteColor: Color = primaryText
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -129,5 +147,52 @@ private fun UvirDetailContextRow(
             maxLines = maxLines,
             overflow = TextOverflow.Ellipsis
         )
+        onEditNote?.let { editNote ->
+            Canvas(
+                modifier =
+                    Modifier
+                        .size(18.dp)
+                        .semantics {
+                            contentDescription = editNoteDescription
+                        }
+                        .clickable(onClick = editNote)
+            ) {
+                val sx = size.width / 24f
+                val sy = size.height / 24f
+                val pencil = Path().apply {
+                    moveTo(3f * sx, 17.25f * sy)
+                    lineTo(3f * sx, 21f * sy)
+                    lineTo(6.75f * sx, 21f * sy)
+                    lineTo(17.81f * sx, 9.94f * sy)
+                    lineTo(14.06f * sx, 6.19f * sy)
+                    close()
+                }
+                val eraser = Path().apply {
+                    moveTo(20.71f * sx, 7.04f * sy)
+                    cubicTo(
+                        21.10f * sx,
+                        6.65f * sy,
+                        21.10f * sx,
+                        6.02f * sy,
+                        20.71f * sx,
+                        5.63f * sy
+                    )
+                    lineTo(18.37f * sx, 3.29f * sy)
+                    cubicTo(
+                        17.98f * sx,
+                        2.90f * sy,
+                        17.35f * sx,
+                        2.90f * sy,
+                        16.96f * sx,
+                        3.29f * sy
+                    )
+                    lineTo(15.13f * sx, 5.12f * sy)
+                    lineTo(18.88f * sx, 8.87f * sy)
+                    close()
+                }
+                drawPath(path = pencil, color = editNoteColor)
+                drawPath(path = eraser, color = editNoteColor)
+            }
+        }
     }
 }

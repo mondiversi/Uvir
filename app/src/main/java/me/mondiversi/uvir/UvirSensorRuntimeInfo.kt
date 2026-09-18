@@ -89,6 +89,7 @@ data class UvirSensorRuntimeInfo(
     val offlineSessionId: Long? = null,
     val offlineCompleted: Int? = null,
     val offlineNextAtMs: Long? = null,
+    val offlineExternalCommand: Boolean? = null,
     val offlineConditionPlan: ConditionalAcquisitionPlan? = null,
     val offlineConditionWaiting: Boolean? = null,
     val offlineEndAtMs: Long? = null,
@@ -99,7 +100,8 @@ data class UvirSensorRuntimeInfo(
     val statusLedEnabled: Boolean? = null,
     val statusLedBrightness: Int? = null,
     val statusBuzzerEnabled: Boolean? = null,
-    val statusBuzzerVolume: Int? = null
+    val statusBuzzerVolume: Int? = null,
+    val externalCommandEnabled: Boolean? = null
 )
 
 internal fun UvirSensorRuntimeInfo.updatedFrom(
@@ -285,6 +287,11 @@ internal fun UvirSensorRuntimeInfo.updatedFrom(
             json.intOrPrevious("offline_completed", offlineCompleted),
         offlineNextAtMs =
             json.longOrPrevious("offline_next_ms", offlineNextAtMs),
+        offlineExternalCommand =
+            json.booleanOrPrevious(
+                "offline_external_command",
+                offlineExternalCommand
+            ),
         offlineConditionPlan = if (json.has("offline_condition_plan"))
             decodeConditionalAcquisitionPlan(json.optString("offline_condition_plan")) else offlineConditionPlan,
         offlineConditionWaiting = json.booleanOrPrevious("offline_condition_waiting", offlineConditionWaiting),
@@ -321,6 +328,11 @@ internal fun UvirSensorRuntimeInfo.updatedFrom(
             json.intOrPrevious(
                 "status_buzzer_volume",
                 statusBuzzerVolume
+            ),
+        externalCommandEnabled =
+            json.booleanOrPrevious(
+                "external_command_enabled",
+                externalCommandEnabled
             )
     )
 

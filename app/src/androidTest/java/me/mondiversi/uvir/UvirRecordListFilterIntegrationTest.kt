@@ -53,7 +53,7 @@ class UvirRecordListFilterIntegrationTest {
         assertTrue(directory.delete())
     }
 
-    @Test fun acquisitionListKeepsFiltersAccessibleWhenNoResultsAndResetsWithoutChangingRecords() {
+    @Test fun acquisitionListKeepsChoiceFiltersAccessibleAndResetsWithoutChangingRecords() {
         repeat(3) { database.saveAcquisition(SensorSample(), "Garden", automatic = true,
             sessionId = 10, sessionSequence = it + 1, sensorDeviceId = "TEST-A") }
         compose.setContent {
@@ -66,7 +66,7 @@ class UvirRecordListFilterIntegrationTest {
         compose.runOnIdle { assertEquals(3, database.readSavedRecords().size) }
     }
 
-    @Test fun alertListKeepsFiltersAccessibleWhenNoResultsAndResetsWithoutChangingRecords() {
+    @Test fun alertListKeepsChoiceFiltersAccessibleAndResetsWithoutChangingRecords() {
         val rule = ThresholdAlertRule(ThresholdAlertMetric.UVA, true, ThresholdAlertDirection.ABOVE, 1.0f)
         repeat(3) { database.insertThresholdAlertLog(
             listOf(ThresholdAlertViolation(rule, 2.0)), timestamp = 1000L + it,
@@ -151,7 +151,7 @@ class UvirRecordListFilterIntegrationTest {
         compose.runOnIdle { assertEquals(3, database.readThresholdAlertLog().size) }
     }
 
-    @Test fun typingInAcquisitionNoteAndIdFiltersDoesNotCrashOrChangeRecords() {
+    @Test fun selectingAcquisitionNoteAndIdFiltersDoesNotCrashOrChangeRecords() {
         repeat(30) { database.saveAcquisition(SensorSample(), "Garden", automatic = true,
             sessionId = 10, sessionSequence = it + 1, sensorDeviceId = "TEST-A") }
         compose.setContent {
@@ -160,12 +160,13 @@ class UvirRecordListFilterIntegrationTest {
                     Color.White, Color.White, Color.Black, Color.Gray, {}, {}, {})
             }
         }
-        exerciseNoteAndIdTyping()
+        exerciseNoteAndIdChoices()
         compose.runOnIdle { assertEquals(30, database.readSavedRecords().size) }
     }
 
-    @Test fun typingInAlertNoteAndIdFiltersDoesNotCrashOrChangeRecords() {
+    @Test fun selectingAlertNoteAndIdFiltersDoesNotCrashOrChangeRecords() {
         val rule = ThresholdAlertRule(ThresholdAlertMetric.UVA, true, ThresholdAlertDirection.ABOVE, 1f)
+        database.startAlertSession(10, "Garden", 1000L, "TEST-A")
         repeat(30) { database.insertThresholdAlertLog(listOf(ThresholdAlertViolation(rule, 2.0)),
             timestamp = 1000L + it, sessionId = 10, sensorDeviceId = "TEST-A") }
         compose.setContent {
@@ -174,24 +175,16 @@ class UvirRecordListFilterIntegrationTest {
                     Color.White, Color.White, Color.Black, Color.Gray, {})
             }
         }
-        // Alert notes can be absent: test a no-match and restore the complete list.
-        exerciseNoteAndIdTyping()
+        exerciseNoteAndIdChoices()
         compose.runOnIdle { assertEquals(30, database.readThresholdAlertLog().size) }
     }
 
-    private fun exerciseNoteAndIdTyping() {
+    private fun exerciseNoteAndIdChoices() {
         compose.onNodeWithTag("list-filter-toggle").performClick()
-        val note = compose.onNodeWithTag("filter-note")
-        note.performScrollTo().performClick().performTextInput("G")
-        compose.waitForIdle()
-        note.performTextInput("ard")
-        note.performTextReplacement("missing-note")
-        compose.onNodeWithText(text(R.string.list_filter_no_results)).assertExists()
-        note.performTextReplacement("")
-        compose.onNodeWithText(text(R.string.list_filter_no_results)).assertDoesNotExist()
-        compose.onNodeWithTag("filter-id").performScrollTo().performClick().performTextInput("2")
+        selectFilterChoice("filter-note", "Garden")
+        selectFilterChoice("filter-id", "2")
         compose.onNodeWithText(text(R.string.list_filter_count, 1, 30)).assertExists()
-        compose.onNodeWithTag("filter-session-id").performScrollTo().performClick().performTextInput("10")
+        selectFilterChoice("filter-session-id", "10")
         compose.onNodeWithText(text(R.string.list_filter_count, 1, 30)).assertExists()
         compose.onNodeWithContentDescription(text(R.string.navigate_back)).performClick()
         compose.onNodeWithTag("filter-note").assertDoesNotExist()
@@ -244,7 +237,7 @@ class UvirRecordListFilterIntegrationTest {
         filtersClosed()
 
         openFilters()
-        compose.onNodeWithTag("filter-id").performScrollTo().performTextInput("2")
+        selectFilterChoice("filter-id", "2")
         titleBack()
         filtersClosed()
         compose.onNodeWithText(text(R.string.list_filter_count, 1, 3)).assertExists()
@@ -269,9 +262,7 @@ class UvirRecordListFilterIntegrationTest {
 
     private fun exerciseFilterAndReset() {
         compose.onNodeWithTag("list-filter-toggle").performClick()
-        compose.onNodeWithTag("filter-id").performScrollTo().performTextInput("999")
-        compose.onNodeWithText(text(R.string.list_filter_no_results)).assertExists()
-        compose.onNodeWithTag("filter-id").performTextReplacement("2")
+        selectFilterChoice("filter-id", "2")
         compose.onNodeWithText(text(R.string.list_filter_count, 1, 3)).assertExists()
         compose.onNodeWithTag("list-filter-toggle").performClick()
         compose.onNodeWithTag("filter-id").assertDoesNotExist()
@@ -279,6 +270,11 @@ class UvirRecordListFilterIntegrationTest {
         compose.onNodeWithTag("list-filter-toggle").performClick()
         compose.onNodeWithTag("filter-reset").performScrollTo().performClick()
         compose.onNodeWithTag("list-filter-toggle").performClick()
-        compose.onNodeWithText(text(R.string.list_filter_no_results)).assertDoesNotExist()
+        compose.onNodeWithText(text(R.string.list_filter_count, 1, 3)).assertDoesNotExist()
+    }
+
+    private fun selectFilterChoice(fieldTag: String, key: String) {
+        compose.onNodeWithTag(fieldTag).performScrollTo().performTouchInput { click(center) }
+        compose.onNodeWithTag("filter-choice-option-$key").performClick()
     }
 }

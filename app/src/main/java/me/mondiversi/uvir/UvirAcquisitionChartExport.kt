@@ -11,38 +11,105 @@ import androidx.core.content.FileProvider
 import androidx.compose.ui.graphics.toArgb
 import java.io.File
 import java.io.FileOutputStream
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 internal fun createAcquisitionChartFiles(
     context: Context,
     record: SavedRecordDetail,
-    group: AcquisitionChartGroup
+    group: AcquisitionChartGroup,
+    includeHeader: Boolean = true
 ): List<File> {
+    val exportContext = uvirExportFormatting(context).context
     val bars = acquisitionChartBars(record.sample, group)
+    var shouldIncludeHeader = includeHeader
     return AcquisitionChartSection.entries.mapNotNull { section ->
         bars.filter { it.section == section }
             .takeIf { it.isNotEmpty() }
             ?.let { sectionBars ->
                 createAcquisitionChartFile(
-                    context = context,
+                    context = exportContext,
                     record = record,
                     group = group,
                     section = section,
-                    bars = sectionBars
-                )
+                    bars = sectionBars,
+                    includeHeader = shouldIncludeHeader
+                ).also { shouldIncludeHeader = false }
             }
     }
 }
+
+internal fun createAcquisitionCombinedChartFile(
+    context: Context,
+    record: SavedRecordDetail,
+    groups: List<AcquisitionChartGroup> = AcquisitionChartGroup.entries
+): File {
+    val selectedGroups = groups.distinct()
+    require(selectedGroups.isNotEmpty())
+    var includeHeader = true
+    val panelFiles =
+        selectedGroups.flatMap { group ->
+            createAcquisitionChartFiles(
+                context = context,
+                record = record,
+                group = group,
+                includeHeader = includeHeader
+            ).also {
+                if (it.isNotEmpty()) includeHeader = false
+            }
+        }
+    val outputFile =
+        File(
+            File(context.cacheDir, "shared"),
+            "${uvirAcquisitionExportBaseName(record)}_Charts.png"
+        )
+    return combineChartExportFiles(outputFile, panelFiles)
+}
+
+internal fun acquisitionChartGroupCount(
+    record: SavedRecordDetail,
+    groups: List<AcquisitionChartGroup> = AcquisitionChartGroup.entries
+): Int =
+    groups.distinct().sumOf { group ->
+        val bars = acquisitionChartBars(record.sample, group)
+        AcquisitionChartSection.entries.count { section ->
+            bars.any { it.section == section }
+        }
+    }
+
+internal fun createAcquisitionSeparateChartFiles(
+    context: Context,
+    record: SavedRecordDetail,
+    groups: List<AcquisitionChartGroup> = AcquisitionChartGroup.entries
+): List<File> =
+    groups.distinct().flatMap { group ->
+        val bars = acquisitionChartBars(record.sample, group)
+        AcquisitionChartSection.entries.mapNotNull { section ->
+            bars.filter { it.section == section }
+                .takeIf { it.isNotEmpty() }
+                ?.let { sectionBars ->
+                    createAcquisitionChartFile(
+                        context = context,
+                        record = record,
+                        group = group,
+                        section = section,
+                        bars = sectionBars,
+                        includeHeader = true
+                    )
+                }
+        }
+    }
 
 private fun createAcquisitionChartFile(
     context: Context,
     record: SavedRecordDetail,
     group: AcquisitionChartGroup,
     section: AcquisitionChartSection,
-    bars: List<AcquisitionChartBar>
+    bars: List<AcquisitionChartBar>,
+    includeHeader: Boolean
 ): File {
+    val exportFormatting = uvirExportFormatting(context)
+    val exportContext = exportFormatting.context
+    val irradianceUnit = exportFormatting.irradianceUnit
+    val valueScale: (Double) -> Double = irradianceUnit::fromCanonicalUwCm2
     val width = 1600
     val titlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.rgb(32, 32, 38)
@@ -52,6 +119,11 @@ private fun createAcquisitionChartFile(
     val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.rgb(90, 90, 98)
         textSize = 25f
+    }
+    val sectionTitlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.rgb(48, 48, 56)
+        textSize = 34f
+        typeface = android.graphics.Typeface.DEFAULT_BOLD
     }
     val smallPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.rgb(82, 82, 90)
@@ -69,9 +141,12 @@ private fun createAcquisitionChartFile(
                     note = record.note,
                     automatic = record.automatic,
                     sessionSequence = record.sessionSequence,
-                    emptyNote = "—"
+                    emptyNote = exportContext.getString(R.string.no_note)
                 ),
-                sensorName = record.sensorDisplayName
+                sensorName = record.sensorDisplayName,
+                noteLabel = exportContext.getString(R.string.share_note_label),
+                sensorLabel = exportContext.getString(R.string.sensor_selector_label),
+                emptyNote = exportContext.getString(R.string.no_note)
             ),
             paint = smallPaint,
             maxWidth = 1420f
@@ -83,7 +158,7 @@ private fun createAcquisitionChartFile(
     val sectionHeights =
         sections.sumOf { (_, sectionBars) ->
             val legendRows = (sectionBars.size + 3) / 4
-            455 + legendRows * 58
+            500 + legendRows * 58
         }
     val height =
         225 + headerOffset.toInt() + sectionHeights + 50
@@ -96,35 +171,39 @@ private fun createAcquisitionChartFile(
     val canvas = Canvas(bitmap)
     canvas.drawColor(Color.WHITE)
 
-    canvas.drawText("Uvir acquisition chart", 90f, 85f, titlePaint)
-    canvas.drawText(
-        chartExportIdentifierLine(
-            recordLabel = "Acquisition",
-            recordId = record.id,
-            sessionId = record.sessionId
-        ) + " · " +
-            SimpleDateFormat(
-                "yyyy-MM-dd HH:mm:ss",
-                Locale.US
-            ).format(Date(record.timestamp)),
-        90f,
-        130f,
-        textPaint
-    )
-    noteLines.forEachIndexed { index, line ->
+    if (includeHeader) {
         canvas.drawText(
-            line,
+            "Uvir ${exportContext.getString(R.string.acquisition_chart_title)}",
             90f,
-            170f + index * 30f,
-            smallPaint
+            85f,
+            titlePaint
         )
+        canvas.drawText(
+            chartExportIdentifierLine(
+                recordLabel = exportContext.getString(R.string.share_measurement_id_label),
+                recordId = record.id,
+                sessionId = record.sessionId,
+                sessionLabel = exportContext.getString(R.string.share_session_id_label)
+            ) + " · " +
+                csvDateTime(
+                    record.timestamp,
+                    exportFormatting.dateFormat,
+                    exportContext.resources.configuration.locales[0],
+                    exportFormatting.timeFormat
+                ),
+            90f,
+            130f,
+            textPaint
+        )
+        noteLines.forEachIndexed { index, line ->
+            canvas.drawText(
+                line,
+                90f,
+                170f + index * 30f,
+                smallPaint
+            )
+        }
     }
-    canvas.drawText(
-        "${group.exportTitle} (${group.exportUnit})",
-        90f,
-        180f + headerOffset,
-        textPaint
-    )
 
     val left = 130f
     val right = 1510f
@@ -134,17 +213,24 @@ private fun createAcquisitionChartFile(
 
     sections.forEachIndexed { sectionIndex, (section, sectionBars) ->
         canvas.drawText(
-            section.exportTitle,
+            exportContext.getString(section.titleResource),
             90f,
-            sectionTop + 25f,
+            sectionTop + 30f,
+            sectionTitlePaint
+        )
+        canvas.drawText(
+            exportContext.getString(group.unitResource).withUvirIrradianceUnit(irradianceUnit),
+            90f,
+            sectionTop + 68f,
             textPaint
         )
 
-        val top = sectionTop + 45f
+        val top = sectionTop + 90f
         val bottom = top + 300f
         val maximum =
             sectionBars
-                .maxOfOrNull { it.value.coerceAtLeast(0.0) }
+                .filterNot { it.outOfRange }
+                .maxOfOrNull { valueScale(it.value).coerceAtLeast(0.0) }
                 ?.coerceAtLeast(1.0)
                 ?: 1.0
 
@@ -153,7 +239,11 @@ private fun createAcquisitionChartFile(
             canvas.drawLine(left, y, right, y, gridPaint)
             val value = maximum * (4 - index) / 4.0
             canvas.drawText(
-                String.format(Locale.US, "%.2f", value),
+                formatUvirNumber(
+                    value,
+                    irradianceUnit.displayFractionDigits(2),
+                    exportFormatting.numericFormat
+                ),
                 24f,
                 y + 8f,
                 smallPaint
@@ -163,8 +253,10 @@ private fun createAcquisitionChartFile(
         val slotWidth = (right - left) / sectionBars.size
         val barWidth = (slotWidth * 0.54f).coerceAtMost(150f)
         sectionBars.forEachIndexed { index, bar ->
+            if (bar.outOfRange) return@forEachIndexed
+            val displayValue = valueScale(bar.value)
             val normalized =
-                (bar.value.coerceAtLeast(0.0) / maximum)
+                (displayValue.coerceAtLeast(0.0) / maximum)
                     .toFloat()
                     .coerceIn(0f, 1f)
             val barHeight = (bottom - top) * normalized
@@ -200,7 +292,16 @@ private fun createAcquisitionChartFile(
             barPaint.color = bar.color.toArgb()
             canvas.drawCircle(x, y - 8f, 10f, barPaint)
             canvas.drawText(
-                "${bar.exportLabel}: ${String.format(Locale.US, "%.3f", bar.value)}",
+                "${bar.displayLabelResource?.let(exportContext::getString) ?: bar.exportLabel}: " +
+                    if (bar.outOfRange) {
+                        exportContext.getString(R.string.out_of_range_short)
+                    } else {
+                        formatUvirNumber(
+                            valueScale(bar.value),
+                            irradianceUnit.displayFractionDigits(3),
+                            exportFormatting.numericFormat
+                        )
+                    },
                 x + 20f,
                 y,
                 smallPaint
@@ -238,15 +339,28 @@ private fun createAcquisitionChartFile(
             "${uvirAcquisitionExportBaseName(record)}_${sectionFileLabel}.png"
         )
 
+    val exportBitmap =
+        if (includeHeader) {
+            bitmap
+        } else {
+            Bitmap.createBitmap(
+                bitmap,
+                0,
+                (225f + headerOffset - 12f).toInt(),
+                width,
+                height - (225f + headerOffset - 12f).toInt()
+            )
+        }
     FileOutputStream(file).use { output ->
         check(
-            bitmap.compress(
+            exportBitmap.compress(
                 Bitmap.CompressFormat.PNG,
                 100,
                 output
             )
         )
     }
+    if (exportBitmap !== bitmap) exportBitmap.recycle()
     bitmap.recycle()
     return file
 }
@@ -254,18 +368,23 @@ private fun createAcquisitionChartFile(
 internal fun shareAcquisitionCharts(
     context: Context,
     record: SavedRecordDetail,
-    groups: List<AcquisitionChartGroup>
+    groups: List<AcquisitionChartGroup>,
+    destination: UvirExportDestination = UvirExportDestination.SHARE
 ) {
     require(groups.isNotEmpty())
 
     val files =
-        groups.flatMap { group ->
-            createAcquisitionChartFiles(
+        listOf(
+            createAcquisitionCombinedChartFile(
                 context = context,
                 record = record,
-                group = group
+                groups = groups
             )
-        }
+        )
+    if (destination == UvirExportDestination.SAVE) {
+        requestUvirExportSave(context, files)
+        return
+    }
     val uris =
         ArrayList(
             files.map { file ->

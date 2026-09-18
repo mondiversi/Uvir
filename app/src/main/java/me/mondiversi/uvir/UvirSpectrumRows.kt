@@ -22,7 +22,6 @@ fun SpectrumCard(
     group: SensorGroup,
     title: String,
     total: Double,
-    unit: String,
 
     expanded: Boolean,
     onToggle: () -> Unit,
@@ -38,6 +37,7 @@ fun SpectrumCard(
     alertMonitoringActive: Boolean = false,
     onAlertClick: (() -> Unit)? = null,
     footnote: String? = null,
+    outOfRange: Boolean = false,
 
     content:
     @Composable ColumnScope.() -> Unit
@@ -97,11 +97,16 @@ fun SpectrumCard(
 
                     Text(
                         text =
-                            "${formatUvirNumber(
-                                total,
-                                1,
-                                LocalUvirNumericFormat.current
-                            )} $unit",
+                            if (outOfRange) {
+                                stringResource(R.string.out_of_range_short)
+                            } else {
+                                "${formatUvirIrradianceNumber(
+                                    total,
+                                    3,
+                                    LocalUvirNumericFormat.current,
+                                    LocalUvirIrradianceUnit.current
+                                )} ${LocalUvirIrradianceUnit.current.symbol}"
+                            },
                         color =
                             if (alerted) {
                                 Color(0xFFF57C00)
@@ -155,12 +160,18 @@ fun SpectrumCard(
                         LiveRollingChart(
                             history = liveHistory,
                             series = liveChartSeries,
-                            unit = "µW/cm²",
+                            unit = LocalUvirIrradianceUnit.current.symbol,
+                            valueScale = LocalUvirIrradianceUnit.current::fromCanonicalUwCm2,
+                            outOfRange = { it.isOutOfRange(group) },
                             primaryText = primaryText,
                             secondaryText = secondaryText
                         )
                     } else {
-                        content()
+                        CompositionLocalProvider(
+                            LocalUvirDisplayedOutOfRange provides outOfRange
+                        ) {
+                            content()
+                        }
                     }
                     footnote?.let { note ->
                         Text(
@@ -176,6 +187,9 @@ fun SpectrumCard(
         }
     }
 }
+
+private val LocalUvirDisplayedOutOfRange =
+    compositionLocalOf { false }
 
 // =====================================================
 // RIGHE SPETTRALI
@@ -249,11 +263,16 @@ fun SpectrumRow(
 
             Text(
                 text =
-                    "${formatUvirNumber(
-                        value,
-                        1,
-                        LocalUvirNumericFormat.current
-                    )} µW/cm²",
+                    if (LocalUvirDisplayedOutOfRange.current) {
+                        stringResource(R.string.out_of_range_short)
+                    } else {
+                        "${formatUvirIrradianceNumber(
+                            value,
+                            3,
+                            LocalUvirNumericFormat.current,
+                            LocalUvirIrradianceUnit.current
+                        )} ${LocalUvirIrradianceUnit.current.symbol}"
+                    },
                 color =
                     if (alerted) {
                         Color(0xFFF57C00)
@@ -371,11 +390,16 @@ fun DerivedSpectrumRow(
 
             Text(
                 text =
-                    "${formatUvirNumber(
-                        value,
-                        1,
-                        LocalUvirNumericFormat.current
-                    )} µW/cm²",
+                    if (LocalUvirDisplayedOutOfRange.current) {
+                        stringResource(R.string.out_of_range_short)
+                    } else {
+                        "${formatUvirIrradianceNumber(
+                            value,
+                            3,
+                            LocalUvirNumericFormat.current,
+                            LocalUvirIrradianceUnit.current
+                        )} ${LocalUvirIrradianceUnit.current.symbol}"
+                    },
                 color =
                     if (alerted) {
                         Color(0xFFF57C00)

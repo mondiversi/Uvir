@@ -81,13 +81,13 @@ class ExampleUnitTest {
             DATA_EXPORT_LANGUAGE
         )
         assertEquals(
-            MEASUREMENT_EXPORT_COLUMNS_EN,
+            MEASUREMENT_EXPORT_COLUMNS_EN + "Out_of_range",
             measurementExportColumns(
                 DATA_EXPORT_LANGUAGE
             )
         )
         assertEquals(
-            31,
+            44,
             MEASUREMENT_EXPORT_COLUMNS_IT.size
         )
         assertEquals(
@@ -96,11 +96,11 @@ class ExampleUnitTest {
         )
         assertEquals(
             "Modello_biologico",
-            MEASUREMENT_EXPORT_COLUMNS_IT[23]
+            MEASUREMENT_EXPORT_COLUMNS_IT[36]
         )
         assertEquals(
             "Biological_model",
-            MEASUREMENT_EXPORT_COLUMNS_EN[23]
+            MEASUREMENT_EXPORT_COLUMNS_EN[36]
         )
         assertEquals(
             "ID_acquisizione",
@@ -110,5 +110,10 @@ class ExampleUnitTest {
             "Acquisition_ID",
             MEASUREMENT_EXPORT_COLUMNS_EN.first()
         )
+        assertFalse("Automatic" in MEASUREMENT_EXPORT_COLUMNS_EN)
+        assertTrue("UVC_percent" in MEASUREMENT_EXPORT_COLUMNS_EN)
+        assertTrue("Ultraviolet_total_uW_cm2" in MEASUREMENT_EXPORT_COLUMNS_EN)
+        assertTrue("Visible_total_uW_cm2" in MEASUREMENT_EXPORT_COLUMNS_EN)
+        assertTrue("Infrared_total_uW_cm2" in MEASUREMENT_EXPORT_COLUMNS_EN)
     }
 }

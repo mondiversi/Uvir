@@ -29,6 +29,7 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
 import android.provider.Settings
+import android.provider.DocumentsContract
 import android.text.TextUtils
 import android.view.View
 import androidx.activity.ComponentActivity
@@ -407,7 +408,7 @@ private object UvirRetainedRuntimeStore {
     }
 }
 
-class MainActivity : ComponentActivity() {
+class MainActivity : ComponentActivity(), UvirExportSaveHost, UvirSettingsImportHost {
     private lateinit var retainedRuntime:
             UvirRetainedRuntime
 
@@ -428,6 +429,133 @@ class MainActivity : ComponentActivity() {
 
     private val openHomeRequestState =
         mutableLongStateOf(0L)
+
+    private val pendingSettingsImportUrisState =
+        mutableStateOf<List<Uri>>(emptyList())
+
+    private val settingsImportPasswordRejectedState =
+        mutableStateOf(false)
+
+    private var pendingExportFiles: List<File> = emptyList()
+
+    private val exportDirectoryLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.OpenDocumentTree()
+        ) { treeUri ->
+            val files = pendingExportFiles
+            pendingExportFiles = emptyList()
+            if (treeUri == null || files.isEmpty()) {
+                return@registerForActivityResult
+            }
+
+            runCatching {
+                val resolver = contentResolver
+                val parentUri =
+                    DocumentsContract.buildDocumentUriUsingTree(
+                        treeUri,
+                        DocumentsContract.getTreeDocumentId(treeUri)
+                    )
+                files.forEach { file ->
+                    val targetUri =
+                        checkNotNull(
+                            DocumentsContract.createDocument(
+                                resolver,
+                                parentUri,
+                                uvirExportMimeType(file),
+                                file.name
+                            )
+                        )
+                    resolver.openOutputStream(targetUri, "w").use { output ->
+                        checkNotNull(output)
+                        file.inputStream().use { input ->
+                            input.copyTo(output)
+                        }
+                    }
+                }
+            }.onSuccess {
+                showUvirBottomMessage(
+                    this,
+                    getString(R.string.export_saved_successfully)
+                )
+            }.onFailure { error ->
+                UvirErrorLog.record(this, "save_export", error)
+                showUvirBottomMessage(
+                    this,
+                    getString(R.string.export_save_failed)
+                )
+            }
+        }
+
+    private val settingsImportLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.OpenMultipleDocuments()
+        ) { uris ->
+            if (uris.isEmpty()) {
+                return@registerForActivityResult
+            }
+            if (uvirSettingsFilesRequirePassword(this, uris)) {
+                settingsImportPasswordRejectedState.value = false
+                pendingSettingsImportUrisState.value = uris
+            } else {
+                importSelectedUvirSettings(uris)
+            }
+        }
+
+    private fun importSelectedUvirSettings(
+        uris: List<Uri>,
+        decryptionPassword: CharArray? = null
+    ) {
+        try {
+            runCatching {
+                UvirDatabaseHelper(this).use { database ->
+                    importUvirSettingsFiles(
+                        this,
+                        database,
+                        uris,
+                        decryptionPassword
+                    )
+                }
+            }.onSuccess { count ->
+                pendingSettingsImportUrisState.value = emptyList()
+                settingsImportPasswordRejectedState.value = false
+                showUvirBottomMessage(
+                    this,
+                    resources.getQuantityString(
+                        R.plurals.settings_imported_count,
+                        count,
+                        count
+                    )
+                )
+                recreate()
+            }.onFailure { error ->
+                if (
+                    error is UvirSettingsDecryptionException &&
+                    pendingSettingsImportUrisState.value.isNotEmpty()
+                ) {
+                    settingsImportPasswordRejectedState.value = true
+                } else {
+                    pendingSettingsImportUrisState.value = emptyList()
+                    settingsImportPasswordRejectedState.value = false
+                    UvirErrorLog.record(this, "import_settings", error)
+                    showUvirBottomMessage(
+                        this,
+                        getString(R.string.settings_import_failed)
+                    )
+                }
+            }
+        } finally {
+            decryptionPassword?.fill('\u0000')
+        }
+    }
+
+    override fun saveUvirExportFiles(files: List<File>) {
+        pendingExportFiles = files.toList()
+        exportDirectoryLauncher.launch(null)
+    }
+
+    override fun selectUvirSettingsFiles() {
+        settingsImportLauncher.launch(arrayOf("application/json", "application/octet-stream"))
+    }
 
     private val localNetworkPermissionLauncher =
         registerForActivityResult(
@@ -531,6 +659,48 @@ class MainActivity : ComponentActivity() {
                             ::requestCurrentWifiSsid,
                         openHomeRequestId =
                             openHomeRequestState.longValue
+                    )
+                }
+                val pendingSettingsImportUris =
+                    pendingSettingsImportUrisState.value
+                if (pendingSettingsImportUris.isNotEmpty()) {
+                    UvirSettingsPasswordDialog(
+                        title =
+                            stringResource(
+                                R.string.settings_decryption_password_title
+                            ),
+                        description =
+                            stringResource(
+                                R.string.settings_decryption_password_description
+                            ),
+                        confirmationRequired = false,
+                        confirmLabel =
+                            stringResource(R.string.settings_decrypt),
+                        cardColor = MaterialTheme.colorScheme.surface,
+                        primaryText = MaterialTheme.colorScheme.onSurface,
+                        secondaryText =
+                            MaterialTheme.colorScheme.onSurfaceVariant,
+                        errorMessage =
+                            if (settingsImportPasswordRejectedState.value) {
+                                stringResource(
+                                    R.string.settings_decryption_password_incorrect
+                                )
+                            } else {
+                                null
+                            },
+                        onInputChanged = {
+                            settingsImportPasswordRejectedState.value = false
+                        },
+                        onDismiss = {
+                            pendingSettingsImportUrisState.value = emptyList()
+                            settingsImportPasswordRejectedState.value = false
+                        },
+                        onConfirm = { password ->
+                            importSelectedUvirSettings(
+                                pendingSettingsImportUris,
+                                password
+                            )
+                        }
                     )
                 }
             }

@@ -88,6 +88,13 @@ android {
         compose = true
         buildConfig = true
     }
+    // Uvir changes language inside the app, so every translation must remain
+    // available even when the release is delivered as an Android App Bundle.
+    bundle {
+        language {
+            enableSplit = false
+        }
+    }
 }
 
 dependencies {

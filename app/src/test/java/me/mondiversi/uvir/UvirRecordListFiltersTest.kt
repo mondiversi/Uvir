@@ -2,6 +2,7 @@ package me.mondiversi.uvir
 
 import org.junit.Assert.*
 import org.junit.Test
+import java.time.ZoneId
 
 class UvirRecordListFiltersTest {
     private val records = listOf(
@@ -39,6 +40,19 @@ class UvirRecordListFiltersTest {
         assertEquals(listOf(1L, 5L), ids(UvirRecordListFilters(automatic = false)))
         assertEquals(listOf(2L, 3L, 4L), ids(UvirRecordListFilters(automatic = true)))
     }
+    @Test fun externalModeIsDistinctFromManualAndAutomatic() {
+        val external = SavedRecordSummary(
+            id = 6, timestamp = 6000, note = "External", automatic = false,
+            sensorId = 1, externalCommand = true
+        )
+        val withExternal = records + external
+        assertEquals(listOf(6L), filterAcquisitionRecords(
+            withExternal, UvirRecordListFilters(externalCommand = true)
+        ).map { it.id })
+        assertEquals(listOf(1L, 5L), filterAcquisitionRecords(
+            withExternal, UvirRecordListFilters(automatic = false, externalCommand = false)
+        ).map { it.id })
+    }
     @Test fun idQueriesAreExactNotSubstringMatches() {
         assertEquals(listOf(2L), ids(UvirRecordListFilters(recordId = "2")))
         assertEquals(listOf(2L, 3L), ids(UvirRecordListFilters(sessionId = "10")))
@@ -55,12 +69,20 @@ class UvirRecordListFiltersTest {
         assertEquals(listOf(3L), ids(UvirRecordListFilters(fromInclusive = 3000,
             note = "garden", sensorKey = "1", automatic = true, sessionId = "10")))
     }
-    @Test fun changedRangeCannotRemainInverted() {
-        val f = UvirRecordListFilters(120_000, 179_999)
-        assertEquals(299_999L, f.withFrom(240_000).untilInclusive)
-        assertEquals(60_000L, f.withUntil(119_999).fromInclusive)
-        assertEquals(59_999L, f.withFrom(240_000).untilInclusive!! - 240_000L)
-        assertEquals(59_999L, 119_999L - f.withUntil(119_999).fromInclusive!!)
+    @Test fun selectedDaysCoverTheWholeDayAndCannotRemainInverted() {
+        val utc = ZoneId.of("UTC")
+        val day = 86_400_000L
+        val f = UvirRecordListFilters(day, day * 2 - 1)
+        assertEquals(day * 4 - 1, f.withFromDay(day * 3, utc).untilInclusive)
+        assertEquals(0L, f.withUntilDay(0L, utc).fromInclusive)
+        assertEquals(day * 3, f.withFromDay(day * 3 + 1234, utc).fromInclusive)
+        assertEquals(day * 2 - 1, f.withUntilDay(day + 1234, utc).untilInclusive)
+    }
+    @Test fun availableDateChoicesContainOnlyDistinctRecordedDays() {
+        val utc = ZoneId.of("UTC")
+        val day = 86_400_000L
+        assertEquals(listOf(day * 2, day), uvirAvailableFilterDays(
+            listOf(day * 2 + 1, day * 2 + 1000, day + 20), utc))
     }
     @Test fun localizedDecimalDigitsAreCanonicalized() {
         assertEquals("123", normalizeRecordFilterId("١٢٣"))

@@ -1,7 +1,7 @@
 package me.mondiversi.uvir
 
-internal const val SENSOR_SETTINGS_SCHEMA_VERSION = 1
-private const val SENSOR_SETTINGS_SNAPSHOT_MINIMUM_FIRMWARE = "0.5.65"
+internal const val SENSOR_SETTINGS_SCHEMA_VERSION = 2
+private const val SENSOR_SETTINGS_SNAPSHOT_MINIMUM_FIRMWARE = "0.5.83"
 
 /** A simulation must restore phone preferences, never the real sensor's cache.
  * This only selects initial UI state; confirmed real-sensor hydration is unchanged. */
@@ -61,7 +61,9 @@ internal fun UvirSensorRuntimeInfo.toSensorSettingsSnapshotOrNull():
                     (statusLedBrightness ?: return null).coerceIn(1, 100),
                 statusBuzzerEnabled = statusBuzzerEnabled ?: return null,
                 statusBuzzerVolume =
-                    (statusBuzzerVolume ?: return null).coerceIn(1, 100)
+                    (statusBuzzerVolume ?: return null).coerceIn(1, 100),
+                externalCommandEnabled =
+                    externalCommandEnabled ?: return null
             ),
         acquisitionParameters =
             AcquisitionParameters(

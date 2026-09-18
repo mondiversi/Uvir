@@ -35,8 +35,8 @@ class UvirSensorRuntimeInfoTest {
     fun completeFirmwareSnapshotBecomesPerSensorSettings() {
         val info =
             UvirSensorRuntimeInfo(
-                sensorSettingsSchemaVersion = 1,
-                firmwareVersion = "0.5.65",
+                sensorSettingsSchemaVersion = 2,
+                firmwareVersion = "0.5.83",
                 visibleCalibrationFactor = 1.25,
                 uvCalibrationFactor = 0.8,
                 samplingSamplesPerMeasurement = 7,
@@ -49,6 +49,7 @@ class UvirSensorRuntimeInfoTest {
                 statusLedBrightness = 12,
                 statusBuzzerEnabled = false,
                 statusBuzzerVolume = 9,
+                externalCommandEnabled = false,
                 alertMonitoringEnabled = true,
                 alertSessionId = 42,
                 offlineAlertRepeatSeconds = 30,
@@ -82,6 +83,7 @@ class UvirSensorRuntimeInfoTest {
         assertFalse(snapshot.acquisitionParameters.discardExtremes)
         assertEquals(42L, snapshot.alertSessionId)
         assertEquals(2, snapshot.alertRules.size)
+        assertFalse(snapshot.sensorParameters.externalCommandEnabled)
         assertEquals(ThresholdAlertMetric.UVA, snapshot.alertRules.first().metric)
         assertEquals("broker.example", snapshot.internetRelayHost)
     }
@@ -90,21 +92,21 @@ class UvirSensorRuntimeInfoTest {
     fun legacyHelloCannotOverwriteLocalSensorSettings() {
         val info =
             UvirSensorRuntimeInfo(
-                firmwareVersion = "0.5.64",
+                firmwareVersion = "0.5.82",
                 samplingSamplesPerMeasurement = 5
             )
 
         assertNull(info.toSensorSettingsSnapshotOrNull())
-        assertFalse(firmwareSupportsSensorSettingsSnapshot("0.5.64"))
-        assertTrue(firmwareSupportsSensorSettingsSnapshot("0.5.65"))
+        assertFalse(firmwareSupportsSensorSettingsSnapshot("0.5.82"))
+        assertTrue(firmwareSupportsSensorSettingsSnapshot("0.5.83"))
     }
 
     @Test
     fun sensorRulesAreExpandedForEveryAlertEditor() {
         val snapshot =
             UvirSensorSettingsSnapshot(
-                schemaVersion = 1,
-                firmwareVersion = "0.5.65",
+                schemaVersion = 2,
+                firmwareVersion = "0.5.83",
                 sensorParameters = SensorParameters(),
                 acquisitionParameters = AcquisitionParameters(5, 500, true),
                 calibrationSettings = SensorCalibrationSettings(),

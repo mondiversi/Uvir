@@ -26,6 +26,17 @@ class UvirNumericInputNormalizationTest {
     }
 
     @Test
+    fun alertControlIntervalIsKeptWithinOneSecondAndOneDay() {
+        val minimum = normalizeDuration("0", "0", "0", 1L, MAX_ALERT_REPEAT_SECONDS)
+        val maximum = normalizeDuration("48", "0", "0", 1L, MAX_ALERT_REPEAT_SECONDS)
+
+        assertEquals(1L, minimum.totalSeconds)
+        assertEquals("1", minimum.secondsText)
+        assertEquals(MAX_ALERT_REPEAT_SECONDS, maximum.totalSeconds)
+        assertEquals("24", maximum.hoursText)
+    }
+
+    @Test
     fun boundedValuesAreClamped() {
         assertEquals(21, normalizeBoundedInteger("99", 1, 21).value)
         assertEquals(150L, normalizeBoundedLong("-1", 150L, 5_000L).value)

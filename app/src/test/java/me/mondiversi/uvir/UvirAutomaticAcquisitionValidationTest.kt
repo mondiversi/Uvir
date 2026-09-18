@@ -72,6 +72,28 @@ class UvirAutomaticAcquisitionValidationTest {
         )
     }
 
+    @Test
+    fun externalCommandIgnoresScheduleButKeepsNote() {
+        val result = validateAutomaticAcquisitionInput(
+            validInput(useStartDelay = true, useDuration = true, limitEnabled = true)
+                .copy(
+                    intervalMinutes = "99",
+                    startDelayMinutes = "99",
+                    durationMinutes = "99",
+                    maxAcquisitions = "0",
+                    externalCommand = true
+                )
+        )
+
+        assertTrue(result is AutomaticAcquisitionValidation.Valid)
+        val request = (result as AutomaticAcquisitionValidation.Valid).request
+        assertTrue(request.externalCommand)
+        assertEquals("test", request.note)
+        assertEquals(true, request.useStartDelay)
+        assertEquals(true, request.useDuration)
+        assertEquals(true, request.limitEnabled)
+    }
+
     private fun validInput(
         useStartDelay: Boolean = false,
         useDuration: Boolean = false,

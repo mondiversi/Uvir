@@ -585,6 +585,7 @@ internal fun sensorSampleToJson(
         .put("rosso", sample.rosso)
         .put("f8", sample.f8)
         .put("nir", sample.nir)
+        .put("quality_flags", sample.qualityFlags)
 
 internal fun JSONObject.toSensorSample(): SensorSample =
     SensorSample(
@@ -598,7 +599,8 @@ internal fun JSONObject.toSensorSample(): SensorSample =
         arancione = optDouble("arancione", 0.0),
         rosso = optDouble("rosso", 0.0),
         f8 = optDouble("f8", 0.0),
-        nir = optDouble("nir", 0.0)
+        nir = optDouble("nir", 0.0),
+        qualityFlags = optInt("quality_flags", 0)
     )
 
 internal fun savedRecordToJson(
@@ -609,6 +611,7 @@ internal fun savedRecordToJson(
         .put("timestamp", record.timestamp)
         .put("note", record.note)
         .put("automatic", record.automatic)
+        .put("external_command", record.externalCommand)
         .put(
             "automatic_session_id",
             record.sessionId
@@ -645,6 +648,7 @@ internal fun JSONObject.toSavedRecordDetail(): SavedRecordDetail {
             ),
         note = optString("note", ""),
         automatic = optBoolean("automatic", false),
+        externalCommand = optBoolean("external_command", false),
         sample =
             optJSONObject("sample")
                 ?.toSensorSample()

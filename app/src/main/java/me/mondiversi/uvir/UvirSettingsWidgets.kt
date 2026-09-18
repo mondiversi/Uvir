@@ -164,6 +164,22 @@ internal fun AdaptiveSingleLineButtonText(
 }
 
 @Composable
+internal fun RowScope.UvirLabeledButtonContent(
+    text: String,
+    maxFontSize: TextUnit = 14.sp,
+    minFontSize: TextUnit = 10.sp,
+    icon: @Composable () -> Unit
+) {
+    icon()
+    Spacer(Modifier.width(8.dp))
+    AdaptiveSingleLineButtonText(
+        text = text,
+        maxFontSize = maxFontSize,
+        minFontSize = minFontSize
+    )
+}
+
+@Composable
 fun CheckSettingRow(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,

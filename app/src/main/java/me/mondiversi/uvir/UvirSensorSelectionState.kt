@@ -23,26 +23,32 @@ internal fun associatedSensorDeviceIds(preferences: SharedPreferences): Set<Stri
 
 private const val SENSOR_CONTEXT_PREFIX = "selected_sensor_context."
 
-internal val sensorSelectionPreferenceKeys: List<String> =
-    (sensorOperationalPreferenceKeys + listOf(
+/** User-configurable values that belong to one sensor profile. */
+internal val sensorConfigurationPreferenceKeys: List<String> =
+    (listOf(
         KEY_SENSOR_CONNECTION_MODE, KEY_LAST_WIRELESS_SENSOR_CONNECTION_MODE,
         KEY_SAMPLES_PER_MEASUREMENT, KEY_SAMPLE_SPACING_MS, KEY_DISCARD_EXTREMES,
         KEY_SENSOR_AUTONOMOUS_RECORDING, KEY_SENSOR_AUTOMATIC_SHUTDOWN_ENABLED,
         KEY_SENSOR_AUTOMATIC_SHUTDOWN_SECONDS, KEY_SENSOR_STATUS_LED_ENABLED,
         KEY_SENSOR_STATUS_LED_BRIGHTNESS, KEY_SENSOR_STATUS_BUZZER_ENABLED,
-        KEY_SENSOR_STATUS_BUZZER_VOLUME, KEY_SENSOR_VISIBLE_CALIBRATION_FACTOR,
+        KEY_SENSOR_STATUS_BUZZER_VOLUME, KEY_SENSOR_EXTERNAL_COMMAND_ENABLED,
+        KEY_SENSOR_VISIBLE_CALIBRATION_FACTOR,
         KEY_SENSOR_UV_CALIBRATION_FACTOR, KEY_MANUAL_SAVE_MODE, KEY_MANUAL_ACQUISITION_NOTE,
         KEY_AUTO_INTERVAL_SECONDS, KEY_AUTO_NOTE, KEY_AUTO_USE_START_DELAY,
         KEY_AUTO_START_DELAY_SECONDS, KEY_AUTO_USE_DURATION, KEY_AUTO_DURATION_SECONDS,
         KEY_AUTO_LIMIT_ENABLED, KEY_AUTO_MAX_COUNT, KEY_THRESHOLD_ALERT_NOTE,
+        KEY_AUTO_EXTERNAL_COMMAND,
         KEY_AUTO_CONDITIONAL_ENABLED, KEY_AUTO_CONDITIONAL_MATCH, KEY_AUTO_CONDITIONAL_ACTION,
-        KEY_AUTO_CONDITIONAL_RULES, KEY_AUTO_FIRST_ALLOWED_MS,
+        KEY_AUTO_CONDITIONAL_RULES,
         KEY_THRESHOLD_ALERT_REPEAT_SECONDS, KEY_THRESHOLD_ALERT_DURATION_SECONDS,
         KEY_THRESHOLD_ALERT_SOUND, KEY_THRESHOLD_ALERT_VOLUME,
         KEY_THRESHOLD_ALERT_CHANNEL, KEY_THRESHOLD_ALERT_DIRECTION, KEY_THRESHOLD_ALERT_VALUE
     ) + ThresholdAlertMetric.entries.flatMap { metric ->
-        listOf("value", "direction").map { thresholdRulePreferenceKey(metric, it) }
+        listOf("enabled", "value", "direction").map { thresholdRulePreferenceKey(metric, it) }
     }).distinct()
+
+internal val sensorSelectionPreferenceKeys: List<String> =
+    (sensorOperationalPreferenceKeys + sensorConfigurationPreferenceKeys).distinct()
 
 private fun sensorContextPrefix(deviceId: String): String =
     SENSOR_CONTEXT_PREFIX + normalizeSensorDeviceId(deviceId) + "."

@@ -57,6 +57,7 @@ internal fun UvirResetAlertRulesConfirmationDialog(
     onDismissRequest: () -> Unit
 ) {
     val context = LocalContext.current
+    val irradianceUnit = LocalUvirIrradianceUnit.current
     val rulesResetCompleteMessage =
         stringResource(R.string.threshold_rules_reset_complete)
 
@@ -103,7 +104,11 @@ internal fun UvirResetAlertRulesConfirmationDialog(
                             alertRuleDirectionValues[rule.metric] =
                                 rule.direction.name
                             alertRuleThresholdTexts[rule.metric] =
-                                rule.threshold.toString()
+                                thresholdEditableValue(
+                                    irradianceUnit.fromCanonicalUwCm2(
+                                        rule.threshold.toDouble()
+                                    )
+                                )
                         }
 
                         onApplyThresholdAlertSettings(

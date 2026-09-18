@@ -30,6 +30,7 @@ internal fun UvirSensorDiagnosticsContent(
     val resources = LocalResources.current
     val scope = rememberCoroutineScope()
     var showDialog by remember { mutableStateOf(false) }
+    var showExportChoice by remember { mutableStateOf(false) }
     var showFirmwareDialog by remember { mutableStateOf(false) }
     var inProgress by remember { mutableStateOf(false) }
     var progress by remember { mutableIntStateOf(0) }
@@ -73,10 +74,15 @@ internal fun UvirSensorDiagnosticsContent(
                 }
             }
         ) {
-            ConnectivitySectionIcon(ConnectivityIconType.DEBUG, Modifier.size(20.dp),
-                tint = LocalContentColor.current)
-            Spacer(Modifier.width(8.dp))
-            AdaptiveSingleLineButtonText(stringResource(R.string.debug_diagnostic))
+            UvirLabeledButtonContent(
+                text = stringResource(R.string.debug_diagnostic)
+            ) {
+                ConnectivitySectionIcon(
+                    ConnectivityIconType.DEBUG,
+                    Modifier.size(20.dp),
+                    tint = LocalContentColor.current
+                )
+            }
         }
         Text(
             stringResource(R.string.diagnostic_description),
@@ -90,6 +96,36 @@ internal fun UvirSensorDiagnosticsContent(
         UvirFirmwareUpdateRequiredDialog(cardColor, primaryText, secondaryText) {
             showFirmwareDialog = false
         }
+    }
+    if (showExportChoice) {
+        val result = report
+        UvirSaveOrShareDialog(
+            cardColor = cardColor,
+            primaryText = primaryText,
+            secondaryText = secondaryText,
+            title = stringResource(R.string.export_diagnostic_dialog_title),
+            description = stringResource(R.string.export_diagnostic_dialog_description),
+            onDismiss = { showExportChoice = false },
+            onExport = { destination ->
+                if (result != null) {
+                    runCatching {
+                        shareUvirSensorDiagnosticReport(
+                            context,
+                            formatUvirSensorDiagnosticReport(resources, result),
+                            result.startedAtMs,
+                            destination
+                        )
+                    }.onFailure { error ->
+                        UvirErrorLog.record(context, "export_sensor_diagnostic", error)
+                        showUvirBottomMessage(
+                            context,
+                            resources.getString(R.string.diagnostic_share_error)
+                        )
+                    }
+                }
+                showExportChoice = false
+            }
+        )
     }
     if (showDialog) {
         val scrollbar = rememberUvirDialogScrollbar(secondaryText.copy(alpha = 0.58f))
@@ -128,16 +164,10 @@ internal fun UvirSensorDiagnosticsContent(
                 TextButton(onClick = ::dismiss) { Text(stringResource(R.string.close)) }
             },
             dismissButton = {
-                TextButton(enabled = !inProgress && report != null, onClick = {
-                    val result = report ?: return@TextButton
-                    runCatching {
-                        shareUvirSensorDiagnosticReport(context,
-                            formatUvirSensorDiagnosticReport(resources, result), result.startedAtMs)
-                    }.onFailure { error ->
-                        UvirErrorLog.record(context, "share_sensor_diagnostic", error)
-                        showUvirBottomMessage(context, resources.getString(R.string.diagnostic_share_error))
-                    }
-                }) { Text(stringResource(R.string.share)) }
+                TextButton(
+                    enabled = !inProgress && report != null,
+                    onClick = { showExportChoice = true }
+                ) { Text(stringResource(R.string.export)) }
             },
             containerColor = cardColor,
             titleContentColor = primaryText,

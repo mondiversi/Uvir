@@ -31,8 +31,8 @@
 namespace {
 
 constexpr char kProtocol[] = "uvir-sensor-v1";
-constexpr char kFirmwareVersion[] = "0.5.75";
-constexpr uint8_t kSensorSettingsSchemaVersion = 1;
+constexpr char kFirmwareVersion[] = "0.5.87";
+constexpr uint8_t kSensorSettingsSchemaVersion = 2;
 constexpr uint32_t kHostTimeoutMs = 12000;
 constexpr uint32_t kMinimumStreamIntervalMs = 150;
 constexpr uint32_t kMaximumStreamIntervalMs = 5000;
@@ -51,17 +51,29 @@ constexpr uint8_t kMaximumOfflineAlertRules = 24;
 constexpr uint32_t kMinimumAutomaticShutdownSeconds = 60;
 constexpr uint32_t kMaximumAutomaticShutdownSeconds = 86400;
 constexpr uint32_t kDefaultAutomaticShutdownSeconds = 1800;
+constexpr uint32_t kExternalCommandDebounceMs = 20;
+constexpr uint32_t kExternalCommandLongPressMs = 2000;
+constexpr uint32_t kExternalCommandMultiPressWindowMs = 400;
+// Bit 62 distinguishes a session created autonomously by the sensor from the
+// progressive session IDs assigned by Android, while remaining a positive
+// signed 64-bit value throughout JSON, SQLite and the offline record format.
+constexpr uint64_t kSensorOriginatedSessionMarker = 1ULL << 62;
+constexpr uint64_t kSensorOriginatedSessionPayloadMask =
+    kSensorOriginatedSessionMarker - 1ULL;
 
 // ESP-IDF NVS keys may contain at most 15 characters. Keep the less obvious
 // persisted names centralized so reads and writes cannot silently diverge.
 constexpr char kPreferenceInternetPrimary[] = "inet_primary";
 constexpr char kPreferenceAutoShutdownEnabled[] = "autooff_on";
 constexpr char kPreferenceAutoShutdownSeconds[] = "autooff_secs";
+constexpr char kPreferenceExternalCommandEnabled[] = "external_cmd";
 static_assert(sizeof(kPreferenceInternetPrimary) - 1 <= 15,
               "NVS preference key is too long");
 static_assert(sizeof(kPreferenceAutoShutdownEnabled) - 1 <= 15,
               "NVS preference key is too long");
 static_assert(sizeof(kPreferenceAutoShutdownSeconds) - 1 <= 15,
+              "NVS preference key is too long");
+static_assert(sizeof(kPreferenceExternalCommandEnabled) - 1 <= 15,
               "NVS preference key is too long");
 
 enum class Transport : uint8_t { None, Usb, Wifi, Bluetooth, Internet };
@@ -74,6 +86,7 @@ struct UvirBandSample {
 
 struct OfflineJob {
   bool enabled = false;
+  bool externalCommand = false;
   uint64_t sessionId = 0;
   uint64_t nextAtMs = 0;
   uint32_t intervalSeconds = 60;
@@ -106,6 +119,7 @@ enum class AveragedAcquisitionKind : uint8_t {
   Automatic,
   AutomaticCondition,
   OfflineAlert,
+  ExternalManual,
 };
 
 struct AveragedAcquisitionState {
@@ -257,6 +271,7 @@ bool statusBuzzerEnabled = true;
 uint8_t statusBuzzerVolume = 10;
 bool autonomousRecordingAllowed = true;
 bool automaticShutdownEnabled = false;
+bool externalCommandEnabled = true;
 uint32_t automaticShutdownSeconds = kDefaultAutomaticShutdownSeconds;
 uint32_t automaticShutdownIdleStartedMs = 0;
 bool offlineStorageError = false;
@@ -276,10 +291,25 @@ float uvCalibrationFactor = 1.0f;
 UvirBandSample liveSampleWindow[kMaximumAcquisitionSamples];
 uint8_t liveSampleWindowCount = 0;
 uint8_t liveSampleWindowNext = 0;
+UvirBandSample latestContinuousSample;
+bool latestContinuousSampleAvailable = false;
+uint32_t latestContinuousSampleAtMs = 0;
+uint32_t nextContinuousSampleAtMs = 0;
 bool pendingLiveAcquisition = false;
 UvirStoredRecord pendingLiveAcquisitionRecord;
 uint32_t pendingLiveAcquisitionSentAtMs = 0;
 AveragedAcquisitionState averagedAcquisition;
+uint8_t externalAcquisitionRequestsPending = 0;
+uint8_t externalCommandShortPressCount = 0;
+uint32_t externalCommandLastShortPressMs = 0;
+bool externalGestureAcquisitionProvisional = false;
+bool externalCommandGesturePrimed = false;
+portMUX_TYPE externalCommandMux = portMUX_INITIALIZER_UNLOCKED;
+volatile bool externalCommandPressActive = false;
+volatile bool externalCommandLongPressReported = false;
+volatile uint8_t externalCommandShortPressPendingCount = 0;
+volatile bool externalCommandLongPressPending = false;
+volatile uint32_t externalCommandPressedAtUs = 0;
 
 bool sensorOperationActive();
 bool sensorActivityActive();
@@ -308,6 +338,11 @@ uint64_t currentEpochMs() {
     return 0;
   }
   return epochBaseMs + static_cast<uint32_t>(millis() - epochBaseUptimeMs);
+}
+
+void anchorRuntimeClock(uint64_t epochMs) {
+  epochBaseMs = epochMs;
+  epochBaseUptimeMs = millis();
 }
 
 bool phoneIsAuthenticated() {
@@ -571,6 +606,8 @@ void loadIdentity() {
           kPreferenceAutoShutdownSeconds, kDefaultAutomaticShutdownSeconds),
       kMinimumAutomaticShutdownSeconds,
       kMaximumAutomaticShutdownSeconds));
+  externalCommandEnabled =
+      preferences.getBool(kPreferenceExternalCommandEnabled, true);
   offlineStorageFull = preferences.getBool("offline_full", false);
   samplingSamplesPerResult = static_cast<uint8_t>(constrain(
       preferences.getUChar("sample_count", 5), 1, kMaximumAcquisitionSamples));
@@ -893,6 +930,7 @@ void printHello(
   printUInt64(output, offlineJob.nextAtMs);
   printConditionalJobFields(output);
   output.print(F(",\"conditional_acquisition_supported\":true"));
+  output.print(F(",\"external_command_supported\":true"));
   output.print(F(",\"status_led_enabled\":"));
   output.print(statusLedEnabled ? F("true") : F("false"));
   output.print(F(",\"status_led_brightness\":"));
@@ -907,6 +945,8 @@ void printHello(
   output.print(automaticShutdownEnabled ? F("true") : F("false"));
   output.print(F(",\"automatic_shutdown_seconds\":"));
   output.print(automaticShutdownSeconds);
+  output.print(F(",\"external_command_enabled\":"));
+  output.print(externalCommandEnabled ? F("true") : F("false"));
   output.print(F(",\"wifi_configured\":"));
   output.print(
       wifiSsid.isEmpty() || wifiPassword.length() < 8 ? F("false") : F("true"));
@@ -1057,7 +1097,11 @@ String alertDetailsForSample(const UvirBandSample &sample) {
 void emitConnectedAlertIfNeeded(
     Print &output,
     const UvirBandSample &sample) {
-  if (!offlineAlertsEnabled || offlineAlertRuleCount == 0 ||
+  // A held external command may become the long-press stop gesture. Do not
+  // create an alert while that gesture is still being classified; a short
+  // release simply allows evaluation to resume on the next live sample.
+  if (externalCommandPressActive || !offlineAlertsEnabled ||
+      offlineAlertRuleCount == 0 ||
       !alertEvaluationReady()) {
     return;
   }
@@ -1086,6 +1130,9 @@ void emitConnectedAlertIfNeeded(
 void resetLiveSampleWindow() {
   liveSampleWindowCount = 0;
   liveSampleWindowNext = 0;
+  latestContinuousSampleAvailable = false;
+  latestContinuousSampleAtMs = 0;
+  nextContinuousSampleAtMs = millis();
 }
 
 void combineBandSamples(
@@ -1143,16 +1190,40 @@ bool appendLiveSample(const UvirBandSample &sample, UvirBandSample &result) {
   return true;
 }
 
-void printSample(Print &output) {
+bool continuousSampleIsFresh() {
+  if (!latestContinuousSampleAvailable) return false;
+  const uint32_t maximumAgeMs = max(500UL, samplingSpacingMs * 3UL);
+  return millis() - latestContinuousSampleAtMs <= maximumAgeMs;
+}
+
+// Keep one rolling, averaged result ready even while no app is connected.
+// Consumers can therefore snapshot the value that actually describes the
+// instant of a physical command instead of starting another full sampling
+// window after the button has already been pressed.
+void serviceContinuousSampling() {
+  if (!visibleSensor.available()) return;
+
+  const uint32_t now = millis();
+  if (static_cast<int32_t>(now - nextContinuousSampleAtMs) < 0) return;
+
   UvirBandSample current;
   if (!captureBandSample(current)) {
-    printError(output, F("sensor_read"), F("Spectral sensor read failed"));
+    nextContinuousSampleAtMs = now + samplingSpacingMs;
     return;
   }
-  UvirBandSample sample;
-  if (!appendLiveSample(current, sample)) {
-    return;
+
+  UvirBandSample averaged;
+  if (appendLiveSample(current, averaged)) {
+    latestContinuousSample = averaged;
+    latestContinuousSampleAvailable = true;
+    latestContinuousSampleAtMs = millis();
   }
+  nextContinuousSampleAtMs = now + samplingSpacingMs;
+}
+
+void printSample(Print &output) {
+  if (!latestContinuousSampleAvailable) return;
+  const UvirBandSample sample = latestContinuousSample;
 
   output.print(F("{\"type\":\"sample\",\"protocol\":\""));
   output.print(kProtocol);
@@ -1220,6 +1291,7 @@ enum class AveragedAcquisitionStep : uint8_t {
 
 void cancelAveragedAcquisition() {
   averagedAcquisition = AveragedAcquisitionState();
+  externalGestureAcquisitionProvisional = false;
 }
 
 void beginAveragedAcquisition(
@@ -1239,6 +1311,31 @@ void beginAveragedAcquisition(
   averagedAcquisition.startedEpochMs = currentEpochMs();
 }
 
+void beginExternalAcquisitionFromReadySampleOrFallback(
+    AveragedAcquisitionKind kind,
+    uint8_t requestedCount,
+    uint32_t spacingMs,
+    bool discardExtremes) {
+  const bool readySampleMatchesConfiguration =
+      requestedCount == samplingSamplesPerResult &&
+      spacingMs == samplingSpacingMs &&
+      discardExtremes == samplingDiscardExtremes &&
+      continuousSampleIsFresh();
+
+  if (!readySampleMatchesConfiguration) {
+    beginAveragedAcquisition(
+        kind, requestedCount, spacingMs, discardExtremes);
+    return;
+  }
+
+  // The ready value is already the configured rolling average. Represent it
+  // as a completed one-item acquisition so the existing gesture classifier,
+  // record creation and acknowledgement paths remain unchanged.
+  beginAveragedAcquisition(kind, 1, 0, false);
+  averagedAcquisition.samples[0] = latestContinuousSample;
+  averagedAcquisition.collectedCount = 1;
+}
+
 // Collect at most one physical sample per loop pass. The former implementation
 // waited here for every configured spacing interval (about two seconds with the
 // former 5 x 500 ms default), preventing connection, stop and test commands from
@@ -1249,6 +1346,16 @@ AveragedAcquisitionStep serviceAveragedAcquisition(UvirBandSample &result) {
   }
 
   if (averagedAcquisition.collectedCount >= averagedAcquisition.targetCount) {
+    // The first external press snapshots the ready rolling result, or starts
+    // its fallback sampling immediately. The completed result remains in RAM
+    // until the short multi-press gesture is classified, so a triple press can
+    // still discard all three gesture presses.
+    if ((externalGestureAcquisitionProvisional &&
+         (externalCommandPressActive || externalCommandShortPressCount > 0)) ||
+        (externalCommandPressActive &&
+         (offlineJob.enabled || alertMonitoringActive()))) {
+      return AveragedAcquisitionStep::Waiting;
+    }
     combineBandSamples(averagedAcquisition.samples, averagedAcquisition.collectedCount,
         averagedAcquisition.discardExtremes, result);
     cancelAveragedAcquisition();
@@ -1276,6 +1383,13 @@ AveragedAcquisitionStep serviceAveragedAcquisition(UvirBandSample &result) {
   if (averagedAcquisition.collectedCount < averagedAcquisition.targetCount) {
     averagedAcquisition.nextSampleAtMs =
         startedAt + averagedAcquisition.spacingMs;
+    return AveragedAcquisitionStep::Waiting;
+  }
+
+  if ((externalGestureAcquisitionProvisional &&
+       (externalCommandPressActive || externalCommandShortPressCount > 0)) ||
+      (externalCommandPressActive &&
+       (offlineJob.enabled || alertMonitoringActive()))) {
     return AveragedAcquisitionStep::Waiting;
   }
 
@@ -1310,7 +1424,17 @@ void persistOfflineAlerts() {
 
 uint64_t nextOfflineRecordId() {
   const uint64_t epoch = currentEpochMs();
-  lastOfflineRecordId = max(lastOfflineRecordId + 1, epoch);
+  if (epoch > 0) {
+    lastOfflineRecordId = max(lastOfflineRecordId + 1, epoch);
+  } else {
+    // Defensive fallback. User-triggered captures are rejected until Android
+    // has supplied a valid clock, but keep record IDs safe for any future path.
+    uint64_t candidate =
+        (static_cast<uint64_t>(esp_random() & 0x7FFFFFFFUL) << 32) |
+        static_cast<uint64_t>(esp_random());
+    if (candidate == 0) candidate = 1;
+    lastOfflineRecordId = max(lastOfflineRecordId + 1, candidate);
+  }
   return lastOfflineRecordId;
 }
 
@@ -1367,6 +1491,22 @@ UvirStoredRecord makeAutomaticAcquisitionRecord(
   record.timestampMs = currentEpochMs();
   record.sessionId = static_cast<int64_t>(offlineJob.sessionId);
   record.sequence = offlineJob.completedCount + 1;
+  memcpy(
+      record.payload.acquisition.bands,
+      sample.values,
+      sizeof(record.payload.acquisition.bands));
+  return record;
+}
+
+UvirStoredRecord makeExternalManualAcquisitionRecord(
+    const UvirBandSample &sample) {
+  UvirStoredRecord record;
+  record.type = static_cast<uint8_t>(UvirStoredRecordType::Acquisition);
+  record.recordId = nextOfflineRecordId();
+  // Zero explicitly means that the sensor had not received a valid clock yet.
+  record.timestampMs = currentEpochMs();
+  record.sessionId = 0;
+  record.sequence = 0;
   memcpy(
       record.payload.acquisition.bands,
       sample.values,
@@ -1503,6 +1643,8 @@ void printStoredRecord(Print &output, const UvirStoredRecord &record) {
 }
 
 void printConditionalJobFields(Print &output) {
+  output.print(F(",\"offline_external_command\":"));
+  output.print(offlineJob.externalCommand ? F("true") : F("false"));
   output.print(F(",\"offline_condition_plan\":\""));
   if (offlineJob.condition.enabled) {
     output.print(uvirConditionMatchName(offlineJob.condition.match));
@@ -1576,6 +1718,258 @@ void printLiveAcquisitionEvent(
   output.print(F(",\"far_red\":")); printFloat(output, record.payload.acquisition.bands[9]);
   output.print(F(",\"nir\":")); printFloat(output, record.payload.acquisition.bands[10]);
   output.println(F("}}"));
+}
+
+void handleExternalCommandShortPress() {
+  if (currentEpochMs() == 0) {
+    statusLed.signalTimeUnavailable();
+    statusBuzzer.signalTimeUnavailable();
+    return;
+  }
+  if (!visibleSensor.available() || pendingLiveAcquisition ||
+      averagedAcquisition.kind != AveragedAcquisitionKind::None) {
+    return;
+  }
+  // While a normal timed/conditional job is active the physical input is not
+  // part of that job. External mode is an explicit, mutually exclusive mode.
+  if (alertMonitoringActive() ||
+      (offlineJob.enabled && !offlineJob.externalCommand)) {
+    return;
+  }
+  if (externalAcquisitionRequestsPending < 3) {
+    ++externalAcquisitionRequestsPending;
+  }
+  automaticShutdownIdleStartedMs = millis();
+}
+
+bool beginExternalCommandProvisionalAcquisition() {
+  if (currentEpochMs() == 0) {
+    statusLed.signalTimeUnavailable();
+    statusBuzzer.signalTimeUnavailable();
+    return false;
+  }
+  if (!visibleSensor.available() || pendingLiveAcquisition ||
+      averagedAcquisition.kind != AveragedAcquisitionKind::None ||
+      alertMonitoringActive() ||
+      (offlineJob.enabled && !offlineJob.externalCommand)) {
+    return false;
+  }
+
+  const bool externalSessionActive =
+      offlineJob.enabled && offlineJob.externalCommand;
+  beginExternalAcquisitionFromReadySampleOrFallback(
+      externalSessionActive
+          ? AveragedAcquisitionKind::Automatic
+          : AveragedAcquisitionKind::ExternalManual,
+      externalSessionActive
+          ? offlineJob.samplesPerAcquisition
+          : samplingSamplesPerResult,
+      externalSessionActive
+          ? offlineJob.sampleSpacingMs
+          : samplingSpacingMs,
+      externalSessionActive
+          ? offlineJob.discardExtremes
+          : samplingDiscardExtremes);
+  externalGestureAcquisitionProvisional = true;
+  automaticShutdownIdleStartedMs = millis();
+  return true;
+}
+
+void handleExternalCommandTriplePress() {
+  // A triple press is a session-start gesture, never three acquisitions.
+  // Existing sessions own the input already and deliberately ignore it.
+  externalAcquisitionRequestsPending = 0;
+  externalCommandGesturePrimed = false;
+  if (externalGestureAcquisitionProvisional) {
+    cancelAveragedAcquisition();
+  }
+  if (offlineJob.enabled || alertMonitoringActive()) return;
+  if (currentEpochMs() == 0) {
+    statusLed.signalTimeUnavailable();
+    statusBuzzer.signalTimeUnavailable();
+    return;
+  }
+  if (!visibleSensor.available() || pendingLiveAcquisition ||
+      averagedAcquisition.kind != AveragedAcquisitionKind::None) {
+    return;
+  }
+
+  const uint64_t epochPayload =
+      currentEpochMs() & kSensorOriginatedSessionPayloadMask;
+  OfflineJob requestedJob;
+  requestedJob.externalCommand = true;
+  requestedJob.sessionId = kSensorOriginatedSessionMarker | epochPayload;
+  requestedJob.samplesPerAcquisition = samplingSamplesPerResult;
+  requestedJob.sampleSpacingMs = samplingSpacingMs;
+  requestedJob.discardExtremes = samplingDiscardExtremes;
+  requestedJob.startedAtMs = currentEpochMs();
+  requestedJob.conditionStarted = true;
+  offlineJob = requestedJob;
+  setAutomaticJobEnabled(true, true);
+  automaticShutdownIdleStartedMs = millis();
+
+  if (appSessionActive && activeTransport != Transport::None &&
+      isAuthenticated(activeTransport)) {
+    Print *output = outputForTransport(activeTransport);
+    if (output != nullptr) {
+      printAutomaticStatus(*output);
+      printHello(*output, false, activeTransport);
+    }
+  }
+}
+
+void handleExternalCommandLongPress() {
+  const bool automaticWasActive = offlineJob.enabled;
+  const bool alertsWereActive = alertMonitoringActive();
+  if (!automaticWasActive && !alertsWereActive) return;
+
+  externalAcquisitionRequestsPending = 0;
+  externalCommandShortPressCount = 0;
+  externalCommandGesturePrimed = false;
+  cancelAveragedAcquisition();
+  setAutomaticJobEnabled(false, false);
+  offlineJob.conditionStopPending = false;
+  offlineJob.conditionTriggered = false;
+  offlineAlertsEnabled = false;
+  offlineAlertSessionId = 0;
+  persistOfflineAlerts();
+  statusBuzzer.signalActivityStopped();
+  automaticShutdownIdleStartedMs = millis();
+
+  if (appSessionActive && activeTransport != Transport::None &&
+      isAuthenticated(activeTransport)) {
+    Print *output = outputForTransport(activeTransport);
+    if (output != nullptr) {
+      printAutomaticStatus(*output);
+      printHello(*output, false, activeTransport);
+    }
+  }
+}
+
+void IRAM_ATTR onExternalCommandEdge() {
+  const bool pressed =
+      digitalRead(UvirHardware::kExternalCommandPin) == LOW;
+  const uint32_t nowUs = micros();
+
+  portENTER_CRITICAL_ISR(&externalCommandMux);
+  if (pressed) {
+    // Contact bounce can generate more than one falling edge. Only the first
+    // one starts the press; a later stable release decides short versus long.
+    if (!externalCommandPressActive) {
+      externalCommandPressActive = true;
+      externalCommandLongPressReported = false;
+      externalCommandPressedAtUs = nowUs;
+    }
+  } else if (externalCommandPressActive) {
+    const uint32_t durationUs = nowUs - externalCommandPressedAtUs;
+    externalCommandPressActive = false;
+    if (externalCommandLongPressReported ||
+        durationUs >= kExternalCommandLongPressMs * 1000UL) {
+      if (!externalCommandLongPressReported) {
+        externalCommandLongPressPending = true;
+      }
+    } else if (durationUs >= kExternalCommandDebounceMs * 1000UL) {
+        if (externalCommandShortPressPendingCount < 3) {
+          ++externalCommandShortPressPendingCount;
+        }
+    }
+  }
+  portEXIT_CRITICAL_ISR(&externalCommandMux);
+}
+
+void serviceExternalCommandInput() {
+  if (!externalCommandEnabled) {
+    portENTER_CRITICAL(&externalCommandMux);
+    externalCommandPressActive = false;
+    externalCommandLongPressReported = false;
+    externalCommandShortPressPendingCount = 0;
+    externalCommandLongPressPending = false;
+    portEXIT_CRITICAL(&externalCommandMux);
+    externalCommandShortPressCount = 0;
+    externalAcquisitionRequestsPending = 0;
+    externalCommandGesturePrimed = false;
+    if (externalGestureAcquisitionProvisional) {
+      cancelAveragedAcquisition();
+    }
+    return;
+  }
+
+  uint8_t shortPressCount = 0;
+  bool longPress = false;
+  const uint32_t nowUs = micros();
+
+  portENTER_CRITICAL(&externalCommandMux);
+  if (externalCommandPressActive && !externalCommandLongPressReported &&
+      nowUs - externalCommandPressedAtUs >=
+          kExternalCommandLongPressMs * 1000UL) {
+    externalCommandLongPressReported = true;
+    externalCommandLongPressPending = true;
+  }
+  shortPressCount = externalCommandShortPressPendingCount;
+  longPress = externalCommandLongPressPending;
+  externalCommandShortPressPendingCount = 0;
+  externalCommandLongPressPending = false;
+  portEXIT_CRITICAL(&externalCommandMux);
+
+  // Debounce the physical press while it is still held, then snapshot the
+  // ready rolling result (or begin its fallback acquisition). The result
+  // remains provisional until the gesture has been classified, so a triple
+  // press still creates no acquisition records.
+  if (!externalCommandGesturePrimed && !externalCommandLongPressReported &&
+      externalCommandShortPressCount == 0 &&
+      externalCommandPressActive &&
+      nowUs - externalCommandPressedAtUs >=
+          kExternalCommandDebounceMs * 1000UL) {
+    externalCommandGesturePrimed = true;
+    beginExternalCommandProvisionalAcquisition();
+  }
+
+  if (longPress) {
+    externalCommandShortPressCount = 0;
+    externalCommandGesturePrimed = false;
+    if (externalGestureAcquisitionProvisional) {
+      cancelAveragedAcquisition();
+    }
+    handleExternalCommandLongPress();
+    return;
+  }
+
+  if (shortPressCount > 0) {
+    const bool startsNewGesture = externalCommandShortPressCount == 0;
+    externalCommandShortPressCount = static_cast<uint8_t>(min(
+        3,
+        static_cast<int>(externalCommandShortPressCount) +
+            static_cast<int>(shortPressCount)));
+    externalCommandLastShortPressMs = millis();
+    if (startsNewGesture && !externalCommandGesturePrimed) {
+      externalCommandGesturePrimed = true;
+      beginExternalCommandProvisionalAcquisition();
+    }
+    if (externalCommandShortPressCount >= 3) {
+      externalCommandShortPressCount = 0;
+      externalCommandGesturePrimed = false;
+      handleExternalCommandTriplePress();
+      return;
+    }
+  }
+
+  if (externalCommandShortPressCount > 0 &&
+      millis() - externalCommandLastShortPressMs >=
+          kExternalCommandMultiPressWindowMs) {
+    const uint8_t completedPresses = externalCommandShortPressCount;
+    externalCommandShortPressCount = 0;
+    externalCommandGesturePrimed = false;
+    if (externalGestureAcquisitionProvisional) {
+      // The first acquisition is already being sampled. Any second press is
+      // queued and begins as soon as the first result has been committed.
+      externalGestureAcquisitionProvisional = false;
+      for (uint8_t index = 1; index < completedPresses; ++index) {
+        if (externalAcquisitionRequestsPending < 3) {
+          ++externalAcquisitionRequestsPending;
+        }
+      }
+    }
+  }
 }
 
 void printSyncComplete(
@@ -1653,18 +2047,21 @@ void serviceOfflineRecording() {
       activeTransport != Transport::None &&
       outputForTransport(activeTransport) != nullptr &&
       isAuthenticated(activeTransport);
-  if (currentEpochMs() == 0 || !visibleSensor.available()) {
+  if (!visibleSensor.available()) {
     return;
   }
 
   // This option governs only autonomous work after the app is gone. A live
   // app session must continue to receive automatic acquisitions normally.
-  if (!transportReady && !autonomousRecordingAllowed) {
+  if (!transportReady && !autonomousRecordingAllowed &&
+      externalAcquisitionRequestsPending == 0 && !offlineJob.externalCommand &&
+      averagedAcquisition.kind != AveragedAcquisitionKind::ExternalManual) {
     cancelAveragedAcquisition();
     return;
   }
 
   const uint64_t now = currentEpochMs();
+  const bool timeAvailable = now > 0;
 
   if (pendingLiveAcquisition) {
     if (transportReady) {
@@ -1721,11 +2118,33 @@ void serviceOfflineRecording() {
     }
   }
 
-  if (offlineJob.enabled && offlineJob.conditionTriggered &&
+  if (!externalCommandPressActive && offlineJob.enabled &&
+      offlineJob.conditionTriggered &&
       averagedAcquisition.kind != AveragedAcquisitionKind::Automatic && !pendingLiveAcquisition)
     beginTriggeredAutomaticAcquisition();
 
-  if (averagedAcquisition.kind == AveragedAcquisitionKind::None && offlineJob.enabled) {
+  if (externalAcquisitionRequestsPending > 0 &&
+      averagedAcquisition.kind == AveragedAcquisitionKind::None &&
+      !pendingLiveAcquisition) {
+    --externalAcquisitionRequestsPending;
+    beginExternalAcquisitionFromReadySampleOrFallback(
+        offlineJob.enabled && offlineJob.externalCommand
+            ? AveragedAcquisitionKind::Automatic
+            : AveragedAcquisitionKind::ExternalManual,
+        offlineJob.enabled && offlineJob.externalCommand
+            ? offlineJob.samplesPerAcquisition
+            : samplingSamplesPerResult,
+        offlineJob.enabled && offlineJob.externalCommand
+            ? offlineJob.sampleSpacingMs
+            : samplingSpacingMs,
+        offlineJob.enabled && offlineJob.externalCommand
+            ? offlineJob.discardExtremes
+            : samplingDiscardExtremes);
+  }
+
+  if (!externalCommandPressActive && timeAvailable &&
+      averagedAcquisition.kind == AveragedAcquisitionKind::None &&
+      offlineJob.enabled && !offlineJob.externalCommand) {
     const bool monitoring = uvirConditionMonitorRequired(offlineJob.condition, offlineJob.conditionStarted);
     // Stop remains responsive while a previous record awaits acknowledgement;
     // Start/Acquire cannot create another record until that buffer is released.
@@ -1744,7 +2163,9 @@ void serviceOfflineRecording() {
   }
 
   if (
+      !externalCommandPressActive &&
       averagedAcquisition.kind == AveragedAcquisitionKind::None &&
+      timeAvailable &&
       !transportReady && offlineAlertsEnabled && offlineAlertRuleCount > 0 &&
       now >= nextOfflineAlertSampleAtMs && alertEvaluationReady()
   ) {
@@ -1791,7 +2212,8 @@ void serviceOfflineRecording() {
     }
     storeOfflineError(
         "sensor_read",
-        completedKind == AveragedAcquisitionKind::Automatic
+        completedKind == AveragedAcquisitionKind::Automatic ||
+                completedKind == AveragedAcquisitionKind::ExternalManual
             ? "Spectral averaged acquisition failed"
             : "Spectral averaged alert sample failed");
     return;
@@ -1854,6 +2276,26 @@ void serviceOfflineRecording() {
       return;
     }
 
+  if (completedKind == AveragedAcquisitionKind::ExternalManual) {
+    UvirStoredRecord record = makeExternalManualAcquisitionRecord(current);
+    if (transportReady) {
+      pendingLiveAcquisitionRecord = record;
+      pendingLiveAcquisition = true;
+      pendingLiveAcquisitionSentAtMs = millis();
+      Print *output = outputForTransport(activeTransport);
+      if (output != nullptr) {
+        printLiveAcquisitionEvent(*output, pendingLiveAcquisitionRecord);
+        statusLed.signalAcquisitionSaved(false);
+        statusBuzzer.signalSaved();
+      }
+    } else if (!appendAutomaticAcquisitionRecord(record)) {
+      pendingLiveAcquisitionRecord = record;
+      pendingLiveAcquisition = true;
+      pendingLiveAcquisitionSentAtMs = 0;
+    }
+    return;
+  }
+
   const uint64_t completedAtMs = currentEpochMs();
   nextOfflineAlertSampleAtMs =
       completedAtMs + kOfflineAlertSampleIntervalMs;
@@ -1913,7 +2355,6 @@ void stopStreaming(bool signalDisconnection = true) {
   statusLed.clearDebugFrame();
   statusBuzzer.stopDebugTone();
   statusLed.setBaseState(UvirLedBaseState::Disconnected);
-  resetLiveSampleWindow();
   visibleSensor.powerDown();
   if (wasConnected && signalDisconnection) {
     statusBuzzer.signalDisconnected();
@@ -2081,7 +2522,7 @@ void serviceAutomaticShutdown() {
   const bool operationActive =
       offlineJob.enabled ||
       alertMonitoringActive() ||
-      pendingLiveAcquisition ||
+      pendingLiveAcquisition || externalAcquisitionRequestsPending > 0 ||
       averagedAcquisition.kind != AveragedAcquisitionKind::None ||
       alertConfigurationInProgress ||
       offlineStore.syncActive() ||
@@ -2266,6 +2707,8 @@ void printSensorParametersStatus(Print &output) {
   output.print(automaticShutdownEnabled ? F("true") : F("false"));
   output.print(F(",\"automatic_shutdown_seconds\":"));
   output.print(automaticShutdownSeconds);
+  output.print(F(",\"external_command_enabled\":"));
+  output.print(externalCommandEnabled ? F("true") : F("false"));
   output.println(F("}"));
 }
 
@@ -2286,7 +2729,8 @@ void printCalibrationStatus(Print &output) {
 
 bool sensorOperationActive() {
   return offlineJob.enabled || alertMonitoringActive() ||
-      pendingLiveAcquisition ||
+      pendingLiveAcquisition || externalAcquisitionRequestsPending > 0 ||
+      externalCommandShortPressCount > 0 ||
       averagedAcquisition.kind != AveragedAcquisitionKind::None ||
       alertConfigurationInProgress || offlineStore.syncActive() ||
       debugPerformance.active() || statusLed.selfTestActive() ||
@@ -2331,7 +2775,10 @@ bool commandIndicatesActivity(const String &command) {
       command == "DEBUG_PERFORMANCE_STOP" ||
       command == "LED_TEST" || command == "BUZZER_TEST" ||
       command == "POWER_OFF" || command == "FACTORY_RESET" ||
-      command.startsWith("OFFLINE_JOB ") || command == "OFFLINE_STOP" ||
+      command.startsWith("OFFLINE_JOB ") ||
+      command.startsWith("OFFLINE_CONDITIONAL_JOB ") ||
+      command.startsWith("OFFLINE_EXTERNAL_JOB ") ||
+      command == "OFFLINE_STOP" ||
       command == "ALERTS_CLEAR" || command.startsWith("ALERT_RULE ") ||
       command.startsWith("ALERT_CONFIG ") ||
       command == "SYNC_BEGIN" || command.startsWith("SYNC_ACK ") ||
@@ -2441,11 +2888,10 @@ void handleCommand(String command, Transport transport, Print &output) {
     const bool sameActiveSession =
         appSessionActive && activeTransport == transport;
     if (activeTransport != Transport::None && activeTransport != transport) {
-      // Transfer ownership without leaving a previous sync reader or live
-      // averaging window attached to the old source.
+      // Transfer ownership without leaving a previous sync reader attached to
+      // the old source. The rolling sensor window is transport-independent.
       offlineStore.stopSync();
       streamEnabled = false;
-      resetLiveSampleWindow();
       visibleSensor.powerDown();
     }
     activeTransport = transport;
@@ -2470,8 +2916,7 @@ void handleCommand(String command, Transport transport, Print &output) {
       printError(output, F("time_invalid"), F("Expected Unix epoch milliseconds"));
       return;
     }
-    epochBaseMs = suppliedEpoch;
-    epochBaseUptimeMs = millis();
+    anchorRuntimeClock(suppliedEpoch);
     output.println(F("{\"type\":\"status\",\"protocol\":\"uvir-sensor-v1\",\"time_synced\":true}"));
     return;
   }
@@ -2492,6 +2937,8 @@ void handleCommand(String command, Transport transport, Print &output) {
         takeCommandToken(payload, position);
     const String automaticShutdownSecondsToken =
         takeCommandToken(payload, position);
+    const String externalCommandToken =
+        takeCommandToken(payload, position);
     const bool hasAnyAutomaticShutdownParameter =
         !automaticShutdownToken.isEmpty() ||
         !automaticShutdownSecondsToken.isEmpty();
@@ -2502,6 +2949,8 @@ void handleCommand(String command, Transport transport, Print &output) {
         hasAutomaticShutdownParameters
             ? automaticShutdownSecondsToken.toInt()
             : static_cast<int>(automaticShutdownSeconds);
+    const bool hasExternalCommandParameter =
+        !externalCommandToken.isEmpty();
     if ((ledToken != "ON" && ledToken != "OFF") ||
         brightness < 1 || brightness > 100 ||
         (offlineToken != "ON" && offlineToken != "OFF") ||
@@ -2516,11 +2965,14 @@ void handleCommand(String command, Transport transport, Print &output) {
         configuredAutomaticShutdownSeconds <
             static_cast<int>(kMinimumAutomaticShutdownSeconds) ||
         configuredAutomaticShutdownSeconds >
-            static_cast<int>(kMaximumAutomaticShutdownSeconds)) {
+            static_cast<int>(kMaximumAutomaticShutdownSeconds) ||
+        (hasExternalCommandParameter &&
+         externalCommandToken != "ON" &&
+         externalCommandToken != "OFF")) {
       printError(
           output,
           F("sensor_configuration_invalid"),
-          F("Use SENSOR_CONFIG LED_ON/OFF brightness OFFLINE_ON/OFF BUZZER_ON/OFF volume AUTO_OFF_ON/OFF seconds"));
+          F("Use SENSOR_CONFIG LED_ON/OFF brightness OFFLINE_ON/OFF BUZZER_ON/OFF volume AUTO_OFF_ON/OFF seconds EXTERNAL_ON/OFF"));
       return;
     }
     statusLedEnabled = ledToken == "ON";
@@ -2544,6 +2996,11 @@ void handleCommand(String command, Transport transport, Print &output) {
           kPreferenceAutoShutdownEnabled, automaticShutdownEnabled);
       preferences.putUInt(
           kPreferenceAutoShutdownSeconds, automaticShutdownSeconds);
+    }
+    if (hasExternalCommandParameter) {
+      externalCommandEnabled = externalCommandToken == "ON";
+      preferences.putBool(
+          kPreferenceExternalCommandEnabled, externalCommandEnabled);
     }
     statusLed.configure(statusLedEnabled, statusLedBrightness);
     statusBuzzer.configure(statusBuzzerEnabled, statusBuzzerVolume);
@@ -2604,6 +3061,7 @@ void handleCommand(String command, Transport transport, Print &output) {
     uvCalibrationFactor = uvFactor;
     preferences.putFloat("cal_visible", visibleCalibrationFactor);
     preferences.putFloat("cal_uv", uvCalibrationFactor);
+    resetLiveSampleWindow();
     printCalibrationStatus(output);
     return;
   }
@@ -2914,7 +3372,58 @@ void handleCommand(String command, Transport transport, Print &output) {
     return;
   }
 
+  if (command.startsWith("OFFLINE_EXTERNAL_JOB ")) {
+    if (currentEpochMs() == 0) {
+      statusLed.signalTimeUnavailable();
+      statusBuzzer.signalTimeUnavailable();
+      printError(output, F("time_unavailable"),
+                 F("Date and time are not available"));
+      return;
+    }
+    if (pendingLiveAcquisition) {
+      printError(output, F("automatic_acquisition_pending"),
+                 F("Wait for the previous acquisition acknowledgement"));
+      return;
+    }
+    String payload = originalCommand.substring(21);
+    int position = 0;
+    OfflineJob requestedJob;
+    requestedJob.externalCommand = true;
+    requestedJob.sessionId = parseUnsigned64(takeCommandToken(payload, position));
+    requestedJob.completedCount = static_cast<uint32_t>(
+        max(0L, takeCommandToken(payload, position).toInt()));
+    const int requestedSampleCount = takeCommandToken(payload, position).toInt();
+    const long requestedSampleSpacingMs = takeCommandToken(payload, position).toInt();
+    requestedJob.samplesPerAcquisition = static_cast<uint8_t>(constrain(
+        requestedSampleCount, 1, static_cast<int>(kMaximumAcquisitionSamples)));
+    requestedJob.sampleSpacingMs = static_cast<uint32_t>(constrain(
+        requestedSampleSpacingMs, 0L, 10000L));
+    requestedJob.discardExtremes = takeCommandToken(payload, position) == "1";
+    takeCommandToken(payload, position);  // Reserved note token.
+    if (requestedJob.sessionId == 0) {
+      printError(output, F("external_job_invalid"),
+                 F("Invalid external acquisition session"));
+      return;
+    }
+    requestedJob.startedAtMs = currentEpochMs();
+    cancelAveragedAcquisition();
+    externalAcquisitionRequestsPending = 0;
+    externalCommandShortPressCount = 0;
+    offlineJob = requestedJob;
+    setAutomaticJobEnabled(true, true);
+    output.println(F("{\"type\":\"status\",\"protocol\":\"uvir-sensor-v1\",\"offline_external_job_configured\":true}"));
+    printAutomaticStatus(output);
+    return;
+  }
+
   if (command.startsWith("OFFLINE_JOB ") || command.startsWith("OFFLINE_CONDITIONAL_JOB ")) {
+    if (currentEpochMs() == 0) {
+      statusLed.signalTimeUnavailable();
+      statusBuzzer.signalTimeUnavailable();
+      printError(output, F("time_unavailable"),
+                 F("Date and time are not available"));
+      return;
+    }
     const bool conditional=command.startsWith("OFFLINE_CONDITIONAL_JOB ");
     if (pendingLiveAcquisition) {
       printError(
@@ -3013,6 +3522,12 @@ void handleCommand(String command, Transport transport, Print &output) {
   }
 
   if (command == "OFFLINE_STOP") {
+    externalAcquisitionRequestsPending = 0;
+    externalCommandShortPressCount = 0;
+    if (averagedAcquisition.kind == AveragedAcquisitionKind::Automatic ||
+        averagedAcquisition.kind == AveragedAcquisitionKind::AutomaticCondition) {
+      cancelAveragedAcquisition();
+    }
     setAutomaticJobEnabled(false, true);
     // A dedicated runtime frame is the acknowledgement: Android must not
     // report success until it has received the sensor's actual stopped state.
@@ -3450,7 +3965,6 @@ void handleCommand(String command, Transport transport, Print &output) {
     appSessionActive = true;
     streamEnabled = true;
     statusLed.setBaseState(UvirLedBaseState::Connected);
-    resetLiveSampleWindow();
     nextSampleAtMs = millis();
     output.print(F("{\"type\":\"status\",\"protocol\":\"uvir-sensor-v1\",\"app_connected\":true,\"streaming\":true,\"interval_ms\":"));
     output.print(streamIntervalMs);
@@ -3623,6 +4137,14 @@ void serviceInternet() {
       resumeWirelessFallbackAfterDisconnect();
     }
 
+    // Establishing a TLS/MQTT session can block for several seconds. Finish
+    // the measurement currently triggered by GPIO 33 (or any other active
+    // acquisition) before attempting that connection, otherwise a physical
+    // command appears to react late even though its interrupt was immediate.
+    if (averagedAcquisition.kind != AveragedAcquisitionKind::None) {
+      return;
+    }
+
     const uint32_t now = millis();
     if (now - lastInternetConnectionAttemptMs < kInternetReconnectIntervalMs) {
       return;
@@ -3697,6 +4219,14 @@ void setup() {
   setCpuFrequencyMhz(80);
   Serial.begin(UvirHardware::kSerialBaud);
   Serial.setTimeout(50);
+  pinMode(UvirHardware::kExternalCommandPin, INPUT_PULLUP);
+  externalCommandPressActive =
+      digitalRead(UvirHardware::kExternalCommandPin) == LOW;
+  externalCommandPressedAtUs = micros();
+  attachInterrupt(
+      digitalPinToInterrupt(UvirHardware::kExternalCommandPin),
+      onExternalCommandEdge,
+      CHANGE);
   usbCommandBuffer.reserve(520);
   wifiCommandBuffer.reserve(176);
   bluetoothCommandBuffer.reserve(176);
@@ -3761,13 +4291,16 @@ void setup() {
 }
 
 void loop() {
+  // Physical automation must remain responsive even while a radio transport
+  // is reconnecting or servicing network traffic.
+  serviceExternalCommandInput();
+  serviceOfflineRecording();
   readCommands(Serial, Serial, usbCommandBuffer, Transport::Usb);
   serviceWifi();
   serviceInternet();
   serviceBluetooth();
   serviceBluetoothSignalStrength();
   serviceWirelessFallback();
-  serviceOfflineRecording();
   debugPerformance.update(statusLed, statusBuzzer);
   serviceDebugPerformanceCompletion();
   serviceAutomaticShutdown();
@@ -3785,6 +4318,8 @@ void loop() {
       resumeWirelessFallbackAfterDisconnect();
     }
   }
+
+  serviceContinuousSampling();
 
   if (streamEnabled && static_cast<int32_t>(now - nextSampleAtMs) >= 0) {
     Print *output = outputForTransport(activeTransport);

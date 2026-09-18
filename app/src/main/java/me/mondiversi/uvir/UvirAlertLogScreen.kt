@@ -145,6 +145,7 @@ internal fun ThresholdAlertLogScreen(
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
+    val resources = LocalResources.current
 
     var allEntries by rememberLiveAlertEntries(database)
     val sensorProfiles by rememberLiveSensorProfiles(database)
@@ -156,6 +157,12 @@ internal fun ThresholdAlertLogScreen(
             id.filterSensorKey() to detailSensorDisplayName(sensorProfiles[id])
         }
     }
+    val filterRecordIds = remember(allEntries) { allEntries.map { it.id }.distinct() }
+    val filterSessionIds = remember(allEntries) { allEntries.mapNotNull { it.sessionId }.distinct() }
+    val filterNotes = remember(allEntries) {
+        allEntries.map { it.note.trim() }.filter { it.isNotEmpty() }.distinct()
+    }
+    val filterDays = remember(allEntries) { uvirAvailableFilterDays(allEntries.map { it.timestamp }) }
     val filterScope = rememberCoroutineScope()
 
     var showDeleteAllConfirmation by rememberSaveable {
@@ -311,14 +318,16 @@ internal fun ThresholdAlertLogScreen(
     }
 
     fun sharePendingAlerts(
-        selection: MeasurementDetailShareSelection
+        selection: MeasurementDetailShareSelection,
+        destination: UvirExportDestination
     ) {
         pendingSharePlan?.let { plan ->
             runCatching {
                 shareAlertExportPlan(
                     context = context,
                     plan = plan,
-                    selection = selection
+                    selection = selection,
+                    destination = destination
                 )
             }.onFailure { error ->
                 UvirErrorLog.record(
@@ -328,7 +337,7 @@ internal fun ThresholdAlertLogScreen(
                 )
                 showUvirBottomMessage(
                     context,
-                    context.getString(R.string.share_error),
+                    resources.getString(R.string.share_error),
                     longDuration = false
                 )
             }
@@ -371,7 +380,7 @@ internal fun ThresholdAlertLogScreen(
                         showDeleteAllConfirmation = false
                         showUvirBottomMessage(
                             context,
-                            context.getString(
+                            resources.getString(
                                 R.string.threshold_alert_log_deleted
                             ),
                             longDuration = false
@@ -438,7 +447,7 @@ internal fun ThresholdAlertLogScreen(
                         if (deleted > 0) {
                             showUvirBottomMessage(
                                 context,
-                                context.getString(
+                                resources.getString(
                                     R.string.threshold_alerts_deleted
                                 ),
                                 longDuration = false
@@ -484,14 +493,14 @@ internal fun ThresholdAlertLogScreen(
             title = {
                 Text(
                     stringResource(
-                        if (filters.isActive) R.string.list_filter_share_question else R.string.share_all_alerts_question
+                        if (filters.isActive) R.string.list_filter_export_question else R.string.export_all_alerts_question
                     )
                 )
             },
             text = {
                 Text(
                     stringResource(
-                        if (filters.isActive) R.string.list_filter_share_warning else R.string.share_all_alerts_warning
+                        if (filters.isActive) R.string.list_filter_export_warning else R.string.export_all_alerts_warning
                     )
                 )
             },
@@ -506,7 +515,7 @@ internal fun ThresholdAlertLogScreen(
                 ) {
                     Text(
                         stringResource(
-                            R.string.share_all
+                            R.string.export_all
                         )
                     )
                 }
@@ -539,10 +548,6 @@ internal fun ThresholdAlertLogScreen(
             cardColor = cardColor,
             primaryText = primaryText,
             secondaryText = secondaryText,
-            chartsDescription =
-                stringResource(
-                    R.string.share_alert_list_charts_description
-                ),
             partialSessionWarningMessage =
                 if (pendingSharePlan?.hasPartialSessions == true) {
                     stringResource(
@@ -551,12 +556,26 @@ internal fun ThresholdAlertLogScreen(
                 } else {
                     null
                 },
+            combinedChartFileCount =
+                pendingSharePlan?.let { plan ->
+                    alertExportChartFileCount(
+                        plan,
+                        UvirChartExportMode.COMBINED
+                    )
+                },
+            separateChartFileCount =
+                pendingSharePlan?.let { plan ->
+                    alertExportChartFileCount(
+                        plan,
+                        UvirChartExportMode.SEPARATE
+                    )
+                },
             onDismiss = {
                 showShareFormatDialog = false
                 pendingSharePlan = null
             },
-            onSelectionConfirmed = { selection ->
-                sharePendingAlerts(selection)
+            onSelectionConfirmed = { selection, destination ->
+                sharePendingAlerts(selection, destination)
             }
         )
     }
@@ -604,7 +623,7 @@ internal fun ThresholdAlertLogScreen(
                         modifier = Modifier.size(UvirTitleActionButtonSize)
                     ) {
                         UvirTitleActionIcon(
-                            type = MenuIconType.SHARE,
+                            type = MenuIconType.EXPORT,
                             modifier = Modifier.size(UvirTitleActionIconSize),
                             tint =
                                 if (entries.isNotEmpty()) {
@@ -669,7 +688,13 @@ internal fun ThresholdAlertLogScreen(
                                     entries.size,
                                     entries.size,
                                     formatDateTime(
-                                        entries.last().timestamp
+                                        entries.asSequence()
+                                            .map { it.timestamp }
+                                            .filter { it > 0L }
+                                            .minOrNull()
+                                            ?: entries.minOf { it.timestamp },
+                                        LocalUvirDateFormat.current,
+                                        LocalUvirTimeFormat.current
                                     )
                                 ),
                             modifier =
@@ -718,7 +743,13 @@ internal fun ThresholdAlertLogScreen(
             ) {
                 UvirVerticalReveal(showFilters) {
                     UvirRecordListFilterPanel(
-                        filters = filters, sensorNames = filterSensorNames, modes = setOf(true),
+                        filters = filters,
+                        recordIds = filterRecordIds,
+                        sessionIds = filterSessionIds,
+                        notes = filterNotes,
+                        dates = filterDays,
+                        sensorNames = filterSensorNames,
+                        modes = setOf(true),
                         backgroundColor = backgroundColor,
                         onChange = {
                             filters = it
@@ -962,7 +993,9 @@ internal fun ThresholdAlertLogScreen(
                                                 sessionCounts[headerSessionId] ?: 1,
                                                 formatAutomaticSessionDateTime(
                                                     sessionStartTimestamps[headerSessionId]
-                                                        ?: entry.timestamp
+                                                        ?: entry.timestamp,
+                                                    LocalUvirDateFormat.current,
+                                                    LocalUvirTimeFormat.current
                                                 ),
                                                 sessionCounts[headerSessionId] ?: 1
                                             ),
@@ -1083,7 +1116,11 @@ internal fun ThresholdAlertLogScreen(
                                                     modifier = Modifier.weight(1f)
                                                 ) {
                                                     Text(
-                                                        text = formatDateTime(entry.timestamp),
+                                                        text = formatDateTime(
+                                                            entry.timestamp,
+                                                            LocalUvirDateFormat.current,
+                                                            LocalUvirTimeFormat.current
+                                                        ),
                                                         color = primaryText,
                                                         fontSize = 13.sp,
                                                         fontWeight = FontWeight.Medium,
@@ -1130,6 +1167,7 @@ internal fun ThresholdAlertLogScreen(
                                             violations.forEach { violation ->
                                                     AlertViolationSummary(
                                                         violation = violation,
+                                                        qualityFlags = entry.qualityFlags,
                                                         primaryText = primaryText,
                                                         secondaryText = secondaryText,
                                                         showBiologicalEquivalentUnit = false,
@@ -1156,6 +1194,7 @@ internal fun ThresholdAlertLogScreen(
 @Composable
 internal fun AlertViolationSummary(
     violation: ThresholdAlertViolation,
+    qualityFlags: Int = 0,
     primaryText: Color,
     secondaryText: Color,
     modifier: Modifier = Modifier,
@@ -1168,14 +1207,15 @@ internal fun AlertViolationSummary(
                 violation.rule.metric
             )
         )
+    val irradianceUnit = LocalUvirIrradianceUnit.current
     val unit =
         if (
             violation.rule.metric.isBiologicalEffect() &&
             showBiologicalEquivalentUnit
         ) {
-            "µW/cm² eq."
+            irradianceUnit.symbol + " eq."
         } else {
-            "µW/cm²"
+            irradianceUnit.symbol
         }
     val symbol =
         if (
@@ -1188,7 +1228,9 @@ internal fun AlertViolationSummary(
         }
     val numericFormat = LocalUvirNumericFormat.current
     val detailText =
-        if (showThresholdDeltaOnly) {
+        if (qualityFlags.isOutOfRange(violation.rule.metric)) {
+            stringResource(R.string.out_of_range_short)
+        } else if (showThresholdDeltaOnly) {
             alertThresholdDeltaPercent(
                 value = violation.value,
                 threshold = violation.rule.threshold.toDouble()
@@ -1202,16 +1244,18 @@ internal fun AlertViolationSummary(
                 "$sign${formatUvirNumber(abs(delta), 1, numericFormat)}%"
             } ?: "—"
         } else {
-            formatUvirNumber(
+            formatUvirIrradianceNumber(
                 violation.value,
                 3,
-                numericFormat
+                numericFormat,
+                irradianceUnit
             ) +
                 " $symbol " +
-                formatUvirNumber(
+                formatUvirIrradianceNumber(
                     violation.rule.threshold.toDouble(),
                     3,
-                    numericFormat
+                    numericFormat,
+                    irradianceUnit
                 ) +
                 " $unit"
         }

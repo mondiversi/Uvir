@@ -12,5 +12,7 @@ internal fun exportSensorNames(names: Collection<String>): String =
 internal fun chartExportContextText(
     note: String,
     sensorName: String,
-    noteLabel: String = "Note"
-): String = "$noteLabel: ${note.ifBlank { "—" }}\nSensor: ${exportSensorName(sensorName)}"
+    noteLabel: String = "Note",
+    sensorLabel: String = "Sensor",
+    emptyNote: String = "No note"
+): String = "$noteLabel: ${note.ifBlank { emptyNote }}\n$sensorLabel: ${exportSensorName(sensorName)}"

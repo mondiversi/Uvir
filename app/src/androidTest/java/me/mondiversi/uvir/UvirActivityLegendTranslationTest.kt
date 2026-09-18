@@ -43,7 +43,7 @@ class UvirActivityLegendTranslationTest {
             val localized = context.createConfigurationContext(config).resources
             for (night in listOf(false, true)) {
                 compose.runOnIdle { localeResources.value = localized; dark.value = night }
-                for (key in listOf(R.string.sensor_led_signal_operation_active_description, R.string.sensor_led_signal_recorded_description)) {
+                for (key in listOf(R.string.sensor_led_signal_operation_active_description, R.string.sensor_led_signal_recorded_description, R.string.sensor_led_signal_time_unavailable_description)) {
                     val layouts = mutableListOf<TextLayoutResult>()
                     compose.onNodeWithText(localized.getString(key)).performSemanticsAction(SemanticsActions.GetTextLayoutResult) {
                         it(layouts)

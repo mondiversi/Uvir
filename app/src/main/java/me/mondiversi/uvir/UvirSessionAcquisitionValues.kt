@@ -41,6 +41,7 @@ internal fun SessionAcquisitionValuesCard(
         }
     val darkMode = isSystemInDarkTheme()
     val numericFormat = LocalUvirNumericFormat.current
+    val irradianceUnit = LocalUvirIrradianceUnit.current
 
     UvirCollapsibleChartCard(
         title = stringResource(group.titleResource),
@@ -52,7 +53,7 @@ internal fun SessionAcquisitionValuesCard(
                 } else {
                     R.string.session_chart_unit
                 }
-            ),
+            ).withUvirIrradianceUnit(irradianceUnit),
         expanded = expanded,
         onToggle = onToggle,
         cardColor = cardColor,
@@ -90,7 +91,11 @@ internal fun SessionAcquisitionValuesCard(
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
-                                text = formatDateTime(record.timestamp),
+                                text = formatDateTime(
+                                    record.timestamp,
+                                    LocalUvirDateFormat.current,
+                                    LocalUvirTimeFormat.current
+                                ),
                                 color = secondaryText,
                                 fontSize = 11.sp,
                                 maxLines = 1
@@ -138,13 +143,27 @@ internal fun SessionAcquisitionValuesCard(
                                     lineHeight = 14.sp,
                                     fontWeight = FontWeight.SemiBold
                                 )
+                                val valueOutOfRange =
+                                    if (group.biological) {
+                                        record.sample.isOutOfRange(
+                                            if (itemIndex < 2) SensorGroup.UV
+                                            else SensorGroup.VISIBLE
+                                        )
+                                    } else {
+                                        record.sample.isOutOfRange(group.spectrumIconGroup())
+                                    }
                                 Text(
                                     text =
-                                        formatUvirNumber(
-                                            item.values[recordIndex],
-                                            3,
-                                            numericFormat
-                                        ),
+                                        if (valueOutOfRange) {
+                                            stringResource(R.string.out_of_range_short)
+                                        } else {
+                                            formatUvirIrradianceNumber(
+                                                item.values[recordIndex],
+                                                3,
+                                                numericFormat,
+                                                irradianceUnit
+                                            )
+                                        },
                                     color = primaryText,
                                     fontSize = 12.sp,
                                     maxLines = 1

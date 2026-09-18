@@ -101,47 +101,79 @@ internal fun buildAlertExportPlan(
 private fun readableAlertBody(
     context: Context,
     entry: ThresholdAlertLogEntry,
-    numericFormat: UvirNumericFormat
+    numericFormat: UvirNumericFormat,
+    dateFormat: UvirDateFormat,
+    timeFormat: UvirTimeFormat,
+    irradianceUnit: UvirIrradianceUnit
 ): String =
     readableThresholdAlertLog(
         context = context,
         entries = listOf(entry),
-        numericFormat = numericFormat
-    ).substringAfter("Uvir value alert log").trim()
+        numericFormat = numericFormat,
+        dateFormat = dateFormat,
+        timeFormat = timeFormat,
+        irradianceUnit = irradianceUnit
+    ).substringAfter('\n').trim()
 
 internal fun readableAlertExportTable(
     context: Context,
     plan: AlertExportPlan,
-    numericFormat: UvirNumericFormat
+    numericFormat: UvirNumericFormat,
+    dateFormat: UvirDateFormat = UvirDateFormat.INTERNATIONAL,
+    timeFormat: UvirTimeFormat = UvirTimeFormat.H24,
+    irradianceUnit: UvirIrradianceUnit = UvirIrradianceUnit.UW_CM2
 ): String = buildString {
-    appendLine("Uvir value alerts")
+    val locale = context.resources.configuration.locales[0]
+    appendLine("Uvir ${context.getString(R.string.threshold_alert_log_title)}")
 
     plan.items.forEachIndexed { index, item ->
         appendLine()
         when (item) {
             is AlertExportItem.CompleteSession -> {
-                appendLine("VALUE ALERT SESSION")
-                appendLine("Session ID: ${item.sessionId}")
-                appendLine("Sensor: ${exportSensorNames(item.entries.map { it.sensorDisplayName })}")
                 appendLine(
-                    "Session note: " +
-                        item.entries.firstOrNull()?.note.orEmpty().ifBlank { "—" }
+                    context.getString(R.string.alert_session_chart_title).uppercase(locale)
                 )
                 appendLine(
-                    "Started: " +
+                    "${context.getString(R.string.share_session_id_label)}: ${item.sessionId}"
+                )
+                appendLine(
+                    "${context.getString(R.string.sensor_selector_label)}: " +
+                        exportSensorNames(item.entries.map { it.sensorDisplayName })
+                )
+                appendLine(
+                    "${context.getString(R.string.session_chart_note)}: " +
+                        item.entries.firstOrNull()?.note.orEmpty().ifBlank {
+                            context.getString(R.string.no_note)
+                        }
+                )
+                appendLine(
+                    context.getString(
+                        R.string.alert_session_chart_start,
                         csvDateTime(
                             item.entries.minOf { it.timestamp },
-                            DATA_EXPORT_LANGUAGE
+                            dateFormat,
+                            context.resources.configuration.locales[0],
+                            timeFormat
                         )
+                    )
                 )
-                appendLine("Total value alerts: ${item.entries.size}")
+                appendLine(
+                    context.resources.getQuantityString(
+                        R.plurals.alert_session_chart_alert_count,
+                        item.entries.size,
+                        item.entries.size
+                    )
+                )
                 appendLine()
                 item.entries.forEachIndexed { entryIndex, entry ->
                     appendLine(
                         readableAlertBody(
                             context,
                             entry,
-                            numericFormat
+                            numericFormat,
+                            dateFormat,
+                            timeFormat,
+                            irradianceUnit
                         )
                     )
                     if (entryIndex < item.entries.lastIndex) {
@@ -153,12 +185,17 @@ internal fun readableAlertExportTable(
             }
 
             is AlertExportItem.IndividualAlert -> {
-                appendLine("VALUE ALERT")
+                appendLine(
+                    context.getString(R.string.alert_chart_title).uppercase(locale)
+                )
                 appendLine(
                     readableAlertBody(
                         context,
                         item.entry,
-                        numericFormat
+                        numericFormat,
+                        dateFormat,
+                        timeFormat,
+                        irradianceUnit
                     )
                 )
             }
@@ -174,20 +211,14 @@ internal fun readableAlertExportTable(
 internal fun shareAlertExportPlan(
     context: Context,
     plan: AlertExportPlan,
-    selection: MeasurementDetailShareSelection
+    selection: MeasurementDetailShareSelection,
+    destination: UvirExportDestination = UvirExportDestination.SHARE
 ) {
     require(plan.selectedEntries.isNotEmpty())
     require(selection.dataFormat != null || selection.includeCharts)
 
-    val exportConfiguration =
-        android.content.res.Configuration(
-            context.resources.configuration
-        ).apply {
-            setLocale(Locale.ENGLISH)
-            setLayoutDirection(Locale.ENGLISH)
-        }
-    val exportContext =
-        context.createConfigurationContext(exportConfiguration)
+    val exportFormatting = uvirExportFormatting(context)
+    val exportContext = exportFormatting.context
     val sharedDirectory =
         File(context.cacheDir, "shared").apply { mkdirs() }
     val sharedBaseName =
@@ -210,7 +241,10 @@ internal fun shareAlertExportPlan(
                     thresholdAlertLogCsv(
                         exportContext,
                         plan.selectedEntries,
-                        UvirNumericFormat.INTERNATIONAL
+                        exportFormatting.numericFormat,
+                        exportFormatting.dateFormat,
+                        exportFormatting.timeFormat,
+                        exportFormatting.irradianceUnit
                     )
                 )
 
@@ -221,7 +255,10 @@ internal fun shareAlertExportPlan(
                     readableAlertExportTable(
                         exportContext,
                         plan,
-                        UvirNumericFormat.INTERNATIONAL
+                        exportFormatting.numericFormat,
+                        exportFormatting.dateFormat,
+                        exportFormatting.timeFormat,
+                        exportFormatting.irradianceUnit
                     )
                 )
 
@@ -232,7 +269,10 @@ internal fun shareAlertExportPlan(
                     thresholdAlertLogCsv(
                         exportContext,
                         plan.selectedEntries,
-                        UvirNumericFormat.INTERNATIONAL
+                        exportFormatting.numericFormat,
+                        exportFormatting.dateFormat,
+                        exportFormatting.timeFormat,
+                        exportFormatting.irradianceUnit
                     )
                 )
             files +=
@@ -241,7 +281,10 @@ internal fun shareAlertExportPlan(
                     readableAlertExportTable(
                         exportContext,
                         plan,
-                        UvirNumericFormat.INTERNATIONAL
+                        exportFormatting.numericFormat,
+                        exportFormatting.dateFormat,
+                        exportFormatting.timeFormat,
+                        exportFormatting.irradianceUnit
                     )
                 )
         }
@@ -254,19 +297,38 @@ internal fun shareAlertExportPlan(
             when (item) {
                 is AlertExportItem.CompleteSession ->
                     files +=
-                        alertSessionChartSeries(item.entries).map { series ->
-                            createAlertSessionChartFile(
-                                context = context,
-                                sessionId = item.sessionId,
-                                entries = item.entries,
-                                metric = series.metric
-                            )
+                        when (selection.chartExportMode) {
+                            UvirChartExportMode.COMBINED ->
+                                listOf(
+                                    createAlertSessionCombinedChartFile(
+                                        context = context,
+                                        sessionId = item.sessionId,
+                                        entries = item.entries
+                                    )
+                                )
+                            UvirChartExportMode.SEPARATE ->
+                                createAlertSessionSeparateChartFiles(
+                                    context = context,
+                                    sessionId = item.sessionId,
+                                    entries = item.entries
+                                )
                         }
 
                 is AlertExportItem.IndividualAlert ->
-                    files += createAlertChartFile(context, item.entry)
+                    files +=
+                        when (selection.chartExportMode) {
+                            UvirChartExportMode.COMBINED ->
+                                listOf(createAlertChartFile(context, item.entry))
+                            UvirChartExportMode.SEPARATE ->
+                                createAlertSeparateChartFiles(context, item.entry)
+                        }
             }
         }
+    }
+
+    if (destination == UvirExportDestination.SAVE) {
+        requestUvirExportSave(context, files)
+        return
     }
 
     val uris =
@@ -329,3 +391,24 @@ internal fun shareAlertExportPlan(
     }
     context.startActivity(chooser)
 }
+
+internal fun alertExportChartFileCount(
+    plan: AlertExportPlan,
+    mode: UvirChartExportMode
+): Int =
+    plan.items.sumOf { item ->
+        when (item) {
+            is AlertExportItem.CompleteSession ->
+                if (mode == UvirChartExportMode.SEPARATE) {
+                    alertSessionChartGroupCount(item.entries)
+                } else {
+                    1
+                }
+            is AlertExportItem.IndividualAlert ->
+                if (mode == UvirChartExportMode.SEPARATE) {
+                    alertChartGroupCount(item.entry)
+                } else {
+                    1
+                }
+        }
+    }

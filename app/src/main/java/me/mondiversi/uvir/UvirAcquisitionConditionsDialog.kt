@@ -28,6 +28,8 @@ internal fun UvirAcquisitionConditionsDialog(
     onDismissRequest: () -> Unit
 ) {
     val context = LocalContext.current
+    val resources = androidx.compose.ui.platform.LocalResources.current
+    val irradianceUnit = LocalUvirIrradianceUnit.current
     val focus = LocalFocusManager.current
     val metrics = remember { acquisitionConditionMetrics() }
     val enabled = remember(initialRules) {
@@ -44,7 +46,11 @@ internal fun UvirAcquisitionConditionsDialog(
     val thresholds = remember(initialRules) {
         mutableStateMapOf<ThresholdAlertMetric, String>().apply {
             metrics.forEach { metric -> put(metric,
-                (initialRules.firstOrNull { it.metric == metric }?.threshold ?: 1f).toString()) }
+                thresholdEditableValue(
+                    irradianceUnit.fromCanonicalUwCm2(
+                        (initialRules.firstOrNull { it.metric == metric }?.threshold ?: 1f).toDouble()
+                    )
+                )) }
         }
     }
     val scrollbar = rememberUvirDialogScrollbar(secondaryText.copy(alpha = 0.58f))
@@ -52,9 +58,9 @@ internal fun UvirAcquisitionConditionsDialog(
         val normalized = normalizeNonNegativeDecimal(thresholds[metric] ?: "1.0")
         thresholds[metric] = normalized.text
         if (normalized.corrected) {
-            showUvirBottomMessage(context, context.getString(R.string.value_out_of_limits_corrected))
+            showUvirBottomMessage(context, resources.getString(R.string.value_out_of_limits_corrected))
         }
-        return normalized.value
+        return irradianceUnit.toCanonicalUwCm2(normalized.value.toDouble()).toFloat()
     }
     AlertDialog(
         onDismissRequest = onDismissRequest,
@@ -96,7 +102,13 @@ internal fun UvirAcquisitionConditionsDialog(
                                         currentValueEnabled = currentSample != null,
                                         onUseCurrentValue = {
                                             focus.clearFocus()
-                                            currentSample?.let { thresholds[metric] = thresholdEditableValue(it.thresholdMetricValue(metric)) }
+                                            currentSample?.let {
+                                                thresholds[metric] = thresholdEditableValue(
+                                                    irradianceUnit.fromCanonicalUwCm2(
+                                                        it.thresholdMetricValue(metric)
+                                                    )
+                                                )
+                                            }
                                         },
                                         cardColor = cardColor, primaryText = primaryText, secondaryText = secondaryText
                                     )
@@ -104,7 +116,8 @@ internal fun UvirAcquisitionConditionsDialog(
                                         value = thresholds[metric] ?: "1.0",
                                         onValueChange = { thresholds[metric] = it },
                                         label = stringResource(if (metric.name.startsWith("BIO_"))
-                                            R.string.threshold_value_biological_label else R.string.threshold_value_label),
+                                            R.string.threshold_value_biological_label else R.string.threshold_value_label)
+                                            .withUvirIrradianceUnit(irradianceUnit),
                                         onEditingComplete = { normalize(metric) },
                                         modifier = Modifier.fillMaxWidth().testTag("acquisition_condition_threshold_${metric.name}")
                                     )

@@ -100,6 +100,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
@@ -416,12 +417,71 @@ private fun ShareChartsOptionRow(
 }
 
 @Composable
+private fun ChartExportModeRow(
+    selected: Boolean,
+    label: String,
+    primaryText: Color,
+    secondaryText: Color,
+    onClick: () -> Unit
+) {
+    Surface(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onClick),
+        shape = RoundedCornerShape(10.dp),
+        color =
+            if (selected) {
+                primaryText.copy(alpha = 0.06f)
+            } else {
+                Color.Transparent
+            }
+    ) {
+        Row(
+            modifier =
+                Modifier.padding(
+                    start = 38.dp,
+                    end = 10.dp,
+                    top = 5.dp,
+                    bottom = 5.dp
+                ),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            CompositionLocalProvider(
+                LocalMinimumInteractiveComponentSize provides 0.dp
+            ) {
+                RadioButton(
+                    selected = selected,
+                    onClick = onClick,
+                    modifier = Modifier.size(22.dp),
+                    colors =
+                        RadioButtonDefaults.colors(
+                            selectedColor = MaterialTheme.colorScheme.primary,
+                            unselectedColor = secondaryText
+                        )
+                )
+            }
+
+            Spacer(Modifier.width(8.dp))
+
+            Text(
+                text = label,
+                modifier = Modifier.weight(1f),
+                color = primaryText,
+                fontSize = 12.5.sp,
+                lineHeight = 15.sp
+            )
+        }
+    }
+}
+
+@Composable
 internal fun MeasurementShareFormatDialog(
     cardColor: Color,
     primaryText: Color,
     secondaryText: Color,
     onDismiss: () -> Unit,
-    onFormatSelected: (MeasurementShareFormat) -> Unit
+    onFormatSelected: (MeasurementShareFormat, UvirExportDestination) -> Unit
 ) {
     var csvSelected by rememberSaveable {
         mutableStateOf(false)
@@ -491,39 +551,460 @@ internal fun MeasurementShareFormatDialog(
             }
         },
         confirmButton = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.End),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    TextButton(
+                        enabled = selectedFormat != null,
+                        onClick = {
+                            selectedFormat?.let {
+                                onFormatSelected(it, UvirExportDestination.SAVE)
+                            }
+                        }
+                    ) {
+                        Text(stringResource(R.string.save))
+                    }
+
+                    TextButton(
+                        enabled = selectedFormat != null,
+                        onClick = {
+                            selectedFormat?.let {
+                                onFormatSelected(it, UvirExportDestination.SHARE)
+                            }
+                        }
+                    ) {
+                        Text(stringResource(R.string.share))
+                    }
+                }
+
+                TextButton(
+                    onClick = onDismiss,
+                    modifier = Modifier.align(Alignment.End),
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = UvirDestructiveActionColor
+                    )
+                ) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        },
+        containerColor = cardColor,
+        titleContentColor = primaryText,
+        textContentColor = secondaryText
+    )
+}
+
+@Composable
+internal fun UvirSaveOrShareDialog(
+    cardColor: Color,
+    primaryText: Color,
+    secondaryText: Color,
+    title: String,
+    description: String,
+    onDismiss: () -> Unit,
+    onExport: (UvirExportDestination) -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                title + stringResource(R.string.confirmation_question_suffix)
+            )
+        },
+        text = {
+            Text(
+                text = description,
+                color = secondaryText
+            )
+        },
+        confirmButton = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.End),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    TextButton(onClick = { onExport(UvirExportDestination.SAVE) }) {
+                        Text(stringResource(R.string.save))
+                    }
+                    TextButton(onClick = { onExport(UvirExportDestination.SHARE) }) {
+                        Text(stringResource(R.string.share))
+                    }
+                }
+                TextButton(
+                    onClick = onDismiss,
+                    modifier = Modifier.align(Alignment.End),
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = UvirDestructiveActionColor
+                    )
+                ) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        },
+        containerColor = cardColor,
+        titleContentColor = primaryText,
+        textContentColor = secondaryText
+    )
+}
+
+@Composable
+private fun SettingsExportOptionRow(
+    selected: Boolean,
+    enabled: Boolean,
+    title: String,
+    description: String,
+    iconType: ConnectivityIconType,
+    primaryText: Color,
+    secondaryText: Color,
+    onClick: () -> Unit
+) {
+    val contentColor =
+        if (enabled) primaryText else secondaryText.copy(alpha = 0.46f)
+
+    Surface(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clickable(enabled = enabled, onClick = onClick),
+        shape = RoundedCornerShape(10.dp),
+        color =
+            if (selected && enabled) {
+                primaryText.copy(alpha = 0.08f)
+            } else {
+                Color.Transparent
+            }
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 9.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            ConnectivitySectionIcon(
+                type = iconType,
+                modifier = Modifier.size(22.dp),
+                tint = contentColor
+            )
+
+            Spacer(Modifier.width(10.dp))
+
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                Text(
+                    text = title,
+                    color = contentColor,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium
+                )
+                Text(
+                    text = description,
+                    color =
+                        if (enabled) secondaryText
+                        else secondaryText.copy(alpha = 0.46f),
+                    fontSize = 11.sp,
+                    lineHeight = 14.sp
+                )
+            }
+
+            Spacer(Modifier.width(10.dp))
+
+            CompositionLocalProvider(
+                LocalMinimumInteractiveComponentSize provides 0.dp
+            ) {
+                Checkbox(
+                    checked = selected,
+                    onCheckedChange = { onClick() },
+                    enabled = enabled,
+                    modifier = Modifier.size(24.dp),
+                    colors =
+                        CheckboxDefaults.colors(
+                            checkedColor = MaterialTheme.colorScheme.primary,
+                            uncheckedColor = secondaryText,
+                            checkmarkColor = MaterialTheme.colorScheme.onPrimary,
+                            disabledCheckedColor = secondaryText.copy(alpha = 0.34f),
+                            disabledUncheckedColor = secondaryText.copy(alpha = 0.34f)
+                        )
+                )
+            }
+        }
+    }
+}
+
+@Composable
+internal fun UvirSettingsExportDialog(
+    cardColor: Color,
+    primaryText: Color,
+    secondaryText: Color,
+    sensorSettingsAvailable: Boolean,
+    onDismiss: () -> Unit,
+    onExport: (
+        includeAppSettings: Boolean,
+        includeSensorSettings: Boolean,
+        encryptionPassword: CharArray?
+    ) -> Unit
+) {
+    var appSelected by rememberSaveable { mutableStateOf(false) }
+    var sensorSelected by rememberSaveable { mutableStateOf(false) }
+    var sensitiveInformationSelected by rememberSaveable { mutableStateOf(false) }
+    var showEncryptionPasswordDialog by rememberSaveable { mutableStateOf(false) }
+    val canExport = appSelected || (sensorSelected && sensorSettingsAvailable)
+
+    if (showEncryptionPasswordDialog) {
+        UvirSettingsPasswordDialog(
+            title = stringResource(R.string.settings_encryption_password_title),
+            description = stringResource(R.string.settings_encryption_password_description),
+            confirmationRequired = true,
+            confirmLabel = stringResource(R.string.settings_encrypt),
+            cardColor = cardColor,
+            primaryText = primaryText,
+            secondaryText = secondaryText,
+            onDismiss = {
+                showEncryptionPasswordDialog = false
+                onDismiss()
+            },
+            onConfirm = { password ->
+                showEncryptionPasswordDialog = false
+                onExport(appSelected, sensorSelected, password)
+            }
+        )
+        return
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.export_settings_title)) },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                SettingsExportOptionRow(
+                    selected = appSelected,
+                    enabled = true,
+                    title = stringResource(R.string.export_app_settings),
+                    description = stringResource(R.string.export_app_settings_description),
+                    iconType = ConnectivityIconType.PHONE,
+                    primaryText = primaryText,
+                    secondaryText = secondaryText,
+                    onClick = { appSelected = !appSelected }
+                )
+                SettingsExportOptionRow(
+                    selected = sensorSelected,
+                    enabled = sensorSettingsAvailable,
+                    title = stringResource(R.string.export_sensor_settings),
+                    description =
+                        stringResource(
+                            R.string.export_sensor_settings_description_complete
+                        ),
+                    iconType = ConnectivityIconType.SENSOR,
+                    primaryText = primaryText,
+                    secondaryText = secondaryText,
+                    onClick = {
+                        sensorSelected = !sensorSelected
+                        if (!sensorSelected) sensitiveInformationSelected = false
+                    }
+                )
+                SettingsExportOptionRow(
+                    selected = sensitiveInformationSelected,
+                    enabled = sensorSelected && sensorSettingsAvailable,
+                    title = stringResource(R.string.settings_include_sensitive_information),
+                    description =
+                        stringResource(
+                            R.string.settings_include_sensitive_information_description
+                        ),
+                    iconType = ConnectivityIconType.SECURITY,
+                    primaryText = primaryText,
+                    secondaryText = secondaryText,
+                    onClick = {
+                        sensitiveInformationSelected = !sensitiveInformationSelected
+                    }
+                )
+            }
+        },
+        confirmButton = {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End,
+                horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.End),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                TextButton(
+                    enabled = canExport,
+                    onClick = {
+                        if (sensitiveInformationSelected) {
+                            showEncryptionPasswordDialog = true
+                        } else {
+                            onExport(appSelected, sensorSelected, null)
+                        }
+                    }
+                ) { Text(stringResource(R.string.export)) }
+                TextButton(
+                    onClick = onDismiss,
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = UvirDestructiveActionColor
+                    )
+                ) { Text(stringResource(R.string.cancel)) }
+            }
+        },
+        containerColor = cardColor,
+        titleContentColor = primaryText,
+        textContentColor = secondaryText
+    )
+}
+
+@Composable
+internal fun UvirSettingsPasswordDialog(
+    title: String,
+    description: String,
+    confirmationRequired: Boolean,
+    confirmLabel: String,
+    cardColor: Color,
+    primaryText: Color,
+    secondaryText: Color,
+    errorMessage: String? = null,
+    onInputChanged: () -> Unit = {},
+    onDismiss: () -> Unit,
+    onConfirm: (CharArray) -> Unit
+) {
+    // Passwords must never enter the Activity saved-state bundle.
+    var password by remember { mutableStateOf("") }
+    var confirmation by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
+    var confirmationVisible by remember { mutableStateOf(false) }
+    var validationAttempted by remember { mutableStateOf(false) }
+    val passwordTooShort =
+        validationAttempted && password.length < UVIR_SETTINGS_MINIMUM_PASSWORD_LENGTH
+    val passwordsDoNotMatch =
+        validationAttempted && confirmationRequired && password != confirmation
+    val validationMessage =
+        when {
+            passwordTooShort ->
+                stringResource(
+                    R.string.settings_encryption_password_too_short,
+                    UVIR_SETTINGS_MINIMUM_PASSWORD_LENGTH
+                )
+            passwordsDoNotMatch ->
+                stringResource(R.string.settings_encryption_password_mismatch)
+            else -> errorMessage
+        }
+
+    fun submit() {
+        validationAttempted = true
+        if (
+            password.length >= UVIR_SETTINGS_MINIMUM_PASSWORD_LENGTH &&
+            (!confirmationRequired || password == confirmation)
+        ) {
+            onConfirm(password.toCharArray())
+        }
+    }
+
+    @Composable
+    fun PasswordField(
+        value: String,
+        onValueChange: (String) -> Unit,
+        label: String,
+        visible: Boolean,
+        onVisibilityChange: () -> Unit
+    ) {
+        val visibilityDescription =
+            stringResource(if (visible) R.string.hide_password else R.string.show_password)
+        OutlinedTextField(
+            value = value,
+            onValueChange = {
+                onValueChange(it)
+                validationAttempted = false
+                onInputChanged()
+            },
+            modifier = Modifier.fillMaxWidth(),
+            label = { Text(label) },
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            visualTransformation =
+                if (visible) VisualTransformation.None
+                else PasswordVisualTransformation(),
+            trailingIcon = {
+                IconButton(onClick = onVisibilityChange) {
+                    UvirPasswordVisibilityIcon(
+                        visible = visible,
+                        modifier = Modifier.semantics {
+                            contentDescription = visibilityDescription
+                        },
+                        tint = primaryText
+                    )
+                }
+            },
+            isError = validationMessage != null,
+            colors = UvirOutlinedTextFieldColors()
+        )
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(title) },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Text(
+                    text = description,
+                    color = secondaryText,
+                    fontSize = 12.sp,
+                    lineHeight = 16.sp
+                )
+                PasswordField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = stringResource(R.string.settings_encryption_password),
+                    visible = passwordVisible,
+                    onVisibilityChange = { passwordVisible = !passwordVisible }
+                )
+                if (confirmationRequired) {
+                    PasswordField(
+                        value = confirmation,
+                        onValueChange = { confirmation = it },
+                        label = stringResource(R.string.settings_encryption_password_confirm),
+                        visible = confirmationVisible,
+                        onVisibilityChange = {
+                            confirmationVisible = !confirmationVisible
+                        }
+                    )
+                }
+                validationMessage?.let { message ->
+                    Text(
+                        text = message,
+                        color = MaterialTheme.colorScheme.error,
+                        fontSize = 11.sp,
+                        lineHeight = 14.sp
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.End),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TextButton(onClick = ::submit) {
+                    Text(confirmLabel)
+                }
                 TextButton(
                     onClick = onDismiss,
                     colors =
                         ButtonDefaults.textButtonColors(
                             contentColor = UvirDestructiveActionColor
                         )
-                ) {
-                    Text(
-                        stringResource(
-                            R.string.cancel
-                        )
-                    )
-                }
-
-                TextButton(
-                    enabled = selectedFormat != null,
-                    onClick = {
-                        selectedFormat?.let(
-                            onFormatSelected
-                        )
-                    }
-                ) {
-                    Text(
-                        stringResource(
-                            R.string.share
-                        )
-                    )
-                }
+                ) { Text(stringResource(R.string.cancel)) }
             }
         },
         containerColor = cardColor,
@@ -537,11 +1018,15 @@ internal fun MeasurementDetailShareDialog(
     cardColor: Color,
     primaryText: Color,
     secondaryText: Color,
-    chartsDescription: String? = null,
     partialSessionWarning: Boolean = false,
     partialSessionWarningMessage: String? = null,
+    combinedChartFileCount: Int? = null,
+    separateChartFileCount: Int? = null,
     onDismiss: () -> Unit,
-    onSelectionConfirmed: (MeasurementDetailShareSelection) -> Unit
+    onSelectionConfirmed: (
+        MeasurementDetailShareSelection,
+        UvirExportDestination
+    ) -> Unit
 ) {
     var csvSelected by rememberSaveable {
         mutableStateOf(false)
@@ -552,6 +1037,13 @@ internal fun MeasurementDetailShareDialog(
     var chartsSelected by rememberSaveable {
         mutableStateOf(false)
     }
+    var chartExportMode by rememberSaveable {
+        mutableStateOf(UvirChartExportMode.COMBINED)
+    }
+    val scrollbar =
+        rememberUvirDialogScrollbar(
+            secondaryText.copy(alpha = 0.58f)
+        )
 
     val dataFormat =
         when {
@@ -566,14 +1058,25 @@ internal fun MeasurementDetailShareDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
+        modifier = scrollbar.dialogModifier,
         title = {
             Text(stringResource(R.string.choose_share_format))
         },
         text = {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(6.dp)
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 460.dp)
+                        .then(scrollbar.viewportModifier)
             ) {
+                Column(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .verticalScroll(scrollbar.scrollState),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
                 ShareFormatOptionRow(
                     format = MeasurementShareFormat.CSV,
                     selected = csvSelected,
@@ -609,17 +1112,50 @@ internal fun MeasurementDetailShareDialog(
                     }
                 )
 
-                Text(
-                    text =
-                        chartsDescription
-                            ?: stringResource(
-                                R.string.share_as_charts_description
-                            ),
-                    modifier = Modifier.padding(horizontal = 10.dp),
-                    color = secondaryText,
-                    fontSize = 11.sp,
-                    lineHeight = 14.sp
-                )
+                if (chartsSelected) {
+                    ChartExportModeRow(
+                        selected = chartExportMode == UvirChartExportMode.COMBINED,
+                        label = stringResource(R.string.share_charts_combined_groups),
+                        primaryText = primaryText,
+                        secondaryText = secondaryText,
+                        onClick = {
+                            chartExportMode = UvirChartExportMode.COMBINED
+                        }
+                    )
+                    ChartExportModeRow(
+                        selected = chartExportMode == UvirChartExportMode.SEPARATE,
+                        label = stringResource(R.string.share_charts_separate_groups),
+                        primaryText = primaryText,
+                        secondaryText = secondaryText,
+                        onClick = {
+                            chartExportMode = UvirChartExportMode.SEPARATE
+                        }
+                    )
+
+                    val chartFileCount =
+                        when (chartExportMode) {
+                            UvirChartExportMode.COMBINED -> combinedChartFileCount
+                            UvirChartExportMode.SEPARATE -> separateChartFileCount
+                        }
+                    if (chartFileCount != null) {
+                        Text(
+                            text =
+                                stringResource(
+                                    R.string.share_chart_file_count,
+                                    chartFileCount
+                                ),
+                            modifier =
+                                Modifier.padding(
+                                    start = 38.dp,
+                                    top = 2.dp,
+                                    end = 10.dp
+                                ),
+                            color = secondaryText,
+                            fontSize = 11.sp,
+                            lineHeight = 14.sp
+                        )
+                    }
+                }
 
                 if (
                     partialSessionWarning ||
@@ -636,36 +1172,60 @@ internal fun MeasurementDetailShareDialog(
                         lineHeight = 14.sp
                     )
                 }
+                }
             }
         },
         confirmButton = {
-            Row(
+            Column(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End,
-                verticalAlignment = Alignment.CenterVertically
+                verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
-                TextButton(
-                    onClick = onDismiss,
-                    colors =
-                        ButtonDefaults.textButtonColors(
-                            contentColor = UvirDestructiveActionColor
-                        )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.End),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(stringResource(R.string.cancel))
+                    TextButton(
+                        enabled = canShare,
+                        onClick = {
+                            onSelectionConfirmed(
+                                MeasurementDetailShareSelection(
+                                    dataFormat = dataFormat,
+                                    includeCharts = chartsSelected,
+                                    chartExportMode = chartExportMode
+                                ),
+                                UvirExportDestination.SAVE
+                            )
+                        }
+                    ) {
+                        Text(stringResource(R.string.save))
+                    }
+
+                    TextButton(
+                        enabled = canShare,
+                        onClick = {
+                            onSelectionConfirmed(
+                                MeasurementDetailShareSelection(
+                                    dataFormat = dataFormat,
+                                    includeCharts = chartsSelected,
+                                    chartExportMode = chartExportMode
+                                ),
+                                UvirExportDestination.SHARE
+                            )
+                        }
+                    ) {
+                        Text(stringResource(R.string.share))
+                    }
                 }
 
                 TextButton(
-                    enabled = canShare,
-                    onClick = {
-                        onSelectionConfirmed(
-                            MeasurementDetailShareSelection(
-                                dataFormat = dataFormat,
-                                includeCharts = chartsSelected
-                            )
-                        )
-                    }
+                    onClick = onDismiss,
+                    modifier = Modifier.align(Alignment.End),
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = UvirDestructiveActionColor
+                    )
                 ) {
-                    Text(stringResource(R.string.share))
+                    Text(stringResource(R.string.cancel))
                 }
             }
         },

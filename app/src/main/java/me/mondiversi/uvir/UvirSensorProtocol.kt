@@ -12,7 +12,18 @@ internal const val UVIR_SENSOR_UNIT = "uW/cm2"
 internal fun JSONObject.toUvirSensorSampleOrNull(): SensorSample? {
     if (optString("unit") != UVIR_SENSOR_UNIT) return null
     val bands = optJSONObject("bands") ?: return null
-    return bands.toUvirBandSample()
+    return bands.toUvirBandSample().copy(qualityFlags = uvirQualityFlags())
+}
+
+internal fun JSONObject.uvirQualityFlags(): Int {
+    var flags = optInt("quality_flags", 0)
+    if (optBoolean("saturated", false)) {
+        flags = flags or UVIR_QUALITY_VISIBLE_NIR_OUT_OF_RANGE
+    }
+    if (optBoolean("uv_saturated", false)) {
+        flags = flags or UVIR_QUALITY_UV_OUT_OF_RANGE
+    }
+    return flags
 }
 
 internal fun JSONObject.toUvirBandSample(): SensorSample =

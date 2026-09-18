@@ -5,7 +5,8 @@ import androidx.compose.ui.graphics.Color
 internal data class AlertSessionChartPoint(
     val timestamp: Long,
     val value: Double,
-    val threshold: Double
+    val threshold: Double,
+    val outOfRange: Boolean = false
 )
 
 internal data class AlertSessionChartSeries(
@@ -44,7 +45,8 @@ internal fun alertSessionChartSeries(
                 AlertSessionChartPoint(
                     timestamp = entry.timestamp,
                     value = violation.value,
-                    threshold = violation.rule.threshold.toDouble()
+                    threshold = violation.rule.threshold.toDouble(),
+                    outOfRange = entry.qualityFlags.isOutOfRange(violation.rule.metric)
                 )
             pointsByMetric
                 .getOrPut(violation.rule.metric) { mutableListOf() }

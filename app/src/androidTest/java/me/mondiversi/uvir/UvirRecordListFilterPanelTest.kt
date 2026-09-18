@@ -36,12 +36,13 @@ class UvirRecordListFilterPanelTest {
                 Column(Modifier.fillMaxSize()) {
                     UvirRecordListFilterButton(filters.isActive, true) { open = !open }
                     if (open) UvirRecordListFilterPanel(filters, mapOf("1" to "Sensor A"),
-                        setOf(true, false), { filters = it })
+                        setOf(true, false), { filters = it }, notes = listOf("Garden"))
                 }
             }
         }
         compose.onNodeWithTag("list-filter-toggle").performClick()
-        compose.onNodeWithTag("filter-note").performTextInput("Garden")
+        compose.onNodeWithTag("filter-note").performTouchInput { click(center) }
+        compose.onNodeWithTag("filter-choice-option-Garden").performClick()
         compose.onNodeWithTag("list-filter-toggle").performClick()
         compose.onNodeWithTag("filter-note").assertDoesNotExist()
         compose.onNodeWithTag("list-filter-toggle").performClick()
@@ -88,17 +89,31 @@ class UvirRecordListFilterPanelTest {
         compose.runOnIdle { assertEquals(expected, state!!.value) }
     }
 
-    @Test fun idFieldUsesExactDigitsWithoutModifyingOtherCriteria() {
+    @Test fun idChoiceUsesAnExistingIdentifierWithoutModifyingOtherCriteria() {
         var filters by mutableStateOf(UvirRecordListFilters(note = "Garden"))
         compose.setContent {
             MaterialTheme { UvirRecordListFilterPanel(filters, mapOf("1" to "Sensor A"),
-                setOf(true, false), { filters = it }) }
+                setOf(true, false), { filters = it }, recordIds = listOf(123)) }
         }
-        compose.onNodeWithTag("filter-id").performScrollTo().performTextInput("x123")
+        compose.onNodeWithTag("filter-id").performScrollTo().performTouchInput { click(center) }
+        compose.onNodeWithTag("filter-choice-option-123").performClick()
         compose.runOnIdle {
             assertEquals("123", filters.recordId)
             assertEquals("Garden", filters.note)
         }
+    }
+    @Test fun controlsFollowIdDateModeSensorNoteOrder() {
+        compose.setContent {
+            MaterialTheme { UvirRecordListFilterPanel(UvirRecordListFilters(),
+                mapOf("1" to "Sensor A"), setOf(true, false), {},
+                recordIds = listOf(1), sessionIds = listOf(10), notes = listOf("Garden"),
+                dates = listOf(0L)) }
+        }
+        fun top(tag: String) = compose.onNodeWithTag(tag).fetchSemanticsNode().boundsInRoot.top
+        assertTrue(top("filter-id") < top("filter-from"))
+        assertTrue(top("filter-from") < top("filter-mode"))
+        assertEquals(top("filter-mode"), top("filter-sensor"), 0.5f)
+        assertTrue(top("filter-mode") < top("filter-note"))
     }
     @Test fun panelMatchesTheListBackgroundAndFieldsStayReadableInBothThemes() {
         val night = mutableStateOf(false)

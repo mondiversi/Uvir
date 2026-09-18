@@ -47,11 +47,15 @@
     <string name="automatic_completed_count">%1$d автоматические измерения сохранены.</string>
     <plurals name="automatic_session_details">
         <item quantity="one">%1$s · (%2$d)</item>
+        <item quantity="few">%1$s · (%2$d)</item>
+        <item quantity="many">%1$s · (%2$d)</item>
         <item quantity="other">%1$s · (%2$d)</item>
     </plurals>
     <string name="session_label">Сессия</string>
     <plurals name="alert_session_details">
         <item quantity="one">%1$s · (%2$d)</item>
+        <item quantity="few">%1$s · (%2$d)</item>
+        <item quantity="many">%1$s · (%2$d)</item>
         <item quantity="other">%1$s · (%2$d)</item>
     </plurals>
 
@@ -63,14 +67,18 @@
     <string name="share_measurements">Поделиться измерениями</string>
     <string name="share_all_measurements_question">Поделиться всеми сохраненными измерениями?</string>
     <string name="share_all_measurements_warning">Никакие измерения не выбраны, поэтому все сохраненные измерения будут доступны.</string>
-    <string name="choose_share_format">Выберите формат обмена</string>
-    <string name="share_as_csv">CSV</string>
-    <string name="share_as_readable_table">Читабельная таблица</string>
-    <string name="share_as_charts">Графики</string>
+    <string name="choose_share_format">Выберите формат экспорта</string>
+    <string name="share_as_csv">Электронная таблица (CSV)</string>
+    <string name="share_as_readable_table">Читабельная таблица (TXT)</string>
+    <string name="acquisition_position_label">Позиция</string>
+    <string name="session_variant_heading">Вариант %1$d/%2$d</string>
+    <string name="session_variant_chart_files_info">Будет создано файлов PNG: %1$d, по одному для каждого варианта.</string>
+    <string name="export_total_label">Итого</string>
+    <string name="share_as_charts">График (PNG)</string>
     <string name="share_as_charts_description">Экспортирует три диаграммы облучённости и одну диаграмму биологических эффектов в виде четырёх отдельных изображений PNG.</string>
     <string name="share_acquisition_list_charts_description">Экспортирует три графика облучённости и один график биологических эффектов в виде четырёх отдельных изображений PNG для каждого выбранного отдельного измерения или сеанса.</string>
     <string name="share_alert_list_charts_description">Экспортирует три графика облучённости и один график биологических эффектов в виде четырёх отдельных изображений PNG для каждого выбранного отдельного оповещения о значении или сеанса.</string>
-    <string name="share_partial_session_warning">Неполные выборки сеанса экспортируются как отдельные измерения: каждое измерение создает собственные диаграммы освещенности и биологических эффектов вместо полных диаграмм сеанса.</string>
+    <string name="share_partial_session_warning">Частично выбранные сеансы экспортируются как отдельные измерения: каждое измерение создаёт собственный график облучённости и биологических эффектов вместо общего графика сеанса.</string>
     <string name="share_partial_alert_session_warning">Выборки сеансов оповещений о неполных значениях экспортируются как отдельные оповещения с отдельной диаграммой для каждого оповещения.</string>
     <string name="share_as_both">Оба</string>
     <string name="share">ПОДЕЛИТЬСЯ</string>
@@ -78,6 +86,8 @@
     <string name="delete_selected_measurements_question">Удалить выбранные измерения?</string>
     <plurals name="delete_selected_measurements_warning">
         <item quantity="one">%1$d Выбранное измерение будет удалено без возможности восстановления.</item>
+        <item quantity="few">%1$d выбранных измерения будут удалены без возможности восстановления.</item>
+        <item quantity="many">%1$d выбранных измерений будут удалены без возможности восстановления.</item>
         <item quantity="other">%1$d Выбранные измерения будут удалены без возможности восстановления.</item>
     </plurals>
     <string name="share_measurement_id_label">идентификатор измерения</string>
@@ -106,14 +116,17 @@
     <string name="automatic_notification_title">Выполняется автоматическое измерение</string>
     <plurals name="automatic_notification_saved">
         <item quantity="one">Измерение %1$d сохранено.</item>
+        <item quantity="few">%1$d измерения сохранены.</item>
+        <item quantity="many">%1$d измерений сохранено.</item>
         <item quantity="other">Измерения %1$d сохранены.</item>
     </plurals>
     <string name="threshold_notification_channel_name">пороговые оповещения</string>
     <string name="threshold_notification_channel_description">Активные оповещения для настроенных значений.</string>
     <string name="threshold_notification_title">Оповещение в процессе</string>
-    <string name="threshold_notification_value">Значение оповещения: %1$.3f %2$s</string>
+    <string name="threshold_notification_value">Значение оповещения: %1$s %2$s</string>
     <string name="threshold_notification_last_measurement">Последнее измерение: %1$s</string>
     <string name="interval">Интервал</string>
+    <string name="execution_interval">Интервал выполнения</string>
     <string name="hours">Часы</string>
     <string name="minutes">Минуты</string>
     <string name="seconds">Секунды</string>
@@ -145,14 +158,16 @@
 
     <string name="acquisition_parameters">Настройки</string>
     <string name="connectivity">Возможности подключения</string>
-    <string name="settings_section_sensor_connection">Подключение датчика</string>
-    <string name="settings_section_sensor_parameters">Управление датчиком</string>
+    <string name="settings_section_sensor_connection">Подключение</string>
+    <string name="settings_section_sensor_parameters">Управление</string>
+    <string name="settings_category_sensor">Датчик</string>
+    <string name="settings_category_phone">Телефон</string>
     <string name="sensor_settings_connection_required">Подключите датчик, чтобы изменить эти настройки.</string>
     <string name="sensor_parameters_description">Настройте работу и поведение датчика.</string>
     <string name="home_sensor_disconnected_title">Датчик не подключён</string>
     <string name="home_sensor_disconnected_description">Подключите датчик для сбора данных, записи предупреждений или изменения настроек датчика.</string>
     <string name="home_sensor_disconnected_hint">Откройте «Настройки» &gt; «Подключение датчика», выберите USB, Wi-Fi или Bluetooth и просмотрите инструкции по подключению.</string>
-    <string name="sensor_connection_provisioning_reminder">Чтобы использовать Wi-Fi или Bluetooth, физически подключите датчик с помощью USB хотя бы один раз. Uvir безопасно получит свою уникальную идентификацию и учетные данные доступа.</string>
+    <string name="sensor_connection_provisioning_reminder">Чтобы использовать Wi-Fi или Bluetooth, подключите датчик по USB хотя бы один раз. Приложение безопасно получит уникальный идентификатор и учётные данные доступа датчика.</string>
     <string name="sensor_connection_usb">USB</string>
     <string name="sensor_connection_wifi">Wi-Fi</string>
     <string name="sensor_connection_bluetooth">Bluetooth</string>
@@ -161,7 +176,7 @@
     <string name="sensor_radio_usb_control_description">Вы можете изменить этот параметр с помощью USB или через другое активное беспроводное соединение. Если оба радиомодуля отключены, для повторного включения одного из них потребуется USB.</string>
     <string name="sensor_radio_setting_updated">Настройки сенсорного радио обновлены.</string>
     <string name="sensor_radio_setting_usb_required">Датчик не подключен. Используйте USB, Wi-Fi или Bluetooth и повторите попытку.</string>
-    <string name="sensor_usb_priority_description">Соединение по умолчанию и приоритетное при вставленном кабеле. Вы по-прежнему можете выбрать Wi-Fi или Bluetooth вручную из исходного меню.</string>
+    <string name="sensor_usb_priority_description">Подключение по умолчанию и приоритетное при вставленном кабеле.</string>
     <string name="sensor_source_title">Источник датчика</string>
     <string name="sensor_source_accessibility">Источник датчика: %1$s</string>
     <string name="sensor_source_debug_accessibility">Активировано переопределение фиктивных данных</string>
@@ -196,7 +211,7 @@
     <string name="sensor_info_sampling">Выборка</string>
     <string name="sensor_info_synchronization">Синхронизация</string>
     <string name="sensor_info_sensor">Датчик</string>
-    <string name="sensor_info_board">Совет</string>
+    <string name="sensor_info_board">Плата</string>
     <string name="sensor_info_chip">Микроконтроллер</string>
     <string name="sensor_info_cpu">Процессор</string>
     <string name="sensor_info_cpu_value">%1$d MHz · %2$d ядра</string>
@@ -249,8 +264,9 @@
     <string name="sensor_info_peak_power">Пиковая мощность</string>
     <string name="sensor_info_reference_voltage">Опорное напряжение</string>
     <string name="sensor_info_power_estimate_note">Оценка программного обеспечения на основе активного соединения, выборки и показателей. Для фактического потребления требуется внешний измеритель мощности.</string>
-    <string name="sensor_wifi_esp32_description">Телефон и датчик должны использовать одну и ту же сеть Wi-Fi. Вы можете сохранить или изменить сеть через USB или через уже активное и проверенное соединение Wi-Fi или Bluetooth. Если беспроводное соединение недоступно, используйте USB.</string>
-    <string name="sensor_bluetooth_esp32_description">Первое соединение USB надежно связывает датчик с этим телефоном. Выберите Bluetooth в качестве источника при подключенном кабеле, затем выполните сопряжение отображаемого устройства Uvir в настройках Android. Соединение прямое и аутентифицированное.</string>
+    <string name="sensor_wifi_esp32_description">Приложение связывается с датчиком, когда оба используют одну сеть Wi-Fi.</string>
+    <string name="sensor_connection_configuration_paths_description">Вы можете сохранять или изменять беспроводные сети через USB или через уже активное и аутентифицированное беспроводное соединение. Если беспроводное соединение недоступно, используйте USB.</string>
+    <string name="sensor_bluetooth_esp32_description">Выполните сопряжение датчика в настройках Bluetooth Android; его соединение с приложением прямое и аутентифицированное.</string>
     <string name="sensor_calibration_estimate_description">Значения VIS/NIR являются оценками в µW/cm², полученными на основе типичной чувствительности AS7343 из таблицы данных. Для абсолютной калибровки этого физического модуля по-прежнему требуется калиброванный оптический эталон.</string>
     <string name="sensor_provisioning_hint">Подключите этот датчик один раз с помощью USB, чтобы безопасно получить его уникальное имя и учетные данные доступа.</string>
     <string name="sensor_associated_value">Идентификатор связанного датчика: %1$s</string>
@@ -288,7 +304,7 @@
     <string name="invalid_acquisition_parameters">Используйте от 1 до 21 выборки и интервал от 150 до 5000 мс.</string>
     <string name="parameters_saved">Настройки сохранены.</string>
     <string name="threshold_alerts_title">Оповещение о значении</string>
-    <string name="threshold_alerts_description">Используйте колокольчик на каждой группе на главном экране, затем выберите значение и его предел. Здесь вы можете установить повтор и звук.</string>
+    <string name="threshold_alerts_description">Используйте колокольчик каждой группы на главном экране, чтобы настроить значения и пределы. Здесь можно выбрать звук оповещения.</string>
     <string name="threshold_alerts_select_values">Ценности и ограничения</string>
     <string name="threshold_alerts_value">Значение для мониторинга</string>
     <string name="threshold_channel_uv_total">Ультрафиолетовый</string>
@@ -311,7 +327,7 @@
     <string name="threshold_rule_below_summary">Срабатывает, когда значение равно или ниже предела.</string>
     <string name="threshold_value_label">Порог (µW/cm²)</string>
     <string name="threshold_value_biological_label">Порог (эквивалент µW/cm²)</string>
-    <string name="threshold_repeat_label">Повторять оповещение каждые</string>
+    <string name="threshold_repeat_label">Интервал проверки</string>
     <string name="threshold_duration_label">Продолжительность звука (секунды)</string>
     <string name="threshold_sound_label">Звук</string>
     <string name="threshold_sound_silent">Тихий</string>
@@ -361,12 +377,16 @@
     <string name="share_all_alerts_warning">Оповещения о значениях не выбраны, поэтому все записанные оповещения о значениях будут переданы.</string>
     <string name="delete_selected_alerts_question">Удалить выбранные оповещения?</string>
     <plurals name="delete_selected_alerts_warning">
-        <item quantity="one">Выбранное оповещение будет удалено навсегда.</item>
+        <item quantity="one">%1$d выбранное оповещение будет удалено навсегда.</item>
+        <item quantity="few">%1$d выбранных оповещения будут безвозвратно удалены.</item>
+        <item quantity="many">%1$d выбранных оповещений будут безвозвратно удалены.</item>
         <item quantity="other">Выбранные оповещения %1$d будут безвозвратно удалены.</item>
     </plurals>
     <string name="threshold_alerts_deleted">Оповещения удалены.</string>
     <plurals name="threshold_alert_count_since">
         <item quantity="one">%1$d сохранен · с момента %2$s</item>
+        <item quantity="few">%1$d сохранено · с момента %2$s</item>
+        <item quantity="many">%1$d сохранено · с момента %2$s</item>
         <item quantity="other">%1$d сохранен · с момента %2$s</item>
     </plurals>
     <string name="threshold_alert_export_subject">Uvir Журнал оповещений о пороговых значениях</string>
@@ -378,15 +398,27 @@
     <string name="threshold_log_violation_below">%1$s: %2$s µW/cm² ≤ %3$s µW/cm²</string>
     <string name="threshold_log_biological_violation_above">%1$s: %2$s µW/cm² экв. ≥ %3$s µW/cm² экв.</string>
     <string name="threshold_log_biological_violation_below">%1$s: %2$s µW/cm² экв. ≤ %3$s µW/cm² экв.</string>
-    <string name="settings_section_numeric_format">Числовой формат</string>
-    <string name="numeric_format_description">Выберите, как цифры будут отображаться в приложении. Экспортируемый или общий контент всегда использует международный числовой формат.</string>
+    <string name="settings_section_numeric_format">Региональные форматы</string>
+    <string name="numeric_format_description">Выберите формат чисел.</string>
+    <string name="format_numbers_heading">Числа</string>
+    <string name="format_date_time_heading">Дата</string>
+    <string name="format_time_heading">Время</string>
+    <string name="time_format_description">Выберите формат времени.</string>
+    <string name="time_format_system">По умолчанию</string>
+    <string name="time_format_24_hours">24 часа</string>
+    <string name="time_format_12_hours">12 часов</string>
+    <string name="date_format_description">Выберите формат даты.</string>
+    <string name="date_format_system">По умолчанию</string>
+    <string name="date_format_international">Международный</string>
+    <string name="date_format_european">Европейский</string>
+    <string name="date_format_american">Американский</string>
     <string name="numeric_format_system">По умолчанию</string>
     <string name="numeric_format_international">Международный</string>
-    <string name="numeric_format_international_example">1,000.23</string>
+    <string name="numeric_format_international_example">1 000.23</string>
     <string name="numeric_format_european">Европейский</string>
     <string name="numeric_format_european_example">1.000,23</string>
     <string name="settings_section_language">Язык</string>
-    <string name="language_description">Выберите язык интерфейса приложения. Экспортируемый или общий контент всегда использует английский язык.</string>
+    <string name="language_description">Выберите язык интерфейса.</string>
     <string name="language_system">По умолчанию</string>
     <string name="language_italian">Italiano</string>
     <string name="language_english">English</string>
@@ -450,6 +482,8 @@
     <string name="delete_all">УДАЛИТЬ ВСЕ</string>
     <plurals name="measurement_count_since">
         <item quantity="one">%1$d сохранен · с момента %2$s</item>
+        <item quantity="few">%1$d сохранено · с момента %2$s</item>
+        <item quantity="many">%1$d сохранено · с момента %2$s</item>
         <item quantity="other">%1$d сохранен · с момента %2$s</item>
     </plurals>
     <string name="no_saved_measurements">Измерения не сохранены.</string>
@@ -461,6 +495,7 @@
     <string name="delete">УДАЛИТЬ</string>
     <string name="saved_measurement">СОХРАНЕННОЕ ИЗМЕРЕНИЕ</string>
     <string name="note">Примечание</string>
+    <string name="edit_note">Изменить примечание</string>
     <string name="no_note">Нет примечания</string>
 
     <string name="automatic_badge">А</string>
@@ -469,6 +504,7 @@
     <string name="acquisition_type">тип измерения</string>
     <string name="automatic_measurement">Автоматический</string>
     <string name="manual_measurement">Руководство</string>
+    <string name="external_measurement">Внешняя</string>
 
     <string name="uv_radiation">Ультрафиолетовый</string>
     <string name="hev_description">Видимая энергия высокой энергии</string>
@@ -501,7 +537,7 @@
     <string name="about_description">Приложение для спектрального измерения ультрафиолетового, видимого и инфракрасного излучения.</string>
     <string name="about_spectral_ranges">Спектральные диапазоны: Ультрафиолет • Видимый свет • Инфракрасное излучение</string>
     <string name="about_sensors">Поддерживаемые датчики: AS7331 UV • AS7343 мультиспектральный</string>
-    <string name="about_derived_values">HEV, HEB и предполагаемые биологические эффекты представляют собой производные значения, рассчитанные на основе полученных спектральных данных.</string>
+    <string name="about_derived_values">Оценочные биологические эффекты — это производные значения, рассчитанные на основе полученных спектральных данных.</string>
     <string name="biological_model_version">Биологическая модель: %1$s.</string>
     <string name="about_copyright">© 2026 Мондиверси</string>
     <string name="about_license">Лицензия: Стандартная общественная лицензия GNU v3.0.</string>
@@ -545,7 +581,7 @@
     <string name="acquisition_chart_share_current">Текущий раздел</string>
     <string name="acquisition_chart_share_current_description">Делится диаграммами в разделе %1$s.</string>
     <string name="acquisition_chart_share_all">Все графики</string>
-    <string name="acquisition_chart_share_all_description">Экспортирует три диаграммы облучённости и одну диаграмму биологических эффектов в виде четырёх отдельных файлов PNG.</string>
+    <string name="acquisition_chart_share_all_description">Экспортирует все разделы графиков в одном изображении PNG.</string>
     <string name="acquisition_chart_share_error">Невозможно поделиться таблицей измерений.</string>
     <string name="acquisition_chart_date">Приобретено: %1$s</string>
     <string name="acquisition_chart_note">Примечание об измерениях</string>
@@ -554,6 +590,8 @@
     <string name="chart_biological_unit">µW/cm² equiv.</string>
     <plurals name="session_chart_acquisition_count">
         <item quantity="one">%1$d измерение</item>
+        <item quantity="few">%1$d измерения</item>
+        <item quantity="many">%1$d измерений</item>
         <item quantity="other">%1$d измерения</item>
     </plurals>
     <string name="alert_session_chart_title">сеанс оповещения о пороге</string>
@@ -577,6 +615,8 @@
     <string name="alert_session_chart_threshold">Порог %1$s %2$s %3$s</string>
     <plurals name="alert_session_chart_alert_count">
         <item quantity="one">Оповещение о пороге %1$d</item>
+        <item quantity="few">%1$d оповещения о пороге</item>
+        <item quantity="many">%1$d оповещений о пороге</item>
         <item quantity="other">Оповещения о пороговых значениях %1$d</item>
     </plurals>
     <string name="alert_chart_title">пороговое оповещение</string>
@@ -657,7 +697,7 @@
     <string name="sensor_automatic_shutdown">Автоматическое выключение</string>
     <string name="sensor_automatic_shutdown_description">Если нет активных операций или синхронизации и приложение остаётся отключённым, датчик переходит в энергосберегающее выключение через выбранное время. Затем его нужно активировать физически.</string>
     <string name="sensor_automatic_shutdown_after">Выключить через</string>
-    <string name="sensor_status_led">Светодиодный индикатор состояния датчика</string>
+    <string name="sensor_status_led">Светодиодный индикатор состояния</string>
     <string name="sensor_status_led_description">Использует светодиод RGB для состояния соединения и синхронизации, а также отдельный синий светодиод для активных операций и записанных событий.</string>
     <string name="sensor_led_info_title">Светодиодные сигналы датчика</string>
     <string name="sensor_led_info_action">Объяснение сигналов светодиодов датчика</string>
@@ -676,10 +716,12 @@
     <string name="sensor_led_signal_operation_active_description">Сеанс, синхронизация или другая операция.</string>
     <string name="sensor_led_signal_recorded">Синий LED · 3 вспышки</string>
     <string name="sensor_led_signal_recorded_description">Измерение/оповещение о значениях.</string>
+    <string name="sensor_led_signal_time_unavailable">Синий LED · 5 быстрых вспышек</string>
+    <string name="sensor_led_signal_time_unavailable_description">Измерение не записано: дата и время недоступны.</string>
     <string name="sensor_connection_toast_connected">Датчик подключён</string>
     <string name="sensor_connection_toast_disconnected">Датчик не подключён</string>
     <string name="sensor_led_brightness">Яркость светодиода</string>
-    <string name="sensor_status_buzzer">Зуммер состояния датчика</string>
+    <string name="sensor_status_buzzer">Зуммер состояния</string>
     <string name="sensor_status_buzzer_description">Воспроизводит звуки состояния подключения, начала или остановки активности, а также новые записи.</string>
     <string name="sensor_buzzer_volume">Громкость зуммера</string>
     <string name="sensor_buzzer_info_title">Звуковые сигналы датчиков</string>
@@ -703,7 +745,7 @@
     <string name="threshold_repeat_connection_required">Подключите датчик, чтобы изменить интервал оповещения.</string>
     <string name="threshold_rules_connection_required">Подключите датчик, чтобы изменить эти оповещения.</string>
     <string name="threshold_repeat_sensor_description">Этот интервал сохраняется в датчике, а также ограничивает количество оповещений, записываемых, когда приложение отключено.</string>
-    <string name="sensor_calibration_title">Калибровка датчика</string>
+    <string name="sensor_calibration_title">Калибровка</string>
     <string name="sensor_calibration_description">Примените поправочные коэффициенты, полученные путем сравнения с калиброванным эталонным прибором. Коэффициент 1,000 сохраняет оценку таблицы данных по умолчанию.</string>
     <string name="sensor_calibration_visible_factor">Поправочный коэффициент VIS/NIR · AS7343</string>
     <string name="sensor_calibration_uv_factor">Поправочный коэффициент УФ · AS7331</string>
@@ -723,16 +765,16 @@
     <string name="language_russian">Русский</string>
     <string name="language_turkish">Türkçe</string>
     <string name="sensor_connection_internet">Интернет</string>
-    <string name="sensor_internet_description">Подключайтесь к датчику удалённо через защищённый MQTT-брокер. Открывать порты на роутере не требуется.</string>
+    <string name="sensor_internet_description">Приложение подключается к датчику удалённо через защищённый MQTT-брокер. Открывать порты на роутере не требуется. Приложение и датчик устанавливают исходящие соединения, поэтому это работает также с мобильными роутерами и CGNAT.</string>
     <string name="sensor_internet_enabled">Включить подключение через Интернет</string>
     <string name="sensor_internet_enabled_description">Оставляет датчик доступным через настроенный MQTT-брокер.</string>
     <string name="sensor_internet_use_primary_wifi">Использовать ту же сеть Wi-Fi</string>
     <string name="sensor_internet_use_primary_wifi_description">Использует сеть, уже настроенную в разделе Wi-Fi.</string>
     <string name="sensor_internet_relay_host_label">Адрес MQTT-брокера</string>
+    <string name="sensor_internet_relay_host_supporting">Только имя хоста: без протокола, порта и пути.</string>
     <string name="sensor_internet_relay_port_label">Порт TLS</string>
     <string name="sensor_internet_mqtt_username_label">Имя пользователя MQTT</string>
     <string name="sensor_internet_mqtt_password_label">Пароль MQTT</string>
-    <string name="sensor_internet_relay_hint">Введите адрес MQTT-брокера, порт TLS и учётные данные. Датчик и приложение устанавливают исходящие соединения, поэтому это работает также с мобильными роутерами и CGNAT.</string>
     <string name="sensor_internet_invalid">Проверьте настройки подключения к Интернету.</string>
     <string name="sensor_selector_label">Датчик</string>
     <string name="sensor_name_label">Имя датчика</string>
@@ -802,6 +844,8 @@
     <string name="diagnostic_failed">Не удалось завершить диагностический тест.</string>
     <string name="debug_secret_melody_found">Вы нашли секретную мелодию</string>
     <string name="conditional_acquisition">Измерять, если</string>
+    <string name="external_command">Внешняя команда</string>
+    <string name="external_command_description">Измерение сохраняется только тогда, когда датчик обнаруживает команду на внешнем входе. Заметка сеанса сохраняется; интервал, отложенный запуск, завершение, предел и условия измерения игнорируются.</string>
     <string name="conditional_waiting">Ожидание условия…</string>
     <string name="conditional_description">Задайте значения и пороги измерения. Условия копируются на датчик при запуске сеанса.</string>
     <string name="conditional_when">Условие</string>
@@ -815,6 +859,8 @@
     <string name="conditional_no_rules">Перед запуском настройте хотя бы одно условие.</string>
     <string name="sensor_buzzer_signal_alert_saved">Три коротких сигнала подряд</string>
     <string name="sensor_buzzer_signal_alert_saved_description">Запись оповещения о значениях.</string>
+    <string name="sensor_buzzer_signal_time_unavailable">Один продолжительный сигнал</string>
+    <string name="sensor_buzzer_signal_time_unavailable_description">Измерение не записано: дата и время недоступны.</string>
     <string name="conditional_configure">Настроить условия</string>
     <string name="conditional_editor_title">Условия измерения</string>
     <string name="conditional_start_description">Проверяет каждый образец. Как только условие выполнено, сразу начинает сбор измерения и отсчёт интервала.</string>
@@ -824,6 +870,8 @@
     <string name="list_filters">Фильтры</string>
     <string name="list_filter_all">Все</string>
     <string name="list_filter_all_modes">Все</string>
+    <string name="list_filter_all_notes">Все</string>
+    <string name="list_filter_all_dates">Все</string>
     <string name="list_filter_from">С</string>
     <string name="list_filter_until">По</string>
     <string name="list_filter_reset">Сбросить фильтры</string>
@@ -832,4 +880,98 @@
     <string name="list_filter_count">Показано %1$d из %2$d</string>
     <string name="list_filter_share_question">Поделиться всеми показанными результатами?</string>
     <string name="list_filter_share_warning">Записи не выбраны. Будут отправлены все записи, соответствующие текущим фильтрам.</string>
+    <string name="settings_section_language_formats">Единицы и форматы</string>
+    <string name="settings_section_sharing_export">Экспорт</string>
+    <string name="export">ЭКСПОРТ</string><string name="import_settings">ИМПОРТ</string>
+    <string name="export_saved_successfully">Файлы сохранены.</string><string name="export_save_failed">Не удалось сохранить файлы.</string>
+    <string name="export_destination_description">Сохраните файлы на устройстве или поделитесь ими с другим приложением.</string>
+    <string name="export_settings_title">Экспорт настроек</string><string name="export_app_settings">Настройки приложения</string>
+    <string name="export_app_settings_description">Интерфейс, форматы и настройки телефона. Записи не включаются.</string>
+    <string name="export_sensor_settings">Настройки датчика</string><string name="export_sensor_settings_description">Калибровка, выборка и рабочие параметры. Учетные данные и сетевые адреса не включаются.</string>
+    <string name="settings_export_failed">Не удалось экспортировать настройки.</string><string name="settings_import_failed">Выбранный файл настроек недействителен или не может быть импортирован.</string>
+    <plurals name="settings_imported_count"><item quantity="one">Импортирован %d файл настроек.</item><item quantity="few">Импортировано %d файла настроек.</item><item quantity="many">Импортировано %d файлов настроек.</item><item quantity="other">Импортировано %d файла настроек.</item></plurals>
+    <string name="language_formats_description">Выберите, как данные отображаются и форматируются в приложении.</string>
+    <string name="export_format_heading">Экспорт</string>
+    <string name="irradiance_measurement_heading">Измерение облучённости</string>
+    <string name="irradiance_measurement_description">Выберите единицу отображения облучённости. Сохранённые значения сохраняют исходную точность датчика.</string>
+    <string name="export_format_description">Выберите, будут ли CSV, читаемые таблицы и графики использовать выбранные настройки или международный научный профиль.</string>
+    <string name="export_profile_heading">Формат</string>
+    <string name="export_format_selected">Выбранные язык и форматы</string>
+    <string name="export_format_international">Международный научный</string>
+    <string name="export_format_preview_heading">Предпросмотр</string>
+    <string name="export_format_profile_summary">Язык: %1$s · Числа: %2$s · Дата: %3$s · Время: %4$s · Облучённость: %5$s</string>
+    <string name="out_of_range_short">OL - Вне диапазона</string>
+    <string name="out_of_range_csv_header">Значение_вне_диапазона</string>
+    <string name="debug_fake_out_of_range">Значения вне диапазона</string>
+    <string name="debug_fake_out_of_range_description">Иногда имитирует значения вне диапазона.</string>
+    <string name="language_english_localized">Английский</string>
+    <string name="sensor_info_scale_sensitivity">Диапазон и чувствительность</string>
+    <string name="sensor_info_display_scale">Шкала отображения</string>
+    <string name="sensor_info_selected_unit">Выбранная единица</string>
+    <string name="sensor_info_scale_equivalence">Эквивалентность шкал</string>
+    <string name="sensor_info_scale_levels">Уровни диапазона</string>
+    <string name="sensor_info_as7343_scale_levels">Автоматическое усиление: 16×, 32×, 64×, 128×, 256×, 512× или 1024×; измерение начинается с 256×. Интегрирование остаётся 27,8 мс на цикл SMUX, три цикла на полный спектр.</string>
+    <string name="sensor_info_range_control">Управление диапазоном</string>
+    <string name="sensor_info_as7343_range_control">Усиление повышается ниже 250 сырых отсчётов и снижается начиная с 9 200. До трёх измерений выбирают подходящий диапазон.</string>
+    <string name="sensor_info_precision">Точность</string>
+    <string name="sensor_info_precision_note">Каждое удвоение усиления удваивает сырой отклик на слабый свет, но примерно вдвое уменьшает запас до насыщения. Это улучшает чувствительность и разрешение, но не точность калибровки; единица отображения не влияет.</string>
+    <string name="sensor_info_status">Состояние</string>
+    <string name="sensor_info_as7331_scale_pending">Текущая прошивка использует фиксированный профиль измерения драйвера; автоматическая настройка диапазона пока не активна.</string>
+    <string name="sensor_info_as7331_precision_note">Большее усиление или время преобразования улучшит разрешение слабого УФ, уменьшая запас до насыщения. Точные автоматические уровни появятся после проверки с оборудованием AS7331.</string>
+    <string name="settings_section_sounds_and_alerts">Звуки и уведомления</string>
+    <string name="export_database_dialog_title">Экспортировать всю базу данных</string>
+    <string name="export_database_dialog_description">Будет экспортирована вся база данных приложения, хранящаяся на этом телефоне, включая сохранённые измерения и оповещения о значениях.</string>
+    <string name="export_error_log_dialog_title">Экспортировать журнал ошибок</string>
+    <string name="export_error_log_dialog_description">Журнал ошибок приложения, хранящийся на этом телефоне, будет экспортирован как технический файл. Сохранённые измерения и учётные данные не включаются.</string>
+    <string name="export_diagnostic_dialog_title">Экспортировать диагностический отчёт</string>
+    <string name="export_diagnostic_dialog_description">Будет экспортирован диагностический отчёт датчика. Он содержит технические результаты теста, но не пароли или учётные данные.</string>
+    <string name="acquisition_feedback_description">Выберите сигнал приложения при сохранении ручного или автоматического измерения.</string>
+    <string name="acquisition_feedback_preview_hint">Коснитесь варианта для проверки. Итоговая громкость также зависит от громкости будильника телефона.</string>
+    <string name="confirmation_question_suffix">?</string>
+    <string name="threshold_alerts_sound_description_v2">Выберите сигнал приложения при регистрации оповещения о значении.</string>
+    <string name="export_all_measurements_question">Экспортировать все сохранённые измерения?</string>
+    <string name="export_all_measurements_warning">Измерения не выбраны, поэтому будут экспортированы все сохранённые измерения.</string>
+    <string name="export_all_alerts_question">Экспортировать все записанные оповещения о значениях?</string>
+    <string name="export_all_alerts_warning">Оповещения о значениях не выбраны, поэтому будут экспортированы все записанные оповещения.</string>
+    <string name="list_filter_export_question">Экспортировать все показанные результаты?</string>
+    <string name="list_filter_export_warning">Записи не выбраны. Будут экспортированы все записи, соответствующие текущим фильтрам.</string>
+    <string name="export_all">ЭКСПОРТИРОВАТЬ ВСЕ</string>
+    <string name="settings_include_sensitive_information">Включить конфиденциальные данные</string>
+    <string name="settings_include_sensitive_information_description">Включает учетные данные подключения. Потребуется пароль шифрования.</string>
+    <string name="settings_encryption_password_title">Пароль шифрования</string>
+    <string name="settings_encryption_password_description">Задайте пароль не менее чем из восьми символов для шифрования файла настроек датчика. Этот же пароль понадобится для последующего импорта.</string>
+    <string name="settings_encryption_password">Пароль шифрования</string>
+    <string name="settings_encryption_password_confirm">Подтвердите пароль</string>
+    <string name="settings_encryption_password_too_short">Используйте не менее %1$d символов.</string>
+    <string name="settings_encryption_password_mismatch">Пароли не совпадают.</string>
+    <string name="settings_encrypt">ЗАШИФРОВАТЬ</string>
+    <string name="settings_decryption_password_title">Разблокировать резервную копию?</string>
+    <string name="settings_decryption_password_description">Эта копия зашифрована. Введите пароль, использованный при экспорте.</string>
+    <string name="settings_decryption_password_incorrect">Неверный пароль или поврежденный файл.</string>
+    <string name="settings_decrypt">РАЗБЛОКИРОВАТЬ</string>
+    <string name="export_sensor_settings_description_complete">Калибровка, выборка, рабочие параметры и настройки подключения.</string>
+    <string name="sensor_external_command_description">Показывает реакцию датчика на команды внешнего входа.</string>
+    <string name="sensor_external_command_info_action">Описание команд внешнего входа</string>
+    <string name="sensor_external_command_info_description">Входом можно управлять кнопкой, сухим контактом или реле. Для работы требуются корректные дата и время.</string>
+    <string name="sensor_external_command_short">Короткое нажатие</string>
+    <string name="sensor_external_command_short_description">Сохраняет отдельное измерение или следующее измерение активного внешнего сеанса.</string>
+    <string name="sensor_external_command_triple">Три коротких нажатия</string>
+    <string name="sensor_external_command_triple_description">Запускает внешний сеанс. Сами три нажатия не сохраняют измерения.</string>
+    <string name="sensor_external_command_long">Долгое нажатие</string>
+    <string name="sensor_external_command_long_description">Останавливает активный сеанс измерения или оповещений по значениям.</string>
+    <string name="sensor_external_command_active">Сеанс уже активен</string>
+    <string name="sensor_external_command_active_description">Три нажатия игнорируются. Короткие нажатия сохраняют данные только во внешнем сеансе.</string>
+    <string name="sensor_external_command_no_time">Дата и время недоступны</string>
+    <string name="sensor_external_command_no_time_description">Ничего не сохраняется и не запускается; синий светодиод быстро мигает пять раз, а зуммер подаёт длинный сигнал.</string>
+    <string name="session_sequence_filter_title">Настроить варианты</string>
+    <string name="session_sequence_filter_description">Каждая позиция съёмки может включать несколько вариантов, например под разными углами. Выберите число вариантов для каждой позиции.</string>
+    <string name="session_sequence_filter_settings_title">Настройки вариантов</string>
+    <string name="session_sequence_filter_cycle_size">Вариантов на позицию</string>
+    <string name="session_sequence_filter_position">Вариант</string>
+    <string name="session_sequence_filter_preview">Показано измерений: %1$d из %2$d</string>
+    <string name="session_sequence_filter_preview_total">%1$d измерений всего</string>
+    <string name="session_sequence_filter_example">Показанные измерения: %1$d, %2$d, %3$d…</string>
+    <string name="share_charts_combined_groups">Один файл для всех групп</string>
+    <string name="share_charts_separate_groups">Один файл для каждой группы</string>
+    <string name="share_chart_file_count">Файлов PNG: %1$d</string>
 </resources>

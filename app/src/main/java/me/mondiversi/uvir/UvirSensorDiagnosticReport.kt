@@ -91,10 +91,19 @@ internal fun formatUvirSensorDiagnosticReport(
     }
 }
 
-internal fun shareUvirSensorDiagnosticReport(context: Context, text: String, startedAtMs: Long) {
+internal fun shareUvirSensorDiagnosticReport(
+    context: Context,
+    text: String,
+    startedAtMs: Long,
+    destination: UvirExportDestination = UvirExportDestination.SHARE
+) {
     val directory = File(context.cacheDir, "shared").apply { mkdirs() }
     val file = File(directory, "Uvir_Diagnostic_${uvirExportTimestamp(startedAtMs)}.txt")
     file.writeText(text, Charsets.UTF_8)
+    if (destination == UvirExportDestination.SAVE) {
+        requestUvirExportSave(context, listOf(file))
+        return
+    }
     val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
     val intent = Intent(Intent.ACTION_SEND).apply {
         type = "text/plain"

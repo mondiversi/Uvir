@@ -57,7 +57,6 @@ class UvirLiveIslandHeaderTest {
                             group = SensorGroup.UV,
                             title = headerText,
                             total = 1.0,
-                            unit = "µW/cm²",
                             expanded = expanded.value,
                             onToggle = { toggles.incrementAndGet(); expanded.value = !expanded.value },
                             showChart = false,

@@ -18,6 +18,7 @@ enum class UvirBuzzerSignal : uint8_t {
   ActivityStopped,
   Saved,
   AlertSaved,
+  TimeUnavailable,
   SelfTest,
 };
 
@@ -67,6 +68,7 @@ class UvirStatusBuzzer {
   void signalActivityStopped() { request(UvirBuzzerSignal::ActivityStopped); }
   void signalSaved() { request(UvirBuzzerSignal::Saved); }
   void signalAlertSaved() { request(UvirBuzzerSignal::AlertSaved); }
+  void signalTimeUnavailable() { request(UvirBuzzerSignal::TimeUnavailable); }
 
   bool requestSelfTest() {
     if (!enabled_) return false;
@@ -430,6 +432,9 @@ class UvirStatusBuzzer {
       case UvirBuzzerSignal::AlertSaved:
         playAlertSaved();
         break;
+      case UvirBuzzerSignal::TimeUnavailable:
+        playTimeUnavailable();
+        break;
       case UvirBuzzerSignal::SelfTest:
         selfTestActive_ = true;
         playConnected();
@@ -443,6 +448,8 @@ class UvirStatusBuzzer {
         playSaved();
         pauseFor(800);
         playAlertSaved();
+        pauseFor(800);
+        playTimeUnavailable();
         selfTestActive_ = false;
         break;
       case UvirBuzzerSignal::None:
@@ -482,6 +489,7 @@ class UvirStatusBuzzer {
 
   void playSaved() { playRecordPattern(kUvirAcquisitionBeep); }
   void playAlertSaved() { playRecordPattern(kUvirAlertBeep); }
+  void playTimeUnavailable() { toneFor(659, 800); }
 
   void playRecordPattern(const UvirBuzzerRecordPattern &pattern) {
     for (uint8_t index = 0; index < pattern.beepCount && enabled_; ++index) {

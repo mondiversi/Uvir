@@ -4,6 +4,12 @@ import android.content.Context
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -27,22 +33,23 @@ internal fun UvirSamplingAndAlertSettings(
     parametersError: String?,
     alertsSectionExpanded: Boolean,
     onAlertsSectionExpandedChange: (Boolean) -> Unit,
-    alertRepeatHoursText: String,
-    onAlertRepeatHoursTextChange: (String) -> Unit,
-    alertRepeatMinutesText: String,
-    onAlertRepeatMinutesTextChange: (String) -> Unit,
-    alertRepeatSecondsText: String,
-    onAlertRepeatSecondsTextChange: (String) -> Unit,
     alertSoundValue: String,
     onAlertSoundValueChange: (String) -> Unit,
     alertVolume: Float,
     onAlertVolumeChange: (Float) -> Unit,
     onPreviewThresholdAlertSound: (ThresholdAlertSound, Int) -> Unit,
+    acquisitionFeedbackSettings: AcquisitionFeedbackSettings,
+    onAcquisitionFeedbackSettingsChange: (AcquisitionFeedbackSettings) -> Unit,
+    onPreviewAcquisitionFeedback: (ThresholdAlertSound, Int) -> Unit,
     cardColor: Color,
     primaryText: Color,
     secondaryText: Color
 ) {
     val commit = LocalSettingsCommit.current
+    var acquisitionVolumeDraft by
+        remember(acquisitionFeedbackSettings.volume) {
+            mutableFloatStateOf(acquisitionFeedbackSettings.volume.toFloat())
+        }
     val valueCorrectedText =
         stringResource(R.string.value_out_of_limits_corrected)
 
@@ -77,15 +84,11 @@ internal fun UvirSamplingAndAlertSettings(
                 alpha = 0.28f
             )
     ) {
-    Text(
-        text =
-            stringResource(
-                R.string.sampling_sensor_processing_description
-            ),
-        color =
-            secondaryText,
-        fontSize =
-            12.sp
+    SettingsPageDescription(
+        text = stringResource(
+            R.string.sampling_sensor_processing_description
+        ),
+        color = secondaryText
     )
 
     Column(
@@ -145,6 +148,8 @@ internal fun UvirSamplingAndAlertSettings(
         secondaryText = secondaryText,
         enabled = sensorSettingsEnabled
     )
+
+    SettingsGroupDivider(secondaryText)
 
     Column(
         verticalArrangement =
@@ -215,14 +220,22 @@ internal fun UvirSamplingAndAlertSettings(
     }
 
     }
+    val settingsNavigation = LocalUvirSettingsNavigation.current
+    if (settingsNavigation != null && settingsNavigation.selectedPage == null) {
+        UvirSettingsListGroupHeader(
+            title = stringResource(R.string.settings_category_phone),
+            icon = ConnectivityIconType.PHONE,
+            secondaryText = secondaryText
+        )
+    }
     SettingsSection(
         settingsPage = UvirSettingsPage.ALERTS,
         title =
             stringResource(
-                R.string.threshold_alerts_title
+                R.string.settings_section_sounds_and_alerts
             ),
         titleIcon =
-            ConnectivityIconType.ALERT,
+            ConnectivityIconType.SOUND,
         expanded =
             alertsSectionExpanded,
         onExpandedChange = { expanded ->
@@ -239,74 +252,142 @@ internal fun UvirSamplingAndAlertSettings(
         dividerColor =
             secondaryText.copy(
                 alpha = 0.28f
-            )
+            ),
+        contentSpacing = UvirIslandSpacing,
+        wrapDetailContent = false
     ) {
-        Text(
-            text = stringResource(R.string.threshold_alerts_description),
-            color = secondaryText,
-            fontSize = 12.sp,
-            lineHeight = 16.sp
-        )
-
-        Column(
-                verticalArrangement =
-                    Arrangement.spacedBy(UvirSettingsRelatedGap)
+        CompositionLocalProvider(LocalSettingsCommit provides null) {
+            SettingsIsland(
+                containerColor = cardColor,
+                contentColor = primaryText
             ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    CaptureMeasurementIcon(
+                        modifier = Modifier.size(20.dp),
+                        tint = primaryText
+                    )
+                    Text(
+                        text = stringResource(R.string.share_acquisition_label),
+                        modifier = Modifier.padding(start = 10.dp),
+                        color = primaryText,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                SettingsGroupDivider(secondaryText)
+
+                SettingsPageDescription(
+                    text = stringResource(R.string.acquisition_feedback_description),
+                    color = secondaryText
+                )
+
                 Text(
-                    text = stringResource(R.string.threshold_repeat_label),
-                    color =
-                        if (sensorSettingsEnabled) {
-                            primaryText
-                        } else {
-                            secondaryText.copy(alpha = 0.62f)
-                        },
+                    text = stringResource(R.string.threshold_sound_label),
+                    color = primaryText,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Medium
                 )
 
-                DurationFields(
-                    hoursText = alertRepeatHoursText,
-                    minutesText = alertRepeatMinutesText,
-                    secondsText = alertRepeatSecondsText,
-                    onHoursChange = onAlertRepeatHoursTextChange,
-                    onMinutesChange = onAlertRepeatMinutesTextChange,
-                    onSecondsChange = onAlertRepeatSecondsTextChange,
-                    enabled = sensorSettingsEnabled,
-                    maxHours = 24,
-                    onEditingComplete = {
-                        val normalized =
-                            normalizeDuration(
-                                alertRepeatHoursText,
-                                alertRepeatMinutesText,
-                                alertRepeatSecondsText,
-                                minimumTotalSeconds = 1L,
-                                maximumTotalSeconds = MAX_ALERT_REPEAT_SECONDS
+                SettingsChoiceGroup {
+                    listOf(
+                        ThresholdAlertSound.SILENT,
+                        ThresholdAlertSound.VIBRATION,
+                        ThresholdAlertSound.SINGLE_BEEP
+                    ).forEach { sound ->
+                        ThresholdAlertRadioRow(
+                            selected = acquisitionFeedbackSettings.sound == sound,
+                            onClick = {
+                                val updated = acquisitionFeedbackSettings.copy(sound = sound)
+                                onAcquisitionFeedbackSettingsChange(updated)
+                                onPreviewAcquisitionFeedback(sound, updated.volume)
+                            },
+                            label = stringResource(
+                                when (sound) {
+                                    ThresholdAlertSound.SILENT -> R.string.threshold_sound_silent
+                                    ThresholdAlertSound.VIBRATION -> R.string.threshold_sound_vibration
+                                    else -> R.string.threshold_sound_single_beep
+                                }
                             )
-                        onAlertRepeatHoursTextChange(normalized.hoursText)
-                        onAlertRepeatMinutesTextChange(normalized.minutesText)
-                        onAlertRepeatSecondsTextChange(normalized.secondsText)
-                        if (normalized.corrected) {
-                            showUvirBottomMessage(context, valueCorrectedText)
-                        }
+                        )
                     }
-                )
+                }
+
+                if (acquisitionFeedbackSettings.sound == ThresholdAlertSound.SINGLE_BEEP) {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(UvirSettingsRelatedGap)
+                    ) {
+                        Text(
+                            text = stringResource(
+                                R.string.threshold_volume_label,
+                                acquisitionFeedbackSettings.volume
+                            ),
+                            color = primaryText,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+
+                        Slider(
+                            value = acquisitionVolumeDraft,
+                            onValueChange = { value ->
+                                acquisitionVolumeDraft = value
+                            },
+                            onValueChangeFinished = {
+                                val volume =
+                                    acquisitionVolumeDraft.roundToInt().coerceIn(0, 100)
+                                onAcquisitionFeedbackSettingsChange(
+                                    acquisitionFeedbackSettings.copy(volume = volume)
+                                )
+                                onPreviewAcquisitionFeedback(
+                                    acquisitionFeedbackSettings.sound,
+                                    volume
+                                )
+                            },
+                            valueRange = 0f..100f,
+                            steps = 9
+                        )
+                    }
+                }
 
                 Text(
-                    text = stringResource(
-                        R.string.threshold_repeat_sensor_description
-                    ),
-                    color =
-                        if (sensorSettingsEnabled) {
-                            secondaryText
-                        } else {
-                            secondaryText.copy(alpha = 0.62f)
-                        },
-                    fontSize = 11.sp,
-                    lineHeight = 14.sp
+                    text = stringResource(R.string.acquisition_feedback_preview_hint),
+                    color = secondaryText,
+                    fontSize = 11.sp
+                )
+            }
+        }
+
+        SettingsIsland(
+            containerColor = cardColor,
+            contentColor = primaryText
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                ConnectivitySectionIcon(
+                    type = ConnectivityIconType.ALERT,
+                    modifier = Modifier.size(20.dp),
+                    tint = primaryText
+                )
+                Text(
+                    text = stringResource(R.string.threshold_alerts_title),
+                    modifier = Modifier.padding(start = 10.dp),
+                    color = primaryText,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold
                 )
             }
 
-        Column(
+            SettingsGroupDivider(secondaryText)
+
+            SettingsPageDescription(
+                    text = stringResource(R.string.threshold_alerts_sound_description_v2),
+                color = secondaryText
+            )
+
+            Column(
                 verticalArrangement =
                     Arrangement.spacedBy(UvirSettingsRelatedGap)
             ) {
@@ -321,7 +402,12 @@ internal fun UvirSamplingAndAlertSettings(
                 )
 
                 SettingsChoiceGroup {
-                    ThresholdAlertSound.entries
+                    listOf(
+                        ThresholdAlertSound.SILENT,
+                        ThresholdAlertSound.VIBRATION,
+                        ThresholdAlertSound.TRIPLE_BEEP,
+                        ThresholdAlertSound.LONG_BEEP
+                    )
                         .forEach { sound ->
                             ThresholdAlertRadioRow(
                             selected =
@@ -403,6 +489,8 @@ internal fun UvirSamplingAndAlertSettings(
                     color = secondaryText,
                     fontSize = 11.sp
                 )
+        }
+
         }
 
     }

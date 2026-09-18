@@ -35,12 +35,12 @@ class UvirInfraredNamingTest {
     }
 
     @Test fun csvChangesOnlyTheGroupHeaderAndKeepsColumnOrder() {
-        assertTrue("Infrarosso_uW_cm2" in MEASUREMENT_EXPORT_COLUMNS_IT)
-        assertTrue("Infrared_uW_cm2" in MEASUREMENT_EXPORT_COLUMNS_EN)
+        assertTrue("Totale_infrarosso_uW_cm2" in MEASUREMENT_EXPORT_COLUMNS_IT)
+        assertTrue("Infrared_total_uW_cm2" in MEASUREMENT_EXPORT_COLUMNS_EN)
         assertFalse("FarRed_NIR_uW_cm2" in MEASUREMENT_EXPORT_COLUMNS_IT)
         assertFalse("FarRed_NIR_uW_cm2" in MEASUREMENT_EXPORT_COLUMNS_EN)
-        assertEquals(22, MEASUREMENT_EXPORT_COLUMNS_IT.indexOf("Infrarosso_uW_cm2"))
-        assertEquals(22, MEASUREMENT_EXPORT_COLUMNS_EN.indexOf("Infrared_uW_cm2"))
+        assertEquals(35, MEASUREMENT_EXPORT_COLUMNS_IT.indexOf("Totale_infrarosso_uW_cm2"))
+        assertEquals(35, MEASUREMENT_EXPORT_COLUMNS_EN.indexOf("Infrared_total_uW_cm2"))
         assertEquals(MEASUREMENT_EXPORT_COLUMNS_IT.size, MEASUREMENT_EXPORT_COLUMNS_EN.size)
     }
 }
