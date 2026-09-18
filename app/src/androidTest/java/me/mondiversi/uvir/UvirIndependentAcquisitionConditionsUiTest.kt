@@ -83,11 +83,17 @@ class UvirIndependentAcquisitionConditionsUiTest {
             warning = resources.getString(R.string.conditional_no_rules)
             MaterialTheme(colorScheme = if (dark.value) darkColorScheme() else lightColorScheme()) {
                 Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-                    UvirConditionalAcquisitionCard(selected.value, AcquisitionConditionMatch.ANY,
-                        AcquisitionConditionAction.ACQUIRE, saved.value, false, false,
-                        MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.onSurface,
-                        MaterialTheme.colorScheme.onSurfaceVariant, UvirNumericFormat.SYSTEM,
-                        { selected.value = it }, { matchCalls++ }, { actionCalls++ }, { show.value = true })
+                    UvirConditionalAcquisitionCard(
+                        enabled = selected.value, match = AcquisitionConditionMatch.ANY,
+                        action = AcquisitionConditionAction.ACQUIRE, rules = saved.value,
+                        waiting = false, locked = false,
+                        cardColor = MaterialTheme.colorScheme.surface,
+                        primaryText = MaterialTheme.colorScheme.onSurface,
+                        secondaryText = MaterialTheme.colorScheme.onSurfaceVariant,
+                        numericFormat = UvirNumericFormat.SYSTEM,
+                        onEnabled = { selected.value = it }, onMatch = { matchCalls++ },
+                        onAction = { actionCalls++ }, onConfigure = { show.value = true }
+                    )
                 }
                 if (show.value) UvirAcquisitionConditionsDialog(saved.value,
                     MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.onSurface,
@@ -144,10 +150,16 @@ class UvirIndependentAcquisitionConditionsUiTest {
             waiting = resources.getString(R.string.conditional_waiting)
             MaterialTheme {
                 Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-                    UvirConditionalAcquisitionCard(true, AcquisitionConditionMatch.ALL,
-                        AcquisitionConditionAction.START, rules(), true, true,
-                        MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.onSurface,
-                        MaterialTheme.colorScheme.onSurfaceVariant, UvirNumericFormat.SYSTEM, { enabledChanges++ }, {}, {})
+                    UvirConditionalAcquisitionCard(
+                        enabled = true, match = AcquisitionConditionMatch.ALL,
+                        action = AcquisitionConditionAction.START, rules = rules(),
+                        waiting = true, locked = true,
+                        cardColor = MaterialTheme.colorScheme.surface,
+                        primaryText = MaterialTheme.colorScheme.onSurface,
+                        secondaryText = MaterialTheme.colorScheme.onSurfaceVariant,
+                        numericFormat = UvirNumericFormat.SYSTEM,
+                        onEnabled = { enabledChanges++ }, onMatch = {}, onAction = {}
+                    )
                 }
             }
         }
@@ -171,11 +183,16 @@ class UvirIndependentAcquisitionConditionsUiTest {
         compose.setContent {
             MaterialTheme(colorScheme = if (dark.value) darkColorScheme() else lightColorScheme()) {
                 Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-                    UvirConditionalAcquisitionCard(selected.value, match.value, action.value,
-                        saved.value, false, false, MaterialTheme.colorScheme.surface,
-                        MaterialTheme.colorScheme.onSurface, MaterialTheme.colorScheme.onSurfaceVariant,
-                        UvirNumericFormat.SYSTEM, { selected.value = it }, { match.value = it },
-                        { action.value = it })
+                    UvirConditionalAcquisitionCard(
+                        enabled = selected.value, match = match.value, action = action.value,
+                        rules = saved.value, waiting = false, locked = false,
+                        cardColor = MaterialTheme.colorScheme.surface,
+                        primaryText = MaterialTheme.colorScheme.onSurface,
+                        secondaryText = MaterialTheme.colorScheme.onSurfaceVariant,
+                        numericFormat = UvirNumericFormat.SYSTEM,
+                        onEnabled = { selected.value = it }, onMatch = { match.value = it },
+                        onAction = { action.value = it }
+                    )
                 }
             }
         }

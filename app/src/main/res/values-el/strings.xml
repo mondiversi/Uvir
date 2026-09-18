@@ -699,7 +699,7 @@
     <string name="sensor_led_signal_recorded">Μπλε LED · 3 αναλαμπές</string>
     <string name="sensor_led_signal_recorded_description">Λήψη/ειδοποίηση τιμών.</string>
     <string name="sensor_led_signal_time_unavailable">Μπλε LED · 5 γρήγορες αναλαμπές</string>
-    <string name="sensor_led_signal_time_unavailable_description">Η λήψη δεν καταγράφηκε: η ημερομηνία και η ώρα δεν είναι διαθέσιμες.</string>
+    <string name="sensor_led_signal_time_unavailable_description">Η λήψη δεν αποθηκεύτηκε: λείπουν ημερομηνία και ώρα.</string>
     <string name="sensor_connection_toast_connected">Αισθητήρας συνδεδεμένος</string>
     <string name="sensor_connection_toast_disconnected">Αισθητήρας μη συνδεδεμένος</string>
     <string name="sensor_led_brightness">Φωτεινότητα LED</string>

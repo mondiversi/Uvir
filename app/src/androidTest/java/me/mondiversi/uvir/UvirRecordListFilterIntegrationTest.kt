@@ -183,9 +183,9 @@ class UvirRecordListFilterIntegrationTest {
         compose.onNodeWithTag("list-filter-toggle").performClick()
         selectFilterChoice("filter-note", "Garden")
         selectFilterChoice("filter-id", "2")
-        compose.onNodeWithText(text(R.string.list_filter_count, 1, 30)).assertExists()
+        assertFilterCount(1, 30)
         selectFilterChoice("filter-session-id", "10")
-        compose.onNodeWithText(text(R.string.list_filter_count, 1, 30)).assertExists()
+        assertFilterCount(1, 30)
         compose.onNodeWithContentDescription(text(R.string.navigate_back)).performClick()
         compose.onNodeWithTag("filter-note").assertDoesNotExist()
     }
@@ -240,9 +240,10 @@ class UvirRecordListFilterIntegrationTest {
         selectFilterChoice("filter-id", "2")
         titleBack()
         filtersClosed()
-        compose.onNodeWithText(text(R.string.list_filter_count, 1, 3)).assertExists()
+        assertFilterCount(1, 3)
         openFilters()
-        compose.onNodeWithTag("filter-id").assertTextContains("2")
+        compose.onNodeWithTag("filter-id")
+            .assertContentDescriptionContains("2", substring = true)
         compose.onNodeWithTag("filter-reset").performScrollTo().performClick()
         titleBack()
         filtersClosed()
@@ -263,10 +264,10 @@ class UvirRecordListFilterIntegrationTest {
     private fun exerciseFilterAndReset() {
         compose.onNodeWithTag("list-filter-toggle").performClick()
         selectFilterChoice("filter-id", "2")
-        compose.onNodeWithText(text(R.string.list_filter_count, 1, 3)).assertExists()
+        assertFilterCount(1, 3)
         compose.onNodeWithTag("list-filter-toggle").performClick()
         compose.onNodeWithTag("filter-id").assertDoesNotExist()
-        compose.onNodeWithText(text(R.string.list_filter_count, 1, 3)).assertExists()
+        assertFilterCount(1, 3)
         compose.onNodeWithTag("list-filter-toggle").performClick()
         compose.onNodeWithTag("filter-reset").performScrollTo().performClick()
         compose.onNodeWithTag("list-filter-toggle").performClick()
@@ -275,6 +276,15 @@ class UvirRecordListFilterIntegrationTest {
 
     private fun selectFilterChoice(fieldTag: String, key: String) {
         compose.onNodeWithTag(fieldTag).performScrollTo().performTouchInput { click(center) }
-        compose.onNodeWithTag("filter-choice-option-$key").performClick()
+        compose.onNodeWithTag("filter-choice-option-$key").performScrollTo().performClick()
+        compose.waitForIdle()
+        compose.onNodeWithTag(fieldTag)
+            .assertContentDescriptionContains(key, substring = true)
+    }
+
+    private fun assertFilterCount(visible: Int, total: Int) {
+        compose.onNodeWithTag("list-filter-count")
+            .assertTextContains(visible.toString(), substring = true)
+            .assertTextContains(total.toString(), substring = true)
     }
 }

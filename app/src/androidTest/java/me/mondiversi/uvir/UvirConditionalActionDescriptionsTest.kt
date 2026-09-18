@@ -36,10 +36,16 @@ class UvirConditionalActionDescriptionsTest {
             CompositionLocalProvider(LocalDensity provides Density(density.density, 1.5f)) {
                 MaterialTheme(colorScheme = if (dark.value) darkColorScheme() else lightColorScheme()) {
                     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-                        UvirConditionalAcquisitionCard(true, AcquisitionConditionMatch.ANY,
-                            AcquisitionConditionAction.ACQUIRE, rules, false, false,
-                            MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.onSurface,
-                            MaterialTheme.colorScheme.onSurfaceVariant, UvirNumericFormat.SYSTEM, {}, {}, {})
+                        UvirConditionalAcquisitionCard(
+                            enabled = true, match = AcquisitionConditionMatch.ANY,
+                            action = AcquisitionConditionAction.ACQUIRE, rules = rules,
+                            waiting = false, locked = false,
+                            cardColor = MaterialTheme.colorScheme.surface,
+                            primaryText = MaterialTheme.colorScheme.onSurface,
+                            secondaryText = MaterialTheme.colorScheme.onSurfaceVariant,
+                            numericFormat = UvirNumericFormat.SYSTEM,
+                            onEnabled = {}, onMatch = {}, onAction = {}
+                        )
                     }
                 }
             }
@@ -55,10 +61,16 @@ class UvirConditionalActionDescriptionsTest {
         compose.setContent {
             MaterialTheme {
                 Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-                    UvirConditionalAcquisitionCard(true, AcquisitionConditionMatch.ANY,
-                        AcquisitionConditionAction.ACQUIRE, rules, false, false,
-                        MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.onSurface,
-                        MaterialTheme.colorScheme.onSurfaceVariant, UvirNumericFormat.SYSTEM, {}, {}, {})
+                    UvirConditionalAcquisitionCard(
+                        enabled = true, match = AcquisitionConditionMatch.ANY,
+                        action = AcquisitionConditionAction.ACQUIRE, rules = rules,
+                        waiting = false, locked = false,
+                        cardColor = MaterialTheme.colorScheme.surface,
+                        primaryText = MaterialTheme.colorScheme.onSurface,
+                        secondaryText = MaterialTheme.colorScheme.onSurfaceVariant,
+                        numericFormat = UvirNumericFormat.SYSTEM,
+                        onEnabled = {}, onMatch = {}, onAction = {}
+                    )
                 }
             }
         }
@@ -81,10 +93,16 @@ class UvirConditionalActionDescriptionsTest {
         compose.setContent {
             MaterialTheme {
                 Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-                    UvirConditionalAcquisitionCard(true, AcquisitionConditionMatch.ANY,
-                        AcquisitionConditionAction.START, rules, true, true,
-                        MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.onSurface,
-                        MaterialTheme.colorScheme.onSurfaceVariant, UvirNumericFormat.SYSTEM, {}, {}, {})
+                    UvirConditionalAcquisitionCard(
+                        enabled = true, match = AcquisitionConditionMatch.ANY,
+                        action = AcquisitionConditionAction.START, rules = rules,
+                        waiting = true, locked = true,
+                        cardColor = MaterialTheme.colorScheme.surface,
+                        primaryText = MaterialTheme.colorScheme.onSurface,
+                        secondaryText = MaterialTheme.colorScheme.onSurfaceVariant,
+                        numericFormat = UvirNumericFormat.SYSTEM,
+                        onEnabled = {}, onMatch = {}, onAction = {}
+                    )
                 }
             }
         }

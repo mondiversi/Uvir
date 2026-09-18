@@ -88,6 +88,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -779,6 +780,7 @@ fun HistoryScreen(
                                 ),
                             modifier =
                                 Modifier
+                                    .testTag("list-filter-count")
                                     .fillMaxWidth()
                                     .padding(
                                         horizontal = 20.dp,

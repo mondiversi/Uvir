@@ -185,7 +185,12 @@ private fun FilterChoice(
     val fieldColors = UvirOutlinedTextFieldColors()
     val nightMode = androidx.compose.foundation.isSystemInDarkTheme()
     val menuScrollState = rememberScrollState()
-    Box(modifier) {
+    // Expose the visible label and selected value as one accessible field.
+    Box(
+        modifier.semantics(mergeDescendants = true) {
+            contentDescription = "$label: $selected"
+        }
+    ) {
         Surface(onClick = { expanded = true }, shape = RoundedCornerShape(12.dp),
             border = androidx.compose.foundation.BorderStroke(1.dp, fieldColors.unfocusedIndicatorColor),
             color = Color.Transparent, modifier = Modifier.fillMaxWidth()) {

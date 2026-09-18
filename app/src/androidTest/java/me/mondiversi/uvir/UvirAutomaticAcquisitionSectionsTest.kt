@@ -162,10 +162,21 @@ class UvirAutomaticAcquisitionSectionsTest {
                 MaterialTheme {
                     title = localized.getString(R.string.conditional_acquisition)
                     Column(Modifier.width(320.dp).height(400.dp).verticalScroll(rememberScrollState())) {
-                        UvirConditionalAcquisitionCard(true, AcquisitionConditionMatch.ANY,
-                            AcquisitionConditionAction.ACQUIRE, emptyList(), false, false,
-                            MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.onSurface,
-                            MaterialTheme.colorScheme.onSurfaceVariant, UvirNumericFormat.SYSTEM, {}, {}, {})
+                        UvirConditionalAcquisitionCard(
+                            enabled = true,
+                            match = AcquisitionConditionMatch.ANY,
+                            action = AcquisitionConditionAction.ACQUIRE,
+                            rules = emptyList(),
+                            waiting = false,
+                            locked = false,
+                            cardColor = MaterialTheme.colorScheme.surface,
+                            primaryText = MaterialTheme.colorScheme.onSurface,
+                            secondaryText = MaterialTheme.colorScheme.onSurfaceVariant,
+                            numericFormat = UvirNumericFormat.SYSTEM,
+                            onEnabled = {},
+                            onMatch = {},
+                            onAction = {}
+                        )
                     }
                 }
             }

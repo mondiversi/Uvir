@@ -7,6 +7,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -80,15 +81,20 @@ class UvirActionTypographyTest {
         val custom = TextStyle(fontSize = 12.sp, lineHeight = 15.sp,
             fontWeight = FontWeight.Medium, letterSpacing = 0.1.sp, color = Color.Cyan)
         var inherited = TextStyle.Default
+        var layout: TextLayoutResult? = null
         compose.setContent {
             Environment(true) {
                 CompositionLocalProvider(LocalTextStyle provides custom) {
-                    UvirActionTheme { inherited = LocalTextStyle.current; Text("Custom") }
+                    UvirActionTheme {
+                        inherited = LocalTextStyle.current
+                        Text("Custom", onTextLayout = { layout = it })
+                    }
                 }
             }
         }
+        compose.waitForIdle()
         assertEquals(custom, inherited)
-        assertEquals(custom, textLayout("Custom").layoutInput.style)
+        assertEquals(custom, layout?.layoutInput?.style)
     }
 
     @Test fun plainMaterialThemeReproducesTheSpacingRegressionButActionThemeDoesNot() {
@@ -137,8 +143,14 @@ class UvirActionTypographyTest {
                             }
                         }
                         Box(Modifier.testTag("context")) {
-                            UvirDetailContextCard(true, "Demo sensor", "Sample note",
-                                Color.Black, Color.White, Color.Gray)
+                            UvirDetailContextCard(
+                                automatic = true,
+                                sensorName = "Demo sensor",
+                                note = "Sample note",
+                                cardColor = Color.Black,
+                                primaryText = Color.White,
+                                secondaryText = Color.Gray
+                            )
                         }
                         Box(Modifier.testTag("identity")) {
                             UvirDetailIdentityCard(null, 1L, "ID / session", "Date and time",
@@ -168,24 +180,53 @@ class UvirActionTypographyTest {
 
     @Test fun materialButtonsAndFieldsStillUseTheirOwnStandardTypography() {
         val themed = mutableStateOf(false)
+        var beforeAction = TextStyle.Default
+        var beforeLabel = TextStyle.Default
+        var afterAction = TextStyle.Default
+        var afterLabel = TextStyle.Default
+        var beforeButtonHeight = 0
+        var beforeFieldHeight = 0
+        var afterButtonHeight = 0
+        var afterFieldHeight = 0
         compose.setContent {
             Environment(true) {
                 val content: @Composable () -> Unit = {
                     Column(Modifier.width(280.dp)) {
-                        TextButton({}, Modifier.testTag("button")) { Text("Action") }
-                        OutlinedTextField("Value", {}, Modifier.testTag("field"), label = { Text("Label") })
+                        TextButton({}, Modifier.testTag("button").onGloballyPositioned {
+                            if (themed.value) afterButtonHeight = it.size.height
+                            else beforeButtonHeight = it.size.height
+                        }) {
+                            val style = LocalTextStyle.current
+                            SideEffect {
+                                if (themed.value) afterAction = style else beforeAction = style
+                            }
+                            Text("Action")
+                        }
+                        OutlinedTextField("Value", {},
+                            Modifier.testTag("field").onGloballyPositioned {
+                                if (themed.value) afterFieldHeight = it.size.height
+                                else beforeFieldHeight = it.size.height
+                            }, label = {
+                                val style = LocalTextStyle.current
+                                SideEffect {
+                                    if (themed.value) afterLabel = style else beforeLabel = style
+                                }
+                                Text("Label")
+                            })
                     }
                 }
                 if (themed.value) UvirActionTheme(content) else content()
             }
         }
-        val styles = listOf("Action", "Value", "Label").associateWith { metrics(textLayout(it).layoutInput.style) }
-        val heights = listOf("button", "field").associateWith {
-            compose.onNodeWithTag(it).fetchSemanticsNode().boundsInRoot.height }
+        compose.waitForIdle()
+        val actionMetrics = metrics(beforeAction)
+        val labelMetrics = metrics(beforeLabel)
         compose.runOnIdle { themed.value = true }
-        for ((label, original) in styles) assertEquals(original, metrics(textLayout(label).layoutInput.style))
-        for ((tag, original) in heights) assertEquals(original,
-            compose.onNodeWithTag(tag).fetchSemanticsNode().boundsInRoot.height, 1f)
+        compose.waitForIdle()
+        assertEquals(actionMetrics, metrics(afterAction))
+        assertEquals(labelMetrics, metrics(afterLabel))
+        assertEquals(beforeButtonHeight, afterButtonHeight)
+        assertEquals(beforeFieldHeight, afterFieldHeight)
     }
 
     private fun textLayout(text: String): TextLayoutResult {

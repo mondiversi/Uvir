@@ -122,10 +122,21 @@ class UvirConditionalAcquisitionUiTest {
                 onDispose { view.keepScreenOn=old } }
             MaterialTheme(colorScheme=if(dark.value) darkColorScheme() else lightColorScheme()) {
                 Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-                    UvirConditionalAcquisitionCard(enabled.value,match.value,action.value,settings().rules,
-                        locked.value,locked.value,MaterialTheme.colorScheme.surface,
-                        MaterialTheme.colorScheme.onSurface,MaterialTheme.colorScheme.onSurfaceVariant,
-                        UvirNumericFormat.SYSTEM,{ enabled.value=it },{ match.value=it },{ action.value=it })
+                    UvirConditionalAcquisitionCard(
+                        enabled = enabled.value,
+                        match = match.value,
+                        action = action.value,
+                        rules = settings().rules,
+                        waiting = locked.value,
+                        locked = locked.value,
+                        cardColor = MaterialTheme.colorScheme.surface,
+                        primaryText = MaterialTheme.colorScheme.onSurface,
+                        secondaryText = MaterialTheme.colorScheme.onSurfaceVariant,
+                        numericFormat = UvirNumericFormat.SYSTEM,
+                        onEnabled = { enabled.value = it },
+                        onMatch = { match.value = it },
+                        onAction = { action.value = it }
+                    )
                 }
             }
         }

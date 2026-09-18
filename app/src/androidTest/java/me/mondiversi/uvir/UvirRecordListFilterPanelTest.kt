@@ -46,7 +46,8 @@ class UvirRecordListFilterPanelTest {
         compose.onNodeWithTag("list-filter-toggle").performClick()
         compose.onNodeWithTag("filter-note").assertDoesNotExist()
         compose.onNodeWithTag("list-filter-toggle").performClick()
-        compose.onNodeWithTag("filter-note").assertTextContains("Garden")
+        compose.onNodeWithTag("filter-note")
+            .assertContentDescriptionContains("Garden", substring = true)
     }
 
     @Test fun onlyModesPresentInTheSourceAreOffered() {
@@ -140,13 +141,13 @@ class UvirRecordListFilterPanelTest {
             assertEquals(expected.green, actual.green, 0.01f)
             assertEquals(expected.blue, actual.blue, 0.01f)
             if (dark) for (tag in listOf("filter-from", "filter-note", "filter-sensor", "filter-mode")) {
-                val pixels = compose.onNodeWithTag(tag).captureToImage().toPixelMap()
+                val pixels = compose.onNodeWithTag(tag).performScrollTo().captureToImage().toPixelMap()
                 var readable = 0
                 for (y in 0 until pixels.height) for (x in 0 until pixels.width)
                     if (pixels[x, y].luminance() > 0.55f) readable++
                 assertTrue("Night text/borders must remain readable: " + tag, readable > 25)
             }
-            compose.onNodeWithTag("filter-sensor").performTouchInput { click(center) }
+            compose.onNodeWithTag("filter-sensor").performScrollTo().performTouchInput { click(center) }
             val menu = compose.onNodeWithTag("filter-choice-menu").captureToImage().toPixelMap()
             if (dark) {
                 val menuColor = menu[menu.width - 16, menu.height / 2]

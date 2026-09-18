@@ -85,9 +85,9 @@ class UvirSensorDiagnosticsUiTest {
         assertEquals(6, calls.get())
         for (darkTheme in listOf(false, true)) {
             compose.runOnIdle { dark.value = darkTheme }
-            compose.onNodeWithText(resources.getString(R.string.share)).assertIsEnabled().assertIsDisplayed()
+            compose.onNodeWithText(resources.getString(R.string.export)).assertIsEnabled().assertIsDisplayed()
             compose.onNodeWithText(resources.getString(R.string.close)).assertIsDisplayed()
-            val share = compose.onNodeWithText(resources.getString(R.string.share)).fetchSemanticsNode().boundsInRoot
+            val share = compose.onNodeWithText(resources.getString(R.string.export)).fetchSemanticsNode().boundsInRoot
             val close = compose.onNodeWithText(resources.getString(R.string.close)).fetchSemanticsNode().boundsInRoot
             assertTrue(share.center.x < close.center.x)
         }
@@ -109,7 +109,7 @@ class UvirSensorDiagnosticsUiTest {
         }
         compose.onNodeWithText(resources.getString(R.string.debug_diagnostic)).performClick()
         compose.waitUntil(2_000L) { waiting.get() }
-        compose.onNodeWithText(resources.getString(R.string.share)).assertIsNotEnabled()
+        compose.onNodeWithText(resources.getString(R.string.export)).assertIsNotEnabled()
         compose.onNodeWithText(resources.getString(R.string.close)).performClick()
         compose.waitUntil(2_000L) { cancelled.get() }
     }
