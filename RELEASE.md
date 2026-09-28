@@ -1,67 +1,74 @@
-# Distribuzione di Uvir
+# Uvir distribution
 
-## Identità definitiva
+## Application identity
 
-- Nome visibile: `Uvir`
+- Display name: `Uvir`
 - Application ID: `me.mondiversi.uvir`
 - Namespace: `me.mondiversi.uvir`
-- Versione corrente: `1.3.0` (`versionCode` 4)
-- Firmware sensore: `0.5.103`
+- Current version: `1.3.0` (`versionCode` 4)
+- Sensor firmware: `0.5.103`
 
-## Creazione dell'APK
+## Building the APK
 
-Fare doppio clic su `CREA_APK_RELEASE.bat`.
+Double-click `CREA_APK_RELEASE.bat`.
 
-Al termine, l'APK firmato e pronto per la distribuzione si trova in:
+When the build finishes, the signed APK ready for distribution is available at:
 
 ```text
 dist\Uvir-1.3.0-release.apk
 ```
 
-Nella stessa cartella viene generato anche il file
-`Uvir-1.3.0-release.apk.sha256`, utile per verificare che il download non sia
-stato alterato o danneggiato.
+The same directory also contains `Uvir-1.3.0-release.apk.sha256`, which can be
+used to verify that a download has not been modified or corrupted.
 
-Il file può essere allegato a una GitHub Release oppure distribuito da un sito.
-Non è necessario pubblicare il progetto sorgente per distribuire l'APK.
+The APK can be attached to a GitHub release or distributed from a website.
+Make the corresponding source available in accordance with the project's
+[GPL-3.0 license](LICENSE).
 
-Per la pubblicazione completa (APK, firmware USB, indice firmato e impronte),
-seguire [docs/UPDATES.md](docs/UPDATES.md). Pubblicare la release solo dopo
-aver caricato tutti i file. La verifica fisica del sensore UV AS7331 resta
-da completare quando il componente sarà disponibile.
+For a complete release (APK, USB firmware, signed index and checksums), follow
+[docs/UPDATES.md](docs/UPDATES.md). Publish the release only after all files have
+been uploaded. Physical validation of the AS7331 UV sensor remains pending until
+the component is available.
 
-## Firma e aggiornamenti
+## Signing and updates
 
-La chiave privata è conservata fuori dal progetto in:
+The private signing key is stored outside the project at:
 
 ```text
 C:\Users\otta8\Documents\UvirSigning\uvir-release.jks
 ```
 
-La configurazione locale con le credenziali si trova in `keystore.properties`.
-Entrambi devono essere conservati in un backup privato e sicuro. Non devono
-essere caricati su GitHub, condivisi o inclusi in archivi pubblici.
+The local configuration containing the signing credentials is in
+`keystore.properties`. Keep both files in a secure, private backup. Never upload
+them to GitHub, share them or include them in public archives.
 
-Il certificato pubblico esportato si trova in:
+The exported public certificate is available at:
 
 ```text
 C:\Users\otta8\Documents\UvirSigning\uvir-release-certificate.pem
 ```
 
-Il certificato pubblico può essere condiviso; la chiave `.jks` no.
+The public certificate may be shared; the private `.jks` key must not be shared.
 
-Per pubblicare un aggiornamento occorre:
+To publish an update:
 
-1. aumentare `versionCode` in `app/build.gradle.kts`;
-2. aggiornare `versionName`;
-3. usare sempre la stessa chiave release;
-4. ricreare l'APK con `CREA_APK_RELEASE.bat`.
+1. Increment `versionCode` in `app/build.gradle.kts`.
+2. Update `versionName`.
+3. Always use the same release signing key.
+4. Rebuild the APK with `CREA_APK_RELEASE.bat`.
 
-Sul computer di sviluppo, anche la variante `debug` avviata da Android Studio
-usa la stessa chiave quando `keystore.properties` è presente. In questo modo
-**Run** e **Debug** possono aggiornare l'app già installata senza conflitti di
-certificato. Sugli altri computer, dove la configurazione privata non esiste,
-Gradle torna automaticamente alla normale chiave debug locale.
+On the development computer, the `debug` variant launched from Android Studio
+also uses this key when `keystore.properties` is present. This lets **Run** and
+**Debug** update an existing installation without certificate conflicts. On other
+computers without this private configuration, Gradle automatically falls back to
+the normal local debug key.
 
-Se la chiave release o la sua password vengono perse, gli APK futuri non
-potranno aggiornare l'app già installata.
+If the release key or its password is lost, future APKs will not be able to
+update an existing installation.
+
+## Public content language
+
+Use English for repository documentation, GitHub release titles and release
+notes, build-tool messages and future project-owned GitHub posts. The Android
+app remains multilingual; its localized interface strings are not subject to
+this documentation rule.

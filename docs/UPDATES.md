@@ -55,6 +55,11 @@ enter the ROM loader. Do not erase the entire flash.
 
 ## Publishing
 
+Write all public repository documentation, release titles, release notes and
+future project-owned GitHub posts in English. This does not change the app's
+localized interface strings. Reuse the English release-notes document when
+publishing so the repository and the GitHub release stay consistent.
+
 1. Increment the app version/code and sensor firmware version.
 2. Run all tests, build the signed release APK and compile the ESP32 huge_app image.
 3. Run `tools/ReleaseTool.java` with Java 17 or newer:

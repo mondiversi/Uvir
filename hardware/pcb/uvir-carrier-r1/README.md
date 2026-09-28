@@ -1,70 +1,69 @@
 # Uvir Carrier R1 — EasyEDA Standard
 
-## File da aprire in EasyEDA
+## File to open in EasyEDA
 
-`uvir-carrier-r1-easyeda-standard-schematic.json` è uno **schema elettrico
-nativo di EasyEDA Standard**. La prima versione apriva i componenti, ma usava
-solo brevi spezzoni con nomi di rete: a vista sembravano scollegati. Questa
-versione usa fili continui e punti di giunzione espliciti. Contiene 13 simboli,
-52 pin, 17 reti e 69 segmenti. Il generatore verifica che ciascuna rete sia
-elettricamente continua nel disegno, non soltanto etichettata allo stesso modo.
-La nuova versione non è ancora stata reimportata e verificata visivamente
-nell'editor EasyEDA.
+`uvir-carrier-r1-easyeda-standard-schematic.json` is a **native EasyEDA Standard
+electrical schematic**. The first version loaded the components but used only
+short wire stubs with net names, so they appeared disconnected. This version
+uses continuous wires and explicit junctions. It contains 13 symbols, 52 pins,
+17 nets and 69 segments. The generator checks that every net is electrically
+continuous in the drawing, rather than merely sharing a label.
+The new version has not yet been reimported and visually checked in the EasyEDA
+editor.
 
-In EasyEDA **Standard** per PC:
+In EasyEDA **Standard** for PC:
 
-1. Aprire `File > Apri > EasyEDA...`.
-2. Selezionare `uvir-carrier-r1-easyeda-standard-schematic.json`.
-3. Lasciare selezionato **Importa file** e confermare.
+1. Open `File > Open > EasyEDA...`.
+2. Select `uvir-carrier-r1-easyeda-standard-schematic.json`.
+3. Leave **Import File** selected and confirm.
 
-Non aprire il file facendo doppio clic in Windows e non scegliere Altium,
-Eagle o KiCad. `uvir-carrier-r1-pin-netlist.json` è la mappa logica di
-riferimento, **non** un documento nativo EasyEDA.
+Do not open the file by double-clicking it in Windows or choose Altium, Eagle
+or KiCad. `uvir-carrier-r1-pin-netlist.json` is the reference logical pin map,
+**not** a native EasyEDA document.
 
-## Corrispondenza pin e posizione
+## Pin mapping and placement
 
-Il simbolo ESP32 riporta i numeri di posizione `J2` (fila sinistra) e `J3`
-(fila destra), guardando la scheda frontalmente con la USB in basso. Sono
-ricavati dalla foto `esp32_pin_ref.jpg` fornita dall'utente e coerenti con
-la piedinatura ESP32-DevKitC a 38 pin. La distanza reale tra le file e il
-passo vanno comunque misurati sulla scheda prima di progettare gli zoccoli.
+The ESP32 symbol shows the `J2` (left row) and `J3` (right row) positions when
+viewing the front of the board with USB at the bottom. These follow the
+user-supplied `esp32_pin_ref.jpg` reference photo and agree with the 38-pin
+ESP32-DevKitC pinout. The actual row spacing and pin pitch must still be measured
+on the board before designing the sockets.
 
-Lo **schema elettrico** dispone i blocchi per rendere leggibili i fili; non
-rappresenta la posizione fisica sul circuito stampato. L'intenzione di
-posizionamento è registrata nella sezione `layout` della mappa logica:
+The **electrical schematic** arranges blocks to make the wiring readable; it
+does not represent the physical PCB layout. Intended placement is recorded in
+the logical pin map's `layout` section:
 
-- **Fronte, dal basso:** ESP32 con USB verso il bordo inferiore; sopra
-  AS7343 visibile/NIR orizzontale; più in alto UV 5 Click orizzontale;
-  in cima buzzer, LED RGB e LED blu. Pulsante laterale a sinistra,
-  leggermente sopra la metà.
-- **Retro, dal basso:** RTC trasversale; area antenna ESP32 libera;
-  FRAM sopra; adattatore microSD in alto con scheda estraibile dal bordo.
-- **Ingombri indicativi:** ESP32 25×52 mm; AS7343 22×13 mm;
-  UV 5 Click 28,6×25,4 mm; RTC 37×22 mm; FRAM 20×15 mm;
-  microSD 24×43 mm. Non bastano per fabbricare la scheda.
+- **Front, bottom to top:** ESP32 with USB facing the bottom edge; horizontal
+  AS7343 visible/NIR board above it; horizontal UV 5 Click board further up;
+  buzzer, RGB LED and blue LED at the top. Side button on the left, slightly
+  above the midpoint.
+- **Back, bottom to top:** transverse RTC; clear ESP32 antenna area; FRAM above;
+  microSD adapter at the top with the card accessible from the edge.
+- **Approximate dimensions:** ESP32 25×52 mm; AS7343 22×13 mm;
+  UV 5 Click 28.6×25.4 mm; RTC 37×22 mm; FRAM 20×15 mm;
+  microSD 24×43 mm. These are not sufficient for fabrication.
 
-Le quattro periferiche I²C condividono GPIO21/SDA, GPIO22/SCL, 3,3 V e GND.
-Il modulo microSD usa GPIO13/18/19/23 per SPI e soltanto il suo VCC usa
-5 V, secondo l'adattatore con regolatore e conversione di livello già
-provato. Ogni LED ha una propria resistenza serie da 330 Ω. Il pulsante
-esterno porta GPIO33 a GND quando viene premuto: i terminali scelti sono
-su lati opposti del contatto.
+The four I²C peripherals share GPIO21/SDA, GPIO22/SCL, 3.3 V and GND.
+The microSD module uses GPIO13/18/19/23 for SPI, and only its VCC uses 5 V,
+following the previously tested adapter with a regulator and level shifting.
+Each LED has its own 330 Ω series resistor. Pressing the external button pulls
+GPIO33 to GND: the chosen terminals are on opposite sides of the contact.
 
-## Limiti prima di ordinare la PCB
+## Requirements before ordering the PCB
 
-Questo documento definisce i collegamenti, **non** è una PCB. I simboli
-dei moduli non hanno ancora impronte fisiche assegnate. Prima dei Gerber:
+This document defines the connections; it is **not** a PCB layout. The module
+symbols do not yet have physical footprints assigned. Before generating Gerbers:
 
-- misurare pin 1, ordine, passo e distanza tra le file degli zoccoli
-  di ogni modulo, nonché polarità di LED/buzzer e orientamento microSD;
-- creare/assegnare le impronte e posizionarle realmente su fronte/retro;
-- verificare il budget del regolatore 3,3 V, i pull-up I²C già presenti
-  sui moduli, l'isolamento ottico e il divieto di rame sotto l'antenna;
-- controllare che la ricarica RTC sia disabilitata con una CR2032;
-- eseguire ERC, DRC e revisione umana prima dell'ordine.
+- Measure pin 1, pin order, pitch and socket row spacing for every module,
+  as well as LED/buzzer polarity and microSD orientation.
+- Create/assign the footprints and place them on the actual front/back layout.
+- Check the 3.3 V regulator budget, existing module I²C pull-ups, optical
+  isolation and the antenna copper keepout.
+- Check that RTC charging is disabled when using a CR2032.
+- Run ERC, DRC and a human review before ordering.
 
-`generate_easyeda_standard.py` rigenera il file dal pinout logico e si
-ferma se manca un pin, è duplicato, la sua rete non è continua oppure la
-mappa GPIO non coincide con `UvirHardwareConfig.h`.
-Il generatore effettivo è `generate_connected_easyeda.py`; il primo nome
-rimane disponibile per compatibilità.
+`generate_easyeda_standard.py` regenerates the file from the logical pinout and
+stops if a pin is missing or duplicated, a net is discontinuous, or the GPIO map
+does not match `UvirHardwareConfig.h`.
+The actual generator is `generate_connected_easyeda.py`; the original name
+remains available for compatibility.

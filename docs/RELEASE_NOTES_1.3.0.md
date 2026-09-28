@@ -1,45 +1,45 @@
-# Uvir 1.3.0 — firmware sensore 0.5.103
+# Uvir 1.3.0 — sensor firmware 0.5.103
 
-Consolidamento della piattaforma Android/ESP32 e primo sistema di aggiornamento
-da GitHub con indice firmato e verifica dei file.
+Consolidation of the Android/ESP32 platform and the first GitHub update system
+with a signed index and verified downloads.
 
-## Novità
+## Highlights
 
-- Gestione multisensore: connessioni e registrazioni distinte, con un sensore
-  selezionato per visualizzazione e comandi.
-- Acquisizioni, allerte, sessioni autonome, comando esterno e varianti di sessione.
-- Registrazioni offline in FRAM/microSD e recupero dello stato con RTC DS3231.
-- Esportazioni CSV/TXT/PNG, backup cifrati e diagnostica estesa.
-- Interfaccia, localizzazioni, accessibilità e selezione sensore rifinite.
-- Ricerca automatica e manuale degli aggiornamenti, elenco ordinato delle versioni,
-  download verificati, aggiornamento dell’app prima del sensore e log dei fallimenti.
-- Aggiornamento USB del firmware con verifica dell’identità, dello stato inattivo
-  e dello schema di memoria. Non cancella impostazioni o dati.
+- Multi-sensor management: independent connections and recordings, with one
+  sensor selected for display and commands.
+- Acquisitions, alerts, autonomous sessions, external commands and session variants.
+- Offline recording in FRAM/microSD and state recovery with the DS3231 RTC.
+- CSV/TXT/PNG exports, encrypted backups and extended diagnostics.
+- Refined interface, localization, accessibility and sensor selection.
+- Automatic and manual update checks, an ordered version list, verified downloads,
+  app updates before sensor updates, and failure logging.
+- USB firmware updates with identity, idle-state and memory-layout checks.
+  Settings and data are preserved.
 
-## File
+## Files
 
-- `Uvir-1.3.0.apk`: app Android firmata (Android 8 o successivo).
-- `UvirSensor-0.5.103-esp32.bin`: sola applicazione ESP32.
-- `UvirSensor-0.5.103-usb.zip`: firmware e istruzioni USB per aggiornamento,
-  recupero e prima installazione.
-- `uvir-update.json`: indice firmato per il controllo dall’app.
-- `SHA256SUMS.txt`: impronte dei file pubblicati.
+- `Uvir-1.3.0.apk`: signed Android app (Android 8 or later).
+- `UvirSensor-0.5.103-esp32.bin`: ESP32 application image only.
+- `UvirSensor-0.5.103-usb.zip`: firmware and USB instructions for updates,
+  recovery and first installation.
+- `uvir-update.json`: signed index for in-app update checks.
+- `SHA256SUMS.txt`: checksums of the published files.
 
-## Verifiche e limiti
+## Validation and limitations
 
-Compilazioni Android e firmware completate; test JVM, test delle logiche firmware
-e controlli sul telefono eseguiti. Il sensore reale è stato aggiornato via USB dal
-computer, con identità, impostazioni, credenziali e conteggi dei record verificati
-prima e dopo, senza creare acquisizioni artificiali.
+Android and firmware builds completed; JVM tests, firmware-logic tests and phone
+checks performed. The physical sensor was updated from a computer over USB,
+with its identity, settings, credentials and record counts checked before and
+after the update, without creating artificial acquisitions.
 
-Il sensore UV AS7331 non è ancora disponibile: la sua validazione fisica e la
-calibrazione restano da completare. Il caricamento firmware direttamente dall’app
-via USB OTG richiede ancora la prova fisica di quel collegamento; il protocollo,
-i blocchi di sicurezza e i file vengono testati separatamente.
+The AS7331 UV sensor is not yet available: physical validation and calibration
+remain pending. Firmware uploads directly from the app over USB OTG still
+require a physical test of that connection; the protocol, safety checks and
+release files are tested separately.
 
-**Non scollegare l’alimentazione durante il caricamento firmware.** L’ESP32 usa
-una sola area applicativa: non è disponibile un rollback automatico. Per recupero
-usare la procedura USB dell’archivio, senza cancellare l’intera flash.
+**Do not disconnect power during a firmware upload.** The ESP32 uses a single
+application partition: automatic rollback is not available. For recovery, use
+the USB procedure included in the archive without erasing the entire flash.
 
-Documentazione: [aggiornamenti e recupero](UPDATES.md),
-[interfaccia seriale](USB_SERIAL_PROTOCOL.md).
+Documentation: [updates and recovery](UPDATES.md),
+[serial interface](USB_SERIAL_PROTOCOL.md).

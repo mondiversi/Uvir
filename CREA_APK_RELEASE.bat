@@ -7,8 +7,8 @@ set "GRADLE_USER_HOME=%USERPROFILE%\.gradle"
 set "GRADLE_OPTS=-Duser.home=%USERPROFILE% %GRADLE_OPTS%"
 
 if not exist "%PROJECT_DIR%keystore.properties" (
-    echo Configurazione di firma assente: keystore.properties
-    echo Consulta RELEASE.md prima di creare un APK pubblico.
+    echo Signing configuration missing: keystore.properties
+    echo Read RELEASE.md before building a public APK.
     pause
     exit /b 1
 )
@@ -19,7 +19,7 @@ call gradlew.bat :app:assembleRelease --no-daemon --no-configuration-cache
 if errorlevel 1 (
     popd
     echo.
-    echo Creazione APK non riuscita.
+    echo APK build failed.
     pause
     exit /b 1
 )
@@ -30,8 +30,8 @@ powershell -NoProfile -Command "$h=(Get-FileHash -LiteralPath '%PROJECT_DIR%dist
 popd
 
 echo.
-echo APK release creato in:
+echo Release APK created at:
 echo %PROJECT_DIR%dist\Uvir-1.3.0-release.apk
-echo Impronta SHA-256 in:
+echo SHA-256 checksum at:
 echo %PROJECT_DIR%dist\Uvir-1.3.0-release.apk.sha256
 pause
