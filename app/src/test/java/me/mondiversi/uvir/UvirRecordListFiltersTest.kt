@@ -100,6 +100,25 @@ class UvirRecordListFiltersTest {
         assertEquals(1, ids(UvirRecordListFilters(recordId = "2")).size)
         assertEquals(5, ids(UvirRecordListFilters()).size)
     }
+    @Test fun variantFilterOffersAndMatchesOnlyCountsPresentInSavedSessions() {
+        val withVariants = records.map { record ->
+            when (record.id) {
+                2L -> record.copy(positionIndex = 1, variantIndex = 1)
+                3L -> record.copy(positionIndex = 1, variantIndex = 2)
+                else -> record
+            }
+        }
+        assertEquals(listOf(2), uvirAvailableVariantCounts(withVariants))
+        assertEquals(listOf(2L, 3L), filterAcquisitionRecords(
+            withVariants, UvirRecordListFilters(variantCount = 2)
+        ).map { it.id })
+        assertEquals(listOf(2L, 3L), filterAcquisitionRecords(
+            withVariants, UvirRecordListFilters(variantCount = -1)
+        ).map { it.id })
+        assertEquals(listOf(1L, 4L, 5L), filterAcquisitionRecords(
+            withVariants, UvirRecordListFilters(variantCount = 0)
+        ).map { it.id })
+    }
     @Test fun alertsAreAlwaysAutomaticAndUseTheSamePredicate() {
         val entries = records.map { ThresholdAlertLogEntry(it.id, it.timestamp, "",
             it.sessionId, it.sessionSequence, it.note, it.sensorId) }

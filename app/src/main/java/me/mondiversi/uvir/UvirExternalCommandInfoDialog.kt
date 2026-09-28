@@ -6,11 +6,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -55,24 +53,22 @@ internal fun UvirExternalCommandInfoDialog(
     cardColor: Color,
     onDismissRequest: () -> Unit
 ) {
-    val dialogScrollbar = rememberUvirDialogScrollbar(
-        color = secondaryText.copy(alpha = 0.58f)
-    )
-    AlertDialog(
+    UvirAlertDialog(
         onDismissRequest = onDismissRequest,
-        modifier = dialogScrollbar.dialogModifier,
-        title = { Text(stringResource(R.string.external_command)) },
+        title = {
+            UvirClosableDialogTitle(
+                title = stringResource(R.string.external_command),
+                onDismiss = onDismissRequest
+            )
+        },
         text = {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(max = 460.dp)
-                    .then(dialogScrollbar.viewportModifier)
             ) {
                 Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .verticalScroll(dialogScrollbar.scrollState),
+                        .fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     externalCommandSignals.forEach { signal ->
@@ -118,11 +114,7 @@ internal fun UvirExternalCommandInfoDialog(
                 }
             }
         },
-        confirmButton = {
-            TextButton(onClick = onDismissRequest) {
-                Text(stringResource(R.string.close))
-            }
-        },
+        confirmButton = {},
         containerColor = cardColor,
         titleContentColor = primaryText,
         textContentColor = primaryText

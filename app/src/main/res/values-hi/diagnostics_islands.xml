@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="diagnostics_test_group">नैदानिक परीक्षण</string>
+    <string name="diagnostics_simulation_group">अनुकरण</string>
+    <string name="diagnostics_simulation_description">सेंसर के लिए माप, अलर्ट और लाइव मानों का अनुकरण करता है।</string>
+</resources>

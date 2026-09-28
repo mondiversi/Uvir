@@ -1,17 +1,23 @@
 package me.mondiversi.uvir
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,7 +39,8 @@ internal fun SessionAcquisitionValuesCard(
     onToggle: () -> Unit,
     cardColor: Color,
     primaryText: Color,
-    secondaryText: Color
+    secondaryText: Color,
+    onOpenRecord: ((SavedRecordDetail) -> Unit)? = null
 ) {
     val series =
         remember(records, group) {
@@ -58,7 +65,8 @@ internal fun SessionAcquisitionValuesCard(
         onToggle = onToggle,
         cardColor = cardColor,
         primaryText = primaryText,
-        secondaryText = secondaryText
+        secondaryText = secondaryText,
+        titleFontWeight = if (group.biological) FontWeight.SemiBold else FontWeight.Bold
     ) {
         if (records.isEmpty()) {
             Text(
@@ -72,34 +80,121 @@ internal fun SessionAcquisitionValuesCard(
             )
         } else {
             Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                modifier = Modifier.padding(vertical = 15.dp),
+                verticalArrangement = Arrangement.spacedBy(15.dp)
             ) {
                 records.forEachIndexed { recordIndex, record ->
                     if (showRecordHeader) {
+                        val chevronInteractionSource =
+                            remember(record.id) { MutableInteractionSource() }
+                        val chevronPressed by
+                            chevronInteractionSource.collectIsPressedAsState()
+                        val elapsedText =
+                            sessionRecordElapsedText(
+                                currentTimestamp = record.timestamp,
+                                previousTimestamp =
+                                    records.getOrNull(recordIndex - 1)?.timestamp
+                            )
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(
+                                        horizontal = 16.dp,
+                                        vertical = 0.dp
+                                    ),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(
-                                text =
-                                    "#${record.sessionSequence ?: recordIndex + 1}",
+                            Row(
                                 modifier = Modifier.weight(1f),
-                                color = primaryText,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Text(
-                                text = formatDateTime(
-                                    record.timestamp,
-                                    LocalUvirDateFormat.current,
-                                    LocalUvirTimeFormat.current
-                                ),
-                                color = secondaryText,
-                                fontSize = 11.sp,
-                                maxLines = 1
-                            )
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text =
+                                        "#${record.sessionSequence ?: recordIndex + 1}",
+                                    color = primaryText,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    maxLines = 1
+                                )
+                                if (
+                                    record.positionIndex != null &&
+                                    record.variantIndex != null
+                                ) {
+                                    Text(
+                                        text =
+                                            "(" +
+                                                uvirCompactVariantPositionLabel(
+                                                    variantIndex = record.variantIndex,
+                                                    positionIndex = record.positionIndex
+                                                ) +
+                                                ")",
+                                        color = secondaryText,
+                                        fontSize = 12.sp,
+                                        lineHeight = 15.sp,
+                                        fontWeight = FontWeight.Normal,
+                                        maxLines = 1
+                                    )
+                                }
+                            }
+                            Column(
+                                horizontalAlignment = Alignment.End,
+                                verticalArrangement = Arrangement.spacedBy(0.dp)
+                            ) {
+                                Text(
+                                    text = formatDateTime(
+                                        record.timestamp,
+                                        LocalUvirDateFormat.current,
+                                        LocalUvirTimeFormat.current
+                                    ),
+                                    color = secondaryText,
+                                    fontSize = 11.sp,
+                                    lineHeight = 12.sp,
+                                    maxLines = 1
+                                )
+                                elapsedText?.let { elapsed ->
+                                    Text(
+                                        text = elapsed,
+                                        color = secondaryText,
+                                        fontSize = 10.sp,
+                                        lineHeight = 10.sp,
+                                        maxLines = 1
+                                    )
+                                }
+                            }
+                            onOpenRecord?.let { openRecord ->
+                                Box(
+                                    modifier =
+                                        Modifier
+                                            .size(32.dp)
+                                            .clickable(
+                                                interactionSource =
+                                                    chevronInteractionSource,
+                                                indication = null,
+                                                onClick = { openRecord(record) }
+                                            ),
+                                    contentAlignment = Alignment.CenterEnd
+                                ) {
+                                    Box(
+                                        modifier =
+                                            Modifier
+                                                .size(28.dp)
+                                                .background(
+                                                    color = if (chevronPressed) {
+                                                        secondaryText.copy(alpha = 0.10f)
+                                                    } else {
+                                                        Color.Transparent
+                                                    },
+                                                    shape = CircleShape
+                                                ),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        UvirDisclosureChevron(tint = secondaryText)
+                                    }
+                                }
+                            }
                         }
                     }
 
@@ -118,7 +213,10 @@ internal fun SessionAcquisitionValuesCard(
 
                     series.forEachIndexed { itemIndex, item ->
                         Column(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp),
                             verticalArrangement = Arrangement.spacedBy(3.dp)
                         ) {
                             Row(
@@ -141,7 +239,11 @@ internal fun SessionAcquisitionValuesCard(
                                         ),
                                     fontSize = 12.sp,
                                     lineHeight = 14.sp,
-                                    fontWeight = FontWeight.SemiBold
+                                    fontWeight = if (itemIndex == 0 && !group.biological) {
+                                        FontWeight.Bold
+                                    } else {
+                                        FontWeight.SemiBold
+                                    }
                                 )
                                 val valueOutOfRange =
                                     if (group.biological) {
@@ -166,15 +268,27 @@ internal fun SessionAcquisitionValuesCard(
                                         },
                                     color = primaryText,
                                     fontSize = 12.sp,
+                                    fontWeight = if (itemIndex == 0 && !group.biological) {
+                                        FontWeight.Bold
+                                    } else {
+                                        FontWeight.Normal
+                                    },
                                     maxLines = 1
                                 )
 
-                                if (showRelativeBreakdown && !group.biological) {
+                                if (!group.biological) {
                                     val total = series.first().values[recordIndex]
-                                    val showsContribution =
-                                        itemIndex > 0
                                     val contribution =
-                                        if (showsContribution) {
+                                        if (itemIndex == 0) {
+                                            record.sample.spectralTotals()
+                                                .share(group.spectrumIconGroup())
+                                                ?.let { share ->
+                                                    stringResource(
+                                                        R.string.biological_compact_relevance,
+                                                        share * 100f
+                                                    )
+                                                } ?: "—"
+                                        } else if (showRelativeBreakdown && !valueOutOfRange) {
                                             stringResource(
                                                 R.string.biological_compact_relevance,
                                                 percentage(
@@ -191,6 +305,11 @@ internal fun SessionAcquisitionValuesCard(
                                         modifier = Modifier.width(44.dp),
                                         color = primaryText,
                                         fontSize = 12.sp,
+                                        fontWeight = if (itemIndex == 0) {
+                                            FontWeight.Bold
+                                        } else {
+                                            FontWeight.Normal
+                                        },
                                         maxLines = 1,
                                         textAlign = TextAlign.End
                                     )
@@ -225,8 +344,8 @@ internal fun SessionAcquisitionValuesCard(
                     }
 
                     if (showRecordHeader && recordIndex < records.lastIndex) {
-                        Spacer(Modifier.height(1.dp))
                         HorizontalDivider(
+                            modifier = Modifier.padding(horizontal = 16.dp),
                             color = secondaryText.copy(alpha = 0.16f)
                         )
                     }

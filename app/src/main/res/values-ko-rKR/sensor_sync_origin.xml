@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sensor_sync_complete_from">%1$s에서 데이터 동기화 완료</string>
+</resources>

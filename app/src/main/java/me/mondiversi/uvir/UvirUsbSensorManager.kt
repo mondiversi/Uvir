@@ -92,9 +92,13 @@ class UvirUsbSensorManager(
     private val serialGeneration = AtomicLong(0L)
     private val connectionLock = Any()
     private val commandWriteLock = Any()
+    @Volatile private var firmwareUpdateLease = false
     private val diagnosticClient = UvirSensorDiagnosticClient()
     private val alertReceiptSequence = AtomicLong(0L)
     private val debugPerformanceCompletionCounter = AtomicLong(0L)
+
+    private val wirelessModeAcknowledgement =
+        java.util.concurrent.atomic.AtomicReference<UvirConnectionModeAcknowledgement?>(null)
 
     @Volatile
     private var expectedRadioSettings: SensorRadioSettings? = null
@@ -173,6 +177,9 @@ class UvirUsbSensorManager(
                         false
                     )
                 ) {
+                    if (UvirSensorCredentialStore.isSensorSelectionDisabled(applicationContext)) {
+                        return
+                    }
                     // A delayed permission result must not replace a newer USB
                     // candidate that has become current in the meantime.
                     if (device.deviceId != currentDeviceId) {
@@ -278,6 +285,7 @@ class UvirUsbSensorManager(
     }
 
     fun scanForSensor() {
+        if (firmwareUpdateLease) return
         val driver =
             UsbSerialProber
                 .getDefaultProber()
@@ -296,9 +304,10 @@ class UvirUsbSensorManager(
         enabled: Boolean,
         intervalMs: Long
     ) {
-        if (enabled && !desiredStreaming) {
-            resetOfflineSyncState()
-        }
+        val nextInterval = intervalMs.coerceIn(MINIMUM_STREAM_INTERVAL_MS, MAXIMUM_STREAM_INTERVAL_MS)
+        if (enabled == desiredStreaming && nextInterval == desiredIntervalMs) return
+        val resumed = enabled && !desiredStreaming
+        if (resumed) resetOfflineSyncState()
         desiredStreaming = enabled
         desiredIntervalMs =
             intervalMs.coerceIn(
@@ -311,6 +320,7 @@ class UvirUsbSensorManager(
                 usbTransportReady()
             ) {
                 if (desiredStreaming) {
+                    if (resumed) writeCommand("HELLO")
                     writeCommand(
                         "STREAM $desiredIntervalMs"
                     )
@@ -353,12 +363,45 @@ class UvirUsbSensorManager(
         }
     }
 
+    /** Confirm the requested radio using only the selected sensor's current USB port. */
+    fun requestWirelessModeAndAwait(
+        deviceId: String,
+        mode: SensorConnectionMode,
+        timeoutMs: Long = 1_500L
+    ): Boolean {
+        val command = mode.wirelessHandoverCommand() ?: return false
+        val port = serialPort ?: return false
+        val transportGeneration = serialGeneration.get()
+        val acknowledgement = UvirConnectionModeAcknowledgement(deviceId, mode)
+        if (!wirelessModeAcknowledgement.compareAndSet(null, acknowledgement)) return false
+        return try {
+            synchronized(commandWriteLock) {
+                val state = mutableState.value
+                if (!usbTransportReady() || serialPort !== port ||
+                    serialGeneration.get() != transportGeneration || deviceId.isBlank() ||
+                    state.status != UsbSensorConnectionStatus.CONNECTED ||
+                    normalizeSensorDeviceId(state.deviceId.orEmpty()) != normalizeSensorDeviceId(deviceId)
+                ) return false
+                port.write("$command\n".toByteArray(StandardCharsets.US_ASCII), WRITE_TIMEOUT_MS)
+            }
+            acknowledgement.await(wirelessHandoverTimeoutMs(timeoutMs))
+        } catch (error: Exception) {
+            if (error is InterruptedException) throw error
+            false
+        } finally {
+            acknowledgement.reject()
+            wirelessModeAcknowledgement.compareAndSet(acknowledgement, null)
+        }
+    }
+
     /** Applies the complete persisted radio selection over trusted USB. */
     @Synchronized
     fun configureWirelessTransportsEnabled(
         target: SensorRadioSettings
     ): Boolean {
         if (!usbTransportReady()) {
+            sendSensorControlCommands(listOf("RADIO WIFI ${if (target.wifiEnabled) "ON" else "OFF"}",
+                "RADIO BLUETOOTH ${if (target.bluetoothEnabled) "ON" else "OFF"}"))
             return false
         }
 
@@ -390,7 +433,7 @@ class UvirUsbSensorManager(
                     SensorConnectionMode.USB -> return false
                 }
             val commandWritten =
-                writeCommand(
+                writeSettingsCommand(
                     "RADIO $transportName " +
                         if (change.enabled) "ON" else "OFF"
                 )
@@ -421,15 +464,16 @@ class UvirUsbSensorManager(
     internal fun configureInternet(
         configuration: SensorInternetConfiguration
     ): Boolean {
-        if (!configuration.isComplete || !usbTransportReady()) return false
-        val current = UvirSensorCredentialStore.load(applicationContext)
+        if (!configuration.isComplete) return false
+        if (!usbTransportReady()) return sendSensorControlCommands(listOf(configuration.protocolCommand))
+        val current = mutableState.value.credentials
         if (!current.isProvisioned) return false
 
         val acknowledgement = CountDownLatch(1)
         internetConfigurationAcknowledgement = acknowledgement
         val acknowledged =
             try {
-                writeCommand(configuration.protocolCommand) &&
+                writeSettingsCommand(configuration.protocolCommand) &&
                     acknowledgement.await(
                         INTERNET_CONFIGURATION_ACK_TIMEOUT_MS,
                         TimeUnit.MILLISECONDS
@@ -445,7 +489,7 @@ class UvirUsbSensorManager(
 
         if (!acknowledged) return false
         val updated = current.withInternetConfiguration(configuration)
-        UvirSensorCredentialStore.save(applicationContext, updated)
+        UvirSensorCredentialStore.updateAssociatedSensor(applicationContext, updated)
         mutableState.value = mutableState.value.copy(credentials = updated)
         return true
     }
@@ -460,10 +504,10 @@ class UvirUsbSensorManager(
             validatedSensorWifiConfiguration(ssid, password)
                 ?: return false
         if (!usbTransportReady()) {
-            return false
+            return sendSensorControlCommands(listOf(configuration.protocolCommand))
         }
 
-        val current = UvirSensorCredentialStore.load(applicationContext)
+        val current = mutableState.value.credentials
         if (!current.isProvisioned) {
             return false
         }
@@ -472,7 +516,7 @@ class UvirUsbSensorManager(
         wifiConfigurationAcknowledgement = acknowledgement
         val acknowledged =
             try {
-                writeCommand(configuration.protocolCommand) &&
+                writeSettingsCommand(configuration.protocolCommand) &&
                     acknowledgement.await(
                         WIFI_CONFIGURATION_ACK_TIMEOUT_MS,
                         TimeUnit.MILLISECONDS
@@ -496,7 +540,7 @@ class UvirUsbSensorManager(
                 wifiPassword = configuration.password,
                 wifiHost = ""
             )
-        UvirSensorCredentialStore.save(applicationContext, updated)
+        UvirSensorCredentialStore.updateAssociatedSensor(applicationContext, updated)
         mutableState.value = mutableState.value.copy(credentials = updated)
         return true
     }
@@ -504,8 +548,44 @@ class UvirUsbSensorManager(
     fun sendSensorControlCommands(
         commands: List<String>
     ): Boolean {
-        if (!usbTransportReady()) return false
-        return commands.all(::writeCommand)
+        val state = mutableState.value
+        return sendDatedSensorSettings(applicationContext,
+            state.credentials.deviceId.ifBlank { state.deviceId.orEmpty() }, state.runtimeInfo, commands) { raw ->
+            usbTransportReady() && raw.all(::writeCommand)
+        }
+    }
+
+    private fun writeSettingsCommand(command: String): Boolean = sendSensorControlCommands(listOf(command))
+
+    internal fun sendDiagnosticControlCommands(
+        hardwareId: String, commands: List<String>, requireIdle: Boolean = false
+    ): Boolean {
+        val port = serialPort ?: return false
+        fun targetStillMatches(): Boolean {
+            val state = mutableState.value
+            return (!requireIdle || uvirSensorRuntimeIdle(state.runtimeInfo)) &&
+                serialPort === port && usbTransportReady() && uvirDiagnosticPeerMatches(
+                hardwareId, state.deviceId.orEmpty(),
+                state.status == UsbSensorConnectionStatus.CONNECTED, state.appConnectionConfirmed
+            )
+        }
+        if (!targetStillMatches()) return false
+        return runCatching {
+            synchronized(commandWriteLock) {
+                if (!targetStillMatches()) return false
+                commands.forEach { command ->
+                    // Keep the original port even if a different USB peer is inserted.
+                    port.write("$command\n".toByteArray(StandardCharsets.US_ASCII), WRITE_TIMEOUT_MS)
+                }
+                true
+            }
+        }.getOrDefault(false)
+    }
+
+    internal fun replayPendingSettings(deviceId: String, pending: UvirPendingSensorSettings): Boolean {
+        val state = mutableState.value
+        return usbTransportReady() && state.credentials.deviceId.equals(deviceId, ignoreCase = true) &&
+            writeCommand(pending.protocolCommand())
     }
 
     internal suspend fun diagnosticProbe(hardwareId: String): UvirDiagnosticProbe {
@@ -519,7 +599,7 @@ class UvirUsbSensorManager(
                     current.appConnectionConfirmed &&
                     current.deviceId.equals(hardwareId, ignoreCase = true)
             },
-            send = { sendSensorControlCommands(listOf(it)) }
+            send = { sendDiagnosticControlCommands(hardwareId, listOf(it)) }
         )
     }
 
@@ -559,17 +639,19 @@ class UvirUsbSensorManager(
             timeoutMs = timeoutMs
         )
 
-    fun restoreDefaultsAndPowerOffAwait(timeoutMs: Long): Boolean =
+    fun restoreDefaultsAndPowerOffAwait(timeoutMs: Long, expectedHardwareUid: String? = null): Boolean =
         sendStatusTestAndAwait(
             command = "FACTORY_RESET",
             expectedField = "factory_reset",
-            timeoutMs = timeoutMs
+            timeoutMs = timeoutMs,
+            expectedHardwareUid = expectedHardwareUid
         )
 
     private fun sendStatusTestAndAwait(
         command: String,
         expectedField: String,
-        timeoutMs: Long
+        timeoutMs: Long,
+        expectedHardwareUid: String? = null
     ): Boolean {
         if (!usbTransportReady()) return false
         val acknowledgement = CountDownLatch(1)
@@ -577,7 +659,9 @@ class UvirUsbSensorManager(
         statusTestExpectedField = expectedField
         statusTestAcknowledgement = acknowledgement
         return try {
-            writeCommand(command) &&
+            (if (expectedHardwareUid != null) {
+                sendDiagnosticControlCommands(expectedHardwareUid, listOf(command), requireIdle = true)
+            } else writeCommand(command)) &&
                 acknowledgement.await(
                     timeoutMs.coerceIn(1_000L, 15_000L),
                     TimeUnit.MILLISECONDS
@@ -788,6 +872,14 @@ class UvirUsbSensorManager(
     private fun connectOrRequestPermission(
         device: UsbDevice
     ) {
+        if (firmwareUpdateLease) return
+        if (
+            UvirSensorCredentialStore.isSensorSelectionDisabled(
+                applicationContext
+            )
+        ) {
+            return
+        }
         val driver =
             UsbSerialProber
                 .getDefaultProber()
@@ -869,6 +961,10 @@ class UvirUsbSensorManager(
     private fun openDevice(device: UsbDevice) {
         executor.execute {
             synchronized(connectionLock) {
+                if (firmwareUpdateLease) return@synchronized
+                if (UvirSensorCredentialStore.isSensorSelectionDisabled(applicationContext)) {
+                    return@synchronized
+                }
                 closeSerialResources()
                 resetOfflineSyncState()
 
@@ -933,6 +1029,7 @@ class UvirUsbSensorManager(
                             }
                         )
                     ioManager = manager
+                    manager.readTimeout = 250
                     manager.start()
 
                     mutableState.value =
@@ -1007,10 +1104,11 @@ class UvirUsbSensorManager(
             }
         }
 
-        if (parseSensorSyncFrame(json, SensorSyncSource.USB)) {
+        if (!protocolAccepted && frameType != "hello") return
+        if (parseSensorSyncFrame(json, SensorSyncSource.USB, mutableState.value.deviceId.orEmpty())) {
             return
         }
-        if (parseSensorRuntimeFrame(json, SensorSyncSource.USB)) {
+        if (parseSensorRuntimeFrame(json, SensorSyncSource.USB, mutableState.value.deviceId.orEmpty())) {
             return
         }
 
@@ -1019,23 +1117,27 @@ class UvirUsbSensorManager(
             "sample" -> parseSample(json)
             "alert_event" -> parseAlertEvent(json)
             "status" -> {
+                wirelessModeAcknowledgement.get()?.confirm(
+                    mutableState.value.deviceId.orEmpty(), json.optString("wireless_mode")
+                )
                 acknowledgeWifiConfiguration(json)
                 acknowledgeInternetConfiguration(json)
                 persistReportedRadioSettings(json)
                 if (usbTransportReady()) {
                     val previous = mutableState.value
+                    val confirmed = when {
+                        json.has("app_connected") -> json.optBoolean("app_connected")
+                        json.optBoolean("streaming", false) -> true
+                        else -> previous.appConnectionConfirmed
+                    }
+                    UvirSensorConnectionHistory.recordIfStarted(applicationContext,
+                        previous.deviceId.orEmpty(), SensorConnectionMode.USB,
+                        previous.appConnectionConfirmed, confirmed)
                     mutableState.value =
                         previous.copy(
                             status = UsbSensorConnectionStatus.CONNECTED,
                             attached = true,
-                            appConnectionConfirmed =
-                                when {
-                                    json.has("app_connected") ->
-                                        json.optBoolean("app_connected")
-
-                                    json.optBoolean("streaming", false) -> true
-                                    else -> previous.appConnectionConfirmed
-                                },
+                            appConnectionConfirmed = confirmed,
                             runtimeInfo =
                                 previous.runtimeInfo.updatedFrom(json),
                             debugPerformanceCompletionSequence =
@@ -1059,6 +1161,7 @@ class UvirUsbSensorManager(
                         "code",
                         "sensor_error"
                     )
+                if (isWirelessHandoverRejection(code)) wirelessModeAcknowledgement.get()?.reject()
                 val fatalError =
                     code == "sensor_not_found" ||
                             code == "sensor_read" ||
@@ -1092,6 +1195,10 @@ class UvirUsbSensorManager(
         if (!protocolAccepted || !desiredStreaming) return
         val details = json.optString("details")
         if (details.isBlank()) return
+        UvirSensorEventHub.emitLiveAlert(
+            mutableState.value.deviceId.orEmpty(), SensorSyncSource.USB,
+            json.toUvirLiveAlert(alertReceiptSequence.incrementAndGet()), json.uvirQualityFlags()
+        )
         Log.i("UvirAlert", "USB live alert event received")
         mutableState.value =
             mutableState.value.copy(
@@ -1104,7 +1211,8 @@ class UvirUsbSensorManager(
                                 .takeIf { it > 0L }
                                 ?: System.currentTimeMillis(),
                         details = details,
-                        sessionId = json.optLong("session_id", 0L)
+                        sessionId = json.optLong("session_id", 0L),
+                        recorded = json.optBoolean("recorded", true)
                     )
             )
     }
@@ -1154,7 +1262,7 @@ class UvirUsbSensorManager(
                     )
             )
         if (updated != credentials) {
-            UvirSensorCredentialStore.save(applicationContext, updated)
+            UvirSensorCredentialStore.updateAssociatedSensor(applicationContext, updated)
             mutableState.value =
                 mutableState.value.copy(credentials = updated)
         }
@@ -1210,7 +1318,7 @@ class UvirUsbSensorManager(
      * switch the ESP32 back to USB and resume streaming immediately.
      */
     private fun usbTransportReady(): Boolean =
-        protocolAccepted && serialPort != null
+        !firmwareUpdateLease && protocolAccepted && serialPort != null
 
     private fun parseHello(json: JSONObject) {
         val sensorAvailable =
@@ -1236,14 +1344,17 @@ class UvirUsbSensorManager(
             return
         }
 
-        val storedCredentials =
-            UvirSensorCredentialStore.load(applicationContext)
+        val selectedCredentials = UvirSensorCredentialStore.load(applicationContext)
+        val storedCredentials = mutableState.value.credentials.takeIf { it.isProvisioned }
+            ?: selectedCredentials
         val deviceId = json.optString("device_id").trim()
         if (
             !isUsbSensorIdentityAllowed(
                 associatedDeviceId = storedCredentials.deviceId,
                 candidateDeviceId = deviceId
-            )
+            ) &&
+            !(mutableState.value.deviceId.isNullOrBlank() &&
+                normalizeSensorDeviceId(deviceId) in UvirSensorCredentialStore.associatedDeviceIds(applicationContext))
         ) {
             rejectUnassociatedSensor(
                 expectedDeviceId = storedCredentials.deviceId,
@@ -1357,10 +1468,11 @@ class UvirUsbSensorManager(
             mutableState.value.runtimeInfo.updatedFrom(json)
 
         if (credentials.isProvisioned) {
-            UvirSensorCredentialStore.save(
-                applicationContext,
-                credentials
-            )
+            if (normalizeSensorDeviceId(credentials.deviceId) in UvirSensorCredentialStore.associatedDeviceIds(applicationContext)) {
+                UvirSensorCredentialStore.updateAssociatedSensor(applicationContext, credentials)
+            } else {
+                UvirSensorCredentialStore.save(applicationContext, credentials)
+            }
         }
 
         protocolAccepted = true
@@ -1494,6 +1606,10 @@ class UvirUsbSensorManager(
     private fun parseSample(json: JSONObject) {
         if (!protocolAccepted) return
         val sample = json.toUvirSensorSampleOrNull() ?: return
+        val previous = mutableState.value
+        UvirSensorConnectionHistory.recordIfStarted(applicationContext,
+            previous.deviceId.orEmpty(), SensorConnectionMode.USB,
+            previous.appConnectionConfirmed, true)
 
         val sequence =
             json.optLong(
@@ -1530,6 +1646,7 @@ class UvirUsbSensorManager(
     }
 
     private fun writeCommand(command: String): Boolean {
+        if (firmwareUpdateLease) return false
         val port = serialPort ?: return false
 
         return runCatching {
@@ -1551,10 +1668,47 @@ class UvirUsbSensorManager(
         }
     }
 
+    /** Exclusive, bounded ownership transfer: the normal reader cannot consume ROM packets. */
+    internal fun withFirmwarePort(expectedUid: String, update: (UsbSerialPort, UvirSensorRuntimeInfo) -> Unit) {
+        try { executor.submit {
+            synchronized(connectionLock) {
+                check(!firmwareUpdateLease && protocolAccepted) { "USB sensor not ready" }
+                val info = mutableState.value.runtimeInfo
+                check(info.deviceId.equals(expectedUid, true) && info.operationActive == false) { "Sensor identity or idle state not confirmed" }
+                check(offlineSyncCompleted && (info.offlineAcquisitions ?: -1) == 0 && (info.offlineAlerts ?: -1) == 0) { "Synchronize sensor records before updating" }
+                val device = usbManager.deviceList.values.firstOrNull { it.deviceId == currentDeviceId }
+                    ?: error("USB sensor missing")
+                firmwareUpdateLease = true
+                // Close the previous USB connection, not just its reader thread. A stopped
+                // asynchronous reader must never share the new ROM port's endpoint.
+                closeSerialResources()
+                var rawConnection: UsbDeviceConnection? = null
+                var rawPort: UsbSerialPort? = null
+                try {
+                    rawConnection = usbManager.openDevice(device) ?: error("USB update port unavailable")
+                    val port = UsbSerialProber.getDefaultProber().probeDevice(device)?.ports?.firstOrNull()
+                        ?: error("USB update driver unavailable")
+                    rawPort = port
+                    port.open(rawConnection)
+                    port.setParameters(SERIAL_BAUD_RATE, UsbSerialPort.DATABITS_8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE)
+                    synchronized(commandWriteLock) { update(port, info) }
+                } finally {
+                    runCatching { rawPort?.close() }
+                    runCatching { rawConnection?.close() }
+                    closeSerialResources()
+                    protocolAccepted = false
+                    firmwareUpdateLease = false
+                    mutableState.value = UvirUsbSensorState(attached = true)
+                }
+            }
+        }.get() } finally { scanForSensor() }
+    }
+
     private fun closeConnection(
         error: String?,
         attached: Boolean
     ) {
+        wirelessModeAcknowledgement.get()?.reject()
         automaticStopConfirmed = false
         automaticStopAcknowledgement?.countDown()
         statusTestConfirmed = false
@@ -1583,6 +1737,7 @@ class UvirUsbSensorManager(
     }
 
     private fun closeSerialResources() {
+        wirelessModeAcknowledgement.get()?.reject()
         serialGeneration.incrementAndGet()
         runCatching {
             ioManager?.stop()

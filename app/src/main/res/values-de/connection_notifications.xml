@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="connection_notification_connected">Verbunden</string>
+    <string name="connection_notification_disconnected">Getrennt</string>
+    <string name="connection_notification_simulation">Simulation</string>
+    <string name="connection_notification_selected">ausgewählt</string>
+    <string name="connection_notification_activity">Aktivität läuft</string>
+    <string name="connection_notification_last_activity">Aktivität läuft (zuletzt bekannter Zustand)</string>
+    <plurals name="connection_notification_connected_count">
+        <item quantity="one">%1$d Sensor verbunden</item>
+        <item quantity="other">%1$d Sensoren verbunden</item>
+    </plurals>
+    <plurals name="connection_notification_connecting_count">
+        <item quantity="one">%1$d Sensor verbindet sich</item>
+        <item quantity="other">%1$d Sensoren verbinden sich</item>
+    </plurals>
+    <plurals name="connection_notification_activity_count">
+        <item quantity="one">%1$d Aktivität läuft</item>
+        <item quantity="other">%1$d Aktivitäten laufen</item>
+    </plurals>
+    <plurals name="connection_notification_simulation_count">
+        <item quantity="one">%1$d Simulation</item>
+        <item quantity="other">%1$d Simulationen</item>
+    </plurals>
+</resources>

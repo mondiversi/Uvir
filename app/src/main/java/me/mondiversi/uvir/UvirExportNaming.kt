@@ -25,6 +25,55 @@ internal fun uvirExportTimestamp(
         ).format(Date(timestamp))
     }
 
+internal fun uvirSafeExportToken(
+    value: String,
+    fallback: String = "Unknown",
+    maxLength: Int = 40
+): String =
+    value
+        .trim()
+        .replace(Regex("[^A-Za-z0-9._-]+"), "_")
+        .trim('_', '.', '-')
+        .take(maxLength.coerceAtLeast(1))
+        .ifBlank { fallback }
+
+internal fun uvirSettingsExportFileName(
+    sensorHardwareUid: String? = null,
+    encrypted: Boolean,
+    timestamp: Long = System.currentTimeMillis()
+): String {
+    val scope =
+        if (sensorHardwareUid == null) {
+            "App"
+        } else {
+            "Sensor_${uvirSafeExportToken(sensorHardwareUid, "Sensor")}"
+        }
+    val protection = if (encrypted) "_Encrypted" else ""
+    return UvirExportFileFormat.SETTINGS.fileName(
+        "Uvir_Settings_${scope}${protection}_${uvirExportTimestamp(timestamp)}"
+    )
+}
+
+internal fun uvirSensorInformationExportFileName(
+    deviceId: String,
+    timestamp: Long = System.currentTimeMillis()
+): String =
+    UvirExportFileFormat.TXT.fileName(
+        "Uvir_Sensor_Information_${
+            uvirSafeExportToken(deviceId, "Sensor")
+        }_${uvirExportTimestamp(timestamp)}"
+    )
+
+internal fun uvirSensorDiagnosticExportFileName(
+    deviceId: String,
+    timestamp: Long
+): String =
+    UvirExportFileFormat.TXT.fileName(
+        "Uvir_Sensor_Diagnostic_${
+            uvirSafeExportToken(deviceId, "Sensor")
+        }_${uvirExportTimestamp(timestamp)}"
+    )
+
 internal fun uvirAcquisitionExportBaseName(
     record: SavedRecordDetail
 ): String =

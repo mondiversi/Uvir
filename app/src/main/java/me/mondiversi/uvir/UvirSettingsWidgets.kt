@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -33,8 +34,12 @@ fun ExpansionChevron(
         label = "island-chevron"
     )
     Canvas(
-        modifier = modifier.size(iconSize)
+        modifier =
+            modifier
+                .size(iconSize)
+                .graphicsLayer(alpha = tint.alpha)
     ) {
+        val tint = tint.copy(alpha = 1f)
         val strokeWidth =
             maxOf(
                 1.6.dp.toPx(),
@@ -80,7 +85,13 @@ internal fun DoubleExpansionChevron(
     modifier: Modifier = Modifier,
     iconSize: Dp = 20.dp
 ) {
-    Canvas(modifier = modifier.size(iconSize)) {
+    Canvas(
+        modifier =
+            modifier
+                .size(iconSize)
+                .graphicsLayer(alpha = tint.alpha)
+    ) {
+        val tint = tint.copy(alpha = 1f)
         val strokeWidth = UvirTitleActionIconStrokeWidth.toPx()
         val downwardCenterLevels = floatArrayOf(0.44f, 0.72f)
 
@@ -136,16 +147,21 @@ internal fun DoubleExpansionChevron(
 internal fun AdaptiveSingleLineButtonText(
     text: String,
     maxFontSize: TextUnit = 14.sp,
-    minFontSize: TextUnit = 10.sp
+    minFontSize: TextUnit = 10.sp,
+    sharedFontSize: MutableState<TextUnit>? = null,
+    fontWeight: FontWeight? = null
 ) {
-    var fontSize by remember(text, maxFontSize, minFontSize) {
+    val localFontSize = remember(text, maxFontSize, minFontSize) {
         mutableStateOf(maxFontSize)
     }
+    val fontSizeState = sharedFontSize ?: localFontSize
+    val fontSize = fontSizeState.value
 
     Text(
         text = text,
         modifier = Modifier.fillMaxWidth(),
         fontSize = fontSize,
+        fontWeight = fontWeight,
         maxLines = 1,
         softWrap = false,
         textAlign = TextAlign.Center,
@@ -154,7 +170,7 @@ internal fun AdaptiveSingleLineButtonText(
                 result.hasVisualOverflow &&
                 fontSize.value > minFontSize.value
             ) {
-                fontSize =
+                fontSizeState.value =
                     (fontSize.value - 0.5f)
                         .coerceAtLeast(minFontSize.value)
                         .sp
@@ -168,14 +184,25 @@ internal fun RowScope.UvirLabeledButtonContent(
     text: String,
     maxFontSize: TextUnit = 14.sp,
     minFontSize: TextUnit = 10.sp,
+    sharedFontSize: MutableState<TextUnit>? = null,
+    fontWeight: FontWeight? = null,
     icon: @Composable () -> Unit
 ) {
-    icon()
+    val settingsStyle = LocalUvirSettingsActionButtons.current
+    CompositionLocalProvider(
+        LocalUvirActionGlyphStrokeScale provides
+            if (settingsStyle) UvirDestructiveOutlinedIconStrokeScale
+            else LocalUvirActionGlyphStrokeScale.current
+    ) {
+        icon()
+    }
     Spacer(Modifier.width(8.dp))
     AdaptiveSingleLineButtonText(
         text = text,
         maxFontSize = maxFontSize,
-        minFontSize = minFontSize
+        minFontSize = minFontSize,
+        sharedFontSize = sharedFontSize,
+        fontWeight = if (settingsStyle) FontWeight.SemiBold else fontWeight
     )
 }
 

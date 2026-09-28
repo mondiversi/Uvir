@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="connection_notification_connected">已连接</string>
+    <string name="connection_notification_disconnected">未连接</string>
+    <string name="connection_notification_simulation">模拟</string>
+    <string name="connection_notification_selected">已选择</string>
+    <string name="connection_notification_activity">活动进行中</string>
+    <string name="connection_notification_last_activity">活动进行中（最后已知状态）</string>
+    <plurals name="connection_notification_connected_count">
+        <item quantity="other">%1$d 个传感器已连接</item>
+    </plurals>
+    <plurals name="connection_notification_connecting_count">
+        <item quantity="other">%1$d 个传感器正在连接</item>
+    </plurals>
+    <plurals name="connection_notification_activity_count">
+        <item quantity="other">%1$d 项活动进行中</item>
+    </plurals>
+    <plurals name="connection_notification_simulation_count">
+        <item quantity="other">%1$d 项模拟</item>
+    </plurals>
+</resources>

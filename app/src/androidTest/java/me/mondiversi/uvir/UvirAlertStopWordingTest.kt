@@ -28,19 +28,19 @@ class UvirAlertStopWordingTest {
         }
     }
 
-    @Test fun italianUsesASingularSessionAndKeepsTheStopActionAndRetentionNotice() {
+    @Test fun italianUsesAlertsAndKeepsTheStopActionAndRetentionNotice() {
         val italian = localized("it")
-        assertEquals("Fermare la sessione allerta valori?",
+        assertEquals("Fermare la sessione di allerte?",
             italian.getString(R.string.stop_all_value_alerts_title))
         assertEquals("FERMA", italian.getString(R.string.stop_all_value_alerts_action))
         val message = italian.getString(R.string.stop_all_value_alerts_message)
-        assertTrue(message.contains("La sessione allerta valori in corso verrà terminata."))
+        assertTrue(message.contains("La sessione di allerte in corso verrà terminata."))
         assertTrue(message.contains("verranno conservate"))
-        assertFalse(message.contains("sessione allerte valori"))
-        assertEquals("Avviare la sessione allerta valori?",
+        assertFalse(message.contains("valori"))
+        assertEquals("Avvia sessione di allerte",
             italian.getString(R.string.start_value_alert_session_title))
         val english = localized("en")
-        assertEquals("Stop value alert session?", english.getString(R.string.stop_all_value_alerts_title))
+        assertEquals("Stop alert session?", english.getString(R.string.stop_all_value_alerts_title))
         assertEquals("STOP", english.getString(R.string.stop_all_value_alerts_action))
     }
 }

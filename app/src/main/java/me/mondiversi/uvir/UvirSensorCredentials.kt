@@ -50,6 +50,8 @@ internal fun isUsbSensorIdentityAllowed(
 object UvirSensorCredentialStore {
     private const val PREFS_NAME = "uvir_sensor_credentials"
     private const val KEY_ACTIVE_DEVICE_ID = "active_device_id"
+    private const val KEY_SENSOR_SELECTION_DISABLED =
+        "sensor_selection_disabled"
     private const val KEY_PROFILE_PREFIX = "sensor_profile."
     private const val KEY_DEVICE_ID = "device_id"
     private const val KEY_FIRMWARE_VERSION = "firmware_version"
@@ -175,12 +177,58 @@ object UvirSensorCredentialStore {
             context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         )
 
+    @Synchronized
     fun activateAssociatedSensor(context: Context, deviceId: String): Boolean {
         if (normalizeSensorDeviceId(deviceId) !in associatedDeviceIds(context)) return false
         val credentials = loadForDevice(context, deviceId) ?: return false
         return save(context, credentials)
     }
 
+    /** True when the user explicitly selected the no-sensor entry. */
+    fun isSensorSelectionDisabled(context: Context): Boolean =
+        context.applicationContext
+            .getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            .getBoolean(KEY_SENSOR_SELECTION_DISABLED, false)
+
+    /**
+     * Restore a complete association profile without replacing the sensor
+     * currently selected by the user. This is used by encrypted backups.
+     */
+    @Synchronized
+    fun restoreAssociatedSensor(
+        context: Context,
+        credentials: UvirSensorCredentials
+    ): Boolean {
+        if (!credentials.isProvisioned) return false
+        val preferences = context.applicationContext
+            .getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        return preferences.edit()
+            .putStringSet(
+                ASSOCIATED_SENSOR_IDS_KEY,
+                associatedSensorDeviceIds(preferences) +
+                    normalizeSensorDeviceId(credentials.deviceId)
+            )
+            .putString(
+                profileKey(credentials.deviceId),
+                credentials.toJson().toString()
+            )
+            .commit()
+    }
+
+
+    /** A running transport may update its own profile, never the UI selection. */
+    @Synchronized
+    fun updateAssociatedSensor(context: Context, credentials: UvirSensorCredentials): Boolean {
+        if (!credentials.isProvisioned ||
+            normalizeSensorDeviceId(credentials.deviceId) !in associatedDeviceIds(context)) return false
+        val selected = load(context).deviceId
+        if (!isSensorSelectionDisabled(context) &&
+            selected.equals(credentials.deviceId, ignoreCase = true)) return save(context, credentials)
+        val preferences = context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        return preferences.edit().putString(profileKey(credentials.deviceId), credentials.toJson().toString()).commit()
+    }
+
+    @Synchronized
     fun save(context: Context, credentials: UvirSensorCredentials): Boolean {
         if (!credentials.isProvisioned) {
             return false
@@ -195,6 +243,7 @@ object UvirSensorCredentialStore {
                 associatedSensorDeviceIds(preferences) + normalizeSensorDeviceId(credentials.deviceId)
             )
             .putString(KEY_ACTIVE_DEVICE_ID, credentials.deviceId)
+            .putBoolean(KEY_SENSOR_SELECTION_DISABLED, false)
             .putString(
                 profileKey(credentials.deviceId),
                 credentials.toJson().toString()
@@ -253,34 +302,63 @@ object UvirSensorCredentialStore {
         val preferences = context.applicationContext
             .getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val currentId = load(context).deviceId
-        val editor =
-            preferences
-                .edit()
-                .putStringSet(
-                    ASSOCIATED_SENSOR_IDS_KEY,
-                    associatedSensorDeviceIds(preferences) - normalizeSensorDeviceId(currentId)
-                )
-                .remove(KEY_ACTIVE_DEVICE_ID)
-        ACTIVE_PROFILE_KEYS.forEach(editor::remove)
-        return editor.commit()
+        UvirSensorSettingsSyncStore.forget(context, currentId)
+        return synchronized(this) {
+            if (!load(context).deviceId.equals(currentId, true)) return@synchronized false
+            val editor =
+                preferences
+                    .edit()
+                    .putStringSet(
+                        ASSOCIATED_SENSOR_IDS_KEY,
+                        associatedSensorDeviceIds(preferences) - normalizeSensorDeviceId(currentId)
+                    )
+                    .remove(KEY_ACTIVE_DEVICE_ID)
+            ACTIVE_PROFILE_KEYS.forEach(editor::remove)
+            editor.commit()
+        }
     }
 
     /** Allows an explicit new USB pairing without removing existing list entries. */
+    @Synchronized
     fun releaseActiveSensor(context: Context): Boolean {
         val preferences = context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val editor = preferences.edit()
             .putStringSet(ASSOCIATED_SENSOR_IDS_KEY, associatedSensorDeviceIds(preferences))
+            .putBoolean(KEY_SENSOR_SELECTION_DISABLED, false)
             .remove(KEY_ACTIVE_DEVICE_ID)
         ACTIVE_PROFILE_KEYS.forEach(editor::remove)
         return editor.commit()
     }
 
-    fun clear(context: Context): Boolean =
-        context.applicationContext
+    /**
+     * Keep every association profile but leave the app deliberately
+     * disconnected until the user selects a sensor again.
+     */
+    @Synchronized
+    fun deactivateSensorSelection(context: Context): Boolean {
+        val preferences = context.applicationContext
             .getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            .edit()
-            .clear()
-            .commit()
+        val editor = preferences.edit()
+            .putStringSet(
+                ASSOCIATED_SENSOR_IDS_KEY,
+                associatedSensorDeviceIds(preferences)
+            )
+            .putBoolean(KEY_SENSOR_SELECTION_DISABLED, true)
+            .remove(KEY_ACTIVE_DEVICE_ID)
+        ACTIVE_PROFILE_KEYS.forEach(editor::remove)
+        return editor.commit()
+    }
+
+    fun clear(context: Context): Boolean {
+        UvirSensorSettingsSyncStore.clear(context)
+        return synchronized(this) {
+            context.applicationContext
+                .getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                .edit()
+                .clear()
+                .commit()
+        }
+    }
 
     private fun profileKey(deviceId: String): String =
         KEY_PROFILE_PREFIX +

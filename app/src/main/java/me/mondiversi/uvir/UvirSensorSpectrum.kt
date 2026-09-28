@@ -39,6 +39,15 @@ fun SensorGroupContent(
     trackColor: Color
 ) {
 
+    val allGroupsInRange =
+        !sample.isOutOfRange(SensorGroup.UV) &&
+            !sample.isOutOfRange(SensorGroup.VISIBLE) &&
+            !sample.isOutOfRange(SensorGroup.NIR)
+    fun totalShare(groupTotal: Double): Float? =
+        if (allGroupsInRange) {
+            uvirIrradianceGroupShare(groupTotal, uvTotal, visibleTotal, nirTotal)
+        } else null
+
     val liveChartSeries =
         when (group) {
             SensorGroup.UV ->
@@ -115,6 +124,10 @@ fun SensorGroupContent(
                 group = group,
                 title = stringResource(R.string.uv_radiation),
                 total = uvTotal,
+                bandLabel = "100–400 nm",
+                relativePercent = totalShare(uvTotal),
+                trackColor = trackColor,
+                barColor = Color(0xFF6A1B9A),
                 outOfRange = sample.isOutOfRange(SensorGroup.UV),
                 expanded = expanded,
                 onToggle = onToggle,
@@ -143,7 +156,7 @@ fun SensorGroupContent(
                                 ThresholdAlertMetric.UV_TOTAL
                             )
                         }
-                    }
+                    },
             ) {
 
                 SpectrumRow(
@@ -242,6 +255,10 @@ fun SensorGroupContent(
                 group = group,
                 title = stringResource(R.string.visible_light),
                 total = visibleTotal,
+                bandLabel = "400–700 nm",
+                relativePercent = totalShare(visibleTotal),
+                trackColor = trackColor,
+                barColor = Color(0xFF00897B),
                 outOfRange = sample.isOutOfRange(SensorGroup.VISIBLE),
                 expanded = expanded,
                 onToggle = onToggle,
@@ -270,7 +287,7 @@ fun SensorGroupContent(
                                 ThresholdAlertMetric.VISIBLE_TOTAL
                             )
                         }
-                    }
+                    },
             ) {
 
                 SpectrumRow(
@@ -476,6 +493,10 @@ fun SensorGroupContent(
                 title = stringResource(R.string.far_red_nir),
                 footnote = stringResource(R.string.infrared_sensor_footnote),
                 total = nirTotal,
+                bandLabel = "745 / 855 nm",
+                relativePercent = totalShare(nirTotal),
+                trackColor = trackColor,
+                barColor = Color(0xFF6D4C41),
                 outOfRange = sample.isOutOfRange(SensorGroup.NIR),
                 expanded = expanded,
                 onToggle = onToggle,
@@ -504,7 +525,7 @@ fun SensorGroupContent(
                                 ThresholdAlertMetric.NIR_TOTAL
                             )
                         }
-                    }
+                    },
             ) {
 
                 SpectrumRow(
@@ -570,3 +591,10 @@ fun SensorGroupContent(
         SensorGroup.BIOLOGICAL -> Unit
     }
 }
+
+internal fun uvirIrradianceGroupShare(
+    groupTotal: Double,
+    uvTotal: Double,
+    visibleTotal: Double,
+    infraredTotal: Double
+): Float = percentage(groupTotal, uvTotal + visibleTotal + infraredTotal)

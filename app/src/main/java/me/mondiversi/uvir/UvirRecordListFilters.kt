@@ -12,17 +12,20 @@ internal data class UvirRecordListFilters(
     val automatic: Boolean? = null,
     val recordId: String = "",
     val sessionId: String = "",
-    val externalCommand: Boolean? = null
+    val externalCommand: Boolean? = null,
+    /** null = any, 0 = no variants, -1 = any variant count, > 1 = exact count. */
+    val variantCount: Int? = null
 ) {
     val isActive: Boolean get() =
         fromInclusive != null || untilInclusive != null || note.isNotBlank() ||
             sensorKey.isNotEmpty() || automatic != null || externalCommand != null ||
-            recordId.isNotEmpty() || sessionId.isNotEmpty()
+            recordId.isNotEmpty() || sessionId.isNotEmpty() || variantCount != null
 
     fun matches(
         id: Long, timestamp: Long, recordNote: String,
         sensorId: Long?, isAutomatic: Boolean, recordSessionId: Long?,
-        isExternalCommand: Boolean = false
+        isExternalCommand: Boolean = false,
+        recordVariantCount: Int = 0
     ): Boolean =
         (fromInclusive == null || timestamp >= fromInclusive) &&
             (untilInclusive == null || timestamp <= untilInclusive) &&
@@ -32,7 +35,13 @@ internal data class UvirRecordListFilters(
             (externalCommand == null || externalCommand == isExternalCommand) &&
             (recordId.isEmpty() || recordId.toLongOrNull() == id) &&
             (sessionId.isEmpty() || (recordSessionId != null &&
-                sessionId.toLongOrNull() == recordSessionId))
+                sessionId.toLongOrNull() == recordSessionId)) &&
+            when (variantCount) {
+                null -> true
+                -1 -> recordVariantCount > 1
+                0 -> recordVariantCount <= 1
+                else -> recordVariantCount == variantCount
+            }
 
     /** Selecting an inverted day moves the other bound instead of hiding everything. */
     fun withFromDay(value: Long, zoneId: ZoneId = ZoneId.systemDefault()): UvirRecordListFilters {
@@ -73,13 +82,31 @@ internal fun Long?.filterSensorKey(): String = this?.toString() ?: "unknown"
 
 internal fun filterAcquisitionRecords(
     records: List<SavedRecordSummary>, filters: UvirRecordListFilters
-): List<SavedRecordSummary> =
-    if (!filters.isActive) records else records.filter {
+): List<SavedRecordSummary> {
+    if (!filters.isActive) return records
+    val variantCountsBySession = uvirVariantCountsBySession(records)
+    return records.filter {
         filters.matches(
             it.id, it.timestamp, it.note, it.sensorId, it.automatic, it.sessionId,
-            it.externalCommand
+            it.externalCommand,
+            it.sessionId?.let(variantCountsBySession::get) ?: 0
         )
     }
+}
+
+internal fun uvirVariantCountsBySession(
+    records: List<SavedRecordSummary>
+): Map<Long, Int> = records.asSequence()
+    .filter { it.sessionId != null && it.variantIndex != null }
+    .groupBy { requireNotNull(it.sessionId) }
+    .mapValues { (_, sessionRecords) ->
+        sessionRecords.maxOf { requireNotNull(it.variantIndex) }
+    }
+    .filterValues { it > 1 }
+
+internal fun uvirAvailableVariantCounts(
+    records: List<SavedRecordSummary>
+): List<Int> = uvirVariantCountsBySession(records).values.distinct().sorted()
 
 internal fun filterAlertEntries(
     entries: List<ThresholdAlertLogEntry>, filters: UvirRecordListFilters

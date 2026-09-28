@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="capture_hint_start">بدء الالتقاط</string>
+    <string name="capture_hint_stop">إيقاف الالتقاط</string>
+    <string name="alert_hint_start">بدء التسجيل</string>
+    <string name="alert_hint_stop">إيقاف التسجيل</string>
+</resources>

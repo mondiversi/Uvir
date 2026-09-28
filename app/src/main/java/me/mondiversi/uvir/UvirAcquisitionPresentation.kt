@@ -1,14 +1,5 @@
 package me.mondiversi.uvir
 
-/** Display-only prefix: stored notes and export content stay unchanged. */
-internal fun sensorAndNoteDisplayText(
-    sensorName: String,
-    note: String,
-    emptyNote: String,
-    sessionSequence: Int? = null
-): String = listNoteDisplayText(note, emptyNote, sessionSequence) +
-    " · " + sensorName.ifBlank { "—" }
-
 internal fun listNoteDisplayText(
     note: String,
     emptyNote: String,

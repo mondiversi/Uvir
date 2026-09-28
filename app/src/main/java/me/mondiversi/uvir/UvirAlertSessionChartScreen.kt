@@ -26,6 +26,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -68,6 +69,7 @@ internal fun AlertSessionChartScreen(
     cardColor: Color,
     primaryText: Color,
     secondaryText: Color,
+    onOpenAlert: (ThresholdAlertLogEntry) -> Unit,
     onBack: () -> Unit,
     onDeleted: () -> Unit
 ) {
@@ -80,6 +82,12 @@ internal fun AlertSessionChartScreen(
         remember(sortedEntries) {
             alertSessionChartSeries(sortedEntries)
         }
+    val initialViewMode =
+        remember(availableSeries) {
+            defaultAlertViewMode(
+                availableSeries.map { series -> series.metric }
+            )
+        }
     val expandedValueSections =
         remember {
             mutableStateMapOf<ViewMode, Boolean>()
@@ -89,7 +97,7 @@ internal fun AlertSessionChartScreen(
             mutableStateMapOf<ViewMode, Boolean>()
         }
     var viewMode by rememberSaveable(sessionId) {
-        mutableStateOf(ViewMode.IRRADIANCE)
+        mutableStateOf(initialViewMode)
     }
     var showShareDialog by rememberSaveable {
         mutableStateOf(false)
@@ -99,13 +107,15 @@ internal fun AlertSessionChartScreen(
     }
     var currentNote by rememberSaveable(sessionId) {
         mutableStateOf(
-            database.readAlertSessionNote(sessionId).ifBlank {
-                sortedEntries.firstOrNull()?.note.orEmpty()
-            }
+            database.readAlertSessionNote(sessionId)
         )
     }
     var showNoteEditor by rememberSaveable(sessionId) {
         mutableStateOf(false)
+    }
+    val noteEditingEnabled = rememberSessionNoteEditingEnabled(database, sessionId, alert = true)
+    LaunchedEffect(noteEditingEnabled) {
+        if (!noteEditingEnabled) showNoteEditor = false
     }
     var showChart by rememberSaveable(sessionId) {
         mutableStateOf(false)
@@ -142,7 +152,7 @@ internal fun AlertSessionChartScreen(
     BackHandler(onBack = onBack)
 
     if (showDeleteConfirmation) {
-        AlertDialog(
+        UvirAlertDialog(
             onDismissRequest = {
                 showDeleteConfirmation = false
             },
@@ -150,11 +160,14 @@ internal fun AlertSessionChartScreen(
                 Text(stringResource(R.string.delete_alert_session_question))
             },
             text = {
-                Text(stringResource(R.string.delete_alert_session_warning))
+                UvirDeleteConfirmationMessage(
+                    stringResource(R.string.delete_alert_session_warning)
+                )
             },
             dismissButton = {
-                TextButton(
-                    onClick = {
+                HoldToConfirmDeleteButton(
+                    label = stringResource(R.string.delete),
+                    onConfirmed = {
                         val deleted =
                             database.deleteThresholdAlertLogs(
                                 sortedEntries.map { it.id }
@@ -168,14 +181,8 @@ internal fun AlertSessionChartScreen(
                             )
                             onDeleted()
                         }
-                    },
-                    colors =
-                        ButtonDefaults.textButtonColors(
-                            contentColor = UvirDestructiveActionColor
-                        )
-                ) {
-                    Text(stringResource(R.string.delete))
-                }
+                    }
+                )
             },
             confirmButton = {
                 TextButton(
@@ -193,10 +200,12 @@ internal fun AlertSessionChartScreen(
     }
 
     if (showShareDialog) {
-        MeasurementDetailShareDialog(
+        MeasurementDataExportScreen(
+            backgroundColor = backgroundColor,
             cardColor = cardColor,
             primaryText = primaryText,
             secondaryText = secondaryText,
+            readableTableFileCount = 1,
             combinedChartFileCount = 1,
             separateChartFileCount = alertSessionChartGroupCount(sortedEntries),
             onDismiss = {
@@ -228,9 +237,10 @@ internal fun AlertSessionChartScreen(
                 showShareDialog = false
             }
         )
+        return
     }
 
-    if (showNoteEditor) {
+    if (showNoteEditor && noteEditingEnabled) {
         UvirNoteEditDialog(
             initialNote = currentNote,
             cardColor = cardColor,
@@ -240,6 +250,17 @@ internal fun AlertSessionChartScreen(
                 if (database.updateAlertSessionNote(sessionId, updatedNote)) {
                     currentNote = updatedNote
                     showNoteEditor = false
+                    showUvirBottomMessage(
+                        context,
+                        resources.getString(R.string.note_updated),
+                        longDuration = false
+                    )
+                } else {
+                    showUvirBottomMessage(
+                        context,
+                        resources.getString(R.string.save_error),
+                        longDuration = false
+                    )
                 }
             },
             onDismiss = {
@@ -268,7 +289,9 @@ internal fun AlertSessionChartScreen(
                         color = primaryText
                     )
 
-                    IconButton(
+                    UvirTitleActionButton(
+                        iconColor = MaterialTheme.colorScheme.primary,
+                        contentDescription = chartShareDescription,
                         onClick = {
                             showShareDialog = true
                         },
@@ -276,23 +299,17 @@ internal fun AlertSessionChartScreen(
                         modifier =
                             Modifier
                                 .size(UvirTitleActionButtonSize)
-                                .semantics {
-                                    contentDescription = chartShareDescription
-                                }
                     ) {
                         UvirTitleActionIcon(
                             type = MenuIconType.EXPORT,
                             modifier = Modifier.size(UvirTitleActionIconSize),
-                            tint =
-                                if (availableSeries.isNotEmpty()) {
-                                    MaterialTheme.colorScheme.primary
-                                } else {
-                                    secondaryText.copy(alpha = 0.38f)
-                                }
+                            tint = LocalContentColor.current
                         )
                     }
 
-                    IconButton(
+                    UvirTitleActionButton(
+                        iconColor = UvirDestructiveActionColor,
+                        contentDescription = deleteDescription,
                         onClick = {
                             showDeleteConfirmation = true
                         },
@@ -300,19 +317,11 @@ internal fun AlertSessionChartScreen(
                         modifier =
                             Modifier
                                 .size(UvirTitleActionButtonSize)
-                                .semantics {
-                                    contentDescription = deleteDescription
-                                }
                     ) {
                         UvirTitleActionIcon(
                             type = MenuIconType.DELETE,
                             modifier = Modifier.size(UvirTitleActionIconSize),
-                            tint =
-                                if (sortedEntries.isNotEmpty()) {
-                                    UvirDestructiveActionColor
-                                } else {
-                                    secondaryText.copy(alpha = 0.38f)
-                                }
+                            tint = LocalContentColor.current
                         )
                     }
                     }
@@ -330,7 +339,11 @@ internal fun AlertSessionChartScreen(
                         state = scrollState,
                         color = secondaryText.copy(alpha = 0.46f)
                     ),
-            contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 20.dp),
+            contentPadding = PaddingValues(
+                start = UvirScreenHorizontalPadding,
+                end = UvirScreenHorizontalPadding,
+                bottom = 20.dp
+            ),
             verticalArrangement = Arrangement.spacedBy(UvirIslandSpacing)
         ) {
             item { UvirDetailIdentityCard(
@@ -339,7 +352,7 @@ internal fun AlertSessionChartScreen(
                 idLabel =
                     "ID / ${stringResource(R.string.session_label)}",
                 dateLabel =
-                    stringResource(R.string.session_date_duration_events_label),
+                    stringResource(R.string.session_start_end_duration_label),
                 dateText =
                     sortedEntries.firstOrNull()?.let { entry ->
                         formatDetailDateTime(
@@ -363,8 +376,6 @@ internal fun AlertSessionChartScreen(
                                 (sortedEntries.firstOrNull()?.timestamp ?: 0L)
                         ).coerceAtLeast(0L) / 1_000L
                     ),
-                durationCount = sortedEntries.size,
-                durationCountKind = UvirDetailDurationCountKind.ALERT,
                 cardColor = cardColor,
                 primaryText = primaryText,
                 secondaryText = secondaryText,
@@ -381,6 +392,14 @@ internal fun AlertSessionChartScreen(
                 cardColor = cardColor,
                 primaryText = primaryText,
                 secondaryText = secondaryText,
+                detailIcon = UvirDetailMetadataIconKind.ALERT,
+                detailText =
+                    pluralStringResource(
+                        R.plurals.alert_session_chart_alert_count,
+                        sortedEntries.size,
+                        sortedEntries.size
+                    ),
+                noteEditingEnabled = noteEditingEnabled,
                 onEditNote = {
                     showNoteEditor = true
                 }
@@ -458,7 +477,8 @@ internal fun AlertSessionChartScreen(
                     },
                     cardColor = cardColor,
                     primaryText = primaryText,
-                    secondaryText = secondaryText
+                    secondaryText = secondaryText,
+                    onOpenAlert = onOpenAlert
                 ) }
             }
         }
@@ -491,11 +511,11 @@ private fun AlertSessionCombinedLineChart(
                 valueScale(point.chartThreshold(percentageScale))
             }
         }
-    val maximum =
+    val maximum = if (percentageScale) {
         (chartValues + chartThresholds)
             .maxOrNull()
-            ?.coerceAtLeast(if (percentageScale) 100.0 else 1.0)
-            ?: 1.0
+            ?.coerceAtLeast(100.0) ?: 100.0
+    } else uvirChartMaximum(chartValues + chartThresholds, valueScale(1.0))
     val numericFormat = LocalUvirNumericFormat.current
     val logExtent =
         if (percentageScale) {

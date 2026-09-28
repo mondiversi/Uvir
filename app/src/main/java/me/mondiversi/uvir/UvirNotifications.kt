@@ -19,7 +19,8 @@ import java.util.Locale
 
 internal fun updateAutomaticAcquisitionNotification(
     context: Context,
-    completedCount: Int
+    completedCount: Int,
+    sensorName: String = ""
 ) {
     if (
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
@@ -73,9 +74,9 @@ internal fun updateAutomaticAcquisitionNotification(
                 )
             )
             .setContentTitle(
-                context.getString(
+                uvirNamedNotificationTitle(sensorName, context.getString(
                     R.string.automatic_notification_title
-                )
+                ))
             )
             .setContentText(
                 savedText
@@ -116,7 +117,8 @@ internal fun cancelAutomaticAcquisitionNotification(
 
 internal fun updateThresholdAlertNotification(
     context: Context,
-    alert: ThresholdNotificationAlert
+    alert: ThresholdNotificationAlert,
+    sensorName: String = ""
 ) {
     if (
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
@@ -193,9 +195,9 @@ internal fun updateThresholdAlertNotification(
     val expandedStyle =
         NotificationCompat.InboxStyle()
             .setBigContentTitle(
-                context.getString(
+                uvirNamedNotificationTitle(sensorName, context.getString(
                     R.string.threshold_notification_title
-                )
+                ))
             )
             .addLine(metricLabel)
             .addLine(alertValueText)
@@ -214,9 +216,9 @@ internal fun updateThresholdAlertNotification(
                 )
             )
             .setContentTitle(
-                context.getString(
+                uvirNamedNotificationTitle(sensorName, context.getString(
                     R.string.threshold_notification_title
-                )
+                ))
             )
             .setContentText(metricLabel)
             .setStyle(expandedStyle)
@@ -367,12 +369,12 @@ internal fun showSensorSyncCompleteNotification(
     createSensorStorageNotificationChannel(context)
 
     val lines = buildList {
-        add(
+        if (summary.acquisitions > 0) add(
             context.getString(
                 R.string.sensor_sync_acquisitions_recovered
             ) + ": ${summary.acquisitions}"
         )
-        add(
+        if (summary.alerts > 0) add(
             context.getString(
                 R.string.sensor_sync_alerts_recovered
             ) + ": ${summary.alerts}"
@@ -392,9 +394,10 @@ internal fun showSensorSyncCompleteNotification(
             )
         }
     }
+    val title = sensorSyncCompleteTitle(context.resources, summary)
     val style = NotificationCompat.InboxStyle()
         .setBigContentTitle(
-            context.getString(R.string.sensor_sync_complete)
+            title
         )
     lines.forEach(style::addLine)
 
@@ -411,9 +414,9 @@ internal fun showSensorSyncCompleteNotification(
                 )
             )
             .setContentTitle(
-                context.getString(R.string.sensor_sync_complete)
+                title
             )
-            .setContentText(lines.first())
+            .setContentText(lines.firstOrNull().orEmpty())
             .setStyle(style)
             .setContentIntent(
                 createOpenHomePendingIntent(

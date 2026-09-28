@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sensor_connection_switch_failed">Could not confirm the connection change. The previous mode remains selected.</string>
+</resources>

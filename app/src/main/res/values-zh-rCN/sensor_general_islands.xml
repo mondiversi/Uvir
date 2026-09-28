@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sensor_general_actions_title">操作</string>
+    <string name="sensor_general_actions_description">管理传感器及其与应用的关联。</string>
+    <string name="sensor_general_profile_title">配置档案</string>
+    <string name="sensor_general_profile_description">选择传感器名称。</string>
+    <string name="sensor_general_operation_title">运行</string>
+    <string name="sensor_general_operation_description">配置传感器的运行方式。</string>
+</resources>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sensor_general_actions_title">الإجراءات</string>
+    <string name="sensor_general_actions_description">أدر المستشعر وارتباطه بالتطبيق.</string>
+    <string name="sensor_general_profile_title">الملف الشخصي</string>
+    <string name="sensor_general_profile_description">اختر اسم المستشعر.</string>
+    <string name="sensor_general_operation_title">التشغيل</string>
+    <string name="sensor_general_operation_description">اضبط سلوك المستشعر.</string>
+</resources>

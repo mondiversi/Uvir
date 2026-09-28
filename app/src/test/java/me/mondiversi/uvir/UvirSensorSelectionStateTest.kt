@@ -4,6 +4,26 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class UvirSensorSelectionStateTest {
+    @Test fun connectionIconsReadEachProfilesModeWithoutChangingSelectionOrPreferences() {
+        val values = mutableMapOf<String, Any?>(
+            KEY_SENSOR_CONNECTION_MODE to "WIFI",
+            sensorContextPreferenceKey("sensor-a", KEY_SENSOR_CONNECTION_MODE) to "USB",
+            sensorContextPreferenceKey("sensor-b", KEY_SENSOR_CONNECTION_MODE) to "BLUETOOTH",
+            sensorContextPreferenceKey("sensor-c", KEY_SENSOR_CONNECTION_MODE) to "INTERNET"
+        )
+        val preferences = memoryPreferences(values)
+        val before = values.toMap()
+        assertEquals(SensorConnectionMode.WIFI,
+            loadSensorContextConnectionMode(preferences, " SENSOR-A ", "sensor-a", SensorConnectionMode.WIFI))
+        assertEquals(SensorConnectionMode.BLUETOOTH,
+            loadSensorContextConnectionMode(preferences, " SENSOR-B ", "sensor-a", SensorConnectionMode.WIFI))
+        assertEquals(SensorConnectionMode.INTERNET,
+            loadSensorContextConnectionMode(preferences, "sensor-c", "sensor-a", SensorConnectionMode.WIFI))
+        assertEquals(SensorConnectionMode.USB,
+            loadSensorContextConnectionMode(preferences, "new-sensor", "sensor-a", SensorConnectionMode.WIFI))
+        assertEquals(before, values)
+    }
+
     @Test fun transferProfileCoversAcquisitionAndAlertConfigurationOnly() {
         val expected =
             setOf(
@@ -125,13 +145,16 @@ class UvirSensorSelectionStateTest {
             KEY_SAMPLE_SPACING_MS to 150L,
             KEY_SENSOR_STATUS_LED_BRIGHTNESS to 10,
             KEY_SENSOR_VISIBLE_CALIBRATION_FACTOR to 2f,
-            KEY_SENSOR_CONNECTION_MODE to "BLUETOOTH"
+            KEY_SENSOR_CONNECTION_MODE to "BLUETOOTH",
+            KEY_LAST_WIRELESS_SENSOR_CONNECTION_MODE to "BLUETOOTH"
         )
         val preferences = memoryPreferences(values)
         assertTrue(saveSelectedSensorContext(preferences, "sensor-A"))
         assertTrue(restoreSelectedSensorContext(preferences, "sensor-B"))
         preferences.edit().putString(KEY_MANUAL_ACQUISITION_NOTE, "manual B")
             .putString(KEY_AUTO_NOTE, "automatic B").putString(KEY_THRESHOLD_ALERT_NOTE, "alert B")
+            .putString(KEY_SENSOR_CONNECTION_MODE, "WIFI")
+            .putString(KEY_LAST_WIRELESS_SENSOR_CONNECTION_MODE, "WIFI")
             .putInt(KEY_THRESHOLD_ALERT_REPEAT_SECONDS, 90)
             .putLong(KEY_SAMPLE_SPACING_MS, 500L).putFloat(KEY_SENSOR_VISIBLE_CALIBRATION_FACTOR, 5f).commit()
         assertTrue(saveSelectedSensorContext(preferences, "sensor-B"))
@@ -143,7 +166,10 @@ class UvirSensorSelectionStateTest {
         assertEquals(150L, preferences.getLong(KEY_SAMPLE_SPACING_MS, 0))
         assertEquals(2f, preferences.getFloat(KEY_SENSOR_VISIBLE_CALIBRATION_FACTOR, 0f))
         assertEquals("BLUETOOTH", preferences.getString(KEY_SENSOR_CONNECTION_MODE, ""))
+        assertEquals("BLUETOOTH", preferences.getString(KEY_LAST_WIRELESS_SENSOR_CONNECTION_MODE, ""))
         restoreSelectedSensorContext(preferences, "sensor-B")
+        assertEquals("WIFI", preferences.getString(KEY_SENSOR_CONNECTION_MODE, ""))
+        assertEquals("WIFI", preferences.getString(KEY_LAST_WIRELESS_SENSOR_CONNECTION_MODE, ""))
         assertEquals("alert B", preferences.getString(KEY_THRESHOLD_ALERT_NOTE, ""))
         assertEquals(90, preferences.getInt(KEY_THRESHOLD_ALERT_REPEAT_SECONDS, 0))
         assertEquals(500L, preferences.getLong(KEY_SAMPLE_SPACING_MS, 0))
@@ -165,6 +191,34 @@ class UvirSensorSelectionStateTest {
         assertEquals(8, preferences.getInt(KEY_AUTO_COMPLETED_COUNT, 0))
         assertEquals(43L, preferences.getLong(KEY_THRESHOLD_ALERT_SESSION_ID, 0))
         assertFalse(loadPersistedOfflineDisconnectionNotice(preferences)!!.autonomousRecordingEnabled)
+    }
+
+    @Test fun threeSensorsKeepIndependentRunningSessionStates() {
+        val preferences = memoryPreferences(mutableMapOf<String, Any?>(
+            KEY_AUTO_ENABLED to true,
+            KEY_AUTO_SESSION_ID to 101L
+        ))
+        assertTrue(saveSelectedSensorContext(preferences, "sensor-a"))
+        for ((deviceId, sessionId) in listOf("sensor-b" to 202L, "sensor-c" to 303L)) {
+            assertTrue(restoreSelectedSensorContext(preferences, deviceId))
+            assertFalse(preferences.getBoolean(KEY_AUTO_ENABLED, false))
+            assertTrue(preferences.edit()
+                .putBoolean(KEY_AUTO_ENABLED, true)
+                .putLong(KEY_AUTO_SESSION_ID, sessionId)
+                .commit())
+            assertTrue(saveSelectedSensorContext(preferences, deviceId))
+        }
+        for ((deviceId, sessionId) in listOf(
+            "sensor-a" to 101L,
+            "sensor-b" to 202L,
+            "sensor-c" to 303L
+        )) {
+            assertTrue(restoreSelectedSensorContext(preferences, deviceId))
+            assertTrue(preferences.getBoolean(KEY_AUTO_ENABLED, false))
+            assertEquals(sessionId, preferences.getLong(KEY_AUTO_SESSION_ID, 0L))
+        }
+        assertTrue(restoreSelectedSensorContext(preferences, ""))
+        assertFalse(preferences.getBoolean(KEY_AUTO_ENABLED, false))
     }
 
     @Test fun newSensorNeverInheritsSettingsButGlobalUiPreferencesRemain() {

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sensor_general_actions_title">عملیات</string>
+    <string name="sensor_general_actions_description">حسگر و پیوند آن با برنامه را مدیریت کنید.</string>
+    <string name="sensor_general_profile_title">پروفایل</string>
+    <string name="sensor_general_profile_description">نام حسگر را انتخاب کنید.</string>
+    <string name="sensor_general_operation_title">عملکرد</string>
+    <string name="sensor_general_operation_description">رفتار حسگر را تنظیم کنید.</string>
+</resources>

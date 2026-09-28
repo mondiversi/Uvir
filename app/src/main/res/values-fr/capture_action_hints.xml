@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="capture_hint_start">Démarrer l’acquisition</string>
+    <string name="capture_hint_stop">Arrêter l’acquisition</string>
+    <string name="alert_hint_start">Démarrer l’enregistrement</string>
+    <string name="alert_hint_stop">Arrêter l’enregistrement</string>
+</resources>

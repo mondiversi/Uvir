@@ -130,7 +130,8 @@ class UvirActionTypographyTest {
                             UvirHomeHeader(SensorConnectionMode.USB, true,
                                 UsbSensorConnectionStatus.DISCONNECTED, false,
                                 WirelessSensorConnectionStatus.DISCONNECTED, null, false, false,
-                                "Info", Color.White, Color.Gray, {}, {}, {})
+                                "Info", Color.White, Color.Gray, {}, {},
+                                sensorSelectionExpanded = false, onSensorSelectionExpandedChange = {})
                         }
                         Box(Modifier.testTag("closed")) {
                             SettingsSection("Closed settings", Color.Black, Color.White, Color.Gray,

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="diagnostics_test_group">Tanı testi</string>
+    <string name="diagnostics_simulation_group">Simülasyon</string>
+    <string name="diagnostics_simulation_description">Sensör için ölçümleri, uyarıları ve canlı değerleri simüle eder.</string>
+</resources>

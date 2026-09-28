@@ -1,21 +1,27 @@
 package me.mondiversi.uvir
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.Calendar
 import java.util.Locale
 
@@ -151,9 +157,19 @@ private fun UvirFormatDescription(
 }
 
 @Composable
+private fun UvirFormatGroupHeader(
+    title: String,
+    icon: ConnectivityIconType,
+    primaryText: Color
+) {
+    SettingsIslandHeader(title, primaryText, icon)
+}
+
+@Composable
 internal fun UvirSettingsGeneralSections(
     database: UvirDatabaseHelper,
     autoEnabled: Boolean,
+    sensorRestoreEnabled: Boolean,
     numericFormatValue: String,
     onNumericFormatValueChange: (String) -> Unit,
     dateFormatValue: String,
@@ -174,6 +190,10 @@ internal fun UvirSettingsGeneralSections(
     onCountersSectionExpandedChange: (Boolean) -> Unit,
     onResetAllRequested: () -> Unit,
     onRestoreDefaultsRequested: () -> Unit,
+    onSensorRestoreRequested: () -> Unit,
+    onSettingsExportRequested: () -> Unit,
+    onSettingsImportRequested: () -> Unit,
+    onDatabaseImportRequested: () -> Unit,
     debugSectionExpanded: Boolean,
     onDebugSectionExpandedChange: (Boolean) -> Unit,
     fakeSensorDataEnabled: Boolean,
@@ -189,6 +209,7 @@ internal fun UvirSettingsGeneralSections(
     onStopDebugPerformance:
         suspend () -> Boolean,
     diagnosticSensorConnected: Boolean,
+    diagnosticSensorDeviceId: String,
     diagnosticSensorInfo: UvirSensorRuntimeInfo,
     diagnosticConnectionMode: SensorConnectionMode,
     diagnosticSensorName: String,
@@ -199,8 +220,15 @@ internal fun UvirSettingsGeneralSections(
 ) {
     val context = LocalContext.current
     val resources = LocalResources.current
+    val coroutineScope = rememberCoroutineScope()
     var standaloneExport by remember {
         mutableStateOf<UvirStandaloneExport?>(null)
+    }
+    var showSimulateEventsConfirmation by remember {
+        mutableStateOf(false)
+    }
+    var simulatingEvents by remember {
+        mutableStateOf(false)
     }
     val dateExampleTimestamp =
         remember {
@@ -218,7 +246,26 @@ internal fun UvirSettingsGeneralSections(
         }
 
     standaloneExport?.let { export ->
-        UvirSaveOrShareDialog(
+        if (export == UvirStandaloneExport.DATABASE) {
+            UvirEncryptedDatabaseExportDialog(
+                cardColor = cardColor,
+                primaryText = primaryText,
+                secondaryText = secondaryText,
+                onDismiss = { standaloneExport = null },
+                onExport = { password, destination ->
+                    runCatching {
+                        shareDatabase(context, database, password, destination)
+                    }.onFailure { error ->
+                        UvirErrorLog.record(context, "export_database", error)
+                        showUvirBottomMessage(
+                            context,
+                            resources.getString(R.string.export_save_failed)
+                        )
+                    }
+                    standaloneExport = null
+                }
+            )
+        } else UvirSaveOrShareDialog(
             cardColor = cardColor,
             primaryText = primaryText,
             secondaryText = secondaryText,
@@ -240,14 +287,18 @@ internal fun UvirSettingsGeneralSections(
                             R.string.export_error_log_dialog_description
                     }
                 ),
+            fileFormat =
+                when (export) {
+                    UvirStandaloneExport.DATABASE ->
+                        UvirExportFileFormat.DATABASE
+                    UvirStandaloneExport.ERROR_LOG ->
+                        UvirExportFileFormat.TXT
+                },
             onDismiss = { standaloneExport = null },
             onExport = { destination ->
                 runCatching {
                     val exported = when (export) {
-                        UvirStandaloneExport.DATABASE -> {
-                            shareDatabase(context, database, destination)
-                            true
-                        }
+                        UvirStandaloneExport.DATABASE -> error("Handled above")
                         UvirStandaloneExport.ERROR_LOG ->
                             UvirErrorLog.share(
                                 context = context,
@@ -272,6 +323,87 @@ internal fun UvirSettingsGeneralSections(
                 }
                 standaloneExport = null
             }
+        )
+    }
+
+    if (showSimulateEventsConfirmation) {
+        UvirAlertDialog(
+            onDismissRequest = {
+                if (!simulatingEvents) {
+                    showSimulateEventsConfirmation = false
+                }
+            },
+            title = {
+                Text(stringResource(R.string.debug_simulate_events_question))
+            },
+            text = {
+                Text(stringResource(R.string.debug_simulate_events_confirmation))
+            },
+            dismissButton = {
+                TextButton(
+                    enabled = !simulatingEvents,
+                    onClick = {
+                        simulatingEvents = true
+                        coroutineScope.launch {
+                            val result =
+                                runCatching {
+                                    withContext(Dispatchers.IO) {
+                                        database.insertDebugSimulationEvents(
+                                            selectedSensorDeviceId = diagnosticSensorDeviceId,
+                                            note =
+                                                resources.getString(
+                                                    R.string.debug_simulation_note
+                                                )
+                                        )
+                                    }
+                                }
+                            simulatingEvents = false
+                            showSimulateEventsConfirmation = false
+                            result.onSuccess { inserted ->
+                                showUvirBottomMessage(
+                                    context,
+                                    resources.getString(
+                                        R.string.debug_simulate_events_completed,
+                                        inserted.acquisitions,
+                                        inserted.alerts
+                                    ),
+                                    longDuration = false
+                                )
+                            }.onFailure { error ->
+                                UvirErrorLog.record(
+                                    context,
+                                    "simulate_debug_events",
+                                    error
+                                )
+                                showUvirBottomMessage(
+                                    context,
+                                    resources.getString(R.string.save_error),
+                                    longDuration = false
+                                )
+                            }
+                        }
+                    }
+                ) {
+                    Text(stringResource(R.string.confirm))
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    enabled = !simulatingEvents,
+                    onClick = {
+                        showSimulateEventsConfirmation = false
+                    },
+                    colors =
+                        ButtonDefaults.textButtonColors(
+                            contentColor = UvirDestructiveActionColor
+                        )
+                ) {
+                    Text(stringResource(R.string.cancel))
+                }
+            },
+            containerColor = cardColor,
+            titleContentColor = primaryText,
+            textContentColor = secondaryText
         )
     }
 
@@ -344,314 +476,153 @@ internal fun UvirSettingsGeneralSections(
         containerColor = cardColor,
         titleColor = primaryText,
         chevronColor = secondaryText,
-        dividerColor = secondaryText.copy(alpha = 0.28f)
+        dividerColor = secondaryText.copy(alpha = 0.28f),
+        contentSpacing = UvirIslandSpacing,
+        wrapDetailContent = false
     ) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(UvirSettingsGroupGap)
+            verticalArrangement = Arrangement.spacedBy(UvirIslandSpacing)
         ) {
-            SettingsPageDescription(
-                text = stringResource(R.string.language_formats_description),
-                color = secondaryText
-            )
-
-            Column(
-                verticalArrangement = Arrangement.spacedBy(UvirSettingsChoiceSpacing)
+            SettingsIsland(
+                containerColor = cardColor,
+                contentColor = primaryText
             ) {
-                Text(
-                    text = stringResource(R.string.irradiance_view),
-                    color = primaryText,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold
+                UvirFormatGroupHeader(
+                    title = stringResource(R.string.irradiance_view),
+                    icon = ConnectivityIconType.IRRADIANCE,
+                    primaryText = primaryText
                 )
-                UvirFormatDescription(
-                    text = stringResource(R.string.irradiance_measurement_description),
-                    secondaryText = secondaryText
-                )
-                Spacer(Modifier.height(4.dp))
-                UvirIrradianceUnit.entries.forEach { unit ->
-                    UvirSettingsRadioOption(
-                        selected = irradianceUnitValue == unit.storedValue,
-                        title = unit.symbol,
-                        primaryText = primaryText,
-                        secondaryText = secondaryText,
-                        onClick = {
-                            if (irradianceUnitValue != unit.storedValue) {
-                                onIrradianceUnitValueChange(unit.storedValue)
-                            }
-                        }
+                Column(verticalArrangement = Arrangement.spacedBy(UvirSettingsChoiceSpacing)) {
+                    UvirFormatDescription(
+                        text = stringResource(R.string.irradiance_measurement_description),
+                        secondaryText = secondaryText
                     )
+                    Spacer(Modifier.height(4.dp))
+                    UvirIrradianceUnit.entries.forEach { unit ->
+                        UvirSettingsRadioOption(
+                            selected = irradianceUnitValue == unit.storedValue,
+                            title = unit.symbol,
+                            primaryText = primaryText,
+                            secondaryText = secondaryText,
+                            onClick = {
+                                if (irradianceUnitValue != unit.storedValue) {
+                                    onIrradianceUnitValueChange(unit.storedValue)
+                                }
+                            }
+                        )
+                    }
                 }
             }
 
-            SettingsGroupDivider(secondaryText)
-
-            Column(
-                verticalArrangement = Arrangement.spacedBy(UvirSettingsChoiceSpacing)
+            SettingsIsland(
+                containerColor = cardColor,
+                contentColor = primaryText
             ) {
-                Text(
-                    text = stringResource(R.string.format_numbers_heading),
-                    color = primaryText,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold
+                UvirFormatGroupHeader(
+                    title = stringResource(R.string.format_numbers_heading),
+                    icon = ConnectivityIconType.NUMERIC_FORMAT,
+                    primaryText = primaryText
                 )
-                UvirFormatDescription(
-                    text = stringResource(R.string.numeric_format_description),
-                    secondaryText = secondaryText
-                )
-                Spacer(Modifier.height(4.dp))
-                UvirNumericFormat.entries.forEach { format ->
-                    UvirSettingsRadioOption(
-                        selected = numericFormatValue == format.storedValue,
-                        title = uvirNumericFormatLabel(format),
-                        example =
-                            formatUvirNumber(1000.23, 2, format),
-                        primaryText = primaryText,
-                        secondaryText = secondaryText,
-                        onClick = {
-                            if (numericFormatValue != format.storedValue) {
-                                onNumericFormatValueChange(format.storedValue)
-                            }
-                        }
+                Column(verticalArrangement = Arrangement.spacedBy(UvirSettingsChoiceSpacing)) {
+                    UvirFormatDescription(
+                        text = stringResource(R.string.numeric_format_description),
+                        secondaryText = secondaryText
                     )
+                    Spacer(Modifier.height(4.dp))
+                    UvirNumericFormat.entries.forEach { format ->
+                        UvirSettingsRadioOption(
+                            selected = numericFormatValue == format.storedValue,
+                            title = uvirNumericFormatLabel(format),
+                            example = formatUvirNumber(1000.23, 2, format),
+                            primaryText = primaryText,
+                            secondaryText = secondaryText,
+                            onClick = {
+                                if (numericFormatValue != format.storedValue) {
+                                    onNumericFormatValueChange(format.storedValue)
+                                }
+                            }
+                        )
+                    }
                 }
             }
 
-            SettingsGroupDivider(secondaryText)
-
-            Column(
-                verticalArrangement = Arrangement.spacedBy(UvirSettingsChoiceSpacing)
+            SettingsIsland(
+                containerColor = cardColor,
+                contentColor = primaryText
             ) {
-                Text(
-                    text = stringResource(R.string.format_date_time_heading),
-                    color = primaryText,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold
+                UvirFormatGroupHeader(
+                    title = stringResource(R.string.format_date_time_heading),
+                    icon = ConnectivityIconType.DATE,
+                    primaryText = primaryText
                 )
-                UvirFormatDescription(
-                    text = stringResource(R.string.date_format_description),
-                    secondaryText = secondaryText
-                )
-                Spacer(Modifier.height(4.dp))
-                UvirDateFormat.entries.forEach { format ->
-                    UvirSettingsRadioOption(
-                        selected = dateFormatValue == format.storedValue,
-                        title = uvirDateFormatLabel(format),
-                        example = formatUvirDateOnly(dateExampleTimestamp, format),
-                        primaryText = primaryText,
-                        secondaryText = secondaryText,
-                        onClick = {
-                            if (dateFormatValue != format.storedValue) {
-                                onDateFormatValueChange(format.storedValue)
-                            }
-                        }
+                Column(verticalArrangement = Arrangement.spacedBy(UvirSettingsChoiceSpacing)) {
+                    UvirFormatDescription(
+                        text = stringResource(R.string.date_format_description),
+                        secondaryText = secondaryText
                     )
+                    Spacer(Modifier.height(4.dp))
+                    UvirDateFormat.entries.forEach { format ->
+                        UvirSettingsRadioOption(
+                            selected = dateFormatValue == format.storedValue,
+                            title = uvirDateFormatLabel(format),
+                            example = formatUvirDateOnly(dateExampleTimestamp, format),
+                            primaryText = primaryText,
+                            secondaryText = secondaryText,
+                            onClick = {
+                                if (dateFormatValue != format.storedValue) {
+                                    onDateFormatValueChange(format.storedValue)
+                                }
+                            }
+                        )
+                    }
                 }
             }
 
-            SettingsGroupDivider(secondaryText)
-
-            Column(
-                verticalArrangement = Arrangement.spacedBy(UvirSettingsChoiceSpacing)
+            SettingsIsland(
+                containerColor = cardColor,
+                contentColor = primaryText
             ) {
-                Text(
-                    text = stringResource(R.string.format_time_heading),
-                    color = primaryText,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold
+                UvirFormatGroupHeader(
+                    title = stringResource(R.string.format_time_heading),
+                    icon = ConnectivityIconType.TIME,
+                    primaryText = primaryText
                 )
-                UvirFormatDescription(
-                    text = stringResource(R.string.time_format_description),
-                    secondaryText = secondaryText
-                )
-                Spacer(Modifier.height(4.dp))
-                UvirTimeFormat.entries.forEach { format ->
-                    val effectiveFormat =
-                        resolveUvirTimeFormat(context, format)
-                    UvirSettingsRadioOption(
-                        selected = timeFormatValue == format.storedValue,
-                        title = uvirTimeFormatLabel(format),
-                        example =
-                            formatUvirTimeOnly(
-                                timestamp = dateExampleTimestamp,
-                                format = effectiveFormat
-                            ),
-                        primaryText = primaryText,
-                        secondaryText = secondaryText,
-                        onClick = {
-                            if (timeFormatValue != format.storedValue) {
-                                onTimeFormatValueChange(format.storedValue)
-                            }
-                        }
+                Column(verticalArrangement = Arrangement.spacedBy(UvirSettingsChoiceSpacing)) {
+                    UvirFormatDescription(
+                        text = stringResource(R.string.time_format_description),
+                        secondaryText = secondaryText
                     )
+                    Spacer(Modifier.height(4.dp))
+                    UvirTimeFormat.entries.forEach { format ->
+                        val effectiveFormat = resolveUvirTimeFormat(context, format)
+                        UvirSettingsRadioOption(
+                            selected = timeFormatValue == format.storedValue,
+                            title = uvirTimeFormatLabel(format),
+                            example =
+                                formatUvirTimeOnly(
+                                    timestamp = dateExampleTimestamp,
+                                    format = effectiveFormat
+                                ),
+                            primaryText = primaryText,
+                            secondaryText = secondaryText,
+                            onClick = {
+                                if (timeFormatValue != format.storedValue) {
+                                    onTimeFormatValueChange(format.storedValue)
+                                }
+                            }
+                        )
+                    }
                 }
             }
-
         }
     }
 
-    SettingsSection(
-        settingsPage = UvirSettingsPage.SHARING_AND_EXPORT,
-        title = stringResource(R.string.settings_section_sharing_export),
-        titleIconContent = { tint ->
-            UvirMenuIcon(
-                type = MenuIconType.EXPORT,
-                modifier = Modifier.size(20.dp),
-                tint = tint
-            )
-        },
-        containerColor = cardColor,
-        titleColor = primaryText,
-        chevronColor = secondaryText,
-        dividerColor = secondaryText.copy(alpha = 0.28f)
-    ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(UvirSettingsGroupGap)
-        ) {
-            SettingsPageDescription(
-                text = stringResource(R.string.export_format_description),
-                color = secondaryText
-            )
-            Column(
-                verticalArrangement = Arrangement.spacedBy(UvirSettingsChoiceSpacing)
-            ) {
-                UvirExportMode.entries.forEach { mode ->
-                    UvirSettingsRadioOption(
-                        selected = exportModeValue == mode.storedValue,
-                        title =
-                            stringResource(
-                                when (mode) {
-                                    UvirExportMode.SELECTED ->
-                                        R.string.export_format_selected
-                                    UvirExportMode.INTERNATIONAL ->
-                                        R.string.export_format_international
-                                }
-                            ),
-                        primaryText = primaryText,
-                        secondaryText = secondaryText,
-                        onClick = {
-                            if (exportModeValue != mode.storedValue) {
-                                onExportModeValueChange(mode.storedValue)
-                            }
-                        }
-                    )
-                }
-            }
-
-            val selectedExportMode =
-                UvirExportMode.fromStoredValue(exportModeValue)
-            val previewNumericFormat =
-                if (selectedExportMode == UvirExportMode.INTERNATIONAL) {
-                    UvirNumericFormat.INTERNATIONAL
-                } else {
-                    UvirNumericFormat.fromStoredValue(numericFormatValue)
-                }
-            val previewDateFormat =
-                if (selectedExportMode == UvirExportMode.INTERNATIONAL) {
-                    UvirDateFormat.INTERNATIONAL
-                } else {
-                    UvirDateFormat.fromStoredValue(dateFormatValue)
-                }
-            val previewTimeFormat =
-                if (selectedExportMode == UvirExportMode.INTERNATIONAL) {
-                    UvirTimeFormat.H24
-                } else {
-                    resolveUvirTimeFormat(
-                        context,
-                        UvirTimeFormat.fromStoredValue(timeFormatValue)
-                    )
-                }
-            val previewIrradianceUnit =
-                if (selectedExportMode == UvirExportMode.INTERNATIONAL) {
-                    UvirIrradianceUnit.W_M2
-                } else {
-                    UvirIrradianceUnit.fromStoredValue(irradianceUnitValue)
-                }
-            val previewContext =
-                if (selectedExportMode == UvirExportMode.INTERNATIONAL) {
-                    val configuration =
-                        android.content.res.Configuration(
-                            androidx.compose.ui.platform.LocalConfiguration.current
-                        ).apply {
-                            setLocale(Locale.ENGLISH)
-                            setLayoutDirection(Locale.ENGLISH)
-                        }
-                    remember(context, selectedExportMode) {
-                        context.createConfigurationContext(configuration)
-                    }
-                } else {
-                    context
-                }
-            val previewDateTime =
-                "${formatUvirDateOnly(dateExampleTimestamp, previewDateFormat)} · " +
-                    formatUvirTimeOnly(dateExampleTimestamp, previewTimeFormat)
-            val previewTotal =
-                formatUvirIrradianceNumber(
-                    canonicalUwCm2 = 123456.78,
-                    fractionDigits = 3,
-                    numericFormat = previewNumericFormat,
-                    unit = previewIrradianceUnit
-                )
-            val previewUva =
-                formatUvirIrradianceNumber(
-                    canonicalUwCm2 = 89214.32,
-                    fractionDigits = 3,
-                    numericFormat = previewNumericFormat,
-                    unit = previewIrradianceUnit
-                )
-
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp),
-                color = secondaryText.copy(alpha = 0.08f),
-                contentColor = primaryText
-            ) {
-                Column(
-                    modifier = Modifier.padding(12.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Text(
-                        text =
-                            "${previewContext.getString(R.string.share_acquisition_label)} #12",
-                        color = primaryText,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = previewDateTime,
-                        color = secondaryText,
-                        fontSize = 11.sp,
-                        lineHeight = 14.sp
-                    )
-                    HorizontalDivider(color = secondaryText.copy(alpha = 0.20f))
-                    Row(modifier = Modifier.fillMaxWidth()) {
-                        Text(
-                            text = previewContext.getString(R.string.uv_radiation),
-                            modifier = Modifier.weight(1f),
-                            color = primaryText,
-                            fontSize = 12.sp
-                        )
-                        Text(
-                            text = "$previewTotal ${previewIrradianceUnit.symbol}",
-                            color = primaryText,
-                            fontSize = 12.sp
-                        )
-                    }
-                    Row(modifier = Modifier.fillMaxWidth()) {
-                        Text(
-                            text = "UVA",
-                            modifier = Modifier.weight(1f),
-                            color = primaryText,
-                            fontSize = 12.sp
-                        )
-                        Text(
-                            text = "$previewUva ${previewIrradianceUnit.symbol}",
-                            color = primaryText,
-                            fontSize = 12.sp
-                        )
-                    }
-                }
-            }
-        }
+    val settingsNavigation = LocalUvirSettingsNavigation.current
+    if (settingsNavigation != null && settingsNavigation.selectedPage == null) {
+        HorizontalDivider(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 3.dp),
+            color = secondaryText.copy(alpha = 0.24f)
+        )
     }
 
     SettingsSection(
@@ -661,7 +632,7 @@ internal fun UvirSettingsGeneralSections(
                 R.string.data_and_restore_title
             ),
         titleIcon =
-            ConnectivityIconType.COUNTERS,
+            ConnectivityIconType.DATA,
         expanded =
             countersSectionExpanded,
         onExpandedChange = { expanded ->
@@ -678,64 +649,152 @@ internal fun UvirSettingsGeneralSections(
         dividerColor =
             secondaryText.copy(
                 alpha = 0.28f
-            )
+            ),
+        contentSpacing = UvirIslandSpacing,
+        wrapDetailContent = false
     ) {
-        SettingsPageDescription(
-            text = stringResource(R.string.data_and_restore_description_split),
-            color = secondaryText
-        )
-
-        Column(
-            verticalArrangement =
-                Arrangement.spacedBy(UvirSettingsRelatedGap)
-        ) {
-            OutlinedButton(
-                onClick = {
-                    standaloneExport = UvirStandaloneExport.DATABASE
-                },
-                modifier = Modifier.fillMaxWidth(),
-                colors =
-                    ButtonDefaults.outlinedButtonColors(
-                        contentColor = primaryText
-                    ),
-                border =
-                    BorderStroke(
-                        1.dp,
-                        secondaryText.copy(alpha = 0.72f)
-                    )
-            ) {
-                UvirLabeledButtonContent(
-                    text = stringResource(R.string.export_database)
+        SettingsIsland(containerColor = cardColor, contentColor = primaryText) {
+            val exportDescription = stringResource(R.string.export_settings_title)
+            val importDescription = stringResource(R.string.import_settings)
+            UvirFormatGroupHeader(
+                title = stringResource(R.string.data_management_settings_group),
+                icon = ConnectivityIconType.GENERAL,
+                primaryText = primaryText
+            )
+            SettingsPageDescription(
+                text = stringResource(R.string.settings_transfer_description),
+                color = secondaryText
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(UvirActionButtonGap)) {
+                OutlinedButton(
+                    onClick = onSettingsExportRequested,
+                    modifier = Modifier.weight(1f).semantics {
+                        contentDescription = exportDescription
+                    },
+                    colors = uvirOutlinedActionColors(primaryText),
+                    border = uvirOutlinedActionBorder(true, secondaryText)
                 ) {
-                    UvirMenuIcon(
-                        type = MenuIconType.EXPORT,
-                        modifier = Modifier.size(20.dp),
-                        tint = LocalContentColor.current
-                    )
+                    UvirLabeledButtonContent(
+                        text = stringResource(R.string.export)
+                            .uppercase(resources.configuration.locales[0])
+                    ) {
+                        UvirMenuIcon(
+                            type = MenuIconType.EXPORT,
+                            modifier = Modifier.size(20.dp),
+                            tint = LocalContentColor.current
+                        )
+                    }
+                }
+
+                OutlinedButton(
+                    onClick = onSettingsImportRequested,
+                    modifier = Modifier.weight(1f).semantics {
+                        contentDescription = importDescription
+                    },
+                    colors = uvirOutlinedActionColors(primaryText),
+                    border = uvirOutlinedActionBorder(true, secondaryText)
+                ) {
+                    UvirLabeledButtonContent(
+                        text = stringResource(R.string.data_management_import_button)
+                            .uppercase(resources.configuration.locales[0])
+                    ) {
+                        UvirMenuIcon(
+                            type = MenuIconType.IMPORT,
+                            modifier = Modifier.size(20.dp),
+                            tint = LocalContentColor.current
+                        )
+                    }
                 }
             }
-
-            Text(
-                text = stringResource(R.string.export_database_description),
-                color = secondaryText,
-                fontSize = 12.sp
-            )
         }
 
+        SettingsIsland(containerColor = cardColor, contentColor = primaryText) {
+            val exportDescription = stringResource(R.string.export_database)
+            val importDescription = stringResource(R.string.import_database)
+            UvirFormatGroupHeader(
+                title = stringResource(R.string.data_management_database_group),
+                icon = ConnectivityIconType.DATABASE,
+                primaryText = primaryText
+            )
+            SettingsPageDescription(
+                text = stringResource(R.string.database_transfer_description),
+                color = secondaryText
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(UvirActionButtonGap)) {
+                OutlinedButton(
+                    onClick = {
+                        standaloneExport = UvirStandaloneExport.DATABASE
+                    },
+                    modifier = Modifier.weight(1f).semantics {
+                        contentDescription = exportDescription
+                    },
+                    colors = uvirOutlinedActionColors(primaryText),
+                    border = uvirOutlinedActionBorder(true, secondaryText)
+                ) {
+                    UvirLabeledButtonContent(
+                        text = stringResource(R.string.export)
+                            .uppercase(resources.configuration.locales[0])
+                    ) {
+                        UvirMenuIcon(
+                            type = MenuIconType.EXPORT,
+                            modifier = Modifier.size(20.dp),
+                            tint = LocalContentColor.current
+                        )
+                    }
+                }
 
-        SettingsGroupDivider(secondaryText)
-
-        UvirDataAndRestoreContent(
-            autoEnabled = autoEnabled,
-            secondaryText = secondaryText,
-            onResetRequested = {
-                onResetAllRequested()
-            },
-            onRestoreDefaultsRequested = {
-                onRestoreDefaultsRequested()
+                OutlinedButton(
+                    onClick = onDatabaseImportRequested,
+                    modifier = Modifier.weight(1f).semantics {
+                        contentDescription = importDescription
+                    },
+                    colors = uvirOutlinedActionColors(primaryText),
+                    border = uvirOutlinedActionBorder(true, secondaryText)
+                ) {
+                    UvirLabeledButtonContent(
+                        text = stringResource(R.string.data_management_import_button)
+                            .uppercase(resources.configuration.locales[0])
+                    ) {
+                        UvirMenuIcon(
+                            type = MenuIconType.IMPORT,
+                            modifier = Modifier.size(20.dp),
+                            tint = LocalContentColor.current
+                        )
+                    }
+                }
             }
+        }
+
+        UvirErrorLogSettingsIsland(
+            cardColor = cardColor,
+            primaryText = primaryText,
+            secondaryText = secondaryText,
+            onExport = { standaloneExport = UvirStandaloneExport.ERROR_LOG }
         )
+
+        SettingsIsland(containerColor = cardColor, contentColor = primaryText) {
+            UvirFormatGroupHeader(
+                title = stringResource(R.string.data_management_reset_group),
+                icon = ConnectivityIconType.COUNTERS,
+                primaryText = primaryText
+            )
+            SettingsPageDescription(
+                text = stringResource(R.string.data_management_reset_description),
+                color = secondaryText
+            )
+            UvirDataAndRestoreContent(
+                autoEnabled = autoEnabled,
+                sensorRestoreEnabled = sensorRestoreEnabled,
+                secondaryText = secondaryText,
+                onResetRequested = onResetAllRequested,
+                onRestoreDefaultsRequested = onRestoreDefaultsRequested,
+                onSensorRestoreRequested = onSensorRestoreRequested
+            )
+        }
     }
+
+    // The menu entry lives at the end of Sensor; keep its existing detail content here.
+    if (settingsNavigation != null && settingsNavigation.selectedPage == null) return
 
     SettingsSection(
         settingsPage = UvirSettingsPage.DEBUG,
@@ -757,112 +816,204 @@ internal fun UvirSettingsGeneralSections(
         titleColor = primaryText,
         chevronColor = secondaryText,
         dividerColor =
-            secondaryText.copy(alpha = 0.28f)
+            secondaryText.copy(alpha = 0.28f),
+        contentSpacing = UvirIslandSpacing,
+        wrapDetailContent = false
     ) {
-        SettingsPageDescription(
-            text = stringResource(R.string.debug_description),
-            color = secondaryText
-        )
-
-        Column(
-            verticalArrangement =
-                Arrangement.spacedBy(UvirSettingsRelatedGap)
-        ) {
-            OutlinedButton(
-                onClick = {
-                    standaloneExport = UvirStandaloneExport.ERROR_LOG
-                },
-                modifier = Modifier.fillMaxWidth(),
-                colors =
-                    ButtonDefaults.outlinedButtonColors(
-                        contentColor = primaryText
-                    ),
-                border =
-                    BorderStroke(
-                        1.dp,
-                        secondaryText.copy(
-                            alpha = 0.72f
-                        )
-                    )
-            ) {
-                UvirLabeledButtonContent(
-                    text = stringResource(R.string.debug_error_log)
-                ) {
-                    UvirMenuIcon(
-                        type = MenuIconType.EXPORT,
-                        modifier = Modifier.size(20.dp),
-                        tint = LocalContentColor.current
-                    )
-                }
-            }
-
-            Text(
-                text =
-                    stringResource(
-                        R.string.debug_error_log_description
-                    ),
-                color = secondaryText,
-                fontSize = 11.sp,
-                lineHeight = 14.sp
-            )
-        }
-
-
-        SettingsGroupDivider(secondaryText)
-
-        UvirSensorDiagnosticsContent(
-            sensorConnected = diagnosticSensorConnected,
-            sensorInfo = diagnosticSensorInfo,
-            connectionMode = diagnosticConnectionMode,
-            sensorName = diagnosticSensorName,
+        UvirDiagnosticsIslands(
             cardColor = cardColor,
             primaryText = primaryText,
             secondaryText = secondaryText,
-            onProbe = onDiagnosticProbe
-        )
+            diagnosticTest = {
+                UvirSensorDiagnosticsContent(
+                    sensorConnected = diagnosticSensorConnected && uvirDiagnosticPeerMatches(
+                        diagnosticSensorDeviceId, diagnosticSensorInfo.deviceId,
+                        connected = true, confirmed = true
+                    ),
+                    sensorInfo = diagnosticSensorInfo,
+                    connectionMode = diagnosticConnectionMode,
+                    sensorName = diagnosticSensorName,
+                    cardColor = cardColor,
+                    primaryText = primaryText,
+                    secondaryText = secondaryText,
+                    onProbe = onDiagnosticProbe,
+                    showDescription = false
+                )
+            },
+            simulation = {
+                Column(
+                    verticalArrangement =
+                        Arrangement.spacedBy(UvirSettingsRelatedGap)
+                ) {
+                    OutlinedButton(
+                        onClick = {
+                            showSimulateEventsConfirmation = true
+                        },
+                        enabled = !simulatingEvents && diagnosticSensorDeviceId.isNotBlank(),
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = uvirOutlinedActionColors(primaryText),
+                        border =
+                            uvirOutlinedActionBorder(
+                                enabled = !simulatingEvents && diagnosticSensorDeviceId.isNotBlank(),
+                                secondaryText = secondaryText
+                            )
+                    ) {
+                        UvirLabeledButtonContent(
+                            text = stringResource(R.string.debug_simulate_events)
+                        ) {
+                            UvirMenuIcon(
+                                type = MenuIconType.SAVED_MEASUREMENTS,
+                                modifier = Modifier.size(20.dp),
+                                tint = LocalContentColor.current
+                            )
+                        }
+                    }
 
-        SettingsGroupDivider(secondaryText)
+                    Text(
+                        text = stringResource(R.string.debug_simulate_events_description),
+                        color = secondaryText,
+                        fontSize = 11.sp,
+                        lineHeight = 14.sp
+                    )
+                }
 
-        SettingsCheckboxWithDescription(
-            checked = fakeSensorDataEnabled,
-            onCheckedChange =
-                { enabled ->
-                    onFakeSensorDataEnabledChange(enabled)
-                },
-            title =
-                stringResource(
-                    R.string.debug_fake_data
-                ),
-            description =
-                stringResource(
-                    R.string.debug_fake_data_description
-                ),
-            primaryText = primaryText,
-            secondaryText = secondaryText
-        )
-
-        SettingsCheckboxWithDescription(
-            checked = fakeSensorOutOfRangeEnabled,
-            onCheckedChange = onFakeSensorOutOfRangeEnabledChange,
-            enabled = fakeSensorDataEnabled,
-            title = stringResource(R.string.debug_fake_out_of_range),
-            description = stringResource(R.string.debug_fake_out_of_range_description),
-            primaryText = primaryText,
-            secondaryText = secondaryText
-        )
-
-        SettingsGroupDivider(secondaryText)
-
-        UvirDebugPerformanceContent(
-            context = context,
-            sensorConnected = debugPerformanceSensorConnected,
-            enabled = debugPerformanceEnabled,
-            firmwareSupported = debugPerformanceFirmwareSupported,
-            completionToken = debugPerformanceCompletionToken,
-            primaryText = primaryText,
-            secondaryText = secondaryText,
-            onStart = onStartDebugPerformance,
-            onStop = onStopDebugPerformance
+                UvirSensorSimulationSettingsContent(
+                    enabled = fakeSensorDataEnabled,
+                    outOfRange = fakeSensorOutOfRangeEnabled,
+                    onEnabledChange = onFakeSensorDataEnabledChange,
+                    onOutOfRangeChange = onFakeSensorOutOfRangeEnabledChange,
+                    primaryText = primaryText,
+                    secondaryText = secondaryText
+                )
+            },
+            concert = {
+                UvirDebugPerformanceContent(
+                    context = context,
+                    sensorConnected = debugPerformanceSensorConnected,
+                    enabled = debugPerformanceEnabled,
+                    firmwareSupported = debugPerformanceFirmwareSupported,
+                    completionToken = debugPerformanceCompletionToken,
+                    primaryText = primaryText,
+                    secondaryText = secondaryText,
+                    onStart = onStartDebugPerformance,
+                    onStop = onStopDebugPerformance
+                )
+            }
         )
     }
+}
+
+@Composable
+internal fun UvirDiagnosticsIslands(
+    cardColor: Color,
+    primaryText: Color,
+    diagnosticTest: @Composable () -> Unit,
+    simulation: @Composable () -> Unit,
+    concert: @Composable () -> Unit,
+    secondaryText: Color = primaryText
+) {
+    SettingsIsland(containerColor = cardColor, contentColor = primaryText) {
+        UvirFormatGroupHeader(
+            stringResource(R.string.diagnostics_test_group), ConnectivityIconType.DEBUG, primaryText
+        )
+        SettingsPageDescription(stringResource(R.string.diagnostic_description), secondaryText)
+        diagnosticTest()
+    }
+    SettingsIsland(containerColor = cardColor, contentColor = primaryText) {
+        UvirFormatGroupHeader(
+            stringResource(R.string.diagnostics_simulation_group), ConnectivityIconType.SIMULATION, primaryText
+        )
+        SettingsPageDescription(stringResource(R.string.diagnostics_simulation_description), secondaryText)
+        simulation()
+    }
+    SettingsIsland(containerColor = cardColor, contentColor = primaryText) {
+        concert()
+    }
+}
+
+@Composable
+internal fun UvirSensorSimulationSettingsContent(
+    enabled: Boolean,
+    outOfRange: Boolean,
+    onEnabledChange: (Boolean) -> Unit,
+    onOutOfRangeChange: (Boolean) -> Unit,
+    primaryText: Color,
+    secondaryText: Color
+) {
+    // These phone-only switches belong to the selected UID, not to its running job.
+    SettingsCheckboxWithDescription(
+        checked = enabled,
+        onCheckedChange = onEnabledChange,
+        title = stringResource(R.string.debug_fake_data),
+        description = stringResource(R.string.debug_fake_data_description),
+        primaryText = primaryText,
+        secondaryText = secondaryText
+    )
+    SettingsCheckboxWithDescription(
+        checked = outOfRange,
+        onCheckedChange = onOutOfRangeChange,
+        enabled = enabled,
+        title = stringResource(R.string.debug_fake_out_of_range),
+        description = stringResource(R.string.debug_fake_out_of_range_description),
+        primaryText = primaryText,
+        secondaryText = secondaryText
+    )
+}
+
+@Composable
+internal fun UvirErrorLogSettingsIsland(
+    cardColor: Color,
+    primaryText: Color,
+    secondaryText: Color,
+    onExport: () -> Unit
+) {
+    val resources = LocalResources.current
+    val exportDescription = stringResource(R.string.debug_error_log)
+    SettingsIsland(containerColor = cardColor, contentColor = primaryText) {
+        UvirFormatGroupHeader(
+            title = stringResource(R.string.data_management_error_log_group),
+            icon = ConnectivityIconType.DEBUG,
+            primaryText = primaryText
+        )
+        SettingsPageDescription(
+            text = stringResource(R.string.data_management_error_log_description),
+            color = secondaryText
+        )
+        OutlinedButton(
+            onClick = onExport,
+            modifier = Modifier.fillMaxWidth().semantics {
+                contentDescription = exportDescription
+            },
+            colors = uvirOutlinedActionColors(primaryText),
+            border = uvirOutlinedActionBorder(true, secondaryText)
+        ) {
+            UvirLabeledButtonContent(
+                text = stringResource(R.string.export)
+                    .uppercase(resources.configuration.locales[0])
+            ) {
+                UvirMenuIcon(
+                    type = MenuIconType.EXPORT,
+                    modifier = Modifier.size(20.dp),
+                    tint = LocalContentColor.current
+                )
+            }
+        }
+    }
+}
+
+@Composable
+internal fun UvirSettingsDiagnosticsListEntry(
+    cardColor: Color,
+    primaryText: Color,
+    secondaryText: Color
+) {
+    SettingsSection(
+        settingsPage = UvirSettingsPage.DEBUG,
+        title = stringResource(R.string.settings_section_debug),
+        titleIcon = ConnectivityIconType.DEBUG,
+        containerColor = cardColor,
+        titleColor = primaryText,
+        chevronColor = secondaryText,
+        dividerColor = secondaryText.copy(alpha = 0.28f)
+    ) { /* The existing diagnostics page is rendered by UvirSettingsGeneralSections. */ }
 }

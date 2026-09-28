@@ -14,6 +14,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -57,6 +58,10 @@ class UvirLiveIslandHeaderTest {
                             group = SensorGroup.UV,
                             title = headerText,
                             total = 1.0,
+                            bandLabel = "315–400 nm",
+                            relativePercent = 0.5f,
+                            trackColor = Color.LightGray,
+                            barColor = Color.Blue,
                             expanded = expanded.value,
                             onToggle = { toggles.incrementAndGet(); expanded.value = !expanded.value },
                             showChart = false,
@@ -106,4 +111,61 @@ class UvirLiveIslandHeaderTest {
     @Test fun biologicalHeaderIncludesItsPaddingInDarkTheme() = checkFullHeader(true, true)
     @Test fun irradianceBellDoesNotCollapseTheCard() = checkIndependentBell(false)
     @Test fun biologicalBellDoesNotCollapseTheCard() = checkIndependentBell(true)
+
+    @Test fun irradianceHeaderUsesTheSameTwoLineSpacingOnBothSidesAndInRows() {
+        compose.setContent {
+            MaterialTheme {
+                Box(Modifier.width(280.dp)) {
+                    SpectrumCard(
+                        group = SensorGroup.UV,
+                        title = "Ultravioletti",
+                        total = 1.0,
+                        bandLabel = "100–400 nm",
+                        relativePercent = 0.5f,
+                        trackColor = Color.LightGray,
+                        barColor = Color.Blue,
+                        expanded = true,
+                        onToggle = {},
+                        showChart = false,
+                        liveHistory = emptyList(),
+                        liveChartSeries = emptyList(),
+                        cardColor = MaterialTheme.colorScheme.surface,
+                        primaryText = Color.Black,
+                        secondaryText = Color.Gray
+                    ) {
+                        SpectrumRow(
+                            name = "UVC",
+                            band = "100–280 nm",
+                            value = 0.5,
+                            percent = 0.5f,
+                            primaryText = Color.Black,
+                            secondaryText = Color.Gray,
+                            trackColor = Color.LightGray,
+                            barColor = Color.Blue
+                        )
+                    }
+                }
+            }
+        }
+        val heading = compose.onNodeWithText("Ultravioletti", useUnmergedTree = true)
+            .fetchSemanticsNode().boundsInRoot
+        val headingBand = compose.onNodeWithText("100–400 nm", useUnmergedTree = true)
+            .fetchSemanticsNode().boundsInRoot
+        val rowHeading = compose.onNodeWithText("UVC", useUnmergedTree = true)
+            .fetchSemanticsNode().boundsInRoot
+        val rowBand = compose.onNodeWithText("100–280 nm", useUnmergedTree = true)
+            .fetchSemanticsNode().boundsInRoot
+        val values = compose.onAllNodesWithText("mW/cm²", substring = true, useUnmergedTree = true)
+            .fetchSemanticsNodes().map { it.boundsInRoot }
+        val percents = compose.onAllNodesWithText("%", substring = true, useUnmergedTree = true)
+            .fetchSemanticsNodes().map { it.boundsInRoot }
+        assertEquals(2, values.size)
+        assertEquals(2, percents.size)
+        assertEquals(heading.top, headingBand.top, 1f)
+        assertEquals(values[0].top, percents[0].top, 1f)
+        assertEquals(headingBand.bottom, heading.bottom, 1f)
+        assertEquals(values[0].top - heading.bottom, percents[0].top - headingBand.bottom, 1f)
+        assertEquals(values[0].top - heading.bottom, values[1].top - rowHeading.bottom, 1f)
+        assertEquals(rowHeading.top, rowBand.top, 1f)
+    }
 }

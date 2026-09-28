@@ -112,6 +112,9 @@ class UvirSensorRuntimeInfoTest {
                 calibrationSettings = SensorCalibrationSettings(),
                 alertMonitoringEnabled = false,
                 alertRepeatSeconds = 30,
+                alertStartDelaySeconds = 90,
+                alertDurationSeconds = 600,
+                alertMaxRegistrations = 4,
                 alertSessionId = 0,
                 alertRules =
                     listOf(
@@ -152,6 +155,9 @@ class UvirSensorRuntimeInfoTest {
         assertTrue(merged.rules.single { it.metric == ThresholdAlertMetric.UVA }.enabled)
         assertFalse(merged.enabled)
         assertEquals(ThresholdAlertSound.DOUBLE_BEEP, merged.sound)
+        assertEquals(90L, merged.startDelaySeconds)
+        assertEquals(600L, merged.durationSeconds)
+        assertEquals(4, merged.maxRegistrations)
     }
 
 }

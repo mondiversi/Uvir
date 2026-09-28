@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -51,6 +52,11 @@ fun BiologicalEffectsContent(
         metrics.any { it in configuredAlertMetrics }
     val anyAlertMonitoring =
         metrics.any { it in monitoringAlertMetrics }
+    val title = stringResource(R.string.biological_effects_view)
+    val accessibilityState =
+        stringResource(
+            if (expanded) R.string.accessibility_expanded else R.string.accessibility_collapsed
+        )
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -73,18 +79,36 @@ fun BiologicalEffectsContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable(onClick = onToggle)
+                    .uvirNestedAccessibleAction(
+                        label = title,
+                        stateText = accessibilityState,
+                        onClick = onToggle
+                    )
                     .padding(UvirIslandContentPadding),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 DnaIcon(color = primaryText)
                 Spacer(Modifier.width(8.dp))
-                Text(
-                    text = stringResource(R.string.biological_effects_view),
+                Row(
                     modifier = Modifier.weight(1f),
-                    color = primaryText,
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.Bold
-                )
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = title,
+                        modifier = Modifier.weight(1f, fill = false),
+                        color = primaryText,
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Spacer(Modifier.width(5.dp))
+                    ExpansionChevron(
+                        expanded = expanded,
+                        tint = secondaryText,
+                        iconSize = 18.dp
+                    )
+                }
 
                 onConfigureAlerts?.let { configureAlerts ->
                     ThresholdAlertBellButton(
@@ -95,11 +119,6 @@ fun BiologicalEffectsContent(
                     Spacer(Modifier.width(10.dp))
                 }
 
-                ExpansionChevron(
-                    expanded = expanded,
-                    tint = secondaryText,
-                    modifier = Modifier.size(20.dp)
-                )
             }
 
             UvirVerticalReveal(expanded) {
@@ -209,7 +228,9 @@ private fun BiologicalEffectRow(
         )
 
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 1.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {

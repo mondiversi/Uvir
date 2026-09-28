@@ -75,6 +75,17 @@ enum class SensorConnectionMode {
     }
 }
 
+/** A restored app without connection credentials must return to trusted USB pairing. */
+internal fun initialSensorConnectionMode(
+    storedValue: String?,
+    hasAssociatedSensor: Boolean
+): SensorConnectionMode =
+    if (hasAssociatedSensor) {
+        SensorConnectionMode.fromStoredValue(storedValue)
+    } else {
+        SensorConnectionMode.USB
+    }
+
 enum class AppLanguage(
     val storedValue: String,
     val languageTag: String
@@ -193,6 +204,14 @@ internal const val KEY_THRESHOLD_ALERT_VOLUME =
     "threshold_alert_volume"
 internal const val KEY_THRESHOLD_ALERT_REPEAT_SECONDS =
     "threshold_alert_repeat_seconds"
+internal const val KEY_THRESHOLD_ALERT_RECORD_EVENTS =
+    "threshold_alert_record_events"
+internal const val KEY_THRESHOLD_ALERT_START_DELAY_SECONDS =
+    "threshold_alert_start_delay_seconds"
+internal const val KEY_THRESHOLD_ALERT_SESSION_DURATION_SECONDS =
+    "threshold_alert_session_duration_seconds"
+internal const val KEY_THRESHOLD_ALERT_MAX_REGISTRATIONS =
+    "threshold_alert_max_registrations"
 internal const val KEY_THRESHOLD_ALERT_SESSION_ID =
     "threshold_alert_session_id"
 internal const val KEY_THRESHOLD_ALERT_NOTE =

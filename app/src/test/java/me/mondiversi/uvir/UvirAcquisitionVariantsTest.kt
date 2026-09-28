@@ -103,6 +103,10 @@ class UvirAcquisitionVariantsTest {
                 UvirChartExportMode.SEPARATE
             )
         )
+        assertEquals(
+            4,
+            acquisitionSessionGroupedVariantChartFileCount(configured)
+        )
     }
 
     @Test

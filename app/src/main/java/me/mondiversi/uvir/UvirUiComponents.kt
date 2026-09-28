@@ -83,6 +83,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
@@ -188,12 +189,28 @@ internal fun UvirAnimatedCountBadge(
             0f
         }
 
-    val describedModifier =
-        contentDescriptionText?.let { description ->
-            modifier.semantics {
-                contentDescription = description
-            }
-        } ?: modifier
+    val shape = RoundedCornerShape(50)
+    val badgeContainerModifier =
+        when {
+            onClick != null && contentDescriptionText != null ->
+                modifier
+                    .clip(shape)
+                    .clickable(onClick = onClick)
+                    .uvirAccessibleAction(
+                        label = contentDescriptionText,
+                        onClick = onClick
+                    )
+            onClick != null ->
+                modifier
+                    .clip(shape)
+                    .clickable(onClick = onClick)
+            contentDescriptionText != null ->
+                modifier
+                    .semantics {
+                        contentDescription = contentDescriptionText
+                    }
+            else -> modifier
+        }
     val badgeBorder =
         if (syncInProgress) {
             null
@@ -212,7 +229,7 @@ internal fun UvirAnimatedCountBadge(
             )
         }
     Box(
-        modifier = describedModifier,
+        modifier = badgeContainerModifier,
         contentAlignment = Alignment.Center
     ) {
         val badgeModifier =
@@ -222,28 +239,15 @@ internal fun UvirAnimatedCountBadge(
                     if (syncInProgress) 2.dp else 0.dp
                 )
 
-        if (onClick != null) {
-            Surface(
-                onClick = onClick,
-                modifier = badgeModifier,
-                shape = RoundedCornerShape(50),
-                color = containerColor,
-                contentColor = contentColor,
-                border = badgeBorder,
-                shadowElevation = shadowElevation,
-                tonalElevation = tonalElevation
-            ) {}
-        } else {
-            Surface(
-                modifier = badgeModifier,
-                shape = RoundedCornerShape(50),
-                color = containerColor,
-                contentColor = contentColor,
-                border = badgeBorder,
-                shadowElevation = shadowElevation,
-                tonalElevation = tonalElevation
-            ) {}
-        }
+        Surface(
+            modifier = badgeModifier,
+            shape = shape,
+            color = containerColor,
+            contentColor = contentColor,
+            border = badgeBorder,
+            shadowElevation = shadowElevation,
+            tonalElevation = tonalElevation
+        ) {}
 
         countText?.let { text ->
             Text(
@@ -289,10 +293,12 @@ internal fun UvirAnimatedCountBadge(
 @Composable
 fun PulsingAutomaticCountBadge(
     completed: Int,
-    onClick: () -> Unit,
+    onClick: (() -> Unit)?,
     color: Color,
     containerColor: Color,
+    contentColor: Color = color,
     syncInProgress: Boolean = false,
+    shadowElevation: Dp = UvirFloatingActionShadowElevation,
     modifier: Modifier = Modifier
 ) {
     val countText = completed.toString()
@@ -307,7 +313,7 @@ fun PulsingAutomaticCountBadge(
         countText = countText,
         indicatorColor = color,
         containerColor = containerColor,
-        contentColor = color,
+        contentColor = contentColor,
         syncInProgress = syncInProgress,
         pulseEnabled = true,
         modifier = modifier,
@@ -315,13 +321,11 @@ fun PulsingAutomaticCountBadge(
         horizontalPadding = 4.dp,
         borderWidth = 2.5.dp,
         syncStrokeWidth = 2.5.dp,
-        contentDescriptionText =
-            stringResource(
-                R.string.automatic_completed_count,
-                completed
-            ),
+        contentDescriptionText = if (onClick != null) {
+            stringResource(R.string.automatic_completed_count, completed)
+        } else null,
         onClick = onClick,
-        shadowElevation = 5.dp,
+        shadowElevation = shadowElevation,
         tonalElevation = 1.dp
     )
 }
@@ -622,8 +626,9 @@ fun AutomaticIntervalTimerIcon(
 ) {
 
     Canvas(
-        modifier = modifier
+        modifier = modifier.graphicsLayer(alpha = color.alpha)
     ) {
+        val color = color.copy(alpha = 1f)
 
         val strokeWidth =
             maxOf(
@@ -715,8 +720,9 @@ fun AutomaticNextIcon(
 ) {
 
     Canvas(
-        modifier = modifier
+        modifier = modifier.graphicsLayer(alpha = color.alpha)
     ) {
+        val color = color.copy(alpha = 1f)
 
         val strokeWidth =
             maxOf(

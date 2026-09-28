@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="update_available">अपडेट उपलब्ध हैं</string>
+    <string name="update_none">कोई अपडेट उपलब्ध नहीं है</string>
+    <string name="update_check_failed">अपडेट की जाँच नहीं हो सकी। त्रुटि लॉग देखें।</string>
+    <string name="update_app">ऐप अपडेट करें</string>
+    <string name="update_sensor">सेंसर अपडेट करें</string>
+    <string name="update_app_first">पहले ऐप अपडेट करें।</string>
+    <string name="update_usb_required">यह सेंसर चुनें और USB से जोड़ें। कोई सक्रिय सत्र न हो और सभी रिकॉर्ड सिंक हों।</string>
+    <string name="update_download">डाउनलोड और सत्यापन…</string>
+    <string name="update_flash">सेंसर अपडेट हो रहा है…</string>
+    <string name="update_verify">सेंसर सत्यापन…</string>
+    <string name="update_keep_connected">USB न निकालें और सेंसर बंद न करें। जरूरत हो तो BOOT दबाए रखें और फिर कोशिश करें।</string>
+    <string name="update_done">सेंसर अपडेट हुआ</string>
+    <string name="update_failed">अपडेट विफल रहा। त्रुटि लॉग देखें। सेंसर चालू न हो तो कंप्यूटर से USB द्वारा फ़र्मवेयर पुनर्स्थापित करें।</string>
+    <string name="update_permission">Android सेटिंग में Uvir को अपडेट स्थापित करने दें।</string>
+    <string name="update_whats_new">ऐप और सेंसर के हस्ताक्षरित अपडेट, सत्यापित डाउनलोड और USB से फ़र्मवेयर लोड करना।</string>
+</resources>

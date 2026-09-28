@@ -97,11 +97,12 @@ internal fun UvirConditionalAcquisitionCard(
                             AcquisitionConditionAction.STOP -> R.string.conditional_stop
                             AcquisitionConditionAction.ACQUIRE -> R.string.conditional_record
                         }), fontSize = 13.sp, color = choicesText)
+                        Spacer(Modifier.height(2.dp))
                         Text(stringResource(when (item) {
                             AcquisitionConditionAction.START -> R.string.conditional_start_description
                             AcquisitionConditionAction.STOP -> R.string.conditional_stop_description
                             AcquisitionConditionAction.ACQUIRE -> R.string.conditional_record_description
-                        }), fontSize = 12.sp, color = descriptionText)
+                        }), fontSize = 11.5.sp, color = descriptionText)
                     }
                 }
             }
@@ -115,11 +116,12 @@ internal fun UvirConditionalAcquisitionCard(
                 AcquisitionConditionAction.STOP -> R.string.conditional_stop
                 AcquisitionConditionAction.ACQUIRE -> R.string.conditional_record
             }), fontSize = 13.sp, color = choicesText)
+            Spacer(Modifier.height(2.dp))
             Text(stringResource(when (action) {
                 AcquisitionConditionAction.START -> R.string.conditional_start_description
                 AcquisitionConditionAction.STOP -> R.string.conditional_stop_description
                 AcquisitionConditionAction.ACQUIRE -> R.string.conditional_record_description
-            }), fontSize = 12.sp, color = secondaryText)
+            }), fontSize = 11.5.sp, color = secondaryText)
         }
         Text(stringResource(R.string.conditional_limits_description),
             fontSize = 12.sp, color = if (locked) secondaryText else descriptionText)

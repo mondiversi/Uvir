@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="capture_hint_start">Avvia acquisizione</string>
+    <string name="capture_hint_stop">Ferma acquisizione</string>
+    <string name="alert_hint_start">Avvia registrazione</string>
+    <string name="alert_hint_stop">Ferma registrazione</string>
+</resources>

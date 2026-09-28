@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="connection_notification_connected">Kimeunganishwa</string>
+    <string name="connection_notification_disconnected">Hakijaunganishwa</string>
+    <string name="connection_notification_simulation">Uigaji</string>
+    <string name="connection_notification_selected">kimechaguliwa</string>
+    <string name="connection_notification_activity">Shughuli inaendelea</string>
+    <string name="connection_notification_last_activity">Shughuli inaendelea (hali ya mwisho inayojulikana)</string>
+    <plurals name="connection_notification_connected_count">
+        <item quantity="one">Kihisi %1$d kimeunganishwa</item>
+        <item quantity="other">Vihisi %1$d vimeunganishwa</item>
+    </plurals>
+    <plurals name="connection_notification_connecting_count">
+        <item quantity="one">Kihisi %1$d kinaunganisha</item>
+        <item quantity="other">Vihisi %1$d vinaunganisha</item>
+    </plurals>
+    <plurals name="connection_notification_activity_count">
+        <item quantity="one">Shughuli %1$d inaendelea</item>
+        <item quantity="other">Shughuli %1$d zinaendelea</item>
+    </plurals>
+    <plurals name="connection_notification_simulation_count">
+        <item quantity="one">Uigaji %1$d</item>
+        <item quantity="other">Uigaji %1$d</item>
+    </plurals>
+</resources>

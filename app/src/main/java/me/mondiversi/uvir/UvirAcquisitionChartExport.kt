@@ -1,13 +1,10 @@
 package me.mondiversi.uvir
 
-import android.content.ClipData
 import android.content.Context
-import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import androidx.core.content.FileProvider
 import androidx.compose.ui.graphics.toArgb
 import java.io.File
 import java.io.FileOutputStream
@@ -16,7 +13,8 @@ internal fun createAcquisitionChartFiles(
     context: Context,
     record: SavedRecordDetail,
     group: AcquisitionChartGroup,
-    includeHeader: Boolean = true
+    includeHeader: Boolean = true,
+    variantCount: Int? = null
 ): List<File> {
     val exportContext = uvirExportFormatting(context).context
     val bars = acquisitionChartBars(record.sample, group)
@@ -31,7 +29,8 @@ internal fun createAcquisitionChartFiles(
                     group = group,
                     section = section,
                     bars = sectionBars,
-                    includeHeader = shouldIncludeHeader
+                    includeHeader = shouldIncludeHeader,
+                    variantCount = variantCount
                 ).also { shouldIncludeHeader = false }
             }
     }
@@ -40,7 +39,8 @@ internal fun createAcquisitionChartFiles(
 internal fun createAcquisitionCombinedChartFile(
     context: Context,
     record: SavedRecordDetail,
-    groups: List<AcquisitionChartGroup> = AcquisitionChartGroup.entries
+    groups: List<AcquisitionChartGroup> = AcquisitionChartGroup.entries,
+    variantCount: Int? = null
 ): File {
     val selectedGroups = groups.distinct()
     require(selectedGroups.isNotEmpty())
@@ -51,7 +51,8 @@ internal fun createAcquisitionCombinedChartFile(
                 context = context,
                 record = record,
                 group = group,
-                includeHeader = includeHeader
+                includeHeader = includeHeader,
+                variantCount = variantCount
             ).also {
                 if (it.isNotEmpty()) includeHeader = false
             }
@@ -78,7 +79,8 @@ internal fun acquisitionChartGroupCount(
 internal fun createAcquisitionSeparateChartFiles(
     context: Context,
     record: SavedRecordDetail,
-    groups: List<AcquisitionChartGroup> = AcquisitionChartGroup.entries
+    groups: List<AcquisitionChartGroup> = AcquisitionChartGroup.entries,
+    variantCount: Int? = null
 ): List<File> =
     groups.distinct().flatMap { group ->
         val bars = acquisitionChartBars(record.sample, group)
@@ -92,7 +94,8 @@ internal fun createAcquisitionSeparateChartFiles(
                         group = group,
                         section = section,
                         bars = sectionBars,
-                        includeHeader = true
+                        includeHeader = true,
+                        variantCount = variantCount
                     )
                 }
         }
@@ -104,7 +107,8 @@ private fun createAcquisitionChartFile(
     group: AcquisitionChartGroup,
     section: AcquisitionChartSection,
     bars: List<AcquisitionChartBar>,
-    includeHeader: Boolean
+    includeHeader: Boolean,
+    variantCount: Int?
 ): File {
     val exportFormatting = uvirExportFormatting(context)
     val exportContext = exportFormatting.context
@@ -151,9 +155,14 @@ private fun createAcquisitionChartFile(
             paint = smallPaint,
             maxWidth = 1420f
         )
+    val hasVariant =
+        record.variantIndex != null &&
+            variantCount != null &&
+            variantCount > 1
+    val variantHeaderOffset = if (hasVariant) 35f else 0f
     val headerOffset =
         (noteLines.size * 30f + 20f - 10f)
-            .coerceAtLeast(40f)
+            .coerceAtLeast(40f) + variantHeaderOffset
     val sections = listOf(section to bars)
     val sectionHeights =
         sections.sumOf { (_, sectionBars) ->
@@ -195,11 +204,22 @@ private fun createAcquisitionChartFile(
             130f,
             textPaint
         )
+        if (hasVariant) {
+            canvas.drawText(
+                uvirVariantHeading(
+                    exportContext.resources,
+                    requireNotNull(record.variantIndex)
+                ),
+                90f,
+                165f,
+                textPaint
+            )
+        }
         noteLines.forEachIndexed { index, line ->
             canvas.drawText(
                 line,
                 90f,
-                170f + index * 30f,
+                170f + variantHeaderOffset + index * 30f,
                 smallPaint
             )
         }
@@ -227,20 +247,20 @@ private fun createAcquisitionChartFile(
 
         val top = sectionTop + 90f
         val bottom = top + 300f
-        val maximum =
+        val maximum = valueScale(uvirChartMaximum(
             sectionBars
                 .filterNot { it.outOfRange }
-                .maxOfOrNull { valueScale(it.value).coerceAtLeast(0.0) }
-                ?.coerceAtLeast(1.0)
-                ?: 1.0
+                .map { it.value }
+        ))
 
         repeat(5) { index ->
             val y = top + (bottom - top) * index / 4f
             canvas.drawLine(left, y, right, y, gridPaint)
             val value = maximum * (4 - index) / 4.0
             canvas.drawText(
-                formatUvirNumber(
+                formatUvirChartAxisValue(
                     value,
+                    maximum,
                     irradianceUnit.displayFractionDigits(2),
                     exportFormatting.numericFormat
                 ),
@@ -381,61 +401,13 @@ internal fun shareAcquisitionCharts(
                 groups = groups
             )
         )
-    if (destination == UvirExportDestination.SAVE) {
-        requestUvirExportSave(context, files)
-        return
-    }
-    val uris =
-        ArrayList(
-            files.map { file ->
-                FileProvider.getUriForFile(
-                    context,
-                    "${context.packageName}.fileprovider",
-                    file
-                )
-            }
-        )
-    val shareIntent =
-        Intent(
-            if (uris.size == 1) {
-                Intent.ACTION_SEND
-            } else {
-                Intent.ACTION_SEND_MULTIPLE
-            }
-        ).apply {
-            type = "image/png"
-            putExtra(
-                Intent.EXTRA_SUBJECT,
-                "Uvir acquisition chart"
-            )
-            if (uris.size == 1) {
-                putExtra(Intent.EXTRA_STREAM, uris.first())
-            } else {
-                putParcelableArrayListExtra(
-                    Intent.EXTRA_STREAM,
-                    uris
-                )
-            }
-            clipData =
-                ClipData.newUri(
-                    context.contentResolver,
-                    files.first().name,
-                    uris.first()
-                ).apply {
-                    uris.drop(1).forEach { uri ->
-                        addItem(ClipData.Item(uri))
-                    }
-                }
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        }
-
-    context.startActivity(
-        Intent.createChooser(
-            shareIntent,
-            context.getString(
-                R.string.acquisition_chart_share
-            )
-        )
+    deliverUvirExportFiles(
+        context = context,
+        files = files,
+        destination = destination,
+        chooserTitle =
+            context.getString(R.string.acquisition_chart_share),
+        subject = "Uvir acquisition chart"
     )
 }
 

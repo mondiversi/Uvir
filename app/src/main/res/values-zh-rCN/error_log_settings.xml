@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="data_management_error_log_group">错误日志</string>
+    <string name="data_management_error_log_description">导出已记录的错误以及应用、手机和传感器的技术信息。</string>
+</resources>

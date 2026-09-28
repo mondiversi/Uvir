@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sensor_reset_selection_title">重置所选传感器？</string>
+    <string name="sensor_reset_selection_message">选择要重置的传感器。其设置、凭据和未同步数据将被删除，然后传感器将关闭。应用中的数据保持不变。只能选择已连接且没有正在进行的活动的传感器。</string>
+    <string name="sensor_reset_selection_failed">重置失败：%1$s。请检查连接并重试。</string>
+</resources>
+

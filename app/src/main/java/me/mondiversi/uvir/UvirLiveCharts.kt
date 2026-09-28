@@ -17,6 +17,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -24,6 +29,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.material3.Text
 import androidx.compose.ui.res.stringResource
@@ -32,7 +38,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlin.math.max
 
 internal const val LIVE_CHART_WINDOW_MILLIS = 60_000L
 internal const val LIVE_CHART_MAX_POINTS = 600
@@ -89,7 +94,13 @@ internal fun LiveIslandModeIcon(
     tint: Color,
     modifier: Modifier = Modifier
 ) {
-    Canvas(modifier = modifier.size(UvirMeasurementSelectorIconSize)) {
+    Canvas(
+        modifier =
+            modifier
+                .size(UvirMeasurementSelectorIconSize)
+                .graphicsLayer(alpha = tint.alpha)
+    ) {
+        val tint = tint.copy(alpha = 1f)
         val stroke = UvirMeasurementSelectorIconStrokeWidth.toPx()
 
         if (showChart) {
@@ -154,26 +165,33 @@ internal fun LiveRollingChart(
     primaryText: Color,
     secondaryText: Color
 ) {
-    val latestTimestamp =
-        history.lastOrNull()?.timestamp
-            ?: System.currentTimeMillis()
-    val windowStart = latestTimestamp - LIVE_CHART_WINDOW_MILLIS
-    val visiblePoints =
-        history.filter { it.timestamp >= windowStart }
-    val maxValue =
-        max(
-            1.0,
-            visiblePoints
-                .asSequence()
-                .flatMap { point ->
-                    series.asSequence().mapNotNull { item ->
-                        if (outOfRange(point.sample)) null
-                        else valueScale(item.value(point.sample)).coerceAtLeast(0.0)
-                    }
+    // Recalculate on data/series changes, not on every frame of the scale animation.
+    val window by remember(history, series, outOfRange) {
+        derivedStateOf {
+            val latestTimestamp = history.lastOrNull()?.timestamp ?: System.currentTimeMillis()
+            val start = latestTimestamp - LIVE_CHART_WINDOW_MILLIS
+            val points = history.filter { it.timestamp >= start }
+            val maximum = uvirChartMaximum(points.asSequence().flatMap { point ->
+                series.asSequence().mapNotNull { item ->
+                    if (outOfRange(point.sample)) null else item.value(point.sample)
                 }
-                .maxOrNull()
-                ?: 0.0
-        )
+            }.asIterable())
+            Triple(start, points, maximum)
+        }
+    }
+    val windowStart = window.first
+    val visiblePoints = window.second
+    val canonicalMaximum = window.third
+    // Animate in canonical units so changing the unit does not animate a different geometry.
+    val floatMaximum = canonicalMaximum.toFloat().takeIf { it.isFinite() && it > 0f }
+    val animatedMaximum by animateFloatAsState(
+        targetValue = floatMaximum ?: 1f,
+        animationSpec = tween(300),
+        label = "liveChartScale"
+    )
+    // A new peak must remain visible even while the axis is expanding.
+    val animatedCanonicalMaximum = if (floatMaximum != null) animatedMaximum.toDouble() else canonicalMaximum
+    val maxValue = valueScale(maxOf(animatedCanonicalMaximum, canonicalMaximum / UVIR_CHART_HEADROOM))
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -239,7 +257,7 @@ internal fun LiveRollingChart(
                         var hasPoint = false
 
                         visiblePoints.forEach { point ->
-                            if (outOfRange(point.sample)) {
+                            if (outOfRange(point.sample) || !item.value(point.sample).isFinite()) {
                                 hasPoint = false
                                 return@forEach
                             }

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sensor_reset_selection_title">Réinitialiser les capteurs sélectionnés ?</string>
+    <string name="sensor_reset_selection_message">Sélectionne les capteurs à réinitialiser. Leurs paramètres, identifiants et données non synchronisées seront supprimés, puis les capteurs seront éteints. Les données de l’application restent inchangées. Seuls les capteurs connectés sans activité en cours sont sélectionnables.</string>
+    <string name="sensor_reset_selection_failed">Échec de la réinitialisation : %1$s. Vérifie la connexion et réessaie.</string>
+</resources>
+

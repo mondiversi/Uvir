@@ -10,18 +10,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.toPixelMap
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.test.click
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTouchInput
 import androidx.test.platform.app.InstrumentationRegistry
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.abs
@@ -68,21 +74,17 @@ class UvirDisabledDebugColorsTest {
             abs(actual.green - expected.green) < 0.035f &&
             abs(actual.blue - expected.blue) < 0.035f
 
-    @Test fun sensorArrowMatchesTextColorInBothThemesAndStates() {
+    @Test fun sensorInfoMatchesTextColorInBothThemesAndStates() {
         compose.setContent {
             Fixture { primary, secondary, card ->
-                UvirSensorSourceDialog(
-                    selectedMode = SensorConnectionMode.USB, useFakeSensorData = false,
-                    wifiEnabled = true, bluetoothEnabled = true, internetEnabled = true,
-                    primaryText = primary, secondaryText = secondary, cardColor = card,
-                    sensorInfo = info, sensorDisplayName = "Color test",
-                    sensorProfiles = listOf(UvirSensorProfile(1, "COLOR_TEST", "Color test", 0, 0)),
-                    selectedSensorDeviceId = "COLOR_TEST", sensorSelectionEnabled = enabled.value,
-                    onSensorSelected = { calls.incrementAndGet() }, sensorConnected = false,
-                    sensorPowerOffEnabled = false, onOpenSensorInfo = { calls.incrementAndGet() },
-                    onRequestSensorPowerOff = { calls.incrementAndGet() },
-                    onModeSelected = { calls.incrementAndGet() }, onDismissRequest = {}
-                )
+                Column(Modifier.fillMaxWidth().background(card)) {
+                    UvirSensorInfoButton(
+                        primaryText = primary, secondaryText = secondary,
+                        enabled = enabled.value,
+                        onClick = { calls.incrementAndGet() },
+                        modifier = Modifier.testTag("sensor_info_action")
+                    )
+                }
             }
         }
         for (night in listOf(false, true)) for (active in listOf(false, true)) {
@@ -91,16 +93,16 @@ class UvirDisabledDebugColorsTest {
             val expected = if (active) {
                 if (night) Color(0xFFF5F7F8) else Color(0xFF101418)
             } else {
-                (if (night) Color(0xFFD5DEE3) else Color(0xFF546E7A))
-                    .copy(alpha = 0.65f).compositeOver(card)
+                (if (night) Color(0xFFB0BEC5) else Color(0xFF546E7A))
+                    .copy(alpha = 0.42f).compositeOver(card)
             }
-            val pixels = compose.onNodeWithTag("sensor_selector_arrow", useUnmergedTree = true)
+            val pixels = compose.onNodeWithTag("sensor_info_action", useUnmergedTree = true)
                 .captureToImage().toPixelMap()
             var matching = 0
             for (y in 0 until pixels.height) for (x in 0 until pixels.width) {
                 if (matches(pixels[x, y], expected)) matching++
             }
-            assertTrue("Arrow/text color: night=$night, enabled=$active", matching > 4)
+            assertTrue("Info/text color: night=$night, enabled=$active", matching > 4)
         }
         assertEquals(0, calls.get())
     }
@@ -155,5 +157,70 @@ class UvirDisabledDebugColorsTest {
             compose.onNodeWithText(context.getString(R.string.debug_performance_play)).assertIsEnabled()
         }
         assertEquals(0, calls.get())
+    }
+
+    @Test fun exportSaveAndShareUseSharedDisabledColorsAndKeepTheirEnabledStyle() {
+        compose.setContent {
+            Fixture { primary, secondary, card ->
+                Column(Modifier.fillMaxWidth().background(card)) {
+                    // Each palette gets fresh controls, without a prior test click's ripple.
+                    key(dark.value) {
+                        UvirExportBottomActions(
+                            enabled = enabled.value, primaryText = primary, secondaryText = secondary,
+                            onSave = { calls.incrementAndGet() }, onShare = { calls.incrementAndGet() }
+                        )
+                    }
+                }
+            }
+        }
+        var expectedCalls = 0
+        for (night in listOf(false, true)) {
+            compose.runOnIdle { dark.value = night; enabled.value = false }
+            compose.mainClock.advanceTimeBy(400)
+            compose.waitForIdle()
+            val container = if (night) Color(0xFF6B6B74) else Color(0xFFE2E3E4)
+            val foreground = if (night) Color(0xFFF4F4F6) else
+                lightColorScheme().onSurface.copy(alpha = 0.38f).compositeOver(container)
+            for (key in listOf(R.string.save, R.string.share)) {
+                val button = compose.onNodeWithText(context.getString(key)).assertIsNotEnabled()
+                val pixels = button.captureToImage().toPixelMap()
+                var surfacePixels = 0
+                var foregroundPixels = 0
+                for (y in 0 until pixels.height) for (x in 0 until pixels.width) {
+                    if (matches(pixels[x, y], container)) surfacePixels++
+                    if (matches(pixels[x, y], foreground)) foregroundPixels++
+                }
+                assertTrue("Export disabled background: $key, night=$night", surfacePixels > 100)
+                val nonSurfaceColors = if (foregroundPixels <= 4) {
+                    val histogram = mutableMapOf<Int, Int>()
+                    for (y in 0 until pixels.height) for (x in 0 until pixels.width) {
+                        val color = pixels[x, y]
+                        if (!matches(color, container)) histogram.merge(color.toArgb(), 1, Int::plus)
+                    }
+                    histogram.entries.sortedByDescending { it.value }.take(8)
+                        .joinToString { "${it.key.toUInt().toString(16)}=${it.value}" }
+                } else ""
+                assertTrue("Export disabled text/icons: $key, night=$night, pixels=$foregroundPixels, colors=$nonSurfaceColors", foregroundPixels > 4)
+                button.performTouchInput { click(center) }
+            }
+            compose.runOnIdle { assertEquals(expectedCalls, calls.get()); enabled.value = true }
+            compose.mainClock.advanceTimeBy(400)
+            compose.waitForIdle()
+            val primary = if (night) Color(0xFFF5F7F8) else Color(0xFF101418)
+            val card = if (night) Color(0xFF202226) else Color.White
+            val activeContainer = primary.copy(alpha = if (night) 0.16f else 0.04f).compositeOver(card)
+            for (key in listOf(R.string.save, R.string.share)) {
+                val button = compose.onNodeWithText(context.getString(key)).assertIsEnabled()
+                val pixels = button.captureToImage().toPixelMap()
+                var activeSurfacePixels = 0
+                for (y in 0 until pixels.height) for (x in 0 until pixels.width) {
+                    if (matches(pixels[x, y], activeContainer)) activeSurfacePixels++
+                }
+                assertTrue("Enabled export style unchanged: $key, night=$night", activeSurfacePixels > 100)
+                button.performClick()
+                expectedCalls++
+                compose.runOnIdle { assertEquals(expectedCalls, calls.get()) }
+            }
+        }
     }
 }

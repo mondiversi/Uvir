@@ -8,7 +8,7 @@ import org.json.JSONObject
 import java.io.File
 
 internal const val UVIR_SETTINGS_TRANSFER_SCHEMA = "uvir-settings"
-internal const val UVIR_SETTINGS_TRANSFER_VERSION = 2
+internal const val UVIR_SETTINGS_TRANSFER_VERSION = 3
 private const val UVIR_SETTINGS_TRANSFER_MINIMUM_VERSION = 1
 private const val SENSOR_PHONE_PREFERENCES = "phone_preferences"
 private const val SENSOR_DISPLAY_NAME = "sensor_display_name"
@@ -23,7 +23,7 @@ private val transientSettingsKeys =
 
 internal fun createUvirAppSettingsBackup(
     context: Context,
-    encryptionPassword: CharArray? = null
+    encryptionPassword: CharArray
 ): File {
     val preferences =
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -36,7 +36,7 @@ internal fun createUvirAppSettingsBackup(
     return writeUvirSettingsFile(
         context = context,
         scope = "app",
-        suffix = "app",
+        sensorHardwareUid = null,
         payload = payload,
         encryptionPassword = encryptionPassword
     )
@@ -47,26 +47,39 @@ internal fun createUvirSensorSettingsBackup(
     database: UvirDatabaseHelper,
     hardwareUid: String,
     includeSensitiveInformation: Boolean = false,
-    encryptionPassword: CharArray? = null
+    encryptionPassword: CharArray
 ): File {
-    require(!includeSensitiveInformation || encryptionPassword != null) {
-        "Sensitive settings require encryption"
-    }
     val normalizedHardwareUid = hardwareUid.trim()
     require(normalizedHardwareUid.isNotEmpty()) { "No selected sensor" }
+    val preferences =
+        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    val activeHardwareUid =
+        preferences.getString("active_device_id", "").orEmpty()
+    val recordingPreferenceKey =
+        if (normalizeSensorDeviceId(activeHardwareUid) == normalizeSensorDeviceId(normalizedHardwareUid)) {
+            KEY_THRESHOLD_ALERT_RECORD_EVENTS
+        } else {
+            sensorContextPreferenceKey(normalizedHardwareUid, KEY_THRESHOLD_ALERT_RECORD_EVENTS)
+        }
     val snapshot =
-        database.readSensorSettings(normalizedHardwareUid)
+        (database.readSensorSettings(normalizedHardwareUid)
             ?: readCachedSensorSettings(
                 context = context,
                 hardwareUid = normalizedHardwareUid
+            )).let { settings ->
+            settings.copy(
+                alertRecordingEnabled = preferences.getBoolean(
+                    recordingPreferenceKey,
+                    settings.alertRecordingEnabled ?: true
+                )
             )
-    val preferences =
-        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        }
+    val pendingSettings = UvirSensorSettingsSyncStore.pending(context, normalizedHardwareUid)
     val credentials =
-        UvirSensorCredentialStore.loadForDevice(context, normalizedHardwareUid)
-            ?: UvirSensorCredentials(deviceId = normalizedHardwareUid)
+        (UvirSensorCredentialStore.loadForDevice(context, normalizedHardwareUid)
+            ?: UvirSensorCredentials(deviceId = normalizedHardwareUid)).let { pendingSettings?.applyTo(it) ?: it }
     val payload =
-        snapshot.toTransferJson()
+        (pendingSettings?.applyTo(snapshot) ?: snapshot).toTransferJson()
             .put(
                 SENSOR_DISPLAY_NAME,
                 database.findSensorProfile(normalizedHardwareUid)?.displayName
@@ -74,17 +87,26 @@ internal fun createUvirSensorSettingsBackup(
             )
             .put(
                 SENSOR_PHONE_PREFERENCES,
-                preferences.sensorConfigurationToTransferJson()
+                preferences.sensorConfigurationToTransferJson(normalizedHardwareUid)
             )
             // Network names are settings; passwords, pairing PINs, MQTT
             // credentials and the device authentication token are never
             // written to a plain-text export.
             .put("internet_wifi_ssid", credentials.internetWifiSsid)
     if (includeSensitiveInformation) {
+        require(credentials.isProvisioned) {
+            "The selected sensor has no restorable association"
+        }
         payload.put(
             SENSOR_SENSITIVE_CONNECTION_SETTINGS,
             JSONObject()
+                .put("device_id", credentials.deviceId)
+                .put("firmware_version", credentials.firmwareVersion)
+                .put("auth_token", credentials.authToken)
                 .put("wifi_password", credentials.wifiPassword)
+                .put("wifi_host", credentials.wifiHost)
+                .put("wifi_port", credentials.wifiPort)
+                .put("wifi_discovery_port", credentials.wifiDiscoveryPort)
                 .put("internet_wifi_password", credentials.internetWifiPassword)
                 .put("internet_mqtt_username", credentials.internetMqttUsername)
                 .put("internet_mqtt_password", credentials.internetMqttPassword)
@@ -95,7 +117,7 @@ internal fun createUvirSensorSettingsBackup(
     return writeUvirSettingsFile(
         context = context,
         scope = "sensor",
-        suffix = "sensor",
+        sensorHardwareUid = normalizedHardwareUid,
         payload = payload,
         encryptionPassword = encryptionPassword
     )
@@ -173,6 +195,10 @@ private fun readCachedSensorSettings(
             preferences.getLong(KEY_THRESHOLD_ALERT_SESSION_ID, 0L)
                 .coerceAtLeast(0L),
         alertRules = alerts.rules,
+        alertRecordingEnabled = alerts.recordEvents,
+        alertStartDelaySeconds = alerts.startDelaySeconds,
+        alertDurationSeconds = alerts.durationSeconds,
+        alertMaxRegistrations = alerts.maxRegistrations,
         wifiEnabled = credentials.wifiEnabled,
         bluetoothEnabled = credentials.bluetoothEnabled,
         internetEnabled = credentials.internetEnabled,
@@ -186,9 +212,9 @@ private fun readCachedSensorSettings(
 private fun writeUvirSettingsFile(
     context: Context,
     scope: String,
-    suffix: String,
+    sensorHardwareUid: String?,
     payload: JSONObject,
-    encryptionPassword: CharArray?
+    encryptionPassword: CharArray
 ): File {
     val root =
         JSONObject()
@@ -198,28 +224,24 @@ private fun writeUvirSettingsFile(
             .put("exported_at", System.currentTimeMillis())
             .put("payload", payload)
     val directory = File(context.cacheDir, "shared").apply { mkdirs() }
+    val encrypted = encryptUvirSettingsText(root.toString(), encryptionPassword)
     val encoded =
-        if (encryptionPassword == null) {
-            root.toString(2)
-        } else {
-            val encrypted =
-                encryptUvirSettingsText(root.toString(), encryptionPassword)
-            JSONObject()
-                .put("schema", UVIR_ENCRYPTED_SETTINGS_SCHEMA)
-                .put("version", UVIR_ENCRYPTED_SETTINGS_VERSION)
-                .put("encryption", UVIR_SETTINGS_ENCRYPTION_NAME)
-                .put("kdf", UVIR_SETTINGS_KDF_NAME)
-                .put("iterations", encrypted.iterations)
-                .put("salt", encrypted.salt)
-                .put("iv", encrypted.iv)
-                .put("ciphertext", encrypted.ciphertext)
-                .toString(2)
-        }
-    val protectedSuffix =
-        if (encryptionPassword == null) suffix else "${suffix}_encrypted"
+        JSONObject()
+            .put("schema", UVIR_ENCRYPTED_SETTINGS_SCHEMA)
+            .put("version", UVIR_ENCRYPTED_SETTINGS_VERSION)
+            .put("encryption", UVIR_SETTINGS_ENCRYPTION_NAME)
+            .put("kdf", UVIR_SETTINGS_KDF_NAME)
+            .put("iterations", encrypted.iterations)
+            .put("salt", encrypted.salt)
+            .put("iv", encrypted.iv)
+            .put("ciphertext", encrypted.ciphertext)
+            .toString(2)
     return File(
         directory,
-        "uvir_settings_${protectedSuffix}_${uvirExportTimestamp(System.currentTimeMillis())}.uvirsettings"
+        uvirSettingsExportFileName(
+            sensorHardwareUid = sensorHardwareUid,
+            encrypted = true
+        )
     ).apply {
         writeText(encoded, Charsets.UTF_8)
     }
@@ -242,15 +264,19 @@ internal fun importUvirSettingsFiles(
     database: UvirDatabaseHelper,
     uris: List<Uri>,
     decryptionPassword: CharArray? = null
-): Int {
-    val roots =
+): UvirSettingsImportResult {
+    val documents =
         uris.map { uri ->
-            decodeUvirSettingsRoot(
-                JSONObject(readUvirSettingsText(context, uri)),
-                decryptionPassword
+            val encodedRoot = JSONObject(readUvirSettingsText(context, uri))
+            DecodedUvirSettingsDocument(
+                root = decodeUvirSettingsRoot(encodedRoot, decryptionPassword),
+                encrypted =
+                    encodedRoot.optString("schema") ==
+                        UVIR_ENCRYPTED_SETTINGS_SCHEMA
             )
         }
-    roots.forEach { root ->
+    documents.forEach { document ->
+        val root = document.root
         require(root.optString("schema") == UVIR_SETTINGS_TRANSFER_SCHEMA)
         require(
             root.optInt("version") in
@@ -259,15 +285,72 @@ internal fun importUvirSettingsFiles(
         require(root.getString("scope") in setOf("app", "sensor"))
         root.getJSONObject("payload")
     }
-    roots.forEach { root ->
+    val importedSensors = mutableListOf<UvirImportedSensorSettings>()
+    var importedAppFiles = 0
+    documents.forEach { document ->
+        val root = document.root
         val payload = root.getJSONObject("payload")
         when (root.getString("scope")) {
-            "app" -> importAppSettings(context, payload)
-            "sensor" -> importSensorSettings(context, database, payload)
+            "app" -> {
+                importAppSettings(context, payload)
+                importedAppFiles++
+            }
+            "sensor" ->
+                importedSensors.add(
+                    importSensorSettings(
+                        context = context,
+                        database = database,
+                        payload = payload,
+                        encrypted = document.encrypted
+                    )
+                )
             else -> error("Unsupported settings scope")
         }
     }
-    return roots.size
+    return UvirSettingsImportResult(
+        fileCount = documents.size,
+        importedAppFiles = importedAppFiles,
+        importedSensors = importedSensors
+    )
+}
+
+private data class DecodedUvirSettingsDocument(
+    val root: JSONObject,
+    val encrypted: Boolean
+)
+
+internal data class UvirSensorSettingsImportRoute(
+    val hardwareUid: String,
+    val restoresAssociation: Boolean
+)
+
+internal data class UvirImportedSensorSettings(
+    val hardwareUid: String,
+    val settings: UvirSensorSettingsSnapshot,
+    val credentials: UvirSensorCredentials,
+    val wasActive: Boolean
+)
+
+internal data class UvirSettingsImportResult(
+    val fileCount: Int,
+    val importedAppFiles: Int,
+    val importedSensors: List<UvirImportedSensorSettings>
+)
+
+internal fun resolveUvirSensorSettingsImportRoute(
+    activeHardwareUid: String,
+    backupHardwareUid: String,
+    backupAuthToken: String,
+    encrypted: Boolean
+): UvirSensorSettingsImportRoute {
+    val canRestoreAssociation =
+        encrypted && backupHardwareUid.isNotBlank() && backupAuthToken.isNotBlank()
+    return UvirSensorSettingsImportRoute(
+        hardwareUid =
+            if (canRestoreAssociation) backupHardwareUid.trim()
+            else activeHardwareUid.trim(),
+        restoresAssociation = canRestoreAssociation
+    )
 }
 
 private fun readUvirSettingsText(context: Context, uri: Uri): String =
@@ -319,14 +402,48 @@ private fun importAppSettings(context: Context, payload: JSONObject) {
 private fun importSensorSettings(
     context: Context,
     database: UvirDatabaseHelper,
-    payload: JSONObject
-) {
-    val currentCredentials = UvirSensorCredentialStore.load(context)
-    val hardwareUid = currentCredentials.deviceId.trim()
+    payload: JSONObject,
+    encrypted: Boolean
+): UvirImportedSensorSettings {
+    val activeCredentials = UvirSensorCredentialStore.load(context)
+    // Association identity is honored only inside an encrypted document.
+    // Old and non-sensitive backups remain portable settings templates.
+    val sensitiveConnectionSettings =
+        payload.optJSONObject(SENSOR_SENSITIVE_CONNECTION_SETTINGS)
+            ?.takeIf { encrypted }
+    val importRoute =
+        resolveUvirSensorSettingsImportRoute(
+            activeHardwareUid = activeCredentials.deviceId,
+            backupHardwareUid =
+                sensitiveConnectionSettings?.optString("device_id").orEmpty(),
+            backupAuthToken =
+                sensitiveConnectionSettings?.optString("auth_token").orEmpty(),
+            encrypted = encrypted
+        )
+    val restoredCredentials =
+        if (importRoute.restoresAssociation) {
+            sensitiveConnectionSettings?.toRestoredSensorCredentials(payload)
+        } else {
+            null
+        }
+    val hardwareUid = importRoute.hardwareUid
     require(hardwareUid.isNotEmpty())
+    val targetWasActive =
+        activeCredentials.deviceId.equals(hardwareUid, ignoreCase = true)
+    val existingCredentials =
+        UvirSensorCredentialStore.loadForDevice(context, hardwareUid)
+    val targetCredentials =
+        restoredCredentials
+            ?: existingCredentials
+            ?: activeCredentials.takeIf { targetWasActive }
+            ?: error("No restorable sensor association")
     val current =
         database.readSensorSettings(hardwareUid)
-            ?: readCachedSensorSettings(context, hardwareUid)
+            ?: if (targetWasActive) {
+                readCachedSensorSettings(context, hardwareUid)
+            } else {
+                defaultImportedSensorSettings(targetCredentials)
+            }
     val imported = payload.toSensorSettingsSnapshot(current)
     check(
         database.upsertSensorSettings(
@@ -344,15 +461,15 @@ private fun importSensorSettings(
     importSensorPhonePreferences(
         preferences = preferences,
         payload = payload.optJSONObject(SENSOR_PHONE_PREFERENCES),
-        importedSettings = imported
+        importedSettings = imported,
+        hardwareUid = hardwareUid,
+        activeSensor = targetWasActive
     )
-    check(saveSelectedSensorContext(preferences, hardwareUid))
-    val sensitiveConnectionSettings =
-        payload.optJSONObject(SENSOR_SENSITIVE_CONNECTION_SETTINGS)
-    check(
-        UvirSensorCredentialStore.save(
-            context,
-            currentCredentials.copy(
+    if (targetWasActive) {
+        check(saveSelectedSensorContext(preferences, hardwareUid))
+    }
+    val importedCredentials =
+        targetCredentials.copy(
                 wifiSsid = imported.wifiSsid,
                 wifiEnabled = imported.wifiEnabled,
                 bluetoothEnabled = imported.bluetoothEnabled,
@@ -361,48 +478,123 @@ private fun importSensorSettings(
                 internetWifiSsid =
                     payload.optString(
                         "internet_wifi_ssid",
-                        currentCredentials.internetWifiSsid
+                        targetCredentials.internetWifiSsid
                     ),
                 internetRelayHost = imported.internetRelayHost,
                 internetRelayPort = imported.internetRelayPort,
                 wifiPassword =
                     sensitiveConnectionSettings?.optString(
                         "wifi_password",
-                        currentCredentials.wifiPassword
-                    ) ?: currentCredentials.wifiPassword,
+                        targetCredentials.wifiPassword
+                    ) ?: targetCredentials.wifiPassword,
                 internetWifiPassword =
                     sensitiveConnectionSettings?.optString(
                         "internet_wifi_password",
-                        currentCredentials.internetWifiPassword
-                    ) ?: currentCredentials.internetWifiPassword,
+                        targetCredentials.internetWifiPassword
+                    ) ?: targetCredentials.internetWifiPassword,
                 internetMqttUsername =
                     sensitiveConnectionSettings?.optString(
                         "internet_mqtt_username",
-                        currentCredentials.internetMqttUsername
-                    ) ?: currentCredentials.internetMqttUsername,
+                        targetCredentials.internetMqttUsername
+                    ) ?: targetCredentials.internetMqttUsername,
                 internetMqttPassword =
                     sensitiveConnectionSettings?.optString(
                         "internet_mqtt_password",
-                        currentCredentials.internetMqttPassword
-                    ) ?: currentCredentials.internetMqttPassword,
+                        targetCredentials.internetMqttPassword
+                    ) ?: targetCredentials.internetMqttPassword,
                 bluetoothName =
                     sensitiveConnectionSettings?.optString(
                         "bluetooth_name",
-                        currentCredentials.bluetoothName
-                    ) ?: currentCredentials.bluetoothName,
+                        targetCredentials.bluetoothName
+                    ) ?: targetCredentials.bluetoothName,
                 bluetoothPin =
                     sensitiveConnectionSettings?.optString(
                         "bluetooth_pin",
-                        currentCredentials.bluetoothPin
-                    ) ?: currentCredentials.bluetoothPin
+                        targetCredentials.bluetoothPin
+                    ) ?: targetCredentials.bluetoothPin
             )
-        )
+    return UvirImportedSensorSettings(
+        hardwareUid = hardwareUid,
+        settings = imported,
+        credentials = importedCredentials,
+        wasActive = targetWasActive
     )
 }
+
+private fun JSONObject.toRestoredSensorCredentials(
+    payload: JSONObject
+): UvirSensorCredentials? {
+    val deviceId = optString("device_id").trim()
+    val authToken = optString("auth_token")
+    if (deviceId.isBlank() || authToken.isBlank()) return null
+    return UvirSensorCredentials(
+        deviceId = deviceId,
+        firmwareVersion = optString("firmware_version"),
+        authToken = authToken,
+        wifiSsid = payload.optString("wifi_ssid"),
+        wifiPassword = optString("wifi_password"),
+        wifiHost = optString("wifi_host"),
+        wifiPort = optInt("wifi_port", 8733).coerceIn(1, 65_535),
+        wifiDiscoveryPort =
+            optInt("wifi_discovery_port", 8732).coerceIn(1, 65_535),
+        wifiEnabled = payload.optBoolean("wifi_enabled", true),
+        internetEnabled = payload.optBoolean("internet_enabled", false),
+        internetUsePrimaryWifi =
+            payload.optBoolean("internet_use_primary_wifi", true),
+        internetWifiSsid = payload.optString("internet_wifi_ssid"),
+        internetWifiPassword = optString("internet_wifi_password"),
+        internetRelayHost = payload.optString("internet_relay_host"),
+        internetRelayPort =
+            payload.optInt("internet_relay_port", DEFAULT_UVIR_RELAY_PORT)
+                .coerceIn(1, 65_535),
+        internetMqttUsername = optString("internet_mqtt_username"),
+        internetMqttPassword = optString("internet_mqtt_password"),
+        bluetoothName = optString("bluetooth_name"),
+        bluetoothPin = optString("bluetooth_pin"),
+        bluetoothEnabled = payload.optBoolean("bluetooth_enabled", true)
+    )
+}
+
+private fun defaultImportedSensorSettings(
+    credentials: UvirSensorCredentials
+): UvirSensorSettingsSnapshot =
+    UvirSensorSettingsSnapshot(
+        schemaVersion = SENSOR_SETTINGS_SCHEMA_VERSION,
+        firmwareVersion = credentials.firmwareVersion,
+        sensorParameters = SensorParameters(
+            autonomousRecordingEnabled = true,
+            automaticShutdownEnabled = false,
+            automaticShutdownSeconds = 1_800,
+            statusLedEnabled = true,
+            statusLedBrightness = 10,
+            statusBuzzerEnabled = true,
+            statusBuzzerVolume = 10,
+            externalCommandEnabled = true
+        ),
+        acquisitionParameters = AcquisitionParameters(
+            samplesPerMeasurement = 5,
+            sampleSpacingMs = DEFAULT_SAMPLE_SPACING_MS,
+            discardExtremes = true
+        ),
+        calibrationSettings = SensorCalibrationSettings(),
+        alertMonitoringEnabled = false,
+        alertRepeatSeconds = 30,
+        alertSessionId = 0L,
+        alertRules = emptyList(),
+        wifiEnabled = credentials.wifiEnabled,
+        bluetoothEnabled = credentials.bluetoothEnabled,
+        internetEnabled = credentials.internetEnabled,
+        internetUsePrimaryWifi = credentials.internetUsePrimaryWifi,
+        wifiSsid = credentials.wifiSsid,
+        internetRelayHost = credentials.internetRelayHost,
+        internetRelayPort = credentials.internetRelayPort,
+        lastSyncedAt = 0L
+    )
 
 private fun UvirSensorSettingsSnapshot.toTransferJson(): JSONObject =
     JSONObject()
         .put("settings_schema_version", schemaVersion)
+        .put("settings_updated_at_ms", updatedAtMs)
         .put("firmware_version", firmwareVersion)
         .put("autonomous_recording_enabled", sensorParameters.autonomousRecordingEnabled)
         .put("automatic_shutdown_enabled", sensorParameters.automaticShutdownEnabled)
@@ -418,6 +610,10 @@ private fun UvirSensorSettingsSnapshot.toTransferJson(): JSONObject =
         .put("visible_calibration_factor", calibrationSettings.visibleFactor.toDouble())
         .put("uv_calibration_factor", calibrationSettings.uvFactor.toDouble())
         .put("alert_repeat_seconds", alertRepeatSeconds)
+        .put("alert_recording_enabled", alertRecordingEnabled)
+        .put("alert_start_delay_seconds", alertStartDelaySeconds)
+        .put("alert_duration_seconds", alertDurationSeconds)
+        .put("alert_max_registrations", alertMaxRegistrations)
         .put("wifi_enabled", wifiEnabled)
         .put("bluetooth_enabled", bluetoothEnabled)
         .put("internet_enabled", internetEnabled)
@@ -445,6 +641,7 @@ private fun JSONObject.toSensorSettingsSnapshot(
 ): UvirSensorSettingsSnapshot =
     UvirSensorSettingsSnapshot(
         schemaVersion = optInt("settings_schema_version", current.schemaVersion),
+        updatedAtMs = optLong("settings_updated_at_ms", current.updatedAtMs).coerceAtLeast(0L),
         // Firmware and active-session state describe the selected device now;
         // they are not user settings that should be restored from a file.
         firmwareVersion = current.firmwareVersion,
@@ -475,6 +672,10 @@ private fun JSONObject.toSensorSettingsSnapshot(
         ),
         alertMonitoringEnabled = current.alertMonitoringEnabled,
         alertRepeatSeconds = getInt("alert_repeat_seconds").coerceIn(1, 86_400),
+        alertRecordingEnabled = optBoolean("alert_recording_enabled", current.alertRecordingEnabled ?: true),
+        alertStartDelaySeconds = optLong("alert_start_delay_seconds", current.alertStartDelaySeconds).coerceIn(0L, 31_536_000L),
+        alertDurationSeconds = optLong("alert_duration_seconds", current.alertDurationSeconds).coerceIn(0L, 31_536_000L),
+        alertMaxRegistrations = optInt("alert_max_registrations", current.alertMaxRegistrations).coerceIn(0, MAX_AUTOMATIC_ACQUISITIONS),
         alertSessionId = current.alertSessionId,
         alertRules = buildList {
             val rules = optJSONArray("alert_rules") ?: JSONArray()
@@ -513,101 +714,127 @@ internal fun isTransferableAppPreference(key: String): Boolean =
         key !in transientSettingsKeys &&
         !key.startsWith("selected_sensor_context.")
 
-private fun SharedPreferences.sensorConfigurationToTransferJson(): JSONObject =
+private fun SharedPreferences.sensorConfigurationToTransferJson(hardwareUid: String): JSONObject =
     JSONObject().also { payload ->
-        all.filterKeys { it in sensorConfigurationPreferenceKeys }
-            .forEach { (key, value) -> payload.putPreferenceValue(key, value) }
+        val activeHardwareUid = getString("active_device_id", "").orEmpty()
+        val isActive = normalizeSensorDeviceId(activeHardwareUid) == normalizeSensorDeviceId(hardwareUid)
+        sensorConfigurationPreferenceKeys.forEach { key ->
+            val storedKey = if (isActive) key else sensorContextPreferenceKey(hardwareUid, key)
+            all[storedKey]?.let { value -> payload.putPreferenceValue(key, value) }
+        }
     }
 
 private fun importSensorPhonePreferences(
     preferences: SharedPreferences,
     payload: JSONObject?,
-    importedSettings: UvirSensorSettingsSnapshot
+    importedSettings: UvirSensorSettingsSnapshot,
+    hardwareUid: String,
+    activeSensor: Boolean
 ) {
+    fun destinationKey(key: String): String =
+        if (activeSensor) key else sensorContextPreferenceKey(hardwareUid, key)
     val editor = preferences.edit()
     // Version 2 contains the complete phone-side sensor profile. Clearing
     // first also restores defaults for values that were absent in the source
     // profile. Version 1 had no such block, so its unrelated drafts survive.
     if (payload != null) {
-        sensorConfigurationPreferenceKeys.forEach(editor::remove)
+        sensorConfigurationPreferenceKeys.forEach { key ->
+            editor.remove(destinationKey(key))
+        }
     }
 
     editor
         .putBoolean(
-            KEY_SENSOR_AUTONOMOUS_RECORDING,
+            destinationKey(KEY_SENSOR_AUTONOMOUS_RECORDING),
             importedSettings.sensorParameters.autonomousRecordingEnabled
         )
         .putBoolean(
-            KEY_SENSOR_AUTOMATIC_SHUTDOWN_ENABLED,
+            destinationKey(KEY_SENSOR_AUTOMATIC_SHUTDOWN_ENABLED),
             importedSettings.sensorParameters.automaticShutdownEnabled
         )
         .putInt(
-            KEY_SENSOR_AUTOMATIC_SHUTDOWN_SECONDS,
+            destinationKey(KEY_SENSOR_AUTOMATIC_SHUTDOWN_SECONDS),
             importedSettings.sensorParameters.automaticShutdownSeconds
         )
         .putBoolean(
-            KEY_SENSOR_STATUS_LED_ENABLED,
+            destinationKey(KEY_SENSOR_STATUS_LED_ENABLED),
             importedSettings.sensorParameters.statusLedEnabled
         )
         .putInt(
-            KEY_SENSOR_STATUS_LED_BRIGHTNESS,
+            destinationKey(KEY_SENSOR_STATUS_LED_BRIGHTNESS),
             importedSettings.sensorParameters.statusLedBrightness
         )
         .putBoolean(
-            KEY_SENSOR_STATUS_BUZZER_ENABLED,
+            destinationKey(KEY_SENSOR_STATUS_BUZZER_ENABLED),
             importedSettings.sensorParameters.statusBuzzerEnabled
         )
         .putInt(
-            KEY_SENSOR_STATUS_BUZZER_VOLUME,
+            destinationKey(KEY_SENSOR_STATUS_BUZZER_VOLUME),
             importedSettings.sensorParameters.statusBuzzerVolume
         )
         .putBoolean(
-            KEY_SENSOR_EXTERNAL_COMMAND_ENABLED,
+            destinationKey(KEY_SENSOR_EXTERNAL_COMMAND_ENABLED),
             importedSettings.sensorParameters.externalCommandEnabled
         )
         .putInt(
-            KEY_SAMPLES_PER_MEASUREMENT,
+            destinationKey(KEY_SAMPLES_PER_MEASUREMENT),
             importedSettings.acquisitionParameters.samplesPerMeasurement
         )
         .putLong(
-            KEY_SAMPLE_SPACING_MS,
+            destinationKey(KEY_SAMPLE_SPACING_MS),
             importedSettings.acquisitionParameters.sampleSpacingMs
         )
         .putBoolean(
-            KEY_DISCARD_EXTREMES,
+            destinationKey(KEY_DISCARD_EXTREMES),
             importedSettings.acquisitionParameters.discardExtremes
         )
         .putFloat(
-            KEY_SENSOR_VISIBLE_CALIBRATION_FACTOR,
+            destinationKey(KEY_SENSOR_VISIBLE_CALIBRATION_FACTOR),
             importedSettings.calibrationSettings.visibleFactor
         )
         .putFloat(
-            KEY_SENSOR_UV_CALIBRATION_FACTOR,
+            destinationKey(KEY_SENSOR_UV_CALIBRATION_FACTOR),
             importedSettings.calibrationSettings.uvFactor
         )
         .putInt(
-            KEY_THRESHOLD_ALERT_REPEAT_SECONDS,
+            destinationKey(KEY_THRESHOLD_ALERT_REPEAT_SECONDS),
             importedSettings.alertRepeatSeconds
+        )
+        .putBoolean(
+            destinationKey(KEY_THRESHOLD_ALERT_RECORD_EVENTS),
+            importedSettings.alertRecordingEnabled ?: true
+        )
+        .putLong(
+            destinationKey(KEY_THRESHOLD_ALERT_START_DELAY_SECONDS),
+            importedSettings.alertStartDelaySeconds
+        )
+        .putLong(
+            destinationKey(KEY_THRESHOLD_ALERT_SESSION_DURATION_SECONDS),
+            importedSettings.alertDurationSeconds
+        )
+        .putInt(
+            destinationKey(KEY_THRESHOLD_ALERT_MAX_REGISTRATIONS),
+            importedSettings.alertMaxRegistrations
         )
 
     importedSettings.alertRules.forEach { rule ->
         editor
             .putBoolean(
-                thresholdRulePreferenceKey(rule.metric, "enabled"),
+                destinationKey(thresholdRulePreferenceKey(rule.metric, "enabled")),
                 rule.enabled
             )
             .putString(
-                thresholdRulePreferenceKey(rule.metric, "direction"),
+                destinationKey(thresholdRulePreferenceKey(rule.metric, "direction")),
                 rule.direction.name
             )
             .putFloat(
-                thresholdRulePreferenceKey(rule.metric, "value"),
+                destinationKey(thresholdRulePreferenceKey(rule.metric, "value")),
                 rule.threshold
             )
     }
     payload?.keys()?.forEach { key ->
         if (key in sensorConfigurationPreferenceKeys) {
-            editor.putJsonPreferenceValue(key, payload.get(key))
+            editor.putJsonPreferenceValue(destinationKey(key), payload.get(key))
         }
     }
     check(editor.commit())

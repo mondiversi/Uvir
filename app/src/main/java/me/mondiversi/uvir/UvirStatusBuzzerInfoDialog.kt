@@ -8,11 +8,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
@@ -118,32 +116,29 @@ internal fun UvirStatusBuzzerInfoDialog(
     onTestBuzzer: suspend () -> Boolean,
     onDismissRequest: () -> Unit
 ) {
-    val dialogScrollbar =
-        rememberUvirDialogScrollbar(
-            color = secondaryText.copy(alpha = 0.58f)
-        )
     val testScope = rememberCoroutineScope()
     var testInProgress by remember { mutableStateOf(false) }
     var activeTestSignalIndex by remember { mutableStateOf<Int?>(null) }
     val signals = statusBuzzerSignals
 
-    AlertDialog(
+    UvirAlertDialog(
         onDismissRequest = onDismissRequest,
-        modifier = dialogScrollbar.dialogModifier,
-        title = { Text(stringResource(R.string.sensor_buzzer_info_title)) },
+        title = {
+            UvirClosableDialogTitle(
+                title = stringResource(R.string.sensor_buzzer_info_title),
+                onDismiss = onDismissRequest
+            )
+        },
         text = {
             Box(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .heightIn(max = 460.dp)
-                        .then(dialogScrollbar.viewportModifier)
             ) {
                 Column(
                     modifier =
                         Modifier
-                            .fillMaxWidth()
-                            .verticalScroll(dialogScrollbar.scrollState),
+                            .fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     signals.forEachIndexed { index, signal ->
@@ -193,11 +188,7 @@ internal fun UvirStatusBuzzerInfoDialog(
                 }
             }
         },
-        confirmButton = {
-            TextButton(onClick = onDismissRequest) {
-                Text(stringResource(R.string.close))
-            }
-        },
+        confirmButton = {},
         dismissButton = {
             TextButton(
                 enabled = testEnabled && !testInProgress,

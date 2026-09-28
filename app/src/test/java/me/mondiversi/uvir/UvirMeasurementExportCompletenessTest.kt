@@ -41,14 +41,48 @@ class UvirMeasurementExportCompletenessTest {
 
         assertFalse("Automatic" in headers)
         assertEquals("4", row["Ultraviolet_total_uW_cm2"])
+        assertEquals("22.2", row["Ultraviolet_total_percent"])
         assertEquals("25.0", row["UVC_percent"])
         assertEquals("50.0", row["UVA_percent"])
         assertEquals("10", row["Visible_total_uW_cm2"])
+        assertEquals("55.6", row["Visible_total_percent"])
         assertEquals("40.0", row["HEV_percent"])
         assertEquals("4", row["Infrared_total_uW_cm2"])
+        assertEquals("22.2", row["Infrared_total_percent"])
         assertEquals("75.0", row["FarRed_percent"])
         assertEquals("25.0", row["NIR_percent"])
         assertEquals(headers.size, values.size)
         assertTrue(headers.size > 40)
+    }
+
+    @Test
+    fun csvUsesVariantIndexAndCountWithoutExposingInternalPosition() {
+        val record =
+            SavedRecordDetail(
+                id = 1L,
+                timestamp = 1L,
+                note = "",
+                automatic = true,
+                sample = SensorSample(),
+                sessionId = 7L,
+                sessionSequence = 3,
+                positionIndex = 2,
+                variantIndex = 1
+            )
+
+        val lines =
+            measurementCsv(
+                records = listOf(record),
+                numericFormat = UvirNumericFormat.INTERNATIONAL,
+                variantCountsBySession = mapOf(7L to 2)
+            ).trim().lines()
+        val headers = lines[0].split(';')
+        val values = lines[1].split(';')
+        val row = headers.zip(values).toMap()
+
+        assertFalse("Position_index" in headers)
+        assertEquals("A", row["Variant"])
+        assertEquals("2", row["Variant_count"])
+        assertEquals(headers.size, values.size)
     }
 }

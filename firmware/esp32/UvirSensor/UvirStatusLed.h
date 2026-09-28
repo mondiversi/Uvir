@@ -10,7 +10,6 @@ enum class UvirLedBaseState : uint8_t {
 
 enum class UvirLedPulse : uint8_t {
   None,
-  SavedEvent,
   TimeUnavailable,
 };
 
@@ -40,7 +39,8 @@ class UvirStatusLed {
     brightnessPercent_ = constrain(brightnessPercent, 1, 100);
     if (!enabled_) {
       portENTER_CRITICAL(&requestMux_);
-      savedPulseRequested_ = false;
+      savedActivityRequested_ = false;
+      savedActivityActive_ = false;
       timeUnavailablePulseRequested_ = false;
       debugFrameActive_ = false;
       portEXIT_CRITICAL(&requestMux_);
@@ -130,24 +130,22 @@ class UvirStatusLed {
 
   bool savedEventActive() {
     portENTER_CRITICAL(&requestMux_);
-    const bool active = enabled_ && (savedPulseRequested_ ||
-        timeUnavailablePulseRequested_ ||
-        (pulse_ != UvirLedPulse::None &&
-         millis() - pulseStartedAtMs_ < pulseDurationMs(pulse_)));
+    const bool active = enabled_ &&
+        (savedActivityRequested_ || savedActivityActive_ ||
+         timeUnavailablePulseRequested_ ||
+         pulse_ != UvirLedPulse::None);
     portEXIT_CRITICAL(&requestMux_);
     return active;
   }
 
   void setPendingSync(bool pending) {
-    if (pendingSync_ != pending) {
-      pendingSync_ = pending;
-      pendingSyncStartedAtMs_ = millis();
-    }
+    pendingSync_ = pending;
   }
 
-  void signalAcquisitionSaved(bool = false) {
+  void signalAcquisitionSaved(bool disconnected = false) {
     portENTER_CRITICAL(&requestMux_);
-    savedPulseRequested_ = true;
+    savedActivityRedRequested_ = disconnected || baseState_ != UvirLedBaseState::Connected;
+    savedActivityRequested_ = true;
     portEXIT_CRITICAL(&requestMux_);
   }
 
@@ -185,60 +183,70 @@ class UvirStatusLed {
       return;
     }
 
-    const UvirLedPulse requested = takeRequestedPulse();
-    if (requested != UvirLedPulse::None) {
-      startPulse(requested);
+    updateSavedActivity();
+    if (takeTimeUnavailableRequest()) startTimeUnavailablePulse();
+
+    const uint32_t now = millis();
+    if (pulse_ != UvirLedPulse::None &&
+        now - pulseStartedAtMs_ >= kTimeUnavailableDurationMs) {
+      pulse_ = UvirLedPulse::None;
+    }
+
+    const bool activityActive =
+        operationActive_ || commandActivityActive();
+    if (activityActive != activityBlinkActive_) {
+      activityBlinkActive_ = activityActive;
+      activityBlinkStartedAtMs_ = now;
     }
 
     uint8_t red = 0;
     uint8_t green = 0;
-    switch (baseState_) {
-      case UvirLedBaseState::Connecting:
-        if (isBlinkOn(millis() - baseStateStartedAtMs_)) {
-          red = 255;
-          green = kYellowGreenLevel;
-        }
-        break;
-      case UvirLedBaseState::Connected:
-        if (!pendingSync_ ||
-            isBlinkOn(millis() - pendingSyncStartedAtMs_)) {
-          green = 255;
-        }
-        break;
-      case UvirLedBaseState::Disconnected:
-      default:
-        if (!pendingSync_ ||
-            isBlinkOn(millis() - pendingSyncStartedAtMs_)) {
-          red = 255;
-        }
-        break;
-    }
-
-    bool operationBlueOn = operationActive_ || commandActivityActive();
-    if (pulse_ != UvirLedPulse::None) {
-      const uint32_t elapsed = millis() - pulseStartedAtMs_;
-      if (elapsed >= pulseDurationMs(pulse_)) {
-        pulse_ = UvirLedPulse::None;
-      } else {
-        // When the operation LED is already steady, make either event visible
-        // as OFF pulses. Otherwise show ordinary blue ON pulses.
-        const uint32_t halfPeriodMs =
-            pulse_ == UvirLedPulse::TimeUnavailable
-                ? kTimeUnavailableHalfPeriodMs
-                : kBlinkHalfPeriodMs;
-        operationBlueOn = pulseBaselineBlueOn_
-            ? !isBlinkOn(elapsed, halfPeriodMs)
-            : isBlinkOn(elapsed, halfPeriodMs);
+    if (pulse_ == UvirLedPulse::TimeUnavailable) {
+      if (isBlinkOn(now - pulseStartedAtMs_, kTimeUnavailableHalfPeriodMs)) {
+        red = 255;
+        green = kOrangeGreenLevel;
+      }
+    } else if (savedActivityActive_) {
+      if (isBlinkOn(now - savedActivityStartedAtMs_, kRapidBlinkHalfPeriodMs)) {
+        red = savedActivityRed_ ? 255 : 0;
+        green = savedActivityRed_ ? 0 : 255;
+      }
+    } else {
+      switch (baseState_) {
+        case UvirLedBaseState::Connecting:
+          // Connection has priority over the activity indication.
+          if (isBlinkOn(now - baseStateStartedAtMs_)) {
+            red = 255;
+            green = kYellowGreenLevel;
+          }
+          break;
+        case UvirLedBaseState::Connected:
+          if (!activityActive ||
+              !isBlinkOn(now - activityBlinkStartedAtMs_)) {
+            green = 255;
+          }
+          break;
+        case UvirLedBaseState::Disconnected:
+        default:
+          if (!activityActive ||
+              !isBlinkOn(now - activityBlinkStartedAtMs_)) {
+            red = 255;
+          }
+          break;
       }
     }
-    write(red, green, operationBlueOn ? 255 : 0);
+
+    // The separate blue LED has exactly one status meaning: unsynchronized
+    // records are present in sensor memory. It remains steady until empty.
+    write(red, green, pendingSync_ ? 255 : 0);
   }
 
  private:
   static constexpr uint32_t kBlinkHalfPeriodMs = 500;
   static constexpr uint32_t kCommandActivityHoldMs = 350;
-  static constexpr uint32_t kSavedEventDurationMs =
-      kBlinkHalfPeriodMs * 6;
+  static constexpr uint32_t kRapidBlinkHalfPeriodMs = 75;
+  static constexpr uint32_t kSavedActivityHoldMs =
+      kRapidBlinkHalfPeriodMs * 6;
   static constexpr uint32_t kTimeUnavailableHalfPeriodMs = 75;
   static constexpr uint32_t kTimeUnavailableDurationMs =
       kTimeUnavailableHalfPeriodMs * 10;
@@ -246,20 +254,15 @@ class UvirStatusLed {
   static constexpr uint32_t kSelfTestBlinkDurationMs =
       kBlinkHalfPeriodMs * 6;
   static constexpr uint32_t kSelfTestDurationMs =
-      kSelfTestFixedDurationMs * 3 + kSelfTestBlinkDurationMs * 4 +
-      kTimeUnavailableDurationMs;
+      kSelfTestFixedDurationMs * 3 + kSelfTestBlinkDurationMs * 3 +
+      kTimeUnavailableDurationMs + kSavedActivityHoldMs * 2;
   static constexpr uint8_t kYellowGreenLevel = 180;
+  static constexpr uint8_t kOrangeGreenLevel = 80;
 
   static bool isBlinkOn(
       uint32_t elapsedMs,
       uint32_t halfPeriodMs = kBlinkHalfPeriodMs) {
     return (elapsedMs / halfPeriodMs) % 2 == 0;
-  }
-
-  static uint32_t pulseDurationMs(UvirLedPulse pulse) {
-    return pulse == UvirLedPulse::TimeUnavailable
-        ? kTimeUnavailableDurationMs
-        : kSavedEventDurationMs;
   }
 
   static void ledTaskEntry(void *context) {
@@ -270,16 +273,30 @@ class UvirStatusLed {
     }
   }
 
-  UvirLedPulse takeRequestedPulse() {
-    UvirLedPulse requested = UvirLedPulse::None;
+  bool takeTimeUnavailableRequest() {
+    bool requested = false;
     portENTER_CRITICAL(&requestMux_);
     if (timeUnavailablePulseRequested_) {
-      requested = UvirLedPulse::TimeUnavailable;
-    } else if (savedPulseRequested_) {
-      requested = UvirLedPulse::SavedEvent;
+      timeUnavailablePulseRequested_ = false;
+      requested = true;
     }
     portEXIT_CRITICAL(&requestMux_);
     return requested;
+  }
+
+  void updateSavedActivity() {
+    portENTER_CRITICAL(&requestMux_);
+    const uint32_t now = millis();
+    if (savedActivityRequested_) {
+      savedActivityRequested_ = false;
+      savedActivityActive_ = true;
+      savedActivityRed_ = savedActivityRedRequested_;
+      savedActivityStartedAtMs_ = now;
+    } else if (savedActivityActive_ &&
+               now - savedActivityStartedAtMs_ >= kSavedActivityHoldMs) {
+      savedActivityActive_ = false;
+    }
+    portEXIT_CRITICAL(&requestMux_);
   }
 
   bool takeSelfTestRequest() {
@@ -287,7 +304,8 @@ class UvirStatusLed {
     portENTER_CRITICAL(&requestMux_);
     if (selfTestRequested_) {
       selfTestRequested_ = false;
-      savedPulseRequested_ = false;
+      savedActivityRequested_ = false;
+      savedActivityActive_ = false;
       timeUnavailablePulseRequested_ = false;
       requested = true;
     }
@@ -317,6 +335,10 @@ class UvirStatusLed {
         greenFixedEnd + kSelfTestBlinkDurationMs;
     const uint32_t blueFixedEnd =
         greenBlinkEnd + kSelfTestFixedDurationMs;
+    const uint32_t orangeRapidEnd =
+        blueFixedEnd + kTimeUnavailableDurationMs;
+    const uint32_t redRapidEnd =
+        orangeRapidEnd + kSavedActivityHoldMs;
 
     if (elapsed < redFixedEnd) {
       write(255, 0, 0);
@@ -342,19 +364,24 @@ class UvirStatusLed {
       }
     } else if (elapsed < blueFixedEnd) {
       write(0, 0, 255);
-    } else if (elapsed < blueFixedEnd + kSelfTestBlinkDurationMs &&
-               !isBlinkOn(elapsed - blueFixedEnd)) {
-      // Begin with an OFF half-period so the preceding steady-blue stage is
-      // visually separated from all three test flashes.
-      write(0, 0, 255);
-    } else if (elapsed < blueFixedEnd + kSelfTestBlinkDurationMs) {
-      write(0, 0, 0);
-    } else if (isBlinkOn(
-                   elapsed - blueFixedEnd - kSelfTestBlinkDurationMs,
-                   kTimeUnavailableHalfPeriodMs)) {
-      write(0, 0, 255);
+    } else if (elapsed < orangeRapidEnd) {
+      if (isBlinkOn(elapsed - blueFixedEnd, kTimeUnavailableHalfPeriodMs)) {
+        write(255, kOrangeGreenLevel, 0);
+      } else {
+        write(0, 0, 0);
+      }
+    } else if (elapsed < redRapidEnd) {
+      if (isBlinkOn(elapsed - orangeRapidEnd, kRapidBlinkHalfPeriodMs)) {
+        write(255, 0, 0);
+      } else {
+        write(0, 0, 0);
+      }
     } else {
-      write(0, 0, 0);
+      if (isBlinkOn(elapsed - redRapidEnd, kRapidBlinkHalfPeriodMs)) {
+        write(0, 255, 0);
+      } else {
+        write(0, 0, 0);
+      }
     }
     return true;
   }
@@ -382,16 +409,10 @@ class UvirStatusLed {
     return active;
   }
 
-  void startPulse(UvirLedPulse pulse) {
-    // Keep one polarity for all three flashes even if the underlying command
-    // or session finishes while the pulse is being displayed.
-    const bool baseline = operationActive_ || commandActivityActive();
+  void startTimeUnavailablePulse() {
     portENTER_CRITICAL(&requestMux_);
-    pulseBaselineBlueOn_ = baseline;
     pulseStartedAtMs_ = millis();
-    pulse_ = pulse;
-    savedPulseRequested_ = false;
-    timeUnavailablePulseRequested_ = false;
+    pulse_ = UvirLedPulse::TimeUnavailable;
     portEXIT_CRITICAL(&requestMux_);
   }
 
@@ -422,11 +443,15 @@ class UvirStatusLed {
   volatile uint32_t commandActivityUntilMs_ = 0;
   volatile bool pendingSync_ = false;
   volatile uint32_t baseStateStartedAtMs_ = 0;
-  volatile uint32_t pendingSyncStartedAtMs_ = 0;
+  volatile bool activityBlinkActive_ = false;
+  volatile uint32_t activityBlinkStartedAtMs_ = 0;
   volatile UvirLedPulse pulse_ = UvirLedPulse::None;
   volatile uint32_t pulseStartedAtMs_ = 0;
-  bool pulseBaselineBlueOn_ = false;
-  volatile bool savedPulseRequested_ = false;
+  volatile bool savedActivityRequested_ = false;
+  volatile bool savedActivityRedRequested_ = false;
+  volatile bool savedActivityActive_ = false;
+  volatile bool savedActivityRed_ = false;
+  volatile uint32_t savedActivityStartedAtMs_ = 0;
   volatile bool timeUnavailablePulseRequested_ = false;
   volatile bool selfTestRequested_ = false;
   volatile bool selfTestActive_ = false;

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sensor_reset_selection_title">לאפס את החיישנים שנבחרו?</string>
+    <string name="sensor_reset_selection_message">בחר את החיישנים לאיפוס. ההגדרות, פרטי ההתחברות והנתונים שלא סונכרנו יימחקו, ואז החיישנים יכבו. הנתונים באפליקציה לא ישתנו. ניתן לבחור רק חיישנים מחוברים ללא פעילות מתמשכת.</string>
+    <string name="sensor_reset_selection_failed">האיפוס נכשל: %1$s. בדוק את החיבור ונסה שוב.</string>
+</resources>
+

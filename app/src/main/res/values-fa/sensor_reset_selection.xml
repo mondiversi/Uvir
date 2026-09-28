@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sensor_reset_selection_title">حسگرهای انتخاب‌شده بازنشانی شوند؟</string>
+    <string name="sensor_reset_selection_message">حسگرها را برای بازنشانی انتخاب کنید. تنظیمات، اطلاعات ورود و داده‌های همگام‌نشده آن‌ها حذف می‌شوند و سپس حسگرها خاموش می‌شوند. داده‌های برنامه تغییر نمی‌کنند. فقط حسگرهای متصل بدون فعالیت جاری قابل انتخاب هستند.</string>
+    <string name="sensor_reset_selection_failed">بازنشانی ناموفق بود: %1$s. اتصال را بررسی کنید و دوباره تلاش کنید.</string>
+</resources>
+

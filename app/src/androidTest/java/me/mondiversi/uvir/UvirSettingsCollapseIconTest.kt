@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.CompositionLocalProvider
@@ -20,6 +21,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assertHeightIsEqualTo
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertWidthIsEqualTo
+import androidx.compose.ui.test.assertHasNoClickAction
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -91,5 +93,45 @@ class UvirSettingsCollapseIconTest {
                 .assertWidthIsEqualTo(UvirTitleActionButtonSize).performClick()
         }
         assertEquals(4, clicks)
+    }
+
+    @Test fun collapseKeepsItsBadgeButNonInteractiveContextIsPlainAndNeutralInBothThemes() {
+        val dark = mutableStateOf(false)
+        val direction = mutableStateOf(LayoutDirection.Ltr)
+        val type = mutableStateOf(ConnectivityIconType.SENSOR)
+        val description = InstrumentationRegistry.getInstrumentation().targetContext
+            .getString(R.string.collapse_all_settings_content_description)
+        compose.setContent {
+            CompositionLocalProvider(LocalLayoutDirection provides direction.value) {
+                MaterialTheme(colorScheme = if (dark.value) darkColorScheme() else lightColorScheme()) {
+                    CompositionLocalProvider(LocalContentColor provides if (dark.value) Color.White else Color(0xFF101418)) {
+                        androidx.compose.foundation.layout.Column(Modifier.background(MaterialTheme.colorScheme.background)) {
+                            UvirSettingsHeader("Settings") {}
+                            Box(Modifier.testTag("context-icon")) { UvirSettingsContextBadge(type.value) }
+                        }
+                    }
+                }
+            }
+        }
+        for (night in listOf(false, true)) for (layout in listOf(LayoutDirection.Ltr, LayoutDirection.Rtl)) {
+            for (contextType in listOf(ConnectivityIconType.SENSOR, ConnectivityIconType.PHONE)) {
+                compose.runOnIdle { dark.value = night; direction.value = layout; type.value = contextType }
+                val scheme = if (night) darkColorScheme() else lightColorScheme()
+                val inset = with(compose.density) { 9.dp.toPx().toInt() }
+                val collapse = compose.onNodeWithContentDescription(description).captureToImage().toPixelMap()
+                val context = compose.onNodeWithTag("context-icon")
+                    .assertHasNoClickAction().assertWidthIsEqualTo(40.dp).assertHeightIsEqualTo(40.dp)
+                    .captureToImage().toPixelMap()
+                assertEquals(scheme.primary, collapse[inset, collapse.height / 2])
+                assertEquals(scheme.background, collapse[0, 0])
+                assertEquals(scheme.background, context[inset, context.height / 2])
+                assertEquals(scheme.background, context[0, 0])
+                val foreground = if (night) Color.White else Color(0xFF101418)
+                assertTrue("The context icon follows the page foreground: $contextType, dark=$night, $layout",
+                    (0 until context.height).any { y -> (0 until context.width).any { x -> context[x, y] == foreground } })
+                assertTrue("The non-interactive marker has no purple badge or purple glyph",
+                    (0 until context.height).all { y -> (0 until context.width).none { x -> context[x, y] == scheme.primary } })
+            }
+        }
     }
 }

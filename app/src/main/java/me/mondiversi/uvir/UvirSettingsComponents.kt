@@ -1,6 +1,7 @@
 package me.mondiversi.uvir
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
@@ -27,7 +28,10 @@ import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.Dp
@@ -41,6 +45,8 @@ internal val UvirSettingsListIslandGap = UvirIslandSpacing
 internal val UvirSettingsRelatedGap = 4.dp
 internal val UvirSettingsControlGap = 8.dp
 internal val UvirSettingsGroupGap = 12.dp
+internal val UvirActionButtonGap = 6.dp
+internal val UvirCompactActionButtonGap = 4.dp
 
 @Composable
 internal fun SettingsPageDescription(
@@ -100,7 +106,12 @@ internal fun SettingsRadioChoiceRow(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .clickable(enabled = enabled, onClick = click),
+                .selectable(
+                    selected = selected,
+                    enabled = enabled,
+                    role = Role.RadioButton,
+                    onClick = click
+                ),
         shape = RoundedCornerShape(10.dp),
         color =
             if (selected) {
@@ -123,7 +134,7 @@ internal fun SettingsRadioChoiceRow(
             ) {
                 RadioButton(
                     selected = selected,
-                    onClick = click,
+                    onClick = null,
                     enabled = enabled,
                     modifier = Modifier.size(24.dp),
                     colors =
@@ -148,8 +159,7 @@ enum class UvirSettingsHeaderControl { CHEVRON, CHECKBOX }
 enum class UvirSettingsPage {
     SENSOR_CONNECTION,
     SENSOR_PARAMETERS,
-    SENSOR_CALIBRATION,
-    SAMPLING,
+    SENSOR_MEASUREMENT,
     ALERTS,
     LANGUAGE,
     LANGUAGE_AND_FORMATS,
@@ -165,6 +175,58 @@ internal data class UvirSettingsNavigation(
 
 internal val LocalUvirSettingsNavigation =
     staticCompositionLocalOf<UvirSettingsNavigation?> { null }
+
+internal val LocalUvirSettingsNeutralIcons = staticCompositionLocalOf { false }
+
+@Composable
+private fun UvirSettingsTitleIcon(
+    icon: ConnectivityIconType?,
+    iconContent: (@Composable (Color) -> Unit)?,
+    plainTint: Color,
+    neutral: Boolean
+) {
+    val draw: @Composable (Color) -> Unit = { tint ->
+        iconContent?.invoke(tint) ?: icon?.let {
+            ConnectivitySectionIcon(it, Modifier.size(20.dp), tint)
+        }
+    }
+    if (neutral) {
+        // Keep the former slot for alignment, but draw only the icon in the
+        // exact title color, including its disabled alpha.
+        Box(
+            modifier = Modifier.size(28.dp),
+            contentAlignment = Alignment.Center
+        ) { draw(plainTint) }
+    } else {
+        draw(plainTint)
+    }
+}
+
+@Composable
+internal fun SettingsIslandHeader(
+    title: String,
+    titleColor: Color,
+    titleIcon: ConnectivityIconType? = null,
+    titleIconContent: (@Composable (Color) -> Unit)? = null,
+    dividerColor: Color = titleColor,
+    modifier: Modifier = Modifier
+) {
+    val tint = titleColor
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        if (titleIconContent != null || titleIcon != null) {
+            UvirSettingsTitleIcon(
+                titleIcon, titleIconContent, tint,
+                LocalUvirSettingsNeutralIcons.current
+            )
+            Spacer(Modifier.width(10.dp))
+        }
+        Text(title, color = tint, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+    }
+    SettingsGroupDivider(dividerColor)
+}
 
 @Composable
 fun SettingsSection(
@@ -188,7 +250,9 @@ fun SettingsSection(
     showExpandedDivider: Boolean = false,
     titleFontSize: TextUnit = 15.sp,
     settingsPage: UvirSettingsPage? = null,
+    listTopSpacing: Dp = 0.dp,
     wrapDetailContent: Boolean = true,
+    headerTrailingContent: (@Composable () -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
     val navigation = LocalUvirSettingsNavigation.current
@@ -197,6 +261,7 @@ fun SettingsSection(
             null -> {
                 UvirSettingsPageRow(
                     title = title,
+                    modifier = Modifier.padding(top = listTopSpacing),
                     containerColor = containerColor,
                     titleColor = titleColor,
                     chevronColor = chevronColor,
@@ -273,22 +338,31 @@ fun SettingsSection(
     }
     val darkTheme = isSystemInDarkTheme()
     val expandedAccentColor = headerAccentColor
+    val accentHeader = expanded && highlightExpandedHeader
     val enabledTitleColor =
-        if (expanded && highlightExpandedHeader) expandedAccentColor else titleColor
+        if (accentHeader) expandedAccentColor else titleColor
     val enabledChevronColor =
-        if (expanded && highlightExpandedHeader) expandedAccentColor else chevronColor
+        if (accentHeader) expandedAccentColor else chevronColor
     val displayedTitleColor =
         if (headerEnabled) enabledTitleColor else enabledTitleColor.copy(alpha = 0.48f)
     val displayedChevronColor =
         if (headerEnabled) enabledChevronColor else enabledChevronColor.copy(alpha = 0.48f)
     val displayedHeaderColor =
-        if (expanded && highlightExpandedHeader) {
+        if (accentHeader) {
             headerAccentColor.copy(
                 alpha = if (darkTheme) 0.18f else 0.10f
             )
         } else {
             Color.Transparent
         }
+    val accessibilityState =
+        stringResource(
+            if (expanded) {
+                R.string.accessibility_expanded
+            } else {
+                R.string.accessibility_collapsed
+            }
+        )
 
     Surface(
         modifier =
@@ -310,10 +384,32 @@ fun SettingsSection(
                         .fillMaxWidth()
                         .background(displayedHeaderColor)
                         .then(
-                            if (onExpandedChange != null && headerEnabled) {
+                            if (onExpandedChange != null) {
                                 // An unavailable settings group must still be
                                 // inspectable: only its controls are disabled.
-                                Modifier.clickable { changeExpanded(!expanded) }
+                                Modifier
+                                    .clickable(enabled = headerEnabled) {
+                                        changeExpanded(!expanded)
+                                    }
+                                    .uvirAccessibleAction(
+                                        label = title,
+                                        enabled = headerEnabled,
+                                        role =
+                                            if (headerControl == UvirSettingsHeaderControl.CHECKBOX) {
+                                                Role.Checkbox
+                                            } else {
+                                                Role.Button
+                                            },
+                                        checkedState =
+                                            if (headerControl == UvirSettingsHeaderControl.CHECKBOX) {
+                                                expanded
+                                            } else {
+                                                null
+                                            },
+                                        stateText = accessibilityState,
+                                        preserveChildActions = headerTrailingContent != null,
+                                        onClick = { changeExpanded(!expanded) }
+                                    )
                             } else {
                                 Modifier
                             }
@@ -321,21 +417,17 @@ fun SettingsSection(
                         .padding(UvirIslandContentPadding),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                titleIconContent?.let { iconContent ->
-                    iconContent(displayedTitleColor)
-                    Spacer(Modifier.width(8.dp))
-                } ?: titleIcon?.let { icon ->
-                    ConnectivitySectionIcon(
-                        type = icon,
-                        modifier = Modifier.size(20.dp),
-                        tint = displayedTitleColor
+                if (titleIconContent != null || titleIcon != null) {
+                    UvirSettingsTitleIcon(
+                        titleIcon, titleIconContent, displayedTitleColor,
+                        LocalUvirSettingsNeutralIcons.current
                     )
                     Spacer(Modifier.width(8.dp))
                 }
 
                 if (headerControl == UvirSettingsHeaderControl.CHECKBOX && onExpandedChange != null) {
                     CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 0.dp) {
-                        Checkbox(checked = expanded, onCheckedChange = changeExpanded,
+                        Checkbox(checked = expanded, onCheckedChange = null,
                             enabled = headerEnabled,
                             modifier = Modifier.size(24.dp))
                     }
@@ -350,6 +442,8 @@ fun SettingsSection(
                         FontWeight.Normal else FontWeight.Bold,
                     color = displayedTitleColor
                 )
+
+                headerTrailingContent?.invoke()
 
                 if (onExpandedChange != null && headerControl == UvirSettingsHeaderControl.CHEVRON) {
                     ExpansionChevron(
@@ -454,6 +548,7 @@ internal fun UvirSettingsListGroupHeader(
 @Composable
 private fun UvirSettingsPageRow(
     title: String,
+    modifier: Modifier,
     containerColor: Color,
     titleColor: Color,
     chevronColor: Color,
@@ -462,10 +557,18 @@ private fun UvirSettingsPageRow(
     titleFontSize: TextUnit,
     onClick: () -> Unit
 ) {
+    val shape = RoundedCornerShape(16.dp)
     Surface(
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .clip(shape)
+                .clickable(onClick = onClick)
+                .uvirAccessibleAction(
+                    label = title,
+                    onClick = onClick
+                ),
+        shape = shape,
         color = containerColor,
         contentColor = titleColor
     ) {
@@ -476,15 +579,8 @@ private fun UvirSettingsPageRow(
                 .padding(horizontal = UvirIslandContentPadding),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            titleIconContent?.let { iconContent ->
-                iconContent(titleColor)
-                Spacer(Modifier.width(8.dp))
-            } ?: titleIcon?.let { icon ->
-                ConnectivitySectionIcon(
-                    type = icon,
-                    modifier = Modifier.size(20.dp),
-                    tint = titleColor
-                )
+            if (titleIconContent != null || titleIcon != null) {
+                UvirSettingsTitleIcon(titleIcon, titleIconContent, titleColor, neutral = true)
                 Spacer(Modifier.width(8.dp))
             }
             Text(
@@ -518,6 +614,25 @@ fun SettingsIsland(
             modifier = Modifier.padding(UvirIslandContentPadding),
             verticalArrangement =
                 Arrangement.spacedBy(UvirSettingsGroupGap),
+            content = content
+        )
+    }
+}
+
+@Composable
+internal fun SettingsStaticIsland(
+    title: String,
+    titleIcon: ConnectivityIconType,
+    containerColor: Color,
+    titleColor: Color,
+    contentEnabled: Boolean = true,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    SettingsIsland(containerColor = containerColor, contentColor = titleColor) {
+        SettingsIslandHeader(title, titleColor, titleIcon)
+        Column(
+            modifier = Modifier.fillMaxWidth().alpha(if (contentEnabled) 1f else 0.48f),
+            verticalArrangement = Arrangement.spacedBy(UvirSettingsGroupGap),
             content = content
         )
     }

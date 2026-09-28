@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="update_available">Updates available</string>
+    <string name="update_none">No updates available</string>
+    <string name="update_check_failed">Unable to check for updates. See the error log.</string>
+    <string name="update_app">Update app</string>
+    <string name="update_sensor">Update sensor</string>
+    <string name="update_app_first">Update the app first.</string>
+    <string name="update_usb_required">Select this sensor and connect it by USB, with no active session and all records synchronized.</string>
+    <string name="update_download">Downloading and verifying…</string>
+    <string name="update_flash">Updating sensor…</string>
+    <string name="update_verify">Verifying sensor…</string>
+    <string name="update_keep_connected">Do not disconnect USB or turn off the sensor. If needed, hold BOOT and retry.</string>
+    <string name="update_done">Sensor updated</string>
+    <string name="update_failed">Update failed. See the error log. If the sensor no longer starts, recover the firmware by USB from a computer.</string>
+    <string name="update_permission">Allow Uvir to install updates in Android settings.</string>
+    <string name="update_whats_new">Signed updates for the app and sensor, verified downloads and USB firmware loading.</string>
+</resources>

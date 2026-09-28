@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="update_available">Masasisho yanapatikana</string>
+    <string name="update_none">Hakuna masasisho</string>
+    <string name="update_check_failed">Imeshindwa kutafuta masasisho. Angalia kumbukumbu ya hitilafu.</string>
+    <string name="update_app">Sasisha programu</string>
+    <string name="update_sensor">Sasisha kihisi</string>
+    <string name="update_app_first">Sasisha programu kwanza.</string>
+    <string name="update_usb_required">Chagua kihisi hiki na ukiunganishe kwa USB bila kipindi kinachoendelea na rekodi zote zikiwa zimesawazishwa.</string>
+    <string name="update_download">Inapakua na kuthibitisha…</string>
+    <string name="update_flash">Inasasisha kihisi…</string>
+    <string name="update_verify">Inathibitisha kihisi…</string>
+    <string name="update_keep_connected">Usikate USB au kuzima kihisi. Ikihitajika shikilia BOOT na ujaribu tena.</string>
+    <string name="update_done">Kihisi kimesasishwa</string>
+    <string name="update_failed">Sasisho limeshindwa. Angalia kumbukumbu ya hitilafu. Kihisi kisipoanza, rejesha programu dhibiti kwa USB kutoka kompyuta.</string>
+    <string name="update_permission">Ruhusu Uvir kusakinisha masasisho katika mipangilio ya Android.</string>
+    <string name="update_whats_new">Masasisho yaliyosainiwa ya programu na kihisi, upakuaji uliothibitishwa na usakinishaji wa programu dhibiti kwa USB.</string>
+</resources>

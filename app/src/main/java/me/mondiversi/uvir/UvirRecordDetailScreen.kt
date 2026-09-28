@@ -146,7 +146,31 @@ fun RecordDetailScreen(
 
     val context =
         LocalContext.current
+    val resources = LocalResources.current
     val detailSensorName = rememberDetailSensorName(record.sensorId, database)
+    val detailVariantCount =
+        remember(record.sessionId) {
+            record.sessionId
+                ?.let(database::readAcquisitionSessionVariantsPerPosition)
+                ?.takeIf { it > 1 }
+        }
+    val detailVariantCode =
+        remember(detailVariantCount, record.positionIndex, record.variantIndex) {
+            val positionIndex = record.positionIndex
+            val variantIndex = record.variantIndex
+            if (
+                detailVariantCount != null &&
+                positionIndex != null &&
+                variantIndex != null
+            ) {
+                uvirCompactVariantPositionLabel(
+                    variantIndex = variantIndex,
+                    positionIndex = positionIndex
+                )
+            } else {
+                null
+            }
+        }
 
     LaunchedEffect(record.id) {
         detailListState.scrollToItem(0)
@@ -175,6 +199,11 @@ fun RecordDetailScreen(
             by rememberSaveable(record.id) {
                 mutableStateOf(false)
             }
+
+    val noteEditingEnabled = rememberSessionNoteEditingEnabled(database, record.sessionId)
+    LaunchedEffect(noteEditingEnabled) {
+        if (!noteEditingEnabled) showNoteEditor = false
+    }
 
     var showChart
             by rememberSaveable(record.id) {
@@ -245,7 +274,7 @@ fun RecordDetailScreen(
                 R.string.measurement_deleted
             )
 
-        AlertDialog(
+        UvirAlertDialog(
             onDismissRequest = {
                 showDeleteConfirmation =
                     false
@@ -260,7 +289,7 @@ fun RecordDetailScreen(
             },
 
             text = {
-                Text(
+                UvirDeleteConfirmationMessage(
                     stringResource(
                         R.string.delete_measurement_warning
                     )
@@ -268,10 +297,9 @@ fun RecordDetailScreen(
             },
 
             dismissButton = {
-
-                TextButton(
-                    onClick = {
-
+                HoldToConfirmDeleteButton(
+                    label = stringResource(R.string.delete),
+                    onConfirmed = {
                         val deleted =
                             database.deleteRecord(
                                 record.id
@@ -287,23 +315,8 @@ fun RecordDetailScreen(
 
                             onDeleted()
                         }
-                    },
-
-                    colors =
-                        ButtonDefaults
-                            .textButtonColors(
-                                contentColor =
-                                    Color(
-                                        0xFFD32F2F
-                                    )
-                            )
-                ) {
-                    Text(
-                        stringResource(
-                            R.string.delete
-                        )
-                    )
-                }
+                    }
+                )
             },
 
             confirmButton = {
@@ -329,10 +342,12 @@ fun RecordDetailScreen(
     }
 
     if (showShareFormatDialog) {
-        MeasurementDetailShareDialog(
+        MeasurementDataExportScreen(
+            backgroundColor = backgroundColor,
             cardColor = cardColor,
             primaryText = primaryText,
             secondaryText = secondaryText,
+            readableTableFileCount = 1,
             combinedChartFileCount = 1,
             separateChartFileCount = acquisitionChartGroupCount(record),
             onDismiss = {
@@ -344,6 +359,7 @@ fun RecordDetailScreen(
                         context = context,
                         record = currentRecord,
                         selection = selection,
+                        variantCount = detailVariantCount,
                         destination = destination
                     )
                 }.onFailure { error ->
@@ -361,9 +377,10 @@ fun RecordDetailScreen(
                 showShareFormatDialog = false
             }
         )
+        return
     }
 
-    if (showNoteEditor) {
+    if (showNoteEditor && noteEditingEnabled) {
         UvirNoteEditDialog(
             initialNote = currentNote,
             cardColor = cardColor,
@@ -373,6 +390,17 @@ fun RecordDetailScreen(
                 if (database.updateAcquisitionNote(record.id, updatedNote)) {
                     currentNote = updatedNote
                     showNoteEditor = false
+                    showUvirBottomMessage(
+                        context,
+                        resources.getString(R.string.note_updated),
+                        longDuration = false
+                    )
+                } else {
+                    showUvirBottomMessage(
+                        context,
+                        resources.getString(R.string.save_error),
+                        longDuration = false
+                    )
                 }
             },
             onDismiss = {
@@ -402,9 +430,7 @@ fun RecordDetailScreen(
                         Alignment.CenterVertically
                 ) {
 
-                    UvirBackButton(
-                        onClick = onBack
-                    )
+                    UvirBackButton(onClick = onBack)
 
                     UvirMenuTitle(
                         text = stringResource(R.string.share_acquisition_label),
@@ -412,29 +438,28 @@ fun RecordDetailScreen(
                         color = primaryText
                     )
 
-                    IconButton(
+                    UvirTitleActionButton(
+                        iconColor = MaterialTheme.colorScheme.primary,
+                        contentDescription = shareDescription,
                         onClick = {
                             showShareFormatDialog = true
                         },
                         modifier =
                             Modifier
-                                .size(40.dp)
-                                .semantics {
-                                    contentDescription =
-                                        shareDescription
-                                }
+                                .size(UvirTitleActionButtonSize)
                     ) {
                         UvirTitleActionIcon(
                             type =
                                 MenuIconType.EXPORT,
                             modifier =
                                 Modifier.size(24.dp),
-                            tint =
-                                MaterialTheme.colorScheme.primary
+                            tint = LocalContentColor.current
                         )
                     }
 
-                    IconButton(
+                    UvirTitleActionButton(
+                        iconColor = UvirDestructiveActionColor,
+                        contentDescription = deleteDescription,
                         onClick = {
                             showDeleteConfirmation =
                                 true
@@ -442,26 +467,20 @@ fun RecordDetailScreen(
 
                         modifier =
                             Modifier
-                                .size(40.dp)
-                                .semantics {
-                                    contentDescription =
-                                        deleteDescription
-                                }
+                                .size(UvirTitleActionButtonSize)
                     ) {
                         UvirTitleActionIcon(
                             type =
                                 MenuIconType.DELETE,
                             modifier =
                                 Modifier.size(24.dp),
-                            tint =
-                                UvirDestructiveActionColor
+                            tint = LocalContentColor.current
                         )
                     }
                     }
                 }
             }
         }
-
     ) { paddingValues ->
 
         LazyColumn(
@@ -484,8 +503,8 @@ fun RecordDetailScreen(
 
             contentPadding =
                 PaddingValues(
-                    start = 20.dp,
-                    end = 20.dp,
+                    start = UvirScreenHorizontalPadding,
+                    end = UvirScreenHorizontalPadding,
                     top = 4.dp,
                     bottom = 40.dp
                 ),
@@ -504,7 +523,7 @@ fun RecordDetailScreen(
                     idLabel =
                         "ID / ${stringResource(R.string.session_label)}",
                     dateLabel =
-                        stringResource(R.string.share_date_label),
+                        stringResource(R.string.session_date_duration_events_label),
                     dateText = formatDetailDateTime(
                         record.timestamp,
                         LocalUvirDateFormat.current,
@@ -531,6 +550,15 @@ fun RecordDetailScreen(
                     cardColor = cardColor,
                     primaryText = primaryText,
                     secondaryText = secondaryText,
+                    detailIcon =
+                        detailVariantCode?.let {
+                            UvirDetailMetadataIconKind.VARIANT
+                        },
+                    detailText =
+                        detailVariantCode?.let { code ->
+                            stringResource(R.string.record_variant_detail, code)
+                        },
+                    noteEditingEnabled = noteEditingEnabled,
                     onEditNote = {
                         showNoteEditor = true
                     }

@@ -1,6 +1,7 @@
 # Gradle files
 .gradle/
 build/
+dist/
 .gradle-task-*/
 .gradle-user-home/
 .arduino-build*/
@@ -40,6 +41,10 @@ keystore.properties
 !keystore.properties.example
 .android-user/
 .android-user-codex/
+.android-sdk-home/
+.android-local/
+.android-user-home/
+.kotlin/
 
 # Google Services (e.g. APIs or Firebase)
 google-services.json

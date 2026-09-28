@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="diagnostics_test_group">آزمون تشخیصی</string>
+    <string name="diagnostics_simulation_group">شبیه‌سازی</string>
+    <string name="diagnostics_simulation_description">اندازه‌گیری‌ها، هشدارها و مقادیر زنده را برای حسگر شبیه‌سازی می‌کند.</string>
+</resources>

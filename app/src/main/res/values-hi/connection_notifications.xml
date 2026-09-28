@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="connection_notification_connected">कनेक्टेड</string>
+    <string name="connection_notification_disconnected">डिस्कनेक्टेड</string>
+    <string name="connection_notification_simulation">अनुकरण</string>
+    <string name="connection_notification_selected">चयनित</string>
+    <string name="connection_notification_activity">गतिविधि जारी</string>
+    <string name="connection_notification_last_activity">गतिविधि जारी (अंतिम ज्ञात स्थिति)</string>
+    <plurals name="connection_notification_connected_count">
+        <item quantity="one">%1$d सेंसर कनेक्टेड</item>
+        <item quantity="other">%1$d सेंसर कनेक्टेड</item>
+    </plurals>
+    <plurals name="connection_notification_connecting_count">
+        <item quantity="one">%1$d सेंसर कनेक्ट हो रहा है</item>
+        <item quantity="other">%1$d सेंसर कनेक्ट हो रहे हैं</item>
+    </plurals>
+    <plurals name="connection_notification_activity_count">
+        <item quantity="one">%1$d गतिविधि जारी</item>
+        <item quantity="other">%1$d गतिविधियाँ जारी</item>
+    </plurals>
+    <plurals name="connection_notification_simulation_count">
+        <item quantity="one">%1$d अनुकरण</item>
+        <item quantity="other">%1$d अनुकरण</item>
+    </plurals>
+</resources>

@@ -25,13 +25,13 @@ if errorlevel 1 (
 )
 
 if not exist "%PROJECT_DIR%dist" mkdir "%PROJECT_DIR%dist"
-copy /Y "%PROJECT_DIR%app\build\outputs\apk\release\app-release.apk" "%PROJECT_DIR%dist\Uvir-1.1.0-release.apk" >nul
-powershell -NoProfile -Command "$h=(Get-FileHash -LiteralPath '%PROJECT_DIR%dist\Uvir-1.1.0-release.apk' -Algorithm SHA256).Hash; Set-Content -LiteralPath '%PROJECT_DIR%dist\Uvir-1.1.0-release.apk.sha256' -Value ($h + '  Uvir-1.1.0-release.apk') -Encoding ascii"
+copy /Y "%PROJECT_DIR%app\build\outputs\apk\release\app-release.apk" "%PROJECT_DIR%dist\Uvir-1.3.0-release.apk" >nul
+powershell -NoProfile -Command "$h=(Get-FileHash -LiteralPath '%PROJECT_DIR%dist\Uvir-1.3.0-release.apk' -Algorithm SHA256).Hash; Set-Content -LiteralPath '%PROJECT_DIR%dist\Uvir-1.3.0-release.apk.sha256' -Value ($h + '  Uvir-1.3.0-release.apk') -Encoding ascii"
 popd
 
 echo.
 echo APK release creato in:
-echo %PROJECT_DIR%dist\Uvir-1.1.0-release.apk
+echo %PROJECT_DIR%dist\Uvir-1.3.0-release.apk
 echo Impronta SHA-256 in:
-echo %PROJECT_DIR%dist\Uvir-1.1.0-release.apk.sha256
+echo %PROJECT_DIR%dist\Uvir-1.3.0-release.apk.sha256
 pause

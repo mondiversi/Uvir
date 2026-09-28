@@ -1,23 +1,14 @@
 package me.mondiversi.uvir
 
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.unit.dp
 
 @Composable
 internal fun UvirSensorInternetSettings(
@@ -44,8 +35,6 @@ internal fun UvirSensorInternetSettings(
 ) {
     val controlsEnabled = sensorSettingsEnabled
     val commit = LocalSettingsCommit.current
-    val mqttPasswordVisible = rememberSaveable { mutableStateOf(false) }
-    val revealMqttPassword = controlsEnabled && mqttPasswordVisible.value
     SettingsSection(
         title = stringResource(R.string.sensor_connection_internet),
         titleIcon = ConnectivityIconType.INTERNET,
@@ -91,15 +80,14 @@ internal fun UvirSensorInternetSettings(
                 singleLine = true,
                 colors = UvirOutlinedTextFieldColors()
             )
-            OutlinedTextField(
+            UvirPasswordTextField(
                 value = wifiPassword,
                 onValueChange = onWifiPasswordChange,
-                modifier = Modifier.fillMaxWidth().settingsCommitOnBlur(),
+                label = stringResource(R.string.sensor_wifi_password_label),
                 enabled = controlsEnabled,
-                label = { Text(stringResource(R.string.sensor_wifi_password_label)) },
-                singleLine = true,
-                visualTransformation = PasswordVisualTransformation(),
-                colors = UvirOutlinedTextFieldColors()
+                primaryText = primaryText,
+                secondaryText = secondaryText,
+                modifier = Modifier.settingsCommitOnBlur()
             )
         }
 
@@ -136,47 +124,14 @@ internal fun UvirSensorInternetSettings(
             singleLine = true,
             colors = UvirOutlinedTextFieldColors()
         )
-        OutlinedTextField(
+        UvirPasswordTextField(
             value = mqttPassword,
             onValueChange = onMqttPasswordChange,
-            modifier = Modifier.fillMaxWidth().settingsCommitOnBlur(),
+            label = stringResource(R.string.sensor_internet_mqtt_password_label),
             enabled = controlsEnabled,
-            label = { Text(stringResource(R.string.sensor_internet_mqtt_password_label)) },
-            singleLine = true,
-            visualTransformation =
-                if (revealMqttPassword) {
-                    VisualTransformation.None
-                } else {
-                    PasswordVisualTransformation()
-                },
-            trailingIcon = {
-                val visibilityDescription =
-                    stringResource(
-                        if (revealMqttPassword) {
-                            R.string.hide_password
-                        } else {
-                            R.string.show_password
-                        }
-                    )
-                IconButton(
-                    onClick = {
-                        mqttPasswordVisible.value = !mqttPasswordVisible.value
-                    },
-                    enabled = controlsEnabled
-                ) {
-                    UvirPasswordVisibilityIcon(
-                        visible = revealMqttPassword,
-                        modifier =
-                            Modifier
-                                .size(22.dp)
-                                .semantics {
-                                    contentDescription = visibilityDescription
-                                },
-                        tint = if (controlsEnabled) primaryText else secondaryText
-                    )
-                }
-            },
-            colors = UvirOutlinedTextFieldColors()
+            primaryText = primaryText,
+            secondaryText = secondaryText,
+            modifier = Modifier.settingsCommitOnBlur()
         )
     }
 }

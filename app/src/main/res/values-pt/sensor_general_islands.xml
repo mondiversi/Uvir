@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sensor_general_actions_title">Ações</string>
+    <string name="sensor_general_actions_description">Gere o sensor e a sua associação à aplicação.</string>
+    <string name="sensor_general_profile_title">Perfil</string>
+    <string name="sensor_general_profile_description">Escolhe o nome do sensor.</string>
+    <string name="sensor_general_operation_title">Funcionamento</string>
+    <string name="sensor_general_operation_description">Configura o comportamento do sensor.</string>
+</resources>

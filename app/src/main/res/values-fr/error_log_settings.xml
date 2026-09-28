@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="data_management_error_log_group">Journal des erreurs</string>
+    <string name="data_management_error_log_description">Exporte les erreurs enregistrées avec des informations techniques sur l’application, le téléphone et les capteurs.</string>
+</resources>

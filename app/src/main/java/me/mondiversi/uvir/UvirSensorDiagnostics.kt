@@ -10,7 +10,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 
 internal const val UVIR_DIAGNOSTIC_REQUESTS = 6
-internal const val UVIR_DIAGNOSTIC_MINIMUM_FIRMWARE = "0.5.69"
+internal const val UVIR_DIAGNOSTIC_MINIMUM_FIRMWARE = "0.5.92"
 
 internal enum class UvirDiagnosticOutcome {
     SUCCESS, TIMEOUT, WRITE_FAILED, CONNECTION_CHANGED
@@ -33,7 +33,35 @@ internal data class UvirSensorDiagnosticReport(
     val responseTimes: List<Double> get() = probes.mapNotNull { it.responseMs }
     val responses: Int get() = probes.count { it.outcome == UvirDiagnosticOutcome.SUCCESS }
     val latestInfo: UvirSensorRuntimeInfo? get() = probes.lastOrNull { it.info != null }?.info
-    val successful: Boolean get() = probes.size == UVIR_DIAGNOSTIC_REQUESTS && responses == probes.size
+    val successful: Boolean
+        get() =
+            probes.size == UVIR_DIAGNOSTIC_REQUESTS &&
+                responses == probes.size &&
+                probes.all { it.info?.diagnosticHardwareHealthy() == true }
+}
+
+internal fun UvirSensorRuntimeInfo.diagnosticHardwareHealthy(): Boolean {
+    val uvHealthy =
+        uvAvailable != true ||
+            (uvSensorBusOk == true &&
+                uvSensorDriverOk == true &&
+                uvSensorReadOk == true)
+    return visibleSensorBusOk == true &&
+        visibleSensorDriverOk == true &&
+        visibleSensorReadOk == true &&
+        uvHealthy &&
+        rtcBusOk == true &&
+        rtcDriverOk == true &&
+        rtcReadOk == true &&
+        sdAvailable == true &&
+        sdReadWriteOk == true &&
+        (framAvailable == null ||
+            (framAvailable == true && framBusOk == true &&
+                framReadWriteOk == true && framQueueAvailable == true)) &&
+        statusLedControlAvailable == true &&
+        statusBuzzerControlAvailable == true &&
+        externalInputReadOk == true &&
+        appConnected == true
 }
 
 /** One correlated, read-only request at a time. Ordinary HELLO/PING replies cannot

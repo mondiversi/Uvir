@@ -4,12 +4,12 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -42,14 +42,16 @@ internal fun UvirSpectrumGroupIcon(
     modifier: Modifier = Modifier,
     iconSize: Dp = UvirMeasurementSelectorIconSize
 ) {
-    Canvas(modifier.size(iconSize)) {
+    Canvas(
+        modifier
+            .size(iconSize)
+            .graphicsLayer(alpha = tint.alpha)
+    ) {
+        val tint = tint.copy(alpha = 1f)
         val width = UvirMeasurementSelectorIconStrokeWidth.toPx() *
             (iconSize / UvirMeasurementSelectorIconSize)
         val stroke = Stroke(width = width, cap = StrokeCap.Round)
         fun point(x: Float, y: Float) = Offset(size.width * x, size.height * y)
-        fun line(x1: Float, y1: Float, x2: Float, y2: Float) {
-            drawLine(tint, point(x1, y1), point(x2, y2), width, StrokeCap.Round)
-        }
         when (group) {
             SensorGroup.UV -> {
                 drawCircle(tint, size.minDimension * 0.21f, center, style = stroke)
@@ -75,17 +77,70 @@ internal fun UvirSpectrumGroupIcon(
                 drawCircle(tint, size.minDimension * 0.14f, center, style = stroke)
             }
             SensorGroup.NIR -> {
-                drawRoundRect(
-                    tint,
-                    topLeft = point(0.38f, 0.08f),
-                    size = Size(size.width * 0.24f, size.height * 0.62f),
-                    cornerRadius = CornerRadius(size.width * 0.12f),
-                    style = stroke
+                // One continuous contour avoids the darker intersections produced by composing
+                // a separate tube and bulb while preserving the familiar thermometer silhouette.
+                val thermometer = Path().apply {
+                    moveTo(size.width * 0.50f, size.height * 0.08f)
+                    cubicTo(
+                        size.width * 0.39f,
+                        size.height * 0.08f,
+                        size.width * 0.34f,
+                        size.height * 0.15f,
+                        size.width * 0.34f,
+                        size.height * 0.25f
+                    )
+                    lineTo(size.width * 0.34f, size.height * 0.60f)
+                    cubicTo(
+                        size.width * 0.23f,
+                        size.height * 0.67f,
+                        size.width * 0.18f,
+                        size.height * 0.77f,
+                        size.width * 0.18f,
+                        size.height * 0.83f
+                    )
+                    cubicTo(
+                        size.width * 0.18f,
+                        size.height * 0.94f,
+                        size.width * 0.32f,
+                        size.height * 0.98f,
+                        size.width * 0.50f,
+                        size.height * 0.98f
+                    )
+                    cubicTo(
+                        size.width * 0.68f,
+                        size.height * 0.98f,
+                        size.width * 0.82f,
+                        size.height * 0.94f,
+                        size.width * 0.82f,
+                        size.height * 0.83f
+                    )
+                    cubicTo(
+                        size.width * 0.82f,
+                        size.height * 0.77f,
+                        size.width * 0.77f,
+                        size.height * 0.67f,
+                        size.width * 0.66f,
+                        size.height * 0.60f
+                    )
+                    lineTo(size.width * 0.66f, size.height * 0.25f)
+                    cubicTo(
+                        size.width * 0.66f,
+                        size.height * 0.15f,
+                        size.width * 0.61f,
+                        size.height * 0.08f,
+                        size.width * 0.50f,
+                        size.height * 0.08f
+                    )
+                    close()
+                }
+                drawPath(thermometer, tint, style = stroke)
+                drawLine(
+                    color = tint,
+                    start = point(0.50f, 0.29f),
+                    end = point(0.50f, 0.81f),
+                    strokeWidth = width,
+                    cap = StrokeCap.Round
                 )
-                drawCircle(tint, size.minDimension * 0.19f, point(0.50f, 0.74f), style = stroke)
-                line(0.50f, 0.30f, 0.50f, 0.74f)
-                line(0.76f, 0.24f, 0.87f, 0.24f)
-                line(0.76f, 0.42f, 0.87f, 0.42f)
             }
             SensorGroup.BIOLOGICAL -> {
                 drawOval(

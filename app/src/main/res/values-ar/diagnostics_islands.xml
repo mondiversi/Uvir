@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="diagnostics_test_group">اختبار تشخيصي</string>
+    <string name="diagnostics_simulation_group">المحاكاة</string>
+    <string name="diagnostics_simulation_description">يحاكي القياسات والتنبيهات والقيم المباشرة للمستشعر.</string>
+</resources>

@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -45,7 +46,13 @@ internal fun UvirTitleCollapseAllIcon(
     modifier: Modifier = Modifier,
     tint: Color = LocalContentColor.current
 ) {
-    Canvas(modifier = modifier.size(UvirTitleActionIconSize)) {
+    Canvas(
+        modifier =
+            modifier
+                .size(UvirTitleActionIconSize)
+                .graphicsLayer(alpha = tint.alpha)
+    ) {
+        val tint = tint.copy(alpha = 1f)
         val strokeWidth = UvirTitleActionIconStrokeWidth.toPx()
         fun arrow(tailY: Float, tipY: Float, wingY: Float) {
             drawLine(
@@ -76,7 +83,13 @@ internal fun UvirTitleSaveIcon(
     modifier: Modifier = Modifier,
     tint: Color = LocalContentColor.current
 ) {
-    Canvas(modifier = modifier.size(UvirTitleActionIconSize)) {
+    Canvas(
+        modifier =
+            modifier
+                .size(UvirTitleActionIconSize)
+                .graphicsLayer(alpha = tint.alpha)
+    ) {
+        val tint = tint.copy(alpha = 1f)
         val check = Path().apply {
             moveTo(size.width * 5f / 24f, size.height * 12f / 24f)
             lineTo(size.width * 10f / 24f, size.height * 17f / 24f)
@@ -94,6 +107,64 @@ internal fun UvirTitleSaveIcon(
     }
 }
 
+@Composable
+internal fun UvirTitleSaveToFolderIcon(
+    modifier: Modifier = Modifier,
+    tint: Color = LocalContentColor.current
+) {
+    Canvas(
+        modifier =
+            modifier
+                .size(UvirTitleActionIconSize)
+                .graphicsLayer(alpha = tint.alpha)
+    ) {
+        val tint = tint.copy(alpha = 1f)
+        val strokeWidth = UvirTitleActionIconStrokeWidth.toPx()
+        val folder = Path().apply {
+            moveTo(size.width * 3f / 24f, size.height * 6f / 24f)
+            lineTo(size.width * 9f / 24f, size.height * 6f / 24f)
+            lineTo(size.width * 11f / 24f, size.height * 8.5f / 24f)
+            lineTo(size.width * 21f / 24f, size.height * 8.5f / 24f)
+            lineTo(size.width * 21f / 24f, size.height * 19f / 24f)
+            lineTo(size.width * 3f / 24f, size.height * 19f / 24f)
+            close()
+        }
+        drawPath(
+            path = folder,
+            color = tint,
+            style = Stroke(
+                width = strokeWidth,
+                cap = StrokeCap.Round,
+                join = StrokeJoin.Round
+            )
+        )
+
+        val centerX = size.width * 12f / 24f
+        val arrowTipY = size.height * 16f / 24f
+        drawLine(
+            color = tint,
+            start = Offset(centerX, size.height * 10.5f / 24f),
+            end = Offset(centerX, arrowTipY),
+            strokeWidth = strokeWidth,
+            cap = StrokeCap.Round
+        )
+        drawLine(
+            color = tint,
+            start = Offset(size.width * 9.5f / 24f, size.height * 13.5f / 24f),
+            end = Offset(centerX, arrowTipY),
+            strokeWidth = strokeWidth,
+            cap = StrokeCap.Round
+        )
+        drawLine(
+            color = tint,
+            start = Offset(size.width * 14.5f / 24f, size.height * 13.5f / 24f),
+            end = Offset(centerX, arrowTipY),
+            strokeWidth = strokeWidth,
+            cap = StrokeCap.Round
+        )
+    }
+}
+
 internal enum class UvirButtonGlyph {
     PLAY,
     STOP,
@@ -104,10 +175,19 @@ internal enum class UvirButtonGlyph {
 internal fun UvirButtonGlyphIcon(
     glyph: UvirButtonGlyph,
     modifier: Modifier = Modifier,
-    tint: Color = LocalContentColor.current
+    tint: Color = LocalContentColor.current,
+    strokeScale: Float = 1f
 ) {
-    Canvas(modifier = modifier.size(20.dp)) {
-        val stroke = maxOf(1.7.dp.toPx(), size.minDimension * 0.085f)
+    val effectiveStrokeScale = maxOf(strokeScale, LocalUvirActionGlyphStrokeScale.current)
+    Canvas(
+        modifier =
+            modifier
+                .size(20.dp)
+                .graphicsLayer(alpha = tint.alpha)
+    ) {
+        val tint = tint.copy(alpha = 1f)
+        val baseStroke = maxOf(1.6.dp.toPx(), size.minDimension * 0.08f)
+        val stroke = baseStroke * effectiveStrokeScale
         when (glyph) {
             UvirButtonGlyph.PLAY -> {
                 val path = Path().apply {
@@ -117,14 +197,21 @@ internal fun UvirButtonGlyphIcon(
                     close()
                 }
                 drawPath(path, tint)
+                if (effectiveStrokeScale > 1f) {
+                    drawPath(path, tint, style = Stroke(stroke - baseStroke, join = StrokeJoin.Round))
+                }
             }
-            UvirButtonGlyph.STOP ->
+            UvirButtonGlyph.STOP -> {
+                // This glyph is solid: add the equivalent outline weight to
+                // its silhouette, keeping the default drawing unchanged.
+                val emphasis = (stroke - baseStroke).coerceAtLeast(0f) / 2f
                 drawRoundRect(
                     color = tint,
-                    topLeft = Offset(size.width * 0.27f, size.height * 0.27f),
-                    size = Size(size.width * 0.46f, size.height * 0.46f),
-                    cornerRadius = CornerRadius(size.minDimension * 0.07f)
+                    topLeft = Offset(size.width * 0.27f - emphasis, size.height * 0.27f - emphasis),
+                    size = Size(size.width * 0.46f + emphasis * 2f, size.height * 0.46f + emphasis * 2f),
+                    cornerRadius = CornerRadius(size.minDimension * 0.07f + emphasis)
                 )
+            }
             UvirButtonGlyph.REFRESH -> {
                 drawArc(
                     color = tint,
@@ -156,11 +243,14 @@ fun UvirMenuIcon(
     uniformStrokeWidth: Dp? = null,
     settingsKnobScale: Float = 1f
 ) {
-
+    val effectiveStrokeScale = maxOf(strokeScale, LocalUvirActionGlyphStrokeScale.current)
     Canvas(
         modifier =
-            modifier.size(22.dp)
+            modifier
+                .size(22.dp)
+                .graphicsLayer(alpha = tint.alpha)
     ) {
+        val tint = tint.copy(alpha = 1f)
 
         val iconWidth = size.width
         val iconHeight = size.height
@@ -168,7 +258,7 @@ fun UvirMenuIcon(
             uniformStrokeWidth?.toPx() ?: (maxOf(
                 1.6.dp.toPx(),
                 size.minDimension * 0.08f
-            ) * strokeScale)
+            ) * effectiveStrokeScale)
         fun detailStroke(multiplier: Float): Float =
             if (uniformStrokeWidth != null) strokeWidth else strokeWidth * multiplier
 
@@ -858,8 +948,11 @@ fun CaptureMeasurementIcon(
 
     Canvas(
         modifier =
-            modifier.size(24.dp)
+            modifier
+                .size(24.dp)
+                .graphicsLayer(alpha = tint.alpha)
     ) {
+        val tint = tint.copy(alpha = 1f)
 
         val strokeWidth =
             if (useCompactStroke) {
@@ -960,15 +1053,21 @@ fun GitHubIcon(
     modifier: Modifier = Modifier,
     tint: Color = LocalContentColor.current
 ) {
+    val strokeScale = LocalUvirActionGlyphStrokeScale.current
     Canvas(
-        modifier = modifier.size(20.dp)
+        modifier =
+            modifier
+                .size(20.dp)
+                .graphicsLayer(alpha = tint.alpha)
     ) {
+        val tint = tint.copy(alpha = 1f)
         val strokeWidth =
             maxOf(
                 1.6.dp.toPx(),
                 size.minDimension * 0.08f
             )
 
+        val actionStrokeWidth = strokeWidth * strokeScale
         val head = Path().apply {
             moveTo(
                 size.width * 0.20f,
@@ -1049,6 +1148,9 @@ fun GitHubIcon(
             path = head,
             color = tint
         )
+        if (strokeScale > 1f) {
+            drawPath(head, tint, style = Stroke(actionStrokeWidth - strokeWidth, join = StrokeJoin.Round))
+        }
 
         val tail = Path().apply {
             moveTo(
@@ -1077,7 +1179,7 @@ fun GitHubIcon(
             path = tail,
             color = tint,
             style = Stroke(
-                width = strokeWidth,
+                width = actionStrokeWidth,
                 cap = StrokeCap.Round
             )
         )
@@ -1091,7 +1193,8 @@ enum class AutomaticSettingIconType {
     MAXIMUM,
     CONDITIONAL,
     CONFIGURE,
-    EXTERNAL_COMMAND
+    EXTERNAL_COMMAND,
+    NO_SAVE
 }
 
 @Composable
@@ -1101,8 +1204,12 @@ fun AutomaticSettingIcon(
     tint: Color = LocalContentColor.current
 ) {
     Canvas(
-        modifier = modifier.size(20.dp)
+        modifier =
+            modifier
+                .size(20.dp)
+                .graphicsLayer(alpha = tint.alpha)
     ) {
+        val tint = tint.copy(alpha = 1f)
         val strokeWidth =
             maxOf(
                 1.6.dp.toPx(),
@@ -1299,6 +1406,23 @@ fun AutomaticSettingIcon(
                 )
             }
 
+            AutomaticSettingIconType.NO_SAVE -> {
+                drawRoundRect(
+                    color = tint,
+                    topLeft = Offset(size.width * 0.20f, size.height * 0.20f),
+                    size = Size(size.width * 0.60f, size.height * 0.60f),
+                    cornerRadius = CornerRadius(size.width * 0.10f),
+                    style = Stroke(width = strokeWidth)
+                )
+                drawLine(
+                    color = tint,
+                    start = Offset(size.width * 0.17f, size.height * 0.83f),
+                    end = Offset(size.width * 0.83f, size.height * 0.17f),
+                    strokeWidth = strokeWidth,
+                    cap = StrokeCap.Round
+                )
+            }
+
             AutomaticSettingIconType.MAXIMUM -> {
                 listOf(0.38f, 0.62f).forEach { x ->
                     drawLine(
@@ -1341,8 +1465,12 @@ fun WhatsNewIcon(
     tint: Color = LocalContentColor.current
 ) {
     Canvas(
-        modifier = modifier.size(20.dp)
+        modifier =
+            modifier
+                .size(20.dp)
+                .graphicsLayer(alpha = tint.alpha)
     ) {
+        val tint = tint.copy(alpha = 1f)
         val strokeWidth =
             maxOf(
                 1.6.dp.toPx(),
@@ -1392,7 +1520,13 @@ internal fun UvirPasswordVisibilityIcon(
     modifier: Modifier = Modifier,
     tint: Color = LocalContentColor.current
 ) {
-    Canvas(modifier = modifier.size(22.dp)) {
+    Canvas(
+        modifier =
+            modifier
+                .size(22.dp)
+                .graphicsLayer(alpha = tint.alpha)
+    ) {
+        val tint = tint.copy(alpha = 1f)
         val strokeWidth = maxOf(1.6.dp.toPx(), size.minDimension * 0.08f)
         val eye = Path().apply {
             moveTo(size.width * 0.08f, size.height * 0.50f)
@@ -1442,11 +1576,14 @@ internal fun UvirDisclosureChevron(
 ) {
     Canvas(
         modifier =
-            modifier.size(
-                width = 10.dp,
-                height = 16.dp
-            )
+            modifier
+                .size(
+                    width = 10.dp,
+                    height = 16.dp
+                )
+                .graphicsLayer(alpha = tint.alpha)
     ) {
+        val tint = tint.copy(alpha = 1f)
         val centerY = size.height / 2f
         val startX = size.width * 0.22f
         val tipX = size.width * 0.76f

@@ -12,14 +12,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -43,13 +40,12 @@ import kotlinx.coroutines.launch
 private enum class StatusLedPattern {
     FIXED,
     BLINKING,
-    TRIPLE_BLINKING,
+    THREE_RAPID_BLINKING,
     FIVE_RAPID_BLINKING
 }
 
 private const val STATUS_LED_BLINK_HALF_PERIOD_MS = 500
 private const val STATUS_LED_BLINK_PERIOD_MS = STATUS_LED_BLINK_HALF_PERIOD_MS * 2
-private const val STATUS_LED_TRIPLE_BLINK_PERIOD_MS = 4_000
 private const val STATUS_LED_FIVE_RAPID_BLINK_PERIOD_MS = 1_750
 private const val STATUS_LED_TEST_RED_FIXED_DURATION_MS = 1_500L
 private const val STATUS_LED_TEST_RED_BLINK_DURATION_MS = 3_000L
@@ -57,15 +53,17 @@ private const val STATUS_LED_TEST_YELLOW_DURATION_MS = 3_000L
 private const val STATUS_LED_TEST_GREEN_FIXED_DURATION_MS = 1_500L
 private const val STATUS_LED_TEST_GREEN_BLINK_DURATION_MS = 3_000L
 private const val STATUS_LED_TEST_BLUE_FIXED_DURATION_MS = 1_500L
-private const val STATUS_LED_TEST_BLUE_BLINK_DURATION_MS = 3_000L
 private const val STATUS_LED_TEST_TIME_UNAVAILABLE_DURATION_MS = 750L
-private val STATUS_LED_TEST_MINIMUM_FIRMWARE = listOf(0, 5, 81)
+private const val STATUS_LED_TEST_RED_RAPID_DURATION_MS = 450L
+private const val STATUS_LED_TEST_GREEN_RAPID_DURATION_MS = 450L
+private val STATUS_LED_TEST_MINIMUM_FIRMWARE = listOf(0, 5, 98)
 
 private data class StatusLedSignal(
     val color: Color,
     val pattern: StatusLedPattern,
     val title: Int,
-    val description: Int
+    val description: Int,
+    val testDurationMs: Long
 )
 
 @Composable
@@ -79,11 +77,8 @@ internal fun UvirStatusLedInfoDialog(
 ) {
     val green = Color(0xFF00C853)
     val yellow = Color(0xFFFFC107)
+    val orange = Color(0xFFFF8F00)
     val blue = Color(0xFF2979FF)
-    val dialogScrollbar =
-        rememberUvirDialogScrollbar(
-            color = secondaryText.copy(alpha = 0.58f)
-        )
     val testScope = rememberCoroutineScope()
     var testInProgress by remember { mutableStateOf(false) }
     var activeTestSignalIndex by remember { mutableStateOf<Int?>(null) }
@@ -93,71 +88,85 @@ internal fun UvirStatusLedInfoDialog(
                 Color(0xFFE53935),
                 StatusLedPattern.FIXED,
                 R.string.sensor_led_signal_disconnected,
-                R.string.sensor_led_signal_disconnected_description
+                R.string.sensor_led_signal_disconnected_description,
+                STATUS_LED_TEST_RED_FIXED_DURATION_MS
             ),
             StatusLedSignal(
                 Color(0xFFE53935),
                 StatusLedPattern.BLINKING,
                 R.string.sensor_led_signal_pending_disconnected,
-                R.string.sensor_led_signal_pending_disconnected_description
+                R.string.sensor_led_signal_pending_disconnected_description,
+                STATUS_LED_TEST_RED_BLINK_DURATION_MS
             ),
             StatusLedSignal(
                 yellow,
                 StatusLedPattern.BLINKING,
                 R.string.sensor_led_signal_connecting,
-                R.string.sensor_led_signal_connecting_description
+                R.string.sensor_led_signal_connecting_description,
+                STATUS_LED_TEST_YELLOW_DURATION_MS
             ),
             StatusLedSignal(
                 green,
                 StatusLedPattern.FIXED,
                 R.string.sensor_led_signal_connected,
-                R.string.sensor_led_signal_connected_description
+                R.string.sensor_led_signal_connected_description,
+                STATUS_LED_TEST_GREEN_FIXED_DURATION_MS
             ),
             StatusLedSignal(
                 green,
                 StatusLedPattern.BLINKING,
                 R.string.sensor_led_signal_pending_connected,
-                R.string.sensor_led_signal_pending_connected_description
+                R.string.sensor_led_signal_pending_connected_description,
+                STATUS_LED_TEST_GREEN_BLINK_DURATION_MS
             ),
             StatusLedSignal(
                 blue,
                 StatusLedPattern.FIXED,
                 R.string.sensor_led_signal_operation_active,
-                R.string.sensor_led_signal_operation_active_description
+                R.string.sensor_led_signal_operation_active_description,
+                STATUS_LED_TEST_BLUE_FIXED_DURATION_MS
             ),
             StatusLedSignal(
-                blue,
-                StatusLedPattern.TRIPLE_BLINKING,
-                R.string.sensor_led_signal_recorded,
-                R.string.sensor_led_signal_recorded_description
-            ),
-            StatusLedSignal(
-                blue,
+                orange,
                 StatusLedPattern.FIVE_RAPID_BLINKING,
                 R.string.sensor_led_signal_time_unavailable,
-                R.string.sensor_led_signal_time_unavailable_description
+                R.string.sensor_led_signal_time_unavailable_description,
+                STATUS_LED_TEST_TIME_UNAVAILABLE_DURATION_MS
+            ),
+            StatusLedSignal(
+                Color(0xFFE53935),
+                StatusLedPattern.THREE_RAPID_BLINKING,
+                R.string.sensor_led_signal_saved_disconnected,
+                R.string.sensor_led_signal_saved_description,
+                STATUS_LED_TEST_RED_RAPID_DURATION_MS
+            ),
+            StatusLedSignal(
+                green,
+                StatusLedPattern.THREE_RAPID_BLINKING,
+                R.string.sensor_led_signal_saved_connected,
+                R.string.sensor_led_signal_saved_description,
+                STATUS_LED_TEST_GREEN_RAPID_DURATION_MS
             )
         )
 
-    AlertDialog(
+    UvirAlertDialog(
         onDismissRequest = onDismissRequest,
-        modifier = dialogScrollbar.dialogModifier,
         title = {
-            Text(stringResource(R.string.sensor_led_info_title))
+            UvirClosableDialogTitle(
+                title = stringResource(R.string.sensor_led_info_title),
+                onDismiss = onDismissRequest
+            )
         },
         text = {
             Box(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .heightIn(max = 490.dp)
-                        .then(dialogScrollbar.viewportModifier)
             ) {
                 Column(
                     modifier =
                         Modifier
-                            .fillMaxWidth()
-                            .verticalScroll(dialogScrollbar.scrollState),
+                            .fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     signals.forEachIndexed { index, signal ->
@@ -173,11 +182,7 @@ internal fun UvirStatusLedInfoDialog(
                 }
             }
         },
-        confirmButton = {
-            TextButton(onClick = onDismissRequest) {
-                Text(stringResource(R.string.close))
-            }
-        },
+        confirmButton = {},
         dismissButton = {
             TextButton(
                 enabled = testEnabled && !testInProgress,
@@ -186,20 +191,9 @@ internal fun UvirStatusLedInfoDialog(
                     testScope.launch {
                         try {
                             if (onTestLed()) {
-                                val stageDurations =
-                                    listOf(
-                                        STATUS_LED_TEST_RED_FIXED_DURATION_MS,
-                                        STATUS_LED_TEST_RED_BLINK_DURATION_MS,
-                                        STATUS_LED_TEST_YELLOW_DURATION_MS,
-                                        STATUS_LED_TEST_GREEN_FIXED_DURATION_MS,
-                                        STATUS_LED_TEST_GREEN_BLINK_DURATION_MS,
-                                        STATUS_LED_TEST_BLUE_FIXED_DURATION_MS,
-                                        STATUS_LED_TEST_BLUE_BLINK_DURATION_MS,
-                                        STATUS_LED_TEST_TIME_UNAVAILABLE_DURATION_MS
-                                    )
-                                stageDurations.forEachIndexed { index, duration ->
+                                signals.forEachIndexed { index, signal ->
                                     activeTestSignalIndex = index
-                                    delay(duration)
+                                    delay(signal.testDurationMs)
                                 }
                             }
                         } finally {
@@ -337,29 +331,23 @@ private fun AnimatedStatusLed(
                     label = "blinking-led"
                 )
 
-            StatusLedPattern.TRIPLE_BLINKING ->
+            StatusLedPattern.THREE_RAPID_BLINKING ->
                 transition.animateFloat(
                     initialValue = 1f,
                     targetValue = 0.14f,
-                    animationSpec =
-                        infiniteRepeatable(
-                            keyframes {
-                                durationMillis = STATUS_LED_TRIPLE_BLINK_PERIOD_MS
-                                1f at 0
-                                1f at 499
-                                0.14f at 500
-                                0.14f at 999
-                                1f at 1000
-                                1f at 1499
-                                0.14f at 1500
-                                0.14f at 1999
-                                1f at 2000
-                                1f at 2499
-                                0.14f at 2500
-                                0.14f at STATUS_LED_TRIPLE_BLINK_PERIOD_MS - 1
-                            }
-                        ),
-                    label = "triple-blinking-led"
+                    animationSpec = infiniteRepeatable(
+                        keyframes {
+                            durationMillis = 900
+                            1f at 0
+                            0.14f at 75
+                            1f at 150
+                            0.14f at 225
+                            1f at 300
+                            0.14f at 375
+                            0.14f at 899
+                        }
+                    ),
+                    label = "three-rapid-blinking-led"
                 )
 
             StatusLedPattern.FIVE_RAPID_BLINKING ->

@@ -21,8 +21,8 @@ import kotlin.math.roundToInt
 @Composable
 internal fun UvirSamplingAndAlertSettings(
     context: Context,
-    samplingSectionExpanded: Boolean,
-    onSamplingSectionExpandedChange: (Boolean) -> Unit,
+    showSamplingSection: Boolean,
+    showAlertsSection: Boolean,
     sensorSettingsEnabled: Boolean,
     samplesText: String,
     onSamplesTextChange: (String) -> Unit,
@@ -53,36 +53,20 @@ internal fun UvirSamplingAndAlertSettings(
     val valueCorrectedText =
         stringResource(R.string.value_out_of_limits_corrected)
 
+    if (showSamplingSection) {
     SettingsAutoSaveGroup(SettingsSaveGroup.SAMPLING) {
-    SettingsSection(
-        settingsPage = UvirSettingsPage.SAMPLING,
+    SettingsStaticIsland(
         title =
             stringResource(
                 R.string.settings_section_acquisition
             ),
         titleIcon =
             ConnectivityIconType.SAMPLING,
-        expanded =
-            samplingSectionExpanded,
-        enabled = sensorSettingsEnabled,
-        onExpandedChange = { expanded ->
-            onSamplingSectionExpandedChange(expanded)
-            saveSettingsSectionExpanded(
-                context,
-                KEY_SETTINGS_SAMPLING_EXPANDED,
-                expanded
-            )
-        },
         containerColor =
             cardColor,
         titleColor =
             primaryText,
-        chevronColor =
-            secondaryText,
-        dividerColor =
-            secondaryText.copy(
-                alpha = 0.28f
-            )
+        contentEnabled = sensorSettingsEnabled
     ) {
     SettingsPageDescription(
         text = stringResource(
@@ -220,6 +204,8 @@ internal fun UvirSamplingAndAlertSettings(
     }
 
     }
+    }
+    if (!showAlertsSection) return
     val settingsNavigation = LocalUvirSettingsNavigation.current
     if (settingsNavigation != null && settingsNavigation.selectedPage == null) {
         UvirSettingsListGroupHeader(
@@ -261,23 +247,14 @@ internal fun UvirSamplingAndAlertSettings(
                 containerColor = cardColor,
                 contentColor = primaryText
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    CaptureMeasurementIcon(
-                        modifier = Modifier.size(20.dp),
-                        tint = primaryText
-                    )
-                    Text(
-                        text = stringResource(R.string.share_acquisition_label),
-                        modifier = Modifier.padding(start = 10.dp),
-                        color = primaryText,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-
-                SettingsGroupDivider(secondaryText)
+                SettingsIslandHeader(
+                    title = stringResource(R.string.saved_measurements),
+                    titleColor = primaryText,
+                    dividerColor = secondaryText,
+                    titleIconContent = { tint ->
+                        CaptureMeasurementIcon(Modifier.size(20.dp), tint)
+                    }
+                )
 
                 SettingsPageDescription(
                     text = stringResource(R.string.acquisition_feedback_description),
@@ -363,24 +340,12 @@ internal fun UvirSamplingAndAlertSettings(
             containerColor = cardColor,
             contentColor = primaryText
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                ConnectivitySectionIcon(
-                    type = ConnectivityIconType.ALERT,
-                    modifier = Modifier.size(20.dp),
-                    tint = primaryText
-                )
-                Text(
-                    text = stringResource(R.string.threshold_alerts_title),
-                    modifier = Modifier.padding(start = 10.dp),
-                    color = primaryText,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
-            SettingsGroupDivider(secondaryText)
+            SettingsIslandHeader(
+                title = stringResource(R.string.threshold_alerts_title),
+                titleColor = primaryText,
+                titleIcon = ConnectivityIconType.ALERT,
+                dividerColor = secondaryText
+            )
 
             SettingsPageDescription(
                     text = stringResource(R.string.threshold_alerts_sound_description_v2),

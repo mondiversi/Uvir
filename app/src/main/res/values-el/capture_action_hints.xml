@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="capture_hint_start">Έναρξη μέτρησης</string>
+    <string name="capture_hint_stop">Διακοπή μέτρησης</string>
+    <string name="alert_hint_start">Έναρξη καταγραφής</string>
+    <string name="alert_hint_stop">Διακοπή καταγραφής</string>
+</resources>

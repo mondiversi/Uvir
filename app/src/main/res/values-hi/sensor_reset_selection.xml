@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sensor_reset_selection_title">चुने हुए सेंसर रीसेट करें?</string>
+    <string name="sensor_reset_selection_message">रीसेट करने के लिए सेंसर चुनें। उनकी सेटिंग, कनेक्शन क्रेडेंशियल और बिना सिंक किए डेटा मिटा दिए जाएंगे, फिर सेंसर बंद हो जाएंगे। ऐप का डेटा नहीं बदलेगा। केवल जुड़े हुए सेंसर चुने जा सकते हैं जिनमें कोई गतिविधि नहीं चल रही है।</string>
+    <string name="sensor_reset_selection_failed">रीसेट विफल: %1$s। कनेक्शन जांचें और फिर से कोशिश करें।</string>
+</resources>
+

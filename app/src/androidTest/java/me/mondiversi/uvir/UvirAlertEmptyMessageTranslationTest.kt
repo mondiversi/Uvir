@@ -9,26 +9,26 @@ import org.junit.Test
 /** Checks packaged translations without opening the database or connecting to a sensor. */
 class UvirAlertEmptyMessageTranslationTest {
     @Test
-    fun emptyListMessageMentionsValueAlertsInEverySupportedLanguage() {
+    fun emptyListMessageMentionsAlertsInEverySupportedLanguage() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val translations = mapOf(
-            "en" to "No value alerts recorded.",
-            "ar" to "لا توجد تنبيهات قيم مسجلة.",
-            "de" to "Keine Wertalarme aufgezeichnet.",
-            "el" to "Δεν έχουν καταγραφεί ειδοποιήσεις τιμών.",
-            "es" to "No hay alertas de valores registradas.",
-            "fa" to "هیچ هشدار مقداری ثبت نشده است.",
-            "fr" to "Aucune alerte de valeurs enregistrée.",
-            "hi" to "कोई मान अलर्ट रिकॉर्ड नहीं किया गया।",
-            "it" to "Nessuna allerta valori registrata.",
-            "he" to "לא נרשמו התראות ערך.",
-            "ja" to "記録された値アラートはありません。",
-            "ko-KR" to "기록된 값 경고가 없습니다.",
-            "pt" to "Nenhum alerta de valor registrado.",
-            "ru" to "Нет зарегистрированных оповещений о значениях.",
-            "sw" to "Hakuna tahadhari za thamani zilizorekodiwa.",
-            "tr" to "Kaydedilmiş değer uyarısı yok.",
-            "zh-CN" to "没有已记录的数值警报。"
+            "en" to "No alerts recorded.",
+            "ar" to "لا توجد تنبيهات مسجلة.",
+            "de" to "Keine Alarme aufgezeichnet.",
+            "el" to "Δεν έχουν καταγραφεί ειδοποιήσεις.",
+            "es" to "No hay alertas registradas.",
+            "fa" to "هیچ هشداری ثبت نشده است.",
+            "fr" to "Aucune alerte enregistrée.",
+            "hi" to "कोई अलर्ट रिकॉर्ड नहीं किया गया।",
+            "it" to "Nessuna allerta registrata.",
+            "he" to "לא נרשמו התראות.",
+            "ja" to "記録されたアラートはありません。",
+            "ko-KR" to "기록된 알림이 없습니다.",
+            "pt" to "Nenhum alerta registrado.",
+            "ru" to "Нет зарегистрированных оповещений.",
+            "sw" to "Hakuna tahadhari zilizorekodiwa.",
+            "tr" to "Kaydedilmiş uyarı yok.",
+            "zh-CN" to "没有已记录的警报。"
         )
         for ((language, expected) in translations) {
             val configuration = Configuration(context.resources.configuration).apply {

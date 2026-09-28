@@ -34,7 +34,7 @@ enum class UvirIrradianceUnit(
         }
 
     fun unitLabel(equivalent: Boolean = false): String =
-        if (equivalent) "$symbol eq." else symbol
+        if (equivalent) "$symbol equiv." else symbol
 
     fun csvUnitLabel(equivalent: Boolean = false): String =
         if (equivalent) "${csvSymbol}_eq" else csvSymbol

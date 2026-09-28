@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sensor_general_actions_title">Vitendo</string>
+    <string name="sensor_general_actions_description">Dhibiti kihisi na uhusiano wake na programu.</string>
+    <string name="sensor_general_profile_title">Wasifu</string>
+    <string name="sensor_general_profile_description">Chagua jina la kihisi.</string>
+    <string name="sensor_general_operation_title">Utendaji</string>
+    <string name="sensor_general_operation_description">Sanidi tabia ya kihisi.</string>
+</resources>

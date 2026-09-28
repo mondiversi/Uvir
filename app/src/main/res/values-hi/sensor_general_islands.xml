@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sensor_general_actions_title">क्रियाएँ</string>
+    <string name="sensor_general_actions_description">सेंसर और ऐप से उसका संबंध प्रबंधित करें।</string>
+    <string name="sensor_general_profile_title">प्रोफ़ाइल</string>
+    <string name="sensor_general_profile_description">सेंसर का नाम चुनें।</string>
+    <string name="sensor_general_operation_title">संचालन</string>
+    <string name="sensor_general_operation_description">सेंसर का व्यवहार कॉन्फ़िगर करें।</string>
+</resources>

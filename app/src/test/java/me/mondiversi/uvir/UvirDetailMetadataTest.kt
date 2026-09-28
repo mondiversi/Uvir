@@ -8,9 +8,9 @@ class UvirDetailMetadataTest {
         UvirSensorProfile(7L, hardwareUid, name, 1L, 2L)
 
     @Test
-    fun bothMetadataCardsShareThirtyFiveSixtyFiveColumns() {
-        assertEquals(0.35f, UvirDetailLeadingColumnWeight, 0f)
-        assertEquals(0.65f, UvirDetailTrailingColumnWeight, 0f)
+    fun bothMetadataCardsShareFortySixtyColumns() {
+        assertEquals(0.40f, UvirDetailLeadingColumnWeight, 0f)
+        assertEquals(0.60f, UvirDetailTrailingColumnWeight, 0f)
         assertEquals(1f, UvirDetailLeadingColumnWeight + UvirDetailTrailingColumnWeight, 0.0001f)
     }
 
@@ -37,45 +37,41 @@ class UvirDetailMetadataTest {
     }
 
     @Test
-    fun listDescriptionPlacesNoteBeforeSensorWithoutChangingStoredText() {
+    fun listDescriptionShowsTheNoteWithoutChangingStoredText() {
         val storedNote = "Balcony reading"
-        assertEquals(
-            "Balcony reading · Garden sensor",
-            sensorAndNoteDisplayText("Garden sensor", storedNote, "No note")
-        )
+        assertEquals("Balcony reading", listNoteDisplayText(storedNote, "No note"))
         assertEquals("Balcony reading", storedNote)
     }
 
     @Test
     fun listDescriptionKeepsSessionSequenceImmediatelyBeforeNote() {
         assertEquals(
-            "#3 · Morning · Garden sensor",
-            sensorAndNoteDisplayText("Garden sensor", "Morning", "No note", sessionSequence = 3)
+            "#3 · Morning",
+            listNoteDisplayText("Morning", "No note", sessionSequence = 3)
         )
     }
 
     @Test
     fun standaloneManualListDescriptionDoesNotInventASequence() {
         val note = acquisitionDisplayNote("Manual", false, null, "No note")
-        assertEquals("Manual · Garden sensor", sensorAndNoteDisplayText("Garden sensor", note, "No note"))
+        assertEquals("Manual", listNoteDisplayText(note, "No note"))
     }
 
     @Test
-    fun emptyListNoteUsesTheLocalizedPlaceholderBeforeTheSensor() {
-        assertEquals("— · Sensore", sensorAndNoteDisplayText("Sensore", "", "—"))
+    fun emptyListNoteUsesTheLocalizedPlaceholder() {
+        assertEquals("—", listNoteDisplayText("", "—"))
     }
 
     @Test
-    fun emptySessionNoteStillKeepsSequenceBeforeSensor() {
+    fun emptySessionNoteStillKeepsSequence() {
         assertEquals(
-            "#3 · — · Garden sensor",
-            sensorAndNoteDisplayText("Garden sensor", "", "—", sessionSequence = 3)
+            "#3 · —",
+            listNoteDisplayText("", "—", sessionSequence = 3)
         )
     }
 
     @Test
-    fun noteIncludingItsSequenceCannotUseMoreThanHalfOfTheListDescriptionWidth() {
-        assertEquals(0.5f, UvirListNoteMaximumWidthFraction, 0f)
+    fun noteIncludingItsSequenceKeepsTheExpectedText() {
         assertEquals("#3 · Morning", listNoteDisplayText("Morning", "No note", 3))
     }
 }

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="diagnostics_test_group">진단 테스트</string>
+    <string name="diagnostics_simulation_group">시뮬레이션</string>
+    <string name="diagnostics_simulation_description">센서의 측정값, 알림 및 실시간 값을 시뮬레이션합니다.</string>
+</resources>

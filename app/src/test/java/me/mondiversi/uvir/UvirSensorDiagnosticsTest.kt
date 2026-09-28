@@ -8,7 +8,24 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class UvirSensorDiagnosticsTest {
-    private val info = UvirSensorRuntimeInfo(deviceId = "ABC123", firmwareVersion = "0.5.69")
+    private val info =
+        UvirSensorRuntimeInfo(
+            deviceId = "ABC123",
+            firmwareVersion = "0.5.92",
+            visibleSensorBusOk = true,
+            visibleSensorDriverOk = true,
+            visibleSensorReadOk = true,
+            uvAvailable = false,
+            rtcBusOk = true,
+            rtcDriverOk = true,
+            rtcReadOk = true,
+            sdAvailable = true,
+            sdReadWriteOk = true,
+            statusLedControlAvailable = true,
+            statusBuzzerControlAvailable = true,
+            externalInputReadOk = true,
+            appConnected = true
+        )
 
     @Test fun correlatedReplyProvidesLatencyAndFreshInfo() = runBlocking {
         val client = UvirSensorDiagnosticClient()
@@ -119,9 +136,38 @@ class UvirSensorDiagnosticsTest {
         assertEquals(info, report.latestInfo)
     }
 
+    @Test fun oneTransientHardwareFailureKeepsTheDiagnosticWarning() = runBlocking {
+        var count = 0
+        val report = runUvirSensorDiagnostics(
+            "Sensor", SensorConnectionMode.USB, info, {}, probe = {
+                count++
+                val current =
+                    if (count == 2) info.copy(sdReadWriteOk = false) else info
+                UvirDiagnosticProbe(UvirDiagnosticOutcome.SUCCESS, 10.0, current)
+            }, spacingMs = 0L
+        )
+
+        assertEquals(6, report.responses)
+        assertFalse(report.successful)
+        assertTrue(report.latestInfo?.sdReadWriteOk == true)
+    }
+
+    @Test fun framIsRequiredWhenTheFirmwareReportsIt() {
+        assertTrue(info.diagnosticHardwareHealthy()) // Older firmware has no FRAM fields.
+        val withFram = info.copy(
+            framAvailable = true,
+            framBusOk = true,
+            framReadWriteOk = true,
+            framQueueAvailable = true
+        )
+        assertTrue(withFram.diagnosticHardwareHealthy())
+        assertFalse(withFram.copy(framReadWriteOk = false).diagnosticHardwareHealthy())
+        assertFalse(withFram.copy(framQueueAvailable = false).diagnosticHardwareHealthy())
+    }
+
     @Test fun diagnosticFeatureRequiresItsOwnMinimumFirmware() {
-        assertTrue(compareFirmwareVersions("0.5.68", UVIR_DIAGNOSTIC_MINIMUM_FIRMWARE) < 0)
-        assertTrue(compareFirmwareVersions("0.5.69", UVIR_DIAGNOSTIC_MINIMUM_FIRMWARE) >= 0)
+        assertTrue(compareFirmwareVersions("0.5.91", UVIR_DIAGNOSTIC_MINIMUM_FIRMWARE) < 0)
+        assertTrue(compareFirmwareVersions("0.5.92", UVIR_DIAGNOSTIC_MINIMUM_FIRMWARE) >= 0)
         assertTrue(compareFirmwareVersions("0.6.0", UVIR_DIAGNOSTIC_MINIMUM_FIRMWARE) >= 0)
     }
 }

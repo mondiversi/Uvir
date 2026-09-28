@@ -116,6 +116,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.collect
 import java.text.SimpleDateFormat
@@ -151,20 +152,35 @@ internal fun UvirAppContent(
     currentWifiSsid: String?,
     onRequestCurrentWifiSsid: () -> Unit,
     openHomeRequestId: Long = 0L,
-    onSensorSelected: (String) -> Unit
+    onSensorSelected: (String) -> Unit,
+    multiSensorRuntime: UvirMultiSensorRuntime? = null
 ) {
 
     val context = LocalContext.current
     val resources = LocalResources.current
 
-    val usbSensorState by
-        usbSensorManager.state.collectAsState()
+    val physicalUsbState by usbSensorManager.state.collectAsState()
+    val intendedDeviceId = UvirSensorCredentialStore.load(context).deviceId
+    val usbSensorState = if (
+        physicalUsbState.deviceId.isNullOrBlank() ||
+        physicalUsbState.deviceId.orEmpty().equals(intendedDeviceId, ignoreCase = true) ||
+        (intendedDeviceId.isBlank() && !UvirSensorCredentialStore.isSensorSelectionDisabled(context))
+    ) physicalUsbState else UvirUsbSensorState()
+    val sensorIndicators by (multiSensorRuntime?.indicators
+        ?: kotlinx.coroutines.flow.MutableStateFlow(emptyMap<String, UvirStatusIndicator>())).collectAsState()
+    val sensorConnectionStates by (multiSensorRuntime?.connectionStates
+        ?: kotlinx.coroutines.flow.MutableStateFlow(emptyList<UvirConnectionSensorState>())).collectAsState()
+    val sensorAlertMonitoringDeviceIds by (multiSensorRuntime?.alertMonitoringDeviceIds
+        ?: kotlinx.coroutines.flow.MutableStateFlow(emptySet<String>())).collectAsState()
+
+    val connectionResources by (multiSensorRuntime?.resources
+        ?: kotlinx.coroutines.flow.MutableStateFlow(UvirConnectionResources())).collectAsState()
 
     val wirelessSensorState by
         wirelessSensorManager.state.collectAsState()
 
     val database = remember {
-        UvirDatabaseHelper(
+        multiSensorRuntime?.database ?: UvirDatabaseHelper(
             context.applicationContext
         ).also { helper ->
             // Open immediately so a schema reset also clears stale AUTO state
@@ -195,7 +211,7 @@ internal fun UvirAppContent(
 
     DisposableEffect(Unit) {
         onDispose {
-            database.close()
+            if (multiSensorRuntime == null) database.close()
         }
     }
 
@@ -288,44 +304,33 @@ internal fun UvirAppContent(
         )
     }
 
+    DisposableEffect(preferences) {
+        val listener = android.content.SharedPreferences.OnSharedPreferenceChangeListener { prefs, key ->
+            if (key == KEY_UNREAD_ACQUISITION_COUNT) unreadAcquisitionCount = prefs.getInt(key, 0)
+            if (key == KEY_UNREAD_ALERT_COUNT) unreadAlertCount = prefs.getInt(key, 0)
+        }
+        preferences.registerOnSharedPreferenceChangeListener(listener)
+        onDispose { preferences.unregisterOnSharedPreferenceChangeListener(listener) }
+    }
+
     fun incrementUnreadAcquisitions(amount: Int = 1) {
         if (amount <= 0 || acquisitionHistoryVisible) return
-        unreadAcquisitionCount =
-            (unreadAcquisitionCount + amount)
-                .coerceAtMost(9_999)
-        preferences.edit()
-            .putInt(
-                KEY_UNREAD_ACQUISITION_COUNT,
-                unreadAcquisitionCount
-            )
-            .apply()
+        unreadAcquisitionCount = UvirUnreadCounters.increment(preferences, KEY_UNREAD_ACQUISITION_COUNT, amount)
     }
 
     fun incrementUnreadAlerts(amount: Int = 1) {
         if (amount <= 0 || alertLogVisible) return
-        unreadAlertCount =
-            (unreadAlertCount + amount)
-                .coerceAtMost(9_999)
-        preferences.edit()
-            .putInt(
-                KEY_UNREAD_ALERT_COUNT,
-                unreadAlertCount
-            )
-            .apply()
+        unreadAlertCount = UvirUnreadCounters.increment(preferences, KEY_UNREAD_ALERT_COUNT, amount)
     }
 
     fun clearUnreadAcquisitions() {
         unreadAcquisitionCount = 0
-        preferences.edit()
-            .putInt(KEY_UNREAD_ACQUISITION_COUNT, 0)
-            .apply()
+        UvirUnreadCounters.clear(preferences, KEY_UNREAD_ACQUISITION_COUNT)
     }
 
     fun clearUnreadAlerts() {
         unreadAlertCount = 0
-        preferences.edit()
-            .putInt(KEY_UNREAD_ALERT_COUNT, 0)
-            .apply()
+        UvirUnreadCounters.clear(preferences, KEY_UNREAD_ALERT_COUNT)
     }
 
     var storedSensorRuntimeSnapshot by remember {
@@ -363,28 +368,51 @@ internal fun UvirAppContent(
         mutableStateOf(loadUvirIrradianceUnit(context))
     }
 
-    var useFakeSensorData by rememberSaveable {
+    val simulationDeviceId = normalizeSensorDeviceId(intendedDeviceId)
+    // Preferences own this state: an old Activity snapshot must not restore
+    // another sensor's simulation choice after selection, import or recreation.
+    var useFakeSensorData by remember(simulationDeviceId) {
         mutableStateOf(
-            preferences.getBoolean(
-                KEY_USE_FAKE_SENSOR_DATA,
-                true
-            )
+            UvirSensorSimulationSettingsStore.load(preferences, simulationDeviceId).enabled
         )
     }
 
-    var fakeSensorOutOfRangeEnabled by rememberSaveable {
+    var fakeSensorOutOfRangeEnabled by remember(simulationDeviceId) {
         mutableStateOf(
-            preferences.getBoolean(KEY_FAKE_SENSOR_OUT_OF_RANGE, false)
+            UvirSensorSimulationSettingsStore.load(preferences, simulationDeviceId).outOfRange
         )
     }
 
     var sensorConnectionModeValue by rememberSaveable {
+        val hasAssociatedSensor =
+            UvirSensorCredentialStore
+                .associatedDeviceIds(context)
+                .isNotEmpty()
         mutableStateOf(
-            preferences.getString(
-                KEY_SENSOR_CONNECTION_MODE,
-                SensorConnectionMode.USB.name
-            ) ?: SensorConnectionMode.USB.name
+            initialSensorConnectionMode(
+                storedValue =
+                    preferences.getString(
+                        KEY_SENSOR_CONNECTION_MODE,
+                        SensorConnectionMode.USB.name
+                    ),
+                hasAssociatedSensor = hasAssociatedSensor
+            ).name
         )
+    }
+
+    LaunchedEffect(Unit) {
+        if (
+            UvirSensorCredentialStore
+                .associatedDeviceIds(context)
+                .isEmpty()
+        ) {
+            preferences.edit()
+                .putString(
+                    KEY_SENSOR_CONNECTION_MODE,
+                    SensorConnectionMode.USB.name
+                )
+                .apply()
+        }
     }
 
     var lastWirelessSensorConnectionModeValue by rememberSaveable {
@@ -430,6 +458,21 @@ internal fun UvirAppContent(
         usbWasAuthorized = authorizedUsbConnected
     }
 
+    LaunchedEffect(wirelessSensorState.status, wirelessSensorState.appConnectionConfirmed,
+        wirelessSensorState.mode, authorizedUsbConnected) {
+        if (multiSensorRuntime != null && !authorizedUsbConnected &&
+            sensorConnectionModeValue == SensorConnectionMode.USB.name &&
+            wirelessSensorState.appConnectionConfirmed &&
+            wirelessSensorState.status == WirelessSensorConnectionStatus.CONNECTED) {
+            wirelessSensorState.mode?.takeUnless { it == SensorConnectionMode.USB }?.let { mode ->
+                sensorConnectionModeValue = mode.name
+                lastWirelessSensorConnectionModeValue = mode.name
+                preferences.edit().putString(KEY_SENSOR_CONNECTION_MODE, mode.name)
+                    .putString(KEY_LAST_WIRELESS_SENSOR_CONNECTION_MODE, mode.name).apply()
+            }
+        }
+    }
+
     LaunchedEffect(usbSensorState.error) {
         if (
             usbSensorState.error ==
@@ -460,6 +503,7 @@ internal fun UvirAppContent(
     var screen by rememberSaveable {
         mutableStateOf(AppScreen.LIVE)
     }
+    var homeActivityInProgress by remember { mutableStateOf(false) }
 
     var selectedRecordId by rememberSaveable {
         mutableStateOf<Long?>(null)
@@ -471,6 +515,10 @@ internal fun UvirAppContent(
 
     var detailReturnScreen by rememberSaveable {
         mutableStateOf(AppScreen.HISTORY)
+    }
+
+    var sessionChartNavigationState by rememberSaveable {
+        mutableStateOf<SessionChartNavigationState?>(null)
     }
 
     LaunchedEffect(screen) {
@@ -742,10 +790,19 @@ internal fun UvirAppContent(
                 )
         )
     }
+    var fakeAlertStartedAtMs by rememberSaveable {
+        mutableLongStateOf(0L)
+    }
+    var fakeAlertRegistrationCount by rememberSaveable {
+        mutableIntStateOf(0)
+    }
+    var realAlertRegistrationCount by rememberSaveable {
+        mutableIntStateOf(0)
+    }
 
     LaunchedEffect(Unit) {
         if (
-            thresholdAlertSettings.hasActiveMonitoring()
+            thresholdAlertSettings.hasActiveMonitoring() && thresholdAlertSettings.recordEvents
         ) {
             if (thresholdAlertSessionId == 0L) {
                 thresholdAlertSessionId =
@@ -831,7 +888,11 @@ internal fun UvirAppContent(
         ) {
             usbSensorManager.sendSensorControlCommands(commands)
         } else {
-            false
+            val credentials = UvirSensorCredentialStore.load(context)
+            val runtime = if (usbSensorState.credentials.deviceId.equals(credentials.deviceId, ignoreCase = true))
+                usbSensorState.runtimeInfo else wirelessSensorState.runtimeInfo
+            // The user edited while connected, but the queued write reached us after link loss.
+            sendDatedSensorSettings(context, credentials.deviceId, runtime, commands) { false }
         }
     }
 
@@ -874,29 +935,12 @@ internal fun UvirAppContent(
         }
     }
 
-    fun restoreSensorDefaultsAndPowerOff(
-        timeoutMs: Long = 8_000L
-    ): Boolean {
-        val selectedMode =
-            SensorConnectionMode.fromStoredValue(
-                sensorConnectionModeValue
-            )
-        return if (
-            selectedMode == SensorConnectionMode.USB &&
-            usbSensorState.status == UsbSensorConnectionStatus.CONNECTED
-        ) {
-            usbSensorManager.restoreDefaultsAndPowerOffAwait(timeoutMs)
-        } else if (
-            wirelessSensorState.status ==
-                WirelessSensorConnectionStatus.CONNECTED
-        ) {
-            wirelessSensorManager.restoreDefaultsAndPowerOffAwait(timeoutMs)
-        } else if (
-            usbSensorState.status == UsbSensorConnectionStatus.CONNECTED
-        ) {
-            usbSensorManager.restoreDefaultsAndPowerOffAwait(timeoutMs)
+    fun sendSelectedDiagnosticCommands(commands: List<String>): Boolean {
+        val selectedMode = SensorConnectionMode.fromStoredValue(sensorConnectionModeValue)
+        return if (selectedMode == SensorConnectionMode.USB) {
+            usbSensorManager.sendDiagnosticControlCommands(intendedDeviceId, commands)
         } else {
-            false
+            wirelessSensorManager.sendDiagnosticControlCommands(intendedDeviceId, selectedMode, commands)
         }
     }
 
@@ -1044,6 +1088,8 @@ internal fun UvirAppContent(
         SensorConnectionMode.fromStoredValue(
             sensorConnectionModeValue
         )
+    val noSensorSelected =
+        UvirSensorCredentialStore.isSensorSelectionDisabled(context)
 
     val selectedRuntimeInfo =
         if (selectedSensorConnectionMode == SensorConnectionMode.USB) {
@@ -1064,6 +1110,10 @@ internal fun UvirAppContent(
             .ifBlank { usbSensorState.credentials.deviceId }
             .ifBlank { UvirSensorCredentialStore.load(context).deviceId }
             .trim()
+    LaunchedEffect(selectedSensorDeviceId, selectedRuntimeInfo.alertCompletedRegistrations) {
+        realAlertRegistrationCount =
+            selectedRuntimeInfo.alertCompletedRegistrations?.coerceAtLeast(0) ?: 0
+    }
     val selectedSensorIsConnected =
         if (selectedSensorConnectionMode == SensorConnectionMode.USB) {
             usbSensorState.status == UsbSensorConnectionStatus.CONNECTED &&
@@ -1074,6 +1124,34 @@ internal fun UvirAppContent(
                 wirelessSensorState.mode == selectedSensorConnectionMode &&
                 wirelessSensorState.appConnectionConfirmed
         }
+    val sensorConnectionPersistenceActive =
+        !useFakeSensorData &&
+            selectedSensorDeviceId.isNotBlank() &&
+            if (selectedSensorConnectionMode == SensorConnectionMode.USB) {
+                usbSensorState.attached
+            } else {
+                true
+            }
+    val sensorConnectionIsInitializing =
+        !selectedSensorIsConnected &&
+            if (selectedSensorConnectionMode == SensorConnectionMode.USB) {
+                usbSensorState.status == UsbSensorConnectionStatus.CONNECTED &&
+                    !usbSensorState.appConnectionConfirmed
+            } else {
+                wirelessSensorState.mode == selectedSensorConnectionMode &&
+                    wirelessSensorState.status == WirelessSensorConnectionStatus.CONNECTED &&
+                    !wirelessSensorState.appConnectionConfirmed
+            }
+    val sensorConnectionIsSearching =
+        !selectedSensorIsConnected &&
+            !sensorConnectionIsInitializing &&
+            selectedSensorConnectionMode != SensorConnectionMode.USB &&
+            wirelessSensorState.mode == selectedSensorConnectionMode &&
+            wirelessSensorState.status == WirelessSensorConnectionStatus.CONNECTING
+    val notificationActivityInProgress =
+        selectedRuntimeInfo.operationActive == true ||
+            sensorSyncInProgress ||
+            (screen == AppScreen.LIVE && homeActivityInProgress)
     val selectedSensorSettingsSnapshot =
         remember(selectedRuntimeInfo) {
             selectedRuntimeInfo.toSensorSettingsSnapshotOrNull()
@@ -1081,6 +1159,8 @@ internal fun UvirAppContent(
     var sensorSettingsHydratedForDeviceId by remember {
         mutableStateOf("")
     }
+
+    var pendingSettingsAttempt by remember { mutableStateOf("") }
 
     LaunchedEffect(
         useFakeSensorData,
@@ -1095,6 +1175,7 @@ internal fun UvirAppContent(
         }
         if (!selectedSensorIsConnected) {
             sensorSettingsHydratedForDeviceId = ""
+            pendingSettingsAttempt = ""
             return@LaunchedEffect
         }
 
@@ -1112,11 +1193,32 @@ internal fun UvirAppContent(
         }
 
         val snapshot = selectedSensorSettingsSnapshot ?: return@LaunchedEffect
+        if (selectedRuntimeInfo.settingsUpdatedAtMs != null) {
+            val pending = withContext(Dispatchers.IO) {
+                UvirSensorSettingsSyncStore.reconcile(context, deviceId, snapshot, database)
+            }
+            if (pending != null && appSensorSettingsAreNewer(pending.updatedAt, snapshot.updatedAtMs)) {
+                val attempt = "$deviceId:${pending.updatedAt}:$sensorConnectionModeValue"
+                if (pendingSettingsAttempt != attempt) {
+                    pendingSettingsAttempt = attempt
+                    withContext(Dispatchers.IO) {
+                        if (SensorConnectionMode.fromStoredValue(sensorConnectionModeValue) == SensorConnectionMode.USB) {
+                            usbSensorManager.replayPendingSettings(deviceId, pending)
+                        } else {
+                            wirelessSensorManager.replayPendingSettings(deviceId, pending)
+                        }
+                    }
+                }
+                // Keep the user's newer edit; an older HELLO cannot acknowledge it.
+                return@LaunchedEffect
+            }
+            pendingSettingsAttempt = ""
+        }
+        val previousAlertSessionId = thresholdAlertSessionId
         withContext(Dispatchers.IO) {
-            database.upsertSensorSettings(
-                hardwareUid = deviceId,
-                settings = snapshot
-            )
+            if (selectedRuntimeInfo.settingsUpdatedAtMs == null) {
+                database.upsertSensorSettings(hardwareUid = deviceId, settings = snapshot)
+            }
             if (
                 snapshot.alertMonitoringEnabled &&
                 snapshot.alertSessionId > 0L
@@ -1129,6 +1231,11 @@ internal fun UvirAppContent(
                     startedAt = System.currentTimeMillis(),
                     sensorDeviceId = deviceId
                 )
+            }
+            if (previousAlertSessionId > 0L &&
+                (!snapshot.alertMonitoringEnabled ||
+                    snapshot.alertSessionId != previousAlertSessionId)) {
+                database.finishAlertSession(previousAlertSessionId)
             }
         }
 
@@ -1181,6 +1288,10 @@ internal fun UvirAppContent(
             .putInt(
                 KEY_SENSOR_STATUS_BUZZER_VOLUME,
                 snapshot.sensorParameters.statusBuzzerVolume
+            )
+            .putBoolean(
+                KEY_SENSOR_EXTERNAL_COMMAND_ENABLED,
+                snapshot.sensorParameters.externalCommandEnabled
             )
             .putInt(
                 KEY_SAMPLES_PER_MEASUREMENT,
@@ -1300,10 +1411,35 @@ internal fun UvirAppContent(
             hardwareUid = normalizedSensorId
         )
     }
+    val notificationSensorName = uvirNotificationSensorName(sensorProfiles, selectedSensorDeviceId)
+    val connectionNotification = buildUvirConnectionNotification(
+        resources = resources,
+        sensors = uvirConnectionNotificationSensors(sensorConnectionStates,
+            selectedSensorDeviceId.takeIf { it.isNotBlank() }?.let { id ->
+                uvirSelectedConnectionNotificationState(sensorConnectionStates,
+                    uvirConnectionSensorState(id, useFakeSensorData, selectedSensorIsConnected,
+                        sensorConnectionIsInitializing, sensorConnectionIsSearching, notificationActivityInProgress),
+                    transientActivity = notificationActivityInProgress)
+            }),
+        profiles = sensorProfiles,
+        selectedDeviceId = selectedSensorDeviceId
+    )
+    LaunchedEffect(sensorConnectionPersistenceActive, connectionNotification,
+        selectedSensorConnectionMode, connectionResources) {
+        UvirConnectionForegroundService.update(
+            context = context,
+            active = sensorConnectionPersistenceActive || connectionResources.active,
+            notification = connectionNotification,
+            wifiLockRequired = connectionResources.wifiRequired ||
+                (sensorConnectionPersistenceActive && (selectedSensorConnectionMode == SensorConnectionMode.WIFI ||
+                    selectedSensorConnectionMode == SensorConnectionMode.INTERNET))
+        )
+    }
     val currentSyncConnectionMode by
         rememberUpdatedState(selectedSensorConnectionMode)
     val currentSyncSensorIsConnected by
         rememberUpdatedState(selectedSensorIsConnected)
+    val currentSyncDeviceId by rememberUpdatedState(selectedSensorDeviceId)
     var lastConnectedSensorRuntimeInfo by remember {
         mutableStateOf(
             storedSensorRuntimeSnapshot?.info
@@ -1346,6 +1482,7 @@ internal fun UvirAppContent(
 
     LaunchedEffect(
         useFakeSensorData,
+        noSensorSelected,
         selectedSensorConnectionMode,
         lastWirelessSensorConnectionModeValue,
         usbSensorState.attached,
@@ -1359,13 +1496,18 @@ internal fun UvirAppContent(
             } ?: SensorConnectionMode.WIFI
 
         val keepWirelessControlAvailable =
+            !noSensorSelected &&
             selectedSensorConnectionMode ==
                     SensorConnectionMode.USB &&
                     !usbSensorState.attached
 
+        if (multiSensorRuntime != null) {
+            multiSensorRuntime.configureSelected(selectedSensorConnectionMode,
+                !useFakeSensorData && !noSensorSelected, sampleSpacingMs)
+        } else {
         usbSensorManager.setStreaming(
             enabled =
-                !useFakeSensorData &&
+                !useFakeSensorData && !noSensorSelected &&
                         selectedSensorConnectionMode ==
                         SensorConnectionMode.USB,
             intervalMs = sampleSpacingMs
@@ -1379,7 +1521,7 @@ internal fun UvirAppContent(
                     selectedSensorConnectionMode
                 },
             enabled =
-                !useFakeSensorData &&
+                !useFakeSensorData && !noSensorSelected &&
                         (
                                 selectedSensorConnectionMode !=
                                 SensorConnectionMode.USB ||
@@ -1390,6 +1532,7 @@ internal fun UvirAppContent(
                 selectedSensorConnectionMode !=
                         SensorConnectionMode.USB
         )
+        }
     }
 
     LaunchedEffect(
@@ -1500,17 +1643,21 @@ internal fun UvirAppContent(
     suspend fun recordThresholdAlert(
         violations: List<ThresholdAlertViolation>,
         timestampMs: Long,
-        sessionId: Long = thresholdAlertSessionId
+        sessionId: Long = thresholdAlertSessionId,
+        recorded: Boolean = thresholdAlertSettings.recordEvents
     ) {
         if (violations.isEmpty()) return
+        if (recorded) {
         val insertedAlertId =
-            database.insertThresholdAlertLog(
-                violations = violations,
-                timestamp = timestampMs,
-                sessionId = sessionId.takeIf { it > 0L },
-                sensorDeviceId = selectedSensorDeviceId,
-                qualityFlags = latestMeasurement.get().qualityFlags
-            )
+            retryUvirDatabaseInsert {
+                database.insertThresholdAlertLog(
+                    violations = violations,
+                    timestamp = timestampMs,
+                    sessionId = sessionId.takeIf { it > 0L },
+                    sensorDeviceId = selectedSensorDeviceId,
+                    qualityFlags = latestMeasurement.get().qualityFlags
+                )
+            }
         if (insertedAlertId != -1L) {
             incrementUnreadAlerts()
             val latestViolation = violations.first()
@@ -1520,6 +1667,13 @@ internal fun UvirAppContent(
                     value = latestViolation.value,
                     timestamp = timestampMs
                 )
+        } else {
+            UvirErrorLog.record(
+                context.applicationContext,
+                source = "threshold_alert_persistence",
+                message = "Threshold alert save failed after retry"
+            )
+        }
         }
         playThresholdAlertTone(
             context = context,
@@ -1544,10 +1698,40 @@ internal fun UvirAppContent(
             return@LaunchedEffect
         }
 
+        if (fakeAlertStartedAtMs == 0L) {
+            fakeAlertStartedAtMs = System.currentTimeMillis()
+            fakeAlertRegistrationCount = 0
+        }
+
         while (true) {
+            val now = System.currentTimeMillis()
+            val firstAllowedAt = fakeAlertStartedAtMs +
+                thresholdAlertSettings.startDelaySeconds * 1_000L
+            val endAt = if (thresholdAlertSettings.durationSeconds > 0L)
+                firstAllowedAt + thresholdAlertSettings.durationSeconds * 1_000L else 0L
+            if ((endAt > 0L && now >= endAt) ||
+                (thresholdAlertSettings.maxRegistrations > 0 &&
+                    fakeAlertRegistrationCount >= thresholdAlertSettings.maxRegistrations)) {
+                if (thresholdAlertSessionId > 0L) {
+                    withContext(Dispatchers.IO) {
+                        database.finishAlertSession(thresholdAlertSessionId)
+                    }
+                }
+                thresholdAlertSessionId = 0L
+                thresholdAlertSettings = thresholdAlertSettings.withMonitoringStopped()
+                saveThresholdAlertSettings(preferences, thresholdAlertSettings)
+                preferences.edit().putLong(KEY_THRESHOLD_ALERT_SESSION_ID, 0L).apply()
+                fakeAlertStartedAtMs = 0L
+                return@LaunchedEffect
+            }
+            if (now < firstAllowedAt) {
+                delay((firstAllowedAt - now).coerceAtMost(250L))
+                continue
+            }
+            val alertSample = latestMeasurement.get()
             val violations =
                 thresholdAlertViolations(
-                    latestMeasurement.get(),
+                    alertSample,
                     thresholdAlertSettings
                 )
 
@@ -1559,62 +1743,35 @@ internal fun UvirAppContent(
                     violations = violations,
                     timestampMs = System.currentTimeMillis()
                 )
+                ++fakeAlertRegistrationCount
+                if (thresholdAlertSettings.maxRegistrations > 0 &&
+                    fakeAlertRegistrationCount >= thresholdAlertSettings.maxRegistrations) {
+                    continue
+                }
                 // During this cooldown no threshold is evaluated. When it
                 // expires, monitoring resumes until the next real violation.
                 delay(
-                    thresholdAlertSettings.repeatSeconds
-                        .coerceIn(1, 3600) * 1000L
+                    (thresholdAlertSettings.repeatSeconds
+                        .coerceIn(1, 3600) * 1000L).coerceAtMost(
+                            if (endAt > 0L) (endAt - System.currentTimeMillis()).coerceAtLeast(1L)
+                            else Long.MAX_VALUE
+                        )
                 )
             }
         }
     }
 
-    var lastHandledUsbAlertSequence by rememberSaveable {
-        mutableLongStateOf(0L)
-    }
-    var lastHandledWirelessAlertSequence by rememberSaveable {
-        mutableLongStateOf(0L)
-    }
-    val selectedLiveAlertEvent =
-        if (selectedSensorConnectionMode == SensorConnectionMode.USB) {
-            usbSensorState.alertEvent
-        } else {
-            wirelessSensorState.alertEvent
-        }
-
-    LaunchedEffect(
-        useFakeSensorData,
-        selectedSensorConnectionMode,
-        selectedLiveAlertEvent?.receiptSequence
-    ) {
-        if (useFakeSensorData || !selectedSensorIsConnected) {
-            return@LaunchedEffect
-        }
-
-        val event = selectedLiveAlertEvent ?: return@LaunchedEffect
-        val alreadyHandled =
-            if (selectedSensorConnectionMode == SensorConnectionMode.USB) {
-                event.receiptSequence <= lastHandledUsbAlertSequence
-            } else {
-                event.receiptSequence <= lastHandledWirelessAlertSequence
+    LaunchedEffect(database, wirelessSensorManager) {
+        UvirSensorEventHub.alerts.collect { received ->
+            if (useFakeSensorData || !received.deviceId.equals(currentSyncDeviceId, true)) return@collect
+            val event = received.event
+            if (event.recorded && !received.newRecord) return@collect
+            realAlertRegistrationCount += 1
+            parseThresholdAlertLogDetails(event.details).firstOrNull()?.let { violation ->
+                if (event.recorded && received.stored) latestThresholdNotificationAlert =
+                    ThresholdNotificationAlert(violation.rule.metric, violation.value, event.timestampMs)
             }
-        if (alreadyHandled) return@LaunchedEffect
-
-        if (selectedSensorConnectionMode == SensorConnectionMode.USB) {
-            lastHandledUsbAlertSequence = event.receiptSequence
-        } else {
-            lastHandledWirelessAlertSequence = event.receiptSequence
-        }
-
-        val violations = parseThresholdAlertLogDetails(event.details)
-        if (violations.isNotEmpty()) {
-            recordThresholdAlert(
-                violations = violations,
-                timestampMs = event.timestampMs,
-                sessionId =
-                    event.sessionId.takeIf { it > 0L }
-                        ?: thresholdAlertSessionId
-            )
+            playThresholdAlertTone(context, thresholdAlertSettings.sound, thresholdAlertSettings.volume)
         }
     }
 
@@ -1842,16 +1999,14 @@ internal fun UvirAppContent(
             showUvirBottomMessage(context, resources.getString(messageId), longDuration = false)
         }
 
-        if (!useFakeSensorData) {
-            finishSimulation(R.string.automatic_stopped)
-            return@LaunchedEffect
-        }
         autoCompletedCount = withContext(Dispatchers.IO) {
             database.acquisitionCountForSession(simulationSessionId)
         }
         preferences.edit().putInt(KEY_AUTO_COMPLETED_COUNT, autoCompletedCount).apply()
 
-        while (useFakeSensorData && autoEnabled && autoSessionId == simulationSessionId) {
+        // Switching the diagnostic source is not a STOP action. Suspend fake
+        // acquisitions while disabled, but keep the job's original deadline.
+        while (autoEnabled && autoSessionId == simulationSessionId) {
             when (val step = simulatedConditionalAutomaticAcquisitionStep(
                 firstAllowedAtMs = firstAllowedAtMs,
                 plan = autoConditionalPlan,
@@ -1863,7 +2018,7 @@ internal fun UvirAppContent(
                 endAtMs = autoEndMs.takeIf { autoUseDuration && it > 0L },
                 maximumCount = autoMaxCount.takeIf { autoLimitEnabled },
                 completedCount = autoCompletedCount,
-                sampleReady = liveReady
+                sampleReady = useFakeSensorData && liveReady
             )) {
                 SimulatedAutomaticAcquisitionStep.Stop -> {
                     finishSimulation(R.string.automatic_stopped)
@@ -2116,7 +2271,9 @@ internal fun UvirAppContent(
         wirelessSensorManager,
         sensorAssociationRevision
     ) {
-        SensorRuntimeEventBus.events.collect { event ->
+        SensorRuntimeEventBus.events.collect { received ->
+            if (!received.deviceId.equals(currentSyncDeviceId, ignoreCase = true)) return@collect
+            val event = received.event
             if (
                 !sensorSyncSourceMatchesSelection(
                     source = event.source,
@@ -2129,82 +2286,12 @@ internal fun UvirAppContent(
 
             when (event) {
                 is SensorRuntimeEvent.Acquisition -> {
-                    val deviceId =
-                        when (event.source) {
-                            SensorSyncSource.USB ->
-                                usbSensorManager.state.value.deviceId
-                            SensorSyncSource.WIRELESS ->
-                                wirelessSensorManager.state.value.deviceId
-                        }.orEmpty()
+                    val deviceId = received.deviceId
                     if (deviceId.isBlank()) return@collect
 
-                    val resolvedSessionId =
-                        if (isSensorOriginatedSessionId(event.sessionId)) {
-                            withContext(Dispatchers.IO) {
-                                database.resolveSensorOriginatedAcquisitionSession(
-                                    sensorDeviceId = deviceId,
-                                    sensorSessionId = event.sessionId,
-                                    startedAt = event.timestamp
-                                )
-                            }
-                        } else {
-                            event.sessionId
-                        }
-
-                    val wasAlreadyStored = withContext(Dispatchers.IO) {
-                        database.hasSensorAcquisition(
-                            sensorDeviceId = deviceId,
-                            sensorRecordId = event.recordId
-                        )
-                    }
-                    // A live record is deliberately retransmitted until the
-                    // sensor receives its ACK. If Android stored the first
-                    // copy but the acknowledgement was lost during a transient
-                    // transport handover, the repeated copy is already in the
-                    // database and still has to be acknowledged. Treating the
-                    // duplicate insert as a failure left the ESP32 permanently
-                    // waiting on record 1 and blocked every later acquisition.
-                    val saved =
-                        if (wasAlreadyStored) {
-                            true
-                        } else {
-                            withContext(Dispatchers.IO) {
-                                database.saveRecoveredAcquisition(
-                                    timestamp = event.timestamp,
-                                    sample = event.sample,
-                                    note = event.note,
-                                    sessionId = resolvedSessionId,
-                                    sequence = event.sequence,
-                                    sensorDeviceId = deviceId,
-                                    sensorRecordId = event.recordId,
-                                    externalCommand =
-                                        isSensorOriginatedSessionId(event.sessionId)
-                                )
-                            }
-                        }
-                    if (!saved) return@collect
-
-                    val acknowledgementSent = withContext(Dispatchers.IO) {
-                        val command =
-                            listOf("ACQUISITION_ACK ${event.recordId}")
-                        when (event.source) {
-                            SensorSyncSource.USB ->
-                                usbSensorManager.sendSensorControlCommands(command)
-                            SensorSyncSource.WIRELESS ->
-                                wirelessSensorManager.sendSensorControlCommands(command)
-                        }
-                    }
-                    if (!acknowledgementSent) {
-                        Log.w(
-                            "UvirAutomatic",
-                            "Acquisition ACK deferred; record=${event.recordId} " +
-                                "source=${event.source}"
-                        )
-                    }
-                    if (!wasAlreadyStored) {
-                        incrementUnreadAcquisitions()
-                        playAcquisitionFeedback()
-                    }
+                    val resolvedSessionId = received.sessionId
+                    if (!received.stored) return@collect
+                    if (received.newRecord) playAcquisitionFeedback()
 
                     if (resolvedSessionId > 0L && resolvedSessionId == autoSessionId) {
                         if (event.jobActive) {
@@ -2245,13 +2332,7 @@ internal fun UvirAppContent(
                 }
 
                 is SensorRuntimeEvent.AutomaticStatus -> {
-                    val deviceId =
-                        when (event.source) {
-                            SensorSyncSource.USB ->
-                                usbSensorManager.state.value.deviceId
-                            SensorSyncSource.WIRELESS ->
-                                wirelessSensorManager.state.value.deviceId
-                        }.orEmpty()
+                    val deviceId = received.deviceId
                     if (deviceId.isBlank()) return@collect
                     val sensorOriginated =
                         isSensorOriginatedSessionId(event.sessionId)
@@ -2368,6 +2449,7 @@ internal fun UvirAppContent(
         sensorAssociationRevision
     ) {
         var activeSyncSource: SensorSyncSource? = null
+        var activeSyncDeviceId = ""
         var expectedAcquisitions = 0
         var expectedAlerts = 0
         var expectedErrors = 0
@@ -2375,7 +2457,7 @@ internal fun UvirAppContent(
         var processedAlerts = 0
         var savedAlerts = 0
         var processedErrors = 0
-        var lastSavedAlertTimestamp = 0L
+        val presentedSyncRecords = mutableSetOf<Pair<String, Long>>()
         var storageWasFull = false
         var summaryShown = false
 
@@ -2395,7 +2477,7 @@ internal fun UvirAppContent(
                     alerts = savedAlerts,
                     errors = processedErrors,
                     storageWasFull = storageWasFull
-                )
+                ).withSensorOrigin(activeSyncDeviceId, sensorProfiles)
                 sensorSyncInProgress = false
                 acquisitionSyncInProgress = false
                 alertSyncInProgress = false
@@ -2403,7 +2485,9 @@ internal fun UvirAppContent(
             }
         }
 
-        SensorSyncEventBus.events.collect { event ->
+        SensorSyncEventBus.events.collect { received ->
+            if (!received.deviceId.equals(currentSyncDeviceId, ignoreCase = true)) return@collect
+            val event = received.event
             if (
                 !sensorSyncSourceMatchesSelection(
                     source = event.source,
@@ -2420,6 +2504,7 @@ internal fun UvirAppContent(
 
             if (event is SensorSyncEvent.Started) {
                 activeSyncSource = event.source
+                activeSyncDeviceId = received.deviceId
                 expectedAcquisitions = event.acquisitions
                 expectedAlerts = event.alerts
                 expectedErrors = event.errors
@@ -2427,7 +2512,7 @@ internal fun UvirAppContent(
                 processedAlerts = 0
                 savedAlerts = 0
                 processedErrors = 0
-                lastSavedAlertTimestamp = 0L
+                presentedSyncRecords.clear()
                 storageWasFull = event.storageWasFull
                 summaryShown = false
                 sensorSyncInProgress = true
@@ -2454,63 +2539,26 @@ internal fun UvirAppContent(
                 }
                 return@collect
             }
-            if (event.source != activeSyncSource) {
-                return@collect
+            if (event.source != activeSyncSource) return@collect
+            val recordKey = when (event) {
+                is SensorSyncEvent.Acquisition -> "acquisition" to event.recordId
+                is SensorSyncEvent.Alert -> "alert" to event.recordId
+                is SensorSyncEvent.Error -> "error" to event.recordId
+                else -> null
             }
+            if (recordKey != null && !presentedSyncRecords.add(recordKey)) return@collect
 
-            val deviceId =
-                when (event.source) {
-                    SensorSyncSource.USB ->
-                        usbSensorManager.state.value.deviceId
-                    SensorSyncSource.WIRELESS ->
-                        wirelessSensorManager.state.value.deviceId
-                }.orEmpty()
+            val deviceId = received.deviceId
 
-            suspend fun acknowledge(recordId: Long) {
-                withContext(Dispatchers.IO) {
-                    when (event.source) {
-                        SensorSyncSource.USB ->
-                            usbSensorManager.acknowledgeOfflineRecord(recordId)
-                        SensorSyncSource.WIRELESS ->
-                            wirelessSensorManager.acknowledgeOfflineRecord(recordId)
-                    }
-                }
-            }
 
             when (event) {
                 is SensorSyncEvent.Started -> Unit
 
                 is SensorSyncEvent.Acquisition -> {
-                    val resolvedSessionId =
-                        if (isSensorOriginatedSessionId(event.sessionId)) {
-                            withContext(Dispatchers.IO) {
-                                database.resolveSensorOriginatedAcquisitionSession(
-                                    sensorDeviceId = deviceId,
-                                    sensorSessionId = event.sessionId,
-                                    startedAt = event.timestamp
-                                )
-                            }
-                        } else {
-                            event.sessionId
-                        }
-                    val result = withContext(Dispatchers.IO) {
-                        runCatching {
-                            database.saveRecoveredAcquisition(
-                                timestamp = event.timestamp,
-                                sample = event.sample,
-                                note = event.note,
-                                sessionId = resolvedSessionId,
-                                sequence = event.sequence,
-                                sensorDeviceId = deviceId,
-                                sensorRecordId = event.recordId,
-                                externalCommand =
-                                    isSensorOriginatedSessionId(event.sessionId)
-                            )
-                        }
-                    }
+                    val resolvedSessionId = received.sessionId
+                    val result = Result.success(received.stored)
                     if (result.getOrDefault(false)) {
                         ++processedAcquisitions
-                        incrementUnreadAcquisitions()
                         if (resolvedSessionId == autoSessionId && autoConditionalPlan?.action == AcquisitionConditionAction.START) {
                             withContext(Dispatchers.IO) { database.confirmConditionalSessionStart(
                                 autoSessionId, deviceId, event.timestamp
@@ -2530,7 +2578,6 @@ internal fun UvirAppContent(
                                 )
                                 .apply()
                         }
-                        acknowledge(event.recordId)
                         acquisitionSyncInProgress =
                             processedAcquisitions < expectedAcquisitions
                         showRecoveredSummaryIfReady()
@@ -2556,54 +2603,10 @@ internal fun UvirAppContent(
                 }
 
                 is SensorSyncEvent.Alert -> {
-                    val minimumIntervalMs =
-                        currentThresholdAlertRepeatSeconds
-                            .coerceIn(1, 3600) * 1000L
-                    val elapsedSinceLastSaved =
-                        event.timestamp - lastSavedAlertTimestamp
-                    if (
-                        lastSavedAlertTimestamp > 0L &&
-                        elapsedSinceLastSaved in 0 until minimumIntervalMs
-                    ) {
-                        ++processedAlerts
-                        Log.w(
-                            "UvirAlert",
-                            "Discarded premature offline alert; " +
-                                "id=${event.recordId} " +
-                                "elapsed=${elapsedSinceLastSaved}ms " +
-                                "minimum=${minimumIntervalMs}ms"
-                        )
-                        acknowledge(event.recordId)
-                        alertSyncInProgress =
-                            processedAlerts < expectedAlerts
-                        showRecoveredSummaryIfReady()
-                        return@collect
-                    }
-                    Log.i(
-                        "UvirAlert",
-                        "Recovered offline alert; id=${event.recordId} " +
-                            "timestamp=${event.timestamp}"
-                    )
-                    val result = withContext(Dispatchers.IO) {
-                        runCatching {
-                            database.insertRecoveredThresholdAlert(
-                                timestamp = event.timestamp,
-                                details = event.details,
-                                sensorDeviceId = deviceId,
-                                sensorRecordId = event.recordId,
-                                sessionId =
-                                    event.sessionId.takeIf { it > 0L }
-                                        ?: thresholdAlertSessionId,
-                                qualityFlags = event.qualityFlags
-                            )
-                        }
-                    }
+                    val result = Result.success(received.stored)
                     if (result.getOrDefault(false)) {
                         ++processedAlerts
                         ++savedAlerts
-                        incrementUnreadAlerts()
-                        lastSavedAlertTimestamp = event.timestamp
-                        acknowledge(event.recordId)
                         alertSyncInProgress =
                             processedAlerts < expectedAlerts
                         showRecoveredSummaryIfReady()
@@ -2629,15 +2632,7 @@ internal fun UvirAppContent(
                 }
 
                 is SensorSyncEvent.Error -> {
-                    UvirErrorLog.record(
-                        context = context.applicationContext,
-                        source = "sensor:${event.code}",
-                        message =
-                            "Sensor timestamp: ${event.timestamp}\n" +
-                                event.message
-                    )
                     ++processedErrors
-                    acknowledge(event.recordId)
                     showRecoveredSummaryIfReady()
                 }
 
@@ -2659,16 +2654,6 @@ internal fun UvirAppContent(
                         )
                     sensorSyncIncompleteSummary =
                         incompleteSummary.takeIf { it.total > 0 }
-                    if (incompleteSummary.total == 0) {
-                        withContext(Dispatchers.IO) {
-                            when (event.source) {
-                                SensorSyncSource.USB ->
-                                    usbSensorManager.markOfflineSyncComplete()
-                                SensorSyncSource.WIRELESS ->
-                                    wirelessSensorManager.markOfflineSyncComplete()
-                            }
-                        }
-                    }
                     expectedAcquisitions =
                         maxOf(expectedAcquisitions, event.acquisitions)
                     expectedAlerts = maxOf(expectedAlerts, event.alerts)
@@ -2687,7 +2672,7 @@ internal fun UvirAppContent(
                                 alerts = processedAlerts,
                                 errors = processedErrors,
                                 storageWasFull = true
-                            )
+                            ).withSensorOrigin(deviceId, sensorProfiles)
                         }
                     }
                     if (autoSessionId > 0L) {
@@ -2935,17 +2920,25 @@ internal fun UvirAppContent(
     var lastAnnouncedSensorConnection by remember {
         mutableStateOf<Boolean?>(null)
     }
+    var lastConnectedAnnouncementDeviceId by remember {
+        mutableStateOf("")
+    }
 
     LaunchedEffect(
         useFakeSensorData,
+        selectedSensorDeviceId,
         selectedSensorIsConnected,
         selectedSensorIsConnecting
     ) {
-        if (useFakeSensorData) {
+        if (multiSensorRuntime != null || useFakeSensorData) {
             lastAnnouncedSensorConnection = null
+            lastConnectedAnnouncementDeviceId = ""
             return@LaunchedEffect
         }
 
+        if (selectedSensorIsConnected && selectedSensorDeviceId.isNotBlank()) {
+            lastConnectedAnnouncementDeviceId = selectedSensorDeviceId.trim()
+        }
         val previous = lastAnnouncedSensorConnection
         if (previous == null) {
             // Establish the initial state without announcing a disconnection
@@ -2957,6 +2950,11 @@ internal fun UvirAppContent(
             return@LaunchedEffect
         }
 
+        val eventDeviceId = uvirConnectionAnnouncementDeviceId(
+            selectedSensorIsConnected,
+            selectedSensorDeviceId,
+            lastConnectedAnnouncementDeviceId
+        )
         if (!selectedSensorIsConnected) {
             // Ignore very short transport hand-offs. A new state change
             // cancels this effect before the message is displayed.
@@ -2969,6 +2967,14 @@ internal fun UvirAppContent(
             }
         }
 
+        // Resolve the saved name at announcement time, including recent renames.
+        val eventProfiles = withContext(Dispatchers.IO) {
+            database.readSensorProfiles()
+        }
+        val eventSensorName = uvirConnectionAnnouncementSensorName(eventDeviceId, eventProfiles)
+        lastAnnouncedSensorConnection = selectedSensorIsConnected
+        if (eventSensorName.isBlank()) return@LaunchedEffect
+
         showUvirBottomMessage(
             context.applicationContext,
             resources.getString(
@@ -2976,11 +2982,13 @@ internal fun UvirAppContent(
                     R.string.sensor_connection_toast_connected
                 } else {
                     R.string.sensor_connection_toast_disconnected
-                }
+                },
+                androidx.core.text.BidiFormatter.getInstance(
+                    resources.configuration.locales[0]
+                ).unicodeWrap(eventSensorName)
             ),
             longDuration = false
         )
-        lastAnnouncedSensorConnection = selectedSensorIsConnected
     }
 
     LaunchedEffect(pendingOfflineReopenState) {
@@ -3044,7 +3052,7 @@ internal fun UvirAppContent(
                                     autoIntervalSeconds.takeIf {
                                         pending.automaticActive && !autoExternalCommand
                                     },
-                                alertsEnabled = pending.alertsActive,
+                                alertsEnabled = pending.alertsActive && thresholdAlertSettings.recordEvents,
                                 alertRepeatSeconds =
                                     thresholdAlertSettings.repeatSeconds,
                                 startDelaySeconds =
@@ -3163,7 +3171,7 @@ internal fun UvirAppContent(
                                         autoEnabled && !autoExternalCommand
                                     },
                                 alertsEnabled =
-                                    thresholdNotificationsConfigured,
+                                    thresholdNotificationsConfigured && thresholdAlertSettings.recordEvents,
                                 alertRepeatSeconds =
                                     thresholdAlertSettings.repeatSeconds,
                                 startDelaySeconds =
@@ -3217,12 +3225,14 @@ internal fun UvirAppContent(
     LaunchedEffect(
         autoEnabled,
         autoCompletedCount,
+        notificationSensorName,
         notificationPermissionGranted
     ) {
         if (autoEnabled && notificationPermissionGranted) {
             updateAutomaticAcquisitionNotification(
                 context = context.applicationContext,
-                completedCount = autoCompletedCount
+                completedCount = autoCompletedCount,
+                sensorName = notificationSensorName
             )
         } else if (!autoEnabled) {
             cancelAutomaticAcquisitionNotification(
@@ -3261,6 +3271,7 @@ internal fun UvirAppContent(
 
     LaunchedEffect(
         currentThresholdNotificationAlert,
+        notificationSensorName,
         notificationPermissionGranted
     ) {
         val activeAlert =
@@ -3272,7 +3283,8 @@ internal fun UvirAppContent(
         ) {
             updateThresholdAlertNotification(
                 context = context.applicationContext,
-                alert = activeAlert
+                alert = activeAlert,
+                sensorName = notificationSensorName
             )
         } else if (activeAlert == null) {
             cancelThresholdAlertNotification(
@@ -3385,6 +3397,13 @@ internal fun UvirAppContent(
         // Safety guard: never start a second AUTO session
         // while one is already running.
         if (autoEnabled) {
+            return
+        }
+        if (thresholdAlertSettings.hasActiveMonitoring()) {
+            showUvirBottomMessage(
+                context,
+                resources.getString(R.string.sensor_external_command_active)
+            )
             return
         }
 
@@ -3631,14 +3650,10 @@ internal fun UvirAppContent(
                                     "Acquisizione non ancora pronta."
                                 )
                             }
-
-                            // A manual acquisition takes ownership of the
-                            // active session and therefore stops AUTO first.
-                            val automaticWasEnabled =
-                                autoEnabled
-
-                            if (automaticWasEnabled) {
-                                stopAutomaticAcquisition()
+                            if (autoEnabled || thresholdAlertSettings.hasActiveMonitoring()) {
+                                throw IllegalStateException(
+                                    "Sessione già attiva."
+                                )
                             }
 
                             val selectedMode =
@@ -3650,39 +3665,27 @@ internal fun UvirAppContent(
                                             .storedValue
                                     )
                                 )
-                            val requestedMode =
-                                if (
-                                    automaticWasEnabled &&
-                                    selectedMode ==
-                                    ManualSaveMode.LAST_MANUAL_SESSION
-                                ) {
-                                    ManualSaveMode.SINGLE
-                                } else {
-                                    selectedMode
-                                }
                             val manualSession =
                                 resolveManualSession(
                                     database = database,
                                     preferences = preferences,
-                                    requestedMode = requestedMode
+                                    requestedMode = selectedMode
                                 )
                             val id =
-                                database.saveAcquisition(
-                                    sample =
-                                        latestMeasurement.get(),
-                                    note =
-                                        payload.optString(
-                                            "note",
-                                            ""
-                                        ).trim(),
-                                    automatic = false,
-                                    sessionId =
-                                        manualSession.sessionId,
-                                    sessionSequence =
-                                        manualSession.sequence,
-                                    sensorDeviceId =
-                                        selectedSensorDeviceId
-                                )
+                                retryUvirDatabaseInsert {
+                                    database.saveAcquisition(
+                                        sample = latestMeasurement.get(),
+                                        note =
+                                            payload.optString(
+                                                "note",
+                                                ""
+                                            ).trim(),
+                                        automatic = false,
+                                        sessionId = manualSession.sessionId,
+                                        sessionSequence = manualSession.sequence,
+                                        sensorDeviceId = selectedSensorDeviceId
+                                    )
+                                }
 
                             if (id == -1L) {
                                 throw IllegalStateException(
@@ -3723,6 +3726,11 @@ internal fun UvirAppContent(
                             if (autoEnabled) {
                                 throw IllegalStateException(
                                     "Acquisizione automatica già attiva."
+                                )
+                            }
+                            if (thresholdAlertSettings.hasActiveMonitoring()) {
+                                throw IllegalStateException(
+                                    "Una sessione di allerte è già attiva."
                                 )
                             }
 
@@ -4143,6 +4151,10 @@ internal fun UvirAppContent(
                 wirelessSensorState =
                     wirelessSensorState,
                 sensorProfiles = sensorProfiles,
+                sensorStatusIndicators = sensorIndicators,
+                sensorAlertMonitoringDeviceIds = sensorAlertMonitoringDeviceIds,
+                counterResetBlocked = thresholdAlertSettings.hasActiveMonitoring() ||
+                    sensorIndicators.values.any { it.pulses && it.dot != UvirStatusDot.YELLOW },
                 selectedSensorDeviceId = selectedSensorDeviceId,
                 sensorSelectionEnabled = !sensorSyncInProgress &&
                     !automaticStopInProgress && !auxiliarySensorCommandInProgress &&
@@ -4162,7 +4174,7 @@ internal fun UvirAppContent(
                                     automaticIntervalSeconds = autoIntervalSeconds.takeIf {
                                         autoEnabled && !autoExternalCommand
                                     },
-                                    alertsEnabled = thresholdNotificationsConfigured,
+                                    alertsEnabled = thresholdNotificationsConfigured && thresholdAlertSettings.recordEvents,
                                     alertRepeatSeconds = thresholdAlertSettings.repeatSeconds,
                                     startDelaySeconds = effectiveDelay,
                                     automaticDurationSeconds = remainingWindow?.let { (it - effectiveDelay).coerceAtLeast(0L) },
@@ -4177,19 +4189,12 @@ internal fun UvirAppContent(
                     onSensorSelected(deviceId)
                 },
                 onUseFakeSensorDataChanged = { enabled ->
+                    UvirSensorSimulationSettingsStore.setEnabled(preferences, simulationDeviceId, enabled)
                     useFakeSensorData = enabled
-                    preferences.edit()
-                        .putBoolean(
-                            KEY_USE_FAKE_SENSOR_DATA,
-                            enabled
-                        )
-                        .apply()
                 },
                 onFakeSensorOutOfRangeChanged = { enabled ->
+                    UvirSensorSimulationSettingsStore.setOutOfRange(preferences, simulationDeviceId, enabled)
                     fakeSensorOutOfRangeEnabled = enabled
-                    preferences.edit()
-                        .putBoolean(KEY_FAKE_SENSOR_OUT_OF_RANGE, enabled)
-                        .apply()
                 },
                 sensorConnectionMode =
                     SensorConnectionMode.fromStoredValue(
@@ -4200,10 +4205,9 @@ internal fun UvirAppContent(
                         SensorConnectionMode.fromStoredValue(
                             sensorConnectionModeValue
                         )
+                    val handoverDeviceId = intendedDeviceId
+                    val handoverManager = wirelessSensorManager
                     val completeModeChange = {
-                        usbSensorManager.configureWirelessMode(
-                            mode
-                        )
                         sensorConnectionModeValue = mode.name
                         preferences.edit()
                             .putString(
@@ -4238,44 +4242,64 @@ internal fun UvirAppContent(
                         }
                     }
 
-                    sensorConnectionSwitchJob?.cancel()
-                    // Keep the old authenticated transport alive until the
-                    // ESP32 explicitly acknowledges the new radio. This
-                    // prevents a socket close with unread samples from
-                    // discarding the switch command.
-                    sensorConnectionSwitchJob =
-                        sensorConnectionScope.launch {
-                            if (
-                                mode != SensorConnectionMode.USB
-                            ) {
-                                withContext(Dispatchers.IO) {
-                                    wirelessSensorManager
-                                        .requestWirelessModeAndAwait(
-                                            mode = mode,
-                                            timeoutMs =
-                                                (
-                                                        samplesPerMeasurement
-                                                            .coerceAtLeast(1)
-                                                            .toLong() *
-                                                        sampleSpacingMs +
-                                                        3_000L
-                                                        )
+                    // Do not replace an in-flight command: the sensor may have
+                    // already switched even though its reply is still arriving.
+                    if (mode != previousMode && sensorConnectionSwitchJob?.isActive != true) {
+                        sensorConnectionSwitchJob = sensorConnectionScope.launch {
+                            try {
+                                val handoverConfirmed = runInterruptible(Dispatchers.IO) {
+                                    val usb = usbSensorManager.state.value
+                                    val wireless = handoverManager.state.value
+                                    val route = uvirConnectionHandoverRoute(
+                                        deviceId = handoverDeviceId,
+                                        previousMode = previousMode,
+                                        targetMode = mode,
+                                        usbDeviceId = usb.deviceId.orEmpty(),
+                                        usbReady = usb.status == UsbSensorConnectionStatus.CONNECTED,
+                                        wirelessDeviceId = wireless.deviceId.orEmpty(),
+                                        wirelessReady = wireless.status == WirelessSensorConnectionStatus.CONNECTED
+                                    )
+                                    val timeoutMs = samplesPerMeasurement.coerceAtLeast(1).toLong() *
+                                        sampleSpacingMs + 3_000L
+                                    when (route) {
+                                        UvirConnectionHandoverRoute.USB -> usbSensorManager.requestWirelessModeAndAwait(
+                                            deviceId = handoverDeviceId, mode = mode, timeoutMs = timeoutMs
                                         )
-                                }
-                            } else if (
-                                previousMode != SensorConnectionMode.USB &&
-                                wirelessSensorState.status ==
-                                    WirelessSensorConnectionStatus.CONNECTED
-                            ) {
-                                withContext(Dispatchers.IO) {
-                                    wirelessSensorManager
-                                        .sendSensorControlCommands(
-                                            listOf("STOP")
+                                        UvirConnectionHandoverRoute.WIRELESS -> handoverManager.requestWirelessModeAndAwait(
+                                            deviceId = handoverDeviceId, mode = mode, timeoutMs = timeoutMs
                                         )
+                                        // With no live transport the user can still choose a source;
+                                        // ordinary reconnection/fallback remains the recovery path.
+                                        UvirConnectionHandoverRoute.LOCAL_SELECTION -> true
+                                    }
                                 }
+                                // Selection/import may have changed the peer while the I/O
+                                // operation was suspended. Never apply its result to another UID.
+                                if (!UvirSensorCredentialStore.load(context).deviceId.equals(handoverDeviceId, true) ||
+                                    UvirSensorCredentialStore.isSensorSelectionDisabled(context)
+                                ) return@launch
+                                if (!handoverConfirmed) {
+                                    showUvirBottomMessage(context.applicationContext,
+                                        resources.getString(R.string.sensor_connection_switch_failed))
+                                    return@launch
+                                }
+                                if (
+                                    mode == SensorConnectionMode.USB &&
+                                    previousMode != SensorConnectionMode.USB &&
+                                    handoverManager.state.value.status == WirelessSensorConnectionStatus.CONNECTED
+                                ) {
+                                    withContext(Dispatchers.IO) {
+                                        handoverManager.sendDiagnosticControlCommands(
+                                            handoverDeviceId, previousMode, listOf("STOP")
+                                        )
+                                    }
+                                }
+                                completeModeChange()
+                            } finally {
+                                sensorConnectionSwitchJob = null
                             }
-                            completeModeChange()
                         }
+                    }
                 },
                 onRequestBluetoothPermission =
                     onRequestBluetoothPermission,
@@ -4401,7 +4425,7 @@ internal fun UvirAppContent(
                         it.protocolValue == performance
                     }?.expectedDurationMs ?: 20_000L) + 5_000L)
                     val accepted = withContext(Dispatchers.IO) {
-                        sendSensorControlCommands(
+                        sendSelectedDiagnosticCommands(
                             listOf(debugPerformanceCommand(performance))
                         )
                     }
@@ -4410,7 +4434,7 @@ internal fun UvirAppContent(
                 },
                 onStopDebugPerformance = {
                     val accepted = withContext(Dispatchers.IO) {
-                        sendSensorControlCommands(
+                        sendSelectedDiagnosticCommands(
                             listOf("DEBUG_PERFORMANCE_STOP")
                         )
                     }
@@ -4437,7 +4461,8 @@ internal fun UvirAppContent(
                     val disassociated = withContext(Dispatchers.IO) {
                         runCatching {
                         val disassociatedDeviceId = UvirSensorCredentialStore.load(context).deviceId
-                        usbSensorManager.disconnectForSensorSelection()
+                        if (usbSensorManager.state.value.deviceId.orEmpty().equals(disassociatedDeviceId, true))
+                            usbSensorManager.disconnectForSensorSelection()
                         wirelessSensorManager.disconnectForSensorSelection()
                         saveSelectedSensorContext(preferences, disassociatedDeviceId)
                         forgetSelectedSensorOperationalContext(preferences, disassociatedDeviceId)
@@ -4502,9 +4527,16 @@ internal fun UvirAppContent(
                         )
                     }
                 },
-                onRestoreSensorDefaults = {
+                onRestoreSensorDefaults = { requestedDeviceIds ->
                     withContext(Dispatchers.IO) {
-                        restoreSensorDefaultsAndPowerOff()
+                        // Re-read associations and live connections when confirming, not when opening.
+                        val associatedIds = database.readSensorProfiles()
+                            .map { normalizeSensorDeviceId(it.hardwareUid) }.toSet()
+                        requestedDeviceIds.distinctBy(::normalizeSensorDeviceId).filter { id ->
+                            normalizeSensorDeviceId(id) in associatedIds &&
+                                (multiSensorRuntime?.restoreSensorDefaults(id)
+                                    ?: restoreConnectedUvirSensor(id, usbSensorManager, wirelessSensorManager))
+                        }.toSet()
                     }
                 },
                 sensorCalibrationSettings = sensorCalibrationSettings,
@@ -4743,7 +4775,7 @@ internal fun UvirAppContent(
                     accepted
                 },
 
-                onApplyThresholdAlertSettings = {
+                onApplyThresholdAlertSettings = applyAlerts@{
                         settings ->
                     val previousSettings = thresholdAlertSettings
                     val previousSessionId = thresholdAlertSessionId
@@ -4755,6 +4787,13 @@ internal fun UvirAppContent(
                                     rule.enabled
                                 }
                         )
+                    if (autoEnabled && normalizedSettings.hasActiveMonitoring()) {
+                        showUvirBottomMessage(
+                            context,
+                            resources.getString(R.string.sensor_external_command_active)
+                        )
+                        return@applyAlerts
+                    }
                     val needsNewSession =
                         shouldStartNewThresholdAlertSession(
                             previous = previousSettings,
@@ -4763,7 +4802,8 @@ internal fun UvirAppContent(
                         )
                     val nextSessionId =
                         when {
-                            !normalizedSettings.hasActiveMonitoring() -> 0L
+                            !normalizedSettings.hasActiveMonitoring() ||
+                                !normalizedSettings.recordEvents -> 0L
                             needsNewSession -> database.nextSessionId()
                             else -> thresholdAlertSessionId
                         }
@@ -4814,9 +4854,16 @@ internal fun UvirAppContent(
                     }
                 },
 
-                onStartThresholdAlertSession = {
+                onStartThresholdAlertSession = startAlerts@{
                         settings,
                         sessionNote ->
+                    if (autoEnabled) {
+                        showUvirBottomMessage(
+                            context,
+                            resources.getString(R.string.sensor_external_command_active)
+                        )
+                        return@startAlerts
+                    }
                     val normalizedSessionNote =
                         limitUvirNote(sessionNote).trim()
                     val normalizedSettings =
@@ -4825,18 +4872,25 @@ internal fun UvirAppContent(
                                 settings.rules.any { rule -> rule.enabled }
                         )
                     if (normalizedSettings.hasActiveMonitoring()) {
+                        clearRememberedManualSession(preferences)
                         val previousSessionId = thresholdAlertSessionId
                         if (previousSessionId > 0L) {
                             database.finishAlertSession(previousSessionId)
                         }
-                        val newSessionId = database.nextSessionId()
-                        database.startAlertSession(
+                        val newSessionId = if (normalizedSettings.recordEvents) database.nextSessionId() else 0L
+                        if (newSessionId > 0L) database.startAlertSession(
                             sessionId = newSessionId,
                             note = normalizedSessionNote,
                             sensorDeviceId = selectedSensorDeviceId
                         )
                         thresholdAlertSessionId = newSessionId
                         thresholdAlertSessionNote = normalizedSessionNote
+                        if (useFakeSensorData) {
+                            fakeAlertStartedAtMs = System.currentTimeMillis()
+                            fakeAlertRegistrationCount = 0
+                        } else {
+                            realAlertRegistrationCount = 0
+                        }
                         thresholdAlertSettings = normalizedSettings
                         saveThresholdAlertSettings(
                             preferences,
@@ -4928,6 +4982,10 @@ internal fun UvirAppContent(
                     autoMaxCount,
                 autoCompletedCount =
                     autoCompletedCount,
+                alertCompletedCount =
+                    if (!thresholdAlertSettings.recordEvents) 0
+                    else if (useFakeSensorData) fakeAlertRegistrationCount
+                    else realAlertRegistrationCount,
                 autoNextSaveMs =
                     autoNextSaveMs,
 
@@ -4939,9 +4997,11 @@ internal fun UvirAppContent(
                 autoConditionalAction = autoConditionalAction,
                 autoConditionalRules = autoConditionalRules,
                 onSaveAcquisitionConditions = { rules ->
-                    if (saveAcquisitionConditions(preferences, rules)) {
+                    val saved = saveAcquisitionConditions(preferences, rules)
+                    if (saved) {
                         autoConditionalRules = loadAcquisitionConditions(preferences)
                     }
+                    saved
                 },
                 onStartAutomaticAcquisition = {
                         request ->
@@ -4955,7 +5015,8 @@ internal fun UvirAppContent(
                 },
 
                 onResetAllCounters = {
-                    if (!autoEnabled) {
+                    if (!autoEnabled && !thresholdAlertSettings.hasActiveMonitoring() &&
+                        sensorIndicators.values.none { it.pulses && it.dot != UvirStatusDot.YELLOW }) {
                         database.resetAllCounters()
                         clearUnreadAcquisitions()
                         clearUnreadAlerts()
@@ -5015,6 +5076,7 @@ internal fun UvirAppContent(
                     unreadAlertCount,
                 sensorSyncInProgress =
                     sensorSyncInProgress,
+                onHomeActivityChanged = { homeActivityInProgress = it },
                 acquisitionSyncInProgress =
                     acquisitionSyncInProgress,
                 alertSyncInProgress =
@@ -5029,9 +5091,6 @@ internal fun UvirAppContent(
                         clearUnreadAlerts()
                     }
                 },
-
-                offlineDisconnectionNotice =
-                    offlineDisconnectionNotice,
 
                 onOpenHistory = {
                     clearUnreadAcquisitions()
@@ -5069,6 +5128,7 @@ internal fun UvirAppContent(
 
                 onOpenSessionChart = { sessionId ->
                     selectedSessionId = sessionId
+                    sessionChartNavigationState = null
                     screen =
                         AppScreen.SESSION_CHART
                 },
@@ -5113,14 +5173,23 @@ internal fun UvirAppContent(
                     cardColor = cardColor,
                     primaryText = primaryText,
                     secondaryText = secondaryText,
+                    initialNavigationState = sessionChartNavigationState,
                     onDeleteSession = {
                         database.deleteRecords(
                             sessionRecords.map { it.id }
                         )
                         selectedSessionId = null
+                        sessionChartNavigationState = null
                         screen = AppScreen.HISTORY
                     },
+                    onOpenRecord = { record, navigationState ->
+                        sessionChartNavigationState = navigationState
+                        selectedRecordId = record.id
+                        detailReturnScreen = AppScreen.SESSION_CHART
+                        screen = AppScreen.DETAIL
+                    },
                     onBack = {
+                        sessionChartNavigationState = null
                         screen =
                             AppScreen.HISTORY
                     }

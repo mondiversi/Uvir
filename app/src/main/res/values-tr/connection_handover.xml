@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sensor_connection_switch_failed">Bağlantı değişikliği doğrulanamadı. Önceki mod seçili kalır.</string>
+</resources>

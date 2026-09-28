@@ -39,6 +39,9 @@ internal class UvirSettingsDecryptionException(cause: Throwable? = null) :
 internal class UvirSettingsPasswordRequiredException :
     GeneralSecurityException("An encryption password is required")
 
+internal fun isValidUvirSettingsExportPassword(password: String): Boolean =
+    password.length >= UVIR_SETTINGS_MINIMUM_PASSWORD_LENGTH
+
 internal fun encryptUvirSettingsText(
     plaintext: String,
     password: CharArray,

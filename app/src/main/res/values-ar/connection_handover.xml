@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sensor_connection_switch_failed">تعذر تأكيد تغيير الاتصال. يظل الوضع السابق محددًا.</string>
+</resources>

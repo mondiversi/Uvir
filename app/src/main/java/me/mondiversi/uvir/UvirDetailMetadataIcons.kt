@@ -11,14 +11,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 
 internal val UvirDetailMetadataIconSize = 11.dp
 internal val UvirDetailMetadataIconStrokeWidth = 1.25.dp
+private val UvirDetailVariantIconStrokeWidth = 0.83.dp
 
 internal enum class UvirDetailMetadataIconKind {
-    DATE, START, END, DURATION, ACQUISITION, ALERT, SENSOR, NOTE
+    DATE, START, END, DURATION, ACQUISITION, ALERT, SENSOR, NOTE, VARIANT
 }
 
 /** One size and stroke for every icon in the two detail metadata cards. */
@@ -49,7 +51,8 @@ internal fun UvirDetailMetadataIcon(
         }
         else -> Unit
     }
-    Canvas(modifier = iconModifier) {
+    Canvas(modifier = iconModifier.graphicsLayer(alpha = tint.alpha)) {
+        val tint = tint.copy(alpha = 1f)
         val strokeWidth = UvirDetailMetadataIconStrokeWidth.toPx()
         val stroke = Stroke(width = strokeWidth, cap = StrokeCap.Round, join = StrokeJoin.Round)
         fun point(x: Float, y: Float) = Offset(size.width * x, size.height * y)
@@ -119,6 +122,27 @@ internal fun UvirDetailMetadataIcon(
                 line(0.34f, 0.35f, 0.66f, 0.35f)
                 line(0.34f, 0.51f, 0.66f, 0.51f)
                 line(0.34f, 0.67f, 0.54f, 0.67f)
+            }
+            UvirDetailMetadataIconKind.VARIANT -> {
+                val variantStroke =
+                    Stroke(
+                        width = UvirDetailVariantIconStrokeWidth.toPx(),
+                        cap = StrokeCap.Round,
+                        join = StrokeJoin.Round
+                    )
+                listOf(
+                    point(0.10f, 0.12f),
+                    point(0.19f, 0.23f),
+                    point(0.28f, 0.34f)
+                ).forEach { topLeft ->
+                    drawRoundRect(
+                        color = tint,
+                        topLeft = topLeft,
+                        size = Size(size.width * 0.60f, size.height * 0.48f),
+                        cornerRadius = CornerRadius(size.minDimension * 0.10f),
+                        style = variantStroke
+                    )
+                }
             }
             else -> Unit
         }

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sensor_reset_selection_title">¿Restablecer los sensores seleccionados?</string>
+    <string name="sensor_reset_selection_message">Selecciona los sensores que quieres restablecer. Se eliminarán sus ajustes, credenciales y datos no sincronizados; después se apagarán. Los datos de la app no cambiarán. Solo se pueden seleccionar sensores conectados sin actividad en curso.</string>
+    <string name="sensor_reset_selection_failed">Error al restablecer: %1$s. Comprueba la conexión e inténtalo de nuevo.</string>
+</resources>
+

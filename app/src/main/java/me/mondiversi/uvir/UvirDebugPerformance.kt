@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
@@ -198,10 +198,13 @@ internal fun UvirDebugPerformanceContent(
     }
 
     Column(
-        verticalArrangement = Arrangement.spacedBy(UvirSettingsControlGap)
+        verticalArrangement = Arrangement.spacedBy(UvirSettingsGroupGap)
     ) {
-        Text(
-            text = stringResource(R.string.debug_performance_title),
+        SettingsIslandHeader(
+            title = stringResource(R.string.debug_performance_title),
+            titleColor = contentPrimaryText,
+            titleIcon = ConnectivityIconType.MUSIC,
+            dividerColor = secondaryText,
             modifier =
                 Modifier.clickable(
                     enabled = selectorEnabled,
@@ -209,25 +212,25 @@ internal fun UvirDebugPerformanceContent(
                     indication = null,
                     // The secret melody requires a full hold; a short click does nothing.
                     onClick = {}
-                ),
-            color = contentPrimaryText,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.SemiBold
+                )
         )
-        Text(
+        SettingsPageDescription(
             text = stringResource(R.string.debug_performance_description),
-            color = contentSecondaryText,
-            fontSize = 11.sp,
-            lineHeight = 14.sp
+            color = contentSecondaryText
         )
 
         UvirVisibleDebugPerformances.forEach { performance ->
+            val selectPerformance: () -> Unit = {
+                if (selected != performance) {
+                    selected = performance
+                }
+            }
             Row(
                 modifier =
                     Modifier
                         .fillMaxWidth()
                         .clickable(enabled = selectorEnabled) {
-                            selected = performance
+                            selectPerformance()
                         },
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -236,7 +239,7 @@ internal fun UvirDebugPerformanceContent(
                 ) {
                     RadioButton(
                         selected = visibleSelection == performance,
-                        onClick = { selected = performance },
+                        onClick = selectPerformance,
                         enabled = selectorEnabled,
                         modifier = Modifier.size(24.dp),
                         colors =
@@ -275,23 +278,26 @@ internal fun UvirDebugPerformanceContent(
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (playing) {
-                Button(
+                OutlinedButton(
                     onClick = ::stopPlayback,
                     modifier = Modifier.weight(1f),
-                    colors = uvirDestructiveButtonColors()
+                    colors = uvirDestructiveOutlinedButtonColors(),
+                    border = uvirDestructiveOutlinedButtonBorder(true, secondaryText)
                 ) {
                     UvirLabeledButtonContent(
-                        text = stringResource(R.string.debug_performance_stop)
+                        text = stringResource(R.string.debug_performance_stop),
+                        fontWeight = FontWeight.Bold
                     ) {
-                        UvirButtonGlyphIcon(UvirButtonGlyph.STOP)
+                        UvirButtonGlyphIcon(UvirButtonGlyph.STOP, strokeScale = UvirDestructiveOutlinedIconStrokeScale)
                     }
                 }
             } else {
-                Button(
+                OutlinedButton(
                     enabled = playbackEnabled,
                     onClick = { startPlayback(visibleSelection) },
                     modifier = Modifier.weight(1f),
-                    colors = uvirPrimaryButtonColors()
+                    colors = uvirPrimaryOutlinedButtonColors(),
+                    border = uvirPrimaryOutlinedButtonBorder(playbackEnabled, secondaryText)
                 ) {
                     UvirLabeledButtonContent(
                         text = stringResource(R.string.debug_performance_play)

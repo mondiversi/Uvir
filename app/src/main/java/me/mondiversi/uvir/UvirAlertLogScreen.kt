@@ -235,7 +235,9 @@ internal fun ThresholdAlertLogScreen(
             }
         }
 
-    selectedChartSessionId?.let { sessionId ->
+    selectedChartSessionId
+        ?.takeIf { selectedChartAlertId == null }
+        ?.let { sessionId ->
         val chartEntries =
             allEntries.filter { it.sessionId == sessionId }
         if (chartEntries.isNotEmpty()) {
@@ -247,6 +249,9 @@ internal fun ThresholdAlertLogScreen(
                 cardColor = cardColor,
                 primaryText = primaryText,
                 secondaryText = secondaryText,
+                onOpenAlert = { entry ->
+                    selectedChartAlertId = entry.id
+                },
                 onBack = {
                     selectedChartSessionId = null
                 },
@@ -303,6 +308,10 @@ internal fun ThresholdAlertLogScreen(
         stringResource(R.string.alert_session_chart_open)
     val alertChartOpenDescription =
         stringResource(R.string.alert_chart_open)
+    val shareDescription =
+        stringResource(R.string.threshold_alert_log_share)
+    val deleteDescription =
+        stringResource(R.string.delete_all)
     fun openShareFormat(
         ids: List<Long>
     ) {
@@ -349,7 +358,7 @@ internal fun ThresholdAlertLogScreen(
     }
 
     if (showDeleteAllConfirmation) {
-        AlertDialog(
+        UvirAlertDialog(
             onDismissRequest = {
                 showDeleteAllConfirmation = false
             },
@@ -361,10 +370,13 @@ internal fun ThresholdAlertLogScreen(
                 )
             },
             text = {
-                Text(
-                    stringResource(
+                UvirHoldConfirmationMessage(
+                    message = stringResource(
                         R.string.threshold_alert_log_delete_warning
-                    )
+                    ),
+                    actionLabel =
+                        stringResource(R.string.threshold_alert_log_delete_all),
+                    holdDurationSeconds = 2
                 )
             },
             dismissButton = {
@@ -409,7 +421,7 @@ internal fun ThresholdAlertLogScreen(
     }
 
     if (showDeleteSelectedConfirmation) {
-        AlertDialog(
+        UvirAlertDialog(
             onDismissRequest = {
                 showDeleteSelectedConfirmation = false
             },
@@ -487,7 +499,7 @@ internal fun ThresholdAlertLogScreen(
     }
 
     if (showShareAllConfirmation) {
-        AlertDialog(
+        UvirAlertDialog(
             onDismissRequest = {
                 showShareAllConfirmation = false
             },
@@ -545,7 +557,8 @@ internal fun ThresholdAlertLogScreen(
     }
 
     if (showShareFormatDialog) {
-        MeasurementDetailShareDialog(
+        MeasurementDataExportScreen(
+            backgroundColor = backgroundColor,
             cardColor = cardColor,
             primaryText = primaryText,
             secondaryText = secondaryText,
@@ -557,6 +570,7 @@ internal fun ThresholdAlertLogScreen(
                 } else {
                     null
                 },
+            readableTableFileCount = 1,
             combinedChartFileCount =
                 pendingSharePlan?.let { plan ->
                     alertExportChartFileCount(
@@ -579,6 +593,7 @@ internal fun ThresholdAlertLogScreen(
                 sharePendingAlerts(selection, destination)
             }
         )
+        return
     }
 
     Scaffold(
@@ -598,10 +613,15 @@ internal fun ThresholdAlertLogScreen(
                     )
 
                     UvirMenuTitle(
-                        text =
-                            stringResource(
+                        text = "${allEntries.size} ${stringResource(
+                            if (allEntries.size == 1) {
+                                R.string.threshold_alerts_title
+                            } else {
                                 R.string.threshold_alert_log_title
-                            ),
+                            }
+                        ).replaceFirstChar { character ->
+                            character.lowercase(Locale.getDefault())
+                        }}",
                         modifier = Modifier.weight(1f),
                         color = primaryText
                     )
@@ -609,10 +629,12 @@ internal fun ThresholdAlertLogScreen(
                     UvirRecordListFilterButton(
                         active = filters.isActive,
                         enabled = allEntries.isNotEmpty(),
+                        compact = true,
                         onClick = { showFilters = !showFilters }
                     )
-
-                    IconButton(
+                    UvirTitleActionButton(
+                        iconColor = MaterialTheme.colorScheme.primary,
+                        contentDescription = shareDescription,
                         onClick = {
                             if (selectedAlertIds.isEmpty()) {
                                 showShareAllConfirmation = true
@@ -626,18 +648,13 @@ internal fun ThresholdAlertLogScreen(
                         UvirTitleActionIcon(
                             type = MenuIconType.EXPORT,
                             modifier = Modifier.size(UvirTitleActionIconSize),
-                            tint =
-                                if (entries.isNotEmpty()) {
-                                    MaterialTheme.colorScheme.primary
-                                } else {
-                                    secondaryText.copy(
-                                        alpha = 0.38f
-                                    )
-                                }
+                            tint = LocalContentColor.current
                         )
                     }
 
-                    IconButton(
+                    UvirTitleActionButton(
+                        iconColor = UvirDestructiveActionColor,
+                        contentDescription = deleteDescription,
                         onClick = {
                             if (selectedAlertIds.isEmpty() && filters.isActive) {
                                 selectedAlertIds = entries.map { it.id }
@@ -654,68 +671,12 @@ internal fun ThresholdAlertLogScreen(
                         UvirTitleActionIcon(
                             type = MenuIconType.DELETE,
                             modifier = Modifier.size(UvirTitleActionIconSize),
-                            tint =
-                                if (entries.isNotEmpty()) {
-                                    UvirDestructiveActionColor
-                                } else {
-                                    secondaryText.copy(
-                                        alpha = 0.38f
-                                    )
-                                }
+                            tint = LocalContentColor.current
                         )
                     }
                 }
             }
         },
-        bottomBar = {
-            if (entries.isNotEmpty()) {
-                Surface(
-                    color = cardColor,
-                    shadowElevation = 4.dp
-                ) {
-                    Column {
-                        HorizontalDivider(
-                            color =
-                                secondaryText.copy(
-                                    alpha = 0.16f
-                                )
-                        )
-
-                        Text(
-                            text = if (filters.isActive) {
-                                stringResource(R.string.list_filter_count, entries.size, allEntries.size)
-                            } else pluralStringResource(
-                                    R.plurals.threshold_alert_count_since,
-                                    entries.size,
-                                    entries.size,
-                                    formatDateTime(
-                                        entries.asSequence()
-                                            .map { it.timestamp }
-                                            .filter { it > 0L }
-                                            .minOrNull()
-                                            ?: entries.minOf { it.timestamp },
-                                        LocalUvirDateFormat.current,
-                                        LocalUvirTimeFormat.current
-                                    )
-                                ),
-                            modifier =
-                                Modifier
-                                    .testTag("list-filter-count")
-                                    .fillMaxWidth()
-                                    .padding(
-                                        horizontal = 20.dp,
-                                        vertical = 6.dp
-                                    ),
-                            color = secondaryText,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Medium,
-                            textAlign = TextAlign.Center,
-                            maxLines = 1
-                        )
-                    }
-                }
-            }
-        }
     ) { paddingValues ->
         if (allEntries.isEmpty()) {
             Box(
@@ -750,6 +711,7 @@ internal fun ThresholdAlertLogScreen(
                         sessionIds = filterSessionIds,
                         notes = filterNotes,
                         dates = filterDays,
+                        variantFilterEnabled = false,
                         sensorNames = filterSensorNames,
                         modes = setOf(true),
                         backgroundColor = backgroundColor,
@@ -771,7 +733,7 @@ internal fun ThresholdAlertLogScreen(
                         modifier =
                             Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 20.dp)
+                                .padding(horizontal = UvirScreenHorizontalPadding)
                                 .clickable {
                                     selectedAlertIds =
                                         if (allSelected) {
@@ -833,7 +795,7 @@ internal fun ThresholdAlertLogScreen(
 
                     HorizontalDivider(
                         modifier =
-                            Modifier.padding(horizontal = 20.dp),
+                            Modifier.padding(horizontal = UvirScreenHorizontalPadding),
                         color =
                             secondaryText.copy(alpha = 0.12f)
                     )
@@ -854,8 +816,8 @@ internal fun ThresholdAlertLogScreen(
                             ),
                     contentPadding =
                         PaddingValues(
-                            start = 20.dp,
-                            end = 20.dp,
+                            start = UvirScreenHorizontalPadding,
+                            end = UvirScreenHorizontalPadding,
                             top = 4.dp,
                             bottom = 20.dp
                         ),
@@ -929,94 +891,117 @@ internal fun ThresholdAlertLogScreen(
                                     }
                                 }
 
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(start = UvirRecordSessionContentInset)
-                                        .uvirRecordSessionHeaderPressTarget(
-                                            onClick = {
-                                                if (selectionMode) toggleSessionSelection()
-                                                else selectedChartSessionId = headerSessionId
-                                            },
-                                            onLongClick = {
-                                                selectionMode = true
-                                                selectedAlertIds = (selectedAlertIds + idsInSession).distinct()
-                                            }
-                                        )
-                                        .padding(UvirRecordSessionHeaderContentPadding)
-                                        .semantics {
-                                            if (!selectionMode) {
-                                                contentDescription = alertSessionChartOpenDescription
-                                            }
-                                        },
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    UvirHorizontalReveal(selectionMode) {
-                                        CompositionLocalProvider(
-                                            LocalMinimumInteractiveComponentSize provides 0.dp
-                                        ) {
-                                            TriStateCheckbox(
-                                                state =
-                                                    when {
-                                                        allSessionSelected -> ToggleableState.On
-                                                        someSessionSelected -> ToggleableState.Indeterminate
-                                                        else -> ToggleableState.Off
-                                                    },
-                                                onClick = toggleSessionSelection,
-                                                modifier = Modifier.size(24.dp),
-                                                colors = CheckboxDefaults.colors(
-                                                    checkedColor = MaterialTheme.colorScheme.primary,
-                                                    uncheckedColor = MaterialTheme.colorScheme.primary,
-                                                    checkmarkColor = MaterialTheme.colorScheme.onPrimary
-                                                )
-                                            )
-                                        }
-                                        Spacer(Modifier.width(8.dp))
-                                    }
+                                val openOrToggleSession: () -> Unit = {
+                                    if (selectionMode) toggleSessionSelection()
+                                    else selectedChartSessionId = headerSessionId
+                                }
+                                val selectSession: () -> Unit = {
+                                    selectionMode = true
+                                    selectedAlertIds =
+                                        (selectedAlertIds + idsInSession).distinct()
+                                }
 
-                                    SessionIdBadge(
-                                        id = headerSessionId,
-                                        textColor = primaryText,
-                                        containerColor = alertSessionColor,
-                                        contentColor = alertSessionContentColor
-                                    )
-                                    Spacer(Modifier.width(4.dp))
-                                    Text(
-                                        text = "·",
-                                        color = secondaryText,
-                                        fontSize = 12.sp,
-                                        fontWeight = FontWeight.SemiBold
-                                    )
-                                    Spacer(Modifier.width(4.dp))
-                                    Text(
-                                        text =
-                                            pluralStringResource(
-                                                R.plurals.alert_session_details,
-                                                sessionCounts[headerSessionId] ?: 1,
+                                Box(
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(start = UvirRecordSessionContentInset)
+                                            .uvirRecordSessionHeaderPressTarget(
+                                                onClick = openOrToggleSession,
+                                                onLongClick = selectSession
+                                            )
+                                            .padding(UvirRecordSessionHeaderContentPadding)
+                                            .semantics {
+                                                if (!selectionMode) {
+                                                    contentDescription =
+                                                        alertSessionChartOpenDescription
+                                                }
+                                            },
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        UvirHorizontalReveal(selectionMode) {
+                                            CompositionLocalProvider(
+                                                LocalMinimumInteractiveComponentSize provides 0.dp
+                                            ) {
+                                                TriStateCheckbox(
+                                                    state =
+                                                        when {
+                                                            allSessionSelected -> ToggleableState.On
+                                                            someSessionSelected ->
+                                                                ToggleableState.Indeterminate
+                                                            else -> ToggleableState.Off
+                                                        },
+                                                    onClick = toggleSessionSelection,
+                                                    modifier = Modifier.size(24.dp),
+                                                    colors = CheckboxDefaults.colors(
+                                                        checkedColor =
+                                                            MaterialTheme.colorScheme.primary,
+                                                        uncheckedColor =
+                                                            MaterialTheme.colorScheme.primary,
+                                                        checkmarkColor =
+                                                            MaterialTheme.colorScheme.onPrimary
+                                                    )
+                                                )
+                                            }
+                                            Spacer(Modifier.width(8.dp))
+                                        }
+
+                                        Text(
+                                            text =
                                                 formatAutomaticSessionDateTime(
                                                     sessionStartTimestamps[headerSessionId]
                                                         ?: entry.timestamp,
                                                     LocalUvirDateFormat.current,
                                                     LocalUvirTimeFormat.current
                                                 ),
-                                                sessionCounts[headerSessionId] ?: 1
-                                            ),
-                                        modifier = Modifier.weight(1f),
-                                        color = secondaryText,
-                                        fontSize = 12.sp,
-                                        fontWeight = FontWeight.SemiBold,
-                                        maxLines = 1
-                                    )
+                                            modifier = Modifier.weight(1f),
+                                            color = secondaryText,
+                                            fontSize = 13.sp,
+                                            fontWeight = FontWeight.SemiBold,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                        Spacer(Modifier.width(8.dp))
+                                        Text(
+                                            text =
+                                                "(${sessionCounts[headerSessionId] ?: 1})",
+                                            color = secondaryText,
+                                            fontSize = 13.sp,
+                                            fontWeight = FontWeight.SemiBold,
+                                            maxLines = 1
+                                        )
 
-                                    if (!selectionMode) {
-                                        Box(
-                                            modifier = Modifier.size(32.dp),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            UvirDisclosureChevron(
-                                                tint = secondaryText
-                                            )
+                                        if (!selectionMode) {
+                                            Box(
+                                                modifier = Modifier.size(32.dp),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                UvirDisclosureChevron(tint = secondaryText)
+                                            }
+                                        } else {
+                                            Spacer(Modifier.width(UvirIslandContentPadding))
                                         }
+                                    }
+
+                                    Box(
+                                        modifier = Modifier
+                                            .align(Alignment.CenterStart)
+                                            .width(UvirRecordSessionContentInset)
+                                            .wrapContentSize(unbounded = true),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        SessionIdBadge(
+                                            id = headerSessionId,
+                                            textColor = primaryText,
+                                            containerColor = alertSessionColor,
+                                            contentColor = alertSessionContentColor,
+                                            modifier = Modifier.uvirRecordSessionHeaderPressTarget(
+                                                onClick = openOrToggleSession,
+                                                onLongClick = selectSession
+                                            )
+                                        )
                                     }
                                 }
                                 Spacer(Modifier.height(UvirRecordSessionItemGap))
@@ -1132,7 +1117,6 @@ internal fun ThresholdAlertLogScreen(
                                                     Spacer(Modifier.height(3.dp))
 
                                                     UvirListRecordDescription(
-                                                        sensorName = detailSensorDisplayName(sensorProfiles[entry.sensorId]),
                                                         note = entry.note,
                                                         sessionSequence = entry.sessionSequence,
                                                         emptyNote = stringResource(R.string.no_note),

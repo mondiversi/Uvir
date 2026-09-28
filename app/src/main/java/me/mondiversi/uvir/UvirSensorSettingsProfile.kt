@@ -21,6 +21,10 @@ data class UvirSensorSettingsSnapshot(
     val alertRepeatSeconds: Int,
     val alertSessionId: Long,
     val alertRules: List<ThresholdAlertRule>,
+    val alertRecordingEnabled: Boolean? = null,
+    val alertStartDelaySeconds: Long = 0L,
+    val alertDurationSeconds: Long = 0L,
+    val alertMaxRegistrations: Int = 0,
     val wifiEnabled: Boolean,
     val bluetoothEnabled: Boolean,
     val internetEnabled: Boolean,
@@ -28,7 +32,8 @@ data class UvirSensorSettingsSnapshot(
     val wifiSsid: String,
     val internetRelayHost: String,
     val internetRelayPort: Int,
-    val lastSyncedAt: Long = 0L
+    val lastSyncedAt: Long = 0L,
+    val updatedAtMs: Long = 0L
 )
 
 internal fun firmwareSupportsSensorSettingsSnapshot(
@@ -47,6 +52,7 @@ internal fun UvirSensorRuntimeInfo.toSensorSettingsSnapshotOrNull():
     return UvirSensorSettingsSnapshot(
         schemaVersion = schemaVersion,
         firmwareVersion = firmwareVersion,
+        updatedAtMs = settingsUpdatedAtMs ?: 0L,
         sensorParameters =
             SensorParameters(
                 autonomousRecordingEnabled =
@@ -99,6 +105,10 @@ internal fun UvirSensorRuntimeInfo.toSensorSettingsSnapshotOrNull():
         alertSessionId =
             (alertSessionId ?: return null).coerceAtLeast(0L),
         alertRules = alertRules ?: return null,
+        alertRecordingEnabled = alertRecordingEnabled,
+        alertStartDelaySeconds = (alertStartDelaySeconds ?: 0L).coerceIn(0L, 31_536_000L),
+        alertDurationSeconds = (alertDurationSeconds ?: 0L).coerceIn(0L, 31_536_000L),
+        alertMaxRegistrations = (alertMaxRegistrations ?: 0).coerceIn(0, MAX_AUTOMATIC_ACQUISITIONS),
         wifiEnabled = wifiEnabled ?: return null,
         bluetoothEnabled = bluetoothEnabled ?: return null,
         internetEnabled = internetEnabled ?: return null,
@@ -129,6 +139,10 @@ internal fun UvirSensorSettingsSnapshot.sensorBackedAlertSettings(
     return appSettings.copy(
         enabled = alertMonitoringEnabled && alertRules.isNotEmpty(),
         rules = completeRules,
-        repeatSeconds = alertRepeatSeconds
+        repeatSeconds = alertRepeatSeconds,
+        recordEvents = alertRecordingEnabled ?: appSettings.recordEvents,
+        startDelaySeconds = alertStartDelaySeconds,
+        durationSeconds = alertDurationSeconds,
+        maxRegistrations = alertMaxRegistrations
     )
 }

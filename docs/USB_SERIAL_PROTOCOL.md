@@ -63,6 +63,18 @@ write it to ordinary logs, or include it in diagnostic reports.
 Physical USB access therefore grants control of the sensor. Products exposing
 the port should apply their own physical-access policy.
 
+### Switching the active wireless transport
+
+An authenticated controller can send `WIRELESS WIFI`, `WIRELESS BLUETOOTH` or
+`WIRELESS INTERNET` over its existing link. The sensor replies with a `status`
+frame containing the requested `wireless_mode` before closing the old radio,
+then enables the requested mode first. If the new link does not authenticate,
+the normal 20-second fallback cycle through configured modes remains available.
+The Android app checks this acknowledgement before saving its new selection;
+a rejection, timeout or link loss does not count as confirmation. Without a
+live link, selecting a source locally still uses normal reconnection. Selecting
+USB does not send `WIRELESS OFF`, so wireless recovery is preserved.
+
 ## Framing and compatibility rules
 
 Commands are ASCII text followed by a newline. Responses are newline-delimited
@@ -120,12 +132,12 @@ SYNC_BEGIN
 STREAM 150
 ```
 
-`TIME` accepts Unix epoch milliseconds from 2020 onward and synchronizes the
-powered runtime. The Android app sends it on every authenticated connection; a
-third-party host should do the same. The ESP32 has no battery-backed clock, so
-a complete power loss clears this time state. External-button and autonomous
-acquisitions are rejected until a connected host supplies a valid date; Uvir
-never creates intentionally undated records.
+`TIME` accepts Unix epoch milliseconds from 2020 onward and synchronizes both
+the powered runtime and the DS3231 battery-backed RTC. Android sends it on every
+authenticated connection; a third-party host should do the same. After a power
+loss the RTC supplies UTC autonomously. If it is absent, uninitialized or has
+lost backup power, external-button and autonomous acquisitions remain rejected;
+Uvir never creates intentionally undated records.
 
 ## Identity and status
 
@@ -135,7 +147,27 @@ Returns a `hello` object containing identity, firmware, capabilities, current
 sampling settings, time state, memory information, configured radios, offline
 queue usage and current automatic/alert state.
 
-Time-related fields are `time_synced` and `current_time_ms`.
+Firmware 0.5.90 adds these storage fields:
+
+- `storage_backend`: `micro_sd`, `internal_emergency`, or `none`;
+- `storage_record_size_bytes`;
+- `sd_available`, `sd_foreign`, and `sd_type`;
+- `sd_total_bytes`, `sd_used_bytes`, and `sd_free_bytes`;
+- `sd_record_capacity_total` and `sd_record_capacity_free`;
+- `sd_invalid_records`, `sd_mount_errors`, and `sd_write_errors`.
+
+Firmware 0.5.95 adds FRAM fields to `hello`: `fram_available`,
+`fram_model`, `fram_i2c_address`, `fram_capacity_bytes`,
+`fram_queue_available`, `fram_record_capacity`, and `fram_records_used`.
+The `offline_*` counts include pending records in both FRAM and the
+filesystem. A full FRAM queue spills new final records to microSD.
+
+Record capacity reserves 5% of the card, with a minimum reserve of 16 MiB, and
+therefore intentionally differs from raw free bytes divided by record size.
+
+Time-related fields are `time_synced`, `current_time_ms`, `rtc_available`,
+`rtc_valid`, `rtc_oscillator_stopped`, `rtc_read_ok`, `rtc_current_time_ms`,
+`time_source`, `rtc_read_errors`, and `rtc_write_errors`.
 
 Use capability fields such as `conditional_acquisition_supported` and
 `external_command_supported` before presenting related controls.
@@ -149,16 +181,26 @@ multiple hosts.
 
 ### `TIME <unix_epoch_ms>`
 
-Sets the volatile runtime clock. The returned status contains
-`"time_synced":true`. Time remains valid across ordinary connection loss while
-the ESP32 stays powered, but not across a complete power loss or restart.
+Sets the runtime clock and, when detected, the DS3231. The returned status
+contains `"time_synced":true` and `rtc_updated`. Time remains valid through a
+complete ESP32 power loss when the RTC backup cell and oscillator are valid.
 
 ### `DIAGNOSTIC <request_id>`
 
-`request_id` must contain exactly 32 hexadecimal characters. The command is
-read-only and returns a correlated `diagnostic` frame with identity, uptime,
-memory, storage, sensor availability and session state. It never includes
-credentials.
+`request_id` must contain exactly 32 hexadecimal characters. Firmware 0.5.92+
+returns a correlated `diagnostic` frame with identity, uptime, processor,
+memory, storage, connection and session state. It also identifies every wired
+component and reports the I²C acknowledgement and driver state for AS7343,
+optional AS7331 and DS3231; microSD adapter/bus/pins and read/write result;
+FRAM bus, queue and non-destructive read/write result (`fram_bus_ok`,
+`fram_queue_available`, `fram_read_write_ok`); LED and buzzer control
+paths/configuration; and the current GPIO33 external
+input state. It never includes credentials or changes settings, sessions or
+measurement records. It tests microSD via one bounded temporary
+write/read/delete round trip (`sd_read_write_ok`) and FRAM by restoring the
+original contents of a reserved diagnostic address. LEDs and buzzer are not
+actuated by this command because
+their final optical or acoustic result cannot be verified electrically.
 
 ## Reading measurements
 
@@ -259,6 +301,13 @@ them.
 
 ## Automatic acquisition jobs
 
+From firmware 0.5.98, automatic acquisition and value-alert monitoring are
+mutually exclusive. `OFFLINE_JOB`, `OFFLINE_CONDITIONAL_JOB` and
+`OFFLINE_EXTERNAL_JOB` return
+`session_busy` while value alerts are active; stop them first with
+`ALERT_CONFIG OFF ...`. Likewise, `ALERT_CONFIG ON ...` returns `session_busy`
+while an automatic job is active; stop it first with `OFFLINE_STOP`.
+
 All IDs and timestamps are unsigned decimal integers. A session note is stored
 by the Uvir app rather than duplicated in every sensor record; `-` is the
 reserved note token in the current wire format.
@@ -297,19 +346,24 @@ GPIO 33 also supports autonomous control when no job was created by the app:
   without storing the three gesture presses as acquisitions;
 - one short closure during that external session stores its next sequenced
   acquisition;
-- while a non-external acquisition or value-alert session is active, short and
-  triple closures do not create acquisitions or start another session;
+- one short closure during a normal automatic session is rejected and cannot
+  add a record to it;
+- one short closure during a manual app session is delivered as an external
+  acquisition within that manual session, marked as externally triggered;
+- a short closure while value-alert monitoring is active is rejected with five
+  orange RGB flashes and one prolonged buzzer tone;
 - a closure held for at least two seconds stops the active automatic or
   value-alert session;
-- a triple closure while a session is active is ignored.
+- a triple closure while an external session is already active is ignored;
+  during a normal automatic or value-alert session it is rejected.
 
 Sensor-originated sessions use a positive 64-bit remote token with bit 62 set.
 Hosts must map the tuple `(device_id, remote session token)` to their own local
 session identifier instead of displaying or adopting the token as a global ID.
 The sensor reuses that token for live events and later offline synchronization.
-All external gestures require a clock previously supplied with `TIME`; without
-it, no job or record is created and the sensor emits its five-flash/long-beep
-time-unavailable signal.
+All external gestures require a valid clock (from `TIME` or the RTC); without
+it, no job or record is created and the sensor emits the same five-flash/long-beep
+rejection signal.
 
 ### Conditional job
 
@@ -348,6 +402,8 @@ acquisition is sent as an `acquisition_event`. Important fields include:
 - `timestamp_ms`;
 - `session_id` (`0` for a standalone external acquisition);
 - `sequence`;
+- `external_command` (`true` only when this specific record was triggered by
+  GPIO 33, including records in external-command sessions);
 - `completed_count` and `job_active`;
 - the `bands` object.
 
@@ -360,6 +416,9 @@ ACQUISITION_ACK <record_id>
 The sensor retries an unacknowledged live event. Never acknowledge a record
 before it has been committed to durable storage. If the transport disappears
 while an event is pending, the sensor moves that event to its offline queue.
+Before creating that event, each required physical sample permits up to three
+read attempts. These are recovery attempts for transient sensor/I2C failures,
+not additional samples in the configured average.
 
 ## Value alerts
 
@@ -369,12 +428,26 @@ Replace the complete rule set atomically:
 ALERTS_CLEAR
 ALERT_RULE <metric> <ABOVE|BELOW> <threshold>
 ALERT_RULE <metric> <ABOVE|BELOW> <threshold>
-ALERT_CONFIG ON <repeat_seconds> <session_id>
+ALERT_CONFIG ON <repeat_seconds> <session_id> <SAVE|NO_SAVE> <start_delay_seconds> <duration_seconds> <maximum_registrations>
 ```
 
 Up to 24 distinct rules are accepted. Use `ALERT_CONFIG OFF ...` to stop alert
 monitoring. Value alerts and automatic-acquisition conditions are different
 features and do not overwrite one another.
+
+The last three parameters were added in firmware 0.5.97. They may be omitted
+by older clients and then default to zero (no delay, no duration limit, no
+registration limit). Duration begins after the start delay. The sensor checks
+the limits autonomously, including when Android is disconnected. A completed
+alert counts toward the maximum only after it has been emitted or stored;
+zero means unlimited. A power interruption does not restart either deadline.
+
+`NO_SAVE` keeps threshold checking, LED and buzzer feedback active without
+creating alert records on the sensor. Connected `alert_event` frames still
+report the occurrence with `"recorded":false`; clients must not add these
+events to their databases. `SAVE` is the default when the final token is
+omitted by an older client. The mode survives power loss with the alert
+configuration. A no-save session uses session ID `0`.
 
 ## Offline synchronization
 
@@ -412,6 +485,16 @@ and will not later appear in the sensor's offline queue.
 Set `TIME`, configure the job, then release the live app session with `STOP`.
 Leave autonomous recording enabled. The ESP32 records final acquisitions in
 its own offline queue, and Uvir can later import them through `SYNC_BEGIN`.
+
+With firmware 0.5.95, FRAM is the first queue for up to 92 pending final
+records; microSD is the overflow and fallback queue. Current automatic-job and
+alert state is stored in alternating checksummed FRAM checkpoints after meaningful
+changes and completed records (on microSD when FRAM is unavailable at startup).
+Following a complete power loss, a valid DS3231
+clock lets the firmware reconcile the restored job autonomously: expired jobs
+close, missed intervals are skipped without synthetic catch-up measurements,
+and a still-valid job keeps its session ID, counters, schedule and conditions.
+Without a valid RTC the job remains paused until a host sends `TIME`.
 
 This second model is appropriate when another apparatus merely powers,
 configures or triggers the sensor and the Android app remains the long-term

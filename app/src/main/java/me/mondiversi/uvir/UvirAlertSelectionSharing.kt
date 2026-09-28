@@ -1,12 +1,7 @@
 package me.mondiversi.uvir
 
-import android.app.Activity
-import android.content.ClipData
 import android.content.Context
-import android.content.Intent
-import androidx.core.content.FileProvider
 import java.io.File
-import java.util.Locale
 
 internal sealed interface AlertExportItem {
     data class CompleteSession(
@@ -326,70 +321,14 @@ internal fun shareAlertExportPlan(
         }
     }
 
-    if (destination == UvirExportDestination.SAVE) {
-        requestUvirExportSave(context, files)
-        return
-    }
-
-    val uris =
-        ArrayList(
-            files.map { file ->
-                FileProvider.getUriForFile(
-                    context,
-                    "${context.packageName}.fileprovider",
-                    file
-                )
-            }
-        )
-    val sendIntent =
-        Intent(
-            if (files.size == 1) {
-                Intent.ACTION_SEND
-            } else {
-                Intent.ACTION_SEND_MULTIPLE
-            }
-        ).apply {
-            type =
-                if (files.size > 1) {
-                    "*/*"
-                } else {
-                    when (files.first().extension.lowercase(Locale.US)) {
-                        "csv" -> "text/csv"
-                        "txt" -> "text/plain"
-                        else -> "image/png"
-                    }
-                }
-            putExtra(
-                Intent.EXTRA_SUBJECT,
-                exportContext.getString(R.string.threshold_alert_export_subject)
-            )
-            if (files.size == 1) {
-                putExtra(Intent.EXTRA_STREAM, uris.first())
-            } else {
-                putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris)
-            }
-            clipData =
-                ClipData.newUri(
-                    context.contentResolver,
-                    files.first().name,
-                    uris.first()
-                ).apply {
-                    uris.drop(1).forEach { uri ->
-                        addItem(ClipData.Item(uri))
-                    }
-                }
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        }
-    val chooser =
-        Intent.createChooser(
-            sendIntent,
-            context.getString(R.string.threshold_alert_log_share)
-        )
-
-    if (context !is Activity) {
-        chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-    }
-    context.startActivity(chooser)
+    deliverUvirExportFiles(
+        context = context,
+        files = files,
+        destination = destination,
+        chooserTitle = context.getString(R.string.threshold_alert_log_share),
+        subject =
+            exportContext.getString(R.string.threshold_alert_export_subject)
+    )
 }
 
 internal fun alertExportChartFileCount(

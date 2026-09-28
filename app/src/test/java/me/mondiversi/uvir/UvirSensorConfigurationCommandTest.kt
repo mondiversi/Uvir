@@ -54,7 +54,7 @@ class UvirSensorConfigurationCommandTest {
                 sessionId = 12L
             )
 
-        assertEquals("ALERT_CONFIG ON 30 12", commands.last())
+        assertEquals("ALERT_CONFIG ON 30 12 SAVE 0 0 0", commands.last())
     }
 
     @Test
@@ -79,7 +79,46 @@ class UvirSensorConfigurationCommandTest {
                 sessionId = 12L
             )
 
-        assertEquals("ALERT_CONFIG OFF 30 12", commands.last())
+        assertEquals("ALERT_CONFIG OFF 30 12 SAVE 0 0 0", commands.last())
+    }
+
+    @Test
+    fun noRecordAlertSessionIsSentToSensor() {
+        val settings = ThresholdAlertSettings(
+            enabled = true,
+            rules = listOf(ThresholdAlertRule(
+                metric = ThresholdAlertMetric.UVA,
+                enabled = true,
+                direction = ThresholdAlertDirection.ABOVE,
+                threshold = 1f
+            )),
+            repeatSeconds = 5,
+            sound = ThresholdAlertSound.SILENT,
+            volume = 0,
+            recordEvents = false
+        )
+        assertEquals("ALERT_CONFIG ON 5 0 NO_SAVE 0 0 0", sensorAlertCommands(settings).last())
+    }
+
+    @Test
+    fun alertScheduleAndMaximumAreSentToSensor() {
+        val settings = ThresholdAlertSettings(
+            enabled = true,
+            rules = listOf(ThresholdAlertRule(
+                metric = ThresholdAlertMetric.UVA,
+                enabled = true,
+                direction = ThresholdAlertDirection.ABOVE,
+                threshold = 1f
+            )),
+            repeatSeconds = 10,
+            sound = ThresholdAlertSound.SILENT,
+            volume = 0,
+            startDelaySeconds = 60L,
+            durationSeconds = 3_600L,
+            maxRegistrations = 12
+        )
+        assertEquals("ALERT_CONFIG ON 10 42 SAVE 60 3600 12",
+            sensorAlertCommands(settings, sessionId = 42L).last())
     }
 
     @Test

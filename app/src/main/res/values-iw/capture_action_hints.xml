@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="capture_hint_start">התחל רכישה</string>
+    <string name="capture_hint_stop">עצור רכישה</string>
+    <string name="alert_hint_start">התחל רישום</string>
+    <string name="alert_hint_stop">עצור רישום</string>
+</resources>

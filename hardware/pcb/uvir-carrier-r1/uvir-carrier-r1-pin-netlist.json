@@ -1,0 +1,172 @@
+{
+  "format": "uvir-pin-netlist-v1",
+  "title": "Uvir carrier R1 - electrical pin map and provisional placement",
+  "status": "electrical_draft_not_fabrication_files",
+  "units": "mm",
+  "firmware_pin_source": "firmware/esp32/UvirSensor/UvirHardwareConfig.h",
+  "easyeda_note": "This is a logical JSON netlist, not an EasyEDA-native schematic or PCB source file. Place symbols and choose the actual socket footprints in EasyEDA before generating a PCB.",
+  "layout": {
+    "board_outline_mm": null,
+    "front_top_to_bottom": ["BZ1,D1,D2", "U3", "U2", "U1"],
+    "front_left_edge": "SW1, slightly above the board midpoint",
+    "back_top_to_bottom": ["U6", "U5", "ESP32_ANTENNA_KEEPOUT", "U4"],
+    "usb_edge": "bottom",
+    "sd_card_access": "side edge opposite the U6 header; final rotation to follow the actual socket opening",
+    "sensor_orientation": "U2 and U3 have their longer board dimension horizontal and their optical faces toward the front",
+    "antenna_keepout": "No components, copper or routing on either carrier layer under/near the U1 PCB antenna; define exact geometry from the actual ESP32 board before layout."
+  },
+  "components": [
+    {
+      "ref": "U1",
+      "model": "ESP32 Dev Module, ESP-WROOM-32, 38-pin",
+      "side": "front",
+      "approx_size_mm": {"width": 25, "height": 52},
+      "mount": "removable, two 1x19 female sockets, nominal 2.54 mm pin pitch",
+      "approx_header_row_spacing_mm": 22,
+      "orientation": "USB connector toward the bottom edge",
+      "header_reference": "User-supplied esp32_pin_ref.jpg; pin order agrees with Espressif ESP32-DevKitC 38-pin reference, but exact socket geometry remains to be measured on the physical board.",
+      "used_header_pins_usb_down": {
+        "U1.3V3": "left 1 (3V3)",
+        "U1.GPIO32": "left 7 (GPIO32)",
+        "U1.GPIO33": "left 8 (GPIO33)",
+        "U1.GPIO25": "left 9 (GPIO25)",
+        "U1.GPIO26": "left 10 (GPIO26)",
+        "U1.GPIO27": "left 11 (GPIO27)",
+        "U1.GPIO13": "left 15 (GPIO13)",
+        "U1.5V_or_VIN": "left 19 (5V)",
+        "U1.GND": "right 1 (GND)",
+        "U1.GPIO23": "right 2 (GPIO23)",
+        "U1.GPIO22": "right 3 (GPIO22)",
+        "U1.GPIO21": "right 6 (GPIO21)",
+        "U1.GPIO19": "right 8 (GPIO19)",
+        "U1.GPIO18": "right 9 (GPIO18)"
+      }
+    },
+    {
+      "ref": "U2",
+      "model": "GY-AS7343 visible/NIR breakout",
+      "side": "front",
+      "approx_size_mm": {"width": 22, "height": 13},
+      "mount": "removable female socket; verify the actual header's pin count/order before footprint selection",
+      "i2c_address": "0x39"
+    },
+    {
+      "ref": "U3",
+      "model": "MIKROE UV 5 Click, AS7331, MIKROE-5535",
+      "side": "front",
+      "size_mm": {"width_rotated_horizontal": 28.6, "height_rotated_horizontal": 25.4},
+      "mount": "removable dual 1x8 mikroBUS female sockets, nominal 2.54 mm pin pitch; preserve the standard row spacing",
+      "i2c_address_default": "0x74",
+      "pin_numbers": {"3V3": 7, "GND_A": 8, "GND_B": 9, "SDA": 11, "SCL": 12}
+    },
+    {
+      "ref": "U4",
+      "model": "HW-084 DS3231 battery-backed RTC breakout",
+      "side": "back",
+      "approx_size_mm": {"width_transverse": 37, "height_transverse": 22},
+      "mount": "removable female socket; verify its physical pin order",
+      "i2c_address": "0x68"
+    },
+    {
+      "ref": "U5",
+      "model": "MB85RC256V 32-KiB I2C FRAM breakout",
+      "side": "back",
+      "approx_size_mm": {"long_side": 20, "short_side": 15},
+      "mount": "removable female socket; verify its physical pin order",
+      "i2c_address_default": "0x50"
+    },
+    {
+      "ref": "U6",
+      "model": "Generic 6-pin SPI microSD adapter with 1117C33 regulator and SN74HC125 buffer",
+      "side": "back",
+      "approx_size_mm": {"long_side": 43, "short_side": 24},
+      "mount": "removable 1x6 female socket; orient card opening toward a board edge",
+      "supply_note": "This tested adapter uses 5V/VIN at VCC; its SPI signal pins are 3.3V compatible. Do not apply this supply rule to a different adapter without checking it."
+    },
+    {
+      "ref": "D1",
+      "model": "Common-cathode RGB LED, red and green channels used",
+      "side": "front_top",
+      "mount": "through-hole, leads may be bent toward the top edge; final package footprint adjustable"
+    },
+    {
+      "ref": "D2",
+      "model": "Blue operation LED",
+      "side": "front_top",
+      "mount": "through-hole, leads may be bent toward the top edge; final package footprint adjustable"
+    },
+    {
+      "ref": "BZ1",
+      "model": "Low-current passive piezo buzzer, two terminals",
+      "side": "front_top",
+      "mount": "through-hole, acoustically front-facing; final diameter and pin pitch adjustable"
+    },
+    {
+      "ref": "SW1",
+      "model": "Momentary normally-open four-leg tactile switch",
+      "side": "front_left_edge",
+      "mount": "through-hole; place actuator toward the side edge",
+      "pin_note": "Use the two different internal contact sides. Two legs on each side are already common; do not choose two legs from the same side as the switch terminals."
+    },
+    {"ref": "R1", "model": "330 ohm LED series resistor", "side": "front", "channel": "RGB red"},
+    {"ref": "R2", "model": "330 ohm LED series resistor", "side": "front", "channel": "RGB green"},
+    {"ref": "R3", "model": "330 ohm LED series resistor", "side": "front", "channel": "blue LED"}
+  ],
+  "nets": [
+    {
+      "name": "5V_USB",
+      "connections": ["U1.5V_or_VIN", "U6.VCC"],
+      "note": "Verify that the exact ESP32 board exposes USB 5 V at its 5V/VIN pin and that U6 matches the tested level-shifted adapter."
+    },
+    {
+      "name": "3V3",
+      "connections": ["U1.3V3", "U2.VCC", "U3.pin7_3V3", "U4.VCC", "U5.VCC"]
+    },
+    {
+      "name": "GND",
+      "connections": ["U1.GND", "U2.GND", "U3.pin8_GND", "U3.pin9_GND", "U4.GND", "U5.GND", "U6.GND", "D1.common_cathode", "D2.cathode", "BZ1.negative", "SW1.contact_B"]
+    },
+    {
+      "name": "I2C_SDA",
+      "connections": ["U1.GPIO21", "U2.SDA", "U3.pin11_SDA", "U4.SDA", "U5.SDA"]
+    },
+    {
+      "name": "I2C_SCL",
+      "connections": ["U1.GPIO22", "U2.SCL", "U3.pin12_SCL", "U4.SCL", "U5.SCL"]
+    },
+    {"name": "SD_CS", "connections": ["U1.GPIO13", "U6.CS"]},
+    {"name": "SD_SCK", "connections": ["U1.GPIO18", "U6.SCK"]},
+    {"name": "SD_MISO", "connections": ["U1.GPIO19", "U6.MISO"]},
+    {"name": "SD_MOSI", "connections": ["U1.GPIO23", "U6.MOSI"]},
+    {"name": "BUZZER_PWM", "connections": ["U1.GPIO32", "BZ1.positive"]},
+    {"name": "EXTERNAL_COMMAND_ACTIVE_LOW", "connections": ["U1.GPIO33", "SW1.contact_A"]},
+    {"name": "LED_RED_DRIVE", "connections": ["U1.GPIO25", "R1.pin1"]},
+    {"name": "LED_RED_ANODE", "connections": ["R1.pin2", "D1.red_anode"]},
+    {"name": "LED_GREEN_DRIVE", "connections": ["U1.GPIO26", "R2.pin1"]},
+    {"name": "LED_GREEN_ANODE", "connections": ["R2.pin2", "D1.green_anode"]},
+    {"name": "LED_BLUE_DRIVE", "connections": ["U1.GPIO27", "R3.pin1"]},
+    {"name": "LED_BLUE_ANODE", "connections": ["R3.pin2", "D2.anode"]}
+  ],
+  "intentionally_unused": [
+    "U2.INT_or_I",
+    "U2.GPIO_or_G",
+    "U3.pin2_SYN",
+    "U3.pin3_CLICK_ID_CS",
+    "U3.pin15_RDY",
+    "U3.pin10_5V",
+    "U4.SQW",
+    "U4.32K",
+    "D1.blue_anode",
+    "U5.WP_A0_A1_A2_use_tested_breakout_defaults_not_ESP_GPIO"
+  ],
+  "checks_before_pcb_order": [
+    "Assign real footprints and confirm pin 1 and header row spacing for every removable module; approximate 2.54 mm pitch is not a complete footprint.",
+    "Verify 3.3 V regulator current budget with all connected modules and LEDs; do not feed the 3V3 rail from 5 V.",
+    "Inspect I2C pull-ups already fitted on breakouts before adding any carrier pull-ups; the four I2C modules share the bus.",
+    "Keep the ESP32 antenna region clear on both carrier layers and away from rear components.",
+    "Leave accessible clearance beyond the microSD card slot and the USB connector.",
+    "Keep optical sensor windows separated from indicator LEDs, using an opaque barrier if necessary.",
+    "Use only a small passive piezo directly on GPIO32; a higher-current buzzer needs a transistor driver.",
+    "The RTC breakout charging path must remain disabled when a non-rechargeable CR2032 is installed."
+  ]
+}

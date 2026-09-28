@@ -40,4 +40,18 @@ class UvirSettingsEncryptionTest {
         assertNotEquals(first.iv, second.iv)
         assertNotEquals(first.ciphertext, second.ciphertext)
     }
+
+    @Test
+    fun exportPasswordRequiresMinimumLength() {
+        assertEquals(
+            false,
+            isValidUvirSettingsExportPassword("short")
+        )
+        assertEquals(false, isValidUvirSettingsExportPassword("1234567"))
+        assertEquals(true, isValidUvirSettingsExportPassword("12345678"))
+        assertEquals(
+            true,
+            isValidUvirSettingsExportPassword("password valida")
+        )
+    }
 }

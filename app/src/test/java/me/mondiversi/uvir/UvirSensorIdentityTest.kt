@@ -1,10 +1,33 @@
 package me.mondiversi.uvir
 
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class UvirSensorIdentityTest {
+    @Test
+    fun restoredAppWithoutCredentialsFallsBackToUsbPairing() {
+        assertEquals(
+            SensorConnectionMode.USB,
+            initialSensorConnectionMode(
+                storedValue = SensorConnectionMode.WIFI.name,
+                hasAssociatedSensor = false
+            )
+        )
+    }
+
+    @Test
+    fun associatedSensorKeepsItsSelectedConnectionMode() {
+        assertEquals(
+            SensorConnectionMode.INTERNET,
+            initialSensorConnectionMode(
+                storedValue = SensorConnectionMode.INTERNET.name,
+                hasAssociatedSensor = true
+            )
+        )
+    }
+
     @Test
     fun firstSensorCanBeDiscoveredWithoutAnExistingAssociation() {
         assertTrue(

@@ -1,8 +1,8 @@
 package me.mondiversi.uvir
 
 import android.util.Log
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import org.json.JSONObject
 
 private const val SENSOR_ORIGINATED_SESSION_MARKER = 1L shl 62
@@ -61,7 +61,8 @@ internal sealed interface SensorSyncEvent {
         val sessionId: Long,
         val sequence: Int,
         val note: String,
-        val sample: SensorSample
+        val sample: SensorSample,
+        val externalCommand: Boolean? = null
     ) : SensorSyncEvent
 
     data class Alert(
@@ -104,12 +105,11 @@ internal sealed interface SensorSyncEvent {
 }
 
 internal object SensorSyncEventBus {
-    private val channel =
-        Channel<SensorSyncEvent>(Channel.UNLIMITED)
+    private val processed = MutableSharedFlow<UvirStoredDeviceEvent<SensorSyncEvent>>(extraBufferCapacity = 128)
+    val events = processed.asSharedFlow()
+    suspend fun publish(event: UvirStoredDeviceEvent<SensorSyncEvent>) { processed.emit(event) }
 
-    val events = channel.receiveAsFlow()
-
-    fun emit(event: SensorSyncEvent) {
+    fun emit(event: SensorSyncEvent, deviceId: String = "") {
         Log.i(
             "UvirSync",
             when (event) {
@@ -134,7 +134,7 @@ internal object SensorSyncEventBus {
                         "code=${event.code}"
             }
         )
-        channel.trySend(event)
+        UvirSensorEventHub.emitSync(deviceId, event)
     }
 }
 
@@ -151,7 +151,8 @@ internal sealed interface SensorRuntimeEvent {
         val completedCount: Int,
         val jobActive: Boolean,
         val nextAtMs: Long,
-        val sample: SensorSample
+        val sample: SensorSample,
+        val externalCommand: Boolean? = null
     ) : SensorRuntimeEvent
 
     data class AutomaticStatus(
@@ -169,19 +170,19 @@ internal sealed interface SensorRuntimeEvent {
 }
 
 internal object SensorRuntimeEventBus {
-    private val channel =
-        Channel<SensorRuntimeEvent>(Channel.UNLIMITED)
+    private val processed = MutableSharedFlow<UvirStoredDeviceEvent<SensorRuntimeEvent>>(extraBufferCapacity = 128)
+    val events = processed.asSharedFlow()
+    suspend fun publish(event: UvirStoredDeviceEvent<SensorRuntimeEvent>) { processed.emit(event) }
 
-    val events = channel.receiveAsFlow()
-
-    fun emit(event: SensorRuntimeEvent) {
-        channel.trySend(event)
+    fun emit(event: SensorRuntimeEvent, deviceId: String = "") {
+        UvirSensorEventHub.emitRuntime(deviceId, event)
     }
 }
 
 internal fun parseSensorRuntimeFrame(
     json: JSONObject,
-    source: SensorSyncSource
+    source: SensorSyncSource,
+    deviceId: String = ""
 ): Boolean {
     return when (json.optString("type")) {
         "acquisition_event" -> {
@@ -200,10 +201,12 @@ internal fun parseSensorRuntimeFrame(
                     completedCount = json.optInt("completed_count", 0),
                     jobActive = json.optBoolean("job_active", false),
                     nextAtMs = json.optLong("next_at_ms", 0L),
+                    externalCommand = json.opt("external_command") as? Boolean,
                     sample = bands.toUvirBandSample().copy(
                         qualityFlags = json.uvirQualityFlags()
                     )
                 )
+                , deviceId
             )
             true
         }
@@ -223,6 +226,7 @@ internal fun parseSensorRuntimeFrame(
                     endAtMs = json.optLong("offline_end_ms").takeIf { json.has("offline_end_ms") },
                     startedAtMs = json.optLong("offline_started_ms").takeIf { json.has("offline_started_ms") }
                 )
+                , deviceId
             )
             true
         }
@@ -233,7 +237,8 @@ internal fun parseSensorRuntimeFrame(
 
 internal fun parseSensorSyncFrame(
     json: JSONObject,
-    source: SensorSyncSource
+    source: SensorSyncSource,
+    deviceId: String = ""
 ): Boolean {
     return when (json.optString("type")) {
         "sync_start" -> {
@@ -246,6 +251,7 @@ internal fun parseSensorSyncFrame(
                     storageWasFull =
                         json.optBoolean("storage_was_full", false)
                 )
+                , deviceId
             )
             true
         }
@@ -268,6 +274,7 @@ internal fun parseSensorSyncFrame(
                         sessionId = json.optLong("session_id", 0L),
                         sequence = json.optInt("sequence", 0),
                         note = json.optString("note"),
+                        externalCommand = json.opt("external_command") as? Boolean,
                         sample = bands.toUvirBandSample().copy(
                             qualityFlags = json.uvirQualityFlags()
                         )
@@ -293,7 +300,7 @@ internal fun parseSensorSyncFrame(
 
                 else -> return true
             }
-            SensorSyncEventBus.emit(event)
+            SensorSyncEventBus.emit(event, deviceId)
             true
         }
 
@@ -315,6 +322,7 @@ internal fun parseSensorSyncFrame(
                     offlineNextAtMs =
                         json.optLong("offline_next_ms", 0L)
                 )
+                , deviceId
             )
             true
         }
@@ -333,6 +341,7 @@ internal fun parseSensorSyncFrame(
                         "offline_sync_failed"
                     )
                 )
+                , deviceId
             )
             true
         }
@@ -439,6 +448,10 @@ internal fun sensorAlertCommands(
             "ALERT_CONFIG " +
                 "${if (settings.hasActiveMonitoring()) "ON" else "OFF"} " +
                 "${settings.repeatSeconds.coerceIn(1, 86_400)} " +
-                sessionId.coerceAtLeast(0L)
+                sessionId.coerceAtLeast(0L) +
+                (if (settings.recordEvents) " SAVE" else " NO_SAVE") +
+                " ${settings.startDelaySeconds.coerceIn(0L, 31_536_000L)}" +
+                " ${settings.durationSeconds.coerceIn(0L, 31_536_000L)}" +
+                " ${if (settings.recordEvents) settings.maxRegistrations.coerceIn(0, MAX_AUTOMATIC_ACQUISITIONS) else 0}"
         )
     }

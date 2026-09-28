@@ -110,11 +110,11 @@ private fun createAlertSessionCategoryPanel(
                 valueScale(point.chartThreshold(percentageScale))
             }
         }
-    val maximum =
+    val maximum = if (percentageScale) {
         (chartValues + chartThresholds)
             .maxOrNull()
-            ?.coerceAtLeast(if (percentageScale) 100.0 else 1.0)
-            ?: 1.0
+            ?.coerceAtLeast(100.0) ?: 100.0
+    } else uvirChartMaximum(chartValues + chartThresholds, valueScale(1.0))
     val logExtent =
         if (percentageScale) alertThresholdCenteredLogExtent(chartValues) else 1.0
     val logTicks =
@@ -287,12 +287,13 @@ private fun createAlertSessionCategoryPanel(
             if (percentageScale) logTicks[index]
             else maximum * (4 - index) / 4.0
         canvas.drawText(
-            formatUvirNumber(
-                value,
-                if (percentageScale) alertThresholdAxisFractionDigits(value)
-                else irradianceUnit.displayFractionDigits(2),
-                exportFormatting.numericFormat
-            ) + if (percentageScale) "%" else "",
+            if (percentageScale) {
+                formatUvirNumber(value, alertThresholdAxisFractionDigits(value),
+                    exportFormatting.numericFormat) + "%"
+            } else {
+                formatUvirChartAxisValue(value, maximum, irradianceUnit.displayFractionDigits(2),
+                    exportFormatting.numericFormat)
+            },
             24f,
             y + 9f,
             smallPaint
@@ -411,7 +412,7 @@ private fun createAlertSessionCategoryPanel(
 
     val outputFile =
         File(
-            File(context.cacheDir, "shared"),
+            File(context.cacheDir, "shared").apply { mkdirs() },
             "${uvirAlertSessionExportBaseName(sessionId, sortedEntries)}_" +
                 if (biological) "Biological_Effects.png" else "Irradiance.png"
         )

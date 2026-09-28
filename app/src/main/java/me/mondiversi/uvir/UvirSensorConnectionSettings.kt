@@ -12,7 +12,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -158,17 +157,15 @@ internal fun UvirSensorConnectionSettings(
                 singleLine = true,
                 colors = UvirOutlinedTextFieldColors()
             )
-            OutlinedTextField(
+            UvirPasswordTextField(
                 value = sensorWifiPassword,
                 onValueChange = onSensorWifiPasswordChange,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .settingsCommitOnBlur(SettingsSaveGroup.WIFI),
+                label = stringResource(R.string.sensor_wifi_password_label),
                 enabled = sensorSettingsEnabled,
-                label = { Text(stringResource(R.string.sensor_wifi_password_label)) },
-                singleLine = true,
-                visualTransformation = PasswordVisualTransformation(),
-                colors = UvirOutlinedTextFieldColors()
+                primaryText = primaryText,
+                secondaryText = secondaryText,
+                modifier = Modifier
+                    .settingsCommitOnBlur(SettingsSaveGroup.WIFI)
             )
             if (sensorCredentials.wifiHost.isNotBlank()) {
                 Text(

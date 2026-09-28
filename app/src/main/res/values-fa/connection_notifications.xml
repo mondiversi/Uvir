@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="connection_notification_connected">متصل</string>
+    <string name="connection_notification_disconnected">قطع‌شده</string>
+    <string name="connection_notification_simulation">شبیه‌سازی</string>
+    <string name="connection_notification_selected">انتخاب‌شده</string>
+    <string name="connection_notification_activity">فعالیت در جریان</string>
+    <string name="connection_notification_last_activity">فعالیت در جریان (آخرین وضعیت شناخته‌شده)</string>
+    <plurals name="connection_notification_connected_count">
+        <item quantity="one">%1$d حسگر متصل</item>
+        <item quantity="other">%1$d حسگر متصل</item>
+    </plurals>
+    <plurals name="connection_notification_connecting_count">
+        <item quantity="one">%1$d حسگر در حال اتصال</item>
+        <item quantity="other">%1$d حسگر در حال اتصال</item>
+    </plurals>
+    <plurals name="connection_notification_activity_count">
+        <item quantity="one">%1$d فعالیت در جریان</item>
+        <item quantity="other">%1$d فعالیت در جریان</item>
+    </plurals>
+    <plurals name="connection_notification_simulation_count">
+        <item quantity="one">%1$d شبیه‌سازی</item>
+        <item quantity="other">%1$d شبیه‌سازی</item>
+    </plurals>
+</resources>

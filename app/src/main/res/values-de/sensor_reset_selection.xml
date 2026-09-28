@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sensor_reset_selection_title">Ausgewählte Sensoren zurücksetzen?</string>
+    <string name="sensor_reset_selection_message">Wähle die Sensoren zum Zurücksetzen. Ihre Einstellungen, Zugangsdaten und nicht synchronisierten Daten werden gelöscht; danach schalten sich die Sensoren aus. Die Daten in der App bleiben unverändert. Nur verbundene Sensoren ohne laufende Aktivität sind auswählbar.</string>
+    <string name="sensor_reset_selection_failed">Zurücksetzen fehlgeschlagen: %1$s. Prüfe die Verbindung und versuche es erneut.</string>
+</resources>
+

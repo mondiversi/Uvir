@@ -87,7 +87,7 @@ class ExampleUnitTest {
             )
         )
         assertEquals(
-            44,
+            47,
             MEASUREMENT_EXPORT_COLUMNS_IT.size
         )
         assertEquals(
@@ -96,11 +96,11 @@ class ExampleUnitTest {
         )
         assertEquals(
             "Modello_biologico",
-            MEASUREMENT_EXPORT_COLUMNS_IT[36]
+            MEASUREMENT_EXPORT_COLUMNS_IT[39]
         )
         assertEquals(
             "Biological_model",
-            MEASUREMENT_EXPORT_COLUMNS_EN[36]
+            MEASUREMENT_EXPORT_COLUMNS_EN[39]
         )
         assertEquals(
             "ID_acquisizione",

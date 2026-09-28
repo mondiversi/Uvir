@@ -20,18 +20,22 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-internal const val UvirDetailLeadingColumnWeight = 0.35f
-internal const val UvirDetailTrailingColumnWeight = 0.65f
+internal const val UvirDetailLeadingColumnWeight = 0.40f
+internal const val UvirDetailTrailingColumnWeight = 0.60f
 
 @Composable
 fun RecordIdentifier(
@@ -63,7 +67,8 @@ fun SessionIdBadge(
     textColor: Color,
     large: Boolean = false,
     containerColor: Color? = null,
-    contentColor: Color? = null
+    contentColor: Color? = null,
+    modifier: Modifier = Modifier
 ) {
     val darkMode =
         isSystemInDarkTheme()
@@ -92,7 +97,7 @@ fun SessionIdBadge(
 
     Surface(
         modifier =
-            Modifier
+            modifier
                 .height(badgeHeight)
                 .widthIn(min = badgeHeight)
                 .semantics {
@@ -222,6 +227,8 @@ internal fun UvirDetailIdentityCard(
     durationText: String? = null,
     durationCount: Int? = null,
     durationCountKind: UvirDetailDurationCountKind? = null,
+    dateMetadataText: String? = null,
+    dateMetadataIcon: UvirDetailMetadataIconKind? = null,
     cardColor: Color,
     primaryText: Color,
     secondaryText: Color,
@@ -284,6 +291,7 @@ internal fun UvirDetailIdentityCard(
                             sessionContentColor ?: uvirSessionContentColor()
                     )
                 }
+
             }
 
             Column(
@@ -304,6 +312,14 @@ internal fun UvirDetailIdentityCard(
                         primaryText = primaryText,
                         marker = UvirDetailMetadataIconKind.DATE
                     )
+                    if (dateMetadataText != null && dateMetadataIcon != null) {
+                        UvirDetailDateTimeRow(
+                            text = dateMetadataText,
+                            primaryText = secondaryText,
+                            marker = dateMetadataIcon,
+                            iconTint = primaryText
+                        )
+                    }
                 } else {
                     UvirDetailDateTimeRow(
                         text = dateText,
@@ -346,14 +362,15 @@ internal enum class UvirDetailDurationCountKind {
 private fun UvirDetailDateTimeRow(
     text: String,
     primaryText: Color,
-    marker: UvirDetailMetadataIconKind
+    marker: UvirDetailMetadataIconKind,
+    iconTint: Color = primaryText
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(5.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        UvirDetailMetadataIcon(kind = marker, tint = primaryText)
+        UvirDetailMetadataIcon(kind = marker, tint = iconTint)
         Text(
             text = text,
             modifier = Modifier.weight(1f),
@@ -395,7 +412,7 @@ private fun UvirDetailDurationRow(
             overflow = TextOverflow.Ellipsis
         )
         Text(
-            text = "—",
+            text = "·",
             color = primaryText,
             fontSize = 12.sp,
             lineHeight = 15.sp
@@ -439,7 +456,7 @@ fun AcquisitionTypeBadge(
             }
         )
 
-    Surface(
+    Box(
         modifier =
             Modifier
                 .size(
@@ -452,76 +469,113 @@ fun AcquisitionTypeBadge(
                 .semantics {
                     contentDescription = description
                 },
-        shape = RoundedCornerShape(50),
-        color = primaryText.copy(alpha = 0.08f)
+        contentAlignment = Alignment.Center
     ) {
-        Box(contentAlignment = Alignment.Center) {
-            AcquisitionTypeGlyph(
-                automatic = automatic,
-                externalCommand = externalCommand,
-                modifier =
-                    Modifier.size(
-                        when {
-                            large -> 15.dp
-                            compact -> 12.dp
-                            else -> 13.dp
-                        }
-                    ),
-                tint = primaryText
-            )
-        }
+        AcquisitionTypeGlyph(
+            automatic = automatic,
+            externalCommand = externalCommand,
+            modifier =
+                Modifier.size(
+                    when {
+                        large -> 15.dp
+                        compact -> 15.dp
+                        else -> 13.dp
+                    }
+                ),
+            tint = primaryText
+        )
     }
 }
 
 @Composable
-private fun AcquisitionTypeGlyph(
+internal fun AcquisitionTypeGlyph(
     automatic: Boolean,
     externalCommand: Boolean = false,
     modifier: Modifier = Modifier,
-    tint: Color = LocalContentColor.current
+    tint: Color = LocalContentColor.current,
+    strokeWidthOverride: Dp? = null
 ) {
-    Canvas(modifier = modifier) {
+    Canvas(modifier = modifier.graphicsLayer(alpha = tint.alpha)) {
+        val tint = tint.copy(alpha = 1f)
         val iconWidth = size.width
         val iconHeight = size.height
 
         // Keep the same stroke-to-size proportion as the automatic icon
         // on the main screen, without making these smaller glyphs heavy.
         val strokeWidth =
-            maxOf(
-                1.dp.toPx(),
-                size.minDimension * 0.08f
+            strokeWidthOverride?.toPx()
+                ?: maxOf(
+                    1.dp.toPx(),
+                    size.minDimension * 0.08f
+                )
+        val stroke =
+            Stroke(
+                width = strokeWidth,
+                cap = StrokeCap.Round,
+                join = StrokeJoin.Round
             )
 
         if (externalCommand) {
+            // External input: a command entering a port.
             drawLine(
                 color = tint,
-                start = Offset(iconWidth * 0.28f, iconHeight * 0.18f),
-                end = Offset(iconWidth * 0.28f, iconHeight * 0.84f),
+                start = Offset(iconWidth * 0.14f, iconHeight * 0.50f),
+                end = Offset(iconWidth * 0.64f, iconHeight * 0.50f),
                 strokeWidth = strokeWidth,
                 cap = StrokeCap.Round
             )
-            listOf(0.18f, 0.51f, 0.84f).forEach { y ->
-                drawLine(
-                    color = tint,
-                    start = Offset(iconWidth * 0.28f, iconHeight * y),
-                    end = Offset(
-                        iconWidth * if (y == 0.51f) 0.68f else 0.74f,
-                        iconHeight * y
-                    ),
-                    strokeWidth = strokeWidth,
-                    cap = StrokeCap.Round
-                )
-            }
+            drawLine(
+                color = tint,
+                start = Offset(iconWidth * 0.48f, iconHeight * 0.34f),
+                end = Offset(iconWidth * 0.64f, iconHeight * 0.50f),
+                strokeWidth = strokeWidth,
+                cap = StrokeCap.Round
+            )
+            drawLine(
+                color = tint,
+                start = Offset(iconWidth * 0.48f, iconHeight * 0.66f),
+                end = Offset(iconWidth * 0.64f, iconHeight * 0.50f),
+                strokeWidth = strokeWidth,
+                cap = StrokeCap.Round
+            )
+            drawLine(
+                color = tint,
+                start = Offset(iconWidth * 0.76f, iconHeight * 0.18f),
+                end = Offset(iconWidth * 0.76f, iconHeight * 0.82f),
+                strokeWidth = strokeWidth,
+                cap = StrokeCap.Round
+            )
+            drawLine(
+                color = tint,
+                start = Offset(iconWidth * 0.76f, iconHeight * 0.18f),
+                end = Offset(iconWidth * 0.88f, iconHeight * 0.18f),
+                strokeWidth = strokeWidth,
+                cap = StrokeCap.Round
+            )
+            drawLine(
+                color = tint,
+                start = Offset(iconWidth * 0.76f, iconHeight * 0.82f),
+                end = Offset(iconWidth * 0.88f, iconHeight * 0.82f),
+                strokeWidth = strokeWidth,
+                cap = StrokeCap.Round
+            )
         } else if (automatic) {
+            // Automatic acquisition: timer/clock.
+            drawCircle(
+                color = tint,
+                radius = size.minDimension * 0.35f,
+                center = Offset(iconWidth * 0.50f, iconHeight * 0.52f),
+                style = stroke
+            )
             drawLine(
                 color = tint,
                 start = Offset(
-                    iconWidth * 0.20f,
-                    iconHeight * 0.84f
+                    iconWidth * 0.50f,
+                    iconHeight * 0.52f
                 ),
                 end = Offset(
                     iconWidth * 0.50f,
-                    iconHeight * 0.16f
+                    iconHeight * 0.31f
                 ),
                 strokeWidth = strokeWidth,
                 cap = StrokeCap.Round
@@ -531,85 +585,66 @@ private fun AcquisitionTypeGlyph(
                 color = tint,
                 start = Offset(
                     iconWidth * 0.50f,
-                    iconHeight * 0.16f
+                    iconHeight * 0.52f
                 ),
                 end = Offset(
-                    iconWidth * 0.80f,
-                    iconHeight * 0.84f
+                    iconWidth * 0.67f,
+                    iconHeight * 0.61f
                 ),
                 strokeWidth = strokeWidth,
                 cap = StrokeCap.Round
             )
-
             drawLine(
                 color = tint,
                 start = Offset(
-                    iconWidth * 0.32f,
-                    iconHeight * 0.58f
+                    iconWidth * 0.40f,
+                    iconHeight * 0.10f
                 ),
                 end = Offset(
-                    iconWidth * 0.68f,
-                    iconHeight * 0.58f
+                    iconWidth * 0.60f,
+                    iconHeight * 0.10f
                 ),
                 strokeWidth = strokeWidth,
                 cap = StrokeCap.Round
             )
         } else {
-            drawLine(
-                color = tint,
-                start = Offset(
-                    iconWidth * 0.18f,
-                    iconHeight * 0.84f
-                ),
-                end = Offset(
-                    iconWidth * 0.18f,
-                    iconHeight * 0.18f
-                ),
-                strokeWidth = strokeWidth,
-                cap = StrokeCap.Round
-            )
-
-            drawLine(
-                color = tint,
-                start = Offset(
-                    iconWidth * 0.18f,
-                    iconHeight * 0.18f
-                ),
-                end = Offset(
-                    iconWidth * 0.50f,
-                    iconHeight * 0.56f
-                ),
-                strokeWidth = strokeWidth,
-                cap = StrokeCap.Round
-            )
-
-            drawLine(
-                color = tint,
-                start = Offset(
-                    iconWidth * 0.50f,
-                    iconHeight * 0.56f
-                ),
-                end = Offset(
-                    iconWidth * 0.82f,
-                    iconHeight * 0.18f
-                ),
-                strokeWidth = strokeWidth,
-                cap = StrokeCap.Round
-            )
-
-            drawLine(
-                color = tint,
-                start = Offset(
-                    iconWidth * 0.82f,
-                    iconHeight * 0.18f
-                ),
-                end = Offset(
-                    iconWidth * 0.82f,
-                    iconHeight * 0.84f
-                ),
-                strokeWidth = strokeWidth,
-                cap = StrokeCap.Round
-            )
+            // Manual acquisition: a finger touching the control.
+            val hand =
+                Path().apply {
+                    moveTo(iconWidth * 0.43f, iconHeight * 0.70f)
+                    lineTo(iconWidth * 0.43f, iconHeight * 0.29f)
+                    cubicTo(
+                        iconWidth * 0.43f,
+                        iconHeight * 0.19f,
+                        iconWidth * 0.56f,
+                        iconHeight * 0.19f,
+                        iconWidth * 0.56f,
+                        iconHeight * 0.29f
+                    )
+                    lineTo(iconWidth * 0.56f, iconHeight * 0.54f)
+                    lineTo(iconWidth * 0.66f, iconHeight * 0.49f)
+                    cubicTo(
+                        iconWidth * 0.76f,
+                        iconHeight * 0.45f,
+                        iconWidth * 0.84f,
+                        iconHeight * 0.55f,
+                        iconWidth * 0.80f,
+                        iconHeight * 0.66f
+                    )
+                    lineTo(iconWidth * 0.73f, iconHeight * 0.84f)
+                    lineTo(iconWidth * 0.39f, iconHeight * 0.84f)
+                    lineTo(iconWidth * 0.22f, iconHeight * 0.62f)
+                    cubicTo(
+                        iconWidth * 0.16f,
+                        iconHeight * 0.54f,
+                        iconWidth * 0.26f,
+                        iconHeight * 0.46f,
+                        iconWidth * 0.34f,
+                        iconHeight * 0.53f
+                    )
+                    close()
+                }
+            drawPath(path = hand, color = tint, style = stroke)
         }
     }
 }
@@ -639,19 +674,18 @@ internal fun ThresholdAlertBellButton(
             inactiveTint
         }
 
-    Box(
-        modifier =
-            Modifier
-                .size(30.dp)
-                .semantics {
-                    contentDescription = description
-                }
-                .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center
+    UvirAccessibleIconButton(
+        contentDescription = description,
+        onClick = onClick,
+        modifier = Modifier.size(30.dp)
     ) {
         Canvas(
-            modifier = Modifier.size(18.dp)
+            modifier =
+                Modifier
+                    .size(18.dp)
+                    .graphicsLayer(alpha = tint.alpha)
         ) {
+            val tint = tint.copy(alpha = 1f)
             val strokeWidth =
                 if (active) {
                     maxOf(

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sensor_connection_switch_failed">לא ניתן לאשר את שינוי החיבור. מצב החיבור הקודם נשאר נבחר.</string>
+</resources>

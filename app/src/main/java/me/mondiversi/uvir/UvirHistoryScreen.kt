@@ -94,7 +94,6 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.input.KeyboardType
@@ -177,6 +176,7 @@ fun HistoryScreen(
         allRecords.map { it.note.trim() }.filter { it.isNotEmpty() }.distinct()
     }
     val filterDays = remember(allRecords) { uvirAvailableFilterDays(allRecords.map { it.timestamp }) }
+    val filterVariantCounts = remember(allRecords) { uvirAvailableVariantCounts(allRecords) }
     val filterScope = rememberCoroutineScope()
 
     LaunchedEffect(records.size) {
@@ -293,6 +293,26 @@ fun HistoryScreen(
                 }
                 .groupingBy { it }
                 .eachCount()
+        }
+
+    val sessionVariantStructures =
+        remember(allRecords) {
+            allRecords
+                .asSequence()
+                .filter { it.sessionId != null }
+                .groupBy { requireNotNull(it.sessionId) }
+                .mapNotNull { (sessionId, sessionRecords) ->
+                    val variants =
+                        sessionRecords.maxOfOrNull { it.variantIndex ?: 0 } ?: 0
+                    val positions =
+                        sessionRecords.maxOfOrNull { it.positionIndex ?: 0 } ?: 0
+                    if (variants > 1 && positions > 0) {
+                        sessionId to (positions to variants)
+                    } else {
+                        null
+                    }
+                }
+                .toMap()
         }
 
     val sessionRecordIds =
@@ -429,7 +449,7 @@ fun HistoryScreen(
     }
 
     if (showDeleteAllConfirmation) {
-        AlertDialog(
+        UvirAlertDialog(
             onDismissRequest = {
                 showDeleteAllConfirmation = false
             },
@@ -441,10 +461,12 @@ fun HistoryScreen(
                 )
             },
             text = {
-                Text(
-                    stringResource(
+                UvirHoldConfirmationMessage(
+                    message = stringResource(
                         R.string.delete_all_measurements_warning
-                    )
+                    ),
+                    actionLabel = stringResource(R.string.delete_all),
+                    holdDurationSeconds = 2
                 )
             },
             dismissButton = {
@@ -481,7 +503,7 @@ fun HistoryScreen(
     }
 
     if (showDeleteSelectedConfirmation) {
-        AlertDialog(
+        UvirAlertDialog(
             onDismissRequest = {
                 showDeleteSelectedConfirmation = false
             },
@@ -559,7 +581,7 @@ fun HistoryScreen(
     }
 
     if (showShareAllConfirmation) {
-        AlertDialog(
+        UvirAlertDialog(
             onDismissRequest = {
                 showShareAllConfirmation = false
             },
@@ -617,12 +639,20 @@ fun HistoryScreen(
     }
 
     if (showShareFormatDialog) {
-        MeasurementDetailShareDialog(
+        MeasurementDataExportScreen(
+            backgroundColor = backgroundColor,
             cardColor = cardColor,
             primaryText = primaryText,
             secondaryText = secondaryText,
             partialSessionWarning =
                 pendingSharePlan?.hasPartialSessions == true,
+            readableTableFileCount =
+                pendingSharePlan?.let(::acquisitionExportReadableTableFileCount),
+            readableTableGroupingAvailable =
+                pendingSharePlan?.items?.any {
+                    it is AcquisitionExportItem.CompleteSession
+                } == true,
+            showReadableTableGroupingScopeNote = true,
             combinedChartFileCount =
                 pendingSharePlan?.let { plan ->
                     acquisitionExportChartFileCount(
@@ -637,6 +667,19 @@ fun HistoryScreen(
                         UvirChartExportMode.SEPARATE
                     )
                 },
+            variantChartGroupingAvailable =
+                pendingSharePlan?.hasCompleteVariantSessions == true,
+            groupedVariantChartFileCount =
+                pendingSharePlan
+                    ?.takeIf { it.hasCompleteVariantSessions }
+                    ?.let { plan ->
+                        acquisitionExportChartFileCount(
+                            plan = plan,
+                            mode = UvirChartExportMode.COMBINED,
+                            variantGrouping = UvirVariantChartGrouping.BY_GROUP
+                        )
+                    },
+            showVariantChartGroupingScopeNote = true,
             onDismiss = {
                 showShareFormatDialog = false
                 pendingSharePlan = null
@@ -645,6 +688,7 @@ fun HistoryScreen(
                 sharePendingRecords(selection, destination)
             }
         )
+        return
     }
 
     Scaffold(
@@ -662,10 +706,15 @@ fun HistoryScreen(
                     )
 
                     UvirMenuTitle(
-                        text =
-                            stringResource(
+                        text = "${allRecords.size} ${stringResource(
+                            if (allRecords.size == 1) {
+                                R.string.share_acquisition_label
+                            } else {
                                 R.string.saved_measurements
-                            ),
+                            }
+                        ).replaceFirstChar { character ->
+                            character.lowercase(Locale.getDefault())
+                        }}",
                         modifier = Modifier.weight(1f),
                         color = primaryText
                     )
@@ -673,10 +722,12 @@ fun HistoryScreen(
                     UvirRecordListFilterButton(
                         active = filters.isActive,
                         enabled = allRecords.isNotEmpty(),
+                        compact = true,
                         onClick = { showFilters = !showFilters }
                     )
-
-                    IconButton(
+                    UvirTitleActionButton(
+                        iconColor = MaterialTheme.colorScheme.primary,
+                        contentDescription = shareDescription,
                         onClick = {
                             if (selectedRecordIds.isEmpty()) {
                                 showShareAllConfirmation = true
@@ -691,26 +742,19 @@ fun HistoryScreen(
                         modifier =
                             Modifier
                                 .size(UvirTitleActionButtonSize)
-                                .semantics {
-                                    contentDescription =
-                                        shareDescription
-                                }
                     ) {
                         UvirTitleActionIcon(
                             type =
                                 MenuIconType.EXPORT,
                             modifier =
                                 Modifier.size(UvirTitleActionIconSize),
-                            tint =
-                                if (records.isNotEmpty()) {
-                                    MaterialTheme.colorScheme.primary
-                                } else {
-                                    secondaryText.copy(alpha = 0.38f)
-                                }
+                            tint = LocalContentColor.current
                         )
                     }
 
-                    IconButton(
+                    UvirTitleActionButton(
+                        iconColor = UvirDestructiveActionColor,
+                        contentDescription = deleteAllDescription,
                         onClick = {
                             if (selectedRecordIds.isEmpty() && filters.isActive) {
                                 selectedRecordIds = records.map { it.id }
@@ -726,76 +770,18 @@ fun HistoryScreen(
                         modifier =
                             Modifier
                                 .size(UvirTitleActionButtonSize)
-                                .semantics {
-                                    contentDescription =
-                                        deleteAllDescription
-                                }
                     ) {
                         UvirTitleActionIcon(
                             type =
                                 MenuIconType.DELETE,
                             modifier =
                                 Modifier.size(UvirTitleActionIconSize),
-                            tint =
-                                if (records.isNotEmpty()) {
-                                    UvirDestructiveActionColor
-                                } else {
-                                    secondaryText.copy(alpha = 0.38f)
-                                }
+                            tint = LocalContentColor.current
                         )
                     }
                 }
             }
         },
-        bottomBar = {
-            if (records.isNotEmpty()) {
-                Surface(
-                    color = cardColor,
-                    shadowElevation = 4.dp
-                ) {
-                    Column {
-                        HorizontalDivider(
-                            color =
-                                secondaryText.copy(
-                                    alpha = 0.16f
-                                )
-                        )
-
-                        Text(
-                            text = if (filters.isActive) {
-                                stringResource(R.string.list_filter_count, records.size, allRecords.size)
-                            } else pluralStringResource(
-                                    R.plurals.measurement_count_since,
-                                    records.size,
-                                    records.size,
-                                    formatDateTime(
-                                        records.asSequence()
-                                            .map { it.timestamp }
-                                            .filter { it > 0L }
-                                            .minOrNull()
-                                            ?: records.minOf { it.timestamp },
-                                        LocalUvirDateFormat.current,
-                                        LocalUvirTimeFormat.current
-                                    )
-                                ),
-                            modifier =
-                                Modifier
-                                    .testTag("list-filter-count")
-                                    .fillMaxWidth()
-                                    .padding(
-                                        horizontal = 20.dp,
-                                        vertical = 6.dp
-                                    ),
-                            color = secondaryText,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Medium,
-                            textAlign = TextAlign.Center,
-                            maxLines = 1
-                        )
-                    }
-                }
-            }
-        }
     ) { paddingValues ->
         if (allRecords.isEmpty()) {
             Box(
@@ -823,6 +809,7 @@ fun HistoryScreen(
                         sessionIds = filterSessionIds,
                         notes = filterNotes,
                         dates = filterDays,
+                        variantCounts = filterVariantCounts,
                         sensorNames = filterSensorNames,
                         modes = filterModes,
                         externalModeAvailable = filterExternalModeAvailable,
@@ -855,7 +842,7 @@ fun HistoryScreen(
                             Modifier
                                 .fillMaxWidth()
                                 .padding(
-                                    horizontal = 20.dp
+                                    horizontal = UvirScreenHorizontalPadding
                                 )
                                 .clickable {
                                     selectAllIds()
@@ -883,8 +870,7 @@ fun HistoryScreen(
                                             emptyList()
                                         }
                                 },
-                                modifier =
-                                    Modifier.size(24.dp),
+                                modifier = Modifier.size(24.dp),
                                 colors =
                                     CheckboxDefaults.colors(
                                         checkedColor =
@@ -926,7 +912,7 @@ fun HistoryScreen(
                     HorizontalDivider(
                         modifier =
                             Modifier.padding(
-                                horizontal = 20.dp
+                                horizontal = UvirScreenHorizontalPadding
                             ),
                         color =
                             secondaryText.copy(
@@ -950,8 +936,8 @@ fun HistoryScreen(
                                 )
                         ),
                     contentPadding = PaddingValues(
-                        start = 20.dp,
-                        end = 20.dp,
+                        start = UvirScreenHorizontalPadding,
+                        end = UvirScreenHorizontalPadding,
                         top = 4.dp,
                         bottom = 20.dp
                     ),
@@ -1057,130 +1043,128 @@ fun HistoryScreen(
                                     }
                                 }
 
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(start = UvirRecordSessionContentInset)
-                                        .uvirRecordSessionHeaderPressTarget(
-                                            onClick = {
-                                                if (selectionMode) toggleSessionSelection()
-                                                else onOpenSessionChart(headerSessionId)
-                                            },
-                                            onLongClick = {
-                                                selectionMode = true
-                                                selectedRecordIds = (selectedRecordIds + idsInSession).distinct()
-                                            }
-                                        )
-                                        .padding(UvirRecordSessionHeaderContentPadding)
-                                        .semantics {
-                                            if (!selectionMode) {
-                                                contentDescription = sessionChartOpenDescription
-                                            }
-                                        },
-                                    verticalAlignment =
-                                        Alignment.CenterVertically
+                                val openOrToggleSession: () -> Unit = {
+                                    if (selectionMode) toggleSessionSelection()
+                                    else onOpenSessionChart(headerSessionId)
+                                }
+                                val selectSession: () -> Unit = {
+                                    selectionMode = true
+                                    selectedRecordIds =
+                                        (selectedRecordIds + idsInSession).distinct()
+                                }
+
+                                Box(
+                                    modifier = Modifier.fillMaxWidth()
                                 ) {
-                                    UvirHorizontalReveal(selectionMode) {
-                                        CompositionLocalProvider(
-                                            LocalMinimumInteractiveComponentSize provides 0.dp
-                                        ) {
-                                            TriStateCheckbox(
-                                                state =
-                                                    when {
-                                                        allSessionSelected ->
-                                                            ToggleableState.On
-
-                                                        someSessionSelected ->
-                                                            ToggleableState.Indeterminate
-
-                                                        else ->
-                                                            ToggleableState.Off
-                                                    },
-                                                onClick = toggleSessionSelection,
-                                                modifier =
-                                                    Modifier.size(24.dp),
-                                                colors =
-                                                    CheckboxDefaults.colors(
-                                                        checkedColor =
-                                                            MaterialTheme
-                                                                .colorScheme
-                                                                .primary,
-                                                        uncheckedColor =
-                                                            MaterialTheme
-                                                                .colorScheme
-                                                                .primary,
-                                                        checkmarkColor =
-                                                            MaterialTheme
-                                                                .colorScheme
-                                                                .onPrimary
-                                                    )
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(start = UvirRecordSessionContentInset)
+                                            .uvirRecordSessionHeaderPressTarget(
+                                                onClick = openOrToggleSession,
+                                                onLongClick = selectSession
                                             )
+                                            .padding(UvirRecordSessionHeaderContentPadding)
+                                            .semantics {
+                                                if (!selectionMode) {
+                                                    contentDescription = sessionChartOpenDescription
+                                                }
+                                            },
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        UvirHorizontalReveal(selectionMode) {
+                                            CompositionLocalProvider(
+                                                LocalMinimumInteractiveComponentSize provides 0.dp
+                                            ) {
+                                                TriStateCheckbox(
+                                                    state =
+                                                        when {
+                                                            allSessionSelected ->
+                                                                ToggleableState.On
+
+                                                            someSessionSelected ->
+                                                                ToggleableState.Indeterminate
+
+                                                            else ->
+                                                                ToggleableState.Off
+                                                        },
+                                                    onClick = toggleSessionSelection,
+                                                    modifier = Modifier.size(24.dp),
+                                                    colors =
+                                                        CheckboxDefaults.colors(
+                                                            checkedColor =
+                                                                MaterialTheme
+                                                                    .colorScheme
+                                                                    .primary,
+                                                            uncheckedColor =
+                                                                MaterialTheme
+                                                                    .colorScheme
+                                                                    .primary,
+                                                            checkmarkColor =
+                                                                MaterialTheme
+                                                                    .colorScheme
+                                                                    .onPrimary
+                                                        )
+                                                )
+                                            }
+
+                                            Spacer(Modifier.width(8.dp))
                                         }
 
-                                        Spacer(
-                                            Modifier.width(8.dp)
+                                        val sessionCount =
+                                            sessionCounts[headerSessionId] ?: 1
+                                        val sessionDate =
+                                            formatAutomaticSessionDateTime(
+                                                sessionStartTimestamps[headerSessionId]
+                                                    ?: record.timestamp,
+                                                LocalUvirDateFormat.current,
+                                                LocalUvirTimeFormat.current
+                                            )
+                                        Text(
+                                            text = sessionDate,
+                                            modifier = Modifier.weight(1f),
+                                            color = secondaryText,
+                                            fontSize = 13.sp,
+                                            fontWeight = FontWeight.SemiBold,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
                                         )
+                                        Spacer(Modifier.width(8.dp))
+                                        Text(
+                                            text = "($sessionCount)",
+                                            color = secondaryText,
+                                            fontSize = 13.sp,
+                                            fontWeight = FontWeight.SemiBold,
+                                            maxLines = 1
+                                        )
+
+                                        if (!selectionMode) {
+                                            Box(
+                                                modifier = Modifier.size(32.dp),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                UvirDisclosureChevron(tint = secondaryText)
+                                            }
+                                        } else {
+                                            Spacer(Modifier.width(UvirIslandContentPadding))
+                                        }
                                     }
 
-                                    SessionIdBadge(
-                                        id = headerSessionId,
-                                        textColor = primaryText
-                                    )
-
-                                    Spacer(
-                                        Modifier.width(4.dp)
-                                    )
-
-                                    Text(
-                                        text = "·",
-                                        color = secondaryText,
-                                        fontSize = 12.sp,
-                                        fontWeight =
-                                            FontWeight.SemiBold
-                                    )
-
-                                    Spacer(
-                                        Modifier.width(4.dp)
-                                    )
-
-                                    Text(
-                                        text =
-                                            pluralStringResource(
-                                                R.plurals.automatic_session_details,
-                                                sessionCounts[
-                                                    headerSessionId
-                                                ] ?: 1,
-                                                formatAutomaticSessionDateTime(
-                                                    sessionStartTimestamps[
-                                                        headerSessionId
-                                                    ] ?: record.timestamp,
-                                                    LocalUvirDateFormat.current,
-                                                    LocalUvirTimeFormat.current
-                                                ),
-                                                sessionCounts[
-                                                    headerSessionId
-                                                ] ?: 1
-                                            ),
-                                        modifier =
-                                            Modifier.weight(1f),
-                                        color = secondaryText,
-                                        fontSize = 12.sp,
-                                        fontWeight =
-                                            FontWeight.SemiBold
-                                    )
-
-                                    if (!selectionMode) {
-                                        Box(
-                                            modifier =
-                                                Modifier
-                                                    .size(32.dp),
-                                            contentAlignment =
-                                                Alignment.Center
-                                        ) {
-                                            UvirDisclosureChevron(
-                                                tint = secondaryText
+                                    Box(
+                                        modifier = Modifier
+                                            .align(Alignment.CenterStart)
+                                            .width(UvirRecordSessionContentInset)
+                                            .wrapContentSize(unbounded = true),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        SessionIdBadge(
+                                            id = headerSessionId,
+                                            textColor = primaryText,
+                                            modifier = Modifier.uvirRecordSessionHeaderPressTarget(
+                                                onClick = openOrToggleSession,
+                                                onLongClick = selectSession
                                             )
-                                        }
+                                        )
                                     }
                                 }
                                 Spacer(Modifier.height(UvirRecordSessionItemGap))
@@ -1267,29 +1251,47 @@ fun HistoryScreen(
                                     )
                                 }
 
+                                val variantText =
+                                    if (
+                                        record.variantIndex != null &&
+                                        record.positionIndex != null
+                                    ) {
+                                        uvirCompactVariantPositionLabel(
+                                            variantIndex = record.variantIndex,
+                                            positionIndex = record.positionIndex
+                                        )
+                                    } else {
+                                        null
+                                    }
+
                                 Column(modifier = Modifier.weight(1f)) {
                                     Row(
+                                        modifier = Modifier.fillMaxWidth(),
                                         verticalAlignment =
                                             Alignment.CenterVertically
                                     ) {
+                                        val recordDateText =
+                                            formatDateTime(
+                                                record.timestamp,
+                                                LocalUvirDateFormat.current,
+                                                LocalUvirTimeFormat.current
+                                            )
                                         Text(
-                                            text =
-                                                formatDateTime(
-                                                    record.timestamp,
-                                                    LocalUvirDateFormat.current,
-                                                    LocalUvirTimeFormat.current
-                                                ),
+                                            text = recordDateText,
                                             color = primaryText,
                                             fontSize = 13.sp,
                                             fontWeight =
-                                                FontWeight.Medium
+                                                FontWeight.Medium,
+                                            modifier = Modifier.weight(1f),
+                                            maxLines = 1,
+                                            softWrap = false,
+                                            overflow = TextOverflow.Ellipsis
                                         )
                                     }
 
                                     Spacer(Modifier.height(3.dp))
 
                                     UvirListRecordDescription(
-                                        sensorName = detailSensorDisplayName(sensorProfiles[record.sensorId]),
                                         note = record.note,
                                         sessionSequence = record.sessionSequence.takeIf { record.automatic },
                                         emptyNote = stringResource(R.string.no_note),
@@ -1297,10 +1299,23 @@ fun HistoryScreen(
                                     )
                                 }
 
+                                variantText?.let { variant ->
+                                    Spacer(Modifier.width(6.dp))
+                                    Text(
+                                        text = variant,
+                                        color = secondaryText,
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Normal,
+                                        maxLines = 1,
+                                        softWrap = false
+                                    )
+                                    Spacer(Modifier.width(12.dp))
+                                }
+
                                 AcquisitionTypeBadge(
                                     automatic = record.automatic,
                                     externalCommand = record.externalCommand,
-                                    primaryText = primaryText,
+                                    primaryText = secondaryText,
                                     compact = true
                                 )
 

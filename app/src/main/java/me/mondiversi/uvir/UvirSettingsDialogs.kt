@@ -17,13 +17,15 @@ internal fun UvirFirmwareUpdateRequiredDialog(
     secondaryText: Color,
     onDismissRequest: () -> Unit
 ) {
-    AlertDialog(
+    UvirAlertDialog(
         onDismissRequest = onDismissRequest,
         title = {
-            Text(
-                stringResource(
-                    R.string.sensor_firmware_update_required_title
-                )
+            UvirClosableDialogTitle(
+                title =
+                    stringResource(
+                        R.string.sensor_firmware_update_required_title
+                    ),
+                onDismiss = onDismissRequest
             )
         },
         text = {
@@ -33,11 +35,7 @@ internal fun UvirFirmwareUpdateRequiredDialog(
                 )
             )
         },
-        confirmButton = {
-            TextButton(onClick = onDismissRequest) {
-                Text(stringResource(R.string.close))
-            }
-        },
+        confirmButton = {},
         containerColor = cardColor,
         titleContentColor = primaryText,
         textContentColor = secondaryText
@@ -61,7 +59,7 @@ internal fun UvirResetAlertRulesConfirmationDialog(
     val rulesResetCompleteMessage =
         stringResource(R.string.threshold_rules_reset_complete)
 
-    AlertDialog(
+    UvirAlertDialog(
         onDismissRequest = onDismissRequest,
         title = {
             Text(
@@ -71,10 +69,15 @@ internal fun UvirResetAlertRulesConfirmationDialog(
             )
         },
         text = {
-            Text(
-                stringResource(
+            UvirHoldConfirmationMessage(
+                message = stringResource(
                     R.string.threshold_rules_reset_confirmation_message
-                )
+                ),
+                actionLabel =
+                    stringResource(
+                        R.string.threshold_rules_reset_confirm_action
+                    ),
+                holdDurationSeconds = 2
             )
         },
         confirmButton = {

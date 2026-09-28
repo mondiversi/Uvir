@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="update_available">Διαθέσιμες ενημερώσεις</string>
+    <string name="update_none">Δεν υπάρχουν ενημερώσεις</string>
+    <string name="update_check_failed">Αποτυχία ελέγχου ενημερώσεων. Δείτε το αρχείο σφαλμάτων.</string>
+    <string name="update_app">Ενημέρωση εφαρμογής</string>
+    <string name="update_sensor">Ενημέρωση αισθητήρα</string>
+    <string name="update_app_first">Ενημερώστε πρώτα την εφαρμογή.</string>
+    <string name="update_usb_required">Επιλέξτε αυτόν τον αισθητήρα και συνδέστε τον με USB, χωρίς ενεργή συνεδρία και με όλες τις εγγραφές συγχρονισμένες.</string>
+    <string name="update_download">Λήψη και επαλήθευση…</string>
+    <string name="update_flash">Ενημέρωση αισθητήρα…</string>
+    <string name="update_verify">Επαλήθευση αισθητήρα…</string>
+    <string name="update_keep_connected">Μην αποσυνδέσετε το USB ή σβήσετε τον αισθητήρα. Αν χρειάζεται, κρατήστε το BOOT και δοκιμάστε ξανά.</string>
+    <string name="update_done">Ο αισθητήρας ενημερώθηκε</string>
+    <string name="update_failed">Η ενημέρωση απέτυχε. Δείτε το αρχείο σφαλμάτων. Αν ο αισθητήρας δεν ξεκινά, ανακτήστε το firmware με USB από υπολογιστή.</string>
+    <string name="update_permission">Επιτρέψτε στο Uvir να εγκαθιστά ενημερώσεις στις ρυθμίσεις Android.</string>
+    <string name="update_whats_new">Υπογεγραμμένες ενημερώσεις εφαρμογής και αισθητήρα, επαληθευμένες λήψεις και φόρτωση firmware με USB.</string>
+</resources>

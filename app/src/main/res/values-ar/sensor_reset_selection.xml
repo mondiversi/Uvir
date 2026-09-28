@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sensor_reset_selection_title">إعادة ضبط المستشعرات المحددة؟</string>
+    <string name="sensor_reset_selection_message">اختر المستشعرات لإعادة ضبطها. ستُحذف إعداداتها وبيانات اعتمادها والبيانات غير المتزامنة، ثم ستتوقف عن التشغيل. لن تتغير بيانات التطبيق. يمكن اختيار المستشعرات المتصلة فقط والتي ليس لديها نشاط جارٍ.</string>
+    <string name="sensor_reset_selection_failed">فشلت إعادة الضبط: %1$s. تحقق من الاتصال وحاول مجددًا.</string>
+</resources>
+

@@ -27,6 +27,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
@@ -48,9 +49,11 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -65,12 +68,21 @@ import java.util.Locale
 import kotlin.math.max
 import kotlin.math.roundToInt
 
+internal data class SessionChartNavigationState(
+    val showChart: Boolean,
+    val viewMode: ViewMode,
+    val sequenceFilterPosition: Int,
+    val firstVisibleItemIndex: Int,
+    val firstVisibleItemScrollOffset: Int
+) : java.io.Serializable
+
 @Composable
 internal fun SessionChartIcon(
     modifier: Modifier = Modifier,
     tint: Color = MaterialTheme.colorScheme.primary
 ) {
-    Canvas(modifier = modifier) {
+    Canvas(modifier = modifier.graphicsLayer(alpha = tint.alpha)) {
+        val tint = tint.copy(alpha = 1f)
         val stroke = max(1.6.dp.toPx(), size.minDimension * 0.075f)
         val left = size.width * 0.14f
         val bottom = size.height * 0.84f
@@ -109,7 +121,7 @@ internal fun SessionChartIcon(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun SessionChartScreen(
+internal fun SessionChartScreen(
     sessionId: Long,
     records: List<SavedRecordDetail>,
     database: UvirDatabaseHelper,
@@ -117,7 +129,9 @@ fun SessionChartScreen(
     cardColor: Color,
     primaryText: Color,
     secondaryText: Color,
+    initialNavigationState: SessionChartNavigationState? = null,
     onDeleteSession: () -> Unit,
+    onOpenRecord: (SavedRecordDetail, SessionChartNavigationState) -> Unit,
     onBack: () -> Unit
 ) {
     val irradianceUnit = LocalUvirIrradianceUnit.current
@@ -127,6 +141,9 @@ fun SessionChartScreen(
         remember(records) {
             records.sortedBy { it.timestamp }
         }
+    val externalOnlySession = remember(sessionId, database, records) {
+        database.acquisitionSessionUsesExternalCommand(sessionId)
+    }
     val expandedChartGroups =
         remember {
             mutableStateMapOf<SessionChartGroup, Boolean>()
@@ -139,13 +156,16 @@ fun SessionChartScreen(
     }
     var currentNote by rememberSaveable(sessionId) {
         mutableStateOf(
-            database.readAcquisitionSessionNote(sessionId).ifBlank {
-                sessionChartNote(sortedRecords, "")
-            }
+            if (sortedRecords.any { it.automatic }) database.readAcquisitionSessionNote(sessionId)
+            else sessionChartNote(sortedRecords, "")
         )
     }
     var showNoteEditor by rememberSaveable(sessionId) {
         mutableStateOf(false)
+    }
+    val noteEditingEnabled = rememberSessionNoteEditingEnabled(database, sessionId)
+    LaunchedEffect(noteEditingEnabled) {
+        if (!noteEditingEnabled) showNoteEditor = false
     }
     var showSequenceFilterPanel by rememberSaveable {
         mutableStateOf(false)
@@ -154,13 +174,13 @@ fun SessionChartScreen(
         mutableIntStateOf(database.readAcquisitionSessionVariantsPerPosition(sessionId))
     }
     var sequenceFilterPosition by rememberSaveable(sessionId) {
-        mutableIntStateOf(1)
+        mutableIntStateOf(initialNavigationState?.sequenceFilterPosition ?: 1)
     }
     var showChart by rememberSaveable(sessionId) {
-        mutableStateOf(false)
+        mutableStateOf(initialNavigationState?.showChart ?: false)
     }
     var viewMode by rememberSaveable(sessionId) {
-        mutableStateOf(ViewMode.IRRADIANCE)
+        mutableStateOf(initialNavigationState?.viewMode ?: ViewMode.IRRADIANCE)
     }
     val chartShareDescription =
         stringResource(
@@ -229,8 +249,19 @@ fun SessionChartScreen(
                 if (database.updateAcquisitionSessionVariantsPerPosition(sessionId, cycleSize)) {
                     sequenceFilterCycleSize = cycleSize
                     sequenceFilterPosition = 1
+                    showSequenceFilterPanel = false
+                    showUvirBottomMessage(
+                        context,
+                        resources.getString(R.string.variants_updated),
+                        longDuration = false
+                    )
+                } else {
+                    showUvirBottomMessage(
+                        context,
+                        resources.getString(R.string.save_error),
+                        longDuration = false
+                    )
                 }
-                showSequenceFilterPanel = false
             },
             onDismiss = {
                 showSequenceFilterPanel = false
@@ -239,7 +270,7 @@ fun SessionChartScreen(
     }
 
     if (showDeleteConfirmation) {
-        AlertDialog(
+        UvirAlertDialog(
             onDismissRequest = {
                 showDeleteConfirmation = false
             },
@@ -251,15 +282,16 @@ fun SessionChartScreen(
                 )
             },
             text = {
-                Text(
+                UvirDeleteConfirmationMessage(
                     stringResource(
                         R.string.delete_acquisition_session_warning
                     )
                 )
             },
             dismissButton = {
-                TextButton(
-                    onClick = {
+                HoldToConfirmDeleteButton(
+                    label = stringResource(R.string.delete),
+                    onConfirmed = {
                         showDeleteConfirmation = false
                         showUvirBottomMessage(
                             context,
@@ -267,14 +299,8 @@ fun SessionChartScreen(
                             longDuration = false
                         )
                         onDeleteSession()
-                    },
-                    colors =
-                        ButtonDefaults.textButtonColors(
-                            contentColor = UvirDestructiveActionColor
-                        )
-                ) {
-                    Text(stringResource(R.string.delete))
-                }
+                    }
+                )
             },
             confirmButton = {
                 TextButton(
@@ -292,10 +318,14 @@ fun SessionChartScreen(
     }
 
     if (showShareDialog) {
-        MeasurementDetailShareDialog(
+        MeasurementDataExportScreen(
+            backgroundColor = backgroundColor,
             cardColor = cardColor,
             primaryText = primaryText,
             secondaryText = secondaryText,
+            readableTableFileCount =
+                acquisitionSessionReadableTableFileCount(noteAwareRecords),
+            readableTableGroupingAvailable = true,
             combinedChartFileCount =
                 acquisitionSessionChartFileCount(
                     noteAwareRecords,
@@ -306,6 +336,10 @@ fun SessionChartScreen(
                     noteAwareRecords,
                     UvirChartExportMode.SEPARATE
                 ),
+            variantChartGroupingAvailable =
+                acquisitionVariantGroups(noteAwareRecords).isNotEmpty(),
+            groupedVariantChartFileCount =
+                acquisitionSessionGroupedVariantChartFileCount(noteAwareRecords),
             onDismiss = {
                 showShareDialog = false
             },
@@ -335,9 +369,10 @@ fun SessionChartScreen(
                 showShareDialog = false
             }
         )
+        return
     }
 
-    if (showNoteEditor) {
+    if (showNoteEditor && noteEditingEnabled) {
         UvirNoteEditDialog(
             initialNote = currentNote,
             cardColor = cardColor,
@@ -347,6 +382,17 @@ fun SessionChartScreen(
                 if (database.updateAcquisitionSessionNote(sessionId, updatedNote)) {
                     currentNote = updatedNote
                     showNoteEditor = false
+                    showUvirBottomMessage(
+                        context,
+                        resources.getString(R.string.note_updated),
+                        longDuration = false
+                    )
+                } else {
+                    showUvirBottomMessage(
+                        context,
+                        resources.getString(R.string.save_error),
+                        longDuration = false
+                    )
                 }
             },
             onDismiss = {
@@ -355,10 +401,24 @@ fun SessionChartScreen(
         )
     }
 
-    val listState = androidx.compose.foundation.lazy.rememberLazyListState()
+    val listState =
+        androidx.compose.foundation.lazy.rememberLazyListState(
+            initialFirstVisibleItemIndex =
+                initialNavigationState?.firstVisibleItemIndex ?: 0,
+            initialFirstVisibleItemScrollOffset =
+                initialNavigationState?.firstVisibleItemScrollOffset ?: 0
+        )
 
-    LaunchedEffect(sessionId) {
-        listState.scrollToItem(0)
+    LaunchedEffect(sessionId, initialNavigationState) {
+        val restoredState = initialNavigationState
+        if (restoredState == null) {
+            listState.scrollToItem(0)
+        } else {
+            listState.scrollToItem(
+                index = restoredState.firstVisibleItemIndex,
+                scrollOffset = restoredState.firstVisibleItemScrollOffset
+            )
+        }
     }
 
     Scaffold(
@@ -382,6 +442,7 @@ fun SessionChartScreen(
                     )
 
                     UvirSessionCycleFilterButton(
+                        compact = true,
                         active = sequenceFilterActive,
                         enabled = sortedRecords.size >= 2,
                         onClick = {
@@ -389,52 +450,39 @@ fun SessionChartScreen(
                         }
                     )
 
-                    IconButton(
+                    UvirTitleActionButton(
+                        iconColor = MaterialTheme.colorScheme.primary,
+                        contentDescription = chartShareDescription,
                         onClick = {
                             showShareDialog = true
                         },
                         enabled = sortedRecords.isNotEmpty(),
                         modifier =
                             Modifier
-                                .size(40.dp)
-                                .semantics {
-                                    contentDescription = chartShareDescription
-                                }
+                                .size(UvirTitleActionButtonSize)
                     ) {
                         UvirTitleActionIcon(
                             type = MenuIconType.EXPORT,
-                            modifier = Modifier.size(24.dp),
-                            tint =
-                                if (sortedRecords.isNotEmpty()) {
-                                    MaterialTheme.colorScheme.primary
-                                } else {
-                                    secondaryText.copy(alpha = 0.38f)
-                                }
+                            modifier = Modifier.size(UvirTitleActionIconSize),
+                            tint = LocalContentColor.current
                         )
                     }
 
-                    IconButton(
+                    UvirTitleActionButton(
+                        iconColor = UvirDestructiveActionColor,
+                        contentDescription = resources.getString(R.string.delete),
                         onClick = {
                             showDeleteConfirmation = true
                         },
                         enabled = sortedRecords.isNotEmpty(),
                         modifier =
                             Modifier
-                                .size(40.dp)
-                                .semantics {
-                                    contentDescription =
-                                        resources.getString(R.string.delete)
-                                }
+                                .size(UvirTitleActionButtonSize)
                     ) {
                         UvirTitleActionIcon(
                             type = MenuIconType.DELETE,
-                            modifier = Modifier.size(24.dp),
-                            tint =
-                                if (sortedRecords.isNotEmpty()) {
-                                    UvirDestructiveActionColor
-                                } else {
-                                    secondaryText.copy(alpha = 0.38f)
-                                }
+                            modifier = Modifier.size(UvirTitleActionIconSize),
+                            tint = LocalContentColor.current
                         )
                     }
                     }
@@ -459,8 +507,8 @@ fun SessionChartScreen(
                         ),
                 contentPadding =
                     PaddingValues(
-                        start = 20.dp,
-                        end = 20.dp,
+                        start = UvirScreenHorizontalPadding,
+                        end = UvirScreenHorizontalPadding,
                         top = 4.dp,
                         bottom = 40.dp
                     ),
@@ -473,7 +521,7 @@ fun SessionChartScreen(
                     idLabel =
                         "ID / ${stringResource(R.string.session_label)}",
                     dateLabel =
-                        stringResource(R.string.session_date_duration_events_label),
+                        stringResource(R.string.session_start_end_duration_label),
                     dateText =
                         sortedRecords.firstOrNull()?.let { record ->
                             formatDetailDateTime(
@@ -497,8 +545,6 @@ fun SessionChartScreen(
                                     (sortedRecords.firstOrNull()?.timestamp ?: 0L)
                             ).coerceAtLeast(0L) / 1_000L
                         ),
-                    durationCount = sortedRecords.size,
-                    durationCountKind = UvirDetailDurationCountKind.ACQUISITION,
                     cardColor = cardColor,
                     primaryText = primaryText,
                     secondaryText = secondaryText
@@ -508,12 +554,25 @@ fun SessionChartScreen(
             item {
                 UvirDetailContextCard(
                     automatic = sortedRecords.firstOrNull()?.automatic,
-                    externalCommand = sortedRecords.any { it.externalCommand },
+                    externalCommand = externalOnlySession,
                     sensorName = detailSensorName,
                     note = currentNote.ifBlank { stringResource(R.string.no_note) },
                     cardColor = cardColor,
                     primaryText = primaryText,
                     secondaryText = secondaryText,
+                    detailIcon = UvirDetailMetadataIconKind.ACQUISITION,
+                    detailText =
+                        stringResource(
+                            R.string.session_acquisitions_detail,
+                            sortedRecords.size
+                        ),
+                    detailSuffix = if (sequenceFilterActive) {
+                        "(${sortedRecords.size / sequenceFilterCycleSize}×$sequenceFilterCycleSize)"
+                    } else {
+                        null
+                    },
+                    detailMaxLines = 2,
+                    noteEditingEnabled = noteEditingEnabled,
                     onEditNote = {
                         showNoteEditor = true
                     }
@@ -642,7 +701,21 @@ fun SessionChartScreen(
                         },
                         cardColor = cardColor,
                         primaryText = primaryText,
-                        secondaryText = secondaryText
+                        secondaryText = secondaryText,
+                        onOpenRecord = { record ->
+                            onOpenRecord(
+                                record,
+                                SessionChartNavigationState(
+                                    showChart = showChart,
+                                    viewMode = viewMode,
+                                    sequenceFilterPosition = sequenceFilterPosition,
+                                    firstVisibleItemIndex =
+                                        listState.firstVisibleItemIndex,
+                                    firstVisibleItemScrollOffset =
+                                        listState.firstVisibleItemScrollOffset
+                                )
+                            )
+                        }
                     )
                 }
             }
@@ -723,15 +796,12 @@ private fun SessionLineChart(
     primaryText: Color,
     secondaryText: Color
 ) {
-    val maximum =
+    val maximum = valueScale(uvirChartMaximum(
         series
             .flatMap { item ->
                 item.values.filterIndexed { index, _ -> item.outOfRange.getOrNull(index) != true }
             }
-            .map(valueScale)
-            .maxOrNull()
-            ?.coerceAtLeast(1.0)
-            ?: 1.0
+    ))
     val startTime = records.first().timestamp
     val endTime = records.last().timestamp
     val timeSpan =

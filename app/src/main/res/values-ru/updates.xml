@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="update_available">Доступны обновления</string>
+    <string name="update_none">Обновлений нет</string>
+    <string name="update_check_failed">Не удалось проверить обновления. См. журнал ошибок.</string>
+    <string name="update_app">Обновить приложение</string>
+    <string name="update_sensor">Обновить датчик</string>
+    <string name="update_app_first">Сначала обновите приложение.</string>
+    <string name="update_usb_required">Выберите этот датчик и подключите по USB. Активных сеансов быть не должно; все записи должны быть синхронизированы.</string>
+    <string name="update_download">Загрузка и проверка…</string>
+    <string name="update_flash">Обновление датчика…</string>
+    <string name="update_verify">Проверка датчика…</string>
+    <string name="update_keep_connected">Не отключайте USB и питание датчика. При необходимости удерживайте BOOT и повторите.</string>
+    <string name="update_done">Датчик обновлён</string>
+    <string name="update_failed">Обновление не удалось. См. журнал ошибок. Если датчик не запускается, восстановите прошивку по USB с компьютера.</string>
+    <string name="update_permission">Разрешите Uvir устанавливать обновления в настройках Android.</string>
+    <string name="update_whats_new">Подписанные обновления приложения и датчика, проверенные загрузки и установка прошивки по USB.</string>
+</resources>

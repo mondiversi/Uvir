@@ -39,10 +39,10 @@ class UvirSignalLegendWordingTest {
         val pairs = listOf(
             "Two ascending tones" to "Connection.",
             "Two descending tones" to "Disconnection.",
-            "Three ascending tones" to "Start of an automatic acquisition or value-alert session.",
-            "Three descending tones" to "End of an automatic acquisition or value-alert session.",
+            "Three ascending tones" to "Start of an automatic acquisition or alert session.",
+            "Three descending tones" to "End of an automatic acquisition or alert session.",
             "One short beep" to "Manual or automatic acquisition.",
-            "Three short beeps in a row" to "Value-alert recording."
+            "Three short beeps in a row" to "Alert recorded."
         )
         compose.setContent {
             Localized("en", dark.value) {
@@ -64,7 +64,7 @@ class UvirSignalLegendWordingTest {
         }
     }
 
-    @Test fun ledLegendUsesConciseDescriptionsAndKeepsPendingDataSignals() {
+    @Test fun ledLegendUsesConciseDescriptionsForActivityAndPendingData() {
         val dark = mutableStateOf(false)
         var pendingDescriptions = emptyList<String>()
         compose.setContent {
@@ -80,7 +80,9 @@ class UvirSignalLegendWordingTest {
         for (night in listOf(false, true)) {
             compose.runOnIdle { dark.value = night }
             (listOf("LED blu · Fisso", "Sensore alimentato ma non connesso.", "Sensore connesso.",
-                "Connessione in corso.", "LED blu · 3 lampeggi", "Acquisizione/allerta valori.") +
+                "Connessione in corso.", "Dati in memoria da sincronizzare.",
+                "RGB · 5 flash arancioni", "RGB · 3 flash rossi",
+                "RGB · 3 flash verdi", "Acquisizione non salvabile.") +
                 pendingDescriptions).forEach {
                 compose.onNodeWithText(it).performScrollTo().assertIsDisplayed()
             }

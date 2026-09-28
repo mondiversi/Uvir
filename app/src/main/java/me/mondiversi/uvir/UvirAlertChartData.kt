@@ -70,6 +70,25 @@ internal data class AlertChartBar(
 internal val AlertChartBar.thresholdDeltaPercent: Double
     get() = thresholdPercent - 100.0
 
+internal fun defaultAlertViewMode(
+    metrics: Iterable<ThresholdAlertMetric>
+): ViewMode {
+    var hasIrradiance = false
+    var hasBiologicalEffects = false
+    metrics.forEach { metric ->
+        if (metric.isBiologicalEffect()) {
+            hasBiologicalEffects = true
+        } else {
+            hasIrradiance = true
+        }
+    }
+    return if (!hasIrradiance && hasBiologicalEffects) {
+        ViewMode.BIOLOGICAL_EFFECTS
+    } else {
+        ViewMode.IRRADIANCE
+    }
+}
+
 internal fun alertThresholdDeltaPercent(
     value: Double,
     threshold: Double

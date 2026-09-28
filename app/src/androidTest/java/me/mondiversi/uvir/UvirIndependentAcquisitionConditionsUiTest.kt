@@ -107,22 +107,22 @@ class UvirIndependentAcquisitionConditionsUiTest {
             R.string.conditional_record).map { context.getString(it) }
         for (night in listOf(false, true)) {
             compose.runOnIdle { dark.value = night }
-            compose.onNodeWithText(title).assertIsEnabled().performClick()
+            compose.onNodeWithContentDescription(title).assertIsEnabled().performClick()
             compose.onNodeWithText(configure).assertIsEnabled().assertIsDisplayed()
             compose.onNodeWithText(warning).assertDoesNotExist()
             choiceLabels.forEach {
                 compose.onNodeWithText(it).performScrollTo().assertIsNotEnabled().performClick()
             }
             compose.runOnIdle { assertTrue(selected.value); assertEquals(0, matchCalls); assertEquals(0, actionCalls) }
-            compose.onNodeWithText(title).performScrollTo().performClick()
+            compose.onNodeWithContentDescription(title).performScrollTo().performClick()
             compose.onNodeWithText(configure).assertDoesNotExist()
             choiceLabels.forEach { compose.onNodeWithText(it).assertDoesNotExist() }
         }
-        compose.onNodeWithText(title).performClick()
+        compose.onNodeWithContentDescription(title).performClick()
         compose.onNodeWithText(configure).performScrollTo().performClick()
         compose.onNodeWithTag("acquisition_condition_check_UVC", useUnmergedTree = true).performClick()
         compose.onNodeWithText(save).performClick()
-        compose.onNodeWithText(title).assertIsEnabled()
+        compose.onNodeWithContentDescription(title).assertIsEnabled()
         compose.runOnIdle { assertTrue(selected.value); assertTrue(saved.value.any { it.enabled }) }
         choiceLabels.forEach { compose.onNodeWithText(it).performScrollTo().assertIsEnabled() }
         compose.onNodeWithText(context.getString(R.string.conditional_description)).assertDoesNotExist()
@@ -165,10 +165,10 @@ class UvirIndependentAcquisitionConditionsUiTest {
         }
         compose.onNodeWithText(configure).assertIsNotEnabled()
         compose.onNodeWithText(waiting).performScrollTo().assertIsDisplayed()
-        compose.onNodeWithText(title).performScrollTo().assertIsEnabled().performClick()
+        compose.onNodeWithContentDescription(title).performScrollTo().assertIsEnabled().performClick()
         compose.onNodeWithText(configure).assertDoesNotExist()
         compose.onNodeWithText(waiting).assertDoesNotExist()
-        compose.onNodeWithText(title).performClick()
+        compose.onNodeWithContentDescription(title).performClick()
         compose.onNodeWithText(configure).assertIsNotEnabled()
         compose.onNodeWithText(waiting).performScrollTo().assertIsDisplayed()
         assertEquals(0, enabledChanges)

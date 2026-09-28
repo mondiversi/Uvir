@@ -18,7 +18,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -33,8 +35,13 @@ internal fun UvirCollapsibleChartCard(
     cardColor: Color,
     primaryText: Color,
     secondaryText: Color,
+    titleFontWeight: FontWeight = FontWeight.SemiBold,
     content: @Composable ColumnScope.() -> Unit
 ) {
+    val accessibilityState =
+        stringResource(
+            if (expanded) R.string.accessibility_expanded else R.string.accessibility_collapsed
+        )
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(18.dp),
@@ -46,6 +53,11 @@ internal fun UvirCollapsibleChartCard(
                     Modifier
                         .fillMaxWidth()
                         .clickable(onClick = onToggle)
+                        .uvirAccessibleAction(
+                            label = title,
+                            stateText = accessibilityState,
+                            onClick = onToggle
+                        )
                         .padding(UvirIslandContentPadding),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -65,12 +77,23 @@ internal fun UvirCollapsibleChartCard(
                 }
 
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = title,
-                        color = primaryText,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = title,
+                            modifier = Modifier.weight(1f, fill = false),
+                            color = primaryText,
+                            fontSize = 15.sp,
+                            fontWeight = titleFontWeight,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Spacer(Modifier.width(5.dp))
+                        ExpansionChevron(
+                            expanded = expanded,
+                            tint = secondaryText,
+                            iconSize = 16.dp
+                        )
+                    }
 
                     subtitle?.let { text ->
                         Text(
@@ -82,11 +105,6 @@ internal fun UvirCollapsibleChartCard(
                     }
                 }
 
-                ExpansionChevron(
-                    expanded = expanded,
-                    tint = secondaryText,
-                    modifier = Modifier.size(20.dp)
-                )
             }
 
             UvirVerticalReveal(expanded) {

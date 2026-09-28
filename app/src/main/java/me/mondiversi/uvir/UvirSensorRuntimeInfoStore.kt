@@ -14,6 +14,8 @@ internal object UvirSensorRuntimeInfoStore {
     private const val SNAPSHOT_KEY = "last_sensor_snapshot"
     private const val MINIMUM_WRITE_INTERVAL_MS = 10_000L
 
+    private val profileWriteTimes = mutableMapOf<Pair<Int, String>, Long>()
+    private var lastPreferenceIdentity = 0
     private var lastSavedAtMs = 0L
     private var lastFingerprint = ""
     private var lastConnectionMode: SensorConnectionMode? = null
@@ -29,8 +31,11 @@ internal object UvirSensorRuntimeInfoStore {
             return
         }
 
+        val preferenceIdentity = System.identityHashCode(context.applicationContext
+            .getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE))
         val fingerprint = info.stableDiagnosticFingerprint()
         if (
+            preferenceIdentity == lastPreferenceIdentity &&
             fingerprint == lastFingerprint &&
             connectionMode == lastConnectionMode &&
             capturedAtMs - lastSavedAtMs < MINIMUM_WRITE_INTERVAL_MS
@@ -54,9 +59,36 @@ internal object UvirSensorRuntimeInfoStore {
             .putString(profileSnapshotKey(info.deviceId), snapshot.toString())
             .apply()
 
+        lastPreferenceIdentity = preferenceIdentity
         lastSavedAtMs = capturedAtMs
         lastFingerprint = fingerprint
         lastConnectionMode = connectionMode
+    }
+
+    /** Background reports are scoped; they must not replace the selected diagnostic snapshot. */
+    @Synchronized
+    fun saveForDevice(context: Context, connectionMode: SensorConnectionMode, info: UvirSensorRuntimeInfo) {
+        if (info.deviceId.isBlank()) return
+        if (UvirSensorCredentialStore.load(context).deviceId.equals(info.deviceId, true)) {
+            save(context, connectionMode, info)
+            return
+        }
+        val now = System.currentTimeMillis()
+        val preferences = context.applicationContext.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
+        val uid = System.identityHashCode(preferences) to normalizeSensorDeviceId(info.deviceId)
+        if (now - (profileWriteTimes[uid] ?: 0L) < MINIMUM_WRITE_INTERVAL_MS &&
+            preferences.contains(profileSnapshotKey(info.deviceId))) return
+        profileWriteTimes[uid] = now
+        val encoded = JSONObject().put("captured_at_ms", now)
+            .put("connection_mode", connectionMode.name).put("info", info.toStoredJson())
+        val previous = preferences.getString(profileSnapshotKey(info.deviceId), null)
+        if (previous != null) {
+            val snapshot = runCatching { JSONObject(previous) }.getOrNull()
+            if (snapshot?.optString("connection_mode") == connectionMode.name &&
+                snapshot.optJSONObject("info")?.toString() == info.toStoredJson().toString() &&
+                System.currentTimeMillis() - snapshot.optLong("captured_at_ms") < MINIMUM_WRITE_INTERVAL_MS) return
+        }
+        preferences.edit().putString(profileSnapshotKey(info.deviceId), encoded.toString()).apply()
     }
 
     fun load(context: Context): UvirStoredSensorRuntimeInfo? {
@@ -176,6 +208,26 @@ private fun UvirSensorRuntimeInfo.stableDiagnosticFingerprint(): String =
         bluetoothName,
         integrationMs,
         gain,
+        storageBackend,
+        storageRecordSizeBytes,
+        sdAvailable,
+        sdForeign,
+        sdType,
+        sdTotalBytes,
+        sdUsedBytes,
+        sdFreeBytes,
+        sdRecordCapacityTotal,
+        sdRecordCapacityFree,
+        sdInvalidRecords,
+        sdMountErrors,
+        sdWriteErrors,
+        rtcAvailable,
+        rtcValid,
+        rtcOscillatorStopped,
+        rtcCurrentTimeMs,
+        timeSource,
+        rtcReadErrors,
+        rtcWriteErrors,
         autonomousRecordingEnabled,
         automaticShutdownEnabled,
         automaticShutdownSeconds,
@@ -228,6 +280,29 @@ private fun UvirSensorRuntimeInfo.toStoredJson(): JSONObject =
         .putIfNotNull("free_heap_bytes", freeHeapBytes)
         .putIfNotNull("filesystem_total_bytes", filesystemTotalBytes)
         .putIfNotNull("filesystem_used_bytes", filesystemUsedBytes)
+        .put("storage_backend", storageBackend)
+        .putIfNotNull("storage_record_size_bytes", storageRecordSizeBytes)
+        .putIfNotNull("sd_available", sdAvailable)
+        .putIfNotNull("sd_foreign", sdForeign)
+        .put("sd_type", sdType)
+        .putIfNotNull("sd_total_bytes", sdTotalBytes)
+        .putIfNotNull("sd_used_bytes", sdUsedBytes)
+        .putIfNotNull("sd_free_bytes", sdFreeBytes)
+        .putIfNotNull("sd_record_capacity_total", sdRecordCapacityTotal)
+        .putIfNotNull("sd_record_capacity_free", sdRecordCapacityFree)
+        .putIfNotNull("sd_invalid_records", sdInvalidRecords)
+        .putIfNotNull("sd_mount_errors", sdMountErrors)
+        .putIfNotNull("sd_write_errors", sdWriteErrors)
+        .putIfNotNull("sd_read_write_ok", sdReadWriteOk)
+        .putIfNotNull("time_synced", timeSynced)
+        .putIfNotNull("rtc_available", rtcAvailable)
+        .putIfNotNull("rtc_valid", rtcValid)
+        .putIfNotNull("rtc_oscillator_stopped", rtcOscillatorStopped)
+        .putIfNotNull("rtc_read_ok", rtcReadOk)
+        .putIfNotNull("rtc_current_time_ms", rtcCurrentTimeMs)
+        .put("time_source", timeSource)
+        .putIfNotNull("rtc_read_errors", rtcReadErrors)
+        .putIfNotNull("rtc_write_errors", rtcWriteErrors)
         .putIfNotNull("offline_storage_available", offlineStorageAvailable)
         .putIfNotNull("offline_capacity", offlineCapacity)
         .putIfNotNull("offline_used", offlineUsed)
@@ -235,6 +310,11 @@ private fun UvirSensorRuntimeInfo.toStoredJson(): JSONObject =
         .putIfNotNull("offline_storage_full", offlineStorageFull)
         .putIfNotNull("offline_acquisitions", offlineAcquisitions)
         .putIfNotNull("offline_alerts", offlineAlerts)
+        .putIfNotNull("alert_recording_enabled", alertRecordingEnabled)
+        .putIfNotNull("alert_start_delay_seconds", alertStartDelaySeconds)
+        .putIfNotNull("alert_duration_seconds", alertDurationSeconds)
+        .putIfNotNull("alert_max_registrations", alertMaxRegistrations)
+        .putIfNotNull("alert_completed_registrations", alertCompletedRegistrations)
         .putIfNotNull(
             "offline_alert_repeat_seconds",
             offlineAlertRepeatSeconds

@@ -26,6 +26,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -75,8 +76,16 @@ internal fun AlertChartScreen(
         remember(entry.details) {
             parseThresholdAlertLogDetails(entry.details)
         }
+    val initialViewMode =
+        remember(entry.details) {
+            defaultAlertViewMode(
+                allViolations.map { violation ->
+                    violation.rule.metric
+                }
+            )
+        }
     var viewMode by rememberSaveable(entry.id) {
-        mutableStateOf(ViewMode.IRRADIANCE)
+        mutableStateOf(initialViewMode)
     }
     var showChart by rememberSaveable(entry.id) {
         mutableStateOf(false)
@@ -98,6 +107,10 @@ internal fun AlertChartScreen(
     }
     var showNoteEditor by rememberSaveable(entry.id) {
         mutableStateOf(false)
+    }
+    val noteEditingEnabled = rememberSessionNoteEditingEnabled(database, entry.sessionId, alert = true)
+    LaunchedEffect(noteEditingEnabled) {
+        if (!noteEditingEnabled) showNoteEditor = false
     }
     val currentEntry =
         remember(entry, currentNote) {
@@ -122,10 +135,12 @@ internal fun AlertChartScreen(
     BackHandler(onBack = onBack)
 
     if (showShareDialog) {
-        MeasurementDetailShareDialog(
+        MeasurementDataExportScreen(
+            backgroundColor = backgroundColor,
             cardColor = cardColor,
             primaryText = primaryText,
             secondaryText = secondaryText,
+            readableTableFileCount = 1,
             combinedChartFileCount = 1,
             separateChartFileCount = alertChartGroupCount(entry),
             onDismiss = {
@@ -154,9 +169,10 @@ internal fun AlertChartScreen(
                 showShareDialog = false
             }
         )
+        return
     }
 
-    if (showNoteEditor) {
+    if (showNoteEditor && noteEditingEnabled) {
         UvirNoteEditDialog(
             initialNote = currentNote,
             cardColor = cardColor,
@@ -166,6 +182,17 @@ internal fun AlertChartScreen(
                 if (database.updateAlertNote(entry.id, updatedNote)) {
                     currentNote = updatedNote
                     showNoteEditor = false
+                    showUvirBottomMessage(
+                        context,
+                        resources.getString(R.string.note_updated),
+                        longDuration = false
+                    )
+                } else {
+                    showUvirBottomMessage(
+                        context,
+                        resources.getString(R.string.save_error),
+                        longDuration = false
+                    )
                 }
             },
             onDismiss = {
@@ -175,7 +202,7 @@ internal fun AlertChartScreen(
     }
 
     if (showDeleteConfirmation) {
-        AlertDialog(
+        UvirAlertDialog(
             onDismissRequest = {
                 showDeleteConfirmation = false
             },
@@ -183,11 +210,14 @@ internal fun AlertChartScreen(
                 Text(stringResource(R.string.delete_alert_question))
             },
             text = {
-                Text(stringResource(R.string.delete_alert_warning))
+                UvirDeleteConfirmationMessage(
+                    stringResource(R.string.delete_alert_warning)
+                )
             },
             dismissButton = {
-                TextButton(
-                    onClick = {
+                HoldToConfirmDeleteButton(
+                    label = stringResource(R.string.delete),
+                    onConfirmed = {
                         val deleted =
                             database.deleteThresholdAlertLogs(
                                 listOf(entry.id)
@@ -201,14 +231,8 @@ internal fun AlertChartScreen(
                             )
                             onDeleted()
                         }
-                    },
-                    colors =
-                        ButtonDefaults.textButtonColors(
-                            contentColor = UvirDestructiveActionColor
-                        )
-                ) {
-                    Text(stringResource(R.string.delete))
-                }
+                    }
+                )
             },
             confirmButton = {
                 TextButton(
@@ -244,7 +268,9 @@ internal fun AlertChartScreen(
                         modifier = Modifier.weight(1f),
                         color = primaryText
                     )
-                    IconButton(
+                    UvirTitleActionButton(
+                        iconColor = MaterialTheme.colorScheme.primary,
+                        contentDescription = shareDescription,
                         onClick = {
                             showShareDialog = true
                         },
@@ -252,37 +278,28 @@ internal fun AlertChartScreen(
                         modifier =
                             Modifier
                                 .size(UvirTitleActionButtonSize)
-                                .semantics {
-                                    contentDescription = shareDescription
-                                }
                     ) {
                         UvirTitleActionIcon(
                             type = MenuIconType.EXPORT,
                             modifier = Modifier.size(UvirTitleActionIconSize),
-                            tint =
-                                if (allBars.isNotEmpty()) {
-                                    MaterialTheme.colorScheme.primary
-                                } else {
-                                    secondaryText.copy(alpha = 0.38f)
-                                }
+                            tint = LocalContentColor.current
                         )
                     }
 
-                    IconButton(
+                    UvirTitleActionButton(
+                        iconColor = UvirDestructiveActionColor,
+                        contentDescription = deleteDescription,
                         onClick = {
                             showDeleteConfirmation = true
                         },
                         modifier =
                             Modifier
                                 .size(UvirTitleActionButtonSize)
-                                .semantics {
-                                    contentDescription = deleteDescription
-                                }
                     ) {
                         UvirTitleActionIcon(
                             type = MenuIconType.DELETE,
                             modifier = Modifier.size(UvirTitleActionIconSize),
-                            tint = UvirDestructiveActionColor
+                            tint = LocalContentColor.current
                         )
                     }
                     }
@@ -300,7 +317,11 @@ internal fun AlertChartScreen(
                         state = scrollState,
                         color = secondaryText.copy(alpha = 0.46f)
                     ),
-            contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 20.dp),
+            contentPadding = PaddingValues(
+                start = UvirScreenHorizontalPadding,
+                end = UvirScreenHorizontalPadding,
+                bottom = 20.dp
+            ),
             verticalArrangement = Arrangement.spacedBy(UvirIslandSpacing)
         ) {
             item { UvirDetailIdentityCard(
@@ -308,7 +329,7 @@ internal fun AlertChartScreen(
                 sessionId = entry.sessionId,
                 idLabel =
                     "ID / ${stringResource(R.string.session_label)}",
-                dateLabel = stringResource(R.string.share_date_label),
+                dateLabel = stringResource(R.string.session_date_duration_events_label),
                 dateText = formatDetailDateTime(
                     entry.timestamp,
                     LocalUvirDateFormat.current,
@@ -338,6 +359,7 @@ internal fun AlertChartScreen(
                 cardColor = cardColor,
                 primaryText = primaryText,
                 secondaryText = secondaryText,
+                noteEditingEnabled = noteEditingEnabled,
                 onEditNote = {
                     showNoteEditor = true
                 }

@@ -29,6 +29,7 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -84,6 +85,7 @@ internal fun AcquisitionChartScreen(
         AcquisitionChartShareDialog(
             record = record,
             selectedGroup = selectedGroup,
+            backgroundColor = backgroundColor,
             cardColor = cardColor,
             primaryText = primaryText,
             secondaryText = secondaryText,
@@ -91,6 +93,7 @@ internal fun AcquisitionChartScreen(
                 showShareDialog = false
             }
         )
+        return
     }
 
     Scaffold(
@@ -106,32 +109,26 @@ internal fun AcquisitionChartScreen(
                 ) {
                     UvirBackButton(onClick = onBack)
 
-                    Text(
-                        text =
-                            stringResource(
-                                R.string.acquisition_chart_title
-                            ),
+                    UvirMenuTitle(
+                        text = stringResource(R.string.acquisition_chart_title),
                         modifier = Modifier.weight(1f),
-                        color = primaryText,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold
+                        color = primaryText
                     )
 
-                    IconButton(
+                    UvirTitleActionButton(
+                        iconColor = MaterialTheme.colorScheme.primary,
+                        contentDescription = shareDescription,
                         onClick = {
                             showShareDialog = true
                         },
                         modifier =
                             Modifier
-                                .size(40.dp)
-                                .semantics {
-                                    contentDescription = shareDescription
-                                }
+                                .size(UvirTitleActionButtonSize)
                     ) {
                         UvirTitleActionIcon(
                             type = MenuIconType.EXPORT,
-                            modifier = Modifier.size(24.dp),
-                            tint = MaterialTheme.colorScheme.primary
+                            modifier = Modifier.size(UvirTitleActionIconSize),
+                            tint = LocalContentColor.current
                         )
                     }
                 }
@@ -145,8 +142,8 @@ internal fun AcquisitionChartScreen(
                     .padding(paddingValues)
                     .verticalScroll(rememberScrollState())
                     .padding(
-                        start = 20.dp,
-                        end = 20.dp,
+                        start = UvirScreenHorizontalPadding,
+                        end = UvirScreenHorizontalPadding,
                         bottom = 20.dp
                     ),
             verticalArrangement = Arrangement.spacedBy(UvirIslandSpacing)
@@ -383,12 +380,11 @@ private fun AcquisitionBarSection(
     primaryText: Color,
     secondaryText: Color
 ) {
-    val maximum =
+    val maximum = valueScale(uvirChartMaximum(
         bars
             .filterNot { it.outOfRange }
-            .maxOfOrNull { valueScale(it.value).coerceAtLeast(0.0) }
-            ?.coerceAtLeast(1.0)
-            ?: 1.0
+            .map { it.value }
+    ))
     val numericFormat = LocalUvirNumericFormat.current
     val irradianceUnit = LocalUvirIrradianceUnit.current
     val outOfRangeText = stringResource(R.string.out_of_range_short)

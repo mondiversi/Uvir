@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sensor_general_actions_title">İşlemler</string>
+    <string name="sensor_general_actions_description">Sensörü ve uygulamayla eşleştirmesini yönetin.</string>
+    <string name="sensor_general_profile_title">Profil</string>
+    <string name="sensor_general_profile_description">Sensör adını seçin.</string>
+    <string name="sensor_general_operation_title">Çalışma</string>
+    <string name="sensor_general_operation_description">Sensörün davranışını yapılandırın.</string>
+</resources>

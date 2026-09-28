@@ -204,7 +204,9 @@ internal fun Modifier.scrollbarOverlay(
     drawWithContent {
         drawContent()
 
-        if (state.maxValue <= 0 || size.height <= 0f || size.width <= 0f) {
+        // A sub-2 dp rounding overflow is not useful scrolling and should not
+        // leave a permanent thumb on otherwise fitting settings pages.
+        if (state.maxValue <= 2.dp.toPx() || size.height <= 0f || size.width <= 0f) {
             return@drawWithContent
         }
 
@@ -268,9 +270,8 @@ internal fun Modifier.scrollbarOverlay(
                         )
 
                     if (
-                        down.position.x <
-                        size.width.toFloat() -
-                            touchWidth
+                        state.maxValue <= 2.dp.toPx() ||
+                        down.position.x < size.width.toFloat() - touchWidth
                     ) {
                         return@awaitEachGesture
                     }
@@ -333,8 +334,8 @@ internal data class UvirDialogScrollbar(
 )
 
 /**
- * Keeps a dialog scrollbar constrained to the scrollable body, excluding the
- * title and action rows. Use the returned viewport modifier on the body Box.
+ * Window-edge scrollbar geometry owned by UvirAlertDialog. Individual popup
+ * callers only supply their content; they must not add a second scroll viewport.
  */
 @Composable
 internal fun rememberUvirDialogScrollbar(
@@ -443,6 +444,7 @@ fun UvirFullScreenPage(
     containerColor: Color,
     contentColor: Color,
     scrollState: ScrollState? = null,
+    lazyListState: LazyListState? = null,
     scrollbarColor: Color = Color.Unspecified,
     contentOverlay:
         @Composable BoxScope.() -> Unit = {},
@@ -482,7 +484,7 @@ fun UvirFullScreenPage(
                                 if (topActionButton != null) {
                                     UvirTitleBarContentPadding
                                 } else {
-                                    PaddingValues(horizontal = 10.dp, vertical = 4.dp)
+                                    PaddingValues(horizontal = 5.dp, vertical = 4.dp)
                                 }
                             ),
                     verticalAlignment =
@@ -526,23 +528,40 @@ fun UvirFullScreenPage(
                             .weight(1f)
                             .fillMaxWidth()
                             .then(
-                                if (scrollState != null) {
-                                    Modifier.scrollbarOverlay(
-                                        state = scrollState,
-                                        color =
-                                            if (
-                                                scrollbarColor !=
-                                                Color.Unspecified
-                                            ) {
-                                                scrollbarColor
-                                            } else {
-                                                contentColor.copy(
-                                                    alpha = 0.46f
-                                                )
-                                            }
-                                    )
-                                } else {
-                                    Modifier
+                                when {
+                                    lazyListState != null ->
+                                        Modifier.lazyScrollbarOverlay(
+                                            state = lazyListState,
+                                            color =
+                                                if (
+                                                    scrollbarColor !=
+                                                    Color.Unspecified
+                                                ) {
+                                                    scrollbarColor
+                                                } else {
+                                                    contentColor.copy(
+                                                        alpha = 0.46f
+                                                    )
+                                                }
+                                        )
+
+                                    scrollState != null ->
+                                        Modifier.scrollbarOverlay(
+                                            state = scrollState,
+                                            color =
+                                                if (
+                                                    scrollbarColor !=
+                                                    Color.Unspecified
+                                                ) {
+                                                    scrollbarColor
+                                                } else {
+                                                    contentColor.copy(
+                                                        alpha = 0.46f
+                                                    )
+                                                }
+                                        )
+
+                                    else -> Modifier
                                 }
                             )
             ) {
@@ -552,7 +571,7 @@ fun UvirFullScreenPage(
                         Modifier
                             .fillMaxSize()
                             .padding(
-                                horizontal = 20.dp
+                                horizontal = UvirScreenHorizontalPadding
                             )
                 ) {
                     text()
@@ -572,7 +591,7 @@ fun UvirFullScreenPage(
                         Modifier
                             .fillMaxWidth()
                             .padding(
-                                horizontal = 20.dp
+                                horizontal = UvirScreenHorizontalPadding
                             )
                 ) {
                     actionButton()

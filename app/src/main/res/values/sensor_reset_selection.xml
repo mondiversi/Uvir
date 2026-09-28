@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sensor_reset_selection_title">Reset the selected sensors?</string>
+    <string name="sensor_reset_selection_message">Select the sensors to reset. Their settings, credentials and unsynchronized data will be erased, then the sensors will shut down. Data in the app stays unchanged. Only connected sensors with no activity in progress can be selected.</string>
+    <string name="sensor_reset_selection_failed">Reset failed: %1$s. Check the connection and try again.</string>
+</resources>
+

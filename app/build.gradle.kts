@@ -27,8 +27,8 @@ android {
         applicationId = "me.mondiversi.uvir"
         minSdk = 26
         targetSdk = 37
-        versionCode = 2
-        versionName = "1.1.0"
+        versionCode = 4
+        versionName = "1.3.0"
         buildConfigField(
             "String",
             "GITHUB_REPOSITORY_URL",
@@ -110,6 +110,7 @@ dependencies {
         "com.github.mik3y:usb-serial-for-android:3.11.0"
     )
     implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5")
+    implementation("net.lingala.zip4j:zip4j:2.11.6")
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)

@@ -14,6 +14,17 @@ constexpr uint8_t kI2cSdaPin = 21;
 constexpr uint8_t kI2cSclPin = 22;
 constexpr uint8_t kAs7343Address = 0x39;
 constexpr uint8_t kAs7331Address = 0x74;
+constexpr uint8_t kDs3231Address = 0x68;
+constexpr uint8_t kFramAddress = 0x50;
+
+// Generic SPI microSD adapter fitted with a 1117C33 regulator and
+// SN74HC125 level shifter. Power the adapter from 5 V/VIN; all signals remain
+// 3.3 V compatible at the ESP32 side.
+constexpr uint8_t kSdChipSelectPin = 13;
+constexpr uint8_t kSdClockPin = 18;
+constexpr uint8_t kSdMisoPin = 19;
+constexpr uint8_t kSdMosiPin = 23;
+constexpr uint32_t kSdSpiFrequencyHz = 4000000;
 
 constexpr uint8_t kStatusLedRedPin = 25;
 constexpr uint8_t kStatusLedGreenPin = 26;

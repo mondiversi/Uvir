@@ -22,11 +22,14 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.unit.LayoutDirection
@@ -50,6 +53,7 @@ class UvirAlertAndSensorMenuColorsTest {
     private val metric = mutableStateOf(ThresholdAlertMetric.UVC)
     private val calls = AtomicInteger()
     private val selected = AtomicReference("")
+    private val selectedSensor = mutableStateOf("A")
     private var defaultMenuColor = Color.Unspecified
 
     @Composable private fun Fixture(content: @Composable (Color, Color, Color) -> Unit) {
@@ -92,39 +96,35 @@ class UvirAlertAndSensorMenuColorsTest {
         return count
     }
 
-    @Test fun sensorMenuIsSlightlyLighterAtNightAndKeepsDayDefaultsAndSelection() {
+    @Test fun sensorPopupKeepsDayNightColorsAndRadioSelection() {
         compose.setContent {
             Fixture { primary, secondary, card ->
-                UvirSensorSourceDialog(
-                    selectedMode = SensorConnectionMode.USB, useFakeSensorData = false,
-                    wifiEnabled = true, bluetoothEnabled = true, internetEnabled = true,
-                    primaryText = primary, secondaryText = secondary, cardColor = card,
-                    sensorInfo = UvirSensorRuntimeInfo(), sensorDisplayName = "Menu test A",
+                UvirSensorSelectionDialog(
+                    primaryText = primary, secondaryText = secondary,
+                    cardColor = card,
                     sensorProfiles = listOf(UvirSensorProfile(1, "A", "Menu test A", 0, 0),
-                        UvirSensorProfile(2, "B", "Menu test B", 0, 0)),
-                    selectedSensorDeviceId = "A", sensorSelectionEnabled = true,
-                    onSensorSelected = { selected.set(it); calls.incrementAndGet() },
-                    sensorConnected = false, sensorPowerOffEnabled = false,
-                    onOpenSensorInfo = { error("No hardware actions") },
-                    onRequestSensorPowerOff = { error("No hardware actions") },
-                    onModeSelected = { error("No connection changes") }, onDismissRequest = {}
+                        UvirSensorProfile(2, "B", "Menu test B", 0, 1_700_000_000_000L)),
+                    selectedSensorDeviceId = selectedSensor.value, enabled = enabled.value,
+                    onSensorSelected = { selected.set(it); selectedSensor.value = it; calls.incrementAndGet() },
+                    onDismissRequest = {}
                 )
             }
         }
         var selections = 0
         for (dark in listOf(false, true)) for (layout in listOf(LayoutDirection.Ltr, LayoutDirection.Rtl)) {
-            compose.runOnIdle { night.value = dark; direction.value = layout }
-            compose.onNodeWithTag("sensor_selector_arrow", useUnmergedTree = true)
-                .performTouchInput { click(center) }
+            compose.runOnIdle { night.value = dark; direction.value = layout; selectedSensor.value = "A" }
             compose.onNodeWithTag("sensor_profile_menu", useUnmergedTree = true).assertIsDisplayed()
-            val container = if (dark) Color(0xFF27323B) else defaultMenuColor
+            compose.onNodeWithText(formatSensorListLastActivity(1_700_000_000_000L),
+                useUnmergedTree = true).assertIsDisplayed()
+            val container = if (dark) Color(0xFF1C242B) else Color.White
             assertTrue("Menu surface: night=$dark, $layout", matchingPixels("sensor_profile_menu", container) > 100)
-            val textColor = if (dark) Color.White else lightColorScheme().onSurface
-            for (label in listOf("Menu test B", context.getString(R.string.sensor_associate_action))) {
+            val textColor = if (dark) Color.White else Color(0xFF101418)
+            for (label in listOf("Menu test B")) {
+                val expectedText = textColor
                 val pixels = compose.onNodeWithText(label, useUnmergedTree = true).captureToImage().toPixelMap()
                 var ink = 0
                 for (y in 0 until pixels.height) for (x in 0 until pixels.width) {
-                    if (matches(pixels[x, y], textColor)) ink++
+                    if (matches(pixels[x, y], expectedText)) ink++
                 }
                 assertTrue("Readable menu text: $label, night=$dark", ink > 4)
             }
@@ -132,8 +132,38 @@ class UvirAlertAndSensorMenuColorsTest {
             selections++
             assertEquals(selections, calls.get())
             assertEquals("B", selected.get())
-            compose.onNodeWithTag("sensor_profile_menu", useUnmergedTree = true).assertDoesNotExist()
+            compose.onNodeWithText("Menu test B").assertIsSelected()
+            compose.onNodeWithText("Menu test A").assertIsNotSelected()
+            compose.onNodeWithTag("sensor_profile_menu", useUnmergedTree = true).assertIsDisplayed()
         }
+    }
+
+    @Test fun sensorPopupKeepsNoSensorAndDisabledGuardsWithoutAssociationAction() {
+        compose.setContent {
+            Fixture { primary, secondary, card ->
+                UvirSensorSelectionDialog(
+                    sensorProfiles = listOf(UvirSensorProfile(1, "A", "Guard sensor", 0, 0)),
+                    selectedSensorDeviceId = selectedSensor.value, enabled = enabled.value,
+                    primaryText = primary, secondaryText = secondary, cardColor = card,
+                    onSensorSelected = {
+                        selected.set(it)
+                        if (it == NO_SENSOR_SELECTED_REQUEST) selectedSensor.value = ""
+                        calls.incrementAndGet()
+                    },
+                    onDismissRequest = {}
+                )
+            }
+        }
+        compose.onNodeWithText("Guard sensor").performClick()
+        assertEquals("Current selection does not reconnect", 0, calls.get())
+        val none = context.getString(R.string.sensor_no_selection)
+        compose.onNodeWithContentDescription(none).performClick().assertIsSelected()
+        assertEquals(NO_SENSOR_SELECTED_REQUEST, selected.get())
+        assertEquals(1, calls.get())
+        compose.onNodeWithText(context.getString(R.string.sensor_associate_action)).assertDoesNotExist()
+        compose.runOnIdle { enabled.value = false }
+        compose.onNodeWithText("Guard sensor").performClick()
+        assertEquals("Disabled rows cannot issue sensor changes", 1, calls.get())
     }
 
     @Test fun alertNamesUseNormalTextAndDotsKeepEveryMetricColorAndRtlOrder() {

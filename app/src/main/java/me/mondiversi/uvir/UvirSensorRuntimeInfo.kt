@@ -20,6 +20,7 @@ internal fun UvirSensorRuntimeInfo.updatedFromActivityFrame(
 
 data class UvirSensorRuntimeInfo(
     val sensorSettingsSchemaVersion: Int? = null,
+    val settingsUpdatedAtMs: Long? = null,
     val protocol: String = "",
     val deviceId: String = "",
     val boardName: String = "",
@@ -34,8 +35,41 @@ data class UvirSensorRuntimeInfo(
     val uvCalibrationFactor: Double? = null,
     val sensorAvailable: Boolean? = null,
     val uvAvailable: Boolean? = null,
+    val i2cSdaPin: Int? = null,
+    val i2cSclPin: Int? = null,
+    val visibleSensorModel: String = "",
+    val visibleSensorI2cAddress: Int? = null,
+    val visibleSensorBusOk: Boolean? = null,
+    val visibleSensorDriverOk: Boolean? = null,
+    val visibleSensorReadOk: Boolean? = null,
+    val continuousSampleAgeMs: Long? = null,
+    val uvSensorModel: String = "",
+    val uvSensorI2cAddress: Int? = null,
+    val uvSensorBusOk: Boolean? = null,
+    val uvSensorDriverOk: Boolean? = null,
+    val uvSensorReadOk: Boolean? = null,
+    val rtcModel: String = "",
+    val rtcI2cAddress: Int? = null,
+    val rtcBusOk: Boolean? = null,
+    val rtcDriverOk: Boolean? = null,
+    val sdAdapterModel: String = "",
+    val sdBus: String = "",
+    val sdCsPin: Int? = null,
+    val sdSckPin: Int? = null,
+    val sdMisoPin: Int? = null,
+    val sdMosiPin: Int? = null,
+    val statusLedControlAvailable: Boolean? = null,
+    val statusLedRedPin: Int? = null,
+    val statusLedGreenPin: Int? = null,
+    val operationLedBluePin: Int? = null,
+    val statusBuzzerControlAvailable: Boolean? = null,
+    val statusBuzzerPin: Int? = null,
+    val externalInputReadOk: Boolean? = null,
+    val externalInputPin: Int? = null,
+    val externalInputActive: Boolean? = null,
     val uptimeMs: Long? = null,
     val streaming: Boolean? = null,
+    val appConnected: Boolean? = null,
     // Ephemeral activity from the connected device, never part of its saved settings.
     val operationActive: Boolean? = null,
     val streamIntervalMs: Long? = null,
@@ -70,7 +104,38 @@ data class UvirSensorRuntimeInfo(
     val freeHeapBytes: Long? = null,
     val filesystemTotalBytes: Long? = null,
     val filesystemUsedBytes: Long? = null,
+    val storageBackend: String = "",
+    val storageRecordSizeBytes: Long? = null,
+    val sdAvailable: Boolean? = null,
+    val sdForeign: Boolean? = null,
+    val sdType: String = "",
+    val sdTotalBytes: Long? = null,
+    val sdUsedBytes: Long? = null,
+    val sdFreeBytes: Long? = null,
+    val sdRecordCapacityTotal: Int? = null,
+    val sdRecordCapacityFree: Int? = null,
+    val sdInvalidRecords: Int? = null,
+    val sdMountErrors: Int? = null,
+    val sdWriteErrors: Int? = null,
+    val sdReadWriteOk: Boolean? = null,
+    val framAvailable: Boolean? = null,
+    val framModel: String = "",
+    val framI2cAddress: Int? = null,
+    val framBusOk: Boolean? = null,
+    val framReadWriteOk: Boolean? = null,
+    val framQueueAvailable: Boolean? = null,
+    val framCapacityBytes: Long? = null,
+    val framRecordCapacity: Int? = null,
+    val framRecordsUsed: Int? = null,
     val timeSynced: Boolean? = null,
+    val rtcAvailable: Boolean? = null,
+    val rtcValid: Boolean? = null,
+    val rtcOscillatorStopped: Boolean? = null,
+    val rtcReadOk: Boolean? = null,
+    val rtcCurrentTimeMs: Long? = null,
+    val timeSource: String = "",
+    val rtcReadErrors: Int? = null,
+    val rtcWriteErrors: Int? = null,
     val offlineStorageAvailable: Boolean? = null,
     val offlineCapacity: Int? = null,
     val offlineUsed: Int? = null,
@@ -80,6 +145,11 @@ data class UvirSensorRuntimeInfo(
     val offlineAlerts: Int? = null,
     val offlineAlertRepeatSeconds: Int? = null,
     val alertMonitoringEnabled: Boolean? = null,
+    val alertRecordingEnabled: Boolean? = null,
+    val alertStartDelaySeconds: Long? = null,
+    val alertDurationSeconds: Long? = null,
+    val alertMaxRegistrations: Int? = null,
+    val alertCompletedRegistrations: Int? = null,
     val alertSessionId: Long? = null,
     val alertRules: List<ThresholdAlertRule>? = null,
     val offlineErrors: Int? = null,
@@ -108,6 +178,7 @@ internal fun UvirSensorRuntimeInfo.updatedFrom(
     json: JSONObject
 ): UvirSensorRuntimeInfo =
     copy(
+        settingsUpdatedAtMs = json.longOrPrevious("settings_updated_at_ms", settingsUpdatedAtMs),
         sensorSettingsSchemaVersion =
             json.intOrPrevious(
                 "sensor_settings_schema",
@@ -140,8 +211,70 @@ internal fun UvirSensorRuntimeInfo.updatedFrom(
             json.booleanOrPrevious("sensor_available", sensorAvailable),
         uvAvailable =
             json.booleanOrPrevious("uv_available", uvAvailable),
+        i2cSdaPin = json.intOrPrevious("i2c_sda_pin", i2cSdaPin),
+        i2cSclPin = json.intOrPrevious("i2c_scl_pin", i2cSclPin),
+        visibleSensorModel =
+            json.stringOrPrevious("visible_sensor_model", visibleSensorModel),
+        visibleSensorI2cAddress =
+            json.intOrPrevious("visible_sensor_i2c_address", visibleSensorI2cAddress),
+        visibleSensorBusOk =
+            json.booleanOrPrevious("visible_sensor_bus_ok", visibleSensorBusOk),
+        visibleSensorDriverOk =
+            json.booleanOrPrevious("visible_sensor_driver_ok", visibleSensorDriverOk),
+        visibleSensorReadOk =
+            json.booleanOrPrevious("visible_sensor_read_ok", visibleSensorReadOk),
+        continuousSampleAgeMs =
+            json.longOrPrevious("continuous_sample_age_ms", continuousSampleAgeMs),
+        uvSensorModel =
+            json.stringOrPrevious("uv_sensor_model", uvSensorModel),
+        uvSensorI2cAddress =
+            json.intOrPrevious("uv_sensor_i2c_address", uvSensorI2cAddress),
+        uvSensorBusOk =
+            json.booleanOrPrevious("uv_sensor_bus_ok", uvSensorBusOk),
+        uvSensorDriverOk =
+            json.booleanOrPrevious("uv_sensor_driver_ok", uvSensorDriverOk),
+        uvSensorReadOk =
+            json.booleanOrPrevious("uv_sensor_read_ok", uvSensorReadOk),
+        rtcModel = json.stringOrPrevious("rtc_model", rtcModel),
+        rtcI2cAddress =
+            json.intOrPrevious("rtc_i2c_address", rtcI2cAddress),
+        rtcBusOk = json.booleanOrPrevious("rtc_bus_ok", rtcBusOk),
+        rtcDriverOk =
+            json.booleanOrPrevious("rtc_driver_ok", rtcDriverOk),
+        sdAdapterModel =
+            json.stringOrPrevious("sd_adapter_model", sdAdapterModel),
+        sdBus = json.stringOrPrevious("sd_bus", sdBus),
+        sdCsPin = json.intOrPrevious("sd_cs_pin", sdCsPin),
+        sdSckPin = json.intOrPrevious("sd_sck_pin", sdSckPin),
+        sdMisoPin = json.intOrPrevious("sd_miso_pin", sdMisoPin),
+        sdMosiPin = json.intOrPrevious("sd_mosi_pin", sdMosiPin),
+        statusLedControlAvailable =
+            json.booleanOrPrevious(
+                "status_led_control_available",
+                statusLedControlAvailable
+            ),
+        statusLedRedPin =
+            json.intOrPrevious("status_led_red_pin", statusLedRedPin),
+        statusLedGreenPin =
+            json.intOrPrevious("status_led_green_pin", statusLedGreenPin),
+        operationLedBluePin =
+            json.intOrPrevious("operation_led_blue_pin", operationLedBluePin),
+        statusBuzzerControlAvailable =
+            json.booleanOrPrevious(
+                "status_buzzer_control_available",
+                statusBuzzerControlAvailable
+            ),
+        statusBuzzerPin =
+            json.intOrPrevious("status_buzzer_pin", statusBuzzerPin),
+        externalInputReadOk =
+            json.booleanOrPrevious("external_input_read_ok", externalInputReadOk),
+        externalInputPin =
+            json.intOrPrevious("external_input_pin", externalInputPin),
+        externalInputActive =
+            json.booleanOrPrevious("external_input_active", externalInputActive),
         uptimeMs = json.longOrPrevious("uptime_ms", uptimeMs),
         streaming = json.booleanOrPrevious("streaming", streaming),
+        appConnected = json.booleanOrPrevious("app_connected", appConnected),
         operationActive = json.booleanOrPrevious("operation_active", operationActive),
         streamIntervalMs =
             json.longOrPrevious("stream_interval_ms", streamIntervalMs),
@@ -239,8 +372,79 @@ internal fun UvirSensorRuntimeInfo.updatedFrom(
                 "filesystem_used_bytes",
                 filesystemUsedBytes
             ),
+        storageBackend =
+            json.stringOrPrevious("storage_backend", storageBackend),
+        storageRecordSizeBytes =
+            json.longOrPrevious(
+                "storage_record_size_bytes",
+                storageRecordSizeBytes
+            ),
+        sdAvailable =
+            json.booleanOrPrevious("sd_available", sdAvailable),
+        sdForeign =
+            json.booleanOrPrevious("sd_foreign", sdForeign),
+        sdType = json.stringOrPrevious("sd_type", sdType),
+        sdTotalBytes =
+            json.longOrPrevious("sd_total_bytes", sdTotalBytes),
+        sdUsedBytes =
+            json.longOrPrevious("sd_used_bytes", sdUsedBytes),
+        sdFreeBytes =
+            json.longOrPrevious("sd_free_bytes", sdFreeBytes),
+        sdRecordCapacityTotal =
+            json.intOrPrevious(
+                "sd_record_capacity_total",
+                sdRecordCapacityTotal
+            ),
+        sdRecordCapacityFree =
+            json.intOrPrevious(
+                "sd_record_capacity_free",
+                sdRecordCapacityFree
+            ),
+        sdInvalidRecords =
+            json.intOrPrevious("sd_invalid_records", sdInvalidRecords),
+        sdMountErrors =
+            json.intOrPrevious("sd_mount_errors", sdMountErrors),
+        sdWriteErrors =
+            json.intOrPrevious("sd_write_errors", sdWriteErrors),
+        sdReadWriteOk =
+            json.booleanOrPrevious("sd_read_write_ok", sdReadWriteOk),
+        framAvailable =
+            json.booleanOrPrevious("fram_available", framAvailable),
+        framModel = json.stringOrPrevious("fram_model", framModel),
+        framI2cAddress =
+            json.intOrPrevious("fram_i2c_address", framI2cAddress),
+        framBusOk = json.booleanOrPrevious("fram_bus_ok", framBusOk),
+        framReadWriteOk =
+            json.booleanOrPrevious("fram_read_write_ok", framReadWriteOk),
+        framQueueAvailable =
+            json.booleanOrPrevious("fram_queue_available", framQueueAvailable),
+        framCapacityBytes =
+            json.longOrPrevious("fram_capacity_bytes", framCapacityBytes),
+        framRecordCapacity =
+            json.intOrPrevious("fram_record_capacity", framRecordCapacity),
+        framRecordsUsed =
+            json.intOrPrevious("fram_records_used", framRecordsUsed),
         timeSynced =
             json.booleanOrPrevious("time_synced", timeSynced),
+        rtcAvailable =
+            json.booleanOrPrevious("rtc_available", rtcAvailable),
+        rtcValid =
+            json.booleanOrPrevious("rtc_valid", rtcValid),
+        rtcOscillatorStopped =
+            json.booleanOrPrevious(
+                "rtc_oscillator_stopped",
+                rtcOscillatorStopped
+            ),
+        rtcReadOk =
+            json.booleanOrPrevious("rtc_read_ok", rtcReadOk),
+        rtcCurrentTimeMs =
+            json.longOrPrevious("rtc_current_time_ms", rtcCurrentTimeMs),
+        timeSource =
+            json.stringOrPrevious("time_source", timeSource),
+        rtcReadErrors =
+            json.intOrPrevious("rtc_read_errors", rtcReadErrors),
+        rtcWriteErrors =
+            json.intOrPrevious("rtc_write_errors", rtcWriteErrors),
         offlineStorageAvailable =
             json.booleanOrPrevious(
                 "offline_storage_available",
@@ -271,6 +475,16 @@ internal fun UvirSensorRuntimeInfo.updatedFrom(
                 "alert_monitoring_enabled",
                 alertMonitoringEnabled
             ),
+        alertRecordingEnabled =
+            json.booleanOrPrevious("alert_recording_enabled", alertRecordingEnabled),
+        alertStartDelaySeconds =
+            json.longOrPrevious("alert_start_delay_seconds", alertStartDelaySeconds),
+        alertDurationSeconds =
+            json.longOrPrevious("alert_duration_seconds", alertDurationSeconds),
+        alertMaxRegistrations =
+            json.intOrPrevious("alert_max_registrations", alertMaxRegistrations),
+        alertCompletedRegistrations =
+            json.intOrPrevious("alert_completed_registrations", alertCompletedRegistrations),
         alertSessionId =
             json.longOrPrevious("alert_session_id", alertSessionId),
         alertRules =

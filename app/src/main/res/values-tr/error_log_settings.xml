@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="data_management_error_log_group">Hata günlüğü</string>
+    <string name="data_management_error_log_description">Kaydedilen hataları uygulama, telefon ve sensörlerle ilgili teknik bilgilerle dışa aktarın.</string>
+</resources>

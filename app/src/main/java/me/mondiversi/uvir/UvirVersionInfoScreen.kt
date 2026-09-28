@@ -13,12 +13,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -36,6 +38,7 @@ internal fun UvirVersionInfoScreen(
     onDismissRequest: () -> Unit
 ) {
     val context = LocalContext.current
+    val updateState by UvirUpdates.state.collectAsState()
     val githubRepositoryUrl =
         BuildConfig.GITHUB_REPOSITORY_URL
             .trim()
@@ -57,188 +60,195 @@ internal fun UvirVersionInfoScreen(
         scrollState = scrollState,
         scrollbarColor = secondaryText.copy(alpha = 0.46f),
         text = {
-            Column(
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .verticalScroll(scrollState),
-                verticalArrangement =
-                    Arrangement.spacedBy(UvirIslandSpacing)
+            CompositionLocalProvider(
+                LocalUvirSettingsNeutralIcons provides true,
+                LocalUvirSettingsActionButtons provides true
             ) {
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    color = cardColor,
-                    contentColor = primaryText
+                Column(
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .verticalScroll(scrollState),
+                    verticalArrangement =
+                        Arrangement.spacedBy(UvirIslandSpacing)
                 ) {
-                    Column(
-                        modifier =
-                            Modifier.padding(UvirIslandContentPadding),
-                        verticalArrangement =
-                            Arrangement.spacedBy(UvirSettingsControlGap)
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        color = cardColor,
+                        contentColor = primaryText
+                    ) {
+                        Column(
+                            modifier =
+                                Modifier.padding(UvirIslandContentPadding),
+                            verticalArrangement =
+                                Arrangement.spacedBy(UvirSettingsControlGap)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.about_description),
+                                fontSize = 13.sp
+                            )
+                            Text(
+                                text = stringResource(R.string.about_derived_values),
+                                color = secondaryText,
+                                fontSize = 12.sp
+                            )
+                        }
+                    }
+
+                    SettingsSection(
+                        highlightExpandedHeader = false,
+                        showExpandedDivider = true,
+                        title =
+                            stringResource(
+                                R.string.about_whats_new_title,
+                                BuildConfig.VERSION_NAME
+                            ),
+                        containerColor = cardColor,
+                        titleColor = primaryText,
+                        dividerColor = secondaryText.copy(alpha = 0.28f),
+                        titleIconContent = { tint ->
+                            WhatsNewIcon(tint = tint)
+                        }
+                    ) {
+                        listOf(
+                            stringResource(R.string.about_whats_new_connectivity),
+                            stringResource(R.string.about_whats_new_connections),
+                            stringResource(R.string.about_whats_new_measurements),
+                            stringResource(R.string.about_whats_new_interface),
+                            stringResource(R.string.update_whats_new),
+                            stringResource(R.string.about_whats_new_github)
+                        ).forEach { change ->
+                            Text(
+                                text = "• $change",
+                                color = secondaryText,
+                                fontSize = 13.sp
+                            )
+                        }
+                    }
+
+                    SettingsSection(
+                        highlightExpandedHeader = false,
+                        showExpandedDivider = true,
+                        title = stringResource(R.string.github_repository_title),
+                        containerColor = cardColor,
+                        titleColor = primaryText,
+                        dividerColor = secondaryText.copy(alpha = 0.28f),
+                        titleIconContent = { tint ->
+                            GitHubIcon(tint = tint)
+                        }
                     ) {
                         Text(
-                            text = stringResource(R.string.about_description),
-                            fontSize = 13.sp
-                        )
-                        Text(
-                            text = stringResource(R.string.about_derived_values),
+                            text =
+                                if (githubRepositoryUrl.isBlank()) {
+                                    stringResource(
+                                        R.string.github_repository_pending
+                                    )
+                                } else {
+                                    githubRepositoryUrl
+                                },
                             color = secondaryText,
                             fontSize = 12.sp
                         )
-                    }
-                }
 
-                SettingsSection(
-                    title =
-                        stringResource(
-                            R.string.about_whats_new_title,
-                            BuildConfig.VERSION_NAME
-                        ),
-                    containerColor = cardColor,
-                    titleColor = primaryText,
-                    dividerColor = secondaryText.copy(alpha = 0.28f),
-                    titleIconContent = { tint ->
-                        WhatsNewIcon(tint = tint)
-                    }
-                ) {
-                    listOf(
-                        stringResource(R.string.about_whats_new_connectivity),
-                        stringResource(R.string.about_whats_new_connections),
-                        stringResource(R.string.about_whats_new_measurements),
-                        stringResource(R.string.about_whats_new_interface),
-                        stringResource(R.string.about_whats_new_github)
-                    ).forEach { change ->
-                        Text(
-                            text = "• $change",
-                            color = secondaryText,
-                            fontSize = 13.sp
-                        )
-                    }
-                }
-
-                SettingsSection(
-                    title = stringResource(R.string.github_repository_title),
-                    containerColor = cardColor,
-                    titleColor = primaryText,
-                    dividerColor = secondaryText.copy(alpha = 0.28f),
-                    titleIconContent = { tint ->
-                        GitHubIcon(tint = tint)
-                    }
-                ) {
-                    Text(
-                        text =
-                            if (githubRepositoryUrl.isBlank()) {
-                                stringResource(
-                                    R.string.github_repository_pending
-                                )
-                            } else {
-                                githubRepositoryUrl
-                            },
-                        color = secondaryText,
-                        fontSize = 12.sp
-                    )
-
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        OutlinedButton(
-                            onClick = {
-                                context.startActivity(
-                                    Intent(
-                                        Intent.ACTION_VIEW,
-                                        Uri.parse(githubRepositoryUrl)
-                                    )
-                                )
-                            },
-                            enabled = githubRepositoryUrl.isNotBlank(),
+                        Column(
                             modifier = Modifier.fillMaxWidth(),
-                            colors = uvirOutlinedActionColors(primaryText),
-                            border =
-                                uvirOutlinedActionBorder(
-                                    githubRepositoryUrl.isNotBlank(),
+                            verticalArrangement = Arrangement.spacedBy(UvirActionButtonGap)
+                        ) {
+                            OutlinedButton(
+                                onClick = {
+                                    context.startActivity(
+                                        Intent(
+                                            Intent.ACTION_VIEW,
+                                            Uri.parse(githubRepositoryUrl)
+                                        )
+                                    )
+                                },
+                                enabled = githubRepositoryUrl.isNotBlank(),
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = uvirOutlinedActionColors(primaryText),
+                                border =
+                                    uvirOutlinedActionBorder(
+                                        githubRepositoryUrl.isNotBlank(),
+                                        secondaryText
+                                    )
+                            ) {
+                                UvirLabeledButtonContent(
+                                    text = stringResource(R.string.open_github_repository)
+                                ) {
+                                    GitHubIcon(
+                                        modifier = Modifier.size(20.dp),
+                                        tint = LocalContentColor.current
+                                    )
+                                }
+                            }
+
+                            OutlinedButton(
+                                onClick = { UvirUpdates.check(context, manual = true) },
+                                enabled = !updateState.checking && !updateState.busy,
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = uvirPrimaryOutlinedButtonColors(),
+                                border = uvirPrimaryOutlinedButtonBorder(
+                                    !updateState.checking && !updateState.busy,
                                     secondaryText
                                 )
-                        ) {
-                            UvirLabeledButtonContent(
-                                text = stringResource(R.string.open_github_repository)
                             ) {
-                                GitHubIcon(
-                                    modifier = Modifier.size(20.dp),
-                                    tint = LocalContentColor.current
-                                )
-                            }
-                        }
-
-                        Button(
-                            onClick = {
-                                context.startActivity(
-                                    Intent(
-                                        Intent.ACTION_VIEW,
-                                        Uri.parse("$githubRepositoryUrl/releases")
-                                    )
-                                )
-                            },
-                            enabled = githubRepositoryUrl.isNotBlank(),
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = uvirPrimaryButtonColors()
-                        ) {
-                            UvirLabeledButtonContent(
-                                text = stringResource(R.string.check_for_updates)
-                            ) {
-                                UvirButtonGlyphIcon(UvirButtonGlyph.REFRESH)
+                                UvirLabeledButtonContent(
+                                    text = stringResource(R.string.check_for_updates)
+                                ) {
+                                    UvirButtonGlyphIcon(UvirButtonGlyph.REFRESH)
+                                }
                             }
                         }
                     }
-                }
 
-                UvirProjectNumbersSection(
-                    cardColor = cardColor,
-                    primaryText = primaryText,
-                    secondaryText = secondaryText
-                )
+                    UvirProjectNumbersSection(
+                        cardColor = cardColor,
+                        primaryText = primaryText,
+                        secondaryText = secondaryText
+                    )
 
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    color = cardColor,
-                    contentColor = primaryText
-                ) {
-                    Column(
-                        modifier =
-                            Modifier.padding(UvirIslandContentPadding),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        color = cardColor,
+                        contentColor = primaryText
                     ) {
-                        Text(
-                            text =
-                                stringResource(
-                                    R.string.biological_model_version,
-                                    BIOLOGICAL_MODEL_VERSION
-                                ),
-                            fontSize = 12.sp,
-                            fontWeight =
-                                androidx.compose.ui.text.font.FontWeight.Medium
-                        )
-                        Text(
-                            text = stringResource(R.string.about_copyright),
-                            color = secondaryText,
-                            fontSize = 11.sp
-                        )
-                        Text(
-                            text = stringResource(R.string.about_license),
-                            color = secondaryText,
-                            fontSize = 11.sp
-                        )
-                        Text(
-                            text =
-                                stringResource(
-                                    R.string.package_name_value,
-                                    context.packageName
-                                ),
-                            color = secondaryText,
-                            fontSize = 11.sp
-                        )
+                        Column(
+                            modifier =
+                                Modifier.padding(UvirIslandContentPadding),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(
+                                text =
+                                    stringResource(
+                                        R.string.biological_model_version,
+                                        BIOLOGICAL_MODEL_VERSION
+                                    ),
+                                fontSize = 12.sp,
+                                fontWeight =
+                                    androidx.compose.ui.text.font.FontWeight.Medium
+                            )
+                            Text(
+                                text = stringResource(R.string.about_copyright),
+                                color = secondaryText,
+                                fontSize = 11.sp
+                            )
+                            Text(
+                                text = stringResource(R.string.about_license),
+                                color = secondaryText,
+                                fontSize = 11.sp
+                            )
+                            Text(
+                                text =
+                                    stringResource(
+                                        R.string.package_name_value,
+                                        context.packageName
+                                    ),
+                                color = secondaryText,
+                                fontSize = 11.sp
+                            )
+                        }
                     }
                 }
             }

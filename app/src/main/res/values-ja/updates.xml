@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="update_available">更新があります</string>
+    <string name="update_none">利用可能な更新はありません</string>
+    <string name="update_check_failed">更新を確認できません。エラーログをご覧ください。</string>
+    <string name="update_app">アプリを更新</string>
+    <string name="update_sensor">センサーを更新</string>
+    <string name="update_app_first">先にアプリを更新してください。</string>
+    <string name="update_usb_required">このセンサーを選択し USB で接続してください。実行中のセッションを終了し、すべての記録を同期してください。</string>
+    <string name="update_download">ダウンロードと検証中…</string>
+    <string name="update_flash">センサーを更新中…</string>
+    <string name="update_verify">センサーを検証中…</string>
+    <string name="update_keep_connected">USB を抜いたりセンサーの電源を切ったりしないでください。必要なら BOOT を押したまま再試行してください。</string>
+    <string name="update_done">センサーを更新しました</string>
+    <string name="update_failed">更新に失敗しました。エラーログをご覧ください。センサーが起動しない場合は、パソコンから USB でファームウェアを復元してください。</string>
+    <string name="update_permission">Android 設定で Uvir に更新のインストールを許可してください。</string>
+    <string name="update_whats_new">アプリとセンサーの署名付き更新、検証済みダウンロード、USB によるファームウェア更新。</string>
+</resources>

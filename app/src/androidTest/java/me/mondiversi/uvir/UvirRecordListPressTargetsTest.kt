@@ -241,7 +241,8 @@ class UvirRecordListPressTargetsTest {
             androidx.compose.ui.graphics.Color(0xFFF28C28))) for (rightToLeft in listOf(false, true)) {
             compose.runOnIdle { rtl.value = rightToLeft; rail.value = color }
             val pixels = compose.onNodeWithTag("rail").captureToImage().toPixelMap()
-            val inset = with(compose.density) { 4.dp.toPx() }.toInt()
+            // Sample the 7 dp rail center, not the white space outside its 3 dp stroke.
+            val inset = with(compose.density) { 7.dp.toPx() }.toInt()
             val x = if (rightToLeft) pixels.width - inset else inset
             val top = with(compose.density) { 2.dp.toPx() }.toInt()
             val bottom = pixels.height - with(compose.density) { 6.dp.toPx() }.toInt()

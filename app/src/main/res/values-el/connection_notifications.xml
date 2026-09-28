@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="connection_notification_connected">Συνδεδεμένος</string>
+    <string name="connection_notification_disconnected">Αποσυνδεδεμένος</string>
+    <string name="connection_notification_simulation">Προσομοίωση</string>
+    <string name="connection_notification_selected">επιλεγμένος</string>
+    <string name="connection_notification_activity">Δραστηριότητα σε εξέλιξη</string>
+    <string name="connection_notification_last_activity">Δραστηριότητα σε εξέλιξη (τελευταία γνωστή κατάσταση)</string>
+    <plurals name="connection_notification_connected_count">
+        <item quantity="one">%1$d αισθητήρας συνδεδεμένος</item>
+        <item quantity="other">%1$d αισθητήρες συνδεδεμένοι</item>
+    </plurals>
+    <plurals name="connection_notification_connecting_count">
+        <item quantity="one">%1$d αισθητήρας συνδέεται</item>
+        <item quantity="other">%1$d αισθητήρες συνδέονται</item>
+    </plurals>
+    <plurals name="connection_notification_activity_count">
+        <item quantity="one">%1$d δραστηριότητα σε εξέλιξη</item>
+        <item quantity="other">%1$d δραστηριότητες σε εξέλιξη</item>
+    </plurals>
+    <plurals name="connection_notification_simulation_count">
+        <item quantity="one">%1$d προσομοίωση</item>
+        <item quantity="other">%1$d προσομοιώσεις</item>
+    </plurals>
+</resources>

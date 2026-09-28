@@ -4,8 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
@@ -32,14 +30,9 @@ internal fun UvirNoteEditDialog(
     var note by rememberSaveable(initialNote) {
         mutableStateOf(initialNote)
     }
-    val scrollbar =
-        rememberUvirDialogScrollbar(
-            color = secondaryText.copy(alpha = 0.58f)
-        )
 
-    AlertDialog(
+    UvirAlertDialog(
         onDismissRequest = onDismiss,
-        modifier = scrollbar.dialogModifier,
         title = {
             Text(stringResource(R.string.edit_note))
         },
@@ -48,14 +41,11 @@ internal fun UvirNoteEditDialog(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .heightIn(max = 460.dp)
-                        .then(scrollbar.viewportModifier)
             ) {
                 Column(
                     modifier =
                         Modifier
-                            .fillMaxWidth()
-                            .verticalScroll(scrollbar.scrollState),
+                            .fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     UvirLimitedNoteField(

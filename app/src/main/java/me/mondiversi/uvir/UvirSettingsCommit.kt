@@ -229,4 +229,8 @@ internal suspend fun applyUvirSettingsGroup(input: UvirSettingsSaveInput) {
 }
 
 internal fun ThresholdAlertSettings.firmwareConfigurationDiffersFrom(other: ThresholdAlertSettings): Boolean =
-    enabled != other.enabled || repeatSeconds != other.repeatSeconds || rules != other.rules
+    enabled != other.enabled || repeatSeconds != other.repeatSeconds ||
+        rules != other.rules || recordEvents != other.recordEvents ||
+        startDelaySeconds != other.startDelaySeconds ||
+        durationSeconds != other.durationSeconds ||
+        maxRegistrations != other.maxRegistrations

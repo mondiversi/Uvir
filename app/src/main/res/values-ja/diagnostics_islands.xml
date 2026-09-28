@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="diagnostics_test_group">診断テスト</string>
+    <string name="diagnostics_simulation_group">シミュレーション</string>
+    <string name="diagnostics_simulation_description">センサーの測定、アラート、リアルタイム値をシミュレートします。</string>
+</resources>

@@ -2,7 +2,6 @@ package me.mondiversi.uvir
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
@@ -37,14 +36,9 @@ internal fun UvirManualAcquisitionDialog(
     onDismissRequest: () -> Unit
 ) {
     val darkMode = isSystemInDarkTheme()
-    val dialogScrollbar =
-        rememberUvirDialogScrollbar(
-            color = secondaryText.copy(alpha = 0.58f)
-        )
 
-    AlertDialog(
+    UvirAlertDialog(
         onDismissRequest = onDismissRequest,
-        modifier = dialogScrollbar.dialogModifier,
         title = {
             Text(stringResource(R.string.save_measurement))
         },
@@ -53,14 +47,11 @@ internal fun UvirManualAcquisitionDialog(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .heightIn(max = 460.dp)
-                        .then(dialogScrollbar.viewportModifier)
             ) {
                 Column(
                     modifier =
                         Modifier
-                            .fillMaxWidth()
-                            .verticalScroll(dialogScrollbar.scrollState),
+                            .fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     UvirLimitedNoteField(
@@ -88,13 +79,14 @@ internal fun UvirManualAcquisitionDialog(
                             mode != ManualSaveMode.LAST_MANUAL_SESSION ||
                                 recentManualSessionId != null
                         val optionLabel = stringResource(labelResource)
+                        val selectMode: () -> Unit = { onModeSelected(mode) }
 
                         Row(
                             modifier =
                                 Modifier
                                     .fillMaxWidth()
                                     .clickable(enabled = enabled) {
-                                        onModeSelected(mode)
+                                        selectMode()
                                     }
                                     .padding(vertical = 3.dp),
                             verticalAlignment = Alignment.CenterVertically
@@ -104,9 +96,7 @@ internal fun UvirManualAcquisitionDialog(
                             ) {
                                 RadioButton(
                                     selected = selectedMode == mode,
-                                    onClick = {
-                                        onModeSelected(mode)
-                                    },
+                                    onClick = selectMode,
                                     enabled = enabled,
                                     modifier = Modifier.size(24.dp),
                                     colors =

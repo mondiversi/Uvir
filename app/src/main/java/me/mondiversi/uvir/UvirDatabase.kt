@@ -15,7 +15,7 @@ class UvirDatabaseHelper(
     context.applicationContext,
     "uvir.db",
     null,
-    18
+    20
 ) {
 
     private val appContext =
@@ -42,6 +42,12 @@ class UvirDatabaseHelper(
 
     private fun notifySensorProfilesChanged() {
         mutableSensorProfileRevision.update { it + 1L }
+    }
+
+    internal fun notifyDatabaseImported() {
+        notifyAcquisitionsChanged()
+        notifyAlertsChanged()
+        notifySensorProfilesChanged()
     }
 
     private fun createSensorsTable(
@@ -222,7 +228,12 @@ class UvirDatabaseHelper(
                 internet_relay_host TEXT NOT NULL,
                 internet_relay_port INTEGER NOT NULL,
                 last_synced_at INTEGER NOT NULL,
-                external_command_enabled INTEGER NOT NULL DEFAULT 1
+                external_command_enabled INTEGER NOT NULL DEFAULT 1,
+                alert_start_delay_seconds INTEGER NOT NULL DEFAULT 0,
+                alert_duration_seconds INTEGER NOT NULL DEFAULT 0,
+                alert_max_registrations INTEGER NOT NULL DEFAULT 0,
+                settings_updated_at_ms INTEGER NOT NULL DEFAULT 0,
+                alert_recording_enabled INTEGER
             )
             """.trimIndent()
         )
@@ -393,6 +404,15 @@ class UvirDatabaseHelper(
 
         if (oldVersion < 18) {
             migrateAcquisitionVariantsToVersion18(db)
+        }
+        if (oldVersion < 19) {
+            addColumnIfMissing(db, "sensor_settings", "alert_start_delay_seconds", "INTEGER NOT NULL DEFAULT 0")
+            addColumnIfMissing(db, "sensor_settings", "alert_duration_seconds", "INTEGER NOT NULL DEFAULT 0")
+            addColumnIfMissing(db, "sensor_settings", "alert_max_registrations", "INTEGER NOT NULL DEFAULT 0")
+        }
+        if (oldVersion < 20) {
+            addColumnIfMissing(db, "sensor_settings", "settings_updated_at_ms", "INTEGER NOT NULL DEFAULT 0")
+            addColumnIfMissing(db, "sensor_settings", "alert_recording_enabled", "INTEGER")
         }
     }
 
@@ -842,6 +862,9 @@ class UvirDatabaseHelper(
                     putBoolean("alert_monitoring_enabled", settings.alertMonitoringEnabled)
                     put("alert_repeat_seconds", settings.alertRepeatSeconds)
                     put("alert_session_id", settings.alertSessionId)
+                    put("alert_start_delay_seconds", settings.alertStartDelaySeconds)
+                    put("alert_duration_seconds", settings.alertDurationSeconds)
+                    put("alert_max_registrations", settings.alertMaxRegistrations)
                     putBoolean("wifi_enabled", settings.wifiEnabled)
                     putBoolean("bluetooth_enabled", settings.bluetoothEnabled)
                     putBoolean("internet_enabled", settings.internetEnabled)
@@ -850,6 +873,9 @@ class UvirDatabaseHelper(
                     put("internet_relay_host", settings.internetRelayHost)
                     put("internet_relay_port", settings.internetRelayPort)
                     put("last_synced_at", syncedAt.coerceAtLeast(0L))
+                    put("settings_updated_at_ms", settings.updatedAtMs.coerceAtLeast(0L))
+                    if (settings.alertRecordingEnabled == null) putNull("alert_recording_enabled")
+                    else putBoolean("alert_recording_enabled", settings.alertRecordingEnabled)
                     putBoolean(
                         "external_command_enabled",
                         settings.sensorParameters.externalCommandEnabled
@@ -945,6 +971,9 @@ class UvirDatabaseHelper(
                 alertMonitoringEnabled = cursor.getInt(14) != 0,
                 alertRepeatSeconds = cursor.getInt(15),
                 alertSessionId = cursor.getLong(16),
+                alertStartDelaySeconds = cursor.getLong(26),
+                alertDurationSeconds = cursor.getLong(27),
+                alertMaxRegistrations = cursor.getInt(28),
                 alertRules = rules,
                 wifiEnabled = cursor.getInt(17) != 0,
                 bluetoothEnabled = cursor.getInt(18) != 0,
@@ -953,7 +982,9 @@ class UvirDatabaseHelper(
                 wifiSsid = cursor.getString(21),
                 internetRelayHost = cursor.getString(22),
                 internetRelayPort = cursor.getInt(23),
-                lastSyncedAt = cursor.getLong(24)
+                lastSyncedAt = cursor.getLong(24),
+                updatedAtMs = cursor.getLong(29),
+                alertRecordingEnabled = if (cursor.isNull(30)) null else cursor.getInt(30) != 0
             )
         }
     }
@@ -1061,7 +1092,12 @@ class UvirDatabaseHelper(
                 "internet_relay_host",
                 "internet_relay_port",
                 "last_synced_at",
-                "external_command_enabled"
+                "external_command_enabled",
+                "alert_start_delay_seconds",
+                "alert_duration_seconds",
+                "alert_max_registrations",
+                "settings_updated_at_ms",
+                "alert_recording_enabled"
             )
     }
 
@@ -1377,10 +1413,11 @@ class UvirDatabaseHelper(
 
         createSessionTables(database)
         val sensorId = ensureSensorRow(database, sensorDeviceId, startedAt)
+        var existingSessionOpen = false
         val existingNote =
             database.query(
                 table,
-                arrayOf("note"),
+                arrayOf("note", "ended_at"),
                 "session_id = ?",
                 arrayOf(sessionId.toString()),
                 null,
@@ -1388,7 +1425,10 @@ class UvirDatabaseHelper(
                 null,
                 "1"
             ).use { cursor ->
-                if (cursor.moveToFirst()) cursor.getString(0) else null
+                if (cursor.moveToFirst()) {
+                    existingSessionOpen = cursor.isNull(1)
+                    cursor.getString(0)
+                } else null
             }
         val normalizedNote = limitUvirNote(note).trim()
         if (existingNote == null) {
@@ -1408,7 +1448,9 @@ class UvirDatabaseHelper(
             )
         } else {
             val values = ContentValues()
-            if (existingNote.isBlank() && normalizedNote.isNotBlank()) {
+            // Once finished, even an empty note is authoritative: late sensor records must
+            // not restore a note that the user deliberately cleared after the session.
+            if (existingSessionOpen && existingNote.isBlank() && normalizedNote.isNotBlank()) {
                 values.put("note", normalizedNote)
             }
             if (reopen) {
@@ -1448,6 +1490,7 @@ class UvirDatabaseHelper(
             sensorDeviceId = sensorDeviceId,
             externalCommand = externalCommand
         )
+        notifyAcquisitionsChanged()
     }
 
     fun ensureAcquisitionSession(
@@ -1474,7 +1517,7 @@ class UvirDatabaseHelper(
         endedAt: Long = System.currentTimeMillis()
     ) {
         if (sessionId <= 0L) return
-        writableDatabase.update(
+        val changed = writableDatabase.update(
             "acquisition_sessions",
             ContentValues().apply {
                 put("ended_at", endedAt.coerceAtLeast(0L))
@@ -1482,6 +1525,7 @@ class UvirDatabaseHelper(
             "session_id = ? AND ended_at IS NULL",
             arrayOf(sessionId.toString())
         )
+        if (changed > 0) notifyAcquisitionsChanged()
     }
 
     /** A lost RAM job has no shutdown timestamp: use only the last recorded event. */
@@ -1523,10 +1567,67 @@ class UvirDatabaseHelper(
             reopen = true,
             sensorDeviceId = sensorDeviceId
         )
+        notifyAlertsChanged()
     }
 
     fun readAcquisitionSessionNote(sessionId: Long): String =
         readSessionNote("acquisition_sessions", sessionId)
+
+    /** An offline or unselected sensor can still own an open session. */
+    fun canEditAcquisitionSessionNote(sessionId: Long?): Boolean =
+        sessionId == null || canEditAcquisitionSessionNote(readableDatabase, sessionId)
+
+    private fun canEditAcquisitionSessionNote(database: SQLiteDatabase, sessionId: Long): Boolean {
+        if (sessionId <= 0L) return false
+        val recordContext = database.rawQuery(
+            """
+            SELECT COUNT(*), COALESCE(MAX(automatic), 0), MAX(sensor_id)
+            FROM acquisitions WHERE session_id = ?
+            """.trimIndent(), arrayOf(sessionId.toString())
+        ).use { cursor ->
+            cursor.moveToFirst()
+            Triple(cursor.getInt(0), cursor.getInt(1) != 0,
+                if (cursor.isNull(2)) null else cursor.getLong(2))
+        }
+        var sessionSensorId: Long? = null
+        val open = database.query(
+            "acquisition_sessions", arrayOf("ended_at", "sensor_id"), "session_id = ?",
+            arrayOf(sessionId.toString()), null, null, null, "1"
+        ).use { cursor ->
+            if (cursor.moveToFirst()) {
+                sessionSensorId = if (cursor.isNull(1)) null else cursor.getLong(1)
+                cursor.isNull(0)
+            } else false
+        }
+        // Manual groups may have a metadata row for variants, without being an ongoing job.
+        if (open && (recordContext.first == 0 || recordContext.second)) return false
+        val sensorId = sessionSensorId ?: recordContext.third
+        val uid = sensorId?.let { id ->
+            database.query("sensors", arrayOf("hardware_uid"), "id = ?",
+                arrayOf(id.toString()), null, null, null, "1").use { cursor ->
+                if (cursor.moveToFirst()) cursor.getString(0).orEmpty() else ""
+            }
+        }.orEmpty()
+        val preferences = appContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val selectedUid = normalizeSensorDeviceId(UvirSensorCredentialStore.load(appContext).deviceId)
+        fun key(name: String) = if (uid.isBlank() || normalizeSensorDeviceId(uid) == selectedUid) {
+            name
+        } else sensorContextPreferenceKey(uid, name)
+        if (preferences.getBoolean(key(KEY_AUTO_ENABLED), false) &&
+            preferences.getLong(key(KEY_AUTO_SESSION_ID), 0L) == sessionId) return false
+        return preferences.getLong(key(KEY_LAST_MANUAL_SESSION_ID), 0L) != sessionId
+    }
+
+    fun canEditAlertSessionNote(sessionId: Long?): Boolean =
+        sessionId != null && canEditAlertSessionNote(readableDatabase, sessionId)
+
+    private fun canEditAlertSessionNote(database: SQLiteDatabase, sessionId: Long): Boolean {
+        if (sessionId <= 0L) return false
+        return database.query(
+            "alert_sessions", arrayOf("ended_at"), "session_id = ?",
+            arrayOf(sessionId.toString()), null, null, null, "1"
+        ).use { cursor -> cursor.moveToFirst() && !cursor.isNull(0) }
+    }
 
     fun updateAcquisitionNote(recordId: Long, note: String): Boolean {
         if (recordId <= 0L) return false
@@ -1555,12 +1656,22 @@ class UvirDatabaseHelper(
             if (recordContext.first && recordContext.second != null) {
                 updateAcquisitionSessionNote(requireNotNull(recordContext.second), note)
             } else {
-                database.update(
-                    "acquisitions",
-                    ContentValues().apply { put("note", limitUvirNote(note).trim()) },
-                    "id = ?",
-                    arrayOf(recordId.toString())
-                ) > 0
+                database.beginTransaction()
+                try {
+                    if (recordContext.second != null &&
+                        !canEditAcquisitionSessionNote(database, requireNotNull(recordContext.second))) {
+                        return false
+                    }
+                    val changed = database.update(
+                        "acquisitions",
+                        ContentValues().apply { put("note", limitUvirNote(note).trim()) },
+                        "id = ?", arrayOf(recordId.toString())
+                    ) > 0
+                    database.setTransactionSuccessful()
+                    changed
+                } finally {
+                    database.endTransaction()
+                }
             }
         if (updated && !(recordContext.first && recordContext.second != null)) {
             notifyAcquisitionsChanged()
@@ -1582,6 +1693,7 @@ class UvirDatabaseHelper(
         var updated = false
         database.beginTransaction()
         try {
+            if (!canEditAcquisitionSessionNote(database, sessionId)) return false
             updated =
                 if (automaticSession) {
                     createSessionTables(database)
@@ -1751,14 +1863,21 @@ class UvirDatabaseHelper(
 
     fun updateAlertSessionNote(sessionId: Long, note: String): Boolean {
         if (sessionId <= 0L) return false
-        createSessionTables(writableDatabase)
-        val updated =
-            writableDatabase.update(
+        val database = writableDatabase
+        var updated = false
+        database.beginTransaction()
+        try {
+            if (!canEditAlertSessionNote(database, sessionId)) return false
+            updated = database.update(
                 "alert_sessions",
                 ContentValues().apply { put("note", limitUvirNote(note).trim()) },
                 "session_id = ?",
                 arrayOf(sessionId.toString())
             ) > 0
+            database.setTransactionSuccessful()
+        } finally {
+            database.endTransaction()
+        }
         if (updated) notifyAlertsChanged()
         return updated
     }
@@ -1801,7 +1920,7 @@ class UvirDatabaseHelper(
         endedAt: Long = System.currentTimeMillis()
     ) {
         if (sessionId <= 0L) return
-        writableDatabase.update(
+        val changed = writableDatabase.update(
             "alert_sessions",
             ContentValues().apply {
                 put("ended_at", endedAt.coerceAtLeast(0L))
@@ -1809,6 +1928,7 @@ class UvirDatabaseHelper(
             "session_id = ? AND ended_at IS NULL",
             arrayOf(sessionId.toString())
         )
+        if (changed > 0) notifyAlertsChanged()
     }
 
     fun currentSessionCounter(): Long {
@@ -1920,6 +2040,41 @@ class UvirDatabaseHelper(
             }
         }
 
+    fun manualSessionBelongsToSensor(
+        sessionId: Long,
+        sensorDeviceId: String,
+        recordTimestamp: Long = Long.MAX_VALUE
+    ): Boolean =
+        sessionId > 0L && sensorDeviceId.isNotBlank() && readableDatabase.rawQuery(
+            """
+            SELECT 1 FROM acquisitions AS acquisition
+            JOIN sensors AS sensor ON sensor.id = acquisition.sensor_id
+            WHERE acquisition.session_id = ? AND acquisition.automatic = 0
+              AND sensor.hardware_uid = ? COLLATE NOCASE
+              AND acquisition.timestamp <= ?
+            LIMIT 1
+            """.trimIndent(),
+            arrayOf(
+                sessionId.toString(), normalizeSensorDeviceId(sensorDeviceId),
+                recordTimestamp.toString()
+            )
+        ).use { it.moveToFirst() }
+
+    fun manualSessionNote(sessionId: Long): String = readableDatabase.rawQuery(
+        """
+        SELECT note FROM acquisitions
+        WHERE session_id = ? AND automatic = 0 AND TRIM(note) <> ''
+        ORDER BY timestamp, id LIMIT 1
+        """.trimIndent(),
+        arrayOf(sessionId.toString())
+    ).use { if (it.moveToFirst()) it.getString(0) else "" }
+
+    fun acquisitionSessionUsesExternalCommand(sessionId: Long): Boolean =
+        readableDatabase.rawQuery(
+            "SELECT external_command FROM acquisition_sessions WHERE session_id = ? LIMIT 1",
+            arrayOf(sessionId.toString())
+        ).use { cursor -> cursor.moveToFirst() && cursor.getInt(0) != 0 }
+
     fun saveAcquisition(
         sample: SensorSample,
         note: String,
@@ -1927,7 +2082,8 @@ class UvirDatabaseHelper(
         sessionId: Long? = null,
         sessionSequence: Int? = null,
         sensorDeviceId: String = "",
-        externalCommand: Boolean = false
+        externalCommand: Boolean = false,
+        timestamp: Long = System.currentTimeMillis()
     ): Long {
 
         val normalizedNote = limitUvirNote(note).trim()
@@ -1936,7 +2092,7 @@ class UvirDatabaseHelper(
         val (positionIndex, variantIndex) =
             acquisitionVariantMetadata(database, sessionId, sessionSequence)
         val values = ContentValues().apply {
-            put("timestamp", System.currentTimeMillis())
+            put("timestamp", timestamp.coerceAtLeast(0L))
             put("note", normalizedNote)
             put("automatic", if (automatic) 1 else 0)
             put("external_command", if (externalCommand) 1 else 0)
@@ -2002,7 +2158,9 @@ class UvirDatabaseHelper(
         sequence: Int,
         sensorDeviceId: String,
         sensorRecordId: Long,
-        externalCommand: Boolean? = null
+        externalCommand: Boolean? = null,
+        externalSession: Boolean = false,
+        manualSession: Boolean = false
     ): Boolean {
         val database = writableDatabase
         var stored = false
@@ -2012,7 +2170,7 @@ class UvirDatabaseHelper(
             createCountersTable(database)
             val sensorId = ensureSensorRow(database, sensorDeviceId, timestamp)
             val recoveredSessionId = sessionId.takeIf { it > 0L }
-            recoveredSessionId?.let {
+            recoveredSessionId?.takeUnless { manualSession }?.let {
                 upsertSession(
                     database = database,
                     table = "acquisition_sessions",
@@ -2021,7 +2179,7 @@ class UvirDatabaseHelper(
                     startedAt = timestamp,
                     reopen = false,
                     sensorDeviceId = sensorDeviceId,
-                    externalCommand = externalCommand == true
+                    externalCommand = externalSession
                 )
             }
             val sessionUsesExternalCommand =
@@ -2051,8 +2209,8 @@ class UvirDatabaseHelper(
                 ContentValues().apply {
                     put("timestamp", timestamp)
                     // Automatic-session notes live once in acquisition_sessions.
-                    put("note", if (recoveredSessionId != null) "" else note)
-                    put("automatic", if (recoveredSessionId != null) 1 else 0)
+                    put("note", if (recoveredSessionId != null && !manualSession) "" else note)
+                    put("automatic", if (recoveredSessionId != null && !manualSession) 1 else 0)
                     put("external_command", if (recoveredThroughExternalCommand) 1 else 0)
                     if (recoveredSessionId != null) {
                         put("session_id", recoveredSessionId)
@@ -2141,8 +2299,8 @@ class UvirDatabaseHelper(
                 acquisition.id,
                 acquisition.timestamp,
                 CASE
-                    WHEN acquisition.automatic = 1
-                    THEN COALESCE(NULLIF(session.note, ''), acquisition.note)
+                    WHEN acquisition.automatic = 1 AND session.session_id IS NOT NULL
+                    THEN COALESCE(session.note, '')
                     ELSE acquisition.note
                 END AS resolved_note,
                 acquisition.automatic,
@@ -2252,8 +2410,8 @@ class UvirDatabaseHelper(
             SELECT
                 acquisition.*,
                 CASE
-                    WHEN acquisition.automatic = 1
-                    THEN COALESCE(NULLIF(session.note, ''), acquisition.note)
+                    WHEN acquisition.automatic = 1 AND session.session_id IS NOT NULL
+                    THEN COALESCE(session.note, '')
                     ELSE acquisition.note
                 END AS resolved_note,
                 CASE
@@ -2348,27 +2506,85 @@ class UvirDatabaseHelper(
     }
 
     fun deleteRecord(id: Long): Int {
-        return writableDatabase.delete(
-            "acquisitions",
-            "id = ?",
-            arrayOf(id.toString())
-        )
+        return deleteRecords(listOf(id))
     }
 
     fun deleteRecords(ids: Collection<Long>): Int {
-        if (ids.isEmpty()) {
-            return 0
+        val normalizedIds = ids.filter { it > 0L }.distinct()
+        if (normalizedIds.isEmpty()) return 0
+
+        val database = writableDatabase
+        val affectedSessionIds = linkedSetOf<Long>()
+        var deletedRows = 0
+        database.beginTransaction()
+        try {
+            createSessionTables(database)
+            // Stay below SQLite's host-parameter limit even for large selections.
+            normalizedIds.chunked(900).forEach { chunk ->
+                val placeholders = chunk.joinToString(",") { "?" }
+                val arguments = chunk.map(Long::toString).toTypedArray()
+                database.rawQuery(
+                    "SELECT DISTINCT session_id FROM acquisitions " +
+                        "WHERE id IN ($placeholders) AND session_id IS NOT NULL",
+                    arguments
+                ).use { cursor ->
+                    while (cursor.moveToNext()) affectedSessionIds += cursor.getLong(0)
+                }
+                deletedRows += database.delete(
+                    "acquisitions",
+                    "id IN ($placeholders)",
+                    arguments
+                )
+            }
+
+            affectedSessionIds.forEach { sessionId ->
+                val remainingRecords = database.rawQuery(
+                    "SELECT COUNT(*) FROM acquisitions WHERE session_id = ?",
+                    arrayOf(sessionId.toString())
+                ).use { cursor ->
+                    if (cursor.moveToFirst()) cursor.getInt(0) else 0
+                }
+                if (remainingRecords == 0) {
+                    // A deleted session must not leave note or variant metadata behind.
+                    database.delete(
+                        "acquisition_sessions",
+                        "session_id = ?",
+                        arrayOf(sessionId.toString())
+                    )
+                } else {
+                    val variantsPerPosition = database.query(
+                        "acquisition_sessions",
+                        arrayOf("variants_per_position"),
+                        "session_id = ?",
+                        arrayOf(sessionId.toString()),
+                        null,
+                        null,
+                        null,
+                        "1"
+                    ).use { cursor ->
+                        if (cursor.moveToFirst()) cursor.getInt(0).coerceAtLeast(1) else 1
+                    }
+                    if (variantsPerPosition > 1) {
+                        database.update(
+                            "acquisition_sessions",
+                            ContentValues().apply { put("variants_per_position", 1) },
+                            "session_id = ?",
+                            arrayOf(sessionId.toString())
+                        )
+                        database.execSQL(
+                            "UPDATE acquisitions SET position_index = NULL, " +
+                                "variant_index = NULL WHERE session_id = ?",
+                            arrayOf(sessionId)
+                        )
+                    }
+                }
+            }
+            database.setTransactionSuccessful()
+        } finally {
+            database.endTransaction()
         }
-
-        val placeholders =
-            ids.joinToString(",") { "?" }
-
-        return writableDatabase.delete(
-            "acquisitions",
-            "id IN ($placeholders)",
-            ids.map { it.toString() }
-                .toTypedArray()
-        )
+        if (deletedRows > 0) notifyAcquisitionsChanged()
+        return deletedRows
     }
 
     fun deleteAllAcquisitions(): Int {
@@ -2618,6 +2834,13 @@ class UvirDatabaseHelper(
         return result
     }
 
+    internal fun hasMatchingSensorAlert(deviceId: String, timestamp: Long, details: String): Boolean =
+        readableDatabase.rawQuery(
+            "SELECT 1 FROM alerts a JOIN sensors s ON s.id = a.sensor_id " +
+                "WHERE lower(s.hardware_uid) = lower(?) AND a.timestamp = ? AND a.details = ? LIMIT 1",
+            arrayOf(deviceId, timestamp.toString(), details)
+        ).use { it.moveToFirst() }
+
     fun insertRecoveredThresholdAlert(
         timestamp: Long,
         details: String,
@@ -2643,6 +2866,18 @@ class UvirDatabaseHelper(
                     reopen = false,
                     sensorDeviceId = sensorDeviceId
                 )
+            }
+            // A live alert has no hardware record ID until queue synchronization.
+            // Attach that ID to the existing row instead of duplicating it.
+            val existingLive = database.rawQuery(
+                "SELECT id FROM alerts WHERE sensor_id = ? AND timestamp = ? AND details = ? AND sensor_record_id IS NULL LIMIT 1",
+                arrayOf(sensorId.toString(), timestamp.toString(), details)
+            ).use { cursor -> if (cursor.moveToFirst()) cursor.getLong(0) else null }
+            if (existingLive != null) {
+                database.update("alerts", ContentValues().apply { put("sensor_record_id", sensorRecordId) },
+                    "id = ?", arrayOf(existingLive.toString()))
+                database.setTransactionSuccessful()
+                return true
             }
             result = database.insertWithOnConflict(
                 "alerts",
@@ -2950,7 +3185,9 @@ class UvirDatabaseHelper(
                                 .orEmpty(),
                         startedAt = ordered.first().timestamp,
                         reopen = false,
-                        externalCommand = ordered.any { it.externalCommand }
+                        // A mixed timed session may contain individual GPIO-triggered
+                        // records without becoming an external-only session.
+                        externalCommand = ordered.all { it.externalCommand }
                     )
                     database.update(
                         "acquisition_sessions",

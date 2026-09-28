@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="data_management_error_log_group">Αρχείο σφαλμάτων</string>
+    <string name="data_management_error_log_description">Εξαγωγή καταγεγραμμένων σφαλμάτων με τεχνικές πληροφορίες για την εφαρμογή, το τηλέφωνο και τους αισθητήρες.</string>
+</resources>

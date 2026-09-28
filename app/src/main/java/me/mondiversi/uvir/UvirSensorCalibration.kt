@@ -42,10 +42,7 @@ internal fun firmwareSupportsSensorCalibration(version: String): Boolean {
 @Composable
 internal fun UvirSensorCalibrationSettings(
     context: Context,
-    expanded: Boolean,
-    onExpandedChange: (Boolean) -> Unit,
     enabled: Boolean,
-    onUnsupportedInteraction: () -> Unit,
     uvSensorAvailable: Boolean,
     visibleFactorText: String,
     onVisibleFactorTextChange: (String) -> Unit,
@@ -57,27 +54,12 @@ internal fun UvirSensorCalibrationSettings(
 ) {
     val valueCorrectedText =
         stringResource(R.string.value_out_of_limits_corrected)
-    SettingsSection(
-        settingsPage = UvirSettingsPage.SENSOR_CALIBRATION,
+    SettingsStaticIsland(
         title = stringResource(R.string.sensor_calibration_title),
         titleIcon = ConnectivityIconType.CALIBRATION,
-        expanded = expanded,
-        enabled = enabled,
-        onExpandedChange = { value ->
-            if (!enabled && value) {
-                onUnsupportedInteraction()
-            }
-            onExpandedChange(value)
-            saveSettingsSectionExpanded(
-                context,
-                KEY_SETTINGS_SENSOR_CALIBRATION_EXPANDED,
-                value
-            )
-        },
         containerColor = cardColor,
         titleColor = primaryText,
-        chevronColor = secondaryText,
-        dividerColor = secondaryText.copy(alpha = 0.28f)
+        contentEnabled = enabled
     ) {
         SettingsPageDescription(
             text = stringResource(R.string.sensor_calibration_description),

@@ -1,8 +1,6 @@
 package me.mondiversi.uvir
 
-import android.content.ClipData
 import android.content.Context
-import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
@@ -11,7 +9,6 @@ import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.Typeface
 import androidx.compose.ui.graphics.toArgb
-import androidx.core.content.FileProvider
 import java.io.File
 import java.io.FileOutputStream
 import java.util.Locale
@@ -123,7 +120,7 @@ internal fun createAlertSessionChartFile(
     val startTimestamp = sortedEntries.first().timestamp
     val endTimestamp = sortedEntries.last().timestamp
     val timeSpan = (endTimestamp - startTimestamp).coerceAtLeast(1L)
-    val maximum =
+    val scaleValues =
         series.points
             .filterNot { it.outOfRange }
             .flatMap { point ->
@@ -132,9 +129,9 @@ internal fun createAlertSessionChartFile(
                     valueScale(point.chartThreshold(percentageScale))
                 )
             }
-            .maxOrNull()
-            ?.coerceAtLeast(if (percentageScale) 100.0 else 1.0)
-            ?: 1.0
+    val maximum = if (percentageScale) {
+        scaleValues.maxOrNull()?.coerceAtLeast(100.0) ?: 100.0
+    } else uvirChartMaximum(scaleValues, valueScale(1.0))
     val logExtent =
         if (percentageScale) {
             alertThresholdCenteredLogExtent(
@@ -177,8 +174,9 @@ internal fun createAlertSessionChartFile(
                     exportFormatting.numericFormat
                 ) + "%"
             } else {
-                formatUvirNumber(
+                formatUvirChartAxisValue(
                     value,
+                    maximum,
                     2,
                     exportFormatting.numericFormat
                 )
@@ -373,24 +371,11 @@ internal fun shareAlertSessionCharts(
             entries = entries,
             metrics = metrics
         )
-    val uri =
-        FileProvider.getUriForFile(
-            context,
-            "${context.packageName}.fileprovider",
-            file
-        )
-    val shareIntent = Intent(Intent.ACTION_SEND).apply {
-        type = "image/png"
-        putExtra(Intent.EXTRA_SUBJECT, "Uvir alert session $sessionId charts")
-        putExtra(Intent.EXTRA_STREAM, uri)
-        clipData = ClipData.newUri(context.contentResolver, file.name, uri)
-        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-    }
-
-    context.startActivity(
-        Intent.createChooser(
-            shareIntent,
-            context.getString(R.string.alert_session_chart_share)
-        )
+    deliverUvirExportFiles(
+        context = context,
+        files = listOf(file),
+        destination = UvirExportDestination.SHARE,
+        chooserTitle = context.getString(R.string.alert_session_chart_share),
+        subject = "Uvir alert session $sessionId charts"
     )
 }

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sensor_general_actions_title">操作</string>
+    <string name="sensor_general_actions_description">センサーとアプリとの関連付けを管理します。</string>
+    <string name="sensor_general_profile_title">プロフィール</string>
+    <string name="sensor_general_profile_description">センサー名を選択します。</string>
+    <string name="sensor_general_operation_title">動作</string>
+    <string name="sensor_general_operation_description">センサーの動作を設定します。</string>
+</resources>

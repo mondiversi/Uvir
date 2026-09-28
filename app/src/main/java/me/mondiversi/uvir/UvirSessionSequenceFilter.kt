@@ -2,6 +2,7 @@ package me.mondiversi.uvir
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -9,16 +10,15 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
@@ -40,10 +40,12 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -80,47 +82,70 @@ internal fun sessionSequenceCycleSizes(recordCount: Int): List<Int> =
 internal val UvirSessionCyclePositionSelectorWidth = 93.dp
 
 @Composable
+internal fun UvirSessionVariantsIcon(
+    tint: Color,
+    modifier: Modifier = Modifier
+) {
+    Canvas(modifier.graphicsLayer(alpha = tint.alpha)) {
+        val tint = tint.copy(alpha = 1f)
+        val stroke = UvirTitleActionIconStrokeWidth.toPx() * 0.82f
+        listOf(
+            Offset(size.width * 0.12f, size.height * 0.14f),
+            Offset(size.width * 0.20f, size.height * 0.24f),
+            Offset(size.width * 0.28f, size.height * 0.34f)
+        ).forEach { topLeft ->
+            drawRoundRect(
+                color = tint,
+                topLeft = topLeft,
+                size = Size(size.width * 0.60f, size.height * 0.48f),
+                cornerRadius = CornerRadius(3.dp.toPx()),
+                style = Stroke(width = stroke)
+            )
+        }
+    }
+}
+
+@Composable
 internal fun UvirSessionCycleFilterButton(
     active: Boolean,
     enabled: Boolean,
+    compact: Boolean = false,
     onClick: () -> Unit
 ) {
     val description = stringResource(R.string.session_sequence_filter_title)
     val fieldColors = UvirOutlinedTextFieldColors()
-    val tint = if (enabled) fieldColors.focusedIndicatorColor else fieldColors.disabledTextColor
+    val tint = if (compact) {
+        if (enabled) androidx.compose.material3.MaterialTheme.colorScheme.primary
+        else androidx.compose.material3.MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+    } else {
+        if (enabled) fieldColors.focusedIndicatorColor else fieldColors.disabledTextColor
+    }
 
-    IconButton(
-        onClick = onClick,
-        enabled = enabled,
-        modifier =
-            Modifier
-                .size(UvirTitleActionButtonSize)
-                .testTag("session-cycle-filter-toggle")
-                .semantics { contentDescription = description }
+    Box(
+        modifier = Modifier.size(UvirTitleActionButtonSize),
+        contentAlignment = Alignment.Center
     ) {
-        Canvas(Modifier.size(UvirTitleActionIconSize)) {
-            val stroke = UvirTitleActionIconStrokeWidth.toPx() * 0.82f
-            listOf(
-                Offset(size.width * 0.12f, size.height * 0.14f),
-                Offset(size.width * 0.20f, size.height * 0.24f),
-                Offset(size.width * 0.28f, size.height * 0.34f)
-            ).forEach { topLeft ->
-                drawRoundRect(
-                    color = tint,
-                    topLeft = topLeft,
-                    size = Size(size.width * 0.60f, size.height * 0.48f),
-                    cornerRadius = CornerRadius(3.dp.toPx()),
-                    style = Stroke(width = stroke)
-                )
-            }
-            if (active) {
-                drawCircle(
-                    color = tint,
-                    radius = 2.dp.toPx(),
-                    center = Offset(size.width * 0.88f, size.height * 0.84f)
-                )
-            }
+        UvirAccessibleIconButton(
+            contentDescription = description,
+            onClick = onClick,
+            modifier = Modifier.fillMaxSize().testTag("session-cycle-filter-toggle"),
+            enabled = enabled,
+            selected = active,
+            visualScale = if (compact) UvirTitleActionVisualScale else 1f,
+            pressedColor = tint,
+            pressedVisualSize = UvirActionIconBadgeSize
+        ) {
+            UvirSessionVariantsIcon(
+                tint = tint,
+                modifier = Modifier.size(UvirTitleActionIconSize)
+            )
         }
+        if (active) UvirTitleActionActiveDot(
+            color = tint,
+            modifier = Modifier.align(Alignment.BottomEnd)
+                .padding(end = UvirTitleActionActiveDotInset, bottom = UvirTitleActionActiveDotInset)
+                .testTag("session-cycle-active-dot")
+        )
     }
 }
 
@@ -136,7 +161,9 @@ internal fun UvirSessionCyclePositionSelector(
     val enabled = cycleSize > 1
     val effectivePosition = position.coerceIn(1, cycleSize.coerceAtLeast(1))
     val totalPositions = cycleSize.coerceAtLeast(1)
-    val positionLabel = stringResource(R.string.session_sequence_filter_position)
+    val positionBaseLabel = stringResource(R.string.session_sequence_filter_position)
+    val positionLabel =
+        if (enabled) "$positionBaseLabel ($totalPositions)" else positionBaseLabel
     val fieldColors = UvirOutlinedTextFieldColors()
     val tint = if (enabled) fieldColors.unfocusedTextColor else fieldColors.disabledTextColor
     val borderColor =
@@ -171,7 +198,7 @@ internal fun UvirSessionCyclePositionSelector(
             ) {
                 Text(
                     text =
-                        if (enabled) "$effectivePosition/$totalPositions"
+                        if (enabled) uvirVariantLabel(effectivePosition)
                         else "—",
                     modifier = Modifier.weight(1f),
                     color = tint,
@@ -180,7 +207,12 @@ internal fun UvirSessionCyclePositionSelector(
                     textAlign = TextAlign.Center,
                     maxLines = 1
                 )
-                Canvas(Modifier.size(16.dp)) {
+                Canvas(
+                    Modifier
+                        .size(16.dp)
+                        .graphicsLayer(alpha = tint.alpha)
+                ) {
+                    val tint = tint.copy(alpha = 1f)
                     val stroke = UvirTitleActionIconStrokeWidth.toPx()
                     drawLine(
                         tint,
@@ -224,12 +256,23 @@ internal fun UvirSessionCyclePositionSelector(
         ) {
             (1..totalPositions).forEach { choice ->
                 DropdownMenuItem(
+                    modifier = Modifier,
                     text = {
-                        Text(
-                            text = "$choice/$totalPositions",
-                            color = primaryText
-                        )
+                        Box(
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(end = 16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = uvirVariantLabel(choice),
+                                color = primaryText,
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     },
+                    contentPadding = PaddingValues(horizontal = 10.dp),
                     onClick = {
                         expanded = false
                         onPositionChange(choice)
@@ -265,14 +308,9 @@ internal fun UvirSessionSequenceFilterPanel(
         )
     }
     val fieldColors = UvirOutlinedTextFieldColors()
-    val dialogScrollbar =
-        rememberUvirDialogScrollbar(
-            secondaryText.copy(alpha = 0.58f)
-        )
 
-    AlertDialog(
+    UvirAlertDialog(
         onDismissRequest = onDismiss,
-        modifier = dialogScrollbar.dialogModifier,
         title = {
             Text(
                 text = stringResource(R.string.session_sequence_filter_title),
@@ -284,14 +322,11 @@ internal fun UvirSessionSequenceFilterPanel(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .heightIn(max = 360.dp)
-                        .then(dialogScrollbar.viewportModifier)
             ) {
                 Column(
                     modifier =
                         Modifier
-                            .fillMaxWidth()
-                            .verticalScroll(dialogScrollbar.scrollState),
+                            .fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Text(
@@ -299,6 +334,13 @@ internal fun UvirSessionSequenceFilterPanel(
                         color = secondaryText,
                         fontSize = 13.sp,
                         lineHeight = 18.sp
+                    )
+                    Text(
+                        text = stringResource(R.string.session_sequence_filter_cycle_size),
+                        color = primaryText,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        lineHeight = 17.sp
                     )
                     FlowRow(
                         modifier = Modifier.fillMaxWidth(),
@@ -348,14 +390,10 @@ internal fun UvirSessionSequenceFilterPanel(
                             if (draftCycleSize > 1) {
                                 stringResource(
                                     R.string.session_sequence_filter_preview,
-                                    visibleRecords.size,
-                                    records.size
+                                    visibleRecords.size
                                 )
                             } else {
-                                stringResource(
-                                    R.string.session_sequence_filter_preview_total,
-                                    records.size
-                                )
+                                stringResource(R.string.session_sequence_filter_preview_total)
                             },
                         modifier = Modifier.fillMaxWidth(),
                         color = secondaryText,
@@ -363,6 +401,13 @@ internal fun UvirSessionSequenceFilterPanel(
                         textAlign = TextAlign.Start,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        text = stringResource(R.string.session_sequence_filter_export_note),
+                        modifier = Modifier.fillMaxWidth(),
+                        color = secondaryText.copy(alpha = 0.78f),
+                        fontSize = 11.sp,
+                        lineHeight = 15.sp
                     )
                 }
             }

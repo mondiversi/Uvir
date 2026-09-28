@@ -11,6 +11,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,6 +41,8 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -82,6 +85,10 @@ internal fun UvirLaunchGate(
 
 @Composable
 internal fun UvirLaunchScreen() {
+    val darkTheme = isSystemInDarkTheme()
+    var measuredLogoCenter by remember {
+        mutableStateOf<Offset?>(null)
+    }
     val transition =
         rememberInfiniteTransition(
             label = "uvir_launch"
@@ -117,6 +124,31 @@ internal fun UvirLaunchScreen() {
             Color(0xFFF97316),
             Color(0xFFEF4444)
         )
+    val backgroundColors =
+        if (darkTheme) {
+            listOf(
+                Color(0xFF050815),
+                Color(0xFF111044),
+                Color(0xFF180B35),
+                Color(0xFF050711)
+            )
+        } else {
+            listOf(
+                Color(0xFFF8F9FF),
+                Color(0xFFECEEFF),
+                Color(0xFFF5EEFF),
+                Color(0xFFF5F7FF)
+            )
+        }
+    val logoContainerColor =
+        if (darkTheme) Color(0xFF080B18) else Color.White
+    val titleColor =
+        if (darkTheme) Color.White else Color(0xFF17143F)
+    val subtitleColor =
+        if (darkTheme) Color(0xFFD7D7F8) else Color(0xFF545474)
+    val glowPrimaryAlpha = if (darkTheme) 0.30f else 0.18f
+    val glowSecondaryAlpha = if (darkTheme) 0.13f else 0.09f
+    val ringBaseAlpha = if (darkTheme) 0.14f else 0.20f
 
     Box(
         modifier =
@@ -124,12 +156,7 @@ internal fun UvirLaunchScreen() {
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
-                        listOf(
-                            Color(0xFF050815),
-                            Color(0xFF111044),
-                            Color(0xFF180B35),
-                            Color(0xFF050711)
-                        )
+                        backgroundColors
                     )
                 )
     ) {
@@ -137,10 +164,11 @@ internal fun UvirLaunchScreen() {
             modifier = Modifier.fillMaxSize()
         ) {
             val center =
-                Offset(
-                    size.width / 2f,
-                    size.height * 0.42f
-                )
+                measuredLogoCenter
+                    ?: Offset(
+                        size.width / 2f,
+                        size.height * 0.42f
+                    )
             val baseRadius = size.minDimension * 0.27f
 
             drawCircle(
@@ -148,8 +176,8 @@ internal fun UvirLaunchScreen() {
                     Brush.radialGradient(
                         colors =
                             listOf(
-                                Color(0xFF6D28D9).copy(alpha = 0.30f),
-                                Color(0xFF2563EB).copy(alpha = 0.13f),
+                                Color(0xFF6D28D9).copy(alpha = glowPrimaryAlpha),
+                                Color(0xFF2563EB).copy(alpha = glowSecondaryAlpha),
                                 Color.Transparent
                             ),
                         center = center,
@@ -163,7 +191,7 @@ internal fun UvirLaunchScreen() {
                 drawCircle(
                     color =
                         spectrum[index]
-                            .copy(alpha = 0.14f - index * 0.025f),
+                            .copy(alpha = ringBaseAlpha - index * 0.025f),
                     radius =
                         baseRadius *
                                 (1.02f + index * 0.20f) *
@@ -176,7 +204,7 @@ internal fun UvirLaunchScreen() {
             }
 
             val wave = Path()
-            val waveY = size.height * 0.42f
+            val waveY = center.y
             val amplitude = size.height * 0.018f
             val steps = 80
 
@@ -227,8 +255,19 @@ internal fun UvirLaunchScreen() {
                 modifier =
                     Modifier
                         .size(196.dp)
+                        .onGloballyPositioned { coordinates ->
+                            val position = coordinates.positionInRoot()
+                            val measuredCenter =
+                                Offset(
+                                    x = position.x + coordinates.size.width / 2f,
+                                    y = position.y + coordinates.size.height / 2f
+                                )
+                            if (measuredLogoCenter != measuredCenter) {
+                                measuredLogoCenter = measuredCenter
+                            }
+                        }
                         .clip(CircleShape)
-                        .background(Color(0xFF080B18))
+                        .background(logoContainerColor)
                         .border(
                             width = 2.dp,
                             brush = Brush.sweepGradient(spectrum),
@@ -261,7 +300,7 @@ internal fun UvirLaunchScreen() {
 
             Text(
                 text = stringResource(R.string.app_name),
-                color = Color.White,
+                color = titleColor,
                 fontSize = 36.sp,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 1.4.sp
@@ -271,7 +310,7 @@ internal fun UvirLaunchScreen() {
 
             Text(
                 text = stringResource(R.string.launch_spectral_subtitle),
-                color = Color(0xFFD7D7F8),
+                color = subtitleColor,
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Medium,
                 textAlign = TextAlign.Center,

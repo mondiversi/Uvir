@@ -65,6 +65,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -152,6 +153,9 @@ internal fun LiveScreen(
     usbSensorState: UvirUsbSensorState,
     wirelessSensorState: UvirWirelessSensorState,
     sensorProfiles: List<UvirSensorProfile>,
+    sensorStatusIndicators: Map<String, UvirStatusIndicator> = emptyMap(),
+    sensorAlertMonitoringDeviceIds: Set<String> = emptySet(),
+    counterResetBlocked: Boolean = false,
     selectedSensorDeviceId: String,
     sensorSelectionEnabled: Boolean,
     onSensorSelected: (String) -> Unit,
@@ -188,7 +192,7 @@ internal fun LiveScreen(
     onRestoreApplicationDefaults:
         suspend () -> Boolean,
     onRestoreSensorDefaults:
-        suspend () -> Boolean,
+        suspend (List<String>) -> Set<String>,
     sensorCalibrationSettings: SensorCalibrationSettings,
     onApplySensorCalibration:
         suspend (SensorCalibrationSettings) -> Boolean,
@@ -251,6 +255,7 @@ internal fun LiveScreen(
     autoLimitEnabled: Boolean,
     autoMaxCount: Int,
     autoCompletedCount: Int,
+    alertCompletedCount: Int,
     autoNextSaveMs: Long,
     autoConditionalPlan: ConditionalAcquisitionPlan?,
     autoConditionalWaiting: Boolean,
@@ -259,7 +264,7 @@ internal fun LiveScreen(
     autoConditionalMatch: AcquisitionConditionMatch,
     autoConditionalAction: AcquisitionConditionAction,
     autoConditionalRules: List<ThresholdAlertRule>,
-    onSaveAcquisitionConditions: (List<ThresholdAlertRule>) -> Unit,
+    onSaveAcquisitionConditions: (List<ThresholdAlertRule>) -> Boolean,
 
     onStartAutomaticAcquisition:
         (AutomaticAcquisitionRequest) -> Unit,
@@ -276,12 +281,11 @@ internal fun LiveScreen(
     unreadAcquisitionCount: Int,
     unreadAlertCount: Int,
     sensorSyncInProgress: Boolean,
+    onHomeActivityChanged: (Boolean) -> Unit,
     acquisitionSyncInProgress: Boolean,
     alertSyncInProgress: Boolean,
     onAlertLogViewed: () -> Unit,
     onAlertLogVisibilityChanged: (Boolean) -> Unit,
-    offlineDisconnectionNotice:
-        UvirOfflineDisconnectionNotice?,
 
     backgroundColor: Color,
     cardColor: Color,
@@ -291,6 +295,10 @@ internal fun LiveScreen(
 
     onOpenHistory: () -> Unit
 ) {
+
+    DisposableEffect(Unit) {
+        onDispose { onHomeActivityChanged(false) }
+    }
 
     val context =
         LocalContext.current
@@ -381,7 +389,7 @@ internal fun LiveScreen(
         selectedSensorProfile?.displayName
             ?.takeIf { it.isNotBlank() }
             ?: sensorProfileHardwareUid.takeIf { it.isNotBlank() }
-            ?: "—"
+            ?: stringResource(R.string.sensor_no_selection)
     var sensorNameText by rememberSaveable(sensorProfileHardwareUid) {
         mutableStateOf(sensorDisplayName)
     }
@@ -726,6 +734,9 @@ internal fun LiveScreen(
     var showStartAllAlertsConfirmation by rememberSaveable {
         mutableStateOf(false)
     }
+    var showAlertValuesScreen by rememberSaveable {
+        mutableStateOf(false)
+    }
     var pendingAlertSessionNote by rememberSaveable {
         mutableStateOf(thresholdAlertSessionNote)
     }
@@ -754,11 +765,12 @@ internal fun LiveScreen(
         mutableStateOf(false)
     }
 
-    var showSensorSourceDialog by rememberSaveable {
+    var showSensorInfoScreen by rememberSaveable {
         mutableStateOf(false)
     }
 
-    var showSensorInfoDialog by rememberSaveable {
+    // Keep the selection dialog open while its sensor information page replaces the home UI.
+    var sensorSelectionExpanded by rememberSaveable {
         mutableStateOf(false)
     }
 
@@ -767,6 +779,14 @@ internal fun LiveScreen(
     }
 
     var sensorPowerOffInProgress by rememberSaveable {
+        mutableStateOf(false)
+    }
+
+    var showSensorRestoreConfirmation by rememberSaveable {
+        mutableStateOf(false)
+    }
+
+    var sensorRestoreInProgress by rememberSaveable {
         mutableStateOf(false)
     }
 
@@ -1104,6 +1124,40 @@ internal fun LiveScreen(
                 .toString()
         )
     }
+    var pendingDoNotRecordAlerts by rememberSaveable(sensorProfileHardwareUid) {
+        mutableStateOf(!thresholdAlertSettings.recordEvents)
+    }
+    var alertUseStartDelay by rememberSaveable(sensorProfileHardwareUid) {
+        mutableStateOf(thresholdAlertSettings.startDelaySeconds > 0L)
+    }
+    var alertStartHours by rememberSaveable(sensorProfileHardwareUid) {
+        mutableStateOf((thresholdAlertSettings.startDelaySeconds / 3_600).toString())
+    }
+    var alertStartMinutes by rememberSaveable(sensorProfileHardwareUid) {
+        mutableStateOf(((thresholdAlertSettings.startDelaySeconds % 3_600) / 60).toString())
+    }
+    var alertStartSeconds by rememberSaveable(sensorProfileHardwareUid) {
+        mutableStateOf((thresholdAlertSettings.startDelaySeconds % 60).toString())
+    }
+    var alertUseDuration by rememberSaveable(sensorProfileHardwareUid) {
+        mutableStateOf(thresholdAlertSettings.durationSeconds > 0L)
+    }
+    var alertDurationHours by rememberSaveable(sensorProfileHardwareUid) {
+        mutableStateOf((thresholdAlertSettings.durationSeconds / 3_600).toString())
+    }
+    var alertDurationMinutes by rememberSaveable(sensorProfileHardwareUid) {
+        mutableStateOf(((thresholdAlertSettings.durationSeconds % 3_600) / 60).toString())
+    }
+    var alertDurationSeconds by rememberSaveable(sensorProfileHardwareUid) {
+        mutableStateOf((thresholdAlertSettings.durationSeconds % 60).toString())
+    }
+    var alertLimitEnabled by rememberSaveable(sensorProfileHardwareUid) {
+        mutableStateOf(thresholdAlertSettings.maxRegistrations > 0)
+    }
+    var alertMaximumText by rememberSaveable(sensorProfileHardwareUid) {
+        mutableStateOf(thresholdAlertSettings.maxRegistrations.coerceAtLeast(1).toString())
+    }
+    val alertRegistrationListState = rememberLazyListState()
 
     var alertSoundValue by rememberSaveable(sensorProfileHardwareUid) {
         mutableStateOf(
@@ -1127,6 +1181,41 @@ internal fun LiveScreen(
             lastLoadedAlertPreferences.sound.name, thresholdAlertSettings.sound.name)
         alertVolume = refreshUneditedSetting(alertVolume,
             lastLoadedAlertPreferences.volume.toFloat(), thresholdAlertSettings.volume.toFloat())
+        pendingDoNotRecordAlerts = refreshUneditedSetting(
+            pendingDoNotRecordAlerts,
+            !lastLoadedAlertPreferences.recordEvents,
+            !thresholdAlertSettings.recordEvents
+        )
+        alertUseStartDelay = refreshUneditedSetting(
+            alertUseStartDelay, lastLoadedAlertPreferences.startDelaySeconds > 0L,
+            thresholdAlertSettings.startDelaySeconds > 0L)
+        alertStartHours = refreshUneditedSetting(alertStartHours,
+            (lastLoadedAlertPreferences.startDelaySeconds / 3_600).toString(),
+            (thresholdAlertSettings.startDelaySeconds / 3_600).toString())
+        alertStartMinutes = refreshUneditedSetting(alertStartMinutes,
+            ((lastLoadedAlertPreferences.startDelaySeconds % 3_600) / 60).toString(),
+            ((thresholdAlertSettings.startDelaySeconds % 3_600) / 60).toString())
+        alertStartSeconds = refreshUneditedSetting(alertStartSeconds,
+            (lastLoadedAlertPreferences.startDelaySeconds % 60).toString(),
+            (thresholdAlertSettings.startDelaySeconds % 60).toString())
+        alertUseDuration = refreshUneditedSetting(
+            alertUseDuration, lastLoadedAlertPreferences.durationSeconds > 0L,
+            thresholdAlertSettings.durationSeconds > 0L)
+        alertDurationHours = refreshUneditedSetting(alertDurationHours,
+            (lastLoadedAlertPreferences.durationSeconds / 3_600).toString(),
+            (thresholdAlertSettings.durationSeconds / 3_600).toString())
+        alertDurationMinutes = refreshUneditedSetting(alertDurationMinutes,
+            ((lastLoadedAlertPreferences.durationSeconds % 3_600) / 60).toString(),
+            ((thresholdAlertSettings.durationSeconds % 3_600) / 60).toString())
+        alertDurationSeconds = refreshUneditedSetting(alertDurationSeconds,
+            (lastLoadedAlertPreferences.durationSeconds % 60).toString(),
+            (thresholdAlertSettings.durationSeconds % 60).toString())
+        alertLimitEnabled = refreshUneditedSetting(alertLimitEnabled,
+            lastLoadedAlertPreferences.maxRegistrations > 0,
+            thresholdAlertSettings.maxRegistrations > 0)
+        alertMaximumText = refreshUneditedSetting(alertMaximumText,
+            lastLoadedAlertPreferences.maxRegistrations.coerceAtLeast(1).toString(),
+            thresholdAlertSettings.maxRegistrations.coerceAtLeast(1).toString())
         lastLoadedAlertPreferences = thresholdAlertSettings
     }
 
@@ -1353,13 +1442,17 @@ internal fun LiveScreen(
         thresholdAlertSessionActive ||
             thresholdAlertSettings.hasActiveMonitoring()
 
-    val alertSessionReadyToStart =
-        !alertSessionActive &&
-            configuredAlertMetrics.isNotEmpty() &&
-            sensorOperationsAvailable
+    val idleCaptureActionsAvailable =
+        uvirIdleCaptureActionsAvailable(liveReady, sensorOperationsAvailable)
 
-    val alertFloatingControlVisible =
-        alertSessionActive || alertSessionReadyToStart
+    val alertSessionReadyToStart =
+        !alertSessionActive && idleCaptureActionsAvailable
+
+    val homeCaptureMenuVisible =
+        autoEnabled || alertSessionActive || idleCaptureActionsAvailable
+
+    val separateAlertFloatingControlVisible =
+        (alertSessionActive || alertSessionReadyToStart) && !homeCaptureMenuVisible
 
     val monitoringAlertMetrics =
         if (alertSessionActive) {
@@ -1634,69 +1727,63 @@ internal fun LiveScreen(
             onModeSelected = { mode ->
                 manualSaveModeValue = mode.storedValue
             },
-            onSave = {
+            onSave = saveManual@{
+                if (autoEnabled || alertSessionActive) {
+                    showSaveDialog = false
+                    showUvirBottomMessage(
+                        context,
+                        resources.getString(R.string.sensor_external_command_active)
+                    )
+                    return@saveManual
+                }
                 val selectedMode =
                     ManualSaveMode.fromStoredValue(
                         manualSaveModeValue
                     )
 
-                // This also covers the unlikely case in which AUTO
-                // is started remotely while this dialog is open.
-                val requestedMode =
-                    if (
-                        autoEnabled &&
-                        selectedMode ==
-                            ManualSaveMode.LAST_MANUAL_SESSION
-                    ) {
-                        ManualSaveMode.SINGLE
-                    } else {
-                        selectedMode
-                    }
-
-                if (autoEnabled) {
-                    onStopAutomaticAcquisition()
-                }
-
                 val manualSession =
                     resolveManualSession(
                         database = database,
                         preferences = manualPreferences,
-                        requestedMode = requestedMode
+                        requestedMode = selectedMode
                     )
-                val result =
-                    database.saveAcquisition(
-                        sample = measurement,
-                        note = note.trim(),
-                        automatic = false,
-                        sessionId =
-                            manualSession.sessionId,
-                        sessionSequence =
-                            manualSession.sequence,
-                        sensorDeviceId =
-                            selectedSensorDeviceId
-                    )
-
-                if (result != -1L) {
-                    rememberManualSaveSuccess(
-                        manualPreferences,
-                        manualSession
-                    )
-                    manualAcquisitionPulseId += 1
-                    onAcquisitionSaved()
-                }
-
-                showUvirBottomMessage(
-                    context,
-                    if (result != -1L) {
-                        measurementSavedText
-                    } else {
-                        saveErrorText
-                    },
-                    longDuration = false
-                )
-
+                val sampleToSave = measurement
+                val noteToSave = note.trim()
+                val sensorDeviceId = selectedSensorDeviceId
                 note = ""
                 showSaveDialog = false
+                settingsApplyScope.launch {
+                    val result =
+                        retryUvirDatabaseInsert {
+                            database.saveAcquisition(
+                                sample = sampleToSave,
+                                note = noteToSave,
+                                automatic = false,
+                                sessionId = manualSession.sessionId,
+                                sessionSequence = manualSession.sequence,
+                                sensorDeviceId = sensorDeviceId
+                            )
+                        }
+
+                    if (result != -1L) {
+                        rememberManualSaveSuccess(
+                            manualPreferences,
+                            manualSession
+                        )
+                        manualAcquisitionPulseId += 1
+                        onAcquisitionSaved()
+                    }
+
+                    showUvirBottomMessage(
+                        context,
+                        if (result != -1L) {
+                            measurementSavedText
+                        } else {
+                            saveErrorText
+                        },
+                        longDuration = false
+                    )
+                }
             },
             onCancel = {
                 note = ""
@@ -1759,51 +1846,154 @@ internal fun LiveScreen(
     }
 
     if (showStartAllAlertsConfirmation) {
-        UvirStartAllAlertsDialog(
-            note = pendingAlertSessionNote,
-            repeatHoursText = alertRepeatHoursText,
-            repeatMinutesText = alertRepeatMinutesText,
-            repeatSecondsText = alertRepeatSecondsText,
-            cardColor = cardColor,
-            primaryText = primaryText,
-            secondaryText = secondaryText,
-            onNoteChanged = {
-                pendingAlertSessionNote = limitUvirNote(it)
-            },
-            onRepeatHoursChanged = { alertRepeatHoursText = it },
-            onRepeatMinutesChanged = { alertRepeatMinutesText = it },
-            onRepeatSecondsChanged = { alertRepeatSecondsText = it },
-            onStart = { sessionNote, repeatSeconds ->
-                if (!sensorFirmwareCurrent) {
-                    showStartAllAlertsConfirmation = false
-                    showFirmwareUpdateRequiredDialog = true
-                } else {
-                    onStartThresholdAlertSession(
-                        thresholdAlertSettings.copy(
-                            enabled = true,
-                            repeatSeconds = repeatSeconds
-                        ),
-                        sessionNote
+        val startAlertRegistration: () -> Unit = startAlert@{
+                if (autoEnabled) {
+                    showUvirBottomMessage(
+                        context,
+                        resources.getString(R.string.sensor_external_command_active)
                     )
-                    showStartAllAlertsConfirmation = false
-                    pendingAlertSessionNote = limitUvirNote(sessionNote).trim()
+                    return@startAlert
                 }
-            },
-            onCancel = {
+                if (configuredAlertMetrics.isEmpty()) {
+                    showUvirBottomMessage(context, resources.getString(R.string.alert_configure_first))
+                    return@startAlert
+                }
+                val repeat = normalizeDuration(alertRepeatHoursText,
+                    alertRepeatMinutesText, alertRepeatSecondsText,
+                    minimumTotalSeconds = 1L, maximumTotalSeconds = MAX_ALERT_REPEAT_SECONDS)
+                val start = if (alertUseStartDelay) normalizeDuration(
+                    alertStartHours, alertStartMinutes, alertStartSeconds,
+                    minimumTotalSeconds = 1L, maximumTotalSeconds = 31_536_000L) else null
+                val duration = if (alertUseDuration) normalizeDuration(
+                    alertDurationHours, alertDurationMinutes, alertDurationSeconds,
+                    minimumTotalSeconds = 1L, maximumTotalSeconds = 31_536_000L) else null
+                val maximum = if (alertLimitEnabled && !pendingDoNotRecordAlerts)
+                    normalizeBoundedInteger(alertMaximumText, 1, MAX_AUTOMATIC_ACQUISITIONS)
+                    else null
+                alertRepeatHoursText = repeat.hoursText
+                alertRepeatMinutesText = repeat.minutesText
+                alertRepeatSecondsText = repeat.secondsText
+                start?.let {
+                    alertStartHours = it.hoursText
+                    alertStartMinutes = it.minutesText
+                    alertStartSeconds = it.secondsText
+                }
+                duration?.let {
+                    alertDurationHours = it.hoursText
+                    alertDurationMinutes = it.minutesText
+                    alertDurationSeconds = it.secondsText
+                }
+                maximum?.let { alertMaximumText = it.text }
+                if (repeat.corrected || start?.corrected == true ||
+                    duration?.corrected == true || maximum?.corrected == true) {
+                    showUvirBottomMessage(context, valueOutOfLimitsCorrectedText)
+                }
+                val needsNewFirmware = start != null || duration != null || maximum != null
+                if (!sensorFirmwareCurrent ||
+                    (!useFakeSensorData &&
+                        ((pendingDoNotRecordAlerts && compareFirmwareVersions(
+                            selectedSensorInfo.firmwareVersion, "0.5.96") < 0) ||
+                         (needsNewFirmware && compareFirmwareVersions(
+                            selectedSensorInfo.firmwareVersion, "0.5.97") < 0)))) {
+                    showFirmwareUpdateRequiredDialog = true
+                    return@startAlert
+                }
+                val sessionNote = limitUvirNote(pendingAlertSessionNote).trim()
+                onStartThresholdAlertSession(
+                    thresholdAlertSettings.copy(
+                        enabled = true,
+                        repeatSeconds = repeat.totalSeconds.toInt(),
+                        recordEvents = !pendingDoNotRecordAlerts,
+                        startDelaySeconds = start?.totalSeconds ?: 0L,
+                        durationSeconds = duration?.totalSeconds ?: 0L,
+                        maxRegistrations = maximum?.value ?: 0
+                    ),
+                    sessionNote
+                )
+                pendingAlertSessionNote = sessionNote
                 showStartAllAlertsConfirmation = false
-                pendingAlertSessionNote = thresholdAlertSessionNote
-                alertRepeatHoursText = (thresholdAlertSettings.repeatSeconds / 3_600).toString()
-                alertRepeatMinutesText = ((thresholdAlertSettings.repeatSeconds % 3_600) / 60).toString()
-                alertRepeatSecondsText = (thresholdAlertSettings.repeatSeconds % 60).toString()
-            },
-            onDismissRequest = {
-                showStartAllAlertsConfirmation = false
-                pendingAlertSessionNote = thresholdAlertSessionNote
-                alertRepeatHoursText = (thresholdAlertSettings.repeatSeconds / 3_600).toString()
-                alertRepeatMinutesText = ((thresholdAlertSettings.repeatSeconds % 3_600) / 60).toString()
-                alertRepeatSecondsText = (thresholdAlertSettings.repeatSeconds % 60).toString()
             }
-        )
+            UvirFullScreenPage(
+                onDismissRequest = { showStartAllAlertsConfirmation = false },
+                title = { UvirMenuTitle(stringResource(R.string.alert_registration_title)) },
+                containerColor = backgroundColor,
+                contentColor = primaryText,
+                lazyListState = alertRegistrationListState,
+                text = {
+                    UvirAlertRegistrationForm(
+                        listState = alertRegistrationListState,
+                        repeatHours = alertRepeatHoursText,
+                        repeatMinutes = alertRepeatMinutesText,
+                        repeatSeconds = alertRepeatSecondsText,
+                        useStartDelay = alertUseStartDelay,
+                        startHours = alertStartHours,
+                        startMinutes = alertStartMinutes,
+                        startSeconds = alertStartSeconds,
+                        useDuration = alertUseDuration,
+                        durationHours = alertDurationHours,
+                        durationMinutes = alertDurationMinutes,
+                        durationSeconds = alertDurationSeconds,
+                        limitEnabled = alertLimitEnabled,
+                        maxRegistrations = alertMaximumText,
+                        doNotRecord = pendingDoNotRecordAlerts,
+                        note = pendingAlertSessionNote,
+                        active = alertSessionActive,
+                        configuredCount = configuredAlertMetrics.size,
+                        cardColor = cardColor,
+                        primaryText = primaryText,
+                        secondaryText = secondaryText,
+                        onRepeatHours = { alertRepeatHoursText = it },
+                        onRepeatMinutes = { alertRepeatMinutesText = it },
+                        onRepeatSeconds = { alertRepeatSecondsText = it },
+                        onStartDelayEnabled = { alertUseStartDelay = it },
+                        onStartHours = { alertStartHours = it },
+                        onStartMinutes = { alertStartMinutes = it },
+                        onStartSeconds = { alertStartSeconds = it },
+                        onDurationEnabled = { alertUseDuration = it },
+                        onDurationHours = { alertDurationHours = it },
+                        onDurationMinutes = { alertDurationMinutes = it },
+                        onDurationSeconds = { alertDurationSeconds = it },
+                        onLimitEnabled = { alertLimitEnabled = it },
+                        onMaxRegistrations = { alertMaximumText = it },
+                        onDoNotRecord = { pendingDoNotRecordAlerts = it },
+                        onNote = { pendingAlertSessionNote = limitUvirNote(it) },
+                        onConfigureValues = { showAlertValuesScreen = true }
+                    )
+                },
+                floatingActionButton = {
+                    UvirAlertRegistrationActionButton(
+                        active = alertSessionActive,
+                        completedCount = alertCompletedCount,
+                        enabled = sensorOperationsAvailable &&
+                            (alertSessionActive || (!autoEnabled && configuredAlertMetrics.isNotEmpty())),
+                        onClick = {
+                            if (alertSessionActive) showStopAllAlertsConfirmation = true
+                            else startAlertRegistration()
+                        }
+                    )
+                }
+            )
+        if (showAlertValuesScreen) {
+            UvirAlertValuesScreen(
+                rules = thresholdAlertSettings.rules,
+                sample = measurement.takeIf { liveReady },
+                enabled = sensorOperationsAvailable && !alertSessionActive,
+                cardColor = cardColor,
+                primaryText = primaryText,
+                secondaryText = secondaryText,
+                onSave = { rules ->
+                    if (!sensorFirmwareCurrent) {
+                        showFirmwareUpdateRequiredDialog = true
+                    } else {
+                        onApplyThresholdAlertSettings(thresholdAlertSettings.copy(rules = rules))
+                        showAlertValuesScreen = false
+                        showUvirBottomMessage(context, resources.getString(R.string.value_alerts_updated))
+                    }
+                },
+                onBack = { showAlertValuesScreen = false }
+            )
+        }
+        return
     }
 
     if (showManualSessionInterruptionConfirmation) {
@@ -1858,6 +2048,197 @@ internal fun LiveScreen(
 
 
     if (showAutomaticDialog) {
+        val automaticActionEnabled =
+            sensorOperationsAvailable &&
+                (autoEnabled || !alertSessionActive) &&
+                (!autoEnabled || !automaticStopInProgress)
+        val handleAutomaticAction: () -> Unit = automaticAction@{
+            if (autoEnabled) {
+                timerError = null
+                showStopConfirmation = true
+                return@automaticAction
+            }
+            if (alertSessionActive) {
+                showUvirBottomMessage(
+                    context,
+                    resources.getString(R.string.sensor_external_command_active)
+                )
+                return@automaticAction
+            }
+
+            val normalizedInterval =
+                normalizeDuration(
+                    timerHours,
+                    timerMinutes,
+                    timerSeconds,
+                    minimumTotalSeconds = 1L
+                )
+            val normalizedStartDelay =
+                if (useStartDelay) {
+                    normalizeDuration(
+                        startDelayHoursText,
+                        startDelayMinutesText,
+                        startDelaySecondsText,
+                        minimumTotalSeconds = 1L
+                    )
+                } else {
+                    null
+                }
+            val normalizedDuration =
+                if (useDuration) {
+                    normalizeDuration(
+                        durationHoursText,
+                        durationMinutesText,
+                        durationSecondsText,
+                        minimumTotalSeconds = 1L
+                    )
+                } else {
+                    null
+                }
+            val normalizedMaximum =
+                if (limitEnabled) {
+                    normalizeBoundedInteger(
+                        maxCountText,
+                        1,
+                        MAX_AUTOMATIC_ACQUISITIONS
+                    )
+                } else {
+                    null
+                }
+
+            if (!externalCommandEnabled) {
+                timerHours = normalizedInterval.hoursText
+                timerMinutes = normalizedInterval.minutesText
+                timerSeconds = normalizedInterval.secondsText
+                normalizedStartDelay?.let {
+                    startDelayHoursText = it.hoursText
+                    startDelayMinutesText = it.minutesText
+                    startDelaySecondsText = it.secondsText
+                }
+                normalizedDuration?.let {
+                    durationHoursText = it.hoursText
+                    durationMinutesText = it.minutesText
+                    durationSecondsText = it.secondsText
+                }
+                normalizedMaximum?.let {
+                    maxCountText = it.text
+                }
+
+                if (
+                    normalizedInterval.corrected ||
+                    normalizedStartDelay?.corrected == true ||
+                    normalizedDuration?.corrected == true ||
+                    normalizedMaximum?.corrected == true
+                ) {
+                    showUvirBottomMessage(
+                        context,
+                        valueOutOfLimitsCorrectedText
+                    )
+                }
+            }
+
+            if (!sensorFirmwareCurrent) {
+                showFirmwareUpdateRequiredDialog = true
+                return@automaticAction
+            }
+
+            val validation =
+                validateAutomaticAcquisitionInput(
+                    AutomaticAcquisitionInput(
+                        intervalHours = normalizedInterval.hoursText,
+                        intervalMinutes = normalizedInterval.minutesText,
+                        intervalSeconds = normalizedInterval.secondsText,
+                        note = timerNote,
+                        useStartDelay = useStartDelay,
+                        startDelayHours =
+                            normalizedStartDelay?.hoursText
+                                ?: startDelayHoursText,
+                        startDelayMinutes =
+                            normalizedStartDelay?.minutesText
+                                ?: startDelayMinutesText,
+                        startDelaySeconds =
+                            normalizedStartDelay?.secondsText
+                                ?: startDelaySecondsText,
+                        useDuration = useDuration,
+                        durationHours =
+                            normalizedDuration?.hoursText
+                                ?: durationHoursText,
+                        durationMinutes =
+                            normalizedDuration?.minutesText
+                                ?: durationMinutesText,
+                        durationSeconds =
+                            normalizedDuration?.secondsText
+                                ?: durationSecondsText,
+                        limitEnabled = limitEnabled,
+                        maxAcquisitions =
+                            normalizedMaximum?.text
+                                ?: maxCountText,
+                        externalCommand = externalCommandEnabled
+                    )
+                )
+
+            when (validation) {
+                AutomaticAcquisitionValidation.InvalidInterval -> {
+                    timerError = invalidIntervalText
+                }
+
+                AutomaticAcquisitionValidation.InvalidSchedule -> {
+                    timerError = invalidScheduleText
+                }
+
+                is AutomaticAcquisitionValidation.Valid -> {
+                    if (
+                        externalCommandEnabled &&
+                        !fakeSensorDataEnabled &&
+                        !firmwareSupportsExternalCommand(
+                            selectedSensorInfo.firmwareVersion
+                        )
+                    ) {
+                        showFirmwareUpdateRequiredDialog = true
+                        return@automaticAction
+                    }
+                    val useConditional =
+                        !externalCommandEnabled &&
+                            conditionalEnabled &&
+                            conditionalConfiguredRulesAvailable
+                    val plan =
+                        if (useConditional) {
+                            conditionalPlanFromRules(
+                                autoConditionalRules,
+                                conditionalMatch,
+                                conditionalAction
+                            )
+                        } else {
+                            null
+                        }
+                    if (useConditional && plan == null) {
+                        showUvirBottomMessage(
+                            context,
+                            resources.getString(R.string.conditional_no_rules)
+                        )
+                        return@automaticAction
+                    }
+                    if (
+                        plan != null &&
+                        !fakeSensorDataEnabled &&
+                        !firmwareSupportsImmediateConditionalAcquisition(
+                            selectedSensorInfo.firmwareVersion
+                        )
+                    ) {
+                        showFirmwareUpdateRequiredDialog = true
+                        return@automaticAction
+                    }
+                    val request = validation.request.copy(conditionalPlan = plan)
+
+                    if (recentManualSessionId != null) {
+                        pendingAutomaticAfterManualConfirmation = request
+                        showManualSessionInterruptionConfirmation = true
+                    } else {
+                        continueAutomaticStart(request)
+                    }
+                }
+            }
+        }
 
         UvirFullScreenPage(
             onDismissRequest = {
@@ -2060,189 +2441,16 @@ internal fun LiveScreen(
             },
 
             floatingActionButton = {
-                val compactOfflineNotice =
-                    offlineDisconnectionNotice
-                        ?.takeIf {
-                            autoEnabled && !sensorOperationsAvailable
-                        }
-
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    compactOfflineNotice?.let { notice ->
-                        UvirCompactOfflineAutonomyNotice(
-                            notice = notice,
-                            primaryText = primaryText
-                        )
-                    }
-
                     UvirAutomaticAcquisitionFloatingAction(
                         automaticActive = autoEnabled,
                         completedCount = autoCompletedCount,
-                        enabled =
-                            sensorOperationsAvailable &&
-                                (!autoEnabled || !automaticStopInProgress),
+                        enabled = automaticActionEnabled,
                         syncInProgress = acquisitionSyncInProgress,
-                        onClick = automaticAction@{
-                            if (autoEnabled) {
-                                timerError = null
-                                showStopConfirmation = true
-                                return@automaticAction
-                            }
-
-                            val normalizedInterval =
-                                normalizeDuration(
-                                    timerHours,
-                                    timerMinutes,
-                                    timerSeconds,
-                                    minimumTotalSeconds = 1L
-                                )
-                            val normalizedStartDelay =
-                                if (useStartDelay) {
-                                    normalizeDuration(
-                                        startDelayHoursText,
-                                        startDelayMinutesText,
-                                        startDelaySecondsText,
-                                        minimumTotalSeconds = 1L
-                                    )
-                                } else {
-                                    null
-                                }
-                            val normalizedDuration =
-                                if (useDuration) {
-                                    normalizeDuration(
-                                        durationHoursText,
-                                        durationMinutesText,
-                                        durationSecondsText,
-                                        minimumTotalSeconds = 1L
-                                    )
-                                } else {
-                                    null
-                                }
-                            val normalizedMaximum =
-                                if (limitEnabled) {
-                                    normalizeBoundedInteger(
-                                        maxCountText,
-                                        1,
-                                        MAX_AUTOMATIC_ACQUISITIONS
-                                    )
-                                } else {
-                                    null
-                                }
-
-                            if (!externalCommandEnabled) {
-                                timerHours = normalizedInterval.hoursText
-                                timerMinutes = normalizedInterval.minutesText
-                                timerSeconds = normalizedInterval.secondsText
-                                normalizedStartDelay?.let {
-                                    startDelayHoursText = it.hoursText
-                                    startDelayMinutesText = it.minutesText
-                                    startDelaySecondsText = it.secondsText
-                                }
-                                normalizedDuration?.let {
-                                    durationHoursText = it.hoursText
-                                    durationMinutesText = it.minutesText
-                                    durationSecondsText = it.secondsText
-                                }
-                                normalizedMaximum?.let {
-                                    maxCountText = it.text
-                                }
-
-                                if (
-                                    normalizedInterval.corrected ||
-                                    normalizedStartDelay?.corrected == true ||
-                                    normalizedDuration?.corrected == true ||
-                                    normalizedMaximum?.corrected == true
-                                ) {
-                                    showUvirBottomMessage(
-                                        context,
-                                        valueOutOfLimitsCorrectedText
-                                    )
-                                }
-                            }
-
-                            if (!sensorFirmwareCurrent) {
-                                showFirmwareUpdateRequiredDialog = true
-                                return@automaticAction
-                            }
-
-                            val validation =
-                                validateAutomaticAcquisitionInput(
-                                    AutomaticAcquisitionInput(
-                                        intervalHours = normalizedInterval.hoursText,
-                                        intervalMinutes = normalizedInterval.minutesText,
-                                        intervalSeconds = normalizedInterval.secondsText,
-                                        note = timerNote,
-                                        useStartDelay = useStartDelay,
-                                        startDelayHours =
-                                            normalizedStartDelay?.hoursText
-                                                ?: startDelayHoursText,
-                                        startDelayMinutes =
-                                            normalizedStartDelay?.minutesText
-                                                ?: startDelayMinutesText,
-                                        startDelaySeconds =
-                                            normalizedStartDelay?.secondsText
-                                                ?: startDelaySecondsText,
-                                        useDuration = useDuration,
-                                        durationHours =
-                                            normalizedDuration?.hoursText
-                                                ?: durationHoursText,
-                                        durationMinutes =
-                                            normalizedDuration?.minutesText
-                                                ?: durationMinutesText,
-                                        durationSeconds =
-                                            normalizedDuration?.secondsText
-                                                ?: durationSecondsText,
-                                        limitEnabled = limitEnabled,
-                                        maxAcquisitions =
-                                            normalizedMaximum?.text
-                                                ?: maxCountText,
-                                        externalCommand = externalCommandEnabled
-                                    )
-                                )
-
-                            when (validation) {
-                                AutomaticAcquisitionValidation.InvalidInterval -> {
-                                    timerError =
-                                        invalidIntervalText
-                                }
-
-                                AutomaticAcquisitionValidation.InvalidSchedule -> {
-                                    timerError =
-                                        invalidScheduleText
-                                }
-
-                                is AutomaticAcquisitionValidation.Valid -> {
-                                    if (externalCommandEnabled && !fakeSensorDataEnabled &&
-                                        !firmwareSupportsExternalCommand(selectedSensorInfo.firmwareVersion)) {
-                                        showFirmwareUpdateRequiredDialog = true
-                                        return@automaticAction
-                                    }
-                                    val useConditional = !externalCommandEnabled &&
-                                        conditionalEnabled && conditionalConfiguredRulesAvailable
-                                    val plan = if (useConditional) conditionalPlanFromRules(
-                                        autoConditionalRules, conditionalMatch, conditionalAction) else null
-                                    if (useConditional && plan == null) {
-                                        showUvirBottomMessage(context, resources.getString(R.string.conditional_no_rules))
-                                        return@automaticAction
-                                    }
-                                    if (plan != null && !fakeSensorDataEnabled &&
-                                        !firmwareSupportsImmediateConditionalAcquisition(selectedSensorInfo.firmwareVersion)) {
-                                        showFirmwareUpdateRequiredDialog = true
-                                        return@automaticAction
-                                    }
-                                    val request = validation.request.copy(conditionalPlan = plan)
-
-                                    if (recentManualSessionId != null) {
-                                        pendingAutomaticAfterManualConfirmation = request
-                                        showManualSessionInterruptionConfirmation = true
-                                    } else {
-                                        continueAutomaticStart(request)
-                                    }
-                                }
-                            }
-                        }
+                        onClick = handleAutomaticAction
                     )
                 }
             }
@@ -2253,8 +2461,20 @@ internal fun LiveScreen(
             primaryText = primaryText, secondaryText = secondaryText,
             currentSample = measurement.takeIf { liveReady },
             onSave = { rules ->
-                onSaveAcquisitionConditions(rules)
-                showConditionalRulesEditor = false
+                if (onSaveAcquisitionConditions(rules)) {
+                    showConditionalRulesEditor = false
+                    showUvirBottomMessage(
+                        context,
+                        resources.getString(R.string.acquisition_conditions_saved),
+                        longDuration = false
+                    )
+                } else {
+                    showUvirBottomMessage(
+                        context,
+                        resources.getString(R.string.save_error),
+                        longDuration = false
+                    )
+                }
             },
             onDismissRequest = { showConditionalRulesEditor = false }
         )
@@ -2303,10 +2523,17 @@ val debugPerformanceEnabled =
 val sensorPowerOffEnabled =
     selectedSensorConnected &&
         !autoEnabled &&
-        !thresholdAlertSettings.hasActiveMonitoring()
+    !thresholdAlertSettings.hasActiveMonitoring()
 
-if (showSensorSourceDialog) {
-    UvirSensorSourceDialog(
+val resetSensorIndicators = uvirSensorSelectionIndicators(
+    selectedSensorDeviceId,
+    uvirStatusIndicator(useFakeSensorData, selectedSensorConnected, false,
+        autoEnabled || thresholdAlertSettings.hasActiveMonitoring()),
+    sensorStatusIndicators
+)
+
+val sourceDialogSnapshot =
+    UvirSensorSourceDialogSnapshot(
         selectedMode = sensorConnectionMode,
         useFakeSensorData = useFakeSensorData,
         wifiEnabled = appliedSensorWifiRadioEnabled,
@@ -2323,29 +2550,10 @@ if (showSensorSourceDialog) {
         selectedSensorDeviceId = sensorProfileHardwareUid,
         sensorSelectionEnabled = sensorSelectionEnabled && !settingsApplyInProgress &&
             !wifiConfigurationInProgress && !sensorPowerOffInProgress && !manualAcquisitionBadgePulseActive,
-        onSensorSelected = { deviceId ->
-            showSensorSourceDialog = false
-            onSensorSelected(deviceId)
-        },
         sensorConnected = selectedSensorConnected,
-        sensorPowerOffEnabled = sensorPowerOffEnabled,
-        onOpenSensorInfo = {
-            showSensorSourceDialog = false
-            showSensorInfoDialog = true
-        },
-        onRequestSensorPowerOff = {
-            showSensorSourceDialog = false
-            showSensorPowerOffConfirmation = true
-        },
-        onModeSelected = { mode ->
-            onSensorConnectionModeChanged(mode)
-            showSensorSourceDialog = false
-        },
-        onDismissRequest = {
-            showSensorSourceDialog = false
-        }
+        dateFormat = LocalUvirDateFormat.current,
+        timeFormat = LocalUvirTimeFormat.current
     )
-}
 
 if (showSensorPowerOffConfirmation) {
     SensorPowerOffConfirmation(
@@ -2362,18 +2570,34 @@ if (showSensorPowerOffConfirmation) {
     )
 }
 
-if (showSensorInfoDialog) {
-    UvirSensorInfoDialog(
+if (showSensorRestoreConfirmation) {
+    SensorRestoreConfirmation(
+        sensorProfiles = sensorProfiles,
+        sensorIndicators = resetSensorIndicators,
+        inProgress = sensorRestoreInProgress,
+        onInProgressChange = { sensorRestoreInProgress = it },
+        coroutineScope = settingsApplyScope,
+        onRestoreSensor = onRestoreSensorDefaults,
+        onDismissRequest = { showSensorRestoreConfirmation = false },
+        cardColor = cardColor,
+        primaryText = primaryText,
+        secondaryText = secondaryText
+    )
+}
+
+if (showSensorInfoScreen) {
+    UvirSensorInfoScreen(
         connectionMode = sensorConnectionMode,
         sensorInfo = selectedSensorInfo,
+        backgroundColor = backgroundColor,
         primaryText = primaryText,
         secondaryText = secondaryText,
         cardColor = cardColor,
         onDismissRequest = {
-            showSensorInfoDialog = false
-            showSensorSourceDialog = false
+            showSensorInfoScreen = false
         }
     )
+    return
 }
 
 // -------------------------------------------------
@@ -2414,12 +2638,6 @@ editingAlertGroup?.let { group ->
             SensorGroup.BIOLOGICAL ->
                 stringResource(R.string.biological_effects_group_name)
         }
-    val groupEditorScrollbar =
-        rememberUvirDialogScrollbar(
-            secondaryText.copy(alpha = 0.58f)
-        )
-    val groupEditorScrollState =
-        groupEditorScrollbar.scrollState
     val groupEditorScope =
         rememberCoroutineScope()
     val groupEditorRequesters =
@@ -2446,13 +2664,12 @@ editingAlertGroup?.let { group ->
         }
     }
 
-    AlertDialog(
+    UvirAlertDialog(
         onDismissRequest = {
             editingAlertGroup = null
             editingAlertMetric = null
             editingAlertError = null
         },
-        modifier = groupEditorScrollbar.dialogModifier,
         title = {
             Text(
                 stringResource(
@@ -2466,18 +2683,11 @@ editingAlertGroup?.let { group ->
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .heightIn(max = 420.dp)
-                        .then(
-                            groupEditorScrollbar.viewportModifier
-                        )
             ) {
                 Column(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                        .verticalScroll(
-                            groupEditorScrollState
-                        )
                 ) {
                 Text(
                     text =
@@ -2797,6 +3007,16 @@ editingAlertGroup?.let { group ->
                                 )
                             )
 
+                            if (!thresholdWasCorrected) {
+                                showUvirBottomMessage(
+                                    context,
+                                    resources.getString(
+                                        R.string.value_alerts_updated
+                                    ),
+                                    longDuration = false
+                                )
+                            }
+
                             editingAlertGroup = null
                             editingAlertError = null
                     }
@@ -2816,16 +3036,11 @@ editingAlertGroup?.let { group ->
 }
 
 if (editingAlertGroup == null) editingAlertMetric?.let { metric ->
-    val metricEditorScrollbar =
-        rememberUvirDialogScrollbar(
-            secondaryText.copy(alpha = 0.58f)
-        )
-    AlertDialog(
+    UvirAlertDialog(
         onDismissRequest = {
             editingAlertMetric = null
             editingAlertError = null
         },
-        modifier = metricEditorScrollbar.dialogModifier,
         title = {
             Text(
                 stringResource(
@@ -2841,18 +3056,11 @@ if (editingAlertGroup == null) editingAlertMetric?.let { metric ->
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .heightIn(max = 420.dp)
-                        .then(
-                            metricEditorScrollbar.viewportModifier
-                        )
             ) {
                 Column(
                     modifier =
                         Modifier
-                            .fillMaxWidth()
-                            .verticalScroll(
-                                metricEditorScrollbar.scrollState
-                            ),
+                            .fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                 Row(
@@ -3026,6 +3234,8 @@ if (editingAlertGroup == null) editingAlertMetric?.let { metric ->
                             } else {
                                 null
                             }
+                        val thresholdWasCorrected =
+                            normalizedThreshold?.corrected == true
                         normalizedThreshold?.let { normalized ->
                             editingAlertThresholdText = normalized.text
                             if (normalized.corrected) {
@@ -3099,6 +3309,16 @@ if (editingAlertGroup == null) editingAlertMetric?.let { metric ->
                                 )
                             )
 
+                            if (!thresholdWasCorrected) {
+                                showUvirBottomMessage(
+                                    context,
+                                    resources.getString(
+                                        R.string.value_alert_updated
+                                    ),
+                                    longDuration = false
+                                )
+                            }
+
                             editingAlertMetric = null
                             editingAlertError = null
                     }
@@ -3136,14 +3356,25 @@ if (showAlertLogDialog) {
 if (showParametersDialog) {
 
     if (showSettingsExportDialog) {
-        val exportSensorHardwareUid = sensorProfileHardwareUid.trim()
+        val associatedHardwareUids =
+            UvirSensorCredentialStore.associatedDeviceIds(context)
+        val exportableSensorProfiles = sensorProfiles
+            .filter { profile ->
+                normalizeSensorDeviceId(profile.hardwareUid) in associatedHardwareUids &&
+                    UvirSensorCredentialStore.loadForDevice(
+                        context,
+                        profile.hardwareUid
+                    )?.isProvisioned == true
+            }
+            .distinctBy { normalizeSensorDeviceId(it.hardwareUid) }
+            .sortedBy { it.displayName.lowercase() }
         UvirSettingsExportDialog(
             cardColor = cardColor,
             primaryText = primaryText,
             secondaryText = secondaryText,
-            sensorSettingsAvailable = exportSensorHardwareUid.isNotEmpty(),
+            sensorProfiles = exportableSensorProfiles,
             onDismiss = { showSettingsExportDialog = false },
-            onExport = { includeApp, includeSensor, encryptionPassword ->
+            onExport = { includeApp, sensorHardwareUids, encryptionPassword, destination ->
                 try {
                     runCatching {
                         buildList {
@@ -3155,21 +3386,28 @@ if (showParametersDialog) {
                                     )
                                 )
                             }
-                            if (includeSensor) {
+                            sensorHardwareUids.forEach { hardwareUid ->
                                 add(
                                     createUvirSensorSettingsBackup(
                                         context = context,
                                         database = database,
-                                        hardwareUid = exportSensorHardwareUid,
-                                        includeSensitiveInformation =
-                                            encryptionPassword != null,
+                                        hardwareUid = hardwareUid,
+                                        includeSensitiveInformation = true,
                                         encryptionPassword = encryptionPassword
                                     )
                                 )
                             }
                         }
                     }.onSuccess { files ->
-                        requestUvirExportSave(context, files)
+                        deliverUvirExportFiles(
+                            context = context,
+                            files = files,
+                            destination = destination,
+                            chooserTitle =
+                                resources.getString(
+                                    R.string.export_settings_title
+                                )
+                        )
                     }.onFailure { error ->
                         UvirErrorLog.record(context, "export_settings", error)
                         showUvirBottomMessage(
@@ -3178,7 +3416,7 @@ if (showParametersDialog) {
                         )
                     }
                 } finally {
-                    encryptionPassword?.fill('\u0000')
+                    encryptionPassword.fill('\u0000')
                 }
                 showSettingsExportDialog = false
             }
@@ -3385,10 +3623,8 @@ if (showParametersDialog) {
                             R.string.settings_section_sensor_connection
                         UvirSettingsPage.SENSOR_PARAMETERS ->
                             R.string.settings_section_sensor_parameters
-                        UvirSettingsPage.SENSOR_CALIBRATION ->
-                            R.string.sensor_calibration_title
-                        UvirSettingsPage.SAMPLING ->
-                            R.string.settings_section_acquisition
+                        UvirSettingsPage.SENSOR_MEASUREMENT ->
+                            R.string.sensor_info_measurement
                         UvirSettingsPage.ALERTS ->
                             R.string.settings_section_sounds_and_alerts
                         UvirSettingsPage.LANGUAGE ->
@@ -3422,57 +3658,28 @@ if (showParametersDialog) {
             ),
 
         topActionButton =
-            if (selectedSettingsPage != null) {
+            if (selectedSettingsPage != null &&
+                selectedSettingsPage != UvirSettingsPage.DATA_RESTORE &&
+                selectedSettingsPage != UvirSettingsPage.DEBUG
+            ) {
                 val page = selectedSettingsPage!!
                 {
-                    Box(modifier = Modifier.padding(end = 10.dp)) {
-                        ConnectivitySectionIcon(
+                    UvirSettingsContextBadge(
                             type =
                                 when (page) {
                                     UvirSettingsPage.SENSOR_CONNECTION,
                                     UvirSettingsPage.SENSOR_PARAMETERS,
-                                    UvirSettingsPage.SENSOR_CALIBRATION,
-                                    UvirSettingsPage.SAMPLING -> ConnectivityIconType.SENSOR
+                                    UvirSettingsPage.SENSOR_MEASUREMENT -> ConnectivityIconType.SENSOR
                                     else -> ConnectivityIconType.PHONE
-                                },
-                            modifier = Modifier.size(UvirTitleActionIconSize),
-                            tint = primaryText,
-                            strokeScale = 1.15f
-                        )
-                    }
+                                }
+                    )
                 }
-            } else {
-                {
-                    Row(
-                        modifier = Modifier.padding(end = 10.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        IconButton(
-                            onClick = { showSettingsExportDialog = true },
-                            modifier = Modifier.size(40.dp)
-                        ) {
-                            UvirTitleActionIcon(
-                                type = MenuIconType.EXPORT,
-                                modifier = Modifier.size(24.dp),
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                        IconButton(
-                            onClick = { requestUvirSettingsImport(context) },
-                            modifier = Modifier.size(40.dp)
-                        ) {
-                            UvirTitleActionIcon(
-                                type = MenuIconType.IMPORT,
-                                modifier = Modifier.size(24.dp),
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                    }
-                }
-            },
+            } else null,
 
         text = {
             CompositionLocalProvider(
+                LocalUvirSettingsNeutralIcons provides true,
+                LocalUvirSettingsActionButtons provides true,
                 LocalSettingsCommit provides UvirSettingsCommitScope(settingsSaveQueue, SettingsSaveGroup.PARAMETERS),
                 LocalUvirSettingsNavigation provides UvirSettingsNavigation(
                     selectedPage = selectedSettingsPage,
@@ -3510,6 +3717,81 @@ if (showParametersDialog) {
                         secondaryText = secondaryText
                     )
                 }
+
+                UvirSensorParametersSettings(
+                    context = context,
+                    expanded = settingsExpansion.sensorParameters,
+                    onExpandedChange = {
+                        settingsExpansion.sensorParameters = it
+                    },
+                    sensorSettingsEnabled =
+                        sensorControlConnectionAvailable,
+                    sensorName = sensorNameText,
+                    onSensorNameChange = {
+                        sensorNameText = it
+                    },
+                    sensorNameEditable =
+                        sensorProfileHardwareUid.isNotBlank(),
+                    autonomousRecordingEnabled =
+                        autonomousRecordingEnabled,
+                    onAutonomousRecordingEnabledChange = {
+                        autonomousRecordingEnabled = it
+                    },
+                    automaticShutdownEnabled =
+                        automaticShutdownEnabled,
+                    onAutomaticShutdownEnabledChange = {
+                        automaticShutdownEnabled = it
+                    },
+                    automaticShutdownHoursText =
+                        automaticShutdownHoursText,
+                    onAutomaticShutdownHoursTextChange = {
+                        automaticShutdownHoursText = it
+                    },
+                    automaticShutdownMinutesText =
+                        automaticShutdownMinutesText,
+                    onAutomaticShutdownMinutesTextChange = {
+                        automaticShutdownMinutesText = it
+                    },
+                    automaticShutdownSecondsText =
+                        automaticShutdownSecondsText,
+                    onAutomaticShutdownSecondsTextChange = {
+                        automaticShutdownSecondsText = it
+                    },
+                    statusLedEnabled = statusLedEnabled,
+                    onStatusLedEnabledChange = {
+                        statusLedEnabled = it
+                    },
+                    statusLedBrightness = statusLedBrightness,
+                    onStatusLedBrightnessChange = {
+                        statusLedBrightness = it
+                    },
+                    statusBuzzerEnabled = statusBuzzerEnabled,
+                    onStatusBuzzerEnabledChange = {
+                        statusBuzzerEnabled = it
+                    },
+                    statusBuzzerVolume = statusBuzzerVolume,
+                    onStatusBuzzerVolumeChange = {
+                        statusBuzzerVolume = it
+                    },
+                    externalCommandEnabled = sensorExternalCommandEnabled,
+                    onExternalCommandEnabledChange = {
+                        sensorExternalCommandEnabled = it
+                    },
+                    statusLedTestEnabled = statusLedTestEnabled,
+                    onTestStatusLed = onTestSensorStatusLed,
+                    statusBuzzerTestEnabled = statusBuzzerTestEnabled,
+                    onTestStatusBuzzer = onTestSensorStatusBuzzer,
+                    sensorAssociated =
+                        sensorCredentials.isProvisioned,
+                    sensorPowerOffEnabled = sensorPowerOffEnabled,
+                    onSensorPowerOffRequested = {
+                        showSensorPowerOffConfirmation = true
+                    },
+                    onDisassociateSensor = onDisassociateSensor,
+                    cardColor = cardColor,
+                    primaryText = primaryText,
+                    secondaryText = secondaryText
+                )
 
                 SettingsAutoSaveGroup(SettingsSaveGroup.RADIO) {
                 UvirSensorConnectionSettings(
@@ -3580,97 +3862,56 @@ if (showParametersDialog) {
                 )
                 }
 
-                UvirSensorParametersSettings(
+                val renderSamplingAndAlerts: @Composable (Boolean, Boolean) -> Unit =
+                    { showSampling, showAlerts ->
+                UvirSamplingAndAlertSettings(
                     context = context,
-                    expanded = settingsExpansion.sensorParameters,
-                    onExpandedChange = {
-                        settingsExpansion.sensorParameters = it
+                    showSamplingSection = showSampling,
+                    showAlertsSection = showAlerts,
+                    sensorSettingsEnabled = sensorControlConnectionAvailable,
+                    samplesText = samplesText,
+                    onSamplesTextChange = { samplesText = it },
+                    spacingText = spacingText,
+                    onSpacingTextChange = { spacingText = it },
+                    trimEnabled = trimEnabled,
+                    onTrimEnabledChange = { trimEnabled = it },
+                    parametersError = parametersError,
+                    alertsSectionExpanded = settingsExpansion.alerts,
+                    onAlertsSectionExpandedChange = {
+                        settingsExpansion.alerts = it
                     },
-                    sensorSettingsEnabled =
-                        sensorControlConnectionAvailable,
-                    sensorName = sensorNameText,
-                    onSensorNameChange = {
-                        sensorNameText = it
-                    },
-                    sensorNameEditable =
-                        sensorProfileHardwareUid.isNotBlank(),
-                    autonomousRecordingEnabled =
-                        autonomousRecordingEnabled,
-                    onAutonomousRecordingEnabledChange = {
-                        autonomousRecordingEnabled = it
-                    },
-                    automaticShutdownEnabled =
-                        automaticShutdownEnabled,
-                    onAutomaticShutdownEnabledChange = {
-                        automaticShutdownEnabled = it
-                    },
-                    automaticShutdownHoursText =
-                        automaticShutdownHoursText,
-                    onAutomaticShutdownHoursTextChange = {
-                        automaticShutdownHoursText = it
-                    },
-                    automaticShutdownMinutesText =
-                        automaticShutdownMinutesText,
-                    onAutomaticShutdownMinutesTextChange = {
-                        automaticShutdownMinutesText = it
-                    },
-                    automaticShutdownSecondsText =
-                        automaticShutdownSecondsText,
-                    onAutomaticShutdownSecondsTextChange = {
-                        automaticShutdownSecondsText = it
-                    },
-                    statusLedEnabled = statusLedEnabled,
-                    onStatusLedEnabledChange = {
-                        statusLedEnabled = it
-                    },
-                    statusLedBrightness = statusLedBrightness,
-                    onStatusLedBrightnessChange = {
-                        statusLedBrightness = it
-                    },
-                    statusBuzzerEnabled = statusBuzzerEnabled,
-                    onStatusBuzzerEnabledChange = {
-                        statusBuzzerEnabled = it
-                    },
-                    statusBuzzerVolume = statusBuzzerVolume,
-                    onStatusBuzzerVolumeChange = {
-                        statusBuzzerVolume = it
-                    },
-                    externalCommandEnabled = sensorExternalCommandEnabled,
-                    onExternalCommandEnabledChange = {
-                        sensorExternalCommandEnabled = it
-                    },
-                    statusLedTestEnabled = statusLedTestEnabled,
-                    onTestStatusLed = onTestSensorStatusLed,
-                    statusBuzzerTestEnabled = statusBuzzerTestEnabled,
-                    onTestStatusBuzzer = onTestSensorStatusBuzzer,
-                    sensorAssociated =
-                        sensorCredentials.isProvisioned,
-                    sensorPowerOffEnabled = sensorPowerOffEnabled,
-                    onDisassociateSensor = onDisassociateSensor,
-                    onRestoreSensor = onRestoreSensorDefaults,
+                    alertSoundValue = alertSoundValue,
+                    onAlertSoundValueChange = { alertSoundValue = it },
+                    alertVolume = alertVolume,
+                    onAlertVolumeChange = { alertVolume = it },
+                    onPreviewThresholdAlertSound = onPreviewThresholdAlertSound,
+                    acquisitionFeedbackSettings = acquisitionFeedbackSettings,
+                    onAcquisitionFeedbackSettingsChange = onAcquisitionFeedbackSettingsChange,
+                    onPreviewAcquisitionFeedback = onPreviewAcquisitionFeedback,
                     cardColor = cardColor,
                     primaryText = primaryText,
                     secondaryText = secondaryText
                 )
+                    }
 
+                SettingsSection(
+                    settingsPage = UvirSettingsPage.SENSOR_MEASUREMENT,
+                    title = stringResource(R.string.sensor_info_measurement),
+                    titleIcon = ConnectivityIconType.MEASUREMENT,
+                    containerColor = cardColor,
+                    titleColor = primaryText,
+                    chevronColor = secondaryText,
+                    dividerColor = secondaryText.copy(alpha = 0.28f),
+                    contentSpacing = UvirIslandSpacing,
+                    wrapDetailContent = false
+                ) {
+                renderSamplingAndAlerts(true, false)
                 SettingsAutoSaveGroup(SettingsSaveGroup.CALIBRATION) {
                 UvirSensorCalibrationSettings(
                     context = context,
-                    expanded = settingsExpansion.sensorCalibration,
-                    onExpandedChange = {
-                        settingsExpansion.sensorCalibration = it
-                    },
                     enabled =
                         sensorControlConnectionAvailable &&
                             sensorCalibrationSupported,
-                    onUnsupportedInteraction = {
-                        if (
-                            sensorControlConnectionAvailable &&
-                            !sensorCalibrationSupported
-                        ) {
-                            showFirmwareUpdateRequiredDialog = true
-                        }
-                    },
                     uvSensorAvailable = selectedSensorInfo.uvAvailable == true,
                     visibleFactorText = visibleCalibrationFactorText,
                     onVisibleFactorTextChange = {
@@ -3685,58 +3926,22 @@ if (showParametersDialog) {
                     secondaryText = secondaryText
                 )
                 }
+                }
+
+                if (selectedSettingsPage == null) {
+                    UvirSettingsDiagnosticsListEntry(cardColor, primaryText, secondaryText)
+                }
 
                 SettingsAutoSaveGroup(SettingsSaveGroup.ALERTS) {
-                UvirSamplingAndAlertSettings(
-                    context = context,
-                    samplingSectionExpanded = settingsExpansion.sampling,
-                    onSamplingSectionExpandedChange = {
-                        settingsExpansion.sampling = it
-                    },
-                    sensorSettingsEnabled =
-                        sensorControlConnectionAvailable,
-                    samplesText = samplesText,
-                    onSamplesTextChange = {
-                        samplesText = it
-                    },
-                    spacingText = spacingText,
-                    onSpacingTextChange = {
-                        spacingText = it
-                    },
-                    trimEnabled = trimEnabled,
-                    onTrimEnabledChange = {
-                        trimEnabled = it
-                    },
-                    parametersError = parametersError,
-                    alertsSectionExpanded = settingsExpansion.alerts,
-                    onAlertsSectionExpandedChange = {
-                        settingsExpansion.alerts = it
-                    },
-                    alertSoundValue = alertSoundValue,
-                    onAlertSoundValueChange = {
-                        alertSoundValue = it
-                    },
-                    alertVolume = alertVolume,
-                    onAlertVolumeChange = {
-                        alertVolume = it
-                    },
-                    onPreviewThresholdAlertSound =
-                        onPreviewThresholdAlertSound,
-                    acquisitionFeedbackSettings =
-                        acquisitionFeedbackSettings,
-                    onAcquisitionFeedbackSettingsChange =
-                        onAcquisitionFeedbackSettingsChange,
-                    onPreviewAcquisitionFeedback =
-                        onPreviewAcquisitionFeedback,
-                    cardColor = cardColor,
-                    primaryText = primaryText,
-                    secondaryText = secondaryText
-                )
+                    renderSamplingAndAlerts(false, true)
                 }
                 CompositionLocalProvider(LocalSettingsCommit provides null) {
                 UvirSettingsGeneralSections(
                     database = database,
-                    autoEnabled = autoEnabled,
+                    autoEnabled = autoEnabled || counterResetBlocked,
+                    sensorRestoreEnabled = sensorProfiles.any {
+                        uvirSensorCanReset(resetSensorIndicators[normalizeSensorDeviceId(it.hardwareUid)])
+                    },
                     numericFormatValue = numericFormatValue,
                     onNumericFormatValueChange = {
                         numericFormatValue = it
@@ -3817,8 +4022,20 @@ if (showParametersDialog) {
                     onResetAllRequested = {
                         showCounterResetConfirmation = true
                     },
+                    onSettingsExportRequested = {
+                        showSettingsExportDialog = true
+                    },
+                    onSettingsImportRequested = {
+                        requestUvirSettingsImport(context)
+                    },
+                    onDatabaseImportRequested = {
+                        requestUvirDatabaseImport(context)
+                    },
                     onRestoreDefaultsRequested = {
                         showRestoreDefaultsConfirmation = true
+                    },
+                    onSensorRestoreRequested = {
+                        showSensorRestoreConfirmation = true
                     },
                     debugSectionExpanded = settingsExpansion.debug,
                     onDebugSectionExpandedChange = {
@@ -3850,6 +4067,7 @@ if (showParametersDialog) {
                         onStartDebugPerformance,
                     onStopDebugPerformance = onStopDebugPerformance,
                     diagnosticSensorConnected = selectedSensorConnected,
+                    diagnosticSensorDeviceId = selectedSensorDeviceId,
                     diagnosticSensorInfo = selectedSensorInfo,
                     diagnosticConnectionMode = sensorConnectionMode,
                     diagnosticSensorName = detailSensorDisplayName(
@@ -3944,11 +4162,33 @@ val homeHeaderContent: @Composable () -> Unit = {
         versionInfoDescription = versionInfoDescription,
         primaryText = primaryText,
         secondaryText = secondaryText,
+        onActivityInProgressChanged = onHomeActivityChanged,
+        sensorDisplayName = sourceDialogSnapshot.sensorDisplayName,
+        sensorSelectionExpanded = sensorSelectionExpanded,
+        onSensorSelectionExpandedChange = { sensorSelectionExpanded = it },
+        sensorDialogColor = cardColor,
+        sensorSelectionEnabled = sourceDialogSnapshot.sensorSelectionEnabled &&
+            sourceDialogSnapshot.sensorProfiles.isNotEmpty(),
+        sensorProfiles = sourceDialogSnapshot.sensorProfiles,
+        sensorStatusIndicators = sensorStatusIndicators,
+        sensorAlertMonitoringDeviceIds = uvirSensorAlertDeviceIds(
+            sensorAlertMonitoringDeviceIds, selectedSensorDeviceId, alertSessionActive),
+        sensorConnectionModes = sourceDialogSnapshot.sensorProfiles.associate { profile ->
+            normalizeSensorDeviceId(profile.hardwareUid) to loadSensorContextConnectionMode(
+                manualPreferences, profile.hardwareUid, sourceDialogSnapshot.selectedSensorDeviceId,
+                sensorConnectionMode
+            )
+        },
+        selectedSensorDeviceId = sourceDialogSnapshot.selectedSensorDeviceId,
+        onSensorSelected = onSensorSelected,
+        onOpenSensorInfo = { if (selectedSensorConnected) showSensorInfoScreen = true },
+        onSensorConnectionModeChanged = onSensorConnectionModeChanged,
+        wifiEnabled = sourceDialogSnapshot.wifiEnabled,
+        bluetoothEnabled = sourceDialogSnapshot.bluetoothEnabled,
+        internetEnabled = sourceDialogSnapshot.internetEnabled,
+        sensorSourceEnabled = sourceDialogSnapshot.sensorSelectionEnabled,
         onOpenVersionInfo = {
             showVersionInfoDialog = true
-        },
-        onOpenSensorSource = {
-            showSensorSourceDialog = true
         },
         onOpenSettings = openSettingsFromHome
     )
@@ -3991,92 +4231,75 @@ containerColor =
 backgroundColor,
 
 floatingActionButton = {
-    val compactOfflineNotice =
-        offlineDisconnectionNotice
-            ?.takeIf { !sensorOperationsAvailable }
-
-    Column(
-        horizontalAlignment = Alignment.End,
-        verticalArrangement = Arrangement.spacedBy(UvirFloatingControlSpacing)
-    ) {
-        if (alertSessionActive) {
-            UvirStopAllAlertsFloatingButton(
-                enabled = sensorOperationsAvailable,
-                onClick = {
-                    showStopAllAlertsConfirmation = true
-                },
-                modifier = Modifier.padding(end = 7.dp)
-            )
-        } else if (alertSessionReadyToStart) {
-            UvirStartAllAlertsFloatingButton(
-                onClick = {
-                    pendingAlertSessionNote = thresholdAlertSessionNote
-                    alertRepeatHoursText = (thresholdAlertSettings.repeatSeconds / 3_600).toString()
-                    alertRepeatMinutesText = ((thresholdAlertSettings.repeatSeconds % 3_600) / 60).toString()
-                    alertRepeatSecondsText = (thresholdAlertSettings.repeatSeconds % 60).toString()
-                    showStartAllAlertsConfirmation = true
-                },
-                modifier = Modifier.padding(end = 7.dp)
-            )
+    val openAlertRegistration: () -> Unit = {
+        if (!alertSessionActive) {
+            pendingAlertSessionNote = thresholdAlertSessionNote
+            alertRepeatHoursText = (thresholdAlertSettings.repeatSeconds / 3_600).toString()
+            alertRepeatMinutesText = ((thresholdAlertSettings.repeatSeconds % 3_600) / 60).toString()
+            alertRepeatSecondsText = (thresholdAlertSettings.repeatSeconds % 60).toString()
+            pendingDoNotRecordAlerts = !thresholdAlertSettings.recordEvents
         }
+        showStartAllAlertsConfirmation = true
+    }
 
-        Row(
-            modifier = Modifier.widthIn(
-                max = (LocalConfiguration.current.screenWidthDp - 32).coerceAtLeast(0).dp
-            ),
-            horizontalArrangement = Arrangement.spacedBy(UvirFloatingControlSpacing),
-            verticalAlignment = Alignment.CenterVertically
+    if (homeCaptureMenuVisible) {
+        UvirHomeCaptureMenu(
+            alertActive = alertSessionActive,
+            onManual = {
+                if (!autoEnabled && !alertSessionActive) {
+                    note = ""
+                    refreshRecentManualSessionState()
+                    showSaveDialog = true
+                }
+            },
+            onAutomatic = { openAutomaticAcquisitionPage() },
+            onAlert = openAlertRegistration,
+            automaticActive = autoEnabled,
+            completedCount = autoCompletedCount,
+            alertCompletedCount = alertCompletedCount,
+            syncInProgress = acquisitionSyncInProgress,
+            automaticIndicatorColor = uvirSessionIndicatorColor(isSystemInDarkTheme()),
+            alertIndicatorColor = uvirAlertSessionIndicatorColor(isSystemInDarkTheme()),
+            automaticContainerColor = cardColor
+        )
+    } else {
+        Column(
+            horizontalAlignment = Alignment.End,
+            verticalArrangement = Arrangement.spacedBy(UvirFloatingControlSpacing)
         ) {
-            compactOfflineNotice?.let { notice ->
-                UvirCompactOfflineAutonomyNotice(
-                    notice = notice,
-                    primaryText = primaryText,
-                    modifier = Modifier.weight(1f, fill = false)
+            if (alertSessionActive) {
+                UvirStopAllAlertsFloatingButton(
+                    enabled = true,
+                    onClick = openAlertRegistration,
+                    modifier = Modifier.padding(end = 7.dp),
+                    opensRegistrationPage = true
+                )
+            } else if (alertSessionReadyToStart) {
+                UvirStartAllAlertsFloatingButton(
+                    onClick = openAlertRegistration,
+                    modifier = Modifier.padding(end = 7.dp)
                 )
             }
 
-            if (!autoEnabled) {
-                UvirAutomaticAcquisitionShortcut(
-                    onClick = { openAutomaticAcquisitionPage() }
-                )
-            }
-
-            if (autoEnabled) {
-                PulsingAutomaticCountBadge(
-                    completed = autoCompletedCount,
-                    syncInProgress = acquisitionSyncInProgress,
-                    onClick = {
-                        openAutomaticAcquisitionPage()
-                    },
-                    color =
-                        uvirSessionIndicatorColor(
-                            isSystemInDarkTheme()
-                        ),
-                    containerColor = cardColor,
-                    modifier = Modifier.size(56.dp)
-                )
-            } else if (liveReady) {
-                FloatingActionButton(
-                    onClick = {
-                        note = ""
-                        refreshRecentManualSessionState()
-                        showSaveDialog = true
-                    },
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                ) {
-                    CaptureMeasurementIcon(
-                        modifier = Modifier.size(25.dp),
-                        tint = MaterialTheme.colorScheme.onPrimary
+            Row(
+                modifier = Modifier.widthIn(
+                    max = (LocalConfiguration.current.screenWidthDp - 32).coerceAtLeast(0).dp
+                ),
+                horizontalArrangement = Arrangement.spacedBy(UvirFloatingControlSpacing),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (idleCaptureActionsAvailable) {
+                    UvirAutomaticAcquisitionShortcut(
+                        onClick = { openAutomaticAcquisitionPage() }
                     )
                 }
-            } else {
+
                 Surface(
                     modifier = Modifier.size(56.dp),
-                    shape = FloatingActionButtonDefaults.shape,
+                    shape = CircleShape,
                     color = uvirDisabledActionContainerColor(),
                     contentColor = uvirDisabledActionContentColor(),
-                    shadowElevation = 5.dp
+                    shadowElevation = UvirFloatingActionShadowElevation
                 ) {
                     Box(
                         modifier = Modifier.fillMaxSize(),
@@ -4109,8 +4332,8 @@ floatingActionButton = {
                     .fillMaxSize()
                     .padding(paddingValues)
                     .padding(
-                        start = 20.dp,
-                        end = 20.dp,
+                        start = UvirScreenHorizontalPadding,
+                        end = UvirScreenHorizontalPadding,
                         top = 4.dp
                     )
         ) {
@@ -4134,7 +4357,7 @@ floatingActionButton = {
             ) {
                 val density = LocalDensity.current
                 val floatingControlsClearance =
-                    if (alertFloatingControlVisible) {
+                    if (separateAlertFloatingControlVisible) {
                         136.dp
                     } else {
                         84.dp
@@ -4297,14 +4520,14 @@ floatingActionButton = {
 
         contentPadding =
             PaddingValues(
-                start = 20.dp,
-                end = 20.dp,
+                start = UvirScreenHorizontalPadding,
+                end = UvirScreenHorizontalPadding,
                 top = 4.dp,
                 bottom =
-                    if (alertFloatingControlVisible) {
-                        150.dp
+                    if (separateAlertFloatingControlVisible) {
+                        142.dp
                     } else {
-                        100.dp
+                        92.dp
                     }
             ),
 
@@ -4388,12 +4611,6 @@ floatingActionButton = {
                     monitoringAlertMetrics =
                         monitoringAlertMetrics,
 
-                    onConfigureAlert = {
-                        it.sensorGroup()?.let { group ->
-                            openThresholdAlertGroup(group)
-                        }
-                    },
-
                     cardColor =
                         cardColor,
 
@@ -4435,12 +4652,6 @@ floatingActionButton = {
 
                     monitoringAlertMetrics =
                         monitoringAlertMetrics,
-
-                    onConfigureAlerts = {
-                        openThresholdAlertGroup(
-                            SensorGroup.BIOLOGICAL
-                        )
-                    },
 
                     cardColor =
                         cardColor,

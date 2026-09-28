@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="update_available">Updates verfügbar</string>
+    <string name="update_none">Keine Updates verfügbar</string>
+    <string name="update_check_failed">Updates konnten nicht geprüft werden. Siehe Fehlerprotokoll.</string>
+    <string name="update_app">App aktualisieren</string>
+    <string name="update_sensor">Sensor aktualisieren</string>
+    <string name="update_app_first">Zuerst die App aktualisieren.</string>
+    <string name="update_usb_required">Diesen Sensor auswählen und per USB verbinden. Keine aktive Sitzung; alle Datensätze müssen synchronisiert sein.</string>
+    <string name="update_download">Download und Prüfung…</string>
+    <string name="update_flash">Sensor wird aktualisiert…</string>
+    <string name="update_verify">Sensor wird geprüft…</string>
+    <string name="update_keep_connected">USB nicht trennen und Sensor nicht ausschalten. Bei Bedarf BOOT gedrückt halten und erneut versuchen.</string>
+    <string name="update_done">Sensor aktualisiert</string>
+    <string name="update_failed">Update fehlgeschlagen. Siehe Fehlerprotokoll. Startet der Sensor nicht mehr, Firmware per USB am Computer wiederherstellen.</string>
+    <string name="update_permission">Uvir in den Android-Einstellungen die Installation von Updates erlauben.</string>
+    <string name="update_whats_new">Signierte Updates für App und Sensor, geprüfte Downloads und Firmware-Übertragung per USB.</string>
+</resources>

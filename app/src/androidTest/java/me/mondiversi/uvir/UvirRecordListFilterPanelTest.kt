@@ -7,11 +7,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.StateRestorationTester
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -115,6 +117,25 @@ class UvirRecordListFilterPanelTest {
         assertTrue(top("filter-from") < top("filter-mode"))
         assertEquals(top("filter-mode"), top("filter-sensor"), 0.5f)
         assertTrue(top("filter-mode") < top("filter-note"))
+        assertEquals(top("filter-note"), top("filter-variant"), 0.5f)
+    }
+    @Test fun variantChoicesComeFromSavedSessionsAndCanBeDisabledForAlerts() {
+        var filters by mutableStateOf(UvirRecordListFilters())
+        var enabled by mutableStateOf(true)
+        compose.setContent {
+            MaterialTheme {
+                UvirRecordListFilterPanel(
+                    filters, mapOf("1" to "Sensor A"), setOf(true), { filters = it },
+                    variantCounts = listOf(2, 5, 4), variantFilterEnabled = enabled
+                )
+            }
+        }
+        compose.onNodeWithTag("filter-variant").performScrollTo().performTouchInput { click(center) }
+        compose.onNodeWithTag("filter-choice-option-2").assertExists()
+        compose.onNodeWithTag("filter-choice-option-4").assertExists()
+        compose.onNodeWithTag("filter-choice-option-5").performClick()
+        compose.runOnIdle { assertEquals(5, filters.variantCount); enabled = false }
+        compose.onNodeWithTag("filter-variant").assertIsNotEnabled()
     }
     @Test fun panelMatchesTheListBackgroundAndFieldsStayReadableInBothThemes() {
         val night = mutableStateOf(false)
@@ -164,6 +185,86 @@ class UvirRecordListFilterPanelTest {
         compose.setContent { MaterialTheme { UvirRecordListFilterButton(false, false) { clicks++ } } }
         compose.onNodeWithTag("list-filter-toggle").assertIsNotEnabled().performTouchInput { click(center) }
         compose.runOnIdle { assertEquals(0, clicks) }
+    }
+
+    @Test fun decorativeIconsPrecedeEveryLabelAndFollowThemeDirectionAndDisabledState() {
+        val night = mutableStateOf(false)
+        val direction = mutableStateOf(LayoutDirection.Ltr)
+        val variantsEnabled = mutableStateOf(true)
+        var enabledTint = Color.Unspecified
+        var disabledTint = Color.Unspecified
+        var panelBackground = Color.Unspecified
+        compose.setContent {
+            val view = LocalView.current
+            DisposableEffect(view) {
+                val previous = view.keepScreenOn
+                view.keepScreenOn = true
+                onDispose { view.keepScreenOn = previous }
+            }
+            val configuration = Configuration(LocalConfiguration.current).apply {
+                uiMode = (uiMode and Configuration.UI_MODE_NIGHT_MASK.inv()) or
+                    if (night.value) Configuration.UI_MODE_NIGHT_YES else Configuration.UI_MODE_NIGHT_NO
+            }
+            val density = LocalDensity.current
+            CompositionLocalProvider(LocalConfiguration provides configuration,
+                LocalLayoutDirection provides direction.value,
+                LocalDensity provides Density(density.density, 1.3f)) {
+                MaterialTheme(colorScheme = if (night.value) darkColorScheme() else lightColorScheme()) {
+                    val colors = UvirOutlinedTextFieldColors()
+                    val background = MaterialTheme.colorScheme.background
+                    SideEffect {
+                        enabledTint = colors.unfocusedLabelColor
+                        disabledTint = colors.disabledTextColor
+                        panelBackground = background
+                    }
+                    UvirRecordListFilterPanel(UvirRecordListFilters(), mapOf("1" to "Sensor A"),
+                        setOf(true, false), {}, variantFilterEnabled = variantsEnabled.value)
+                }
+            }
+        }
+        val fields = listOf(
+            Triple("id", "filter-id", R.string.list_filter_id),
+            Triple("session", "filter-session-id", R.string.share_session_id_label),
+            Triple("from", "filter-from", R.string.list_filter_from),
+            Triple("until", "filter-until", R.string.list_filter_until),
+            Triple("mode", "filter-mode", R.string.acquisition_mode_label),
+            Triple("sensor", "filter-sensor", R.string.sensor_selector_label),
+            Triple("note", "filter-note", R.string.share_note_label),
+            Triple("variant", "filter-variant", R.string.list_filter_variant)
+        )
+        for (dark in listOf(false, true)) for (layout in listOf(LayoutDirection.Ltr, LayoutDirection.Rtl)) {
+            compose.runOnIdle { night.value = dark; direction.value = layout; variantsEnabled.value = true }
+            for ((icon, field, textId) in fields) {
+                compose.onNodeWithTag(field).performScrollTo()
+                val image = compose.onNodeWithTag("filter-label-icon-$icon", useUnmergedTree = true)
+                    .assertIsDisplayed()
+                val bounds = image.fetchSemanticsNode().boundsInRoot
+                val text = compose.onNodeWithText(label(textId), useUnmergedTree = true)
+                    .fetchSemanticsNode().boundsInRoot
+                if (layout == LayoutDirection.Ltr) assertTrue(bounds.right < text.left)
+                else assertTrue(bounds.left > text.right)
+                assertEquals("Label and icon stay vertically centered: $icon", text.center.y, bounds.center.y, 1f)
+                assertIconTint(image.captureToImage().toPixelMap(), enabledTint)
+            }
+            compose.runOnIdle { variantsEnabled.value = false }
+            compose.onNodeWithTag("filter-variant").performScrollTo().assertIsNotEnabled()
+            val disabled = compose.onNodeWithTag("filter-label-icon-variant", useUnmergedTree = true)
+                .assertHasNoClickAction().captureToImage().toPixelMap()
+            // Disabled alpha is applied once to the whole drawing, not once per overlapping path.
+            assertIconTint(disabled, disabledTint.compositeOver(panelBackground))
+            assertTrue("Disabled icon is less prominent than enabled labels", disabledTint.alpha < enabledTint.alpha)
+        }
+    }
+
+    private fun assertIconTint(pixels: androidx.compose.ui.graphics.PixelMap, expected: Color) {
+        var matching = 0
+        for (y in 0 until pixels.height) for (x in 0 until pixels.width) {
+            val pixel = pixels[x, y]
+            if (kotlin.math.abs(pixel.red - expected.red) < 0.03f &&
+                kotlin.math.abs(pixel.green - expected.green) < 0.03f &&
+                kotlin.math.abs(pixel.blue - expected.blue) < 0.03f) matching++
+        }
+        assertTrue("The decorative icon uses the label color", matching > 3)
     }
 
 }

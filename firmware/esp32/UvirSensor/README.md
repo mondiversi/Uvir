@@ -7,6 +7,35 @@ USB serial, the local Wi-Fi network, Bluetooth Classic SPP, or an encrypted
 Internet relay. Firmware keeps
 working with UV values unavailable when the optional AS7331 is not installed.
 
+## Settings authority and interrupted transfers
+
+Firmware 0.5.102 reports `settings_updated_at_ms` in `HELLO`: UTC Unix
+milliseconds of the last committed configuration change, persisted in NVS.
+Receiving `TIME`, connecting, reading samples and running sessions do not refresh
+this revision. Native serial configuration edits also advance it monotonically,
+even if the runtime clock is unavailable or moves backwards.
+
+Android keeps a separate revision/outbox for each hardware identity. Hardware
+wins when its revision is equal or newer; otherwise Android resends its pending
+configuration after authentication. Writes are queued durably before transfer
+and are not acknowledged merely because a socket write succeeded. Pending
+commands containing network credentials are excluded from Android cloud/device
+backups; explicit encrypted settings exports include the desired settings.
+
+`SETTINGS_APPLY <updated_at_ms> <hex_utf8_commands>` applies a bounded batch of
+configuration commands separated by newlines. Its revision is committed only
+after all commands succeed. Older/equal batches are ignored and answered with
+`HELLO`. Interrupted/partially applied batches keep the previous revision and
+can be retried. Radio reconnection is deferred until after commit/readback.
+This is a recoverable configuration batch, not an atomic flash transaction.
+The allowlist excludes acquisition, reset, session start/stop and other
+operational commands. `ALERT_SETTINGS` synchronizes alert rules/timing without
+changing an active session's identity, counters, cooldown or enabled state.
+
+The outbox is invalidated when the association's access token changes (factory
+reset), when that sensor is disassociated, or when the app's associations are
+reset. Older firmware retains its previous sensor-authoritative readback behavior.
+
 ## Current wiring
 
 | GY-AS7343 | ESP32 Dev Module |
@@ -33,6 +62,69 @@ The sensors do not conflict: AS7343 uses address `0x39` and AS7331 uses
 `0x74`. The AS7331 runs in command/one-shot mode and therefore does not need
 its `INT` or `SYN` pins for Uvir.
 
+HW-084 / DS3231 battery-backed real-time clock on the same I2C bus:
+
+| RTC module | ESP32 Dev Module |
+|---|---|
+| SDA | GPIO 21 (shared I2C bus) |
+| SCL | GPIO 22 (shared I2C bus) |
+| VCC | 3.3 V |
+| GND | GND |
+| SQW / 32K | Not connected |
+
+The DS3231 uses address `0x68`; the module's optional AT24C32 EEPROM commonly
+uses `0x57` and is not used by Uvir. The backup cell powers only the clock when
+main power is absent, so the module power LED going out is normal. If a CR2032
+is fitted, the module's charging path must remain disabled. Uvir stores UTC in
+the RTC and converts it for display in Android.
+
+32 KiB MB85RC256V I²C FRAM on the shared bus:
+
+| FRAM module | ESP32 Dev Module |
+|---|---|
+| SDA | GPIO 21 |
+| SCL | GPIO 22 |
+| VCC | 3.3 V |
+| GND | GND |
+| WP / A0 / A1 / A2 | Leave at the module defaults; do not drive high |
+
+The tested board answers at `0x50`, independently of AS7343 (`0x39`), DS3231
+(`0x68`) and optional AS7331 (`0x74`). FRAM keeps two checksummed copies of
+the current activity state and up to 92 pending final records. Each record is
+committed after a readback, then removed only after Android acknowledges it.
+The remaining 4 KiB are reserved for future diagnostics. If FRAM is absent or
+belongs to a different sensor, the microSD/LittleFS path remains available;
+foreign FRAM contents are never silently erased.
+
+Generic 6-pin microSD adapter with onboard level conversion (durable overflow
+storage):
+
+| microSD adapter | ESP32 Dev Module |
+|---|---|
+| CS | GPIO 13 |
+| SCK | GPIO 18 |
+| MOSI | GPIO 23 |
+| MISO | GPIO 19 |
+| VCC | 5 V / VIN |
+| GND | GND |
+
+The tested generic board uses an SN74HC125 level-conversion buffer and a 3.3 V
+regulator, so its `VCC` input is powered from 5 V while all SPI signals remain
+safe for the ESP32. Use a FAT32 card. The firmware binds a newly initialized
+card to the ESP32 hardware identity, stores overflow acquisitions, alerts and
+sensor errors under `/uvir`, and keeps two checksummed activity checkpoints as
+a fallback when FRAM is unavailable. A card
+belonging to another sensor is never silently adopted. If the card is missing,
+the internal LittleFS partition remains a deliberately small emergency fallback.
+Existing valid LittleFS records are migrated to the card without changing their
+record IDs.
+
+Capacity is calculated from the actual mounted card and the current binary
+record size, while reserving 5% of the card (at least 16 MiB) for filesystem
+headroom. The app reports total bytes, free bytes, total record capacity and
+records still available in **Sensor information**. The diagnostic test performs
+a temporary write/read/delete round trip without creating a measurement record.
+
 Optional common-cathode RGB connection LED:
 
 | RGB LED | ESP32 Dev Module |
@@ -42,9 +134,9 @@ Optional common-cathode RGB connection LED:
 | Green anode | GPIO 26 through its own 330 Ω resistor |
 
 The RGB blue anode is not connected. GPIO 27 instead drives a separate blue
-operation LED:
+synchronization LED:
 
-| Blue operation LED | ESP32 Dev Module |
+| Blue synchronization LED | ESP32 Dev Module |
 |---|---|
 | Anode | GPIO 27 through its own 330 Ω resistor |
 | Cathode | GND |
@@ -80,7 +172,7 @@ an external session. Three consecutive short presses start an external session;
 the gesture itself does not create three records. A triple press is ignored
 while any session is already active. Holding for two seconds stops the active
 automatic or value-alert session. All gestures require a valid sensor clock;
-otherwise the blue LED flashes rapidly five times and the buzzer emits one
+otherwise the RGB LED flashes orange rapidly five times and the buzzer emits one
 prolonged beep. Never apply 5 V directly to GPIO 33: use an optocoupler or a
 properly designed level-shifting/protection stage for an industrial 5 V command.
 
@@ -139,13 +231,19 @@ JSON frame. USB, Bluetooth and MQTT output are unchanged.
 Commands accepted by the ESP32:
 
 - `HELLO` or `PING`: report identity and capabilities;
-- `DIAGNOSTIC <32-character hexadecimal request ID>` (firmware 0.5.69+):
-  return one correlated, read-only `diagnostic` frame containing identity,
-  firmware, RAM/flash/offline capacity, sensor availability, and session state.
-  No sampling, session, LED/buzzer, configuration, or synchronization command
-  is executed. Credentials are never included. Android sends six spaced probes
-  over the selected transport, measures round-trip latency at receipt, and
-  offers the same localized report in a scrollable dialog and UTF-8 TXT export.
+- `DIAGNOSTIC <32-character hexadecimal request ID>` (full component report in
+  firmware 0.5.92+): return one correlated `diagnostic` frame containing
+  identity, firmware, processor, RAM/flash, connection state and the hardware
+  map. Each probe checks the AS7343, optional AS7331 and DS3231 on I²C, performs
+  a temporary microSD read/write round trip, reads the external input and
+  reports the LED and buzzer control paths, pins and current configuration.
+  The temporary microSD file is deleted immediately; settings, sessions and
+  measurement records are never changed. LED and buzzer outputs are not
+  actuated automatically because their final optical/acoustic result requires
+  physical confirmation. Credentials are never included. Android sends six
+  spaced probes over the selected transport, measures round-trip latency at
+  receipt, and offers the localized report in a scrollable dialog and UTF-8 TXT
+  export.
 - `APP_CONNECT`: confirm that the authenticated transport is the source
   currently selected by Uvir, before synchronization and live streaming;
 - `STREAM 150`: request one sample about every 150 ms;
@@ -153,14 +251,14 @@ Commands accepted by the ESP32:
 - `SAMPLING_CONFIG 5 150 1`: keep five raw samples in ESP32 RAM, one every
   150 ms, discard the per-band minimum and maximum, and emit only the final
   averaged result;
-- `LED_EVENT ACQUISITION`: shows three flashes on the separate blue operation
-  LED after Android confirms a manual acquisition was saved. Automatic
+- `LED_EVENT ACQUISITION`: briefly keeps the RGB activity indication visible
+  after Android confirms a manual acquisition was saved. Automatic
   acquisitions are timed and signalled directly by the ESP32;
-- `LED_EVENT ALERT`: compatibility/diagnostic command that shows the same
-  three blue flashes used for a saved manual acquisition. During normal live
-  use the ESP32 evaluates the configured rules on the same final averaged
-  result sent to Android and starts the green signal locally, without waiting
-  for a return command from the phone;
+- `LED_EVENT ALERT`: compatibility/diagnostic command that shows the same RGB
+  activity indication. During normal live use the ESP32 evaluates the
+  configured rules on the same final averaged result sent to Android and
+  signals the activity locally, without waiting for a return command from the
+  phone;
 - `LED_TEST`: when connected and idle, reproduces every status signal in legend
   order, then automatically restores the current real sensor state;
 - `BUZZER_TEST`: when connected and idle, reproduces the connection,
@@ -173,7 +271,7 @@ Commands accepted by the ESP32:
   firmware, while the saved buzzer/LED switches, volume and brightness remain
   authoritative;
 - `DEBUG_PERFORMANCE_STOP`: immediately cancels the current diagnostic theme
-  and restores the real connection/operation LED state;
+  and restores the real connection/activity and synchronization LED state;
 - `DEBUG_FRAME 784 220 255 150 0`: legacy diagnostic command that plays one
   audiovisual frame without overriding saved buzzer or LED settings;
 - `POWER_OFF`: when connected and idle, enters deep sleep. The sensor must then
@@ -238,6 +336,12 @@ connection.
 Select Wi-Fi or Bluetooth from the source icon while USB is still connected.
 After this first secure provisioning, Uvir can switch between the two radios
 through whichever authenticated wireless connection is currently active.
+The app waits for a `status` acknowledgement of the requested `wireless_mode`
+before committing a connected handover. The new mode gets a fresh 20-second
+window before normal fallback; repeated requests for an already exposed but
+unauthenticated radio preserve and refresh that window too. A rejected request
+leaves the previous source selected. Automatic jobs and alert sessions are not
+stopped by a transport handover.
 Selecting USB as the measurement source does not turn off the last wireless
 radio, so disconnecting the data cable never strands the sensor offline. The
 spectral devices remain powered down between individual conversions; use the
@@ -284,13 +388,22 @@ conversion; the UV sensor immediately returns to power-down before the next
 step. Mock data remains generated and averaged by Android because no physical
 sensor exists in that mode.
 
+A logical acquisition tolerates up to three physical-read attempts for each
+required sample. Retries are scheduled on later loop passes with a short delay,
+so a transient I2C error does not discard an external command and does not block
+connection or stop handling. This retry count is independent from the configured
+number of raw samples used to calculate an averaged result. Once a final record
+exists, live delivery remains pending until Android acknowledges durable storage;
+offline writes are retried without replacing the record with a later reading.
+
 When automatic acquisition or value alerts are active and the authenticated
 phone connection disappears, the sensor continues from the last time and job
 configuration received from Uvir. Completed acquisitions, alert events and
-sensor errors are queued in LittleFS. Raw intermediate samples are never
-written to flash. At reconnection the queue is transferred to Android, every
-record is acknowledged individually, and the ESP32 clears the queue only
-after the complete transfer succeeds. The Android database deduplicates
+sensor errors are queued in FRAM first, with microSD (or emergency LittleFS)
+as fallback or overflow. Raw intermediate samples are never persisted. At
+reconnection the queue is transferred to Android. Each FRAM record is removed
+after its individual acknowledgment; the filesystem queue is cleared after
+its complete acknowledged transfer. The Android database deduplicates
 repeated transfers by sensor ID and sensor record ID.
 
 Autonomous offline recording can be disabled from **Sensor parameters**. This
@@ -302,11 +415,30 @@ disconnected and no acquisition, alert monitoring, pending result or
 synchronization is active. Waking from this low-power shutdown requires a
 physical reset or a power cycle.
 
-The active automatic-session state and its progress remain exclusively in RAM.
-They survive USB/Wi-Fi/Bluetooth connection changes but are deliberately not
-resumed after an ESP32 restart or power loss. Persistent writes are reserved
-for user-confirmed settings and final records that really need the offline
-queue; no periodic automatic-session checkpoint is written.
+The active automatic-session and alert state is journaled in FRAM at meaningful
+transitions and completed acquisitions, not on every raw sample. The RTC gives
+the absolute time after power loss; recovery resumes valid work, closes expired
+work and skips missed intervals without inventing measurements. If FRAM is
+absent, the existing redundant microSD checkpoints remain the fallback.
+Firmware 0.5.97 also journals alert-session start delay, end deadline and
+completed-registration count; these limits remain effective without an app
+connection and after a power cycle.
+
+Firmware 0.5.98 makes acquisition and value-alert sessions mutually exclusive:
+`OFFLINE_JOB` and `OFFLINE_EXTERNAL_JOB` are rejected while value alerts run,
+and `ALERT_CONFIG ON` is rejected while automatic acquisition runs. `LED_TEST`
+now includes the rapid orange, red and green event patterns as well as the
+steady and slow-blinking states. If a journal written by older firmware
+contains both activities, recovery keeps the automatic job and closes alert
+monitoring without deleting its already stored records.
+
+Firmware 0.5.100 rejects a short GPIO 33 acquisition during a normal automatic
+or value-alert session with five orange flashes and one long tone. A short
+press is accepted in an external-command session, or when no sensor job is
+active. In the latter case, the app attaches the external record to an active
+manual app session when one exists. `external_command` identifies the
+individual record in live and synchronized messages. A long hold can still
+stop the active sensor session.
 
 The included custom partition reserves about 960 KiB for this queue. The
 compact version-2 format supports up to 3200 final records while preserving
@@ -321,22 +453,24 @@ The app uses the capacity and remaining-record values reported by the firmware
 to show an offline-autonomy estimate if the connection is lost while automatic
 acquisition or value alerts are active.
 
-The RGB LED reports connection and pending synchronization: steady red means
-powered but not connected to the app, flashing red means disconnected with
-acquisitions, alerts, or errors waiting in sensor memory, flashing yellow means
-that an app connection is in progress, steady green means connected, and
-flashing green means connected while stored records are being synchronized.
-The separate blue LED is reserved for operations: steady blue means an
-automatic session or value-alert monitor is active, while three blue flashes
-report a newly recorded acquisition or alert. Five much faster blue flashes
-report that an explicit acquisition was rejected because date and time were not
-available. The connection, synchronization, and operation indicators work
-independently.
+The RGB LED reports connection and activity: steady red means powered but not
+connected to the app, flashing red means disconnected with an activity in
+progress, flashing yellow means that an app connection is in progress, steady
+green means connected, and flashing green means connected with an activity in
+progress. The separate blue LED has one status meaning: steady blue indicates
+that acquisitions, alerts, or errors remain in sensor memory waiting to be
+synchronized. Three rapid red flashes indicate an acquisition or value alert
+while disconnected; three rapid green flashes indicate the same while
+connected. Five rapid orange flashes report that an explicit acquisition
+cannot be saved, for example because date and time are unavailable or
+value-alert monitoring is active. The RGB and blue indicators
+work independently, so synchronization can show flashing green together with
+steady blue.
 LED use and brightness can be changed in Uvir under **Sensor parameters**.
 The same section controls the optional status buzzer. It distinguishes app
 connection, disconnection, activity start, activity stop and a saved record.
 One prolonged tone reports the same missing-date rejection as the five rapid
-blue flashes.
+orange flashes.
 All sounds run in a dedicated task so they do not delay sampling or connectivity.
 
 For Wi-Fi, leave the phone connected to the same local network. Uvir finds only

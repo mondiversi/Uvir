@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sensor_general_actions_title">Действия</string>
+    <string name="sensor_general_actions_description">Управляйте датчиком и его привязкой к приложению.</string>
+    <string name="sensor_general_profile_title">Профиль</string>
+    <string name="sensor_general_profile_description">Выберите имя датчика.</string>
+    <string name="sensor_general_operation_title">Работа</string>
+    <string name="sensor_general_operation_description">Настройте поведение датчика.</string>
+</resources>

@@ -33,10 +33,11 @@ internal fun UvirChartYAxis(
     val numericFormat = LocalUvirNumericFormat.current
     val resolvedLabels =
         labels ?: (UVIR_CHART_AXIS_DIVISIONS downTo 0).map { step ->
-                formatUvirNumber(
+                formatUvirChartAxisValue(
                     value = maximum * step / UVIR_CHART_AXIS_DIVISIONS,
-                    fractionDigits = fractionDigits,
-                    format = numericFormat
+                    maximum = maximum,
+                    preferredFractionDigits = fractionDigits,
+                    numericFormat = numericFormat
                 ) + suffix
             }
 

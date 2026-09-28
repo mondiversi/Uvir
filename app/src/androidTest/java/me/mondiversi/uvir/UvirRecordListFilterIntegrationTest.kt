@@ -283,8 +283,9 @@ class UvirRecordListFilterIntegrationTest {
     }
 
     private fun assertFilterCount(visible: Int, total: Int) {
-        compose.onNodeWithTag("list-filter-count")
-            .assertTextContains(visible.toString(), substring = true)
-            .assertTextContains(total.toString(), substring = true)
+        // The persistent footer was intentionally removed; filtering must not
+        // change the total shown in the list title.
+        compose.onNodeWithTag("list-filter-count").assertDoesNotExist()
+        compose.onAllNodes(hasText(total.toString(), substring = true)).assertAny(hasText(total.toString(), substring = true))
     }
 }

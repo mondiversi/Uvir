@@ -3,13 +3,14 @@ package me.mondiversi.uvir
 import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -34,6 +35,9 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
+
+private const val SENSOR_DISASSOCIATE_HOLD_SECONDS = 5
+private const val SENSOR_POWER_OFF_HOLD_SECONDS = 5
 
 @Composable
 internal fun UvirSensorParametersSettings(
@@ -70,8 +74,8 @@ internal fun UvirSensorParametersSettings(
     onTestStatusBuzzer: suspend () -> Boolean,
     sensorAssociated: Boolean,
     sensorPowerOffEnabled: Boolean,
+    onSensorPowerOffRequested: () -> Unit,
     onDisassociateSensor: suspend () -> Boolean,
-    onRestoreSensor: suspend () -> Boolean,
     cardColor: Color,
     primaryText: Color,
     secondaryText: Color
@@ -85,12 +89,6 @@ internal fun UvirSensorParametersSettings(
         mutableStateOf(false)
     }
     var sensorDisassociateInProgress by rememberSaveable {
-        mutableStateOf(false)
-    }
-    var showSensorRestoreConfirmation by rememberSaveable {
-        mutableStateOf(false)
-    }
-    var sensorRestoreInProgress by rememberSaveable {
         mutableStateOf(false)
     }
     val valueCorrectedText =
@@ -115,7 +113,7 @@ internal fun UvirSensorParametersSettings(
     SettingsSection(
         settingsPage = UvirSettingsPage.SENSOR_PARAMETERS,
         title = stringResource(R.string.settings_section_sensor_parameters),
-        titleIcon = ConnectivityIconType.MANAGEMENT,
+        titleIcon = ConnectivityIconType.GENERAL,
         expanded = expanded,
         enabled = sensorSettingsEnabled,
         dimContentWhenDisabled = false,
@@ -130,127 +128,152 @@ internal fun UvirSensorParametersSettings(
         containerColor = cardColor,
         titleColor = primaryText,
         chevronColor = secondaryText,
-        dividerColor = secondaryText.copy(alpha = 0.28f)
+        dividerColor = secondaryText.copy(alpha = 0.28f),
+        contentSpacing = UvirIslandSpacing,
+        wrapDetailContent = false
     ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(UvirSettingsGroupGap)
+        SettingsStaticIsland(
+            title = stringResource(R.string.sensor_general_profile_title),
+            titleIcon = ConnectivityIconType.SENSOR,
+            containerColor = cardColor,
+            titleColor = primaryText
         ) {
-            SettingsPageDescription(
-                text = stringResource(R.string.sensor_parameters_description),
-                color = secondaryText
-            )
-
             Column(
-                verticalArrangement = Arrangement.spacedBy(UvirSettingsRelatedGap)
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(UvirSettingsControlGap)
             ) {
-                OutlinedTextField(
-                    value = sensorName,
-                    onValueChange = {
-                        onSensorNameChange(
-                            it.take(MAX_SENSOR_DISPLAY_NAME_LENGTH)
-                        )
-                    },
-                    modifier = Modifier.fillMaxWidth().settingsCommitOnBlur(SettingsSaveGroup.NAME),
-                    enabled = sensorNameEditable,
-                    singleLine = true,
-                    label = {
-                        AdaptiveFieldLabel(
-                            stringResource(R.string.sensor_name_label)
-                        )
-                    },
-                    colors = UvirOutlinedTextFieldColors()
+                SettingsPageDescription(
+                    text = stringResource(R.string.sensor_general_profile_description),
+                    color = secondaryText
                 )
-                Text(
-                    text = stringResource(R.string.sensor_name_description),
-                    color = secondaryText,
-                    fontSize = 11.sp,
-                    lineHeight = 14.sp
-                )
-            }
 
-            SettingsGroupDivider(secondaryText)
-
-            SettingsCheckboxWithDescription(
-                checked = autonomousRecordingEnabled,
-                onCheckedChange = onAutonomousRecordingEnabledChange,
-                title = stringResource(R.string.sensor_autonomous_recording),
-                description = stringResource(
-                    R.string.sensor_autonomous_recording_description
-                ),
-                enabled = sensorSettingsEnabled,
-                primaryText = primaryText,
-                secondaryText = secondaryText
-            )
-
-            SettingsCheckboxWithDescription(
-                checked = automaticShutdownEnabled,
-                onCheckedChange = onAutomaticShutdownEnabledChange,
-                title = stringResource(R.string.sensor_automatic_shutdown),
-                description = stringResource(
-                    R.string.sensor_automatic_shutdown_description
-                ),
-                enabled = sensorSettingsEnabled,
-                primaryText = primaryText,
-                secondaryText = secondaryText
-            )
-
-            if (automaticShutdownEnabled) {
                 Column(
-                    verticalArrangement =
-                        Arrangement.spacedBy(UvirSettingsRelatedGap)
+                    verticalArrangement = Arrangement.spacedBy(UvirSettingsRelatedGap)
                 ) {
+                    OutlinedTextField(
+                        value = sensorName,
+                        onValueChange = {
+                            onSensorNameChange(
+                                it.take(MAX_SENSOR_DISPLAY_NAME_LENGTH)
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth().settingsCommitOnBlur(SettingsSaveGroup.NAME),
+                        enabled = sensorNameEditable,
+                        singleLine = true,
+                        label = {
+                            AdaptiveFieldLabel(
+                                stringResource(R.string.sensor_name_label)
+                            )
+                        },
+                        colors = UvirOutlinedTextFieldColors()
+                    )
                     Text(
-                        text = stringResource(
-                            R.string.sensor_automatic_shutdown_after
-                        ),
-                        color =
-                            if (sensorSettingsEnabled) {
-                                primaryText
-                            } else {
-                                secondaryText
-                            },
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium
-                    )
-                    DurationFields(
-                        hoursText = automaticShutdownHoursText,
-                        minutesText = automaticShutdownMinutesText,
-                        secondsText = automaticShutdownSecondsText,
-                        onHoursChange =
-                            onAutomaticShutdownHoursTextChange,
-                        onMinutesChange =
-                            onAutomaticShutdownMinutesTextChange,
-                        onSecondsChange =
-                            onAutomaticShutdownSecondsTextChange,
-                        enabled = sensorSettingsEnabled,
-                        maxHours = 24,
-                        onEditingComplete =
-                            normalizeAutomaticShutdownDuration
+                        text = stringResource(R.string.sensor_name_description),
+                        color = secondaryText,
+                        fontSize = 11.sp,
+                        lineHeight = 14.sp
                     )
                 }
+
             }
+        }
 
-            SettingsGroupDivider(secondaryText)
+        SettingsStaticIsland(
+            title = stringResource(R.string.sensor_general_operation_title),
+            titleIcon = ConnectivityIconType.GENERAL,
+            containerColor = cardColor,
+            titleColor = primaryText
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(UvirSettingsControlGap)
+            ) {
+                SettingsPageDescription(
+                    text = stringResource(R.string.sensor_general_operation_description),
+                    color = secondaryText
+                )
 
-            SettingsCheckboxWithDescription(
-                checked = statusLedEnabled,
-                onCheckedChange = onStatusLedEnabledChange,
-                title = stringResource(R.string.sensor_status_led),
-                description = stringResource(R.string.sensor_status_led_description),
-                enabled = sensorSettingsEnabled,
-                primaryText = primaryText,
-                secondaryText = secondaryText,
-                trailingContent = {
-                    ParameterInfoButton(
-                        contentDescription = resources.getString(
-                            R.string.sensor_led_info_action
-                        ),
-                        tint = primaryText,
-                        onClick = { showStatusLedInfo = true }
-                    )
+                SettingsCheckboxWithDescription(
+                    checked = autonomousRecordingEnabled,
+                    onCheckedChange = onAutonomousRecordingEnabledChange,
+                    title = stringResource(R.string.sensor_autonomous_recording),
+                    description = stringResource(
+                        R.string.sensor_autonomous_recording_description
+                    ),
+                    enabled = sensorSettingsEnabled,
+                    primaryText = primaryText,
+                    secondaryText = secondaryText
+                )
+
+                SettingsCheckboxWithDescription(
+                    checked = automaticShutdownEnabled,
+                    onCheckedChange = onAutomaticShutdownEnabledChange,
+                    title = stringResource(R.string.sensor_automatic_shutdown),
+                    description = stringResource(
+                        R.string.sensor_automatic_shutdown_description
+                    ),
+                    enabled = sensorSettingsEnabled,
+                    primaryText = primaryText,
+                    secondaryText = secondaryText
+                )
+
+                if (automaticShutdownEnabled) {
+                    Column(
+                        verticalArrangement =
+                            Arrangement.spacedBy(UvirSettingsRelatedGap)
+                    ) {
+                        Text(
+                            text = stringResource(
+                                R.string.sensor_automatic_shutdown_after
+                            ),
+                            color =
+                                if (sensorSettingsEnabled) {
+                                    primaryText
+                                } else {
+                                    secondaryText
+                                },
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                        DurationFields(
+                            hoursText = automaticShutdownHoursText,
+                            minutesText = automaticShutdownMinutesText,
+                            secondsText = automaticShutdownSecondsText,
+                            onHoursChange =
+                                onAutomaticShutdownHoursTextChange,
+                            onMinutesChange =
+                                onAutomaticShutdownMinutesTextChange,
+                            onSecondsChange =
+                                onAutomaticShutdownSecondsTextChange,
+                            enabled = sensorSettingsEnabled,
+                            maxHours = 24,
+                            onEditingComplete =
+                                normalizeAutomaticShutdownDuration
+                        )
+                    }
                 }
-            )
 
+            }
+        }
+
+        SensorParameterIsland(
+            title = stringResource(R.string.sensor_status_led),
+            titleIcon = ConnectivityIconType.LED,
+            checked = statusLedEnabled,
+            onCheckedChange = onStatusLedEnabledChange,
+            enabled = sensorSettingsEnabled,
+            cardColor = cardColor,
+            primaryText = primaryText,
+            secondaryText = secondaryText,
+            info = {
+                ParameterInfoButton(
+                    contentDescription = resources.getString(R.string.sensor_led_info_action),
+                    tint = primaryText,
+                    onClick = { showStatusLedInfo = true }
+                )
+            }
+        ) {
+            SettingsPageDescription(stringResource(R.string.sensor_status_led_description), secondaryText)
             SensorParameterSlider(
                 title = stringResource(R.string.sensor_led_brightness),
                 value = statusLedBrightness,
@@ -260,29 +283,26 @@ internal fun UvirSensorParametersSettings(
                 onValueChange = onStatusLedBrightnessChange
             )
 
-            SettingsGroupDivider(secondaryText)
+        }
 
-            SettingsCheckboxWithDescription(
-                checked = statusBuzzerEnabled,
-                onCheckedChange = onStatusBuzzerEnabledChange,
-                title = stringResource(R.string.sensor_status_buzzer),
-                description = stringResource(
-                    R.string.sensor_status_buzzer_description
-                ),
-                enabled = sensorSettingsEnabled,
-                primaryText = primaryText,
-                secondaryText = secondaryText,
-                trailingContent = {
-                    ParameterInfoButton(
-                        contentDescription = resources.getString(
-                            R.string.sensor_buzzer_info_action
-                        ),
-                        tint = primaryText,
-                        onClick = { showStatusBuzzerInfo = true }
-                    )
-                }
-            )
-
+        SensorParameterIsland(
+            title = stringResource(R.string.sensor_status_buzzer),
+            titleIcon = ConnectivityIconType.SOUND,
+            checked = statusBuzzerEnabled,
+            onCheckedChange = onStatusBuzzerEnabledChange,
+            enabled = sensorSettingsEnabled,
+            cardColor = cardColor,
+            primaryText = primaryText,
+            secondaryText = secondaryText,
+            info = {
+                ParameterInfoButton(
+                    contentDescription = resources.getString(R.string.sensor_buzzer_info_action),
+                    tint = primaryText,
+                    onClick = { showStatusBuzzerInfo = true }
+                )
+            }
+        ) {
+            SettingsPageDescription(stringResource(R.string.sensor_status_buzzer_description), secondaryText)
             SensorParameterSlider(
                 title = stringResource(R.string.sensor_buzzer_volume),
                 value = statusBuzzerVolume,
@@ -292,65 +312,86 @@ internal fun UvirSensorParametersSettings(
                 onValueChange = onStatusBuzzerVolumeChange
             )
 
-            SettingsGroupDivider(secondaryText)
+        }
 
-            SettingsCheckboxWithDescription(
-                checked = externalCommandEnabled,
-                onCheckedChange = onExternalCommandEnabledChange,
-                title = stringResource(R.string.external_command),
-                description = stringResource(
-                    R.string.sensor_external_command_info_description
-                ),
-                enabled = sensorSettingsEnabled,
-                primaryText = primaryText,
-                secondaryText = secondaryText,
-                trailingContent = {
-                    ParameterInfoButton(
-                        contentDescription = resources.getString(
-                            R.string.sensor_external_command_info_action
-                        ),
-                        tint = primaryText,
-                        onClick = { showExternalCommandInfo = true }
-                    )
-                }
+        SensorParameterIsland(
+            title = stringResource(R.string.external_command),
+            titleIconContent = { tint ->
+                AutomaticSettingIcon(AutomaticSettingIconType.EXTERNAL_COMMAND, Modifier.size(20.dp), tint)
+            },
+            checked = externalCommandEnabled,
+            onCheckedChange = onExternalCommandEnabledChange,
+            enabled = sensorSettingsEnabled,
+            cardColor = cardColor,
+            primaryText = primaryText,
+            secondaryText = secondaryText,
+            info = {
+                ParameterInfoButton(
+                    contentDescription = resources.getString(R.string.sensor_external_command_info_action),
+                    tint = primaryText,
+                    onClick = { showExternalCommandInfo = true }
+                )
+            }
+        ) {
+            SettingsPageDescription(
+                stringResource(R.string.sensor_external_command_info_description), secondaryText
             )
+        }
 
-            SettingsGroupDivider(secondaryText)
-
+        SensorParameterIsland(
+            title = stringResource(R.string.sensor_general_actions_title),
+            titleIcon = ConnectivityIconType.ACTIONS,
+            cardColor = cardColor,
+            primaryText = primaryText,
+            secondaryText = secondaryText
+        ) {
+            SettingsPageDescription(stringResource(R.string.sensor_general_actions_description), secondaryText)
             Column(
                 modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(UvirSettingsControlGap)
+                verticalArrangement = Arrangement.spacedBy(UvirActionButtonGap)
             ) {
-                Button(
+                OutlinedButton(
+                    onClick = onSensorPowerOffRequested,
+                    enabled = sensorPowerOffEnabled,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = uvirDestructiveOutlinedButtonColors(),
+                    border = uvirDestructiveOutlinedButtonBorder(
+                        sensorPowerOffEnabled,
+                        secondaryText
+                    )
+                ) {
+                    UvirLabeledButtonContent(
+                        text = stringResource(R.string.sensor_power_off),
+                        fontWeight = FontWeight.Bold
+                    ) {
+                        UvirMenuIcon(
+                            type = MenuIconType.POWER,
+                            modifier = Modifier.size(20.dp),
+                            strokeScale = UvirDestructiveOutlinedIconStrokeScale
+                        )
+                    }
+                }
+
+                OutlinedButton(
                     onClick = {
                         showSensorDisassociateConfirmation = true
                     },
                     enabled = sensorAssociated,
                     modifier = Modifier.fillMaxWidth(),
-                    colors = uvirDestructiveButtonColors()
+                    colors = uvirDestructiveOutlinedButtonColors(),
+                    border = uvirDestructiveOutlinedButtonBorder(
+                        sensorAssociated,
+                        secondaryText
+                    )
                 ) {
                     UvirLabeledButtonContent(
-                        text = stringResource(R.string.sensor_disassociate_action)
+                        text = stringResource(R.string.sensor_disassociate_action),
+                        fontWeight = FontWeight.Bold
                     ) {
                         ConnectivitySectionIcon(
                             type = ConnectivityIconType.SENSOR_CONNECTION,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                }
-
-                Button(
-                    onClick = { showSensorRestoreConfirmation = true },
-                    enabled = sensorPowerOffEnabled,
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = uvirDestructiveButtonColors()
-                ) {
-                    UvirLabeledButtonContent(
-                        text = stringResource(R.string.sensor_restore_action)
-                    ) {
-                        UvirRestoreDefaultsIcon(
                             modifier = Modifier.size(20.dp),
-                            tint = androidx.compose.material3.LocalContentColor.current
+                            strokeScale = UvirDestructiveOutlinedIconStrokeScale
                         )
                     }
                 }
@@ -407,18 +448,46 @@ internal fun UvirSensorParametersSettings(
         )
     }
 
-    if (showSensorRestoreConfirmation) {
-        SensorRestoreConfirmation(
-            inProgress = sensorRestoreInProgress,
-            onInProgressChange = { sensorRestoreInProgress = it },
-            coroutineScope = coroutineScope,
-            onRestoreSensor = onRestoreSensor,
-            onDismissRequest = { showSensorRestoreConfirmation = false },
-            cardColor = cardColor,
-            primaryText = primaryText,
-            secondaryText = secondaryText
-        )
-    }
+}
+
+/** Match Connection: checking the header enables the feature and reveals its controls. */
+@Composable
+private fun SensorParameterIsland(
+    title: String,
+    cardColor: Color,
+    primaryText: Color,
+    secondaryText: Color,
+    titleIcon: ConnectivityIconType? = null,
+    titleIconContent: (@Composable (Color) -> Unit)? = null,
+    checked: Boolean = true,
+    onCheckedChange: ((Boolean) -> Unit)? = null,
+    enabled: Boolean = true,
+    info: (@Composable () -> Unit)? = null,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    val commit = LocalSettingsCommit.current
+    SettingsSection(
+        title = title,
+        titleIcon = titleIcon,
+        titleIconContent = titleIconContent,
+        expanded = checked,
+        enabled = enabled,
+        headerEnabled = enabled,
+        dimContentWhenDisabled = false,
+        onExpandedChange = onCheckedChange?.let { change ->
+            { value -> change(value); commit?.commit() }
+        },
+        headerControl = UvirSettingsHeaderControl.CHECKBOX,
+        highlightExpandedHeader = false,
+        showExpandedDivider = true,
+        headerTrailingContent = info,
+        containerColor = cardColor,
+        titleColor = primaryText,
+        chevronColor = secondaryText,
+        dividerColor = secondaryText.copy(alpha = 0.28f),
+        contentSpacing = UvirSettingsControlGap,
+        content = content
+    )
 }
 
 @Composable
@@ -427,11 +496,10 @@ private fun ParameterInfoButton(
     tint: Color,
     onClick: () -> Unit
 ) {
-    IconButton(
+    UvirAccessibleIconButton(
+        contentDescription = contentDescription,
         onClick = onClick,
-        modifier = Modifier.size(28.dp).semantics {
-            this.contentDescription = contentDescription
-        }
+        modifier = Modifier.size(28.dp)
     ) {
         UvirMenuIcon(
             type = MenuIconType.VERSION_INFO,
@@ -495,10 +563,16 @@ internal fun SensorPowerOffConfirmation(
     primaryText: Color,
     secondaryText: Color
 ) {
-    AlertDialog(
+    UvirAlertDialog(
         onDismissRequest = { if (!inProgress) onDismissRequest() },
         title = { Text(stringResource(R.string.sensor_power_off_title)) },
-        text = { Text(stringResource(R.string.sensor_power_off_message)) },
+        text = {
+            UvirHoldConfirmationMessage(
+                message = stringResource(R.string.sensor_power_off_message),
+                actionLabel = stringResource(R.string.sensor_power_off_confirm),
+                holdDurationSeconds = SENSOR_POWER_OFF_HOLD_SECONDS
+            )
+        },
         confirmButton = {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -507,6 +581,7 @@ internal fun SensorPowerOffConfirmation(
             ) {
                 HoldToConfirmDeleteButton(
                     label = stringResource(R.string.sensor_power_off_confirm),
+                    holdDurationMillis = SENSOR_POWER_OFF_HOLD_SECONDS * 1_000L,
                     onConfirmed = {
                         if (!inProgress) {
                             onInProgressChange(true)
@@ -532,64 +607,6 @@ internal fun SensorPowerOffConfirmation(
     )
 }
 
-@Composable
-private fun SensorRestoreConfirmation(
-    inProgress: Boolean,
-    onInProgressChange: (Boolean) -> Unit,
-    coroutineScope: CoroutineScope,
-    onRestoreSensor: suspend () -> Boolean,
-    onDismissRequest: () -> Unit,
-    cardColor: Color,
-    primaryText: Color,
-    secondaryText: Color
-) {
-    val context = androidx.compose.ui.platform.LocalContext.current
-    val failureMessage = stringResource(R.string.sensor_restore_failed)
-
-    AlertDialog(
-        onDismissRequest = { if (!inProgress) onDismissRequest() },
-        title = { Text(stringResource(R.string.sensor_restore_title)) },
-        text = { Text(stringResource(R.string.sensor_restore_message)) },
-        confirmButton = {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                HoldToConfirmDeleteButton(
-                    label = stringResource(R.string.sensor_restore_confirm),
-                    holdDurationMillis = 5_000L,
-                    onConfirmed = {
-                        if (!inProgress) {
-                            onInProgressChange(true)
-                            coroutineScope.launch {
-                                val restored = onRestoreSensor()
-                                onInProgressChange(false)
-                                if (restored) {
-                                    onDismissRequest()
-                                } else {
-                                    showUvirBottomMessage(
-                                        context,
-                                        failureMessage
-                                    )
-                                }
-                            }
-                        }
-                    }
-                )
-                TextButton(
-                    onClick = onDismissRequest,
-                    enabled = !inProgress
-                ) {
-                    Text(stringResource(R.string.cancel))
-                }
-            }
-        },
-        containerColor = cardColor,
-        titleContentColor = primaryText,
-        textContentColor = secondaryText
-    )
-}
 
 
 @Composable
@@ -609,13 +626,18 @@ private fun SensorDisassociateConfirmation(
     val failureMessage =
         stringResource(R.string.sensor_disassociate_failed)
 
-    AlertDialog(
+    UvirAlertDialog(
         onDismissRequest = { if (!inProgress) onDismissRequest() },
         title = {
             Text(stringResource(R.string.sensor_disassociate_title))
         },
         text = {
-            Text(stringResource(R.string.sensor_disassociate_message))
+            UvirHoldConfirmationMessage(
+                message = stringResource(R.string.sensor_disassociate_message),
+                actionLabel =
+                    stringResource(R.string.sensor_disassociate_confirm),
+                holdDurationSeconds = 5
+            )
         },
         confirmButton = {
             Row(
@@ -628,7 +650,7 @@ private fun SensorDisassociateConfirmation(
                         stringResource(
                             R.string.sensor_disassociate_confirm
                         ),
-                    holdDurationMillis = 2_000L,
+                    holdDurationMillis = 5_000L,
                     onConfirmed = {
                         if (!inProgress) {
                             onInProgressChange(true)

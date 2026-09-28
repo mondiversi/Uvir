@@ -20,7 +20,11 @@
 #include "UvirDebugPerformance.h"
 #include "UvirPublicCaBundle.h"
 #include "UvirOfflineStore.h"
+#include "UvirFram.h"
+#include "UvirRtcClock.h"
 #include "UvirConditionalAcquisition.h"
+#include "UvirAcquisitionRetry.h"
+#include "UvirExternalCommandPolicy.h"
 #include "UvirStatusBuzzer.h"
 #include "UvirStatusLed.h"
 #include "UvirUvSensor.h"
@@ -31,7 +35,7 @@
 namespace {
 
 constexpr char kProtocol[] = "uvir-sensor-v1";
-constexpr char kFirmwareVersion[] = "0.5.87";
+constexpr char kFirmwareVersion[] = "0.5.103";
 constexpr uint8_t kSensorSettingsSchemaVersion = 2;
 constexpr uint32_t kHostTimeoutMs = 12000;
 constexpr uint32_t kMinimumStreamIntervalMs = 150;
@@ -46,7 +50,14 @@ constexpr uint32_t kWirelessAuthenticationTimeoutMs = 5000;
 constexpr uint32_t kWirelessFallbackIntervalMs = 20000;
 constexpr uint32_t kSignalUpdateIntervalMs = 2000;
 constexpr uint8_t kMaximumAcquisitionSamples = 21;
+constexpr uint8_t kMaximumAcquisitionReadAttempts = 3;
+constexpr uint32_t kAcquisitionReadRetryDelayMs = 50;
+constexpr uint32_t kOfflineWriteRetryIntervalMs = 250;
 constexpr uint32_t kOfflineAlertSampleIntervalMs = 500;
+constexpr uint64_t kMinimumValidEpochMs = 1577836800000ULL;
+constexpr uint32_t kRtcRefreshIntervalMs = 3600000;
+constexpr uint32_t kRtcDiscoveryRetryIntervalMs = 10000;
+constexpr uint64_t kRtcCorrectionThresholdMs = 2000ULL;
 constexpr uint8_t kMaximumOfflineAlertRules = 24;
 constexpr uint32_t kMinimumAutomaticShutdownSeconds = 60;
 constexpr uint32_t kMaximumAutomaticShutdownSeconds = 86400;
@@ -78,6 +89,7 @@ static_assert(sizeof(kPreferenceExternalCommandEnabled) - 1 <= 15,
 
 enum class Transport : uint8_t { None, Usb, Wifi, Bluetooth, Internet };
 enum class WirelessMode : uint8_t { Off, Wifi, Bluetooth, Internet };
+enum class ClockSource : uint8_t { Unavailable, Rtc, Phone };
 
 struct UvirBandSample {
   float values[kUvirStoredBandCount] = {};
@@ -114,6 +126,54 @@ struct OfflineAlertRule {
   float threshold = 0.0f;
 };
 
+struct PersistentAlertRule {
+  char metric[32] = {};
+  uint8_t above = 1;
+  float threshold = 0.0f;
+};
+
+struct PersistentRuntimeActivityStateV1 {
+  uint32_t magic = 0x55565254;
+  uint16_t version = 1;
+  uint16_t size = 0;
+  uint8_t automaticEnabled = 0;
+  uint8_t externalCommand = 0;
+  uint8_t conditionStarted = 1;
+  uint8_t alertsEnabled = 0;
+  uint64_t sessionId = 0;
+  uint64_t nextAtMs = 0;
+  uint32_t intervalSeconds = 60;
+  uint64_t endAtMs = 0;
+  uint32_t maximumCount = 0;
+  uint32_t completedCount = 0;
+  uint8_t samplesPerAcquisition = 1;
+  uint32_t sampleSpacingMs = kDefaultStreamIntervalMs;
+  uint8_t discardExtremes = 0;
+  UvirConditionPlan condition;
+  uint64_t conditionDurationSeconds = 0;
+  uint64_t startedAtMs = 0;
+  uint64_t conditionFirstAllowedAtMs = 0;
+  uint64_t conditionNextCheckAtMs = 0;
+  uint32_t alertRepeatSeconds = 30;
+  uint64_t alertSessionId = 0;
+  uint64_t nextAlertEvaluationMs = 0;
+  uint8_t alertRuleCount = 0;
+  PersistentAlertRule alertRules[kMaximumOfflineAlertRules];
+};
+struct PersistentRuntimeActivityState : PersistentRuntimeActivityStateV1 {
+  PersistentRuntimeActivityState() { version = 2; }
+  uint32_t alertStartDelaySeconds = 0;
+  uint32_t alertDurationSeconds = 0;
+  uint32_t alertMaximumRegistrations = 0;
+  uint32_t alertCompletedRegistrations = 0;
+  uint64_t alertStartAtMs = 0;
+  uint64_t alertEndAtMs = 0;
+};
+static_assert(
+    sizeof(PersistentRuntimeActivityState) <=
+        UvirFram::kStateSlotBytes - 16,
+    "Runtime activity state exceeds the FRAM journal slot");
+
 enum class AveragedAcquisitionKind : uint8_t {
   None,
   Automatic,
@@ -127,6 +187,7 @@ struct AveragedAcquisitionState {
   UvirBandSample samples[kMaximumAcquisitionSamples];
   uint8_t targetCount = 0;
   uint8_t collectedCount = 0;
+  uint8_t currentSampleAttempts = 0;
   uint32_t spacingMs = 0;
   uint32_t nextSampleAtMs = 0;
   uint64_t startedEpochMs = 0;
@@ -136,7 +197,14 @@ struct AveragedAcquisitionState {
 UvirVisibleSensor visibleSensor;
 UvirUvSensor uvSensor;
 Preferences preferences;
+uint64_t settingsUpdatedAtMs = 0;
+bool applyingDatedSettings = false;
+uint32_t settingsCommandErrors = 0;
+bool settingsWirelessReconfigurePending = false;
+WirelessMode settingsWirelessNextMode = WirelessMode::Off;
 UvirOfflineStore offlineStore;
+UvirFram fram;
+UvirRtcClock rtcClock;
 UvirStatusLed statusLed;
 UvirStatusBuzzer statusBuzzer;
 UvirDebugPerformancePlayer debugPerformance;
@@ -258,12 +326,22 @@ OfflineAlertRule offlineAlertRules[kMaximumOfflineAlertRules];
 uint8_t offlineAlertRuleCount = 0;
 bool offlineAlertsEnabled = false;
 uint32_t offlineAlertRepeatSeconds = 30;
+bool offlineAlertRecordingEnabled = true;
 uint64_t offlineAlertSessionId = 0;
+uint32_t offlineAlertStartDelaySeconds = 0;
+uint32_t offlineAlertDurationSeconds = 0;
+uint32_t offlineAlertMaximumRegistrations = 0;
+uint32_t offlineAlertCompletedRegistrations = 0;
+uint64_t offlineAlertStartAtMs = 0;
+uint64_t offlineAlertEndAtMs = 0;
 bool alertConfigurationInProgress = false;
 bool alertActivityBeforeConfiguration = false;
 uint64_t nextOfflineAlertSampleAtMs = 0;
 uint64_t epochBaseMs = 0;
 uint32_t epochBaseUptimeMs = 0;
+ClockSource clockSource = ClockSource::Unavailable;
+uint32_t nextRtcRefreshAtMs = 0;
+uint64_t lastRtcEpochMs = 0;
 uint64_t lastOfflineRecordId = 0;
 bool statusLedEnabled = true;
 uint8_t statusLedBrightness = 10;
@@ -298,8 +376,12 @@ uint32_t nextContinuousSampleAtMs = 0;
 bool pendingLiveAcquisition = false;
 UvirStoredRecord pendingLiveAcquisitionRecord;
 uint32_t pendingLiveAcquisitionSentAtMs = 0;
+bool pendingOfflineAlert = false;
+UvirStoredRecord pendingOfflineAlertRecord;
+uint32_t pendingOfflineAlertRetryAtMs = 0;
 AveragedAcquisitionState averagedAcquisition;
 uint8_t externalAcquisitionRequestsPending = 0;
+uint64_t externalAcquisitionQueuedSessionId = 0;
 uint8_t externalCommandShortPressCount = 0;
 uint32_t externalCommandLastShortPressMs = 0;
 bool externalGestureAcquisitionProvisional = false;
@@ -310,6 +392,11 @@ volatile bool externalCommandLongPressReported = false;
 volatile uint8_t externalCommandShortPressPendingCount = 0;
 volatile bool externalCommandLongPressPending = false;
 volatile uint32_t externalCommandPressedAtUs = 0;
+bool runtimeStatePersistenceEnabled = false;
+
+void persistRuntimeActivityState();
+bool restoreRuntimeActivityState();
+void reconcileRestoredActivityState();
 
 bool sensorOperationActive();
 bool sensorActivityActive();
@@ -345,6 +432,73 @@ void anchorRuntimeClock(uint64_t epochMs) {
   epochBaseUptimeMs = millis();
 }
 
+const __FlashStringHelper *clockSourceName() {
+  switch (clockSource) {
+    case ClockSource::Rtc:
+      return F("rtc");
+    case ClockSource::Phone:
+      return F("phone");
+    default:
+      return F("unavailable");
+  }
+}
+
+bool probeI2cAddress(uint8_t address) {
+  Wire.beginTransmission(address);
+  return Wire.endTransmission() == 0;
+}
+
+bool readAndApplyRtcClock(bool forceApply) {
+  uint64_t rtcEpochMs = 0;
+  if (!rtcClock.readEpochMs(rtcEpochMs) ||
+      rtcEpochMs < kMinimumValidEpochMs) {
+    return false;
+  }
+  lastRtcEpochMs = rtcEpochMs;
+  const uint64_t runtimeEpochMs = currentEpochMs();
+  const uint64_t difference =
+      runtimeEpochMs > rtcEpochMs
+          ? runtimeEpochMs - rtcEpochMs
+          : rtcEpochMs - runtimeEpochMs;
+  if (forceApply || runtimeEpochMs == 0 ||
+      difference > kRtcCorrectionThresholdMs) {
+    anchorRuntimeClock(rtcEpochMs);
+    clockSource = ClockSource::Rtc;
+  }
+  return true;
+}
+
+void initializeRtcClock() {
+  for (uint8_t attempt = 0; attempt < 5 && !rtcClock.available(); ++attempt) {
+    rtcClock.begin(Wire, UvirHardware::kDs3231Address);
+    if (!rtcClock.available()) delay(50);
+  }
+  const bool clockRestored =
+      rtcClock.available() && readAndApplyRtcClock(true);
+  nextRtcRefreshAtMs =
+      millis() + (clockRestored
+                      ? kRtcRefreshIntervalMs
+                      : kRtcDiscoveryRetryIntervalMs);
+}
+
+void serviceRtcClock() {
+  if (static_cast<int32_t>(millis() - nextRtcRefreshAtMs) < 0) {
+    return;
+  }
+  if (!rtcClock.available()) {
+    rtcClock.begin(Wire, UvirHardware::kDs3231Address);
+  }
+  const bool clockRestored =
+      rtcClock.available() && readAndApplyRtcClock(currentEpochMs() == 0);
+  if (clockRestored) {
+    reconcileRestoredActivityState();
+  }
+  nextRtcRefreshAtMs =
+      millis() + (clockRestored
+                      ? kRtcRefreshIntervalMs
+                      : kRtcDiscoveryRetryIntervalMs);
+}
+
 bool phoneIsAuthenticated() {
   return activeTransport == Transport::Usb ||
          (wifiAuthenticated && wifiClient && wifiClient.connected()) ||
@@ -359,6 +513,7 @@ bool alertMonitoringActive() {
 void setAutomaticJobEnabled(bool enabled, bool announceChange) {
   const bool wasEnabled = offlineJob.enabled;
   offlineJob.enabled = enabled;
+  if (runtimeStatePersistenceEnabled) persistRuntimeActivityState();
   if (!announceChange || wasEnabled == enabled) return;
   if (enabled) {
     statusBuzzer.signalActivityStarted();
@@ -575,6 +730,7 @@ WirelessMode alternateWirelessMode(WirelessMode mode) {
 void loadIdentity() {
   sensorDeviceId = createDeviceId();
   preferences.begin("uvir", false);
+  settingsUpdatedAtMs = preferences.getULong64("settings_date", 0);
   removeLegacyAutomaticJobState();
 
   authToken = preferences.getString("auth_token", "");
@@ -618,6 +774,7 @@ void loadIdentity() {
   samplingDiscardExtremes = preferences.getBool("sample_discard", true);
   streamIntervalMs = samplingSpacingMs;
   offlineAlertsEnabled = preferences.getBool("alert_enabled", false);
+  offlineAlertRecordingEnabled = preferences.getBool("alert_record", true);
   offlineAlertSessionId =
       preferences.getULong64("alert_session", 0);
   const uint32_t storedAlertRepeatSeconds =
@@ -627,6 +784,12 @@ void loadIdentity() {
           ? 30
           : static_cast<uint32_t>(
                 constrain(storedAlertRepeatSeconds, 1UL, 86400UL));
+  offlineAlertStartDelaySeconds = preferences.getUInt("alert_delay", 0);
+  offlineAlertDurationSeconds = preferences.getUInt("alert_duration", 0);
+  offlineAlertMaximumRegistrations = preferences.getUInt("alert_max", 0);
+  offlineAlertCompletedRegistrations = preferences.getUInt("alert_done", 0);
+  offlineAlertStartAtMs = preferences.getULong64("alert_start_at", 0);
+  offlineAlertEndAtMs = preferences.getULong64("alert_end_at", 0);
   visibleCalibrationFactor =
       preferences.getFloat("cal_visible", 1.0f);
   uvCalibrationFactor = preferences.getFloat("cal_uv", 1.0f);
@@ -684,6 +847,7 @@ void printError(
     Print &output,
     const __FlashStringHelper *code,
     const __FlashStringHelper *message) {
+  ++settingsCommandErrors;
   output.print(F("{\"type\":\"error\",\"protocol\":\""));
   output.print(kProtocol);
   output.print(F("\",\"code\":\""));
@@ -781,6 +945,8 @@ void printHello(
     Print &output,
     bool includeProvisioning,
     Transport transport) {
+  const bool rtcReadOk =
+      rtcClock.available() && readAndApplyRtcClock(false);
   const esp_partition_t *runningPartition = esp_ota_get_running_partition();
   const size_t applicationPartitionBytes =
       runningPartition == nullptr ? 0 : runningPartition->size;
@@ -799,6 +965,8 @@ void printHello(
   output.print(kProtocol);
   output.print(F("\",\"sensor_settings_schema\":"));
   output.print(kSensorSettingsSchemaVersion);
+  output.print(F(",\"settings_updated_at_ms\":"));
+  output.print(settingsUpdatedAtMs);
   output.print(F(",\"device_id\":\""));
   output.print(sensorDeviceId);
   output.print(F("\",\"board\":\""));
@@ -872,9 +1040,48 @@ void printHello(
   output.print(F(",\"free_heap_bytes\":"));
   output.print(freeHeapBytes);
   output.print(F(",\"filesystem_total_bytes\":"));
-  output.print(offlineStore.storageTotalBytes());
+  printUInt64(output, offlineStore.storageTotalBytes());
   output.print(F(",\"filesystem_used_bytes\":"));
-  output.print(offlineStore.storageUsedBytes());
+  printUInt64(output, offlineStore.storageUsedBytes());
+  output.print(F(",\"storage_backend\":\""));
+  output.print(offlineStore.backendName());
+  output.print(F("\",\"storage_record_size_bytes\":"));
+  output.print(offlineStore.recordSizeBytes());
+  output.print(F(",\"sd_available\":"));
+  output.print(offlineStore.microSdAvailable() ? F("true") : F("false"));
+  output.print(F(",\"fram_available\":"));
+  output.print(fram.available() ? F("true") : F("false"));
+  output.print(F(",\"fram_model\":\"MB85RC256V\""));
+  output.print(F(",\"fram_i2c_address\":"));
+  output.print(UvirHardware::kFramAddress);
+  output.print(F(",\"fram_capacity_bytes\":"));
+  output.print(fram.available() ? UvirFram::kCapacity : 0);
+  output.print(F(",\"fram_queue_available\":"));
+  output.print(offlineStore.framAvailable() ? F("true") : F("false"));
+  output.print(F(",\"fram_record_capacity\":"));
+  output.print(offlineStore.framRecordCapacity());
+  output.print(F(",\"fram_records_used\":"));
+  output.print(offlineStore.framRecordCount());
+  output.print(F(",\"sd_foreign\":"));
+  output.print(offlineStore.foreignMicroSd() ? F("true") : F("false"));
+  output.print(F(",\"sd_type\":\""));
+  output.print(offlineStore.microSdTypeName());
+  output.print(F("\",\"sd_total_bytes\":"));
+  printUInt64(output, offlineStore.microSdTotalBytes());
+  output.print(F(",\"sd_used_bytes\":"));
+  printUInt64(output, offlineStore.microSdUsedBytes());
+  output.print(F(",\"sd_free_bytes\":"));
+  printUInt64(output, offlineStore.microSdFreeBytes());
+  output.print(F(",\"sd_record_capacity_total\":"));
+  output.print(offlineStore.microSdTotalRecordCapacity());
+  output.print(F(",\"sd_record_capacity_free\":"));
+  output.print(offlineStore.microSdFreeRecordCapacity());
+  output.print(F(",\"sd_invalid_records\":"));
+  output.print(offlineStore.invalidRecordCount());
+  output.print(F(",\"sd_mount_errors\":"));
+  output.print(offlineStore.mountErrorCount());
+  output.print(F(",\"sd_write_errors\":"));
+  output.print(offlineStore.writeErrorCount());
   output.print(F(",\"time_synced\":"));
   output.print(currentEpochMs() > 0 ? F("true") : F("false"));
   output.print(F(",\"current_time_ms\":"));
@@ -883,6 +1090,26 @@ void printHello(
   } else {
     output.print(F("null"));
   }
+  output.print(F(",\"rtc_available\":"));
+  output.print(rtcClock.available() ? F("true") : F("false"));
+  output.print(F(",\"rtc_valid\":"));
+  output.print(rtcClock.valid() ? F("true") : F("false"));
+  output.print(F(",\"rtc_oscillator_stopped\":"));
+  output.print(rtcClock.oscillatorStopped() ? F("true") : F("false"));
+  output.print(F(",\"rtc_read_ok\":"));
+  output.print(rtcReadOk ? F("true") : F("false"));
+  output.print(F(",\"rtc_current_time_ms\":"));
+  if (rtcReadOk) {
+    printUInt64(output, lastRtcEpochMs);
+  } else {
+    output.print(F("null"));
+  }
+  output.print(F(",\"time_source\":\""));
+  output.print(clockSourceName());
+  output.print(F("\",\"rtc_read_errors\":"));
+  output.print(rtcClock.readErrors());
+  output.print(F(",\"rtc_write_errors\":"));
+  output.print(rtcClock.writeErrors());
   output.print(F(",\"offline_storage_available\":"));
   output.print(offlineStore.available() ? F("true") : F("false"));
   output.print(F(",\"offline_capacity\":"));
@@ -901,6 +1128,16 @@ void printHello(
   output.print(offlineAlertRepeatSeconds);
   output.print(F(",\"alert_monitoring_enabled\":"));
   output.print(offlineAlertsEnabled ? F("true") : F("false"));
+  output.print(F(",\"alert_recording_enabled\":"));
+  output.print(offlineAlertRecordingEnabled ? F("true") : F("false"));
+  output.print(F(",\"alert_start_delay_seconds\":"));
+  output.print(offlineAlertStartDelaySeconds);
+  output.print(F(",\"alert_duration_seconds\":"));
+  output.print(offlineAlertDurationSeconds);
+  output.print(F(",\"alert_max_registrations\":"));
+  output.print(offlineAlertMaximumRegistrations);
+  output.print(F(",\"alert_completed_registrations\":"));
+  output.print(offlineAlertCompletedRegistrations);
   output.print(F(",\"alert_session_id\":"));
   printUInt64(output, offlineAlertSessionId);
   output.print(F(",\"alert_rules\":["));
@@ -1064,14 +1301,21 @@ bool captureBandSample(UvirBandSample &sample) {
 bool alertEvaluationReady() {
   const uint64_t now = currentEpochMs();
   return now > 0 &&
+         (offlineAlertStartAtMs == 0 || now >= offlineAlertStartAtMs) &&
+         (offlineAlertEndAtMs == 0 || now < offlineAlertEndAtMs) &&
+         (offlineAlertMaximumRegistrations == 0 ||
+          offlineAlertCompletedRegistrations < offlineAlertMaximumRegistrations) &&
          (nextAlertEvaluationEpochMs == 0 || now >= nextAlertEvaluationEpochMs);
 }
 
 void startAlertCooldown() {
   const uint64_t now = currentEpochMs();
   if (now == 0) return;
+  if (offlineAlertCompletedRegistrations < UINT32_MAX)
+    ++offlineAlertCompletedRegistrations;
   nextAlertEvaluationEpochMs =
       now + static_cast<uint64_t>(max(1UL, offlineAlertRepeatSeconds)) * 1000ULL;
+  if (runtimeStatePersistenceEnabled) persistRuntimeActivityState();
 }
 
 String alertDetailsForSample(const UvirBandSample &sample) {
@@ -1118,6 +1362,8 @@ void emitConnectedAlertIfNeeded(
   printJsonString(output, details);
   output.print(F("\",\"session_id\":"));
   printUInt64(output, offlineAlertSessionId);
+  output.print(F(",\"recorded\":"));
+  output.print(offlineAlertRecordingEnabled ? F("true") : F("false"));
   output.println(F("}"));
 
   // The ESP32 owns this single deadline for connected and disconnected use.
@@ -1369,9 +1615,20 @@ AveragedAcquisitionStep serviceAveragedAcquisition(UvirBandSample &result) {
   const uint32_t startedAt = now;
   if (!captureBandSample(
           averagedAcquisition.samples[averagedAcquisition.collectedCount])) {
+    if (uvirRegisterFailedReadAttempt(
+            averagedAcquisition.currentSampleAttempts,
+            kMaximumAcquisitionReadAttempts)) {
+      // Keep the same logical acquisition alive. The delay is short and the
+      // retry happens on a later loop pass, so connection and stop commands
+      // remain responsive while a transient I2C failure is recovered.
+      averagedAcquisition.nextSampleAtMs =
+          millis() + kAcquisitionReadRetryDelayMs;
+      return AveragedAcquisitionStep::Waiting;
+    }
     cancelAveragedAcquisition();
     return AveragedAcquisitionStep::Failed;
   }
+  uvirResetReadAttempts(averagedAcquisition.currentSampleAttempts);
 
   if (averagedAcquisition.kind == AveragedAcquisitionKind::Automatic &&
       offlineJob.conditionStopPending) {
@@ -1404,8 +1661,15 @@ AveragedAcquisitionStep serviceAveragedAcquisition(UvirBandSample &result) {
 
 void persistOfflineAlerts() {
   preferences.putBool("alert_enabled", offlineAlertsEnabled);
+  preferences.putBool("alert_record", offlineAlertRecordingEnabled);
   preferences.putUInt("alert_repeat", offlineAlertRepeatSeconds);
   preferences.putULong64("alert_session", offlineAlertSessionId);
+  preferences.putUInt("alert_delay", offlineAlertStartDelaySeconds);
+  preferences.putUInt("alert_duration", offlineAlertDurationSeconds);
+  preferences.putUInt("alert_max", offlineAlertMaximumRegistrations);
+  preferences.putUInt("alert_done", offlineAlertCompletedRegistrations);
+  preferences.putULong64("alert_start_at", offlineAlertStartAtMs);
+  preferences.putULong64("alert_end_at", offlineAlertEndAtMs);
   preferences.putUChar("alert_count", offlineAlertRuleCount);
   for (uint8_t index = 0; index < offlineAlertRuleCount; ++index) {
     char suffix[3];
@@ -1420,6 +1684,7 @@ void persistOfflineAlerts() {
     preferences.putFloat(
         thresholdKey.c_str(), offlineAlertRules[index].threshold);
   }
+  if (runtimeStatePersistenceEnabled) persistRuntimeActivityState();
 }
 
 uint64_t nextOfflineRecordId() {
@@ -1445,6 +1710,210 @@ void copyText(char *target, size_t capacity, const String &value) {
   const size_t count = min(value.length(), capacity - 1);
   memcpy(target, value.c_str(), count);
   target[count] = '\0';
+}
+
+void persistRuntimeActivityState() {
+  if (!offlineStore.available()) return;
+
+  PersistentRuntimeActivityState state;
+  state.size = sizeof(PersistentRuntimeActivityState);
+  state.automaticEnabled = offlineJob.enabled ? 1 : 0;
+  state.externalCommand = offlineJob.externalCommand ? 1 : 0;
+  state.conditionStarted = offlineJob.conditionStarted ? 1 : 0;
+  state.sessionId = offlineJob.sessionId;
+  state.nextAtMs = offlineJob.nextAtMs;
+  state.intervalSeconds = offlineJob.intervalSeconds;
+  state.endAtMs = offlineJob.endAtMs;
+  state.maximumCount = offlineJob.maximumCount;
+  state.completedCount = offlineJob.completedCount;
+  state.samplesPerAcquisition = offlineJob.samplesPerAcquisition;
+  state.sampleSpacingMs = offlineJob.sampleSpacingMs;
+  state.discardExtremes = offlineJob.discardExtremes ? 1 : 0;
+  state.condition = offlineJob.condition;
+  state.conditionDurationSeconds = offlineJob.conditionDurationSeconds;
+  state.startedAtMs = offlineJob.startedAtMs;
+  state.conditionFirstAllowedAtMs = offlineJob.conditionFirstAllowedAtMs;
+  state.conditionNextCheckAtMs = offlineJob.conditionNextCheckAtMs;
+
+  state.alertsEnabled = offlineAlertsEnabled ? 1 : 0;
+  state.alertRepeatSeconds = offlineAlertRepeatSeconds;
+  state.alertSessionId = offlineAlertSessionId;
+  state.nextAlertEvaluationMs = nextAlertEvaluationEpochMs;
+  state.alertStartDelaySeconds = offlineAlertStartDelaySeconds;
+  state.alertDurationSeconds = offlineAlertDurationSeconds;
+  state.alertMaximumRegistrations = offlineAlertMaximumRegistrations;
+  state.alertCompletedRegistrations = offlineAlertCompletedRegistrations;
+  state.alertStartAtMs = offlineAlertStartAtMs;
+  state.alertEndAtMs = offlineAlertEndAtMs;
+  state.alertRuleCount = min(
+      offlineAlertRuleCount,
+      static_cast<uint8_t>(kMaximumOfflineAlertRules));
+  for (uint8_t index = 0; index < state.alertRuleCount; ++index) {
+    copyText(
+        state.alertRules[index].metric,
+        sizeof(state.alertRules[index].metric),
+        offlineAlertRules[index].metric);
+    state.alertRules[index].above = offlineAlertRules[index].above ? 1 : 0;
+    state.alertRules[index].threshold = offlineAlertRules[index].threshold;
+  }
+
+  if (!offlineStore.saveRuntimeState(&state, sizeof(state))) {
+    offlineStorageError = true;
+  }
+}
+
+bool restoreRuntimeActivityState() {
+  PersistentRuntimeActivityState state;
+  const bool restoredV2 = offlineStore.loadRuntimeState(&state, sizeof(state));
+  PersistentRuntimeActivityStateV1 previousState;
+  if (!restoredV2 &&
+      !offlineStore.loadRuntimeState(&previousState, sizeof(previousState)))
+    return false;
+  const PersistentRuntimeActivityStateV1 &saved =
+      restoredV2 ? static_cast<const PersistentRuntimeActivityStateV1 &>(state)
+                 : previousState;
+  if (saved.magic != 0x55565254 ||
+      saved.version != (restoredV2 ? 2 : 1) ||
+      saved.size != (restoredV2 ? sizeof(state) : sizeof(previousState)) ||
+      saved.samplesPerAcquisition == 0 ||
+      saved.samplesPerAcquisition > kMaximumAcquisitionSamples ||
+      saved.sampleSpacingMs > 10000 ||
+      saved.alertRuleCount > kMaximumOfflineAlertRules ||
+      (saved.condition.enabled && !uvirConditionPlanValid(saved.condition))) {
+    return false;
+  }
+
+  const PersistentRuntimeActivityStateV1 &stateV1 = saved;
+
+  OfflineJob restoredJob;
+  restoredJob.enabled = stateV1.automaticEnabled != 0;
+  restoredJob.externalCommand = stateV1.externalCommand != 0;
+  restoredJob.sessionId = stateV1.sessionId;
+  restoredJob.nextAtMs = stateV1.nextAtMs;
+  restoredJob.intervalSeconds = max(1UL, stateV1.intervalSeconds);
+  restoredJob.endAtMs = stateV1.endAtMs;
+  restoredJob.maximumCount = stateV1.maximumCount;
+  restoredJob.completedCount = stateV1.completedCount;
+  restoredJob.samplesPerAcquisition = stateV1.samplesPerAcquisition;
+  restoredJob.sampleSpacingMs = stateV1.sampleSpacingMs;
+  restoredJob.discardExtremes = stateV1.discardExtremes != 0;
+  restoredJob.condition = stateV1.condition;
+  restoredJob.conditionStarted = stateV1.conditionStarted != 0;
+  restoredJob.conditionDurationSeconds = stateV1.conditionDurationSeconds;
+  restoredJob.startedAtMs = stateV1.startedAtMs;
+  restoredJob.conditionFirstAllowedAtMs = stateV1.conditionFirstAllowedAtMs;
+  restoredJob.conditionNextCheckAtMs = stateV1.conditionNextCheckAtMs;
+  offlineJob = restoredJob;
+
+  offlineAlertsEnabled = stateV1.alertsEnabled != 0;
+  offlineAlertRepeatSeconds = static_cast<uint32_t>(constrain(
+      stateV1.alertRepeatSeconds, 1UL, 86400UL));
+  offlineAlertSessionId = offlineAlertsEnabled ? stateV1.alertSessionId : 0;
+  nextAlertEvaluationEpochMs = stateV1.nextAlertEvaluationMs;
+  offlineAlertRuleCount = stateV1.alertRuleCount;
+  if (restoredV2) {
+    offlineAlertStartDelaySeconds = state.alertStartDelaySeconds;
+    offlineAlertDurationSeconds = state.alertDurationSeconds;
+    offlineAlertMaximumRegistrations = state.alertMaximumRegistrations;
+    offlineAlertCompletedRegistrations = state.alertCompletedRegistrations;
+    offlineAlertStartAtMs = state.alertStartAtMs;
+    offlineAlertEndAtMs = state.alertEndAtMs;
+  }
+  for (uint8_t index = 0; index < offlineAlertRuleCount; ++index) {
+    const PersistentAlertRule &source = stateV1.alertRules[index];
+    const String metric(source.metric);
+    if (metric.isEmpty() || !isfinite(source.threshold) ||
+        source.threshold < 0.0f) {
+      offlineAlertsEnabled = false;
+      offlineAlertRuleCount = 0;
+      offlineAlertSessionId = 0;
+      return false;
+    }
+    offlineAlertRules[index].metric = metric;
+    offlineAlertRules[index].above = source.above != 0;
+    offlineAlertRules[index].threshold = source.threshold;
+  }
+  return true;
+}
+
+void reconcileRestoredActivityState() {
+  // Older firmware could journal both modes simultaneously. Preserve the
+  // automatic job and its records, but stop alert monitoring before either
+  // mode is resumed by this version.
+  if (offlineJob.enabled && alertMonitoringActive()) {
+    offlineAlertsEnabled = false;
+    offlineAlertSessionId = 0;
+    nextAlertEvaluationEpochMs = 0;
+    persistOfflineAlerts();
+  }
+  const uint64_t now = currentEpochMs();
+  if (now < kMinimumValidEpochMs) return;
+
+  bool changed = false;
+  if (offlineAlertsEnabled &&
+      ((offlineAlertEndAtMs > 0 && now >= offlineAlertEndAtMs) ||
+       (offlineAlertMaximumRegistrations > 0 &&
+        offlineAlertCompletedRegistrations >= offlineAlertMaximumRegistrations))) {
+    offlineAlertsEnabled = false;
+    offlineAlertSessionId = 0;
+    persistOfflineAlerts();
+    changed = true;
+  }
+  if (offlineJob.enabled) {
+    const bool deadlineExpired =
+        offlineJob.endAtMs > 0 && now >= offlineJob.endAtMs;
+    const bool countReached =
+        offlineJob.maximumCount > 0 &&
+        offlineJob.completedCount >= offlineJob.maximumCount;
+    if (deadlineExpired || countReached) {
+      // A power interruption cannot extend an already elapsed session and
+      // must not create a synthetic final acquisition.
+      offlineJob.enabled = false;
+      offlineJob.conditionTriggered = false;
+      offlineJob.conditionStopPending = false;
+      offlineJob.conditionStartSignalPending = false;
+      changed = true;
+    } else if (!offlineJob.externalCommand) {
+      const uint64_t intervalMs =
+          static_cast<uint64_t>(max(1UL, offlineJob.intervalSeconds)) *
+          1000ULL;
+      const bool monitorRequired =
+          uvirConditionMonitorRequired(
+              offlineJob.condition, offlineJob.conditionStarted);
+      if (monitorRequired) {
+        // Resume condition observation immediately. Acquire conditions retain
+        // only a still-active cooldown; missed checks are never replayed.
+        offlineJob.conditionNextCheckAtMs = now;
+        if (offlineJob.condition.action == UvirConditionAction::Acquire &&
+            offlineJob.nextAtMs < now) {
+          offlineJob.nextAtMs = now;
+        } else if (offlineJob.condition.action == UvirConditionAction::Stop &&
+                   offlineJob.nextAtMs < now) {
+          const uint64_t skipped =
+              (now - offlineJob.nextAtMs) / intervalMs + 1ULL;
+          offlineJob.nextAtMs += skipped * intervalMs;
+        }
+        changed = true;
+      } else if (offlineJob.nextAtMs < now) {
+        // Preserve the original cadence while skipping every acquisition that
+        // could not physically be measured during the power interruption.
+        const uint64_t skipped =
+            (now - offlineJob.nextAtMs) / intervalMs + 1ULL;
+        offlineJob.nextAtMs += skipped * intervalMs;
+        changed = true;
+      }
+    }
+  }
+
+  if (offlineAlertsEnabled && offlineAlertRuleCount > 0 &&
+      nextAlertEvaluationEpochMs < now) {
+    nextAlertEvaluationEpochMs = now;
+    changed = true;
+  }
+
+  if (changed && runtimeStatePersistenceEnabled) {
+    persistRuntimeActivityState();
+  }
 }
 
 void setOfflineStorageFull() {
@@ -1502,6 +1971,7 @@ UvirStoredRecord makeExternalManualAcquisitionRecord(
     const UvirBandSample &sample) {
   UvirStoredRecord record;
   record.type = static_cast<uint8_t>(UvirStoredRecordType::Acquisition);
+  record.reserved = kUvirAcquisitionExternalTriggerFlag;
   record.recordId = nextOfflineRecordId();
   // Zero explicitly means that the sensor had not received a valid clock yet.
   record.timestampMs = currentEpochMs();
@@ -1534,19 +2004,7 @@ float valueForOfflineAlertMetric(const String &metric, const UvirBandSample &sam
   return index<0 ? 0.0f : uvirConditionMetricValue(static_cast<uint8_t>(index),sample.values);
 }
 
-bool storeOfflineAlerts(const UvirBandSample &sample) {
-  const String details = alertDetailsForSample(sample);
-  if (details.isEmpty()) return false;
-
-  UvirStoredRecord record;
-  record.type = static_cast<uint8_t>(UvirStoredRecordType::Alert);
-  record.recordId = nextOfflineRecordId();
-  record.timestampMs = currentEpochMs();
-  record.sessionId = static_cast<int64_t>(offlineAlertSessionId);
-  copyText(
-      record.payload.details,
-      sizeof(record.payload.details),
-      details);
+bool appendOfflineAlertRecord(UvirStoredRecord &record) {
   const bool saved = offlineStore.append(record);
   if (saved && offlineStore.full()) {
     setOfflineStorageFull();
@@ -1559,6 +2017,36 @@ bool storeOfflineAlerts(const UvirBandSample &sample) {
     statusBuzzer.signalAlertSaved();
   }
   return saved;
+}
+
+bool storeOfflineAlerts(const UvirBandSample &sample) {
+  const String details = alertDetailsForSample(sample);
+  if (details.isEmpty()) return false;
+
+  if (!offlineAlertRecordingEnabled) {
+    statusLed.signalAlertSaved(true);
+    statusBuzzer.signalAlertSaved();
+    return true;
+  }
+
+  UvirStoredRecord record;
+  record.type = static_cast<uint8_t>(UvirStoredRecordType::Alert);
+  record.recordId = nextOfflineRecordId();
+  record.timestampMs = currentEpochMs();
+  record.sessionId = static_cast<int64_t>(offlineAlertSessionId);
+  copyText(
+      record.payload.details,
+      sizeof(record.payload.details),
+      details);
+  if (appendOfflineAlertRecord(record)) return true;
+
+  // Preserve the exact alert instead of replacing it with a later sample.
+  // Only one alert can reach this point because monitoring is paused while
+  // the pending record is retried.
+  pendingOfflineAlertRecord = record;
+  pendingOfflineAlert = true;
+  pendingOfflineAlertRetryAtMs = millis() + kOfflineWriteRetryIntervalMs;
+  return false;
 }
 
 void storeOfflineError(const String &code, const String &message) {
@@ -1609,6 +2097,9 @@ void printStoredRecord(Print &output, const UvirStoredRecord &record) {
     printUInt64(output, static_cast<uint64_t>(record.sessionId));
     output.print(F(",\"sequence\":"));
     output.print(record.sequence);
+    output.print(F(",\"external_command\":"));
+    output.print((record.reserved & kUvirAcquisitionExternalTriggerFlag) != 0
+        ? F("true") : F("false"));
     output.print(F(",\"note\":\""));
     printJsonString(
         output,
@@ -1697,6 +2188,9 @@ void printLiveAcquisitionEvent(
   printUInt64(output, static_cast<uint64_t>(record.sessionId));
   output.print(F(",\"sequence\":"));
   output.print(record.sequence);
+  output.print(F(",\"external_command\":"));
+  output.print((record.reserved & kUvirAcquisitionExternalTriggerFlag) != 0
+      ? F("true") : F("false"));
   output.print(F(",\"note\":\""));
   printJsonString(output, String(record.payload.acquisition.legacyNote));
   output.print(F("\",\"completed_count\":"));
@@ -1720,28 +2214,6 @@ void printLiveAcquisitionEvent(
   output.println(F("}}"));
 }
 
-void handleExternalCommandShortPress() {
-  if (currentEpochMs() == 0) {
-    statusLed.signalTimeUnavailable();
-    statusBuzzer.signalTimeUnavailable();
-    return;
-  }
-  if (!visibleSensor.available() || pendingLiveAcquisition ||
-      averagedAcquisition.kind != AveragedAcquisitionKind::None) {
-    return;
-  }
-  // While a normal timed/conditional job is active the physical input is not
-  // part of that job. External mode is an explicit, mutually exclusive mode.
-  if (alertMonitoringActive() ||
-      (offlineJob.enabled && !offlineJob.externalCommand)) {
-    return;
-  }
-  if (externalAcquisitionRequestsPending < 3) {
-    ++externalAcquisitionRequestsPending;
-  }
-  automaticShutdownIdleStartedMs = millis();
-}
-
 bool beginExternalCommandProvisionalAcquisition() {
   if (currentEpochMs() == 0) {
     statusLed.signalTimeUnavailable();
@@ -1750,8 +2222,9 @@ bool beginExternalCommandProvisionalAcquisition() {
   }
   if (!visibleSensor.available() || pendingLiveAcquisition ||
       averagedAcquisition.kind != AveragedAcquisitionKind::None ||
-      alertMonitoringActive() ||
-      (offlineJob.enabled && !offlineJob.externalCommand)) {
+      !uvirExternalAcquisitionAllowed(
+          offlineJob.enabled, offlineJob.externalCommand,
+          alertMonitoringActive())) {
     return false;
   }
 
@@ -1779,11 +2252,17 @@ void handleExternalCommandTriplePress() {
   // A triple press is a session-start gesture, never three acquisitions.
   // Existing sessions own the input already and deliberately ignore it.
   externalAcquisitionRequestsPending = 0;
+  externalAcquisitionQueuedSessionId = 0;
   externalCommandGesturePrimed = false;
   if (externalGestureAcquisitionProvisional) {
     cancelAveragedAcquisition();
   }
-  if (offlineJob.enabled || alertMonitoringActive()) return;
+  if (offlineJob.enabled && offlineJob.externalCommand) return;
+  if (offlineJob.enabled || alertMonitoringActive()) {
+    statusLed.signalTimeUnavailable();
+    statusBuzzer.signalTimeUnavailable();
+    return;
+  }
   if (currentEpochMs() == 0) {
     statusLed.signalTimeUnavailable();
     statusBuzzer.signalTimeUnavailable();
@@ -1824,6 +2303,7 @@ void handleExternalCommandLongPress() {
   if (!automaticWasActive && !alertsWereActive) return;
 
   externalAcquisitionRequestsPending = 0;
+  externalAcquisitionQueuedSessionId = 0;
   externalCommandShortPressCount = 0;
   externalCommandGesturePrimed = false;
   cancelAveragedAcquisition();
@@ -1887,6 +2367,7 @@ void serviceExternalCommandInput() {
     portEXIT_CRITICAL(&externalCommandMux);
     externalCommandShortPressCount = 0;
     externalAcquisitionRequestsPending = 0;
+    externalAcquisitionQueuedSessionId = 0;
     externalCommandGesturePrimed = false;
     if (externalGestureAcquisitionProvisional) {
       cancelAveragedAcquisition();
@@ -1959,16 +2440,30 @@ void serviceExternalCommandInput() {
     const uint8_t completedPresses = externalCommandShortPressCount;
     externalCommandShortPressCount = 0;
     externalCommandGesturePrimed = false;
-    if (externalGestureAcquisitionProvisional) {
-      // The first acquisition is already being sampled. Any second press is
-      // queued and begins as soon as the first result has been committed.
+    if (!uvirExternalAcquisitionAllowed(
+            offlineJob.enabled, offlineJob.externalCommand,
+            alertMonitoringActive())) {
+      if (externalGestureAcquisitionProvisional) cancelAveragedAcquisition();
+      statusLed.signalTimeUnavailable();
+      statusBuzzer.signalTimeUnavailable();
       externalGestureAcquisitionProvisional = false;
-      for (uint8_t index = 1; index < completedPresses; ++index) {
-        if (externalAcquisitionRequestsPending < 3) {
-          ++externalAcquisitionRequestsPending;
-        }
+      return;
+    }
+    if (currentEpochMs() > 0 && visibleSensor.available()) {
+      // If an external-session acquisition already owns the sensor, retain
+      // the physical request and run it immediately after that measurement.
+      // A provisional external measurement already accounts for press one.
+      const uint8_t requestsToQueue = externalGestureAcquisitionProvisional
+          ? completedPresses - 1 : completedPresses;
+      if (requestsToQueue > 0) {
+        externalAcquisitionQueuedSessionId = offlineJob.enabled
+            ? offlineJob.sessionId : 0;
+        externalAcquisitionRequestsPending = static_cast<uint8_t>(min(
+            3, static_cast<int>(externalAcquisitionRequestsPending) +
+                   static_cast<int>(requestsToQueue)));
       }
     }
+    externalGestureAcquisitionProvisional = false;
   }
 }
 
@@ -2047,6 +2542,22 @@ void serviceOfflineRecording() {
       activeTransport != Transport::None &&
       outputForTransport(activeTransport) != nullptr &&
       isAuthenticated(activeTransport);
+  const uint64_t now = currentEpochMs();
+  const bool timeAvailable = now > 0;
+  if (offlineAlertsEnabled && timeAvailable &&
+      ((offlineAlertEndAtMs > 0 && now >= offlineAlertEndAtMs) ||
+       (offlineAlertMaximumRegistrations > 0 &&
+        offlineAlertCompletedRegistrations >= offlineAlertMaximumRegistrations))) {
+    const bool wasActive = alertMonitoringActive();
+    offlineAlertsEnabled = false;
+    offlineAlertSessionId = 0;
+    persistOfflineAlerts();
+    signalAlertActivityTransition(wasActive, false);
+    if (transportReady) {
+      Print *output = outputForTransport(activeTransport);
+      if (output != nullptr) printHello(*output, false, activeTransport);
+    }
+  }
   if (!visibleSensor.available()) {
     return;
   }
@@ -2060,9 +2571,6 @@ void serviceOfflineRecording() {
     return;
   }
 
-  const uint64_t now = currentEpochMs();
-  const bool timeAvailable = now > 0;
-
   if (pendingLiveAcquisition) {
     if (transportReady) {
       Print *output = outputForTransport(activeTransport);
@@ -2072,14 +2580,32 @@ void serviceOfflineRecording() {
         printLiveAcquisitionEvent(*output, pendingLiveAcquisitionRecord);
         pendingLiveAcquisitionSentAtMs = millis();
       }
-    } else if (appendAutomaticAcquisitionRecord(
-                   pendingLiveAcquisitionRecord)) {
-      pendingLiveAcquisition = false;
-      pendingLiveAcquisitionSentAtMs = 0;
+    } else if (pendingLiveAcquisitionSentAtMs == 0 ||
+               millis() - pendingLiveAcquisitionSentAtMs >=
+                   kOfflineWriteRetryIntervalMs) {
+      if (appendAutomaticAcquisitionRecord(pendingLiveAcquisitionRecord)) {
+        pendingLiveAcquisition = false;
+        pendingLiveAcquisitionSentAtMs = 0;
+      } else {
+        pendingLiveAcquisitionSentAtMs = millis();
+      }
     }
   }
 
-  if (!transportReady && offlineStorageFull) {
+  if (pendingOfflineAlert &&
+      static_cast<int32_t>(millis() - pendingOfflineAlertRetryAtMs) >= 0) {
+    if (appendOfflineAlertRecord(pendingOfflineAlertRecord)) {
+      pendingOfflineAlert = false;
+      pendingOfflineAlertRetryAtMs = 0;
+      startAlertCooldown();
+    } else {
+      pendingOfflineAlertRetryAtMs =
+          millis() + kOfflineWriteRetryIntervalMs;
+    }
+  }
+
+  if (!transportReady && offlineStorageFull &&
+      (offlineAlertRecordingEnabled || !offlineAlertsEnabled)) {
     cancelAveragedAcquisition();
     return;
   }
@@ -2099,6 +2625,7 @@ void serviceOfflineRecording() {
 
   if (offlineJob.conditionStartSignalPending) {
     offlineJob.conditionStartSignalPending = false;
+    persistRuntimeActivityState();
     statusBuzzer.signalActivityStarted();
     if (transportReady) { Print *out=outputForTransport(activeTransport); if(out) printAutomaticStatus(*out); }
   }
@@ -2126,20 +2653,34 @@ void serviceOfflineRecording() {
   if (externalAcquisitionRequestsPending > 0 &&
       averagedAcquisition.kind == AveragedAcquisitionKind::None &&
       !pendingLiveAcquisition) {
-    --externalAcquisitionRequestsPending;
-    beginExternalAcquisitionFromReadySampleOrFallback(
-        offlineJob.enabled && offlineJob.externalCommand
-            ? AveragedAcquisitionKind::Automatic
-            : AveragedAcquisitionKind::ExternalManual,
-        offlineJob.enabled && offlineJob.externalCommand
-            ? offlineJob.samplesPerAcquisition
-            : samplingSamplesPerResult,
-        offlineJob.enabled && offlineJob.externalCommand
-            ? offlineJob.sampleSpacingMs
-            : samplingSpacingMs,
-        offlineJob.enabled && offlineJob.externalCommand
-            ? offlineJob.discardExtremes
-            : samplingDiscardExtremes);
+    if (!uvirExternalAcquisitionAllowed(
+            offlineJob.enabled, offlineJob.externalCommand,
+            alertMonitoringActive()) ||
+        (externalAcquisitionQueuedSessionId != 0 &&
+         (!offlineJob.enabled ||
+          offlineJob.sessionId != externalAcquisitionQueuedSessionId))) {
+      externalAcquisitionRequestsPending = 0;
+      externalAcquisitionQueuedSessionId = 0;
+      statusLed.signalTimeUnavailable();
+      statusBuzzer.signalTimeUnavailable();
+    } else {
+      --externalAcquisitionRequestsPending;
+      beginExternalAcquisitionFromReadySampleOrFallback(
+          offlineJob.enabled && offlineJob.externalCommand
+              ? AveragedAcquisitionKind::Automatic
+              : AveragedAcquisitionKind::ExternalManual,
+          offlineJob.enabled && offlineJob.externalCommand
+              ? offlineJob.samplesPerAcquisition
+              : samplingSamplesPerResult,
+          offlineJob.enabled && offlineJob.externalCommand
+              ? offlineJob.sampleSpacingMs
+              : samplingSpacingMs,
+          offlineJob.enabled && offlineJob.externalCommand
+              ? offlineJob.discardExtremes
+              : samplingDiscardExtremes);
+      if (externalAcquisitionRequestsPending == 0)
+        externalAcquisitionQueuedSessionId = 0;
+    }
   }
 
   if (!externalCommandPressActive && timeAvailable &&
@@ -2166,6 +2707,7 @@ void serviceOfflineRecording() {
       !externalCommandPressActive &&
       averagedAcquisition.kind == AveragedAcquisitionKind::None &&
       timeAvailable &&
+      !pendingOfflineAlert &&
       !transportReady && offlineAlertsEnabled && offlineAlertRuleCount > 0 &&
       now >= nextOfflineAlertSampleAtMs && alertEvaluationReady()
   ) {
@@ -2186,6 +2728,7 @@ void serviceOfflineRecording() {
   const AveragedAcquisitionStep step = serviceAveragedAcquisition(current);
   if (offlineJob.conditionStartSignalPending) {
     offlineJob.conditionStartSignalPending = false;
+    persistRuntimeActivityState();
     statusBuzzer.signalActivityStarted();
     if (transportReady) { Print *out=outputForTransport(activeTransport); if(out) printAutomaticStatus(*out); }
   }
@@ -2209,6 +2752,7 @@ void serviceOfflineRecording() {
   if (step == AveragedAcquisitionStep::Failed) {
     if (completedKind == AveragedAcquisitionKind::AutomaticCondition) {
       offlineJob.conditionNextCheckAtMs = currentEpochMs() + max(1UL, offlineJob.sampleSpacingMs);
+      persistRuntimeActivityState();
     }
     storeOfflineError(
         "sensor_read",
@@ -2245,6 +2789,9 @@ void serviceOfflineRecording() {
         return;
       }
       UvirStoredRecord record = makeAutomaticAcquisitionRecord(current);
+      if (offlineJob.externalCommand) {
+        record.reserved |= kUvirAcquisitionExternalTriggerFlag;
+      }
       ++offlineJob.completedCount;
       const uint64_t intervalMs =
           static_cast<uint64_t>(offlineJob.intervalSeconds) * 1000ULL;
@@ -2252,6 +2799,8 @@ void serviceOfflineRecording() {
       if (offlineJob.maximumCount > 0 &&
           offlineJob.completedCount >= offlineJob.maximumCount) {
         setAutomaticJobEnabled(false, true);
+      } else {
+        persistRuntimeActivityState();
       }
 
       if (transportReady) {
@@ -2277,6 +2826,15 @@ void serviceOfflineRecording() {
     }
 
   if (completedKind == AveragedAcquisitionKind::ExternalManual) {
+    // A session can start while an idle external sample is still being
+    // prepared. Never attach that sample to a normal automatic/alert session.
+    if (!uvirExternalAcquisitionAllowed(
+            offlineJob.enabled, offlineJob.externalCommand,
+            alertMonitoringActive())) {
+      statusLed.signalTimeUnavailable();
+      statusBuzzer.signalTimeUnavailable();
+      return;
+    }
     UvirStoredRecord record = makeExternalManualAcquisitionRecord(current);
     if (transportReady) {
       pendingLiveAcquisitionRecord = record;
@@ -2803,11 +3361,38 @@ class UvirCommandActivityScope {
   bool active_;
 };
 
+bool isDatedSettingsCommand(const String &command) {
+  return command.startsWith("SENSOR_CONFIG ") || command.startsWith("SAMPLING_CONFIG ") ||
+      command.startsWith("CALIBRATION_CONFIG ") || command.startsWith("WIFI_CONFIG ") ||
+      command.startsWith("INTERNET_CONFIG ") || command.startsWith("RADIO WIFI ") ||
+      command.startsWith("RADIO BLUETOOTH ") || command.startsWith("ALERT_SETTINGS ");
+}
+
+// Native serial edits also acquire a revision; handshake, TIME and live work do not.
+class UvirSettingsRevisionScope {
+ public:
+  explicit UvirSettingsRevisionScope(bool settings) : settings_(settings), errors_(settingsCommandErrors) {}
+  ~UvirSettingsRevisionScope() {
+    if (settings_ && !applyingDatedSettings && errors_ == settingsCommandErrors) {
+      settingsUpdatedAtMs = max(settingsUpdatedAtMs + 1, currentEpochMs());
+      preferences.putULong64("settings_date", settingsUpdatedAtMs);
+    }
+  }
+ private:
+  bool settings_;
+  uint32_t errors_;
+};
+
 void handleCommand(String command, Transport transport, Print &output) {
   command.trim();
   const String originalCommand = command;
   command.toUpperCase();
-  lastHostActivityMs = millis();
+  // Only the owner of the current app session may renew its lease. A command
+  // arriving through another interface must not keep a stale link alive.
+  if (appSessionActive && activeTransport == transport &&
+      isAuthenticated(transport)) {
+    lastHostActivityMs = millis();
+  }
 
   if (command.startsWith("AUTH ")) {
     const String suppliedToken = originalCommand.substring(5);
@@ -2832,6 +3417,65 @@ void handleCommand(String command, Transport transport, Print &output) {
     return;
   }
 
+  if (command.startsWith("SETTINGS_APPLY ")) {
+    if (applyingDatedSettings) {
+      printError(output, F("settings_invalid"), F("Nested settings updates are not allowed"));
+      return;
+    }
+    String payload = originalCommand.substring(15);
+    int position = 0;
+    const uint64_t updatedAt = parseUnsigned64(takeCommandToken(payload, position));
+    String decoded;
+    if (updatedAt == 0 || updatedAt > 253402300799999ULL ||
+        !decodeHex(takeCommandToken(payload, position), decoded) || decoded.isEmpty() || decoded.length() > 6000) {
+      printError(output, F("settings_invalid"), F("Invalid settings date or payload"));
+      return;
+    }
+    if (updatedAt <= settingsUpdatedAtMs) {
+      // Hardware wins ties, including a replay of an already committed edit.
+      printHello(output, transport == Transport::Usb, transport);
+      return;
+    }
+    // Validate the allowlist BEFORE executing anything. No SAMPLE, job, reset or session controls.
+    int start = 0;
+    while (start < decoded.length()) {
+      int end = decoded.indexOf('\n', start);
+      if (end < 0) end = decoded.length();
+      if (!isDatedSettingsCommand(decoded.substring(start, end))) {
+        printError(output, F("settings_invalid"), F("Only configuration commands can be synchronized"));
+        return;
+      }
+      start = end + 1;
+    }
+    const uint32_t errorsBefore = settingsCommandErrors;
+    applyingDatedSettings = true;
+    settingsWirelessReconfigurePending = false;
+    start = 0;
+    while (start < decoded.length() && errorsBefore == settingsCommandErrors) {
+      int end = decoded.indexOf('\n', start);
+      if (end < 0) end = decoded.length();
+      handleCommand(decoded.substring(start, end), transport, output);
+      start = end + 1;
+    }
+    applyingDatedSettings = false;
+    if (errorsBefore == settingsCommandErrors) {
+      // Commit the date only after the whole update succeeds. Interrupted updates remain retryable.
+      settingsUpdatedAtMs = updatedAt;
+      preferences.putULong64("settings_date", settingsUpdatedAtMs);
+    }
+    printHello(output, transport == Transport::Usb, transport);
+    output.flush();
+    if (settingsWirelessReconfigurePending) {
+      settingsWirelessReconfigurePending = false;
+      delay(80);
+      applyWirelessMode(settingsWirelessNextMode, true);
+    }
+    return;
+  }
+
+  const UvirSettingsRevisionScope settingsRevision(
+      isDatedSettingsCommand(command) || command.startsWith("ALERT_CONFIG "));
+
   const UvirCommandActivityScope activityScope(commandIndicatesActivity(command));
 
   if (command.startsWith("DIAGNOSTIC ")) {
@@ -2847,13 +3491,42 @@ void handleCommand(String command, Transport transport, Print &output) {
       printError(output, F("invalid_diagnostic_request"), F("Invalid diagnostic request ID"));
       return;
     }
+    const bool storageReadWriteOk = offlineStore.runReadWriteDiagnostic();
+    const bool framReadWriteOk = fram.runReadWriteDiagnostic();
+    uint64_t diagnosticRtcEpochMs = 0;
+    const bool diagnosticRtcReadOk =
+        rtcClock.available() && rtcClock.readEpochMs(diagnosticRtcEpochMs);
+    const bool visibleSensorBusOk =
+        probeI2cAddress(UvirHardware::kAs7343Address);
+    const bool uvSensorBusOk =
+        probeI2cAddress(UvirHardware::kAs7331Address);
+    const bool rtcBusOk =
+        probeI2cAddress(UvirHardware::kDs3231Address);
+    const bool visibleSensorReadOk =
+        visibleSensor.available() && latestContinuousSampleAvailable &&
+        continuousSampleIsFresh();
+    const bool uvSensorReadOk =
+        uvSensor.available() && visibleSensorReadOk && uvSensor.healthy();
+    const bool externalInputActive =
+        digitalRead(UvirHardware::kExternalCommandPin) == LOW;
+    const bool wifiConnected = WiFi.status() == WL_CONNECTED;
+    const bool bluetoothConnected = bluetoothSerial.hasClient();
+    const bool internetConnected = internetMqttClient.connected();
     output.print(F("{\"type\":\"diagnostic\",\"protocol\":\"uvir-sensor-v1\",\"request_id\":\""));
     output.print(requestId);
     output.print(F("\",\"device_id\":\""));
     output.print(sensorDeviceId);
     output.print(F("\",\"firmware\":\""));
     output.print(kFirmwareVersion);
-    output.print(F("\",\"uptime_ms\":"));
+    output.print(F("\",\"board\":\""));
+    output.print(UvirHardware::kBoardName);
+    output.print(F("\",\"chip_model\":\""));
+    output.print(ESP.getChipModel());
+    output.print(F("\",\"chip_cores\":"));
+    output.print(ESP.getChipCores());
+    output.print(F(",\"cpu_frequency_mhz\":"));
+    output.print(ESP.getCpuFreqMHz());
+    output.print(F(",\"uptime_ms\":"));
     output.print(millis());
     output.print(F(",\"heap_size_bytes\":"));
     output.print(ESP.getHeapSize());
@@ -2861,12 +3534,151 @@ void handleCommand(String command, Transport transport, Print &output) {
     output.print(ESP.getFreeHeap());
     output.print(F(",\"flash_size_bytes\":"));
     output.print(ESP.getFlashChipSize());
+    output.print(F(",\"i2c_sda_pin\":"));
+    output.print(UvirHardware::kI2cSdaPin);
+    output.print(F(",\"i2c_scl_pin\":"));
+    output.print(UvirHardware::kI2cSclPin);
+    output.print(F(",\"visible_sensor_model\":\"AS7343\""));
+    output.print(F(",\"visible_sensor_i2c_address\":"));
+    output.print(UvirHardware::kAs7343Address);
+    output.print(F(",\"visible_sensor_bus_ok\":"));
+    output.print(visibleSensorBusOk ? F("true") : F("false"));
+    output.print(F(",\"visible_sensor_driver_ok\":"));
+    output.print(visibleSensor.available() ? F("true") : F("false"));
+    output.print(F(",\"visible_sensor_read_ok\":"));
+    output.print(visibleSensorReadOk ? F("true") : F("false"));
+    output.print(F(",\"continuous_sample_age_ms\":"));
+    if (latestContinuousSampleAvailable) {
+      output.print(millis() - latestContinuousSampleAtMs);
+    } else {
+      output.print(F("null"));
+    }
+    output.print(F(",\"uv_sensor_model\":\"AS7331\""));
+    output.print(F(",\"uv_sensor_i2c_address\":"));
+    output.print(UvirHardware::kAs7331Address);
+    output.print(F(",\"uv_sensor_bus_ok\":"));
+    output.print(uvSensorBusOk ? F("true") : F("false"));
+    output.print(F(",\"uv_sensor_driver_ok\":"));
+    output.print(uvSensor.healthy() ? F("true") : F("false"));
+    output.print(F(",\"uv_sensor_read_ok\":"));
+    if (uvSensor.available()) {
+      output.print(uvSensorReadOk ? F("true") : F("false"));
+    } else {
+      output.print(F("null"));
+    }
+    output.print(F(",\"rtc_model\":\"DS3231\""));
+    output.print(F(",\"rtc_i2c_address\":"));
+    output.print(UvirHardware::kDs3231Address);
+    output.print(F(",\"rtc_bus_ok\":"));
+    output.print(rtcBusOk ? F("true") : F("false"));
+    output.print(F(",\"rtc_driver_ok\":"));
+    output.print(rtcClock.available() ? F("true") : F("false"));
+    output.print(F(",\"fram_model\":\"MB85RC256V\""));
+    output.print(F(",\"fram_i2c_address\":"));
+    output.print(UvirHardware::kFramAddress);
+    output.print(F(",\"fram_bus_ok\":"));
+    output.print(fram.available() ? F("true") : F("false"));
+    output.print(F(",\"fram_available\":"));
+    output.print(fram.available() ? F("true") : F("false"));
+    output.print(F(",\"fram_capacity_bytes\":"));
+    output.print(fram.available() ? UvirFram::kCapacity : 0);
+    output.print(F(",\"fram_read_write_ok\":"));
+    output.print(framReadWriteOk ? F("true") : F("false"));
+    output.print(F(",\"fram_queue_available\":"));
+    output.print(offlineStore.framAvailable() ? F("true") : F("false"));
+    output.print(F(",\"fram_record_capacity\":"));
+    output.print(offlineStore.framRecordCapacity());
+    output.print(F(",\"fram_records_used\":"));
+    output.print(offlineStore.framRecordCount());
+    output.print(F(",\"sd_adapter_model\":\"SN74HC125 + 1117C33\""));
+    output.print(F(",\"sd_bus\":\"SPI\""));
+    output.print(F(",\"sd_cs_pin\":"));
+    output.print(UvirHardware::kSdChipSelectPin);
+    output.print(F(",\"sd_sck_pin\":"));
+    output.print(UvirHardware::kSdClockPin);
+    output.print(F(",\"sd_miso_pin\":"));
+    output.print(UvirHardware::kSdMisoPin);
+    output.print(F(",\"sd_mosi_pin\":"));
+    output.print(UvirHardware::kSdMosiPin);
+    output.print(F(",\"status_led_control_available\":true"));
+    output.print(F(",\"status_led_red_pin\":"));
+    output.print(UvirHardware::kStatusLedRedPin);
+    output.print(F(",\"status_led_green_pin\":"));
+    output.print(UvirHardware::kStatusLedGreenPin);
+    output.print(F(",\"operation_led_blue_pin\":"));
+    output.print(UvirHardware::kOperationLedBluePin);
+    output.print(F(",\"status_led_enabled\":"));
+    output.print(statusLed.enabled() ? F("true") : F("false"));
+    output.print(F(",\"status_led_brightness\":"));
+    output.print(statusLed.brightnessPercent());
+    output.print(F(",\"status_buzzer_control_available\":true"));
+    output.print(F(",\"status_buzzer_pin\":"));
+    output.print(UvirHardware::kStatusBuzzerPin);
+    output.print(F(",\"status_buzzer_enabled\":"));
+    output.print(statusBuzzer.enabled() ? F("true") : F("false"));
+    output.print(F(",\"status_buzzer_volume\":"));
+    output.print(statusBuzzer.volumePercent());
+    output.print(F(",\"external_input_read_ok\":true"));
+    output.print(F(",\"external_input_pin\":"));
+    output.print(UvirHardware::kExternalCommandPin);
+    output.print(F(",\"external_input_active\":"));
+    output.print(externalInputActive ? F("true") : F("false"));
+    output.print(F(",\"external_command_enabled\":"));
+    output.print(externalCommandEnabled ? F("true") : F("false"));
     output.print(F(",\"offline_storage_available\":"));
     output.print(offlineStore.available() ? F("true") : F("false"));
     output.print(F(",\"offline_capacity\":"));
     output.print(offlineStore.maximumRecords());
     output.print(F(",\"offline_used\":"));
     output.print(offlineStore.totalCount());
+    output.print(F(",\"storage_backend\":\""));
+    output.print(offlineStore.backendName());
+    output.print(F("\",\"storage_record_size_bytes\":"));
+    output.print(offlineStore.recordSizeBytes());
+    output.print(F(",\"sd_available\":"));
+    output.print(offlineStore.microSdAvailable() ? F("true") : F("false"));
+    output.print(F(",\"sd_foreign\":"));
+    output.print(offlineStore.foreignMicroSd() ? F("true") : F("false"));
+    output.print(F(",\"sd_type\":\""));
+    output.print(offlineStore.microSdTypeName());
+    output.print(F("\",\"sd_total_bytes\":"));
+    printUInt64(output, offlineStore.microSdTotalBytes());
+    output.print(F(",\"sd_used_bytes\":"));
+    printUInt64(output, offlineStore.microSdUsedBytes());
+    output.print(F(",\"sd_free_bytes\":"));
+    printUInt64(output, offlineStore.microSdFreeBytes());
+    output.print(F(",\"sd_record_capacity_total\":"));
+    output.print(offlineStore.microSdTotalRecordCapacity());
+    output.print(F(",\"sd_record_capacity_free\":"));
+    output.print(offlineStore.microSdFreeRecordCapacity());
+    output.print(F(",\"sd_invalid_records\":"));
+    output.print(offlineStore.invalidRecordCount());
+    output.print(F(",\"sd_mount_errors\":"));
+    output.print(offlineStore.mountErrorCount());
+    output.print(F(",\"sd_write_errors\":"));
+    output.print(offlineStore.writeErrorCount());
+    output.print(F(",\"sd_read_write_ok\":"));
+    output.print(storageReadWriteOk ? F("true") : F("false"));
+    output.print(F(",\"rtc_available\":"));
+    output.print(rtcClock.available() ? F("true") : F("false"));
+    output.print(F(",\"rtc_valid\":"));
+    output.print(rtcClock.valid() ? F("true") : F("false"));
+    output.print(F(",\"rtc_oscillator_stopped\":"));
+    output.print(rtcClock.oscillatorStopped() ? F("true") : F("false"));
+    output.print(F(",\"rtc_read_ok\":"));
+    output.print(diagnosticRtcReadOk ? F("true") : F("false"));
+    output.print(F(",\"rtc_current_time_ms\":"));
+    if (diagnosticRtcReadOk) {
+      printUInt64(output, diagnosticRtcEpochMs);
+    } else {
+      output.print(F("null"));
+    }
+    output.print(F(",\"time_source\":\""));
+    output.print(clockSourceName());
+    output.print(F("\",\"rtc_read_errors\":"));
+    output.print(rtcClock.readErrors());
+    output.print(F(",\"rtc_write_errors\":"));
+    output.print(rtcClock.writeErrors());
     output.print(F(",\"offline_recording\":"));
     output.print(offlineJob.enabled ? F("true") : F("false"));
     output.print(F(",\"alert_monitoring_enabled\":"));
@@ -2875,6 +3687,25 @@ void handleCommand(String command, Transport transport, Print &output) {
     output.print(visibleSensor.available() ? F("true") : F("false"));
     output.print(F(",\"uv_available\":"));
     output.print(uvSensor.available() ? F("true") : F("false"));
+    output.print(F(",\"active_transport\":\""));
+    output.print(transportName(transport));
+    output.print(F("\",\"app_connected\":"));
+    output.print(
+        appSessionActive && activeTransport == transport
+            ? F("true")
+            : F("false"));
+    output.print(F(",\"wifi_enabled\":"));
+    output.print(wifiEnabled ? F("true") : F("false"));
+    output.print(F(",\"wifi_connected\":"));
+    output.print(wifiConnected ? F("true") : F("false"));
+    output.print(F(",\"bluetooth_enabled\":"));
+    output.print(bluetoothEnabled ? F("true") : F("false"));
+    output.print(F(",\"bluetooth_connected\":"));
+    output.print(bluetoothConnected ? F("true") : F("false"));
+    output.print(F(",\"internet_enabled\":"));
+    output.print(internetEnabled ? F("true") : F("false"));
+    output.print(F(",\"internet_relay_connected\":"));
+    output.print(internetConnected ? F("true") : F("false"));
     output.println(F("}"));
     return;
   }
@@ -2896,6 +3727,7 @@ void handleCommand(String command, Transport transport, Print &output) {
     }
     activeTransport = transport;
     appSessionActive = true;
+    lastHostActivityMs = millis();
     // The LED task can reflect the confirmed app session immediately; it no
     // longer waits for the rest of this loop (sync or sensor acquisition).
     statusLed.setBaseState(UvirLedBaseState::Connected);
@@ -2912,12 +3744,22 @@ void handleCommand(String command, Transport transport, Print &output) {
 
   if (command.startsWith("TIME ")) {
     const uint64_t suppliedEpoch = parseUnsigned64(originalCommand.substring(5));
-    if (suppliedEpoch < 1577836800000ULL) {
+    if (suppliedEpoch < kMinimumValidEpochMs) {
       printError(output, F("time_invalid"), F("Expected Unix epoch milliseconds"));
       return;
     }
     anchorRuntimeClock(suppliedEpoch);
-    output.println(F("{\"type\":\"status\",\"protocol\":\"uvir-sensor-v1\",\"time_synced\":true}"));
+    clockSource = ClockSource::Phone;
+    const bool rtcUpdated =
+        rtcClock.available() && rtcClock.writeEpochMs(suppliedEpoch);
+    if (rtcUpdated) {
+      lastRtcEpochMs = suppliedEpoch - suppliedEpoch % 1000ULL;
+    }
+    nextRtcRefreshAtMs = millis() + kRtcRefreshIntervalMs;
+    reconcileRestoredActivityState();
+    output.print(F("{\"type\":\"status\",\"protocol\":\"uvir-sensor-v1\",\"time_synced\":true,\"rtc_updated\":"));
+    output.print(rtcUpdated ? F("true") : F("false"));
+    output.println(F("}"));
     return;
   }
 
@@ -3234,7 +4076,7 @@ void handleCommand(String command, Transport transport, Print &output) {
           F("The status LED test is already running"));
       return;
     }
-    output.println(F("{\"type\":\"status\",\"protocol\":\"uvir-sensor-v1\",\"led_test\":\"started\",\"duration_ms\":16500}"));
+    output.println(F("{\"type\":\"status\",\"protocol\":\"uvir-sensor-v1\",\"led_test\":\"started\",\"duration_ms\":15150}"));
     return;
   }
 
@@ -3318,7 +4160,9 @@ void handleCommand(String command, Transport transport, Print &output) {
       return;
     }
     offlineStore.stopSync();
+    runtimeStatePersistenceEnabled = false;
     if (!offlineStore.clearAll()) {
+      runtimeStatePersistenceEnabled = offlineStore.available();
       rememberRadioCredentialsReset(false);
       printError(
           output,
@@ -3329,6 +4173,8 @@ void handleCommand(String command, Transport transport, Print &output) {
 
     pendingLiveAcquisition = false;
     pendingLiveAcquisitionSentAtMs = 0;
+    pendingOfflineAlert = false;
+    pendingOfflineAlertRetryAtMs = 0;
     setAutomaticJobEnabled(false, false);
     offlineJob = OfflineJob();
     offlineAlertsEnabled = false;
@@ -3373,6 +4219,11 @@ void handleCommand(String command, Transport transport, Print &output) {
   }
 
   if (command.startsWith("OFFLINE_EXTERNAL_JOB ")) {
+    if (alertMonitoringActive()) {
+      printError(output, F("session_busy"),
+                 F("Stop value alerts before starting automatic acquisition"));
+      return;
+    }
     if (currentEpochMs() == 0) {
       statusLed.signalTimeUnavailable();
       statusBuzzer.signalTimeUnavailable();
@@ -3417,6 +4268,11 @@ void handleCommand(String command, Transport transport, Print &output) {
   }
 
   if (command.startsWith("OFFLINE_JOB ") || command.startsWith("OFFLINE_CONDITIONAL_JOB ")) {
+    if (alertMonitoringActive()) {
+      printError(output, F("session_busy"),
+                 F("Stop value alerts before starting automatic acquisition"));
+      return;
+    }
     if (currentEpochMs() == 0) {
       statusLed.signalTimeUnavailable();
       statusBuzzer.signalTimeUnavailable();
@@ -3498,6 +4354,7 @@ void handleCommand(String command, Transport transport, Print &output) {
         static_cast<uint32_t>(
             max(0L, takeCommandToken(payload, position).toInt()));
     offlineJob.nextAtMs = parseUnsigned64(takeCommandToken(payload, position));
+    persistRuntimeActivityState();
     output.println(F("{\"type\":\"status\",\"protocol\":\"uvir-sensor-v1\",\"offline_progress_updated\":true}"));
     return;
   }
@@ -3534,6 +4391,52 @@ void handleCommand(String command, Transport transport, Print &output) {
     // This is especially important when the command arrives while an averaged
     // acquisition is still being completed.
     printAutomaticStatus(output);
+    return;
+  }
+
+  if (command.startsWith("ALERT_SETTINGS ")) {
+    String payload = originalCommand.substring(15);
+    int position = 0;
+    const long repeatSeconds = takeCommandToken(payload, position).toInt();
+    const String recording = takeCommandToken(payload, position);
+    const long delaySeconds = takeCommandToken(payload, position).toInt();
+    const long durationSeconds = takeCommandToken(payload, position).toInt();
+    const long maximum = takeCommandToken(payload, position).toInt();
+    const String ruleHex = takeCommandToken(payload, position);
+    String rules;
+    if (repeatSeconds < 1 || repeatSeconds > 86400 ||
+        (recording != "SAVE" && recording != "NO_SAVE") || delaySeconds < 0 || delaySeconds > 31536000 ||
+        durationSeconds < 0 || durationSeconds > 31536000 || maximum < 0 || maximum > 999999 ||
+        (ruleHex != "-" && !decodeHex(ruleHex, rules))) {
+      printError(output, F("settings_invalid"), F("Invalid alert settings"));
+      return;
+    }
+    int start = 0;
+    while (start < rules.length()) {
+      int end = rules.indexOf('\n', start);
+      if (end < 0) end = rules.length();
+      if (!rules.substring(start, end).startsWith("ALERT_RULE ")) {
+        printError(output, F("settings_invalid"), F("Invalid alert rule"));
+        return;
+      }
+      start = end + 1;
+    }
+    handleCommand("ALERTS_CLEAR", transport, output);
+    start = 0;
+    while (start < rules.length()) {
+      int end = rules.indexOf('\n', start);
+      if (end < 0) end = rules.length();
+      handleCommand(rules.substring(start, end), transport, output);
+      start = end + 1;
+    }
+    offlineAlertRepeatSeconds = repeatSeconds;
+    offlineAlertRecordingEnabled = recording == "SAVE";
+    offlineAlertStartDelaySeconds = delaySeconds;
+    offlineAlertDurationSeconds = durationSeconds;
+    offlineAlertMaximumRegistrations = maximum;
+    alertConfigurationInProgress = false;
+    // Keep enable state, session ID, counters, timing and cooldown exactly as they were.
+    persistOfflineAlerts();
     return;
   }
 
@@ -3576,13 +4479,19 @@ void handleCommand(String command, Transport transport, Print &output) {
   if (command.startsWith("ALERT_CONFIG ")) {
     String payload = originalCommand.substring(13);
     int position = 0;
+    const String enableToken = takeCommandToken(payload, position);
+    if (enableToken == "ON" && (offlineJob.enabled || pendingLiveAcquisition)) {
+      printError(output, F("session_busy"),
+                 F("Stop automatic acquisition before starting value alerts"));
+      return;
+    }
     const bool activityWasActive =
         alertConfigurationInProgress
             ? alertActivityBeforeConfiguration
             : alertMonitoringActive();
     const bool wasEnabled = offlineAlertsEnabled;
     const uint64_t previousAlertSessionId = offlineAlertSessionId;
-    offlineAlertsEnabled = takeCommandToken(payload, position) == "ON";
+    offlineAlertsEnabled = enableToken == "ON";
     // Arduino's constrain macro evaluates its first argument more than once.
     // Read the stateful command token once, otherwise later evaluations see an
     // empty token and silently turn a valid interval (for example 30) into 0.
@@ -3592,12 +4501,37 @@ void handleCommand(String command, Transport transport, Print &output) {
         requestedRepeatSeconds, 1L, 86400L));
     offlineAlertSessionId =
         parseUnsigned64(takeCommandToken(payload, position));
+    const String recordingToken = takeCommandToken(payload, position);
+    offlineAlertRecordingEnabled = recordingToken != "NO_SAVE";
+    // Optional trailing tokens keep earlier Android clients compatible.
+    const String delayToken = takeCommandToken(payload, position);
+    const String durationToken = takeCommandToken(payload, position);
+    const String maximumToken = takeCommandToken(payload, position);
+    offlineAlertStartDelaySeconds = delayToken.isEmpty() ? 0 :
+        static_cast<uint32_t>(constrain(delayToken.toInt(), 0L, 31536000L));
+    offlineAlertDurationSeconds = durationToken.isEmpty() ? 0 :
+        static_cast<uint32_t>(constrain(durationToken.toInt(), 0L, 31536000L));
+    offlineAlertMaximumRegistrations = maximumToken.isEmpty() ? 0 :
+        static_cast<uint32_t>(constrain(maximumToken.toInt(), 0L, 999999L));
+    const bool newSession =
+        !wasEnabled || offlineAlertSessionId != previousAlertSessionId;
+    if (offlineAlertsEnabled && newSession) {
+      const uint64_t now = currentEpochMs();
+      offlineAlertCompletedRegistrations = 0;
+      offlineAlertStartAtMs = now > 0 ?
+          now + static_cast<uint64_t>(offlineAlertStartDelaySeconds) * 1000ULL : 0;
+      offlineAlertEndAtMs = offlineAlertDurationSeconds > 0 && offlineAlertStartAtMs > 0 ?
+          offlineAlertStartAtMs + static_cast<uint64_t>(offlineAlertDurationSeconds) * 1000ULL : 0;
+    }
     if (!offlineAlertsEnabled) {
       offlineAlertSessionId = 0;
+      offlineAlertStartAtMs = 0;
+      offlineAlertEndAtMs = 0;
+      offlineAlertCompletedRegistrations = 0;
     }
     if (
         !offlineAlertsEnabled ||
-        (!wasEnabled && offlineAlertsEnabled) ||
+        newSession ||
         offlineAlertSessionId != previousAlertSessionId
     ) {
       nextAlertEvaluationEpochMs = 0;
@@ -3731,7 +4665,10 @@ void handleCommand(String command, Transport transport, Print &output) {
     if (wirelessMode == WirelessMode::Wifi ||
         (wirelessMode == WirelessMode::Internet && internetUsePrimaryWifi)) {
       delay(80);
-      applyWirelessMode(wirelessMode, true);
+      if (applyingDatedSettings) {
+        settingsWirelessReconfigurePending = true;
+        settingsWirelessNextMode = wirelessMode;
+      } else applyWirelessMode(wirelessMode, true);
     }
     return;
   }
@@ -3813,9 +4750,10 @@ void handleCommand(String command, Transport transport, Print &output) {
 
     if (wirelessMode == WirelessMode::Internet) {
       delay(80);
-      applyWirelessMode(
-          internetIsConfigured() ? WirelessMode::Internet : WirelessMode::Off,
-          true);
+      if (applyingDatedSettings) {
+        settingsWirelessReconfigurePending = true;
+        settingsWirelessNextMode = internetIsConfigured() ? WirelessMode::Internet : WirelessMode::Off;
+      } else applyWirelessMode(internetIsConfigured() ? WirelessMode::Internet : WirelessMode::Off, true);
     }
     return;
   }
@@ -3860,7 +4798,6 @@ void handleCommand(String command, Transport transport, Print &output) {
     // Provisioning remains USB-only, but an authenticated Wi-Fi/Bluetooth
     // client may switch to the other radio. Reply before stopping the current
     // transport, and keep repeated control messages idempotent.
-    stopWirelessFallback(false);
     if (newMode != wirelessMode) {
       output.print(F("{\"type\":\"status\",\"protocol\":\"uvir-sensor-v1\",\"wireless_mode\":\""));
       output.print(wirelessModeName(newMode));
@@ -3869,6 +4806,16 @@ void handleCommand(String command, Transport transport, Print &output) {
       delay(40);
       applyWirelessMode(newMode, true);
       return;
+    }
+    // A repeated USB request for the currently exposed radio must still give
+    // the app a full connection window. Do not disable fallback before an
+    // authenticated wireless client has actually arrived.
+    if (newMode != WirelessMode::Off && !wifiAuthenticated &&
+        !bluetoothAuthenticated && !internetAuthenticated) {
+      wirelessModeStartedAtMs = millis();
+      wirelessFallbackSwitchNow = false;
+      wirelessFallbackActive =
+          alternateWirelessMode(wirelessMode) != WirelessMode::Off;
     }
     output.print(F("{\"type\":\"status\",\"protocol\":\"uvir-sensor-v1\",\"wireless_mode\":\""));
     output.print(wirelessModeName(wirelessMode));
@@ -3911,7 +4858,10 @@ void handleCommand(String command, Transport transport, Print &output) {
 
     if (transport == Transport::Usb) {
       if (nextMode != wirelessMode) {
-        applyWirelessMode(nextMode, true);
+        if (applyingDatedSettings) {
+          settingsWirelessReconfigurePending = true;
+          settingsWirelessNextMode = nextMode;
+        } else applyWirelessMode(nextMode, true);
       }
       printHello(output, true, transport);
       return;
@@ -3935,7 +4885,10 @@ void handleCommand(String command, Transport transport, Print &output) {
 
     if (nextMode != wirelessMode) {
       delay(80);
-      applyWirelessMode(nextMode, true);
+      if (applyingDatedSettings) {
+        settingsWirelessReconfigurePending = true;
+        settingsWirelessNextMode = nextMode;
+      } else applyWirelessMode(nextMode, true);
     }
     return;
   }
@@ -4246,7 +5199,20 @@ void setup() {
     enterLowPowerShutdown();
     return;
   }
-  offlineStorageError = !offlineStore.begin();
+  offlineStorageError = !offlineStore.begin(sensorDeviceId);
+
+  Wire.begin(UvirHardware::kI2cSdaPin, UvirHardware::kI2cSclPin);
+  Wire.setClock(400000);
+  fram.begin(Wire, UvirHardware::kFramAddress);
+  offlineStore.attachFram(fram);
+  offlineStorageError = !offlineStore.available();
+  initializeRtcClock();
+
+  if (offlineStore.available()) {
+    restoreRuntimeActivityState();
+  }
+  runtimeStatePersistenceEnabled = offlineStore.available();
+  reconcileRestoredActivityState();
   offlineStorageFull = offlineStorageFull || offlineStore.full();
   if (offlineStorageFull) {
     preferences.putBool("offline_full", true);
@@ -4256,8 +5222,6 @@ void setup() {
     }
   }
 
-  Wire.begin(UvirHardware::kI2cSdaPin, UvirHardware::kI2cSclPin);
-  Wire.setClock(400000);
   visibleSensor.begin(UvirHardware::kAs7343Address, Wire);
   // The AS7331 is optional. Its driver starts in power-down and each reading
   // explicitly uses command/one-shot mode, so an installed UV sensor consumes
@@ -4294,6 +5258,7 @@ void loop() {
   // Physical automation must remain responsive even while a radio transport
   // is reconnecting or servicing network traffic.
   serviceExternalCommandInput();
+  serviceRtcClock();
   serviceOfflineRecording();
   readCommands(Serial, Serial, usbCommandBuffer, Transport::Usb);
   serviceWifi();
@@ -4309,12 +5274,21 @@ void loop() {
   if (appSessionActive && now - lastHostActivityMs >= kHostTimeoutMs) {
     const Transport timedOutTransport = activeTransport;
     stopStreaming();
-    if (timedOutTransport == Transport::Internet) {
-      // The ESP32-to-broker socket can stay connected after Android closes,
-      // so MQTT connectivity alone is not proof that the app is still there.
-      // Expire the app authentication lease and resume the same recovery cycle
-      // used by local Wi-Fi and Bluetooth disconnects.
+    // An unresponsive app may leave any wireless link looking physically
+    // connected. Expire its authentication and restart the same fallback
+    // cycle regardless of whether it used Wi-Fi, Bluetooth or Internet.
+    if (timedOutTransport == Transport::Wifi) {
+      wifiAuthenticated = false;
+      wifiClient.stop();
+    } else if (timedOutTransport == Transport::Bluetooth) {
+      bluetoothAuthenticated = false;
+      bluetoothSerial.disconnect();
+    } else if (timedOutTransport == Transport::Internet) {
       internetAuthenticated = false;
+    }
+    if (timedOutTransport == Transport::Wifi ||
+        timedOutTransport == Transport::Bluetooth ||
+        timedOutTransport == Transport::Internet) {
       resumeWirelessFallbackAfterDisconnect();
     }
   }

@@ -115,7 +115,11 @@ class UvirTitleIconStrokeTest {
                     val pixels = compose.onNodeWithTag("open_drawing").captureToImage().toPixelMap()
                     val inset = 64
                     val size = 96
-                    val y = inset + (size * if (icon == 0) 0.50f else 0.36f).toInt()
+                    // Sample the smaller back glyph mid-segment, away from its round caps.
+                    val y = if (icon == 2) {
+                        val backPixels = UvirTitleBackIconSize.value * 4f
+                        ((pixels.height - backPixels) / 2f + backPixels * .35f).toInt()
+                    } else inset + (size * if (icon == 0) 0.50f else 0.36f).toInt()
                     val range = when (icon) {
                         0 -> (inset + 44)..(inset + 80)
                         1 -> 0..(inset + size / 2)

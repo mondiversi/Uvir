@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sensor_reset_selection_title">Weka upya vihisi vilivyochaguliwa?</string>
+    <string name="sensor_reset_selection_message">Chagua vihisi vya kuweka upya. Mipangilio, taarifa za uthibitishaji na data ambazo hazijasawazishwa zitafutwa, kisha vihisi vitazimwa. Data kwenye programu haitabadilika. Ni vihisi vilivyounganishwa bila shughuli inayoendelea tu vinavyoweza kuchaguliwa.</string>
+    <string name="sensor_reset_selection_failed">Kuweka upya kumeshindikana: %1$s. Angalia muunganisho na ujaribu tena.</string>
+</resources>
+

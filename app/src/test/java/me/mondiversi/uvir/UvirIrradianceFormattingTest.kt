@@ -7,6 +7,11 @@ import org.junit.Test
 
 class UvirIrradianceFormattingTest {
     @Test
+    fun biologicalUnitUsesTheSameEquivalentAbbreviationAsSavedRecords() {
+        assertEquals("mW/cm² equiv.", UvirIrradianceUnit.MW_CM2.unitLabel(equivalent = true))
+    }
+
+    @Test
     fun missingPreferenceUsesMilliwattsPerSquareCentimetre() {
         assertEquals(
             UvirIrradianceUnit.MW_CM2,

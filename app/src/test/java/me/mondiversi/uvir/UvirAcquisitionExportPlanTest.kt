@@ -114,6 +114,16 @@ class UvirAcquisitionExportPlanTest {
         assertEquals(8, separate.completeSessionFiles)
         assertEquals(4, separate.individualAcquisitionFiles)
         assertEquals(12, separate.totalFiles)
+        assertEquals(3, acquisitionExportReadableTableFileCount(plan))
+        assertTrue(plan.hasCompleteVariantSessions)
+        assertEquals(
+            5,
+            acquisitionExportChartFileCount(
+                plan,
+                UvirChartExportMode.COMBINED,
+                UvirVariantChartGrouping.BY_GROUP
+            )
+        )
     }
 
     @Test
@@ -145,5 +155,20 @@ class UvirAcquisitionExportPlanTest {
                 UvirChartExportMode.SEPARATE
             )
         )
+        assertEquals(3, acquisitionExportReadableTableFileCount(plan))
+        assertFalse(plan.hasCompleteVariantSessions)
+    }
+
+    @Test
+    fun readableTableCountUsesOneFileForSessionWithoutVariants() {
+        val records =
+            listOf(
+                record(1, sessionId = 10),
+                record(2, sessionId = 10)
+            )
+        val plan = buildAcquisitionExportPlan(records, records)
+
+        assertEquals(1, acquisitionExportReadableTableFileCount(plan))
+        assertEquals(1, acquisitionSessionReadableTableFileCount(records))
     }
 }

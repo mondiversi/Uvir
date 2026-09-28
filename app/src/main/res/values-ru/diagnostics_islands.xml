@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="diagnostics_test_group">Диагностический тест</string>
+    <string name="diagnostics_simulation_group">Моделирование</string>
+    <string name="diagnostics_simulation_description">Имитирует измерения, оповещения и текущие значения для датчика.</string>
+</resources>

@@ -170,6 +170,10 @@ internal fun loadThresholdAlertSettings(
                 KEY_THRESHOLD_ALERT_REPEAT_SECONDS,
                 30
             ).coerceIn(1, 3600),
+        recordEvents = preferences.getBoolean(KEY_THRESHOLD_ALERT_RECORD_EVENTS, true),
+        startDelaySeconds = preferences.getLong(KEY_THRESHOLD_ALERT_START_DELAY_SECONDS, 0L).coerceIn(0L, 31_536_000L),
+        durationSeconds = preferences.getLong(KEY_THRESHOLD_ALERT_SESSION_DURATION_SECONDS, 0L).coerceIn(0L, 31_536_000L),
+        maxRegistrations = preferences.getInt(KEY_THRESHOLD_ALERT_MAX_REGISTRATIONS, 0).coerceIn(0, MAX_AUTOMATIC_ACQUISITIONS),
         sound =
             when (
                 val storedSound =
@@ -221,6 +225,10 @@ internal fun saveThresholdAlertSettings(
                 KEY_THRESHOLD_ALERT_REPEAT_SECONDS,
                 settings.repeatSeconds
             )
+            .putBoolean(KEY_THRESHOLD_ALERT_RECORD_EVENTS, settings.recordEvents)
+            .putLong(KEY_THRESHOLD_ALERT_START_DELAY_SECONDS, settings.startDelaySeconds)
+            .putLong(KEY_THRESHOLD_ALERT_SESSION_DURATION_SECONDS, settings.durationSeconds)
+            .putInt(KEY_THRESHOLD_ALERT_MAX_REGISTRATIONS, settings.maxRegistrations)
             .putString(
                 KEY_THRESHOLD_ALERT_SOUND,
                 settings.sound.name

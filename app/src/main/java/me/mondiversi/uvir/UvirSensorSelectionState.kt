@@ -6,6 +6,7 @@ import java.util.Locale
 internal const val ASSOCIATED_SENSOR_IDS_KEY = "associated_sensor_ids"
 internal const val KEY_MANUAL_ACQUISITION_NOTE = "manual_acquisition_note"
 internal const val ASSOCIATE_NEW_SENSOR_REQUEST = "__associate_new_sensor__"
+internal const val NO_SENSOR_SELECTED_REQUEST = "__no_sensor_selected__"
 
 internal fun normalizeSensorDeviceId(deviceId: String): String =
     deviceId.trim().lowercase(Locale.ROOT)
@@ -40,7 +41,11 @@ internal val sensorConfigurationPreferenceKeys: List<String> =
         KEY_AUTO_EXTERNAL_COMMAND,
         KEY_AUTO_CONDITIONAL_ENABLED, KEY_AUTO_CONDITIONAL_MATCH, KEY_AUTO_CONDITIONAL_ACTION,
         KEY_AUTO_CONDITIONAL_RULES,
-        KEY_THRESHOLD_ALERT_REPEAT_SECONDS, KEY_THRESHOLD_ALERT_DURATION_SECONDS,
+        KEY_THRESHOLD_ALERT_REPEAT_SECONDS, KEY_THRESHOLD_ALERT_RECORD_EVENTS,
+        KEY_THRESHOLD_ALERT_START_DELAY_SECONDS,
+        KEY_THRESHOLD_ALERT_SESSION_DURATION_SECONDS,
+        KEY_THRESHOLD_ALERT_MAX_REGISTRATIONS,
+        KEY_THRESHOLD_ALERT_DURATION_SECONDS,
         KEY_THRESHOLD_ALERT_SOUND, KEY_THRESHOLD_ALERT_VOLUME,
         KEY_THRESHOLD_ALERT_CHANNEL, KEY_THRESHOLD_ALERT_DIRECTION, KEY_THRESHOLD_ALERT_VALUE
     ) + ThresholdAlertMetric.entries.flatMap { metric ->
@@ -53,13 +58,39 @@ internal val sensorSelectionPreferenceKeys: List<String> =
 private fun sensorContextPrefix(deviceId: String): String =
     SENSOR_CONTEXT_PREFIX + normalizeSensorDeviceId(deviceId) + "."
 
+/** Address one saved value without activating that sensor in the UI. */
+internal fun sensorContextPreferenceKey(deviceId: String, key: String): String =
+    sensorContextPrefix(deviceId) + key
+
+/** Read a profile's next connection choice without activating or modifying it. */
+internal fun loadSensorContextConnectionMode(
+    preferences: SharedPreferences,
+    deviceId: String,
+    selectedDeviceId: String,
+    currentMode: SensorConnectionMode
+): SensorConnectionMode =
+    if (normalizeSensorDeviceId(deviceId) == normalizeSensorDeviceId(selectedDeviceId)) {
+        currentMode
+    } else {
+        SensorConnectionMode.fromStoredValue(
+            preferences.getString(sensorContextPreferenceKey(deviceId, KEY_SENSOR_CONNECTION_MODE), null)
+        )
+    }
+
 /** Phone-only drafts and last-known operational state, never a command to the chip. */
-internal fun saveSelectedSensorContext(preferences: SharedPreferences, deviceId: String): Boolean {
+internal fun saveSelectedSensorContext(
+    preferences: SharedPreferences, deviceId: String,
+    preserveSensorReadback: Boolean = false
+): Boolean {
     if (deviceId.isBlank()) return true
     val values = preferences.all
     val prefix = sensorContextPrefix(deviceId)
     val editor = preferences.edit()
+    val reportedKeys = setOf(KEY_AUTO_SESSION_ID, KEY_AUTO_ENABLED, KEY_AUTO_COMPLETED_COUNT,
+        KEY_AUTO_NEXT_SAVE_MS, KEY_AUTO_END_MS, KEY_AUTO_CONDITIONAL_PLAN, KEY_AUTO_CONDITIONAL_WAITING)
     sensorSelectionPreferenceKeys.forEach { key ->
+        // A final frame may have been persisted while the old UI was being disposed.
+        if (preserveSensorReadback && key in reportedKeys && values.containsKey(prefix + key)) return@forEach
         editor.remove(prefix + key)
         values[key]?.let { editor.putSensorContextValue(prefix + key, it) }
     }

@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
@@ -16,6 +17,7 @@ import androidx.compose.ui.unit.dp
 /** Clip before the indication: the normal press effect covers the card, including
  * its padding, without spilling beyond rounded corners. No new ripple colors. */
 @OptIn(ExperimentalFoundationApi::class)
+@Composable
 internal fun Modifier.uvirRecordListPressTarget(
     onClick: () -> Unit,
     onLongClick: () -> Unit
@@ -29,6 +31,10 @@ internal val UvirRecordSessionItemGap = 5.dp
 // Header and record cards share the same horizontal footprint, outside the rail.
 internal val UvirRecordSessionContentInset = 14.dp
 
+// The session badge sits on this same axis, covering the rail without changing
+// the horizontal start shared by the header date and the record cards.
+private val UvirRecordSessionRailCenter = 7.dp
+
 // The old 6 dp lower gap is split evenly; the leading inset mirrors the
 // disclosure arrow's inner spacing without shifting its trailing alignment.
 internal val UvirRecordSessionHeaderContentPadding = PaddingValues(
@@ -37,12 +43,14 @@ internal val UvirRecordSessionHeaderContentPadding = PaddingValues(
 
 /** Apply before content padding so the whole session title row is interactive.
  * The caller supplies the same action for the row and its selection checkbox. */
+@Composable
 internal fun Modifier.uvirRecordSessionHeaderPressTarget(
     onClick: () -> Unit
 ): Modifier = uvirRecordSessionHeaderPressTarget(onClick, onLongClick = null)
 
 /** A long press selects the session, while the normal tap keeps its open action. */
 @OptIn(ExperimentalFoundationApi::class)
+@Composable
 internal fun Modifier.uvirRecordSessionHeaderPressTarget(
     onClick: () -> Unit,
     onLongClick: (() -> Unit)?
@@ -55,8 +63,11 @@ internal fun Modifier.uvirRecordSessionRail(
     color: Color, isFirst: Boolean, isLast: Boolean
 ): Modifier = drawBehind {
     val stroke = 3.dp.toPx()
-    val x = if (layoutDirection == LayoutDirection.Ltr) 4.dp.toPx()
-        else size.width - 4.dp.toPx()
+    val x = if (layoutDirection == LayoutDirection.Ltr) {
+        UvirRecordSessionRailCenter.toPx()
+    } else {
+        size.width - UvirRecordSessionRailCenter.toPx()
+    }
     drawLine(
         color = color,
         start = Offset(x, if (isFirst) stroke / 2f else 0f),

@@ -1,12 +1,7 @@
 package me.mondiversi.uvir
 
-import android.app.Activity
-import android.content.ClipData
 import android.content.Context
-import android.content.Intent
-import androidx.core.content.FileProvider
 import java.io.File
-import java.util.Locale
 
 internal fun thresholdAlertLogCsv(
     context: Context,
@@ -184,34 +179,19 @@ internal fun shareThresholdAlertLog(
     val exportFormatting = uvirExportFormatting(context)
     val exportContext = exportFormatting.context
     val numericFormat = exportFormatting.numericFormat
-    val sharedDirectory =
-        File(
-            context.cacheDir,
-            "shared"
-        ).apply {
-            mkdirs()
-        }
     val baseName =
         uvirExportBaseName(
             UvirExportContent.ALERTS
         )
 
     fun writeSharedFile(
-        extension: String,
+        fileFormat: UvirExportFileFormat,
         content: String
     ): File =
-        File(
-            sharedDirectory,
-            "$baseName.$extension"
-        ).apply {
-            writeText(content, Charsets.UTF_8)
-        }
-
-    fun sharedUri(file: File) =
-        FileProvider.getUriForFile(
-            context,
-            "${context.packageName}.fileprovider",
-            file
+        prepareUvirTextExport(
+            context = context,
+            fileName = fileFormat.fileName(baseName),
+            text = content
         )
 
     val csvContent =
@@ -237,110 +217,42 @@ internal fun shareThresholdAlertLog(
             R.string.threshold_alert_export_subject
         )
 
-    val sendIntent =
+    val files =
         when (format) {
-            MeasurementShareFormat.CSV -> {
-                val file =
+            MeasurementShareFormat.CSV ->
+                listOf(
                     writeSharedFile(
-                        "csv",
+                        UvirExportFileFormat.CSV,
                         csvContent
                     )
-                val uri = sharedUri(file)
+                )
 
-                Intent(Intent.ACTION_SEND).apply {
-                    type = "text/csv"
-                    putExtra(Intent.EXTRA_SUBJECT, subject)
-                    putExtra(Intent.EXTRA_STREAM, uri)
-                    clipData =
-                        ClipData.newUri(
-                            context.contentResolver,
-                            file.name,
-                            uri
-                        )
-                    addFlags(
-                        Intent.FLAG_GRANT_READ_URI_PERMISSION
-                    )
-                }
-            }
-
-            MeasurementShareFormat.READABLE_TABLE -> {
-                val file =
+            MeasurementShareFormat.READABLE_TABLE ->
+                listOf(
                     writeSharedFile(
-                        "txt",
+                        UvirExportFileFormat.TXT,
                         readableContent
                     )
-                val uri = sharedUri(file)
+                )
 
-                Intent(Intent.ACTION_SEND).apply {
-                    type = "text/plain"
-                    putExtra(Intent.EXTRA_SUBJECT, subject)
-                    putExtra(Intent.EXTRA_STREAM, uri)
-                    clipData =
-                        ClipData.newUri(
-                            context.contentResolver,
-                            file.name,
-                            uri
-                        )
-                    addFlags(
-                        Intent.FLAG_GRANT_READ_URI_PERMISSION
-                    )
-                }
-            }
-
-            MeasurementShareFormat.BOTH -> {
-                val csvFile =
+            MeasurementShareFormat.BOTH ->
+                listOf(
                     writeSharedFile(
-                        "csv",
+                        UvirExportFileFormat.CSV,
                         csvContent
-                    )
-                val readableFile =
+                    ),
                     writeSharedFile(
-                        "txt",
+                        UvirExportFileFormat.TXT,
                         readableContent
                     )
-                val csvUri = sharedUri(csvFile)
-                val readableUri = sharedUri(readableFile)
-
-                Intent(Intent.ACTION_SEND_MULTIPLE).apply {
-                    type = "text/*"
-                    putExtra(Intent.EXTRA_SUBJECT, subject)
-                    putParcelableArrayListExtra(
-                        Intent.EXTRA_STREAM,
-                        arrayListOf(
-                            csvUri,
-                            readableUri
-                        )
-                    )
-                    clipData =
-                        ClipData.newUri(
-                            context.contentResolver,
-                            csvFile.name,
-                            csvUri
-                        ).apply {
-                            addItem(
-                                ClipData.Item(readableUri)
-                            )
-                        }
-                    addFlags(
-                        Intent.FLAG_GRANT_READ_URI_PERMISSION
-                    )
-                }
-            }
+                )
         }
 
-    val chooser =
-        Intent.createChooser(
-            sendIntent,
-            context.getString(
-                R.string.threshold_alert_log_share
-            )
-        )
-
-    if (context !is Activity) {
-        chooser.addFlags(
-            Intent.FLAG_ACTIVITY_NEW_TASK
-        )
-    }
-
-    context.startActivity(chooser)
+    deliverUvirExportFiles(
+        context = context,
+        files = files,
+        destination = UvirExportDestination.SHARE,
+        chooserTitle = context.getString(R.string.threshold_alert_log_share),
+        subject = subject
+    )
 }

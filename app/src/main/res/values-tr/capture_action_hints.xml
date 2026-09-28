@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="capture_hint_start">Ölçümü başlat</string>
+    <string name="capture_hint_stop">Ölçümü durdur</string>
+    <string name="alert_hint_start">Kaydı başlat</string>
+    <string name="alert_hint_stop">Kaydı durdur</string>
+</resources>

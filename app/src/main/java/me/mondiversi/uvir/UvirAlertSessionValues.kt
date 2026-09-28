@@ -1,15 +1,25 @@
 package me.mondiversi.uvir
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -56,7 +66,8 @@ internal fun AlertSessionValuesCard(
     onToggle: () -> Unit,
     cardColor: Color,
     primaryText: Color,
-    secondaryText: Color
+    secondaryText: Color,
+    onOpenAlert: ((ThresholdAlertLogEntry) -> Unit)? = null
 ) {
     UvirCollapsibleChartCard(
         iconViewMode = if (biologicalEffects) ViewMode.BIOLOGICAL_EFFECTS else ViewMode.IRRADIANCE,
@@ -83,15 +94,31 @@ internal fun AlertSessionValuesCard(
         secondaryText = secondaryText
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            modifier = Modifier.padding(vertical = 15.dp),
+            verticalArrangement = Arrangement.spacedBy(15.dp)
         ) {
             events.forEachIndexed { eventIndex, event ->
+                val chevronInteractionSource =
+                    remember(event.entry.id) { MutableInteractionSource() }
+                val chevronPressed by
+                    chevronInteractionSource.collectIsPressedAsState()
                 val sequence = event.entry.sessionSequence ?: eventIndex + 1
+                val elapsedText =
+                    sessionRecordElapsedText(
+                        currentTimestamp = event.entry.timestamp,
+                        previousTimestamp =
+                            events.getOrNull(eventIndex - 1)?.entry?.timestamp
+                    )
 
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(
+                                horizontal = 16.dp,
+                                vertical = 0.dp
+                            ),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
@@ -101,21 +128,68 @@ internal fun AlertSessionValuesCard(
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold
                     )
-                    Text(
-                        text = formatDateTime(
-                            event.entry.timestamp,
-                            LocalUvirDateFormat.current,
-                            LocalUvirTimeFormat.current
-                        ),
-                        color = secondaryText,
-                        fontSize = 11.sp,
-                        maxLines = 1
-                    )
+                    Column(
+                        horizontalAlignment = Alignment.End,
+                        verticalArrangement = Arrangement.spacedBy(0.dp)
+                    ) {
+                        Text(
+                            text = formatDateTime(
+                                event.entry.timestamp,
+                                LocalUvirDateFormat.current,
+                                LocalUvirTimeFormat.current
+                            ),
+                            color = secondaryText,
+                            fontSize = 11.sp,
+                            lineHeight = 12.sp,
+                            maxLines = 1
+                        )
+                        elapsedText?.let { elapsed ->
+                            Text(
+                                text = elapsed,
+                                color = secondaryText,
+                                fontSize = 10.sp,
+                                lineHeight = 10.sp,
+                                maxLines = 1
+                            )
+                        }
+                    }
+                    onOpenAlert?.let { openAlert ->
+                        Box(
+                            modifier =
+                                Modifier
+                                    .size(32.dp)
+                                    .clickable(
+                                        interactionSource =
+                                            chevronInteractionSource,
+                                        indication = null,
+                                        onClick = { openAlert(event.entry) }
+                                    ),
+                            contentAlignment = Alignment.CenterEnd
+                        ) {
+                            Box(
+                                modifier =
+                                    Modifier
+                                        .size(28.dp)
+                                        .background(
+                                            color = if (chevronPressed) {
+                                                secondaryText.copy(alpha = 0.10f)
+                                            } else {
+                                                Color.Transparent
+                                            },
+                                            shape = CircleShape
+                                        ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                UvirDisclosureChevron(tint = secondaryText)
+                            }
+                        }
+                    }
                 }
 
                 event.violations
                     .sortedBy { it.rule.metric.ordinal }
                     .forEach { violation ->
+                    Box(modifier = Modifier.padding(horizontal = 16.dp)) {
                         AlertViolationDataRow(
                             violation = violation,
                             qualityFlags = event.entry.qualityFlags,
@@ -123,9 +197,11 @@ internal fun AlertSessionValuesCard(
                             secondaryText = secondaryText
                         )
                     }
+                    }
 
                 if (eventIndex < events.lastIndex) {
                     HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 16.dp),
                         color = secondaryText.copy(alpha = 0.16f)
                     )
                 }
@@ -170,8 +246,8 @@ internal fun AlertViolationDataCard(
         secondaryText = secondaryText
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 15.dp),
+            verticalArrangement = Arrangement.spacedBy(15.dp)
         ) {
             violations
                 .sortedBy { it.rule.metric.ordinal }

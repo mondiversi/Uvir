@@ -84,6 +84,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
@@ -91,9 +92,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -148,16 +152,18 @@ fun UvirHomeActionButton(
     Box(
         modifier = modifier.size(42.dp)
     ) {
+        val shape = RoundedCornerShape(11.dp)
         Surface(
-            onClick = onClick,
             modifier =
                 Modifier
                     .matchParentSize()
-                    .semantics {
-                        this.contentDescription =
-                            contentDescription
-                    },
-            shape = RoundedCornerShape(11.dp),
+                    .clip(shape)
+                    .clickable(onClick = onClick)
+                    .uvirAccessibleAction(
+                        label = contentDescription,
+                        onClick = onClick
+                    ),
+            shape = shape,
             color = cardColor,
             contentColor = primaryText
         ) {
@@ -215,7 +221,13 @@ fun UvirHomeActionButton(
                         .defaultMinSize(
                             minWidth = 18.dp,
                             minHeight = 18.dp
-                        ),
+                        )
+                        .pointerInput(onClick) {
+                            detectTapGestures {
+                                onClick()
+                            }
+                        }
+                        .clearAndSetSemantics {},
                 fontSize = badgeFontSize,
                 horizontalPadding = 4.dp,
                 shadowElevation = 2.dp
@@ -438,7 +450,7 @@ internal fun MeasurementDataChartSelector(
             LiveIslandModeIcon(
                 showChart = true,
                 tint = if (showChart) primaryText else secondaryText,
-                modifier = Modifier.size(UvirMeasurementSelectorIconSize)
+                modifier = Modifier.size(UvirMeasurementSelectorIconSize).testTag("measurement_chart_glyph")
             )
         }
     }
@@ -454,9 +466,14 @@ fun ViewModeButton(
     primaryText: Color,
     secondaryText: Color,
     enabled: Boolean = true,
+    minimumHeight: Dp? = null,
     content:
     @Composable () -> Unit
 ) {
+
+    val select: () -> Unit = {
+        onClick()
+    }
 
     val selectedColor =
         uvirSegmentedSelectedContainerColor(
@@ -466,9 +483,8 @@ fun ViewModeButton(
     Box(
         modifier =
             modifier
-                .height(
-                    40.dp
-                )
+                .then(if (minimumHeight == null) Modifier.height(40.dp)
+                    else Modifier.heightIn(min = minimumHeight))
                 .background(
                     if (selected)
                         selectedColor
@@ -501,12 +517,15 @@ fun ViewModeButton(
                         )
                 )
                 .clickable(enabled = enabled) {
-                    onClick()
+                    select()
                 }
-                .semantics {
-                    this.contentDescription =
-                        contentDescription
-                },
+                .uvirAccessibleAction(
+                    label = contentDescription,
+                    enabled = enabled,
+                    role = Role.Tab,
+                    selectedState = selected,
+                    onClick = select
+                ),
 
         contentAlignment =
             Alignment.Center
@@ -535,8 +554,9 @@ fun ElectromagneticWaveIcon(
         modifier =
             modifier.size(
                 iconSize
-            )
+            ).graphicsLayer(alpha = color.alpha)
     ) {
+        val color = color.copy(alpha = 1f)
 
         val midY =
             size.height / 2f
@@ -612,8 +632,9 @@ fun DnaIcon(
         modifier =
             modifier.size(
                 iconSize
-            )
+            ).graphicsLayer(alpha = color.alpha)
     ) {
+        val color = color.copy(alpha = 1f)
 
         val left =
             Path()

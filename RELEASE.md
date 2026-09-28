@@ -5,7 +5,8 @@
 - Nome visibile: `Uvir`
 - Application ID: `me.mondiversi.uvir`
 - Namespace: `me.mondiversi.uvir`
-- Versione corrente: `1.1.0` (`versionCode` 2)
+- Versione corrente: `1.3.0` (`versionCode` 4)
+- Firmware sensore: `0.5.103`
 
 ## Creazione dell'APK
 
@@ -14,15 +15,20 @@ Fare doppio clic su `CREA_APK_RELEASE.bat`.
 Al termine, l'APK firmato e pronto per la distribuzione si trova in:
 
 ```text
-dist\Uvir-1.1.0-release.apk
+dist\Uvir-1.3.0-release.apk
 ```
 
 Nella stessa cartella viene generato anche il file
-`Uvir-1.1.0-release.apk.sha256`, utile per verificare che il download non sia
+`Uvir-1.3.0-release.apk.sha256`, utile per verificare che il download non sia
 stato alterato o danneggiato.
 
 Il file può essere allegato a una GitHub Release oppure distribuito da un sito.
 Non è necessario pubblicare il progetto sorgente per distribuire l'APK.
+
+Per la pubblicazione completa (APK, firmware USB, indice firmato e impronte),
+seguire [docs/UPDATES.md](docs/UPDATES.md). Pubblicare la release solo dopo
+aver caricato tutti i file. La verifica fisica del sensore UV AS7331 resta
+da completare quando il componente sarà disponibile.
 
 ## Firma e aggiornamenti
 

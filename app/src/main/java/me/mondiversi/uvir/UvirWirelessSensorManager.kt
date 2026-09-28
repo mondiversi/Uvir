@@ -82,7 +82,20 @@ data class UvirWirelessSensorState(
  * Provisioning data is learned from the ESP32 over USB. Only one worker and
  * one transport can be active, which prevents duplicate streams and samples.
  */
-class UvirWirelessSensorManager(context: Context) {
+class UvirWirelessSensorManager(
+    context: Context,
+    private val boundDeviceId: String? = null
+) {
+    private fun loadCredentials(): UvirSensorCredentials =
+        boundDeviceId?.let { UvirSensorCredentialStore.loadForDevice(applicationContext, it) }
+            ?: if (boundDeviceId == null) UvirSensorCredentialStore.load(applicationContext)
+            else UvirSensorCredentials()
+
+    private fun saveCredentials(credentials: UvirSensorCredentials): Boolean =
+        if (boundDeviceId == null) UvirSensorCredentialStore.save(applicationContext, credentials)
+        else if (credentials.deviceId.equals(boundDeviceId, ignoreCase = true))
+            UvirSensorCredentialStore.updateAssociatedSensor(applicationContext, credentials)
+        else false
     private val applicationContext = context.applicationContext
     private val executor: ExecutorService = Executors.newSingleThreadExecutor()
     private val generation = AtomicInteger(0)
@@ -114,11 +127,8 @@ class UvirWirelessSensorManager(context: Context) {
     @Volatile
     private var activeProtocolOutput: OutputStream? = null
 
-    @Volatile
-    private var expectedWirelessMode: SensorConnectionMode? = null
-
-    @Volatile
-    private var wirelessModeAcknowledgement: CountDownLatch? = null
+    private val wirelessModeAcknowledgement =
+        java.util.concurrent.atomic.AtomicReference<UvirConnectionModeAcknowledgement?>(null)
 
     @Volatile
     private var expectedRadioSettings: SensorRadioSettings? = null
@@ -292,7 +302,8 @@ class UvirWirelessSensorManager(context: Context) {
         if (
             desiredStreaming &&
             mutableState.value.status !=
-            WirelessSensorConnectionStatus.CONNECTED
+            WirelessSensorConnectionStatus.CONNECTED &&
+            worker?.isDone != false
         ) {
             restartWorker()
         }
@@ -304,49 +315,47 @@ class UvirWirelessSensorManager(context: Context) {
      * an already paired sensor can move between Wi-Fi and Bluetooth without
      * being physically reconnected first.
      */
-    @Synchronized
     fun requestWirelessModeAndAwait(
         mode: SensorConnectionMode,
-        timeoutMs: Long = WIRELESS_MODE_ACK_TIMEOUT_MS
+        timeoutMs: Long = 1_500L,
+        deviceId: String = loadCredentials().deviceId
     ): Boolean {
+        val command = mode.wirelessHandoverCommand() ?: return false
         val currentMode = desiredMode
+        val current = mutableState.value
         if (
             !desiredStreaming ||
             currentMode == null ||
-            currentMode == mode ||
-            mutableState.value.status !=
-            WirelessSensorConnectionStatus.CONNECTED
+            current.status != WirelessSensorConnectionStatus.CONNECTED ||
+            deviceId.isBlank() ||
+            normalizeSensorDeviceId(current.deviceId.orEmpty()) != normalizeSensorDeviceId(deviceId)
         ) {
             return false
         }
-
         val output = activeProtocolOutput ?: return false
-        val command = when (mode) {
-            SensorConnectionMode.USB -> "WIRELESS OFF"
-            SensorConnectionMode.WIFI -> "WIRELESS WIFI"
-            SensorConnectionMode.BLUETOOTH -> "WIRELESS BLUETOOTH"
-            SensorConnectionMode.INTERNET -> "WIRELESS INTERNET"
-        }
-        val acknowledgement = CountDownLatch(1)
-        expectedWirelessMode = mode
-        wirelessModeAcknowledgement = acknowledgement
-
+        if (currentMode == mode) return true
+        val transportGeneration = generation.get()
+        val acknowledgement = UvirConnectionModeAcknowledgement(deviceId, mode)
+        if (!wirelessModeAcknowledgement.compareAndSet(null, acknowledgement)) return false
         return try {
-            writeLine(output, command)
-            acknowledgement.await(
-                timeoutMs.coerceIn(
-                    WIRELESS_MODE_ACK_TIMEOUT_MS,
-                    MAXIMUM_WIRELESS_MODE_ACK_TIMEOUT_MS
-                ),
-                TimeUnit.MILLISECONDS
-            )
-        } catch (_: Exception) {
+            // Keep only the short write serialized. Waiting must not lock the
+            // manager: background multisensor refresh and UI stay responsive.
+            synchronized(outputWriteLock) {
+                val state = mutableState.value
+                if (generation.get() != transportGeneration || activeProtocolOutput !== output ||
+                    desiredMode != currentMode || !desiredStreaming ||
+                    state.status != WirelessSensorConnectionStatus.CONNECTED ||
+                    normalizeSensorDeviceId(state.deviceId.orEmpty()) != normalizeSensorDeviceId(deviceId)
+                ) return false
+                writeLine(output, command)
+            }
+            acknowledgement.await(wirelessHandoverTimeoutMs(timeoutMs))
+        } catch (error: Exception) {
+            if (error is InterruptedException) throw error
             false
         } finally {
-            if (wirelessModeAcknowledgement === acknowledgement) {
-                wirelessModeAcknowledgement = null
-                expectedWirelessMode = null
-            }
+            acknowledgement.reject()
+            wirelessModeAcknowledgement.compareAndSet(acknowledgement, null)
         }
     }
 
@@ -355,16 +364,16 @@ class UvirWirelessSensorManager(context: Context) {
         target: SensorRadioSettings
     ): Boolean {
         val state = mutableState.value
-        if (
-            state.status != WirelessSensorConnectionStatus.CONNECTED ||
-            !target.hasWirelessTransport
-        ) {
+        if (!target.hasWirelessTransport) return false
+        if (state.status != WirelessSensorConnectionStatus.CONNECTED) {
+            sendSensorControlCommands(listOf("RADIO WIFI ${if (target.wifiEnabled) "ON" else "OFF"}",
+                "RADIO BLUETOOTH ${if (target.bluetoothEnabled) "ON" else "OFF"}"))
             return false
         }
 
         val output = activeProtocolOutput ?: return false
         val credentials =
-            UvirSensorCredentialStore.load(applicationContext)
+            loadCredentials()
         var current =
             SensorRadioSettings(
                 wifiEnabled = credentials.wifiEnabled,
@@ -393,12 +402,10 @@ class UvirWirelessSensorManager(context: Context) {
                             SensorConnectionMode.INTERNET -> return false
                             SensorConnectionMode.USB -> return false
                         }
-                    writeLine(
-                        output,
+                    if (!sendSensorControlCommands(listOf(
                         "RADIO $transportName " +
                             if (change.enabled) "ON" else "OFF"
-                    )
-                    acknowledgement.await(
+                    ))) false else acknowledgement.await(
                         RADIO_SETTINGS_ACK_TIMEOUT_MS,
                         TimeUnit.MILLISECONDS
                     )
@@ -435,11 +442,11 @@ class UvirWirelessSensorManager(context: Context) {
                 ?: return false
         val currentState = mutableState.value
         if (currentState.status != WirelessSensorConnectionStatus.CONNECTED) {
-            return false
+            return sendSensorControlCommands(listOf(configuration.protocolCommand))
         }
 
         val output = activeProtocolOutput ?: return false
-        val current = UvirSensorCredentialStore.load(applicationContext)
+        val current = loadCredentials()
         if (!current.isProvisioned) {
             return false
         }
@@ -448,8 +455,7 @@ class UvirWirelessSensorManager(context: Context) {
         wifiConfigurationAcknowledgement = acknowledgement
         val acknowledged =
             try {
-                writeLine(output, configuration.protocolCommand)
-                acknowledgement.await(
+                sendSensorControlCommands(listOf(configuration.protocolCommand)) && acknowledgement.await(
                     WIFI_CONFIGURATION_ACK_TIMEOUT_MS,
                     TimeUnit.MILLISECONDS
                 )
@@ -468,9 +474,7 @@ class UvirWirelessSensorManager(context: Context) {
             return false
         }
 
-        UvirSensorCredentialStore.save(
-            applicationContext,
-            current.copy(
+        saveCredentials(current.copy(
                 wifiSsid = configuration.ssid,
                 wifiPassword = configuration.password,
                 wifiHost = ""
@@ -488,18 +492,17 @@ class UvirWirelessSensorManager(context: Context) {
             mutableState.value.status !=
                 WirelessSensorConnectionStatus.CONNECTED
         ) {
-            return false
+            return sendSensorControlCommands(listOf(configuration.protocolCommand))
         }
         val output = activeProtocolOutput ?: return false
-        val current = UvirSensorCredentialStore.load(applicationContext)
+        val current = loadCredentials()
         if (!current.isProvisioned) return false
 
         val acknowledgement = CountDownLatch(1)
         internetConfigurationAcknowledgement = acknowledgement
         val acknowledged =
             try {
-                writeLine(output, configuration.protocolCommand)
-                acknowledgement.await(
+                sendSensorControlCommands(listOf(configuration.protocolCommand)) && acknowledgement.await(
                     INTERNET_CONFIGURATION_ACK_TIMEOUT_MS,
                     TimeUnit.MILLISECONDS
                 )
@@ -515,9 +518,7 @@ class UvirWirelessSensorManager(context: Context) {
             }
         if (!acknowledged) return false
 
-        UvirSensorCredentialStore.save(
-            applicationContext,
-            current.withInternetConfiguration(configuration)
+        saveCredentials(current.withInternetConfiguration(configuration)
         )
         return true
     }
@@ -525,16 +526,41 @@ class UvirWirelessSensorManager(context: Context) {
     fun sendSensorControlCommands(
         commands: List<String>
     ): Boolean {
-        if (
-            mutableState.value.status !=
-            WirelessSensorConnectionStatus.CONNECTED
-        ) {
-            return false
+        val state = mutableState.value
+        return sendDatedSensorSettings(applicationContext, state.deviceId.orEmpty().ifBlank { state.runtimeInfo.deviceId }, state.runtimeInfo, commands) { raw ->
+            val output = activeProtocolOutput
+            if (state.status != WirelessSensorConnectionStatus.CONNECTED || output == null) false
+            else runCatching { raw.forEach { writeLine(output, it) }; true }.getOrDefault(false)
         }
+    }
+
+    internal fun replayPendingSettings(deviceId: String, pending: UvirPendingSensorSettings): Boolean {
+        val state = mutableState.value
         val output = activeProtocolOutput ?: return false
+        return state.status == WirelessSensorConnectionStatus.CONNECTED && state.appConnectionConfirmed &&
+            state.deviceId.orEmpty().equals(deviceId, ignoreCase = true) &&
+            runCatching { writeLine(output, pending.protocolCommand()); true }.getOrDefault(false)
+    }
+
+    internal fun sendDiagnosticControlCommands(
+        hardwareId: String, mode: SensorConnectionMode, commands: List<String>,
+        requireIdle: Boolean = false
+    ): Boolean {
+        val output = activeProtocolOutput ?: return false
+        fun targetStillMatches(): Boolean {
+            val state = mutableState.value
+            return (!requireIdle || uvirSensorRuntimeIdle(state.runtimeInfo)) &&
+                activeProtocolOutput === output && state.mode == mode && uvirDiagnosticPeerMatches(
+                hardwareId, state.deviceId.orEmpty(),
+                state.status == WirelessSensorConnectionStatus.CONNECTED, state.appConnectionConfirmed
+            )
+        }
+        if (!targetStillMatches()) return false
         return runCatching {
-            commands.forEach { writeLine(output, it) }
-            true
+            commands.all { command ->
+                if (!targetStillMatches()) false
+                else { writeLine(output, command); true }
+            }
         }.getOrDefault(false)
     }
 
@@ -552,7 +578,7 @@ class UvirWirelessSensorManager(context: Context) {
                     current.appConnectionConfirmed && current.mode == mode &&
                     current.deviceId.equals(hardwareId, ignoreCase = true)
             },
-            send = { sendSensorControlCommands(listOf(it)) }
+            send = { sendDiagnosticControlCommands(hardwareId, mode, listOf(it)) }
         )
     }
 
@@ -599,17 +625,19 @@ class UvirWirelessSensorManager(context: Context) {
             timeoutMs = timeoutMs
         )
 
-    fun restoreDefaultsAndPowerOffAwait(timeoutMs: Long): Boolean =
+    fun restoreDefaultsAndPowerOffAwait(timeoutMs: Long, expectedHardwareUid: String? = null): Boolean =
         sendStatusTestAndAwait(
             command = "FACTORY_RESET",
             expectedField = "factory_reset",
-            timeoutMs = timeoutMs
+            timeoutMs = timeoutMs,
+            expectedHardwareUid = expectedHardwareUid
         )
 
     private fun sendStatusTestAndAwait(
         command: String,
         expectedField: String,
-        timeoutMs: Long
+        timeoutMs: Long,
+        expectedHardwareUid: String? = null
     ): Boolean {
         if (
             mutableState.value.status !=
@@ -623,7 +651,11 @@ class UvirWirelessSensorManager(context: Context) {
         statusTestExpectedField = expectedField
         statusTestAcknowledgement = acknowledgement
         return try {
-            writeLine(output, command)
+            if (expectedHardwareUid != null) {
+                val mode = mutableState.value.mode ?: return false
+                if (!sendDiagnosticControlCommands(expectedHardwareUid, mode,
+                        listOf(command), requireIdle = true)) return false
+            } else writeLine(output, command)
             acknowledgement.await(
                 timeoutMs.coerceIn(1_000L, 15_000L),
                 TimeUnit.MILLISECONDS
@@ -722,13 +754,14 @@ class UvirWirelessSensorManager(context: Context) {
         mode: SensorConnectionMode,
         currentGeneration: Int
     ) {
+        val wifiDiscoveryLog = UvirWifiDiscoveryLogEpisode()
         while (
             desiredStreaming &&
             desiredMode == mode &&
             generation.get() == currentGeneration &&
             !Thread.currentThread().isInterrupted
         ) {
-            val credentials = UvirSensorCredentialStore.load(applicationContext)
+            val credentials = loadCredentials()
             if (!credentials.isProvisioned) {
                 mutableState.value = UvirWirelessSensorState(
                     status = WirelessSensorConnectionStatus.PROVISIONING_REQUIRED,
@@ -745,8 +778,30 @@ class UvirWirelessSensorManager(context: Context) {
 
             try {
                 when (mode) {
-                    SensorConnectionMode.WIFI ->
-                        connectWifi(credentials, mode, currentGeneration)
+                    SensorConnectionMode.WIFI -> {
+                        val discovered = connectWifi(
+                            credentials,
+                            mode,
+                            currentGeneration
+                        ) {
+                            wifiDiscoveryLog.onDiscovered()?.let { message ->
+                                UvirErrorLog.record(
+                                    applicationContext,
+                                    "wireless_wifi_discovery",
+                                    message
+                                )
+                            }
+                        }
+                        if (!discovered) {
+                            wifiDiscoveryLog.onMiss()?.let { message ->
+                                UvirErrorLog.record(
+                                    applicationContext,
+                                    "wireless_wifi_discovery",
+                                    message
+                                )
+                            }
+                        }
+                    }
 
                     SensorConnectionMode.BLUETOOTH ->
                         connectBluetooth(credentials, mode, currentGeneration)
@@ -803,19 +858,19 @@ class UvirWirelessSensorManager(context: Context) {
     private fun connectWifi(
         credentials: UvirSensorCredentials,
         mode: SensorConnectionMode,
-        currentGeneration: Int
-    ) {
+        currentGeneration: Int,
+        onDiscovered: () -> Unit
+    ): Boolean {
         if (credentials.wifiSsid.isBlank()) {
             throw IllegalStateException("wifi_not_configured")
         }
 
         val discoveredHost = discoverWifiSensor(credentials)
-            ?: throw IllegalStateException("wifi_sensor_not_found")
+            ?: return false
+        onDiscovered()
 
         if (discoveredHost != credentials.wifiHost) {
-            UvirSensorCredentialStore.save(
-                applicationContext,
-                credentials.copy(wifiHost = discoveredHost)
+            saveCredentials(credentials.copy(wifiHost = discoveredHost)
             )
         }
 
@@ -825,6 +880,7 @@ class UvirWirelessSensorManager(context: Context) {
             mode,
             currentGeneration
         )
+        return true
     }
 
     private fun connectWifiAtHost(
@@ -990,12 +1046,16 @@ class UvirWirelessSensorManager(context: Context) {
                     json.optString("protocol") == PROTOCOL_NAME &&
                     json.optString("type") == "discovery" &&
                     json.optString("device_id") == credentials.deviceId &&
-                    json.optString("nonce") == nonce &&
-                    MessageDigest.isEqual(
+                    json.optString("nonce") == nonce
+                ) {
+                    if (!MessageDigest.isEqual(
                         json.optString("proof").hexToBytes(),
                         expectedProof
-                    )
-                ) {
+                    )) {
+                        throw IllegalStateException(
+                            "wifi_discovery_authentication_failed"
+                        )
+                    }
                     return response.address.hostAddress
                 }
             }
@@ -1265,12 +1325,16 @@ class UvirWirelessSensorManager(context: Context) {
             }
         }
 
-        if (parseSensorSyncFrame(json, SensorSyncSource.WIRELESS)) {
+        if ((isSynchronizationFrame || frameType == "acquisition_event" ||
+                frameType == "automatic_status" || frameType == "alert_event") &&
+            !mutableState.value.deviceId.orEmpty().equals(credentials.deviceId, ignoreCase = true)) return
+
+        if (parseSensorSyncFrame(json, SensorSyncSource.WIRELESS, credentials.deviceId)) {
             return
         }
         if (
             desiredSampling &&
-            parseSensorRuntimeFrame(json, SensorSyncSource.WIRELESS)
+            parseSensorRuntimeFrame(json, SensorSyncSource.WIRELESS, credentials.deviceId)
         ) {
             return
         }
@@ -1313,7 +1377,7 @@ class UvirWirelessSensorManager(context: Context) {
                 // this connection remained alive, so never merge a HELLO into
                 // the stale snapshot or MQTT credentials could be rolled back.
                 val currentCredentials =
-                    UvirSensorCredentialStore.load(applicationContext)
+                    loadCredentials()
                 val updatedCredentials =
                     currentCredentials.copy(
                         firmwareVersion = firmwareVersion,
@@ -1350,9 +1414,7 @@ class UvirWirelessSensorManager(context: Context) {
                     )
 
                 if (updatedCredentials != currentCredentials) {
-                    UvirSensorCredentialStore.save(
-                        applicationContext,
-                        updatedCredentials
+                    saveCredentials(updatedCredentials
                     )
                 }
 
@@ -1424,16 +1486,16 @@ class UvirWirelessSensorManager(context: Context) {
                 acknowledgeRadioSettings(json)
                 acknowledgeWirelessMode(json)
                 val previous = mutableState.value
+                val confirmed = when {
+                    json.has("app_connected") -> json.optBoolean("app_connected")
+                    json.optBoolean("streaming", false) -> true
+                    else -> previous.appConnectionConfirmed
+                }
+                UvirSensorConnectionHistory.recordIfStarted(applicationContext,
+                    previous.deviceId.orEmpty(), mode, previous.appConnectionConfirmed, confirmed)
                 mutableState.value =
                     previous.copy(
-                        appConnectionConfirmed =
-                            when {
-                                json.has("app_connected") ->
-                                    json.optBoolean("app_connected")
-
-                                json.optBoolean("streaming", false) -> true
-                                else -> previous.appConnectionConfirmed
-                            },
+                        appConnectionConfirmed = confirmed,
                         runtimeInfo =
                             previous.runtimeInfo.updatedFrom(json),
                         debugPerformanceCompletionSequence =
@@ -1450,6 +1512,15 @@ class UvirWirelessSensorManager(context: Context) {
             }
             "error" -> {
                 val code = json.optString("code", "sensor_error")
+                if (isWirelessHandoverRejection(code) &&
+                    wirelessModeAcknowledgement.get()?.reject() == true
+                ) {
+                    // A rejected mode is not a broken connection. Keep the old
+                    // authenticated radio alive so the user can correct it.
+                    UvirErrorLog.record(applicationContext, "wireless_handover:$code",
+                        json.optString("message", code))
+                    return
+                }
                 if (
                     code == "auth_required" &&
                     mode == SensorConnectionMode.INTERNET
@@ -1492,6 +1563,10 @@ class UvirWirelessSensorManager(context: Context) {
     private fun parseAlertEvent(json: JSONObject) {
         val details = json.optString("details")
         if (details.isBlank()) return
+        UvirSensorEventHub.emitLiveAlert(
+            mutableState.value.deviceId.orEmpty(), SensorSyncSource.WIRELESS,
+            json.toUvirLiveAlert(alertReceiptSequence.incrementAndGet()), json.uvirQualityFlags()
+        )
         Log.i("UvirAlert", "Wireless live alert event received")
         mutableState.value =
             mutableState.value.copy(
@@ -1504,7 +1579,8 @@ class UvirWirelessSensorManager(context: Context) {
                                 .takeIf { it > 0L }
                                 ?: System.currentTimeMillis(),
                         details = details,
-                        sessionId = json.optLong("session_id", 0L)
+                        sessionId = json.optLong("session_id", 0L),
+                        recorded = json.optBoolean("recorded", true)
                     )
             )
     }
@@ -1525,7 +1601,7 @@ class UvirWirelessSensorManager(context: Context) {
         // credentials) immediately after a successful configuration save.
         // Always merge sensor-reported availability into the latest durable
         // copy instead.
-        val current = UvirSensorCredentialStore.load(applicationContext)
+        val current = loadCredentials()
         val updated =
             current.copy(
                 wifiEnabled =
@@ -1560,26 +1636,15 @@ class UvirWirelessSensorManager(context: Context) {
                     )
             )
         if (updated != current) {
-            UvirSensorCredentialStore.save(
-                applicationContext,
-                updated
+            saveCredentials(updated
             )
         }
     }
 
     private fun acknowledgeWirelessMode(json: JSONObject) {
-        val reportedMode =
-            when (json.optString("wireless_mode").lowercase()) {
-                "wifi" -> SensorConnectionMode.WIFI
-                "bluetooth" -> SensorConnectionMode.BLUETOOTH
-                "internet" -> SensorConnectionMode.INTERNET
-                "off" -> SensorConnectionMode.USB
-                else -> null
-            }
-
-        if (reportedMode == expectedWirelessMode) {
-            wirelessModeAcknowledgement?.countDown()
-        }
+        wirelessModeAcknowledgement.get()?.confirm(
+            mutableState.value.deviceId.orEmpty(), json.optString("wireless_mode")
+        )
     }
 
     private fun acknowledgeRadioSettings(json: JSONObject) {
@@ -1634,6 +1699,9 @@ class UvirWirelessSensorManager(context: Context) {
 
     private fun parseSample(json: JSONObject, mode: SensorConnectionMode) {
         val sample = json.toUvirSensorSampleOrNull() ?: return
+        val previous = mutableState.value
+        UvirSensorConnectionHistory.recordIfStarted(applicationContext,
+            previous.deviceId.orEmpty(), mode, previous.appConnectionConfirmed, true)
 
         mutableState.value = mutableState.value.copy(
             status = WirelessSensorConnectionStatus.CONNECTED,
@@ -1663,6 +1731,7 @@ class UvirWirelessSensorManager(context: Context) {
 
     @Synchronized
     private fun closeTransport() {
+        wirelessModeAcknowledgement.get()?.reject()
         automaticStopConfirmed = false
         automaticStopAcknowledgement?.countDown()
         statusTestConfirmed = false
@@ -1759,8 +1828,6 @@ class UvirWirelessSensorManager(context: Context) {
         private const val INPUT_BUFFER_SIZE = 2048
         private const val INPUT_POLL_INTERVAL_MS = 20L
         private const val OFFLINE_SYNC_RETRY_TIMEOUT_MS = 12_000L
-        private const val WIRELESS_MODE_ACK_TIMEOUT_MS = 1500L
-        private const val MAXIMUM_WIRELESS_MODE_ACK_TIMEOUT_MS = 120_000L
         private const val RADIO_SETTINGS_ACK_TIMEOUT_MS = 1500L
         private const val WIFI_CONFIGURATION_ACK_TIMEOUT_MS = 2000L
         private const val INTERNET_CONFIGURATION_ACK_TIMEOUT_MS = 3000L

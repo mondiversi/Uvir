@@ -1,13 +1,14 @@
-<?xml version="1.0" encoding="utf-8"?><!--
-   Sample backup rules file; uncomment and customize as necessary.
-   See https://developer.android.com/guide/topics/data/autobackup
-   for details.
-   Note: This file is ignored for devices older than API 31
-   See https://developer.android.com/about/versions/12/backup-restore
--->
+<?xml version="1.0" encoding="utf-8"?>
 <full-backup-content>
+    <exclude domain="sharedpref" path="uvir_updates.xml" />
+    <exclude domain="sharedpref" path="uvir_sensor_settings_pending.xml" />
     <!--
-   <include domain="sharedpref" path="."/>
-   <exclude domain="sharedpref" path="device.xml"/>
--->
+        Keep sensor authentication tokens and Wi-Fi, Bluetooth and MQTT
+        credentials out of Android Auto Backup on Android 11 and earlier.
+        Sensitive settings can still be transferred explicitly with Uvir's
+        encrypted settings export.
+    -->
+    <exclude
+        domain="sharedpref"
+        path="uvir_sensor_credentials.xml" />
 </full-backup-content>

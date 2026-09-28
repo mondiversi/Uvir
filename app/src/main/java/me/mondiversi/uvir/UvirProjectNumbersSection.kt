@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -23,7 +24,13 @@ private fun ProjectNumbersIcon(
     tint: Color,
     modifier: Modifier = Modifier
 ) {
-    Canvas(modifier = modifier.size(20.dp)) {
+    Canvas(
+        modifier =
+            modifier
+                .size(20.dp)
+                .graphicsLayer(alpha = tint.alpha)
+    ) {
+        val tint = tint.copy(alpha = 1f)
         val strokeWidth =
             maxOf(
                 1.6.dp.toPx(),
@@ -67,15 +74,17 @@ internal fun UvirProjectNumbersSection(
                 R.string.project_numbers_development_time_value,
             R.string.project_numbers_ai_use to
                 R.string.project_numbers_ai_use_value,
+            R.string.project_numbers_languages to
+                R.string.project_numbers_languages_value,
+            R.string.project_numbers_automated_tests to
+                R.string.project_numbers_automated_tests_value,
             R.string.project_numbers_prototype_cost to
-                R.string.project_numbers_prototype_cost_value,
-            R.string.project_numbers_traditional_work to
-                R.string.project_numbers_traditional_work_value,
-            R.string.project_numbers_time_saved to
-                R.string.project_numbers_time_saved_value
+                R.string.project_numbers_prototype_cost_value
         )
 
     SettingsSection(
+        highlightExpandedHeader = false,
+        showExpandedDivider = true,
         title = stringResource(R.string.project_numbers_title),
         containerColor = cardColor,
         titleColor = primaryText,
@@ -115,7 +124,11 @@ internal fun UvirProjectNumbersSection(
         }
 
         Text(
-            text = stringResource(R.string.project_numbers_estimate_note),
+            text =
+                stringResource(
+                    R.string.project_numbers_snapshot_note,
+                    BuildConfig.VERSION_NAME
+                ),
             color = secondaryText,
             fontSize = 11.sp
         )

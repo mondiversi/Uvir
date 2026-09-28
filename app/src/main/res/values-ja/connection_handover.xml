@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sensor_connection_switch_failed">接続方法の変更を確認できませんでした。以前の接続方法が選択されたままです。</string>
+</resources>

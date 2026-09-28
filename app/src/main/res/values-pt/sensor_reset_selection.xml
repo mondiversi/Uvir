@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sensor_reset_selection_title">Repor os sensores selecionados?</string>
+    <string name="sensor_reset_selection_message">Seleciona os sensores a repor. As suas definições, credenciais e dados não sincronizados serão eliminados; depois os sensores desligam-se. Os dados na aplicação não mudam. Só podes selecionar sensores ligados sem atividade em curso.</string>
+    <string name="sensor_reset_selection_failed">Falha na reposição: %1$s. Verifica a ligação e tenta novamente.</string>
+</resources>
+

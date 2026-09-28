@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="capture_hint_start">मापन शुरू करें</string>
+    <string name="capture_hint_stop">मापन रोकें</string>
+    <string name="alert_hint_start">रिकॉर्डिंग शुरू करें</string>
+    <string name="alert_hint_stop">रिकॉर्डिंग रोकें</string>
+</resources>

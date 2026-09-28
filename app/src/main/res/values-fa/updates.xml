@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="update_available">به‌روزرسانی موجود است</string>
+    <string name="update_none">به‌روزرسانی موجود نیست</string>
+    <string name="update_check_failed">بررسی به‌روزرسانی ناموفق بود. گزارش خطا را ببینید.</string>
+    <string name="update_app">به‌روزرسانی برنامه</string>
+    <string name="update_sensor">به‌روزرسانی حسگر</string>
+    <string name="update_app_first">ابتدا برنامه را به‌روز کنید.</string>
+    <string name="update_usb_required">این حسگر را انتخاب و با USB وصل کنید؛ بدون جلسه فعال و پس از همگام‌سازی همه رکوردها.</string>
+    <string name="update_download">دانلود و بررسی…</string>
+    <string name="update_flash">به‌روزرسانی حسگر…</string>
+    <string name="update_verify">بررسی حسگر…</string>
+    <string name="update_keep_connected">USB را جدا نکنید و حسگر را خاموش نکنید. در صورت نیاز BOOT را نگه دارید و دوباره تلاش کنید.</string>
+    <string name="update_done">حسگر به‌روز شد</string>
+    <string name="update_failed">به‌روزرسانی ناموفق بود. گزارش خطا را ببینید. اگر حسگر راه‌اندازی نشد، میان‌افزار را با USB از رایانه بازیابی کنید.</string>
+    <string name="update_permission">در تنظیمات Android به Uvir اجازه نصب به‌روزرسانی بدهید.</string>
+    <string name="update_whats_new">به‌روزرسانی امضاشده برنامه و حسگر، دانلود تأییدشده و بارگذاری میان‌افزار با USB.</string>
+</resources>

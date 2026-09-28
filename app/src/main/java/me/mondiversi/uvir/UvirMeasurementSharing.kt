@@ -1,10 +1,6 @@
 package me.mondiversi.uvir
 
-import android.app.Activity
-import android.content.ClipData
 import android.content.Context
-import android.content.Intent
-import androidx.core.content.FileProvider
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -48,8 +44,8 @@ internal val MEASUREMENT_EXPORT_COLUMNS_IT =
         "Tipo_acquisizione",
         "Nota",
         "Progressivo_sessione",
-        "Posizione",
         "Variante",
+        "Numero_varianti",
         "UVC_100_280_nm_uW_cm2",
         "UVC_percentuale",
         "UVB_280_315_nm_uW_cm2",
@@ -57,6 +53,7 @@ internal val MEASUREMENT_EXPORT_COLUMNS_IT =
         "UVA_315_400_nm_uW_cm2",
         "UVA_percentuale",
         "Totale_ultravioletti_uW_cm2",
+        "Totale_ultravioletti_percentuale",
         "HEV_400_500_nm_uW_cm2",
         "HEV_percentuale",
         "Violetto_400_450_nm_uW_cm2",
@@ -72,11 +69,13 @@ internal val MEASUREMENT_EXPORT_COLUMNS_IT =
         "Rosso_620_700_nm_uW_cm2",
         "Rosso_percentuale",
         "Totale_luce_visibile_uW_cm2",
+        "Totale_luce_visibile_percentuale",
         "FarRed_picco_745_nm_uW_cm2",
         "FarRed_percentuale",
         "NIR_picco_855_nm_uW_cm2",
         "NIR_percentuale",
         "Totale_infrarosso_uW_cm2",
+        "Totale_infrarosso_percentuale",
         "Modello_biologico",
         "Irradianza_pesata_stimata_UV_effetto_DNA_uW_cm2_eq",
         "Indice_spettrale_UV_effetto_DNA_0_100",
@@ -96,8 +95,8 @@ internal val MEASUREMENT_EXPORT_COLUMNS_EN =
         "Acquisition_type",
         "Note",
         "Session_sequence",
-        "Position_index",
-        "Variant_index",
+        "Variant",
+        "Variant_count",
         "UVC_100_280_nm_uW_cm2",
         "UVC_percent",
         "UVB_280_315_nm_uW_cm2",
@@ -105,6 +104,7 @@ internal val MEASUREMENT_EXPORT_COLUMNS_EN =
         "UVA_315_400_nm_uW_cm2",
         "UVA_percent",
         "Ultraviolet_total_uW_cm2",
+        "Ultraviolet_total_percent",
         "HEV_400_500_nm_uW_cm2",
         "HEV_percent",
         "Violet_400_450_nm_uW_cm2",
@@ -120,11 +120,13 @@ internal val MEASUREMENT_EXPORT_COLUMNS_EN =
         "Red_620_700_nm_uW_cm2",
         "Red_percent",
         "Visible_total_uW_cm2",
+        "Visible_total_percent",
         "FarRed_peak_745_nm_uW_cm2",
         "FarRed_percent",
         "NIR_peak_855_nm_uW_cm2",
         "NIR_percent",
         "Infrared_total_uW_cm2",
+        "Infrared_total_percent",
         "Biological_model",
         "Estimated_weighted_irradiance_UV_DNA_effect_uW_cm2_eq",
         "Spectral_index_UV_DNA_effect_0_100",
@@ -177,8 +179,8 @@ internal fun measurementExportColumns(
         label(R.string.acquisition_mode_label),
         label(R.string.share_note_label),
         "${label(R.string.share_session_id_label)}_sequence",
-        label(R.string.acquisition_position_label),
         label(R.string.session_sequence_filter_position),
+        label(R.string.export_variant_count_label),
         "UVC_100_280_nm_${irradianceUnit.csvSymbol}",
         "UVC_%",
         "UVB_280_315_nm_${irradianceUnit.csvSymbol}",
@@ -186,6 +188,7 @@ internal fun measurementExportColumns(
         "UVA_315_400_nm_${irradianceUnit.csvSymbol}",
         "UVA_%",
         "${label(R.string.export_total_label)}_${label(R.string.uv_radiation)}_${irradianceUnit.csvSymbol}",
+        "${label(R.string.export_total_label)}_${label(R.string.uv_radiation)}_%",
         "HEV_400_500_nm_${irradianceUnit.csvSymbol}",
         "HEV_%",
         "${label(R.string.violet)}_400_450_nm_${irradianceUnit.csvSymbol}",
@@ -201,11 +204,13 @@ internal fun measurementExportColumns(
         "${label(R.string.red)}_620_700_nm_${irradianceUnit.csvSymbol}",
         "${label(R.string.red)}_%",
         "${label(R.string.export_total_label)}_${label(R.string.visible_light)}_${irradianceUnit.csvSymbol}",
+        "${label(R.string.export_total_label)}_${label(R.string.visible_light)}_%",
         "${label(R.string.session_chart_series_far_red)}_peak_745_nm_${irradianceUnit.csvSymbol}",
         "${label(R.string.session_chart_series_far_red)}_%",
         "NIR_peak_855_nm_${irradianceUnit.csvSymbol}",
         "NIR_%",
         "${label(R.string.export_total_label)}_${label(R.string.far_red_nir)}_${irradianceUnit.csvSymbol}",
+        "${label(R.string.export_total_label)}_${label(R.string.far_red_nir)}_%",
         "${label(R.string.biological_effects_group_name)}_model",
         "${estimatedWeighted}_${label(R.string.dna_uv_proxy)}_${irradianceUnit.csvSymbol}_eq",
         "${spectralIndex}_${label(R.string.dna_uv_proxy)}_0_100",
@@ -240,7 +245,8 @@ internal fun measurementCsv(
     locale: Locale = Locale.US,
     labelContext: Context? = null,
     timeFormat: UvirTimeFormat = UvirTimeFormat.H24,
-    irradianceUnit: UvirIrradianceUnit = UvirIrradianceUnit.UW_CM2
+    irradianceUnit: UvirIrradianceUnit = UvirIrradianceUnit.UW_CM2,
+    variantCountsBySession: Map<Long, Int> = emptyMap()
 ): String = buildString {
     val columns =
         labelContext?.let {
@@ -251,6 +257,24 @@ internal fun measurementCsv(
             csvCell(it)
         }
     )
+    val inferredVariantCountsBySession =
+        records
+            .mapNotNull { record ->
+                val sessionId = record.sessionId
+                val variantIndex = record.variantIndex
+                if (sessionId != null && variantIndex != null) {
+                    sessionId to variantIndex
+                } else {
+                    null
+                }
+            }
+            .groupBy(
+                keySelector = { it.first },
+                valueTransform = { it.second }
+            )
+            .mapValues { (_, variants) -> variants.maxOrNull() ?: 1 }
+    val effectiveVariantCountsBySession =
+        inferredVariantCountsBySession + variantCountsBySession
 
     records.forEach { record ->
         val sample = record.sample
@@ -272,6 +296,11 @@ internal fun measurementCsv(
         val farRedNirTotal =
             sample.f8 +
                 sample.nir
+        val spectralTotals = sample.spectralTotals()
+        val variantCount =
+            record.sessionId
+                ?.let(effectiveVariantCountsBySession::get)
+                ?.takeIf { it > 1 }
         fun irradiance(value: Double, group: SensorGroup): String =
             if (sample.isOutOfRange(group)) {
                 ""
@@ -292,6 +321,10 @@ internal fun measurementCsv(
                     numericFormat
                 )
             }
+        fun groupShare(group: SensorGroup): String =
+            spectralTotals.share(group)?.let { share ->
+                formatUvirNumber(share.toDouble() * 100.0, 1, numericFormat)
+            }.orEmpty()
 
         appendLine(
             listOf(
@@ -323,10 +356,11 @@ internal fun measurementCsv(
                 record.sessionSequence
                     ?.toString()
                     .orEmpty(),
-                record.positionIndex
-                    ?.toString()
-                    .orEmpty(),
                 record.variantIndex
+                    ?.takeIf { variantCount != null }
+                    ?.let(::uvirVariantLabel)
+                    .orEmpty(),
+                variantCount
                     ?.toString()
                     .orEmpty(),
                 irradiance(sample.uvc, SensorGroup.UV),
@@ -336,6 +370,7 @@ internal fun measurementCsv(
                 irradiance(sample.uva, SensorGroup.UV),
                 relativePercent(sample.uva, uvTotal, SensorGroup.UV),
                 irradiance(uvTotal, SensorGroup.UV),
+                groupShare(SensorGroup.UV),
                 irradiance(hev, SensorGroup.VISIBLE),
                 relativePercent(hev, visibleTotal, SensorGroup.VISIBLE),
                 irradiance(sample.violetto, SensorGroup.VISIBLE),
@@ -351,11 +386,13 @@ internal fun measurementCsv(
                 irradiance(sample.rosso, SensorGroup.VISIBLE),
                 relativePercent(sample.rosso, visibleTotal, SensorGroup.VISIBLE),
                 irradiance(visibleTotal, SensorGroup.VISIBLE),
+                groupShare(SensorGroup.VISIBLE),
                 irradiance(sample.f8, SensorGroup.NIR),
                 relativePercent(sample.f8, farRedNirTotal, SensorGroup.NIR),
                 irradiance(sample.nir, SensorGroup.NIR),
                 relativePercent(sample.nir, farRedNirTotal, SensorGroup.NIR),
                 irradiance(farRedNirTotal, SensorGroup.NIR),
+                groupShare(SensorGroup.NIR),
                 BIOLOGICAL_MODEL_VERSION,
                 irradiance(effects.dnaUvProxy, SensorGroup.UV),
                 csvNumber(effects.dnaUvScore.toDouble() * 100.0, numericFormat),
@@ -379,8 +416,32 @@ internal fun readableMeasurementTable(
     dateFormat: UvirDateFormat = UvirDateFormat.INTERNATIONAL,
     timeFormat: UvirTimeFormat = UvirTimeFormat.H24,
     irradianceUnit: UvirIrradianceUnit = UvirIrradianceUnit.UW_CM2,
-    groupByVariant: Boolean = false
-): String = buildString {
+    groupByVariant: Boolean = false,
+    variantCountOverride: Int? = null,
+    includeRecordVariant: Boolean = true,
+    grouping: UvirReadableTableGrouping = UvirReadableTableGrouping.BY_ACQUISITION
+): String {
+    if (
+        grouping == UvirReadableTableGrouping.BY_SPECTRAL_AREA &&
+        records.size > 1
+    ) {
+        return buildString {
+            appendLine("Uvir ${context.getString(R.string.saved_measurements)}")
+            appendLine()
+            append(
+                readableMeasurementSpectralAreaBody(
+                    context = context,
+                    records = records,
+                    numericFormat = numericFormat,
+                    dateFormat = dateFormat,
+                    timeFormat = timeFormat,
+                    irradianceUnit = irradianceUnit
+                )
+            )
+        }
+    }
+
+    return buildString {
     appendLine("Uvir ${context.getString(R.string.saved_measurements)}")
     appendLine()
 
@@ -392,7 +453,12 @@ internal fun readableMeasurementTable(
         } else {
             records
         }
-    val variantCount = variantGroups.maxOfOrNull { it.count } ?: 1
+    val variantCount =
+        variantCountOverride
+            ?.coerceAtLeast(1)
+            ?: variantGroups.maxOfOrNull { it.count }
+            ?: orderedRecords.mapNotNull { it.variantIndex }.maxOrNull()
+            ?: 1
     var previousVariant: Int? = null
 
     orderedRecords.forEachIndexed { index, record ->
@@ -401,10 +467,9 @@ internal fun readableMeasurementTable(
             record.variantIndex != previousVariant
         ) {
             appendLine(
-                context.getString(
-                    R.string.session_variant_heading,
-                    record.variantIndex ?: 1,
-                    variantCount
+                uvirVariantHeading(
+                    context.resources,
+                    record.variantIndex ?: 1
                 ).uppercase(context.resources.configuration.locales[0])
             )
             appendLine()
@@ -422,17 +487,16 @@ internal fun readableMeasurementTable(
             "${context.getString(R.string.share_session_id_label)}: " +
                 (record.sessionId?.toString() ?: "—")
         )
-        record.positionIndex?.let { position ->
-            appendLine(
-                "${context.getString(R.string.acquisition_position_label)}: $position"
-            )
-        }
-        record.variantIndex?.let { variant ->
-            appendLine(
-                "${context.getString(R.string.session_sequence_filter_position)}: " +
-                    if (variantCount > 1) "$variant/$variantCount" else variant.toString()
-            )
-        }
+        record.variantIndex
+            ?.takeIf { includeRecordVariant && variantCount > 1 }
+            ?.let { variant ->
+                appendLine(
+                    uvirVariantHeading(
+                        context.resources,
+                        variant
+                    )
+                )
+            }
 
         appendLine(
             "${context.getString(R.string.share_date_label)}: " +
@@ -519,7 +583,10 @@ internal fun readableMeasurementTable(
                 maxOf(totalText.length, rows.maxOfOrNull { it.second.length } ?: 0)
 
             appendLine(
-                title.padEnd(nameWidth) + "  " + totalText.padEnd(valueWidth)
+                title.padEnd(nameWidth) + "  " + totalText.padEnd(valueWidth) +
+                    "  " + (record.sample.spectralTotals().share(group)?.let { share ->
+                        formatUvirNumber(share.toDouble() * 100.0, 1, numericFormat) + "%"
+                    } ?: "—")
             )
             rows.forEach { (name, value, relativePercentage) ->
                 appendLine(
@@ -640,6 +707,7 @@ internal fun readableMeasurementTable(
             appendLine()
         }
     }
+    }
 }
 
 internal fun shareMeasurements(
@@ -672,176 +740,54 @@ internal fun shareMeasurements(
             exportFormatting.irradianceUnit
         )
 
-    val sharedDirectory =
-        File(
-            context.cacheDir,
-            "shared"
-        ).apply {
-            mkdirs()
-        }
-
     val sharedBaseName =
         uvirExportBaseName(
             UvirExportContent.ACQUISITIONS
         )
 
     fun writeSharedFile(
-        extension: String,
+        fileFormat: UvirExportFileFormat,
         content: String
     ): File =
-        File(
-            sharedDirectory,
-            "$sharedBaseName.$extension"
-        ).apply {
-            writeText(
-                content,
-                Charsets.UTF_8
-            )
-        }
-
-    fun sharedUri(file: File) =
-        FileProvider.getUriForFile(
-            context,
-            "${context.packageName}.fileprovider",
-            file
+        prepareUvirTextExport(
+            context = context,
+            fileName = fileFormat.fileName(sharedBaseName),
+            text = content
         )
 
-    val sendIntent =
+    fun csvFile(): File =
+        writeSharedFile(
+            UvirExportFileFormat.CSV,
+            measurementCsv(
+                records,
+                numericFormat,
+                dateFormat,
+                exportFormatting.language,
+                exportContext.resources.configuration.locales[0],
+                exportContext,
+                timeFormat,
+                exportFormatting.irradianceUnit
+            )
+        )
+
+    fun readableFile(): File =
+        writeSharedFile(
+            UvirExportFileFormat.TXT,
+            readableText
+        )
+
+    val files =
         when (format) {
-            MeasurementShareFormat.CSV -> {
-                val csvFile =
-                    writeSharedFile(
-                        "csv",
-                        measurementCsv(
-                            records,
-                            numericFormat,
-                            dateFormat,
-                            exportFormatting.language,
-                            exportContext.resources.configuration.locales[0],
-                            exportContext,
-                            timeFormat,
-                            exportFormatting.irradianceUnit
-                        )
-                    )
-
-                val uri =
-                    sharedUri(csvFile)
-
-                Intent(Intent.ACTION_SEND).apply {
-                    type = "text/csv"
-                    putExtra(Intent.EXTRA_SUBJECT, subject)
-                    putExtra(Intent.EXTRA_STREAM, uri)
-                    clipData =
-                        ClipData.newUri(
-                            context.contentResolver,
-                            csvFile.name,
-                            uri
-                        )
-                    addFlags(
-                        Intent.FLAG_GRANT_READ_URI_PERMISSION
-                    )
-                }
-            }
-
-            MeasurementShareFormat.READABLE_TABLE -> {
-                val readableFile =
-                    writeSharedFile(
-                        "txt",
-                        readableText
-                    )
-
-                val uri =
-                    sharedUri(readableFile)
-
-                Intent(Intent.ACTION_SEND).apply {
-                    type = "text/plain"
-                    putExtra(Intent.EXTRA_SUBJECT, subject)
-                    putExtra(Intent.EXTRA_STREAM, uri)
-                    clipData =
-                        ClipData.newUri(
-                            context.contentResolver,
-                            readableFile.name,
-                            uri
-                        )
-                    addFlags(
-                        Intent.FLAG_GRANT_READ_URI_PERMISSION
-                    )
-                }
-            }
-
-            MeasurementShareFormat.BOTH -> {
-                val csvFile =
-                    writeSharedFile(
-                        "csv",
-                        measurementCsv(
-                            records,
-                            numericFormat,
-                            dateFormat,
-                            exportFormatting.language,
-                            exportContext.resources.configuration.locales[0],
-                            exportContext,
-                            timeFormat,
-                            exportFormatting.irradianceUnit
-                        )
-                    )
-
-                val readableFile =
-                    writeSharedFile(
-                        "txt",
-                        readableText
-                    )
-
-                val csvUri =
-                    sharedUri(csvFile)
-
-                val readableUri =
-                    sharedUri(readableFile)
-
-                val uris =
-                    arrayListOf(
-                        csvUri,
-                        readableUri
-                    )
-
-                Intent(Intent.ACTION_SEND_MULTIPLE).apply {
-                    type = "text/*"
-                    putExtra(Intent.EXTRA_SUBJECT, subject)
-                    putParcelableArrayListExtra(
-                        Intent.EXTRA_STREAM,
-                        uris
-                    )
-                    clipData =
-                        ClipData.newUri(
-                            context.contentResolver,
-                            csvFile.name,
-                            csvUri
-                        ).apply {
-                            addItem(
-                                ClipData.Item(
-                                    readableUri
-                                )
-                            )
-                        }
-                    addFlags(
-                        Intent.FLAG_GRANT_READ_URI_PERMISSION
-                    )
-                }
-            }
+            MeasurementShareFormat.CSV -> listOf(csvFile())
+            MeasurementShareFormat.READABLE_TABLE -> listOf(readableFile())
+            MeasurementShareFormat.BOTH -> listOf(csvFile(), readableFile())
         }
 
-    val chooser =
-        Intent.createChooser(
-            sendIntent,
-            context.getString(
-                R.string.share_measurements
-            )
-        )
-
-    if (context !is Activity) {
-        chooser.addFlags(
-            Intent.FLAG_ACTIVITY_NEW_TASK
-        )
-    }
-
-    context.startActivity(chooser)
+    deliverUvirExportFiles(
+        context = context,
+        files = files,
+        destination = UvirExportDestination.SHARE,
+        chooserTitle = context.getString(R.string.share_measurements),
+        subject = subject
+    )
 }

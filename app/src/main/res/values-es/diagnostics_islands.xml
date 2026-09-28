@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="diagnostics_test_group">Prueba de diagnóstico</string>
+    <string name="diagnostics_simulation_group">Simulación</string>
+    <string name="diagnostics_simulation_description">Simula adquisiciones, alertas y valores en vivo para el sensor.</string>
+</resources>

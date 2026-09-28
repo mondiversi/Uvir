@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="connection_notification_connected">متصل</string>
+    <string name="connection_notification_disconnected">غير متصل</string>
+    <string name="connection_notification_simulation">محاكاة</string>
+    <string name="connection_notification_selected">محدد</string>
+    <string name="connection_notification_activity">نشاط جارٍ</string>
+    <string name="connection_notification_last_activity">نشاط جارٍ (آخر حالة معروفة)</string>
+    <plurals name="connection_notification_connected_count">
+        <item quantity="zero">%1$d مستشعر متصل</item>
+        <item quantity="one">%1$d مستشعر متصل</item>
+        <item quantity="two">%1$d مستشعران متصلان</item>
+        <item quantity="few">%1$d مستشعرات متصلة</item>
+        <item quantity="many">%1$d مستشعراً متصلاً</item>
+        <item quantity="other">%1$d مستشعر متصل</item>
+    </plurals>
+    <plurals name="connection_notification_connecting_count">
+        <item quantity="zero">%1$d مستشعر قيد الاتصال</item>
+        <item quantity="one">%1$d مستشعر قيد الاتصال</item>
+        <item quantity="two">%1$d مستشعران قيد الاتصال</item>
+        <item quantity="few">%1$d مستشعرات قيد الاتصال</item>
+        <item quantity="many">%1$d مستشعراً قيد الاتصال</item>
+        <item quantity="other">%1$d مستشعر قيد الاتصال</item>
+    </plurals>
+    <plurals name="connection_notification_activity_count">
+        <item quantity="zero">%1$d نشاط جارٍ</item>
+        <item quantity="one">%1$d نشاط جارٍ</item>
+        <item quantity="two">%1$d نشاطان جاريان</item>
+        <item quantity="few">%1$d أنشطة جارية</item>
+        <item quantity="many">%1$d نشاطاً جارياً</item>
+        <item quantity="other">%1$d نشاط جارٍ</item>
+    </plurals>
+    <plurals name="connection_notification_simulation_count">
+        <item quantity="zero">%1$d محاكاة</item>
+        <item quantity="one">%1$d محاكاة</item>
+        <item quantity="two">%1$d محاكاتان</item>
+        <item quantity="few">%1$d محاكاة</item>
+        <item quantity="many">%1$d محاكاة</item>
+        <item quantity="other">%1$d محاكاة</item>
+    </plurals>
+</resources>

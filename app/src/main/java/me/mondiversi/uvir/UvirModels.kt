@@ -87,7 +87,11 @@ data class ThresholdAlertSettings(
     val rules: List<ThresholdAlertRule>,
     val repeatSeconds: Int,
     val sound: ThresholdAlertSound,
-    val volume: Int
+    val volume: Int,
+    val recordEvents: Boolean = true,
+    val startDelaySeconds: Long = 0L,
+    val durationSeconds: Long = 0L,
+    val maxRegistrations: Int = 0
 )
 
 data class ThresholdAlertRule(
@@ -119,7 +123,8 @@ data class SensorLiveAlertEvent(
     val receiptSequence: Long,
     val timestampMs: Long,
     val details: String,
-    val sessionId: Long = 0L
+    val sessionId: Long = 0L,
+    val recorded: Boolean = true
 )
 
 internal data class ThresholdNotificationAlert(

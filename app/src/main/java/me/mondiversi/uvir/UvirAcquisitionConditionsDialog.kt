@@ -4,7 +4,6 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,6 +23,10 @@ internal fun UvirAcquisitionConditionsDialog(
     primaryText: androidx.compose.ui.graphics.Color,
     secondaryText: androidx.compose.ui.graphics.Color,
     currentSample: SensorSample? = null,
+    metrics: List<ThresholdAlertMetric> = acquisitionConditionMetrics(),
+    titleRes: Int = R.string.conditional_editor_title,
+    descriptionRes: Int = R.string.threshold_group_choose_value,
+    controlsEnabled: Boolean = true,
     onSave: (List<ThresholdAlertRule>) -> Unit,
     onDismissRequest: () -> Unit
 ) {
@@ -31,7 +34,6 @@ internal fun UvirAcquisitionConditionsDialog(
     val resources = androidx.compose.ui.platform.LocalResources.current
     val irradianceUnit = LocalUvirIrradianceUnit.current
     val focus = LocalFocusManager.current
-    val metrics = remember { acquisitionConditionMetrics() }
     val enabled = remember(initialRules) {
         mutableStateMapOf<ThresholdAlertMetric, Boolean>().apply {
             metrics.forEach { metric -> put(metric, initialRules.firstOrNull { it.metric == metric }?.enabled == true) }
@@ -53,7 +55,12 @@ internal fun UvirAcquisitionConditionsDialog(
                 )) }
         }
     }
-    val scrollbar = rememberUvirDialogScrollbar(secondaryText.copy(alpha = 0.58f))
+    fun setConditionEnabled(metric: ThresholdAlertMetric, value: Boolean) {
+        focus.clearFocus()
+        if (enabled[metric] != value) {
+            enabled[metric] = value
+        }
+    }
     fun normalize(metric: ThresholdAlertMetric): Float {
         val normalized = normalizeNonNegativeDecimal(thresholds[metric] ?: "1.0")
         thresholds[metric] = normalized.text
@@ -62,31 +69,33 @@ internal fun UvirAcquisitionConditionsDialog(
         }
         return irradianceUnit.toCanonicalUwCm2(normalized.value.toDouble()).toFloat()
     }
-    AlertDialog(
+    UvirAlertDialog(
         onDismissRequest = onDismissRequest,
-        modifier = scrollbar.dialogModifier,
-        title = { Text(stringResource(R.string.conditional_editor_title)) },
+        title = { Text(stringResource(titleRes)) },
         text = {
-            Box(Modifier.fillMaxWidth().heightIn(max = 460.dp).then(scrollbar.viewportModifier)) {
-                Column(Modifier.fillMaxWidth().verticalScroll(scrollbar.scrollState)) {
-                    Text(stringResource(R.string.threshold_group_choose_value),
+            Box(Modifier.fillMaxWidth()) {
+                Column(Modifier.fillMaxWidth()) {
+                    Text(stringResource(descriptionRes),
                         color = secondaryText, fontSize = 13.sp)
                     Spacer(Modifier.height(UvirSettingsControlGap))
                     metrics.forEach { metric ->
                         Row(
                             Modifier.fillMaxWidth()
                                 .testTag("acquisition_condition_row_${metric.name}")
-                                .clickable { focus.clearFocus(); enabled[metric] = enabled[metric] != true }
+                                .clickable(enabled = controlsEnabled) {
+                                    setConditionEnabled(metric, enabled[metric] != true)
+                                }
                                 .padding(vertical = 10.dp, horizontal = 2.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Checkbox(
                                 checked = enabled[metric] == true,
-                                onCheckedChange = { checked -> focus.clearFocus(); enabled[metric] = checked },
+                                onCheckedChange = { checked -> setConditionEnabled(metric, checked) },
+                                enabled = controlsEnabled,
                                 modifier = Modifier.size(40.dp).testTag("acquisition_condition_check_${metric.name}")
                             )
                             ThresholdAlertMetricLabel(metric, primaryText, secondaryText,
-                                enabled = true, modifier = Modifier.weight(1f))
+                                enabled = controlsEnabled, modifier = Modifier.weight(1f))
                         }
                         if (enabled[metric] == true) {
                             Surface(
@@ -110,7 +119,8 @@ internal fun UvirAcquisitionConditionsDialog(
                                                 )
                                             }
                                         },
-                                        cardColor = cardColor, primaryText = primaryText, secondaryText = secondaryText
+                                        cardColor = cardColor, primaryText = primaryText, secondaryText = secondaryText,
+                                        enabled = controlsEnabled
                                     )
                                     DecimalField(
                                         value = thresholds[metric] ?: "1.0",
@@ -119,6 +129,7 @@ internal fun UvirAcquisitionConditionsDialog(
                                             R.string.threshold_value_biological_label else R.string.threshold_value_label)
                                             .withUvirIrradianceUnit(irradianceUnit),
                                         onEditingComplete = { normalize(metric) },
+                                        enabled = controlsEnabled,
                                         modifier = Modifier.fillMaxWidth().testTag("acquisition_condition_threshold_${metric.name}")
                                     )
                                 }
@@ -129,7 +140,7 @@ internal fun UvirAcquisitionConditionsDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = {
+            TextButton(enabled = controlsEnabled, onClick = {
                 focus.clearFocus()
                 onSave(metrics.map { metric ->
                     ThresholdAlertRule(metric, enabled[metric] == true,

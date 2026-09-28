@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="capture_hint_start">Anza upimaji</string>
+    <string name="capture_hint_stop">Simamisha upimaji</string>
+    <string name="alert_hint_start">Anza kurekodi</string>
+    <string name="alert_hint_stop">Simamisha kurekodi</string>
+</resources>

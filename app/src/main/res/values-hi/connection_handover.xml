@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sensor_connection_switch_failed">कनेक्शन बदलने की पुष्टि नहीं हो सकी। पिछला मोड चयनित रहता है।</string>
+</resources>

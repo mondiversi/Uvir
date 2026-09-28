@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sensor_general_actions_title">פעולות</string>
+    <string name="sensor_general_actions_description">נהל את החיישן ואת השיוך שלו לאפליקציה.</string>
+    <string name="sensor_general_profile_title">פרופיל</string>
+    <string name="sensor_general_profile_description">בחר את שם החיישן.</string>
+    <string name="sensor_general_operation_title">פעולה</string>
+    <string name="sensor_general_operation_description">הגדר את התנהגות החיישן.</string>
+</resources>

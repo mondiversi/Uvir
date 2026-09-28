@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="update_available">تحديثات متاحة</string>
+    <string name="update_none">لا توجد تحديثات متاحة</string>
+    <string name="update_check_failed">تعذر البحث عن تحديثات. راجع سجل الأخطاء.</string>
+    <string name="update_app">تحديث التطبيق</string>
+    <string name="update_sensor">تحديث المستشعر</string>
+    <string name="update_app_first">حدّث التطبيق أولاً.</string>
+    <string name="update_usb_required">اختر هذا المستشعر وصله عبر USB دون جلسة نشطة وبعد مزامنة جميع السجلات.</string>
+    <string name="update_download">التنزيل والتحقق…</string>
+    <string name="update_flash">جارٍ تحديث المستشعر…</string>
+    <string name="update_verify">جارٍ التحقق من المستشعر…</string>
+    <string name="update_keep_connected">لا تفصل USB ولا تطفئ المستشعر. عند الحاجة اضغط مطولاً على BOOT وأعد المحاولة.</string>
+    <string name="update_done">تم تحديث المستشعر</string>
+    <string name="update_failed">فشل التحديث. راجع سجل الأخطاء. إذا لم يبدأ المستشعر، استعد البرنامج عبر USB من حاسوب.</string>
+    <string name="update_permission">اسمح لتطبيق Uvir بتثبيت التحديثات في إعدادات Android.</string>
+    <string name="update_whats_new">تحديثات موقعة للتطبيق والمستشعر وتنزيلات موثقة وتحميل البرنامج عبر USB.</string>
+</resources>

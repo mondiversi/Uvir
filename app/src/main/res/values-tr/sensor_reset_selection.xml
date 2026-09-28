@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sensor_reset_selection_title">Seçili sensörler sıfırlansın mı?</string>
+    <string name="sensor_reset_selection_message">Sıfırlanacak sensörleri seç. Ayarları, kimlik bilgileri ve eşitlenmemiş verileri silinir, ardından sensörler kapanır. Uygulamadaki veriler değişmez. Yalnızca bağlı ve etkin işlemi olmayan sensörler seçilebilir.</string>
+    <string name="sensor_reset_selection_failed">Sıfırlama başarısız: %1$s. Bağlantıyı kontrol edip tekrar dene.</string>
+</resources>
+

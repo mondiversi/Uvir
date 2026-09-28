@@ -3,16 +3,55 @@ package me.mondiversi.uvir
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.compositeOver
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+
+// Keep both dialogs equally tall, including two connection-date lines and a useful touch target.
+internal val SensorRadioOptionMinHeight = 48.dp
+internal val SensorRadioOptionHorizontalPadding = 10.dp
+internal val SensorRadioOptionVerticalPadding = 9.dp
+internal val SensorRadioOptionGap = 6.dp
+
+/** Shared selected frame and clipped press feedback for both sensor radio dialogs. */
+@Composable
+internal fun SensorRadioOptionSurface(
+    selected: Boolean,
+    primaryText: Color,
+    secondaryText: Color,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    highlightColor: Color = Color.Transparent,
+    onClick: () -> Unit,
+    content: @Composable () -> Unit
+) {
+    val shape = RoundedCornerShape(10.dp)
+    Surface(
+        modifier = modifier.fillMaxWidth().clip(shape)
+            .selectable(selected = selected, role = Role.RadioButton, enabled = enabled, onClick = onClick),
+        shape = shape,
+        color = highlightColor.compositeOver(if (selected) {
+            if (enabled) primaryText.copy(alpha = 0.08f) else secondaryText.copy(alpha = 0.04f)
+        } else Color.Transparent),
+        content = content
+    )
+}
+
+@Composable
+internal fun sensorRadioOptionTextStyle() =
+    MaterialTheme.typography.bodyLarge.copy(fontSize = 14.sp, fontWeight = FontWeight.Medium)
 
 @Composable
 internal fun SensorSourceOptionRow(
@@ -24,9 +63,12 @@ internal fun SensorSourceOptionRow(
     enabled: Boolean = true,
     signalLevel: Int? = null,
     signalPercentage: Int? = null,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
-    val darkMode = isSystemInDarkTheme()
+    val select: () -> Unit = {
+        onClick()
+    }
     val disabledForeground = secondaryText.copy(alpha = 0.46f)
     val iconType =
         when (mode) {
@@ -43,31 +85,19 @@ internal fun SensorSourceOptionRow(
                 ConnectivityIconType.INTERNET
         }
 
-    Surface(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .clickable(
-                    enabled = enabled,
-                    onClick = onClick
-                ),
-        shape = RoundedCornerShape(10.dp),
-        color =
-            if (selected) {
-                if (enabled) {
-                    primaryText.copy(alpha = 0.08f)
-                } else {
-                    secondaryText.copy(alpha = 0.04f)
-                }
-            } else {
-                Color.Transparent
-            }
+    SensorRadioOptionSurface(
+        modifier = modifier,
+        selected = selected,
+        enabled = enabled,
+        primaryText = primaryText,
+        secondaryText = secondaryText,
+        onClick = select
     ) {
         Row(
             modifier =
-                Modifier.padding(
-                    horizontal = 10.dp,
-                    vertical = 9.dp
+                Modifier.heightIn(min = SensorRadioOptionMinHeight).padding(
+                    horizontal = SensorRadioOptionHorizontalPadding,
+                    vertical = SensorRadioOptionVerticalPadding
                 ),
             verticalAlignment =
                 Alignment.CenterVertically
@@ -85,8 +115,7 @@ internal fun SensorSourceOptionRow(
                 modifier = Modifier.weight(1f),
                 color =
                     if (enabled) primaryText else disabledForeground,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium
+                style = sensorRadioOptionTextStyle()
             )
 
             if (signalLevel != null && signalPercentage != null) {
@@ -114,9 +143,9 @@ internal fun SensorSourceOptionRow(
             ) {
                 RadioButton(
                     selected = selected,
-                    onClick = onClick,
+                    onClick = null,
                     enabled = enabled,
-                    modifier = Modifier.size(24.dp),
+                    modifier = Modifier.size(24.dp).testTag("home_source_radio_${mode.name}"),
                     colors =
                         RadioButtonDefaults.colors(
                             selectedColor =

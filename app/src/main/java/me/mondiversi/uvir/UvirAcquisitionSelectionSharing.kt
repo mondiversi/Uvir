@@ -1,12 +1,7 @@
 package me.mondiversi.uvir
 
-import android.app.Activity
-import android.content.ClipData
 import android.content.Context
-import android.content.Intent
-import androidx.core.content.FileProvider
 import java.io.File
-import java.util.Locale
 
 internal sealed interface AcquisitionExportItem {
     data class CompleteSession(
@@ -23,10 +18,18 @@ internal sealed interface AcquisitionExportItem {
 internal data class AcquisitionExportPlan(
     val selectedRecords: List<SavedRecordDetail>,
     val items: List<AcquisitionExportItem>,
-    val partialSessionIds: Set<Long>
+    val partialSessionIds: Set<Long>,
+    val variantCountsBySession: Map<Long, Int> = emptyMap()
 ) {
     val hasPartialSessions: Boolean
         get() = partialSessionIds.isNotEmpty()
+
+    val hasCompleteVariantSessions: Boolean
+        get() =
+            items.any { item ->
+                item is AcquisitionExportItem.CompleteSession &&
+                    acquisitionVariantGroups(item.records).isNotEmpty()
+            }
 }
 
 private fun acquisitionExportRecords(
@@ -63,6 +66,23 @@ internal fun buildAcquisitionExportPlan(
         selected
             .filter { it.sessionId != null }
             .groupBy { requireNotNull(it.sessionId) }
+    val variantCountsBySession =
+        allRecords
+            .mapNotNull { record ->
+                val sessionId = record.sessionId
+                val variantIndex = record.variantIndex
+                if (sessionId != null && variantIndex != null) {
+                    sessionId to variantIndex
+                } else {
+                    null
+                }
+            }
+            .groupBy(
+                keySelector = { it.first },
+                valueTransform = { it.second }
+            )
+            .mapValues { (_, variants) -> variants.maxOrNull() ?: 1 }
+            .filterValues { it > 1 }
     val completeSessionIds =
         selectedBySession
             .filter { (sessionId, sessionRecords) ->
@@ -106,7 +126,8 @@ internal fun buildAcquisitionExportPlan(
     return AcquisitionExportPlan(
         selectedRecords = selected,
         items = items,
-        partialSessionIds = partialSessionIds
+        partialSessionIds = partialSessionIds,
+        variantCountsBySession = variantCountsBySession
     )
 }
 
@@ -116,7 +137,9 @@ private fun readableMeasurementBody(
     numericFormat: UvirNumericFormat,
     dateFormat: UvirDateFormat,
     timeFormat: UvirTimeFormat,
-    irradianceUnit: UvirIrradianceUnit
+    irradianceUnit: UvirIrradianceUnit,
+    variantCount: Int? = null,
+    includeVariant: Boolean = true
 ): String =
     readableMeasurementTable(
         context = context,
@@ -124,7 +147,9 @@ private fun readableMeasurementBody(
         numericFormat = numericFormat,
         dateFormat = dateFormat,
         timeFormat = timeFormat,
-        irradianceUnit = irradianceUnit
+        irradianceUnit = irradianceUnit,
+        variantCountOverride = variantCount,
+        includeRecordVariant = includeVariant
     ).substringAfter('\n').trim()
 
 internal fun readableAcquisitionExportTable(
@@ -133,7 +158,8 @@ internal fun readableAcquisitionExportTable(
     numericFormat: UvirNumericFormat,
     dateFormat: UvirDateFormat = UvirDateFormat.INTERNATIONAL,
     timeFormat: UvirTimeFormat = UvirTimeFormat.H24,
-    irradianceUnit: UvirIrradianceUnit = UvirIrradianceUnit.UW_CM2
+    irradianceUnit: UvirIrradianceUnit = UvirIrradianceUnit.UW_CM2,
+    grouping: UvirReadableTableGrouping = UvirReadableTableGrouping.BY_ACQUISITION
 ): String = buildString {
     val locale = context.resources.configuration.locales[0]
     appendLine("Uvir ${context.getString(R.string.saved_measurements)}")
@@ -175,44 +201,61 @@ internal fun readableAcquisitionExportTable(
                         item.records.size
                 )
                 appendLine()
-                val variantGroups = acquisitionVariantGroups(item.records)
-                val orderedRecords =
-                    if (variantGroups.isNotEmpty()) {
-                        variantGroups.flatMap { it.records }
-                    } else {
-                        item.records
-                    }
-                val variantCount = variantGroups.maxOfOrNull { it.count } ?: 1
-                var previousVariant: Int? = null
-                orderedRecords.forEachIndexed { recordIndex, record ->
-                    if (
-                        variantGroups.isNotEmpty() &&
-                        record.variantIndex != previousVariant
-                    ) {
-                        appendLine(
-                            context.getString(
-                                R.string.session_variant_heading,
-                                record.variantIndex ?: 1,
-                                variantCount
-                            ).uppercase(locale)
-                        )
-                        appendLine()
-                        previousVariant = record.variantIndex
-                    }
-                    appendLine(
-                        readableMeasurementBody(
-                            context,
-                            record,
-                            numericFormat,
-                            dateFormat,
-                            timeFormat,
-                            irradianceUnit
+                if (grouping == UvirReadableTableGrouping.BY_SPECTRAL_AREA) {
+                    append(
+                        readableMeasurementSpectralAreaBody(
+                            context = context,
+                            records = item.records,
+                            numericFormat = numericFormat,
+                            dateFormat = dateFormat,
+                            timeFormat = timeFormat,
+                            irradianceUnit = irradianceUnit
                         )
                     )
-                    if (recordIndex < orderedRecords.lastIndex) {
-                        appendLine()
-                        appendLine("────────────────────")
-                        appendLine()
+                } else {
+                    val variantGroups = acquisitionVariantGroups(item.records)
+                    val orderedRecords =
+                        if (variantGroups.isNotEmpty()) {
+                            variantGroups.flatMap { it.records }
+                        } else {
+                            item.records
+                        }
+                    val variantCount =
+                        plan.variantCountsBySession[item.sessionId]
+                            ?: variantGroups.maxOfOrNull { it.count }
+                            ?: 1
+                    var previousVariant: Int? = null
+                    orderedRecords.forEachIndexed { recordIndex, record ->
+                        if (
+                            variantCount > 1 &&
+                            record.variantIndex != previousVariant
+                        ) {
+                            appendLine(
+                                uvirVariantHeading(
+                                    context.resources,
+                                    record.variantIndex ?: 1
+                                ).uppercase(locale)
+                            )
+                            appendLine()
+                            previousVariant = record.variantIndex
+                        }
+                        appendLine(
+                            readableMeasurementBody(
+                                context,
+                                record,
+                                numericFormat,
+                                dateFormat,
+                                timeFormat,
+                                irradianceUnit,
+                                variantCount = variantCount,
+                                includeVariant = false
+                            )
+                        )
+                        if (recordIndex < orderedRecords.lastIndex) {
+                            appendLine()
+                            appendLine("────────────────────")
+                            appendLine()
+                        }
                     }
                 }
             }
@@ -228,7 +271,11 @@ internal fun readableAcquisitionExportTable(
                         numericFormat,
                         dateFormat,
                         timeFormat,
-                        irradianceUnit
+                        irradianceUnit,
+                        variantCount =
+                            item.record.sessionId?.let {
+                                plan.variantCountsBySession[it]
+                            }
                     )
                 )
             }
@@ -266,6 +313,87 @@ internal fun shareAcquisitionExportPlan(
             writeText(content, Charsets.UTF_8)
         }
 
+    fun writeReadableExportFiles(): List<File> =
+        plan.items.flatMap { item ->
+            when (item) {
+                is AcquisitionExportItem.CompleteSession -> {
+                    val variantGroups = acquisitionVariantGroups(item.records)
+                    val parts =
+                        if (variantGroups.isEmpty()) {
+                            listOf(null to item.records)
+                        } else {
+                            variantGroups.map { it to it.records }
+                        }
+                    parts.map { (variant, records) ->
+                        val partPlan =
+                            AcquisitionExportPlan(
+                                selectedRecords = records,
+                                items =
+                                    listOf(
+                                        AcquisitionExportItem.CompleteSession(
+                                            sessionId = item.sessionId,
+                                            records = records
+                                        )
+                                    ),
+                                partialSessionIds = emptySet(),
+                                variantCountsBySession =
+                                    mapOf(item.sessionId to (variant?.count ?: 1))
+                            )
+                        val variantSuffix =
+                            variant?.let {
+                                "_${uvirVariantFileToken(it.index)}"
+                            }.orEmpty()
+                        File(
+                            sharedDirectory,
+                            "${sharedBaseName}_Session_ID${item.sessionId}$variantSuffix.txt"
+                        ).apply {
+                            writeText(
+                                readableAcquisitionExportTable(
+                                    exportContext,
+                                    partPlan,
+                                    exportFormatting.numericFormat,
+                                    exportFormatting.dateFormat,
+                                    exportFormatting.timeFormat,
+                                    exportFormatting.irradianceUnit,
+                                    grouping = selection.readableTableGrouping
+                                ),
+                                Charsets.UTF_8
+                            )
+                        }
+                    }
+                }
+
+                is AcquisitionExportItem.IndividualAcquisition -> {
+                    val partPlan =
+                        AcquisitionExportPlan(
+                            selectedRecords = listOf(item.record),
+                            items = listOf(item),
+                            partialSessionIds = emptySet(),
+                            variantCountsBySession = plan.variantCountsBySession
+                        )
+                    listOf(
+                        File(
+                            sharedDirectory,
+                            "${sharedBaseName}_Acquisition_ID${item.record.id}.txt"
+                        ).apply {
+                            writeText(
+                                readableAcquisitionExportTable(
+                                    exportContext,
+                                    partPlan,
+                                    exportFormatting.numericFormat,
+                                    exportFormatting.dateFormat,
+                                    exportFormatting.timeFormat,
+                                    exportFormatting.irradianceUnit,
+                                    grouping = UvirReadableTableGrouping.BY_ACQUISITION
+                                ),
+                                Charsets.UTF_8
+                            )
+                        }
+                    )
+                }
+            }
+        }
+
     when (selection.dataFormat) {
         MeasurementShareFormat.CSV ->
             files +=
@@ -279,23 +407,13 @@ internal fun shareAcquisitionExportPlan(
                         exportContext.resources.configuration.locales[0],
                         exportContext,
                         exportFormatting.timeFormat,
-                        exportFormatting.irradianceUnit
+                        exportFormatting.irradianceUnit,
+                        variantCountsBySession = plan.variantCountsBySession
                     )
                 )
 
         MeasurementShareFormat.READABLE_TABLE ->
-            files +=
-                writeSharedFile(
-                    "txt",
-                    readableAcquisitionExportTable(
-                        exportContext,
-                        plan,
-                        exportFormatting.numericFormat,
-                        exportFormatting.dateFormat,
-                        exportFormatting.timeFormat,
-                        exportFormatting.irradianceUnit
-                    )
-                )
+            files += writeReadableExportFiles()
 
         MeasurementShareFormat.BOTH -> {
             files +=
@@ -309,21 +427,11 @@ internal fun shareAcquisitionExportPlan(
                         exportContext.resources.configuration.locales[0],
                         exportContext,
                         exportFormatting.timeFormat,
-                        exportFormatting.irradianceUnit
+                        exportFormatting.irradianceUnit,
+                        variantCountsBySession = plan.variantCountsBySession
                     )
                 )
-            files +=
-                writeSharedFile(
-                    "txt",
-                    readableAcquisitionExportTable(
-                        exportContext,
-                        plan,
-                        exportFormatting.numericFormat,
-                        exportFormatting.dateFormat,
-                        exportFormatting.timeFormat,
-                        exportFormatting.irradianceUnit
-                    )
-                )
+            files += writeReadableExportFiles()
         }
 
         null -> Unit
@@ -338,7 +446,8 @@ internal fun shareAcquisitionExportPlan(
                             context = context,
                             sessionId = item.sessionId,
                             records = item.records,
-                            mode = selection.chartExportMode
+                            mode = selection.chartExportMode,
+                            variantGrouping = selection.variantChartGrouping
                         )
 
                 is AcquisitionExportItem.IndividualAcquisition ->
@@ -348,83 +457,34 @@ internal fun shareAcquisitionExportPlan(
                                 listOf(
                                     createAcquisitionCombinedChartFile(
                                         context = context,
-                                        record = item.record
+                                        record = item.record,
+                                        variantCount =
+                                            item.record.sessionId?.let {
+                                                plan.variantCountsBySession[it]
+                                            }
                                     )
                                 )
                             UvirChartExportMode.SEPARATE ->
                                 createAcquisitionSeparateChartFiles(
                                     context = context,
-                                    record = item.record
+                                    record = item.record,
+                                    variantCount =
+                                        item.record.sessionId?.let {
+                                            plan.variantCountsBySession[it]
+                                        }
                                 )
                         }
             }
         }
     }
 
-    if (destination == UvirExportDestination.SAVE) {
-        requestUvirExportSave(context, files)
-        return
-    }
-
-    val uris =
-        ArrayList(
-            files.map { file ->
-                FileProvider.getUriForFile(
-                    context,
-                    "${context.packageName}.fileprovider",
-                    file
-                )
-            }
-        )
-    val sendIntent =
-        Intent(
-            if (files.size == 1) {
-                Intent.ACTION_SEND
-            } else {
-                Intent.ACTION_SEND_MULTIPLE
-            }
-        ).apply {
-            type =
-                if (files.size > 1) {
-                    "*/*"
-                } else {
-                    when (files.first().extension.lowercase(Locale.US)) {
-                        "csv" -> "text/csv"
-                        "txt" -> "text/plain"
-                        else -> "image/png"
-                    }
-                }
-            putExtra(
-                Intent.EXTRA_SUBJECT,
-                exportContext.getString(R.string.share_subject)
-            )
-            if (files.size == 1) {
-                putExtra(Intent.EXTRA_STREAM, uris.first())
-            } else {
-                putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris)
-            }
-            clipData =
-                ClipData.newUri(
-                    context.contentResolver,
-                    files.first().name,
-                    uris.first()
-                ).apply {
-                    uris.drop(1).forEach { uri ->
-                        addItem(ClipData.Item(uri))
-                    }
-                }
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        }
-    val chooser =
-        Intent.createChooser(
-            sendIntent,
-            context.getString(R.string.share_measurements)
-        )
-
-    if (context !is Activity) {
-        chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-    }
-    context.startActivity(chooser)
+    deliverUvirExportFiles(
+        context = context,
+        files = files,
+        destination = destination,
+        chooserTitle = context.getString(R.string.share_measurements),
+        subject = exportContext.getString(R.string.share_subject)
+    )
 }
 
 internal data class AcquisitionExportChartFileBreakdown(
@@ -442,7 +502,9 @@ internal data class AcquisitionExportChartFileBreakdown(
  */
 internal fun acquisitionExportChartFileBreakdown(
     plan: AcquisitionExportPlan,
-    mode: UvirChartExportMode
+    mode: UvirChartExportMode,
+    variantGrouping: UvirVariantChartGrouping =
+        UvirVariantChartGrouping.BY_VARIANT
 ): AcquisitionExportChartFileBreakdown {
     var completeSessionFiles = 0
     var individualAcquisitionFiles = 0
@@ -450,7 +512,16 @@ internal fun acquisitionExportChartFileBreakdown(
         when (item) {
             is AcquisitionExportItem.CompleteSession ->
                 completeSessionFiles +=
-                    acquisitionSessionChartFileCount(item.records, mode)
+                    if (
+                        mode == UvirChartExportMode.COMBINED &&
+                        variantGrouping == UvirVariantChartGrouping.BY_GROUP
+                    ) {
+                        acquisitionSessionGroupedVariantChartFileCount(
+                            item.records
+                        )
+                    } else {
+                        acquisitionSessionChartFileCount(item.records, mode)
+                    }
             is AcquisitionExportItem.IndividualAcquisition ->
                 individualAcquisitionFiles +=
                     if (mode == UvirChartExportMode.SEPARATE) {
@@ -469,5 +540,27 @@ internal fun acquisitionExportChartFileBreakdown(
 
 internal fun acquisitionExportChartFileCount(
     plan: AcquisitionExportPlan,
-    mode: UvirChartExportMode
-): Int = acquisitionExportChartFileBreakdown(plan, mode).totalFiles
+    mode: UvirChartExportMode,
+    variantGrouping: UvirVariantChartGrouping =
+        UvirVariantChartGrouping.BY_VARIANT
+): Int =
+    acquisitionExportChartFileBreakdown(
+        plan,
+        mode,
+        variantGrouping
+    ).totalFiles
+
+internal fun acquisitionSessionReadableTableFileCount(
+    records: List<SavedRecordDetail>
+): Int = acquisitionVariantGroups(records).size.coerceAtLeast(1)
+
+internal fun acquisitionExportReadableTableFileCount(
+    plan: AcquisitionExportPlan
+): Int =
+    plan.items.sumOf { item ->
+        when (item) {
+            is AcquisitionExportItem.CompleteSession ->
+                acquisitionSessionReadableTableFileCount(item.records)
+            is AcquisitionExportItem.IndividualAcquisition -> 1
+        }
+    }

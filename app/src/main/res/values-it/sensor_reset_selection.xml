@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sensor_reset_selection_title">Resettare i sensori selezionati?</string>
+    <string name="sensor_reset_selection_message">Seleziona i sensori da resettare. Le loro impostazioni, credenziali e i dati non sincronizzati saranno eliminati, poi i sensori si spegneranno. I dati nell’app restano invariati. Sono selezionabili solo sensori connessi senza attività in corso.</string>
+    <string name="sensor_reset_selection_failed">Reset non riuscito: %1$s. Controlla la connessione e riprova.</string>
+</resources>
+

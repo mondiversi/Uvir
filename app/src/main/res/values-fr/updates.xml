@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="update_available">Mises à jour disponibles</string>
+    <string name="update_none">Aucune mise à jour disponible</string>
+    <string name="update_check_failed">Impossible de rechercher les mises à jour. Consultez le journal des erreurs.</string>
+    <string name="update_app">Mettre à jour l’application</string>
+    <string name="update_sensor">Mettre à jour le capteur</string>
+    <string name="update_app_first">Mettez d’abord l’application à jour.</string>
+    <string name="update_usb_required">Sélectionnez ce capteur et connectez-le par USB, sans session active et avec tous les enregistrements synchronisés.</string>
+    <string name="update_download">Téléchargement et vérification…</string>
+    <string name="update_flash">Mise à jour du capteur…</string>
+    <string name="update_verify">Vérification du capteur…</string>
+    <string name="update_keep_connected">Ne débranchez pas l’USB et n’éteignez pas le capteur. Si nécessaire, maintenez BOOT et réessayez.</string>
+    <string name="update_done">Capteur mis à jour</string>
+    <string name="update_failed">Échec de la mise à jour. Consultez le journal des erreurs. Si le capteur ne démarre plus, restaurez le firmware par USB depuis un ordinateur.</string>
+    <string name="update_permission">Autorisez Uvir à installer des mises à jour dans les paramètres Android.</string>
+    <string name="update_whats_new">Mises à jour signées de l’application et du capteur, téléchargements vérifiés et chargement du firmware par USB.</string>
+</resources>

@@ -36,6 +36,12 @@ class UvirSimulatedAutomaticAcquisitionTest {
         assertEquals(SimulatedAutomaticAcquisitionStep.Wait(100L), step(ready = false))
     }
 
+    @Test fun temporarilyDisabledSimulationWaitsAndResumesWithoutInventingMissedRecords() {
+        assertEquals(SimulatedAutomaticAcquisitionStep.Wait(100L), step(now = 7_000L, ready = false))
+        assertEquals(SimulatedAutomaticAcquisitionStep.Acquire(12_000L), step(now = 7_000L))
+        assertEquals(SimulatedAutomaticAcquisitionStep.Stop, step(now = 7_000L, end = 7_000L, ready = false))
+    }
+
     @Test fun durationEndsWithoutAnotherAcquisitionAtTheDeadline() {
         assertEquals(SimulatedAutomaticAcquisitionStep.Stop, step(end = 1_000L))
         assertEquals(SimulatedAutomaticAcquisitionStep.Stop, step(end = 999L))

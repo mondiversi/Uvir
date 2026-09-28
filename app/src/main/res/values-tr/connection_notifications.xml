@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="connection_notification_connected">Bağlı</string>
+    <string name="connection_notification_disconnected">Bağlı değil</string>
+    <string name="connection_notification_simulation">Simülasyon</string>
+    <string name="connection_notification_selected">seçili</string>
+    <string name="connection_notification_activity">Etkinlik sürüyor</string>
+    <string name="connection_notification_last_activity">Etkinlik sürüyor (son bilinen durum)</string>
+    <plurals name="connection_notification_connected_count">
+        <item quantity="one">%1$d sensör bağlı</item>
+        <item quantity="other">%1$d sensör bağlı</item>
+    </plurals>
+    <plurals name="connection_notification_connecting_count">
+        <item quantity="one">%1$d sensör bağlanıyor</item>
+        <item quantity="other">%1$d sensör bağlanıyor</item>
+    </plurals>
+    <plurals name="connection_notification_activity_count">
+        <item quantity="one">%1$d etkinlik sürüyor</item>
+        <item quantity="other">%1$d etkinlik sürüyor</item>
+    </plurals>
+    <plurals name="connection_notification_simulation_count">
+        <item quantity="one">%1$d simülasyon</item>
+        <item quantity="other">%1$d simülasyon</item>
+    </plurals>
+</resources>

@@ -1,23 +1,28 @@
 package me.mondiversi.uvir
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalContext
@@ -25,29 +30,38 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
 internal fun UvirStartAllAlertsFloatingButton(
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    iconTint: Color? = null,
+    iconStrokeWidth: Dp? = null
 ) {
     val description =
         stringResource(R.string.start_value_alert_session_accessibility)
+    val contentColor = iconTint ?: uvirAlertSessionContentColor()
+    val interactionSource = remember { MutableInteractionSource() }
+    val pressedScale = uvirFloatingPressedScale(interactionSource)
 
     Surface(
         onClick = onClick,
+        interactionSource = interactionSource,
         modifier =
             modifier
                 .size(UvirSecondaryFloatingControlSize)
+                .scale(pressedScale)
+                .uvirHapticOnPress()
                 .semantics {
                     contentDescription = description
                 },
         shape = CircleShape,
-        color = UvirAttentionColor,
-        contentColor = Color.White,
-        shadowElevation = 5.dp
+        color = uvirAlertSessionIndicatorColor(isSystemInDarkTheme()),
+        contentColor = contentColor,
+        shadowElevation = UvirFloatingActionShadowElevation
     ) {
         Box(
             modifier = Modifier.fillMaxSize(),
@@ -56,7 +70,8 @@ internal fun UvirStartAllAlertsFloatingButton(
             UvirMenuIcon(
                 type = MenuIconType.ALERT_LOG,
                 modifier = Modifier.size(23.dp),
-                tint = Color.White
+                tint = contentColor,
+                uniformStrokeWidth = iconStrokeWidth
             )
         }
     }
@@ -66,19 +81,26 @@ internal fun UvirStartAllAlertsFloatingButton(
 internal fun UvirStopAllAlertsFloatingButton(
     enabled: Boolean,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    opensRegistrationPage: Boolean = false,
+    iconTint: Color? = null,
+    iconStrokeWidth: Dp? = null
 ) {
     val description =
-        stringResource(R.string.stop_all_value_alerts_accessibility)
+        stringResource(if (opensRegistrationPage) R.string.alert_registration_title
+            else R.string.stop_all_value_alerts_accessibility)
+    val interactionSource = remember { MutableInteractionSource() }
+    val pressedScale = uvirFloatingPressedScale(interactionSource, enabled)
     val containerColor =
         if (enabled) {
-            UvirDestructiveActionBaseColor
+            if (opensRegistrationPage) uvirAlertSessionIndicatorColor(isSystemInDarkTheme())
+            else UvirDestructiveActionBaseColor
         } else {
             uvirDisabledActionContainerColor()
         }
     val contentColor =
         if (enabled) {
-            Color.White
+            iconTint ?: if (opensRegistrationPage) uvirAlertSessionContentColor() else Color.White
         } else {
             uvirDisabledActionContentColor()
         }
@@ -86,16 +108,19 @@ internal fun UvirStopAllAlertsFloatingButton(
     Surface(
         onClick = onClick,
         enabled = enabled,
+        interactionSource = interactionSource,
         modifier =
             modifier
                 .size(UvirSecondaryFloatingControlSize)
+                .scale(pressedScale)
+                .uvirHapticOnPress(enabled)
                 .semantics {
                     contentDescription = description
                 },
         shape = CircleShape,
         color = containerColor,
         contentColor = contentColor,
-        shadowElevation = 5.dp
+        shadowElevation = UvirFloatingActionShadowElevation
     ) {
         Box(
             modifier = Modifier.fillMaxSize(),
@@ -105,16 +130,80 @@ internal fun UvirStopAllAlertsFloatingButton(
                 UvirMenuIcon(
                     type = MenuIconType.ALERT_LOG,
                     modifier = Modifier.fillMaxSize(),
-                    tint = contentColor
+                    tint = contentColor,
+                    uniformStrokeWidth = iconStrokeWidth
                 )
-                Canvas(modifier = Modifier.fillMaxSize()) {
-                    drawLine(
-                        color = contentColor,
-                        start = Offset(size.width * 0.12f, size.height * 0.12f),
-                        end = Offset(size.width * 0.88f, size.height * 0.88f),
-                        strokeWidth = 2.2.dp.toPx(),
-                        cap = StrokeCap.Round
+                if (!opensRegistrationPage) {
+                    Canvas(modifier = Modifier.fillMaxSize()) {
+                        drawLine(
+                            color = contentColor,
+                            start = Offset(size.width * 0.12f, size.height * 0.12f),
+                            end = Offset(size.width * 0.88f, size.height * 0.88f),
+                            strokeWidth = 2.2.dp.toPx(),
+                            cap = StrokeCap.Round
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+internal fun UvirAlertRegistrationActionButton(
+    active: Boolean,
+    completedCount: Int,
+    enabled: Boolean,
+    onClick: () -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val pressedScale = uvirFloatingPressedScale(interactionSource, enabled)
+    val content = if (enabled) Color.White else uvirDisabledActionContentColor()
+    val countText = completedCount.toString()
+    val showHint = uvirFloatingActionHintVisible(interactionSource, enabled)
+    Box(modifier = Modifier.size(56.dp)) {
+        UvirFloatingActionHint(
+            text = stringResource(if (active) R.string.alert_hint_stop else R.string.alert_hint_start),
+            visible = showHint
+        )
+        Surface(
+            modifier = Modifier.size(56.dp).scale(pressedScale),
+            shape = CircleShape,
+            color = when {
+                !enabled -> uvirDisabledActionContainerColor()
+                else -> uvirDestructiveButtonContainerColor()
+            },
+            contentColor = content,
+            shadowElevation = UvirFloatingActionShadowElevation
+        ) {
+            UvirAccessibleIconButton(
+                contentDescription = stringResource(
+                    if (active) R.string.stop_all_value_alerts_accessibility
+                    else R.string.start_value_alert_session_accessibility
+                ),
+                onClick = onClick,
+                hapticOnPress = true,
+                enabled = enabled,
+                pressedColor = content,
+                interactionSource = interactionSource,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                if (active) {
+                    Text(
+                        text = countText,
+                        color = content,
+                        fontSize = when {
+                            countText.length >= 6 -> 12.sp
+                            countText.length >= 4 -> 15.sp
+                            else -> 18.sp
+                        },
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1
                     )
+                } else {
+                    Canvas(modifier = Modifier.size(20.dp)) {
+                        drawCircle(color = content)
+                    }
                 }
             }
         }
@@ -127,6 +216,7 @@ internal fun UvirStartAllAlertsDialog(
     repeatHoursText: String,
     repeatMinutesText: String,
     repeatSecondsText: String,
+    doNotRecord: Boolean,
     cardColor: Color,
     primaryText: Color,
     secondaryText: Color,
@@ -134,6 +224,7 @@ internal fun UvirStartAllAlertsDialog(
     onRepeatHoursChanged: (String) -> Unit,
     onRepeatMinutesChanged: (String) -> Unit,
     onRepeatSecondsChanged: (String) -> Unit,
+    onDoNotRecordChanged: (Boolean) -> Unit,
     onStart: (String, Int) -> Unit,
     onCancel: () -> Unit,
     onDismissRequest: () -> Unit
@@ -158,13 +249,8 @@ internal fun UvirStartAllAlertsDialog(
         }
         return normalized
     }
-    val dialogScrollbar =
-        rememberUvirDialogScrollbar(
-            color = secondaryText.copy(alpha = 0.58f)
-        )
-    AlertDialog(
+    UvirAlertDialog(
         onDismissRequest = onDismissRequest,
-        modifier = dialogScrollbar.dialogModifier,
         title = {
             Text(stringResource(R.string.start_value_alert_session_title))
         },
@@ -173,14 +259,11 @@ internal fun UvirStartAllAlertsDialog(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .heightIn(max = 420.dp)
-                        .then(dialogScrollbar.viewportModifier)
             ) {
                 Column(
                     modifier =
                         Modifier
-                            .fillMaxWidth()
-                            .verticalScroll(dialogScrollbar.scrollState),
+                            .fillMaxWidth(),
                     verticalArrangement =
                         androidx.compose.foundation.layout.Arrangement.spacedBy(12.dp)
                 ) {
@@ -209,6 +292,28 @@ internal fun UvirStartAllAlertsDialog(
                             }
                         )
                     }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Checkbox(
+                            checked = doNotRecord,
+                            onCheckedChange = { checked ->
+                                onDoNotRecordChanged(checked)
+                            },
+                            modifier = Modifier
+                        )
+                        Text(
+                            text = stringResource(R.string.alert_session_do_not_record),
+                            color = primaryText,
+                            fontSize = 14.sp
+                        )
+                    }
+                    Text(
+                        text = stringResource(R.string.alert_session_do_not_record_description),
+                        color = secondaryText,
+                        fontSize = 12.sp
+                    )
                     UvirLimitedNoteField(
                         value = note,
                         onValueChange = onNoteChanged,
@@ -262,25 +367,26 @@ internal fun UvirStopAllAlertsDialog(
     onContinue: () -> Unit,
     onDismissRequest: () -> Unit
 ) {
-    AlertDialog(
+    UvirAlertDialog(
         onDismissRequest = onDismissRequest,
         title = {
             Text(stringResource(R.string.stop_all_value_alerts_title))
         },
         text = {
-            Text(stringResource(R.string.stop_all_value_alerts_message))
+            UvirHoldConfirmationMessage(
+                message = stringResource(R.string.stop_all_value_alerts_message),
+                actionLabel = stringResource(R.string.stop_all_value_alerts_action),
+                holdDurationSeconds = 2,
+                replaceEmbeddedInstruction = false
+            )
         },
         dismissButton = {
-            TextButton(
-                onClick = onStop,
+            HoldToConfirmActionButton(
+                label = stringResource(R.string.stop_all_value_alerts_action),
+                onConfirmed = onStop,
                 enabled = stopEnabled,
-                colors =
-                    ButtonDefaults.textButtonColors(
-                        contentColor = UvirDestructiveActionColor
-                    )
-            ) {
-                Text(stringResource(R.string.stop_all_value_alerts_action))
-            }
+                holdDurationMillis = 2_000L
+            )
         },
         confirmButton = {
             TextButton(onClick = onContinue) {

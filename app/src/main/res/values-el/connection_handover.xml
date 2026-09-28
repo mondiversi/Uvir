@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sensor_connection_switch_failed">Δεν ήταν δυνατή η επιβεβαίωση της αλλαγής σύνδεσης. Η προηγούμενη λειτουργία παραμένει επιλεγμένη.</string>
+</resources>

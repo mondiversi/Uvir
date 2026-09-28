@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sensor_sync_complete_from">已同步来自 %1$s 的数据</string>
+</resources>

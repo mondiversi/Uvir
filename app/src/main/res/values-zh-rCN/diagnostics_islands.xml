@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="diagnostics_test_group">诊断测试</string>
+    <string name="diagnostics_simulation_group">模拟</string>
+    <string name="diagnostics_simulation_description">模拟传感器的采集、警报和实时数值。</string>
+</resources>

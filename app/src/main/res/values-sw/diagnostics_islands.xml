@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="diagnostics_test_group">Jaribio la uchunguzi</string>
+    <string name="diagnostics_simulation_group">Uigaji</string>
+    <string name="diagnostics_simulation_description">Huiga vipimo, tahadhari na thamani za moja kwa moja za kihisi.</string>
+</resources>

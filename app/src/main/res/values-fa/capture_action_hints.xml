@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="capture_hint_start">شروع اندازه‌گیری</string>
+    <string name="capture_hint_stop">توقف اندازه‌گیری</string>
+    <string name="alert_hint_start">شروع ثبت</string>
+    <string name="alert_hint_stop">توقف ثبت</string>
+</resources>

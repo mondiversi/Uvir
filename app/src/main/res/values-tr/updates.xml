@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="update_available">Güncellemeler mevcut</string>
+    <string name="update_none">Güncelleme yok</string>
+    <string name="update_check_failed">Güncellemeler kontrol edilemedi. Hata günlüğüne bakın.</string>
+    <string name="update_app">Uygulamayı güncelle</string>
+    <string name="update_sensor">Sensörü güncelle</string>
+    <string name="update_app_first">Önce uygulamayı güncelleyin.</string>
+    <string name="update_usb_required">Bu sensörü seçin ve USB ile bağlayın. Etkin oturum olmamalı, tüm kayıtlar eşitlenmiş olmalıdır.</string>
+    <string name="update_download">İndirme ve doğrulama…</string>
+    <string name="update_flash">Sensör güncelleniyor…</string>
+    <string name="update_verify">Sensör doğrulanıyor…</string>
+    <string name="update_keep_connected">USB bağlantısını kesmeyin veya sensörü kapatmayın. Gerekirse BOOT düğmesini basılı tutup tekrar deneyin.</string>
+    <string name="update_done">Sensör güncellendi</string>
+    <string name="update_failed">Güncelleme başarısız. Hata günlüğüne bakın. Sensör açılmıyorsa bilgisayardan USB ile ürün yazılımını kurtarın.</string>
+    <string name="update_permission">Android ayarlarında Uvir uygulamasına güncelleme yükleme izni verin.</string>
+    <string name="update_whats_new">Uygulama ve sensör için imzalı güncellemeler, doğrulanmış indirmeler ve USB ile ürün yazılımı yükleme.</string>
+</resources>

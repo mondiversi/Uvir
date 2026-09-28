@@ -14,6 +14,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -22,6 +23,10 @@ fun SpectrumCard(
     group: SensorGroup,
     title: String,
     total: Double,
+    bandLabel: String,
+    relativePercent: Float?,
+    trackColor: Color,
+    barColor: Color,
 
     expanded: Boolean,
     onToggle: () -> Unit,
@@ -38,10 +43,13 @@ fun SpectrumCard(
     onAlertClick: (() -> Unit)? = null,
     footnote: String? = null,
     outOfRange: Boolean = false,
-
     content:
     @Composable ColumnScope.() -> Unit
 ) {
+    val accessibilityState =
+        stringResource(
+            if (expanded) R.string.accessibility_expanded else R.string.accessibility_collapsed
+        )
     Card(
         modifier =
             Modifier.fillMaxWidth(),
@@ -65,39 +73,55 @@ fun SpectrumCard(
                 )
         ) {
 
-            Row(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable {
                         onToggle()
                     }
-                    .padding(UvirIslandContentPadding),
-
-                verticalAlignment =
-                    Alignment.CenterVertically
-            ) {
-
-                UvirSpectrumGroupIcon(
-                    group = group,
-                    tint = if (alerted) UvirAttentionColor else primaryText
-                )
-                Spacer(Modifier.width(8.dp))
-
-                Column(
-                    modifier =
-                        Modifier.weight(1f)
-                ) {
-
-                    Text(
-                        text = title,
-                        color = if (alerted) UvirAttentionColor else primaryText,
-                        fontSize = 17.sp,
-                        fontWeight = FontWeight.Bold
+                    .uvirNestedAccessibleAction(
+                        label = title,
+                        stateText = accessibilityState,
+                        onClick = onToggle
                     )
+                    .padding(UvirIslandContentPadding),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    UvirSpectrumGroupIcon(
+                        group = group,
+                        tint = if (alerted) UvirAttentionColor else primaryText
+                    )
+                    Spacer(Modifier.width(8.dp))
 
-                    Text(
-                        text =
-                            if (outOfRange) {
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(3.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = title,
+                                modifier = Modifier.weight(1f, fill = false),
+                                color = if (alerted) UvirAttentionColor else primaryText,
+                                fontSize = 16.sp,
+                                lineHeight = 19.sp,
+                                fontWeight = FontWeight.Bold,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                            Spacer(Modifier.width(5.dp))
+                            ExpansionChevron(
+                                expanded = expanded,
+                                tint = secondaryText,
+                                iconSize = 18.dp
+                            )
+                        }
+
+                        Text(
+                            text = if (outOfRange) {
                                 stringResource(R.string.out_of_range_short)
                             } else {
                                 "${formatUvirIrradianceNumber(
@@ -107,34 +131,54 @@ fun SpectrumCard(
                                     LocalUvirIrradianceUnit.current
                                 )} ${LocalUvirIrradianceUnit.current.symbol}"
                             },
-                        color =
-                            if (alerted) {
-                                Color(0xFFF57C00)
-                            } else {
-                                primaryText
-                            },
-                        fontSize =
-                            13.sp
-                    )
+                            color = if (alerted) Color(0xFFF57C00) else primaryText,
+                            fontSize = 12.sp,
+                            lineHeight = 15.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
+                    onAlertClick?.let { alertClick ->
+                        ThresholdAlertBellButton(
+                            active = alertConfigured,
+                            onClick = alertClick,
+                            inactiveTint = secondaryText
+                        )
+                        Spacer(Modifier.width(10.dp))
+                    }
+
+                    Column(
+                        horizontalAlignment = Alignment.End,
+                        verticalArrangement = Arrangement.spacedBy(3.dp)
+                    ) {
+                        Text(
+                            text = bandLabel,
+                            color = secondaryText,
+                            fontSize = 12.sp,
+                            lineHeight = 19.sp,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1
+                        )
+                        Text(
+                            text = relativePercent?.let {
+                                "${formatUvirNumber(
+                                    it.toDouble() * 100.0,
+                                    1,
+                                    LocalUvirNumericFormat.current
+                                )}%"
+                            } ?: "—",
+                            color = secondaryText,
+                            fontSize = 12.sp,
+                            lineHeight = 15.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
 
-                onAlertClick?.let { alertClick ->
-                    ThresholdAlertBellButton(
-                        active = alertConfigured,
-                        onClick = alertClick,
-                        inactiveTint = secondaryText
-                    )
-
-                    Spacer(
-                        Modifier.width(10.dp)
-                    )
-                }
-
-                ExpansionChevron(
-                    expanded = expanded,
-                    tint = secondaryText,
-                    modifier =
-                        Modifier.size(20.dp)
+                SpectrumBar(
+                    percent = relativePercent ?: 0f,
+                    trackColor = trackColor,
+                    barColor = barColor
                 )
             }
 
@@ -215,7 +259,7 @@ fun SpectrumRow(
             Modifier.fillMaxWidth(),
 
         verticalArrangement =
-            Arrangement.spacedBy(4.dp)
+            Arrangement.spacedBy(2.dp)
     ) {
 
         Row(
@@ -236,6 +280,7 @@ fun SpectrumRow(
                     },
                 fontSize =
                     16.sp,
+                lineHeight = 19.sp,
                 fontWeight =
                     FontWeight.Bold
             )
@@ -248,14 +293,17 @@ fun SpectrumRow(
                 text = band,
                 color = secondaryText,
                 fontSize =
-                    12.sp
+                    12.sp,
+                lineHeight = 19.sp
             )
 
         }
 
         Row(
             modifier =
-                Modifier.fillMaxWidth(),
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 1.dp),
 
             horizontalArrangement =
                 Arrangement.SpaceBetween
@@ -280,7 +328,8 @@ fun SpectrumRow(
                         primaryText
                     },
                 fontSize =
-                    12.sp
+                    12.sp,
+                lineHeight = 15.sp
             )
 
             Text(
@@ -293,7 +342,8 @@ fun SpectrumRow(
                 color =
                     secondaryText,
                 fontSize =
-                    12.sp
+                    12.sp,
+                lineHeight = 15.sp
             )
         }
 

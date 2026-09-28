@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="diagnostics_test_group">Διαγνωστικός έλεγχος</string>
+    <string name="diagnostics_simulation_group">Προσομοίωση</string>
+    <string name="diagnostics_simulation_description">Προσομοιώνει μετρήσεις, ειδοποιήσεις και ζωντανές τιμές για τον αισθητήρα.</string>
+</resources>

@@ -29,6 +29,24 @@ fun formatInterval(totalSeconds: Long): String {
     )
 }
 
+internal fun sessionRecordElapsedText(
+    currentTimestamp: Long,
+    previousTimestamp: Long?
+): String? {
+    if (previousTimestamp == null) {
+        return "+00:00:00"
+    }
+    if (
+        currentTimestamp <= 0L ||
+        previousTimestamp <= 0L ||
+        currentTimestamp < previousTimestamp
+    ) {
+        return null
+    }
+
+    return "+${formatInterval((currentTimestamp - previousTimestamp) / 1_000L)}"
+}
+
 fun generateRandomSample(
     simulateOutOfRange: Boolean = false
 ): SensorSample {

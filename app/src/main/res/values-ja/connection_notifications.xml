@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="connection_notification_connected">接続済み</string>
+    <string name="connection_notification_disconnected">未接続</string>
+    <string name="connection_notification_simulation">シミュレーション</string>
+    <string name="connection_notification_selected">選択中</string>
+    <string name="connection_notification_activity">動作中</string>
+    <string name="connection_notification_last_activity">動作中（最後に確認した状態）</string>
+    <plurals name="connection_notification_connected_count">
+        <item quantity="other">%1$d 台のセンサーが接続済み</item>
+    </plurals>
+    <plurals name="connection_notification_connecting_count">
+        <item quantity="other">%1$d 台のセンサーが接続中</item>
+    </plurals>
+    <plurals name="connection_notification_activity_count">
+        <item quantity="other">%1$d 件の動作が進行中</item>
+    </plurals>
+    <plurals name="connection_notification_simulation_count">
+        <item quantity="other">%1$d 件のシミュレーション</item>
+    </plurals>
+</resources>

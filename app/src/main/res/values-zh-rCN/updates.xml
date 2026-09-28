@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="update_available">有可用更新</string>
+    <string name="update_none">没有可用更新</string>
+    <string name="update_check_failed">无法检查更新。请查看错误日志。</string>
+    <string name="update_app">更新应用</string>
+    <string name="update_sensor">更新传感器</string>
+    <string name="update_app_first">请先更新应用。</string>
+    <string name="update_usb_required">选择此传感器并通过 USB 连接。请先结束活动会话并同步所有记录。</string>
+    <string name="update_download">正在下载并验证…</string>
+    <string name="update_flash">正在更新传感器…</string>
+    <string name="update_verify">正在验证传感器…</string>
+    <string name="update_keep_connected">请勿断开 USB 或关闭传感器。必要时按住 BOOT 并重试。</string>
+    <string name="update_done">传感器已更新</string>
+    <string name="update_failed">更新失败。请查看错误日志。如果传感器无法启动，请通过计算机 USB 恢复固件。</string>
+    <string name="update_permission">请在 Android 设置中允许 Uvir 安装更新。</string>
+    <string name="update_whats_new">应用和传感器的签名更新、经过验证的下载及 USB 固件更新。</string>
+</resources>

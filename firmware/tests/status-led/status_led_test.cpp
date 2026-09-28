@@ -2,122 +2,162 @@
 #include <iostream>
 #include "UvirStatusLed.h"
 
-static UvirStatusLed led() {
+static UvirStatusLed led(UvirLedBaseState state = UvirLedBaseState::Connected) {
   FakeArduino::now = 1000;
   UvirStatusLed value;
   value.begin(25, 26, 27);
   value.configure(true, 10);
-  value.setBaseState(UvirLedBaseState::Connected);
+  value.setBaseState(state);
   return value;
 }
 
+static bool red() { return FakeArduino::pwm[25] != 0; }
+static bool green() { return FakeArduino::pwm[26] != 0; }
 static bool blue() { return FakeArduino::pwm[27] != 0; }
 
 int main() {
   {
     auto value = led();
     value.update();
-    assert(!blue());
-    assert(FakeArduino::pwm[26] == 25);
-    value.beginCommandActivity();
+    assert(!red() && green() && !blue());
+    value.setOperationActive(true);
     value.update();
-    assert(blue() && FakeArduino::pwm[27] == 25);
-    value.endCommandActivity();
-    FakeArduino::now += 349;
+    assert(!green());
+    FakeArduino::now += 500;
     value.update();
-    assert(blue());
-    FakeArduino::now += 1;
+    assert(green());
+    FakeArduino::now += 500;
+    value.update();
+    assert(!green());
+    value.setOperationActive(false);
+    value.update();
+    assert(green());
+  }
+  {
+    auto value = led(UvirLedBaseState::Disconnected);
+    value.setOperationActive(true);
+    value.update();
+    assert(!red() && !green());
+    FakeArduino::now += 500;
+    value.update();
+    assert(red() && !green());
+  }
+  {
+    auto value = led(UvirLedBaseState::Connecting);
+    value.setOperationActive(true);
+    value.update();
+    assert(red() && green());
+    FakeArduino::now += 500;
+    value.update();
+    assert(!red() && !green());
+  }
+  {
+    auto value = led();
+    value.setPendingSync(true);
+    value.update();
+    assert(green() && blue());
+    value.setOperationActive(true);
+    value.update();
+    assert(!green() && blue());
+    FakeArduino::now += 500;
+    value.update();
+    assert(green() && blue());
+    value.setPendingSync(false);
     value.update();
     assert(!blue());
   }
   {
     auto value = led();
-    value.beginCommandActivity();
+    value.signalAcquisitionSaved();
+    assert(value.savedEventActive());
+    value.update();
+    for (uint32_t half = 0; half < 6; ++half) {
+      FakeArduino::now = 1000 + half * 75;
+      value.update();
+      assert(!red() && green() == (half % 2 == 0) && !blue());
+    }
+    FakeArduino::now = 1450;
+    value.update();
+    assert(green() && !blue());
+    assert(!value.savedEventActive());
+  }
+  {
+    auto value = led(UvirLedBaseState::Disconnected);
+    value.signalAlertSaved(true);
+    for (uint32_t half = 0; half < 6; ++half) {
+      FakeArduino::now = 1000 + half * 75;
+      value.update();
+      assert(red() == (half % 2 == 0) && !green());
+    }
+  }
+  {
+    auto value = led();
+    value.setPendingSync(true);
+    value.signalTimeUnavailable();
+    assert(value.savedEventActive());
+    for (uint32_t half = 0; half < 10; ++half) {
+      FakeArduino::now = 1000 + half * 75;
+      value.update();
+      assert(red() == (half % 2 == 0));
+      assert(green() == (half % 2 == 0));
+      assert(blue());
+    }
+    FakeArduino::now = 1750;
+    value.update();
+    assert(!red() && green() && blue());
+    assert(!value.savedEventActive());
+  }
+  {
+    auto value = led();
     value.beginCommandActivity();
     value.endCommandActivity();
-    FakeArduino::now += 1000;
+    FakeArduino::now += 349;
     assert(value.commandActivityActive());
-    value.endCommandActivity();
-    FakeArduino::now += 350;
+    FakeArduino::now += 1;
     assert(!value.commandActivityActive());
     FakeArduino::now += 0x80000000u;
     assert(!value.commandActivityActive());
   }
   {
     auto value = led();
-    FakeArduino::now = UINT32_MAX - 100;
-    value.beginCommandActivity();
-    value.endCommandActivity();
-    FakeArduino::now += 349;
-    assert(value.commandActivityActive());
-    FakeArduino::now += 1;
-    assert(!value.commandActivityActive());
-  }
-  for (bool active : {false, true}) {
-    auto value = led();
-    value.setOperationActive(active);
-    value.update();
-    assert(blue() == active);
-    value.signalAcquisitionSaved();
-    assert(value.savedEventActive());
-    for (uint32_t half = 0; half < 6; ++half) {
-      FakeArduino::now = 1000 + half * 500;
-      if (half == 1) value.setOperationActive(!active);
-      value.update();
-      assert(blue() == (active ? half % 2 == 1 : half % 2 == 0));
-    }
-    FakeArduino::now = 4000;
-    value.update();
-    assert(!value.savedEventActive());
-    assert(blue() == !active);
-  }
-  {
-    auto value = led();
-    value.setOperationActive(true);
-    value.signalAlertSaved();
-    for (uint32_t half = 0; half < 6; ++half) {
-      FakeArduino::now = 1000 + half * 500;
-      value.update();
-      assert(blue() == (half % 2 == 1));
-    }
-    FakeArduino::now = 4000;
-    value.update();
-    assert(blue());
-  }
-  {
-    auto value = led();
-    value.setOperationActive(true);
+    value.setPendingSync(true);
     assert(value.requestDebugFrame(255, 0, 0, 100));
     value.update();
-    assert(!blue() && FakeArduino::pwm[25] == 25);
+    assert(red() && !green() && !blue());
     FakeArduino::now += 100;
     value.update();
-    assert(blue());
+    assert(green() && blue());
     value.configure(false, 10);
-    value.beginCommandActivity();
-    value.signalAcquisitionSaved();
     value.update();
-    assert(value.commandActivityActive());
-    assert(!value.savedEventActive());
-    assert(!blue() && FakeArduino::pwm[25] == 0 && FakeArduino::pwm[26] == 0);
+    assert(!red() && !green() && !blue());
   }
   {
     auto value = led();
-    value.setOperationActive(true);
     assert(value.requestSelfTest());
     value.update();
-    assert(FakeArduino::pwm[25] == 25 && !blue());
+    assert(red() && !green() && !blue());
     FakeArduino::now = 1000 + 12000;
     value.update();
-    assert(blue());
-    for (uint32_t half = 0; half < 6; ++half) {
-      FakeArduino::now = 1000 + 13500 + half * 500;
+    assert(!red() && !green() && blue());
+    for (uint32_t half = 0; half < 10; ++half) {
+      FakeArduino::now = 1000 + 13500 + half * 75;
       value.update();
-      assert(blue() == (half % 2 == 1));
+      assert(red() == (half % 2 == 0));
+      assert(green() == (half % 2 == 0) && !blue());
     }
-    FakeArduino::now = 1000 + 16500;
+    for (uint32_t half = 0; half < 6; ++half) {
+      FakeArduino::now = 1000 + 14250 + half * 75;
+      value.update();
+      assert(red() == (half % 2 == 0) && !green() && !blue());
+    }
+    for (uint32_t half = 0; half < 6; ++half) {
+      FakeArduino::now = 1000 + 14700 + half * 75;
+      value.update();
+      assert(!red() && green() == (half % 2 == 0) && !blue());
+    }
+    FakeArduino::now = 1000 + 15150;
     value.update();
-    assert(!value.selfTestActive() && blue());
+    assert(!value.selfTestActive() && green() && !blue());
   }
-  std::cout << "Status LED checks passed: activity, rollover, three flashes, disabled LEDs and test/debug effects.\n";
+  std::cout << "Status LED checks passed: RGB activity, connection priority, steady pending-sync blue, missing-time signal and self-test.\n";
 }

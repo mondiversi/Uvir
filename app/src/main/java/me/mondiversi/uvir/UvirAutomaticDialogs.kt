@@ -18,7 +18,7 @@ internal fun UvirStopAutomaticDialog(
     onContinue: () -> Unit,
     onDismissRequest: () -> Unit
 ) {
-    AlertDialog(
+    UvirAlertDialog(
         onDismissRequest = onDismissRequest,
         title = {
             Text(
@@ -28,23 +28,22 @@ internal fun UvirStopAutomaticDialog(
             )
         },
         text = {
-            Text(
-                stringResource(
+            UvirHoldConfirmationMessage(
+                message = stringResource(
                     R.string.stop_automatic_confirmation_message
-                )
+                ),
+                actionLabel = stringResource(R.string.stop),
+                holdDurationSeconds = 2,
+                replaceEmbeddedInstruction = false
             )
         },
         dismissButton = {
-            TextButton(
-                onClick = onStop,
+            HoldToConfirmActionButton(
+                label = stringResource(R.string.stop),
+                onConfirmed = onStop,
                 enabled = stopEnabled,
-                colors =
-                    ButtonDefaults.textButtonColors(
-                        contentColor = UvirDestructiveActionColor
-                    )
-            ) {
-                Text(stringResource(R.string.stop))
-            }
+                holdDurationMillis = 2_000L
+            )
         },
         confirmButton = {
             TextButton(onClick = onContinue) {
@@ -66,7 +65,7 @@ internal fun UvirAutomaticBackgroundWarningDialog(
     onContinue: () -> Unit,
     onDismissRequest: () -> Unit
 ) {
-    AlertDialog(
+    UvirAlertDialog(
         onDismissRequest = onDismissRequest,
         title = {
             Text(stringResource(R.string.automatic_background_title))
@@ -107,7 +106,7 @@ internal fun UvirInterruptManualSessionDialog(
     onContinueManualSession: () -> Unit,
     onDismissRequest: () -> Unit
 ) {
-    AlertDialog(
+    UvirAlertDialog(
         onDismissRequest = onDismissRequest,
         title = {
             Text(stringResource(R.string.interrupt_manual_session_title))

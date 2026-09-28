@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="connection_notification_connected">מחובר</string>
+    <string name="connection_notification_disconnected">מנותק</string>
+    <string name="connection_notification_simulation">הדמיה</string>
+    <string name="connection_notification_selected">נבחר</string>
+    <string name="connection_notification_activity">פעילות מתבצעת</string>
+    <string name="connection_notification_last_activity">פעילות מתבצעת (המצב הידוע האחרון)</string>
+    <plurals name="connection_notification_connected_count">
+        <item quantity="one">%1$d חיישן מחובר</item>
+        <item quantity="two">%1$d חיישנים מחוברים</item>
+        <item quantity="other">%1$d חיישנים מחוברים</item>
+    </plurals>
+    <plurals name="connection_notification_connecting_count">
+        <item quantity="one">%1$d חיישן מתחבר</item>
+        <item quantity="two">%1$d חיישנים מתחברים</item>
+        <item quantity="other">%1$d חיישנים מתחברים</item>
+    </plurals>
+    <plurals name="connection_notification_activity_count">
+        <item quantity="one">%1$d פעילות מתבצעת</item>
+        <item quantity="two">%1$d פעילויות מתבצעות</item>
+        <item quantity="other">%1$d פעילויות מתבצעות</item>
+    </plurals>
+    <plurals name="connection_notification_simulation_count">
+        <item quantity="one">%1$d הדמיה</item>
+        <item quantity="two">%1$d הדמיות</item>
+        <item quantity="other">%1$d הדמיות</item>
+    </plurals>
+</resources>

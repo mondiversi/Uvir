@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sensor_general_actions_title">Ενέργειες</string>
+    <string name="sensor_general_actions_description">Διαχειρίσου τον αισθητήρα και τη συσχέτισή του με την εφαρμογή.</string>
+    <string name="sensor_general_profile_title">Προφίλ</string>
+    <string name="sensor_general_profile_description">Επίλεξε το όνομα του αισθητήρα.</string>
+    <string name="sensor_general_operation_title">Λειτουργία</string>
+    <string name="sensor_general_operation_description">Ρύθμισε τη συμπεριφορά του αισθητήρα.</string>
+</resources>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="capture_hint_start">Iniciar adquisición</string>
+    <string name="capture_hint_stop">Detener adquisición</string>
+    <string name="alert_hint_start">Iniciar registro</string>
+    <string name="alert_hint_stop">Detener registro</string>
+</resources>

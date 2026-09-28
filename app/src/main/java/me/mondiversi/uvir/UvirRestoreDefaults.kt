@@ -2,6 +2,8 @@ package me.mondiversi.uvir
 
 import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
@@ -51,12 +54,13 @@ internal fun restoreUvirApplicationDefaults(
         UvirSensorCredentialStore.clear(applicationContext)
     val runtimeInfoCleared =
         UvirSensorRuntimeInfoStore.clear(applicationContext)
+    val connectionHistoryCleared = UvirSensorConnectionHistory.clear(applicationContext)
     val restored =
         recordsCleared &&
             errorLogCleared &&
             preferencesCleared &&
             credentialsCleared &&
-            runtimeInfoCleared
+            runtimeInfoCleared && connectionHistoryCleared
 
     if (restored) {
         cancelAutomaticAcquisitionNotification(applicationContext)
@@ -95,7 +99,8 @@ internal fun UvirRestoreDefaultsConfirmationDialog(
         stringResource(R.string.restore_app_settings_failed)
     var inProgress by remember { mutableStateOf(false) }
 
-    AlertDialog(
+    UvirAlertDialog(
+        modifier = Modifier.testTag("app_reset_dialog"),
         onDismissRequest = {
             if (!inProgress) onDismissRequest()
         },
@@ -103,7 +108,16 @@ internal fun UvirRestoreDefaultsConfirmationDialog(
             Text(stringResource(R.string.restore_app_settings_title))
         },
         text = {
-            Text(stringResource(R.string.restore_app_settings_message))
+            Box(Modifier.fillMaxWidth()) {
+                Column(Modifier.fillMaxWidth()
+                    .testTag("app_reset_scroll")) {
+                    UvirHoldConfirmationMessage(
+                        message = stringResource(R.string.restore_app_settings_message),
+                        actionLabel = stringResource(R.string.restore_app_settings_confirm),
+                        holdDurationSeconds = 5
+                    )
+                }
+            }
         },
         confirmButton = {
             Row(

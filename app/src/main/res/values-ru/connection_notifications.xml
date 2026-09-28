@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="connection_notification_connected">Подключён</string>
+    <string name="connection_notification_disconnected">Отключён</string>
+    <string name="connection_notification_simulation">Имитация</string>
+    <string name="connection_notification_selected">выбран</string>
+    <string name="connection_notification_activity">Активность продолжается</string>
+    <string name="connection_notification_last_activity">Активность продолжается (последнее известное состояние)</string>
+    <plurals name="connection_notification_connected_count">
+        <item quantity="one">%1$d датчик подключён</item>
+        <item quantity="few">%1$d датчика подключены</item>
+        <item quantity="many">%1$d датчиков подключено</item>
+        <item quantity="other">%1$d датчиков подключено</item>
+    </plurals>
+    <plurals name="connection_notification_connecting_count">
+        <item quantity="one">%1$d датчик подключается</item>
+        <item quantity="few">%1$d датчика подключаются</item>
+        <item quantity="many">%1$d датчиков подключаются</item>
+        <item quantity="other">%1$d датчиков подключаются</item>
+    </plurals>
+    <plurals name="connection_notification_activity_count">
+        <item quantity="one">%1$d операция выполняется</item>
+        <item quantity="few">%1$d операции выполняются</item>
+        <item quantity="many">%1$d операций выполняется</item>
+        <item quantity="other">%1$d операций выполняется</item>
+    </plurals>
+    <plurals name="connection_notification_simulation_count">
+        <item quantity="one">%1$d имитация</item>
+        <item quantity="few">%1$d имитации</item>
+        <item quantity="many">%1$d имитаций</item>
+        <item quantity="other">%1$d имитаций</item>
+    </plurals>
+</resources>

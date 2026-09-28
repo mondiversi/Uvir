@@ -12,7 +12,6 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.toArgb
 import java.io.File
 import java.io.FileOutputStream
-import java.util.Locale
 
 internal fun createSessionChartFile(
     context: Context,
@@ -22,9 +21,13 @@ internal fun createSessionChartFile(
     includeHeader: Boolean = true,
     variantIndex: Int? = null,
     variantCount: Int? = null,
+    variantLabelInSectionTitle: Boolean = false,
+    headerRecords: List<SavedRecordDetail> = records,
+    maximumCanonicalOverride: Double? = null,
     exportBaseName: String = uvirSessionAcquisitionsExportBaseName(sessionId, records)
 ): File {
     require(records.isNotEmpty())
+    require(headerRecords.isNotEmpty())
     val exportFormatting = uvirExportFormatting(context)
     val exportContext = exportFormatting.context
     val irradianceUnit = exportFormatting.irradianceUnit
@@ -58,10 +61,10 @@ internal fun createSessionChartFile(
         wrapChartExportText(
             text = chartExportContextText(
                 note = sessionChartNote(
-                    records,
+                    headerRecords,
                     exportContext.getString(R.string.no_note)
                 ),
-                sensorName = exportSensorNames(records.map { it.sensorDisplayName }),
+                sensorName = exportSensorNames(headerRecords.map { it.sensorDisplayName }),
                 noteLabel = exportContext.getString(R.string.share_note_label),
                 sensorLabel = exportContext.getString(R.string.sensor_selector_label),
                 emptyNote = exportContext.getString(R.string.no_note)
@@ -69,9 +72,15 @@ internal fun createSessionChartFile(
             paint = notePaint,
             maxWidth = 1420f
         )
+    val hasVariant =
+        variantIndex != null &&
+            variantCount != null &&
+            variantCount > 1
+    val variantHeaderOffset =
+        if (hasVariant && !variantLabelInSectionTitle) 35f else 0f
     val headerOffset =
         (noteLines.size * 30f + 20f - 10f)
-            .coerceAtLeast(40f)
+            .coerceAtLeast(40f) + variantHeaderOffset
     val spansMultipleDays =
         sessionChartSpansMultipleDays(records.first().timestamp, records.last().timestamp)
     val timeAxisExtra = if (spansMultipleDays) 30 else 0
@@ -94,13 +103,13 @@ internal fun createSessionChartFile(
         )
         val sessionDateRange =
             csvDateTime(
-                records.first().timestamp,
+                headerRecords.first().timestamp,
                 exportFormatting.dateFormat,
                 exportContext.resources.configuration.locales[0],
                 exportFormatting.timeFormat
             ) + " – " +
                 csvDateTime(
-                    records.last().timestamp,
+                    headerRecords.last().timestamp,
                     exportFormatting.dateFormat,
                     exportContext.resources.configuration.locales[0],
                     exportFormatting.timeFormat
@@ -111,46 +120,54 @@ internal fun createSessionChartFile(
                 recordId = null,
                 sessionId = sessionId,
                 sessionLabel = exportContext.getString(R.string.share_session_id_label)
-            ) +
-                if (
-                    variantIndex != null &&
-                    variantCount != null &&
-                    variantCount > 1
-                ) {
-                    " · " + exportContext.getString(
-                        R.string.session_variant_heading,
-                        variantIndex,
-                        variantCount
-                    )
-                } else {
-                    ""
-                } + " · " +
+            ) + " · " +
                 exportContext.resources.getQuantityString(
                     R.plurals.session_chart_acquisition_count,
-                    records.size,
-                    records.size
+                    headerRecords.size,
+                    headerRecords.size
                 ),
             90f,
             130f,
             textPaint
         )
+        if (hasVariant && !variantLabelInSectionTitle) {
+            canvas.drawText(
+                uvirVariantHeading(
+                    exportContext.resources,
+                    requireNotNull(variantIndex)
+                ),
+                90f,
+                165f,
+                textPaint
+            )
+        }
         canvas.drawText(
             sessionDateRange,
             90f,
-            165f,
+            165f + variantHeaderOffset,
             textPaint
         )
         noteLines.forEachIndexed { index, line ->
             canvas.drawText(
                 line,
                 90f,
-                200f + index * 30f,
+                200f + variantHeaderOffset + index * 30f,
                 notePaint
             )
         }
     }
+    val sectionTitle =
+        if (hasVariant && variantLabelInSectionTitle) {
+            exportContext.getString(group.titleResource) + " · " +
+                uvirVariantHeading(
+                    exportContext.resources,
+                    requireNotNull(variantIndex)
+                )
+        } else {
+            exportContext.getString(group.titleResource)
+        }
     canvas.drawText(
-        exportContext.getString(group.titleResource),
+        sectionTitle,
         90f,
         240f + headerOffset,
         sectionTitlePaint
@@ -206,23 +223,24 @@ internal fun createSessionChartFile(
                     ) + 28f
             )
         }
-    val maximum =
-        series
-            .flatMap { item ->
-                item.values.filterIndexed { index, _ -> item.outOfRange.getOrNull(index) != true }
-            }
-            .map(valueScale)
-            .maxOrNull()
-            ?.coerceAtLeast(1.0)
-            ?: 1.0
+    val maximum = valueScale(uvirChartMaximum(
+        maximumCanonicalOverride?.let { listOf(it) }
+            ?: series
+                .flatMap { item ->
+                    item.values.filterIndexed { index, _ ->
+                        item.outOfRange.getOrNull(index) != true
+                    }
+                }
+    ))
 
     repeat(5) { index ->
         val y = top + (bottom - top) * index / 4f
         canvas.drawLine(left, y, right, y, gridPaint)
         val value = maximum * (4 - index) / 4.0
         canvas.drawText(
-            formatUvirNumber(
+            formatUvirChartAxisValue(
                 value,
+                maximum,
                 irradianceUnit.displayFractionDigits(2),
                 exportFormatting.numericFormat
             ),
@@ -391,7 +409,7 @@ internal fun createSessionChartFile(
                     variantCount != null &&
                     variantCount > 1
                 ) {
-                    "_Var${String.format(Locale.US, "%02d", variantIndex)}"
+                    "_${uvirVariantFileToken(variantIndex)}"
                 } else {
                     ""
                 } + "_" +
@@ -457,10 +475,65 @@ internal fun createSessionCombinedChartFile(
                     variantCount != null &&
                     variantCount > 1
                 ) {
-                    "_Var${String.format(Locale.US, "%02d", variantIndex)}"
+                    "_${uvirVariantFileToken(variantIndex)}"
                 } else {
                     ""
-                } + "_Chart.png"
+                } + "_Charts.png"
+        )
+    return combineChartExportFiles(outputFile, panelFiles)
+}
+
+private fun sessionChartMaximumCanonical(
+    records: List<SavedRecordDetail>,
+    group: SessionChartGroup
+): Double =
+    sessionChartSeries(records, group)
+        .flatMap { item ->
+            item.values.filterIndexed { index, _ ->
+                item.outOfRange.getOrNull(index) != true
+            }
+        }
+        .filter { it.isFinite() && it > 0.0 }
+        .maxOrNull()
+        ?: 0.0
+
+private fun sessionChartGroupFileToken(group: SessionChartGroup): String =
+    when (group) {
+        SessionChartGroup.UV -> "UV"
+        SessionChartGroup.VISIBLE -> "Visible_Light"
+        SessionChartGroup.FAR_RED_NIR -> "Infrared"
+        SessionChartGroup.BIOLOGICAL -> "Biological_Effects"
+    }
+
+private fun createSessionGroupAcrossVariantsChartFile(
+    context: Context,
+    sessionId: Long,
+    records: List<SavedRecordDetail>,
+    variantGroups: List<AcquisitionVariantGroup>,
+    group: SessionChartGroup,
+    exportBaseName: String
+): File {
+    val commonMaximum = sessionChartMaximumCanonical(records, group)
+    val panelFiles =
+        variantGroups.mapIndexed { index, variant ->
+            createSessionChartFile(
+                context = context,
+                sessionId = sessionId,
+                records = variant.records,
+                group = group,
+                includeHeader = index == 0,
+                variantIndex = variant.index,
+                variantCount = variant.count,
+                variantLabelInSectionTitle = true,
+                headerRecords = records,
+                maximumCanonicalOverride = commonMaximum,
+                exportBaseName = exportBaseName
+            )
+        }
+    val outputFile =
+        File(
+            File(context.cacheDir, "shared"),
+            "${exportBaseName}_${sessionChartGroupFileToken(group)}_All_Variants.png"
         )
     return combineChartExportFiles(outputFile, panelFiles)
 }
@@ -469,7 +542,8 @@ internal fun createSessionVariantChartFiles(
     context: Context,
     sessionId: Long,
     records: List<SavedRecordDetail>,
-    mode: UvirChartExportMode = UvirChartExportMode.COMBINED
+    mode: UvirChartExportMode = UvirChartExportMode.COMBINED,
+    variantGrouping: UvirVariantChartGrouping = UvirVariantChartGrouping.BY_VARIANT
 ): List<File> {
     val variantGroups = acquisitionVariantGroups(records)
     val exportBaseName = uvirSessionAcquisitionsExportBaseName(sessionId, records)
@@ -488,6 +562,20 @@ internal fun createSessionVariantChartFiles(
                         exportBaseName = exportBaseName
                     )
                 }
+        }
+    } else if (
+        mode == UvirChartExportMode.COMBINED &&
+        variantGrouping == UvirVariantChartGrouping.BY_GROUP
+    ) {
+        SessionChartGroup.entries.map { group ->
+            createSessionGroupAcrossVariantsChartFile(
+                context = context,
+                sessionId = sessionId,
+                records = records,
+                variantGroups = variantGroups,
+                group = group,
+                exportBaseName = exportBaseName
+            )
         }
     } else {
         variantGroups.flatMap { variant ->
@@ -520,6 +608,15 @@ internal fun createSessionVariantChartFiles(
         }
     }
 }
+
+internal fun acquisitionSessionGroupedVariantChartFileCount(
+    records: List<SavedRecordDetail>
+): Int =
+    if (acquisitionVariantGroups(records).isEmpty()) {
+        1
+    } else {
+        SessionChartGroup.entries.size
+    }
 
 internal fun acquisitionSessionChartFileCount(
     records: List<SavedRecordDetail>,

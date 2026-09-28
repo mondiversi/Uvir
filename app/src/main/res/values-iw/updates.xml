@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="update_available">עדכונים זמינים</string>
+    <string name="update_none">אין עדכונים זמינים</string>
+    <string name="update_check_failed">לא ניתן לבדוק עדכונים. יש לעיין ביומן השגיאות.</string>
+    <string name="update_app">עדכון האפליקציה</string>
+    <string name="update_sensor">עדכון החיישן</string>
+    <string name="update_app_first">יש לעדכן קודם את האפליקציה.</string>
+    <string name="update_usb_required">יש לבחור בחיישן זה ולחבר אותו דרך USB, ללא הפעלה פעילה ולאחר סנכרון כל הרשומות.</string>
+    <string name="update_download">הורדה ואימות…</string>
+    <string name="update_flash">עדכון החיישן…</string>
+    <string name="update_verify">אימות החיישן…</string>
+    <string name="update_keep_connected">אין לנתק USB או לכבות את החיישן. במידת הצורך יש להחזיק את BOOT ולנסות שוב.</string>
+    <string name="update_done">החיישן עודכן</string>
+    <string name="update_failed">העדכון נכשל. יש לעיין ביומן השגיאות. אם החיישן אינו מתחיל, יש לשחזר קושחה דרך USB ממחשב.</string>
+    <string name="update_permission">יש לאפשר ל־Uvir להתקין עדכונים בהגדרות Android.</string>
+    <string name="update_whats_new">עדכונים חתומים לאפליקציה ולחיישן, הורדות מאומתות וטעינת קושחה דרך USB.</string>
+</resources>

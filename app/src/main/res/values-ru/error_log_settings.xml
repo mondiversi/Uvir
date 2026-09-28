@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="data_management_error_log_group">Журнал ошибок</string>
+    <string name="data_management_error_log_description">Экспорт записанных ошибок с технической информацией о приложении, телефоне и датчиках.</string>
+</resources>

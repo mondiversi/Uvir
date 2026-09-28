@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.util.Locale
 
-internal const val UVIR_NOTE_MAX_CHARACTERS = 96
+internal const val UVIR_NOTE_MAX_CHARACTERS = 34
 
 /**
  * Counts user-visible Unicode characters rather than UTF-8 bytes or UTF-16
@@ -70,7 +70,8 @@ internal fun UvirLimitedNoteField(
     modifier: Modifier = Modifier,
     placeholder: String? = null,
     supportingText: String? = null,
-    minLines: Int = 2
+    minLines: Int = 2,
+    enabled: Boolean = true
 ) {
     Column(
         modifier = modifier,
@@ -85,6 +86,7 @@ internal fun UvirLimitedNoteField(
                 { Text(text) }
             },
             colors = UvirOutlinedTextFieldColors(),
+            enabled = enabled,
             minLines = minLines,
             maxLines = 4
         )

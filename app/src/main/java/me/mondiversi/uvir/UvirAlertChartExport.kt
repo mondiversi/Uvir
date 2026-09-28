@@ -1,15 +1,12 @@
 package me.mondiversi.uvir
 
-import android.content.ClipData
 import android.content.Context
-import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.DashPathEffect
 import android.graphics.Paint
 import androidx.compose.ui.graphics.toArgb
-import androidx.core.content.FileProvider
 import java.io.File
 import java.io.FileOutputStream
 import kotlin.math.abs
@@ -35,7 +32,7 @@ internal fun createAlertChartFile(
     val outputFile =
         File(
             File(context.cacheDir, "shared"),
-            "${uvirAlertExportBaseName(entry)}_Chart.png"
+            "${uvirAlertExportBaseName(entry)}_Charts.png"
         )
     return combineChartExportFiles(outputFile, panels)
 }
@@ -310,29 +307,11 @@ internal fun shareAlertChart(
     entry: ThresholdAlertLogEntry
 ) {
     val file = createAlertChartFile(context, entry)
-    val uri =
-        FileProvider.getUriForFile(
-            context,
-            "${context.packageName}.fileprovider",
-            file
-        )
-    val shareIntent =
-        Intent(Intent.ACTION_SEND).apply {
-            type = "image/png"
-            putExtra(Intent.EXTRA_SUBJECT, "Uvir value alert chart")
-            putExtra(Intent.EXTRA_STREAM, uri)
-            clipData =
-                ClipData.newUri(
-                    context.contentResolver,
-                    file.name,
-                    uri
-                )
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        }
-    context.startActivity(
-        Intent.createChooser(
-            shareIntent,
-            context.getString(R.string.alert_chart_share)
-        )
+    deliverUvirExportFiles(
+        context = context,
+        files = listOf(file),
+        destination = UvirExportDestination.SHARE,
+        chooserTitle = context.getString(R.string.alert_chart_share),
+        subject = "Uvir alert chart"
     )
 }

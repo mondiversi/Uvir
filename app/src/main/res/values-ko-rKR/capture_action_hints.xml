@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="capture_hint_start">측정 시작</string>
+    <string name="capture_hint_stop">측정 중지</string>
+    <string name="alert_hint_start">기록 시작</string>
+    <string name="alert_hint_stop">기록 중지</string>
+</resources>

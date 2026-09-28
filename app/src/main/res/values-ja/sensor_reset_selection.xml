@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sensor_reset_selection_title">選択したセンサーをリセットしますか？</string>
+    <string name="sensor_reset_selection_message">リセットするセンサーを選択してください。設定、認証情報、未同期のデータが削除され、センサーの電源が切れます。アプリ内のデータは変更されません。接続済みで動作中の処理がないセンサーのみ選択できます。</string>
+    <string name="sensor_reset_selection_failed">リセットに失敗しました：%1$s。接続を確認して再試行してください。</string>
+</resources>
+

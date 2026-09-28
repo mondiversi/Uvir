@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="connection_notification_connected">Conectado</string>
+    <string name="connection_notification_disconnected">Desconectado</string>
+    <string name="connection_notification_simulation">Simulação</string>
+    <string name="connection_notification_selected">selecionado</string>
+    <string name="connection_notification_activity">Atividade em andamento</string>
+    <string name="connection_notification_last_activity">Atividade em andamento (último estado conhecido)</string>
+    <plurals name="connection_notification_connected_count">
+        <item quantity="one">%1$d sensor conectado</item>
+        <item quantity="many">%1$d sensores conectados</item>
+        <item quantity="other">%1$d sensores conectados</item>
+    </plurals>
+    <plurals name="connection_notification_connecting_count">
+        <item quantity="one">%1$d sensor conectando</item>
+        <item quantity="many">%1$d sensores conectando</item>
+        <item quantity="other">%1$d sensores conectando</item>
+    </plurals>
+    <plurals name="connection_notification_activity_count">
+        <item quantity="one">%1$d atividade em andamento</item>
+        <item quantity="many">%1$d atividades em andamento</item>
+        <item quantity="other">%1$d atividades em andamento</item>
+    </plurals>
+    <plurals name="connection_notification_simulation_count">
+        <item quantity="one">%1$d simulação</item>
+        <item quantity="many">%1$d simulações</item>
+        <item quantity="other">%1$d simulações</item>
+    </plurals>
+</resources>

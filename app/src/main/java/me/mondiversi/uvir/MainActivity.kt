@@ -114,6 +114,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.Dispatchers
@@ -356,8 +357,9 @@ private class UvirRetainedRuntime(
     val usbSensorManager =
         UvirUsbSensorManager(context.applicationContext)
 
-    val wirelessSensorManager =
-        UvirWirelessSensorManager(context.applicationContext)
+    val multiSensorRuntime = UvirMultiSensorRuntime(context.applicationContext, usbSensorManager)
+    val wirelessSensorManager: UvirWirelessSensorManager
+        get() = multiSensorRuntime.selectedWireless()
 
     private var started = false
     private var directNetworkEnabled: Boolean? = null
@@ -368,6 +370,7 @@ private class UvirRetainedRuntime(
         directNetwork: Boolean
     ) {
         if (!started) {
+            multiSensorRuntime.start()
             usbSensorManager.start(initialIntent)
             remoteServer.start(directNetwork)
             directNetworkEnabled = directNetwork
@@ -384,7 +387,7 @@ private class UvirRetainedRuntime(
 
         remoteServer.stop()
         usbSensorManager.stop()
-        wirelessSensorManager.stop()
+        multiSensorRuntime.stop()
         started = false
         directNetworkEnabled = null
     }
@@ -408,7 +411,8 @@ private object UvirRetainedRuntimeStore {
     }
 }
 
-class MainActivity : ComponentActivity(), UvirExportSaveHost, UvirSettingsImportHost {
+class MainActivity : ComponentActivity(), UvirExportSaveHost, UvirSettingsImportHost,
+    UvirDatabaseImportHost {
     private lateinit var retainedRuntime:
             UvirRetainedRuntime
 
@@ -418,8 +422,8 @@ class MainActivity : ComponentActivity(), UvirExportSaveHost, UvirSettingsImport
     private lateinit var usbSensorManager:
             UvirUsbSensorManager
 
-    private lateinit var wirelessSensorManager:
-            UvirWirelessSensorManager
+    private val wirelessSensorManager: UvirWirelessSensorManager
+        get() = retainedRuntime.wirelessSensorManager
 
     private val remoteNetworkEnabledState =
         mutableStateOf(false)
@@ -435,6 +439,12 @@ class MainActivity : ComponentActivity(), UvirExportSaveHost, UvirSettingsImport
 
     private val settingsImportPasswordRejectedState =
         mutableStateOf(false)
+
+    private val pendingDatabaseImportUriState = mutableStateOf<Uri?>(null)
+
+    private val databaseImportInProgressState = mutableStateOf(false)
+
+    private val databaseImportErrorState = mutableStateOf(false)
 
     private var pendingExportFiles: List<File> = emptyList()
 
@@ -501,33 +511,109 @@ class MainActivity : ComponentActivity(), UvirExportSaveHost, UvirSettingsImport
             }
         }
 
+    private val databaseImportLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.OpenDocument()
+        ) { uri ->
+            if (uri != null) {
+                databaseImportErrorState.value = false
+                pendingDatabaseImportUriState.value = uri
+            }
+        }
+
+    private fun importSelectedUvirDatabase(uri: Uri, password: CharArray) {
+        if (databaseImportInProgressState.value) {
+            password.fill('\u0000')
+            return
+        }
+        databaseImportInProgressState.value = true
+        databaseImportErrorState.value = false
+        lifecycleScope.launch {
+            try {
+                UvirDatabaseHelper(this@MainActivity).use { database ->
+                    importEncryptedUvirDatabaseArchive(
+                        this@MainActivity,
+                        database,
+                        uri,
+                        password
+                    )
+                }
+                pendingDatabaseImportUriState.value = null
+                showUvirBottomMessage(
+                    this@MainActivity,
+                    getString(R.string.import_database_success)
+                )
+                recreate()
+            } catch (error: Exception) {
+                UvirErrorLog.record(this@MainActivity, "import_database", error)
+                databaseImportErrorState.value = true
+            } finally {
+                password.fill('\u0000')
+                databaseImportInProgressState.value = false
+            }
+        }
+    }
+
     private fun importSelectedUvirSettings(
         uris: List<Uri>,
         decryptionPassword: CharArray? = null
     ) {
-        try {
-            runCatching {
-                UvirDatabaseHelper(this).use { database ->
-                    importUvirSettingsFiles(
-                        this,
-                        database,
-                        uris,
-                        decryptionPassword
-                    )
+        lifecycleScope.launch {
+            try {
+                val result = withContext(Dispatchers.IO) {
+                    UvirDatabaseHelper(this@MainActivity).use { database ->
+                        importUvirSettingsFiles(
+                            this@MainActivity,
+                            database,
+                            uris,
+                            decryptionPassword
+                        )
+                    }
                 }
-            }.onSuccess { count ->
+                val sensorStatuses = withContext(Dispatchers.IO) {
+                    result.importedSensors.map { imported ->
+                        val restoreStatus =
+                            restoreImportedSensorSettingsToConnectedSensor(
+                                imported = imported,
+                                usbSensorManager = usbSensorManager,
+                                wirelessSensorManager = retainedRuntime.multiSensorRuntime.wirelessFor(imported.hardwareUid)
+                            )
+                        if (!persistImportedSensorAssociation(this@MainActivity, imported)) {
+                            UvirImportedSensorRestoreStatus.FAILED
+                        } else {
+                            restoreStatus
+                        }
+                    }
+                }
                 pendingSettingsImportUrisState.value = emptyList()
                 settingsImportPasswordRejectedState.value = false
-                showUvirBottomMessage(
-                    this,
-                    resources.getQuantityString(
-                        R.plurals.settings_imported_count,
-                        count,
-                        count
-                    )
-                )
+                when {
+                    sensorStatuses.any {
+                        it == UvirImportedSensorRestoreStatus.FAILED
+                    } ->
+                        showUvirBottomMessage(
+                            this@MainActivity,
+                            getString(R.string.sensor_settings_restore_failed)
+                        )
+                    sensorStatuses.any {
+                        it == UvirImportedSensorRestoreStatus.NOT_CONNECTED
+                    } ->
+                        showUvirBottomMessage(
+                            this@MainActivity,
+                            getString(R.string.sensor_settings_restore_requires_connection)
+                        )
+                    else ->
+                        showUvirBottomMessage(
+                            this@MainActivity,
+                            resources.getQuantityString(
+                                R.plurals.settings_imported_count,
+                                result.fileCount,
+                                result.fileCount
+                            )
+                        )
+                }
                 recreate()
-            }.onFailure { error ->
+            } catch (error: Exception) {
                 if (
                     error is UvirSettingsDecryptionException &&
                     pendingSettingsImportUrisState.value.isNotEmpty()
@@ -536,15 +622,15 @@ class MainActivity : ComponentActivity(), UvirExportSaveHost, UvirSettingsImport
                 } else {
                     pendingSettingsImportUrisState.value = emptyList()
                     settingsImportPasswordRejectedState.value = false
-                    UvirErrorLog.record(this, "import_settings", error)
+                    UvirErrorLog.record(this@MainActivity, "import_settings", error)
                     showUvirBottomMessage(
-                        this,
+                        this@MainActivity,
                         getString(R.string.settings_import_failed)
                     )
                 }
+            } finally {
+                decryptionPassword?.fill('\u0000')
             }
-        } finally {
-            decryptionPassword?.fill('\u0000')
         }
     }
 
@@ -555,6 +641,12 @@ class MainActivity : ComponentActivity(), UvirExportSaveHost, UvirSettingsImport
 
     override fun selectUvirSettingsFiles() {
         settingsImportLauncher.launch(arrayOf("application/json", "application/octet-stream"))
+    }
+
+    override fun selectUvirDatabaseArchive() {
+        databaseImportLauncher.launch(
+            arrayOf("application/zip", "application/x-zip-compressed", "application/octet-stream")
+        )
     }
 
     private val localNetworkPermissionLauncher =
@@ -578,7 +670,7 @@ class MainActivity : ComponentActivity(), UvirExportSaveHost, UvirSettingsImport
         registerForActivityResult(
             ActivityResultContracts.RequestPermission()
         ) {
-            if (::wirelessSensorManager.isInitialized) {
+            if (::retainedRuntime.isInitialized) {
                 wirelessSensorManager.retry()
             }
         }
@@ -620,7 +712,6 @@ class MainActivity : ComponentActivity(), UvirExportSaveHost, UvirSettingsImport
 
         remoteServer = retainedRuntime.remoteServer
         usbSensorManager = retainedRuntime.usbSensorManager
-        wirelessSensorManager = retainedRuntime.wirelessSensorManager
 
         val directAccessAllowed =
             hasLocalNetworkPermission()
@@ -651,6 +742,7 @@ class MainActivity : ComponentActivity(), UvirExportSaveHost, UvirSettingsImport
                             usbSensorManager,
                         wirelessSensorManager =
                             wirelessSensorManager,
+                        multiSensorRuntime = retainedRuntime.multiSensorRuntime,
                         onRequestBluetoothPermission =
                             ::requestBluetoothSensorPermission,
                         currentWifiSsid =
@@ -660,6 +752,7 @@ class MainActivity : ComponentActivity(), UvirExportSaveHost, UvirSettingsImport
                         openHomeRequestId =
                             openHomeRequestState.longValue
                     )
+                    UvirUpdateHost(usbSensorManager)
                 }
                 val pendingSettingsImportUris =
                     pendingSettingsImportUrisState.value
@@ -703,6 +796,27 @@ class MainActivity : ComponentActivity(), UvirExportSaveHost, UvirSettingsImport
                         }
                     )
                 }
+                pendingDatabaseImportUriState.value?.let { uri ->
+                    UvirSettingsPasswordDialog(
+                        title = stringResource(R.string.import_database_dialog_title),
+                        description = stringResource(R.string.import_database_dialog_description),
+                        confirmationRequired = false,
+                        confirmLabel = stringResource(R.string.import_database_confirm),
+                        cardColor = MaterialTheme.colorScheme.surface,
+                        primaryText = MaterialTheme.colorScheme.onSurface,
+                        secondaryText = MaterialTheme.colorScheme.onSurfaceVariant,
+                        busy = databaseImportInProgressState.value,
+                        errorMessage = if (databaseImportErrorState.value) {
+                            stringResource(R.string.import_database_failed)
+                        } else null,
+                        onInputChanged = { databaseImportErrorState.value = false },
+                        onDismiss = {
+                            pendingDatabaseImportUriState.value = null
+                            databaseImportErrorState.value = false
+                        },
+                        onConfirm = { password -> importSelectedUvirDatabase(uri, password) }
+                    )
+                }
             }
             }
         }
@@ -716,7 +830,12 @@ class MainActivity : ComponentActivity(), UvirExportSaveHost, UvirSettingsImport
     }
 
     override fun onDestroy() {
-        if (!isChangingConfigurations) {
+        if (!isChangingConfigurations && !UvirUpdates.state.value.busy) {
+            UvirConnectionForegroundService.update(
+                context = this,
+                active = false
+            )
+
             if (::retainedRuntime.isInitialized) {
                 UvirRetainedRuntimeStore.release(
                     retainedRuntime
@@ -738,8 +857,14 @@ class MainActivity : ComponentActivity(), UvirExportSaveHost, UvirSettingsImport
             refreshCurrentWifiSsid()
         }
 
-        if (::wirelessSensorManager.isInitialized) {
-            wirelessSensorManager.retryIfNeeded()
+        if (::retainedRuntime.isInitialized) {
+            retainedRuntime.multiSensorRuntime.retryAll()
+        }
+
+        // USB attachment broadcasts and permission results can be missed while Android is
+        // restoring or recreating the app. A foreground scan safely resumes first pairing too.
+        if (::usbSensorManager.isInitialized) {
+            usbSensorManager.scanForSensor()
         }
     }
 
@@ -786,7 +911,7 @@ class MainActivity : ComponentActivity(), UvirExportSaveHost, UvirSettingsImport
             bluetoothPermissionLauncher.launch(
                 Manifest.permission.BLUETOOTH_CONNECT
             )
-        } else if (::wirelessSensorManager.isInitialized) {
+        } else if (::retainedRuntime.isInitialized) {
             wirelessSensorManager.retry()
         }
     }
