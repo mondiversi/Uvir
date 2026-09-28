@@ -28,6 +28,17 @@ internal object UvirUpdatePolicy {
     fun validFirmwareImage(image: ByteArray): Boolean = image.size in 24..APP_CAPACITY &&
         image[0].toInt() and 255 == 0xE9 && image[12].toInt() == 0 && image[13].toInt() == 0
     fun sha256(bytes: ByteArray): String = MessageDigest.getInstance("SHA-256").digest(bytes).toHex()
+    fun sha256(file: File): String {
+        val digest = MessageDigest.getInstance("SHA-256")
+        file.inputStream().use { input ->
+            val buffer = ByteArray(32768)
+            while (true) {
+                val count = input.read(buffer); if (count < 0) break
+                digest.update(buffer, 0, count)
+            }
+        }
+        return digest.digest().toHex()
+    }
 }
 
 internal fun ByteArray.toHex(): String = joinToString("") { "%02x".format(it.toInt() and 255) }
@@ -77,7 +88,7 @@ internal class UvirUpdateClient(private val context: Context) {
     fun download(asset: UvirUpdateAsset, suffix: String, progress: (Float) -> Unit): File {
         val directory = File(context.noBackupFilesDir, "updates").apply { mkdirs() }
         val target = File(directory, "${asset.sha256}.$suffix")
-        if (target.isFile && target.length() == asset.bytes && UvirUpdatePolicy.sha256(target.readBytes()) == asset.sha256) return target
+        if (target.isFile && target.length() == asset.bytes && UvirUpdatePolicy.sha256(target) == asset.sha256) return target
         val partial = File(directory, "${asset.sha256}.part")
         try {
             connection(asset.url).let { connection ->
