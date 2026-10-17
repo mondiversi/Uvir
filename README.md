@@ -20,10 +20,16 @@ follow PCB assembly. See [hardware identification](hardware/README.md) and the
 
 - [Setup and assembly tutorial](docs/GETTING_STARTED.md): components, GPIO map,
   app/firmware builds, first association, diagnostics and backups.
+- [Complete hardware wiring](hardware/wiring/README.md),
+  [parts list](hardware/BILL_OF_MATERIALS.md) and
+  [assembly / acceptance checks](hardware/ASSEMBLY.md): all fitted components,
+  not only the visible-light board.
 - [Schematics, PCB versions and Gerbers](hardware/pcb/uvir-carrier-2026-10-05/README.md):
   anonymized design files and previews, shared as a development snapshot for
   review, **not a production-approved board**.
-- [Direct sensor integration](docs/USB_SERIAL_PROTOCOL.md) and
+- [Use the sensor without the app](docs/STANDALONE_SENSOR.md): USB serial,
+  Wi-Fi TCP, Bluetooth SPP, MQTT/TLS, live examples and autonomous operation.
+- [Command / record protocol](docs/USB_SERIAL_PROTOCOL.md) and
   [signed app/sensor updates](docs/UPDATES.md).
 
 This push updates development sources and documentation. It does not replace

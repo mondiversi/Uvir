@@ -5,7 +5,10 @@ Status: development documentation for protocol `uvir-sensor-v1`.
 This document describes the USB interface currently implemented by the Uvir
 ESP32 firmware. It is intended for computers, mobile devices and embedded
 controllers that need to power and control the sensor without running the Uvir
-Android application. It was verified against firmware `0.5.80`.
+Android application. The command documentation was checked against firmware
+source `0.5.104` on 2026-10-17. See the
+[standalone transport/setup guide](STANDALONE_SENSOR.md) for concrete USB,
+Wi-Fi, Bluetooth and MQTT connection procedures and a runnable live reader.
 
 The protocol is usable now, but Uvir is still under active development. An
 integrator should validate the `protocol` field and advertised capabilities
@@ -60,6 +63,11 @@ The USB `hello` response can contain provisioning data that is deliberately
 withheld from wireless responses. Treat it as sensitive: do not publish it,
 write it to ordinary logs, or include it in diagnostic reports.
 
+The token is 32 case-sensitive text characters, not necessarily hexadecimal.
+`AUTH` uses it verbatim. A Wi-Fi client must authenticate within five seconds
+of opening its TCP socket. Initial token retrieval requires trusted USB;
+later configuration changes can use an authenticated existing link.
+
 Physical USB access therefore grants control of the sensor. Products exposing
 the port should apply their own physical-access policy.
 
@@ -85,7 +93,7 @@ PING\n
 ```
 
 ```json
-{"type":"hello","protocol":"uvir-sensor-v1","device_id":"…","firmware":"0.5.80"}
+{"type":"hello","protocol":"uvir-sensor-v1","device_id":"…","firmware":"0.5.104"}
 ```
 
 An integration should:
@@ -118,9 +126,16 @@ and may become more descriptive over time.
 4. Send `APP_CONNECT` if this host is going to act as the current live app
    session.
 5. Send `TIME <unix_epoch_ms>` before recording anything.
-6. Send `SYNC_BEGIN` and safely import any queued records.
+6. If this host will own the archive, send `SYNC_BEGIN` and safely import any
+   queued records. A live-only reader must not blindly acknowledge them.
 7. Start `STREAM <interval_ms>` or issue other commands.
 8. Send `STOP` before deliberately releasing the live connection.
+
+Throughout the active session, send `PING` at approximately four-second
+intervals, including during synchronization or output tests. The owner lease
+expires after 12 seconds without incoming host commands. Receiving stream
+frames alone does not keep a session alive. Parse keepalive replies and other
+asynchronous frames independently of the operation currently being awaited.
 
 Example:
 
@@ -277,8 +292,11 @@ as a precise number.
 
 ### `STOP` / `SLEEP`
 
-Stops live streaming for the active transport and powers down the spectral
-sensors between operations. It does not erase stored records.
+Releases live ownership/streaming for the active transport and closes an
+interrupted sync reader. Rolling measurements continue at the configured
+cadence, with sensors powered down between reads. It does not erase records,
+stop an autonomous job, stop alerts, or enter ESP32 deep sleep. Use
+`OFFLINE_STOP`, `ALERT_CONFIG OFF ...`, or `POWER_OFF` for those separate actions.
 
 ## Sampling and calibration configuration
 
@@ -304,15 +322,70 @@ Both factors must be finite values from 0.1 to 10.0. Calibration is persistent.
 Current syntax:
 
 ```text
-SENSOR_CONFIG <LED_ON|OFF> <brightness_0_100> <OFFLINE_ON|OFF> <BUZZER_ON|OFF> <volume_0_100> <AUTO_OFF_ON|OFF> <seconds> <EXTERNAL_ON|OFF>
+SENSOR_CONFIG <ON|OFF> <brightness_1_100> <ON|OFF> <ON|OFF> <volume_1_100> <ON|OFF> <seconds_60_86400> <ON|OFF>
 ```
 
-These are persistent sensor settings. `EXTERNAL_ON|OFF` enables or disables the
-GPIO 33 external-command input and defaults to `ON`, including after a factory
-reset. Firmware 0.5.83 and later also accept the previous command without the
+The eight fields mean LED enabled, LED brightness, autonomous recording enabled,
+buzzer enabled, buzzer volume, automatic shutdown enabled, shutdown idle seconds,
+and external-command input enabled, respectively. All boolean tokens are
+literally `ON` or `OFF`, **not** `LED_ON`, `OFFLINE_ON` or `EXTERNAL_ON`.
+Brightness and volume cannot be zero; disable the corresponding output instead.
+
+For example, fresh defaults are represented by:
+
+```text
+SENSOR_CONFIG ON 20 ON ON 20 OFF 1800 ON
+```
+
+Do not send this default example to an already configured device unless those
+are the intended new settings. Read `HELLO` and preserve unrelated user values.
+These settings are persistent. The final token enables/disables GPIO 33 and
+defaults to `ON`, including after a factory reset.
+Firmware 0.5.83 and later also accept the previous command without the
 last token and leave the saved external-command setting unchanged. Configuration commands
 may evolve as hardware capabilities are added; read back `HELLO` after changing
 them.
+
+### Settings revision and `SETTINGS_APPLY`
+
+`HELLO` includes `sensor_settings_schema` and `settings_updated_at_ms` for each
+physical sensor. A newer local configuration may be submitted as:
+
+```text
+SETTINGS_APPLY <updated_at_epoch_ms> <hex_encoded_utf8_command_lines>
+```
+
+The sensor wins equal/older revisions and returns its current hello. A newer
+revision is committed only after all accepted commands complete without errors.
+This is not a rollback transaction: commands applied before an error or power
+loss may already be persistent, while the old revision remains retryable.
+
+Allowed inner commands are `SENSOR_CONFIG`, `SAMPLING_CONFIG`,
+`CALIBRATION_CONFIG`, `WIFI_CONFIG`, `INTERNET_CONFIG`, `RADIO WIFI`,
+`RADIO BLUETOOTH` and `ALERT_SETTINGS`. Separate them with LF before UTF-8 hex
+encoding. Jobs, samples, resets, session controls and nested updates are not
+allowed. Native accepted settings commands also advance the sensor revision;
+`TIME` and keepalives do not.
+
+Although the inner decoder permits up to 6000 decoded characters, the outer
+USB/Wi-Fi/SPP command must still fit **512 characters including its hex payload**.
+Do not confuse an inner limit with the usable transport envelope. Keep updates
+small, read back settings, and do not use the same committed revision for later
+chunks (equal revisions are ignored).
+
+### `ALERT_SETTINGS`
+
+```text
+ALERT_SETTINGS <repeat_seconds> <SAVE|NO_SAVE> <delay_seconds> <duration_seconds> <maximum_registrations> <rules_hex_or_->
+```
+
+The last field is UTF-8 hex for newline-separated `ALERT_RULE ...` commands,
+or `-` for an empty rule list. It updates the saved configuration while retaining
+the current enabled flag, session identity, counters, timing and cooldown.
+It is not the command for starting/stopping an alert session. Use repeat 1–86400,
+delay/duration 0–31536000 and maximum 0–999999; zero removes the respective limit.
+Validate metrics/rules client-side and check replies; do not assume flash-level
+atomicity or send an oversized hex-expanded command.
 
 ### `BUZZER_PREVIEW`
 
@@ -413,8 +486,9 @@ ORANGE RED NIR_TOTAL FAR_RED NIR BIO_DNA_UV BIO_UVA_PHOTOAGING
 BIO_HEV_OXIDATIVE
 ```
 
-The condition plan is a session-only snapshot held in RAM. It is independent
-from the separately configured value-alert rules.
+The condition plan is a snapshot belonging to that acquisition session, separate
+from value-alert rules. It is checkpointed with the active job so recovery after
+power loss preserves the conditions; it is not merely a volatile RAM template.
 
 ### `OFFLINE_STOP`
 
@@ -450,7 +524,7 @@ not additional samples in the configured average.
 
 ## Value alerts
 
-Replace the complete rule set atomically:
+Replace the complete rule set in one configuration sequence:
 
 ```text
 ALERTS_CLEAR
@@ -463,6 +537,11 @@ Up to 24 distinct rules are accepted. Use `ALERT_CONFIG OFF ...` to stop alert
 monitoring. Value alerts and automatic-acquisition conditions are different
 features and do not overwrite one another.
 
+`ALERTS_CLEAR` suspends evaluation while the rule list is being replaced;
+`ALERT_CONFIG` completes the sequence. Check every reply and finish the update.
+This evaluation guard is not a power-failure-atomic storage transaction.
+Use only the supported metric names and finite, meaningful thresholds.
+
 The last three parameters were added in firmware 0.5.97. They may be omitted
 by older clients and then default to zero (no delay, no duration limit, no
 registration limit). Duration begins after the start delay. The sensor checks
@@ -473,9 +552,14 @@ zero means unlimited. A power interruption does not restart either deadline.
 `NO_SAVE` keeps threshold checking, LED and buzzer feedback active without
 creating alert records on the sensor. Connected `alert_event` frames still
 report the occurrence with `"recorded":false`; clients must not add these
-events to their databases. `SAVE` is the default when the final token is
+events to their databases. `SAVE` is the default when the recording-mode token is
 omitted by an older client. The mode survives power loss with the alert
 configuration. A no-save session uses session ID `0`.
+
+Live `alert_event` frames contain timestamp, details, session ID and `recorded`,
+but no record ID / `ACQUISITION_ACK` exchange. The connected host is responsible
+for storing recorded alerts; this live delivery is not an ACK/replay guarantee.
+Offline saved alerts instead use the acknowledgement-driven queue below.
 
 ## Offline synchronization
 
@@ -545,6 +629,7 @@ explicit confirmation and suitable authorization.
 
 ```text
 open serial 115200 8N1
+start a periodic PING task (about every 4 seconds after APP_CONNECT)
 send "HELLO\n"
 hello = wait for JSON type "hello"
 assert hello.protocol == "uvir-sensor-v1"
@@ -574,3 +659,8 @@ Until the public protocol is frozen, implementation remains authoritative:
 - conditional grammar: `firmware/esp32/UvirSensor/UvirConditionalAcquisition.h`;
 - Android USB client: `app/src/main/java/me/mondiversi/uvir/UvirUsbSensorManager.kt`;
 - Android command builders: `app/src/main/java/me/mondiversi/uvir/UvirOfflineSensorSync.kt`.
+
+Radio provisioning, authenticated UDP discovery, TCP ports, Bluetooth SPP,
+MQTT topics/TLS, a live reader and autonomous-job examples are in
+[Standalone sensor operation](STANDALONE_SENSOR.md). Hardware assembly has its
+own [complete component wiring index](../hardware/wiring/README.md).

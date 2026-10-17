@@ -48,9 +48,11 @@ Use a FAT32 microSD card. Check the RTC module's charging circuit against the
 installed backup cell; a non-rechargeable cell must not be charged. A physical
 module's pin order and polarity must be checked, even when its chip model matches.
 
-For full wiring, power and operation notes, see the
-[firmware guide](../firmware/esp32/UvirSensor/README.md) and
-[visible-module wiring](../hardware/wiring/ESP32-AS7343.md).
+For complete construction instructions, use the
+[bill of materials](../hardware/BILL_OF_MATERIALS.md),
+[assembly guide](../hardware/ASSEMBLY.md) and
+[wiring index for every component](../hardware/wiring/README.md).
+The [firmware guide](../firmware/esp32/UvirSensor/README.md) explains the implementation.
 
 ## 3. Schematics and carrier PCB
 
@@ -142,9 +144,11 @@ check its active job and pending synchronization state.
   their password securely; Android cloud backup is not a substitute.
 - Database import replaces the local archive/profile database: export a backup
   first. Use a compatible AES ZIP tool for database inspection on a PC.
-- [USB/Wi-Fi/Bluetooth/MQTT protocol](USB_SERIAL_PROTOCOL.md) documents direct
-  integration without the official app. Acknowledge durable record storage
-  correctly to avoid deleting unsaved sensor records.
+- [Standalone sensor operation](STANDALONE_SENSOR.md) gives concrete USB,
+  Wi-Fi, Bluetooth and MQTT setup without the official app, a runnable live
+  reader, and autonomous recording/recovery examples. The
+  [protocol reference](USB_SERIAL_PROTOCOL.md) defines the command grammar.
+  Acknowledge durable record storage correctly to avoid deleting unsaved data.
 - [Calibration plan](../hardware/calibration/README.md) describes the final
   assembled optical tests. LEDs, enclosure/windows and shielding affect them.
 

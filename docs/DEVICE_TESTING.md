@@ -87,3 +87,37 @@ check; no acquisitions, alerts or associations were created or changed. PCB
 ERC/DRC, footprint/outline review, community-library permissions and final
 assembled optical calibration remain separate review items, documented with
 the hardware bundle.
+
+## Complete build and standalone guides - 2026-10-17
+
+The follow-up documentation pass adds a complete wiring index and nine guides
+(controller, visible/NIR, UV, RTC, FRAM, microSD, LEDs, buzzer and external input),
+a bill of materials, assembly/acceptance instructions and independent operation
+over USB, Wi-Fi TCP, Bluetooth SPP and MQTT/TLS. The protocol reference was checked
+against firmware source 0.5.104: corrected SENSOR_CONFIG boolean tokens/ranges,
+added settings revisions, kept-alive host ownership and persisted conditions,
+and distinguished live/offline alert delivery and non-atomic configuration.
+
+The live-only Python example uses no persistent configuration commands and no
+record acknowledgements; it refuses a reported busy sensor and does not print
+provisioning replies. Its 12 host-only tests cover framing, keepalive, protocol
+and identity rejection, busy-state rejection, cleanup, command/response bounds,
+case-sensitive non-hex tokens and output-field filtering. No physical USB/radio
+test is claimed for this documentation pass.
+
+To repeat the documentation/example checks:
+
+```text
+python tools/check_documentation.py
+python tools/check_hardware_bundle.py
+python -m unittest discover -s tools/examples -p "test_*.py" -v
+python tools/examples/uvir_live.py --help
+```
+
+The documentation checker verifies local file links, component-guide coverage,
+GPIO/address references against UvirHardwareConfig.h and the documented firmware
+version. It does not verify physical wiring or certify the PCB. Hardware bundle
+contents, app/firmware behavior, calibration and device archives are unchanged.
+The existing R1 logical generator also passed its firmware-pin, wire-reachability
+and junction checks (52 wired pins, 17 nets, 69 segments). It generated a separate
+local verification copy equal to the published schematic; no CAD was rewritten.

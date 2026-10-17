@@ -3,14 +3,23 @@
 This directory contains the physical design and assembly documentation used
 by Uvir.
 
-Contents include:
+## Build the complete instrument
 
-- breadboard wiring diagrams;
-- pin assignments and I2C addresses;
-- power requirements and level-shifting notes;
-- schematics and PCB revisions;
-- bill of materials;
-- assembly photos and sensor test notes.
+- [Bill of materials](BILL_OF_MATERIALS.md): every fitted module, indicators,
+  button, resistors, connectors and approximate dimensions.
+- [Assembly and acceptance guide](ASSEMBLY.md): power, shared I2C bus, removable
+  modules, optical isolation, first startup and full functional checks.
+- [Complete wiring index](wiring/README.md): controller, visible/NIR, UV, RTC,
+  FRAM, microSD, LEDs, buzzer and external input, with a guide for each.
+- [Standalone operation](../docs/STANDALONE_SENSOR.md): use USB serial, Wi-Fi,
+  Bluetooth or MQTT without the official app, including autonomous recording.
+- [Calibration](calibration/README.md): the remaining final optical work.
+
+The system's acquisition, storage, RTC and communication logic is implemented;
+final calibration does not require inventing the missing wiring or protocol.
+The guides distinguish this functional state from PCB fabrication approval and
+calibrated measurement accuracy. CAD previews are provided with the exports;
+they are not photographs or proof of an assembled board.
 
 ## Current optical modules
 

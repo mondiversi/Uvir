@@ -45,6 +45,11 @@ reset. Older firmware retains its previous sensor-authoritative readback behavio
 
 ## Current wiring
 
+For construction, start with the [complete component wiring index](../../../hardware/wiring/README.md),
+[bill of materials](../../../hardware/BILL_OF_MATERIALS.md) and
+[assembly / acceptance guide](../../../hardware/ASSEMBLY.md). The tables below
+are the firmware-oriented summary, not the only wiring documentation.
+
 | GY-AS734X / AS7343 | ESP32 Dev Module |
 |---|---|
 | SDA | GPIO 21 |
@@ -239,9 +244,10 @@ from this folder, so later changes stay under version control.
 
 ## USB protocol
 
-For the standalone integration guide, including the recommended handshake,
-measurement schema, automatic jobs and acknowledgement-safe offline recovery,
-see [USB serial integration](../../../docs/USB_SERIAL_PROTOCOL.md).
+For independent PC/controller use, see [Standalone sensor operation](../../../docs/STANDALONE_SENSOR.md)
+for USB, local Wi-Fi, Bluetooth and MQTT setup plus runnable live examples.
+The [protocol reference](../../../docs/USB_SERIAL_PROTOCOL.md) defines measurement
+schemas, automatic jobs and acknowledgement-safe offline recovery.
 
 The serial port uses 115200 baud, 8 data bits, no parity and one stop bit. Each
 message is one JSON object followed by a newline. Protocol name:
@@ -274,7 +280,8 @@ Commands accepted by the ESP32:
 - `APP_CONNECT`: confirm that the authenticated transport is the source
   currently selected by Uvir, before synchronization and live streaming;
 - `STREAM 150`: request one sample about every 150 ms;
-- `SAMPLE`: acquire one sample;
+- `SAMPLE`: return the newest completed rolling average; it does not trigger a
+  second physical sampling sequence;
 - `SAMPLING_CONFIG 5 150 1`: keep five raw samples in ESP32 RAM, one every
   150 ms, discard the per-band minimum and maximum, and emit only the final
   averaged result;
@@ -333,20 +340,22 @@ Commands accepted by the ESP32:
   network credentials. It is accepted over USB or an already authenticated
   Wi-Fi/Bluetooth connection. USB remains the recovery path when no wireless
   connection is available.
-- `INTERNET_CONFIG ON|OFF PRIMARY|SECONDARY <SSID_HEX_OR_-> <PASSWORD_HEX_OR_-> <RELAY_HOST_HEX_OR_-> <PORT>`:
-  configure the encrypted remote relay. `PRIMARY` reuses the normal Wi-Fi
+- `INTERNET_CONFIG <ON|OFF> <PRIMARY|SECONDARY> <SSID_HEX_OR_-> <PASSWORD_HEX_OR_-> <BROKER_HOST_HEX_OR_-> <PORT> <MQTT_USERNAME_HEX_OR_-> <MQTT_PASSWORD_HEX_OR_->`:
+  configure the TLS MQTT broker. `PRIMARY` reuses the normal Wi-Fi
   credentials; `SECONDARY` stores a separate network, useful with a portable
   router. Both the sensor and app connect outward, so no sensor-router port is
   exposed.
-- `WIFI_DISCONNECT`: disable and persistently turn off the Wi-Fi radio. This
-  command is accepted only through an already authenticated Wi-Fi connection;
-  Wi-Fi must then be re-enabled through USB.
+- `WIFI_DISCONNECT`: accepted only through an authenticated Wi-Fi connection;
+  sets the persisted wireless mode to off and stops fallback/radios. This is
+  distinct from changing the `wifi_enabled` preference using `RADIO WIFI OFF`.
+  Use another available trusted connection (normally USB) to select a radio again.
 
 The ESP32 stops sending frames automatically if it does not hear from the
-Android host for 12 seconds. Measurement continues at the configured cadence
+active host for 12 seconds. Send `PING` about every four seconds; receiving
+samples alone does not renew the lease. Measurement continues at the configured cadence
 even without an active stream, keeping the latest averaged result ready in
-RAM for autonomous and external commands. The sensor LED stays off and both
-spectral devices return to power-down between reads. The default/recommended
+RAM for autonomous and external commands. The optical devices return to
+power-down between reads. The default/recommended
 interval is 150 ms; the safe range is 150–5000 ms. A capture that takes longer
 still finishes before another sample is taken. Existing saved intervals are
 preserved; the default applies to an unconfigured or factory-reset sensor.
@@ -364,8 +373,8 @@ an already authenticated Wi-Fi or Bluetooth connection. The password is kept
 in ESP32 NVS and Android private storage and is never returned over a wireless
 connection.
 
-Select Wi-Fi or Bluetooth from the source icon while USB is still connected.
-After this first secure provisioning, Uvir can switch between the two radios
+Select Wi-Fi, Bluetooth or Internet from the sensor-selection connection controls
+while USB is still connected. After provisioning, Uvir can switch radio modes
 through whichever authenticated wireless connection is currently active.
 The app waits for a `status` acknowledgement of the requested `wireless_mode`
 before committing a connected handover. The new mode gets a fresh 20-second
@@ -379,11 +388,11 @@ spectral devices remain powered down between individual conversions; use the
 explicit Wi-Fi disconnect control when the radio itself must be disabled.
 The ESP32 persists the chosen radio and keeps only that radio enabled. At
 startup it tries the last successfully authenticated mode first. If Uvir does
-not authenticate within 20 seconds, the sensor switches to the other configured
-wireless transport and continues alternating until the app is found. Once Uvir
-authenticates, that mode is saved and the fallback stops, so both radios are
-never left active together. A transport disabled in Uvir settings is excluded
-from this fallback; disabling both leaves the sensor in USB-only mode:
+not authenticate within 20 seconds, the sensor tries the next configured enabled
+mode among local Wi-Fi, Bluetooth and Internet. Once Uvir authenticates, that
+mode is saved and fallback stops; modes are not left active concurrently.
+A disabled/unconfigured mode is excluded. Disabling all wireless modes leaves
+the sensor in USB-only mode:
 
 USB identity checks (`HELLO`/`PING`) do not interrupt fallback, which is useful
 when the ESP32 is powered from a computer while the phone uses a wireless
