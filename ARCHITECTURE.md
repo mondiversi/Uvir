@@ -17,6 +17,28 @@ limitations. The updater never needs a database migration or an app uninstall.
 
 ## Android
 
+`UvirMeasurementPanels.kt` shares the landscape measurement layout between the
+four saved acquisition/alert detail pages. Metadata occupies the left 50%; the
+existing selector and lazy values/charts occupy the right 50%.
+The selector stays accessible at the top of the right pane, above the independently
+scrolling measurements. Both first islands share a measured top edge below the tallest
+header. A fixed 4 dp gap sits outside the clipped scroll viewports, so scrolling cannot
+consume that space or paint underneath the controls. Headers are measured and placed
+in the same layout pass without a resize frame. The selector is the explicit boundary in the same list builder, so measurement
+items are not composed twice or eagerly expanded. Each pane scrolls independently;
+the detail title stays above the left pane. Portrait retains the original single
+list, collapsing title and sticky selector. Narrow landscape windows also retain
+that layout. Irradiance/biological, optional variants and data/chart controls stay
+on one centered row in both orientations. This changes presentation, not persistence,
+exports or sensor operations.
+
+The live page keeps its full-width header and sticky controls in both orientations.
+`UvirLiveLandscapeIslands.kt` reflows only its irradiance islands in landscape:
+UV above NIR in the left half, visible light in the right half. Each island's
+measured viewport bounds preserve the off-screen alert indicators even though
+all three islands now share one lazy-list item. Portrait and biological effects
+retain their existing arrangement.
+
 - `UvirAppRoot.kt` owns application lifecycle and cross-screen state.
 - `UvirLiveScreen.kt` coordinates the live screen and its overlays.
 - Dedicated screen and settings files contain the visual sections used by the
@@ -27,6 +49,26 @@ limitations. The updater never needs a database migration or an app uninstall.
   Android `SensorSample`, shared by USB, Wi-Fi, Bluetooth and offline records.
 - `UvirOfflineSensorSync.kt` owns versioned commands and synchronized records.
 - `UvirDatabase.kt` and the export files own persistence and interchange.
+- Export UI responsibilities are separate: `UvirShareDialogs.kt` contains shared
+  destination dialogs and the duplicate-request gate; `UvirSettingsTransferDialogs.kt`
+  owns encrypted settings/database dialogs and password fields;
+  `UvirDataExportScreen.kt` owns the data export screen;
+  `UvirExportOptionRows.kt` and `UvirDataExportControls.kt` own reusable options,
+  format profiles and save/share controls. `UvirHoldConfirmation.kt` owns the
+  shared timed confirmation and accessibility fallback. Moving a component does
+  not create another dialog container or change export contents.
+- `UvirRecordListFilters.kt` owns filter state and backward-compatible persistence.
+  `UvirRecordFilterMatcher.kt` normalizes IDs and note queries once per list pass.
+  Alternatives within one field remain OR; different fields remain AND. Variant
+  maxima are accumulated without allocating a list for every session, and that
+  pass is skipped when the variant filter is inactive.
+
+Localized resources are grouped identically across all 20 language catalogs.
+`sensor_information.xml`, `diagnostics.xml` and `data_export.xml` hold those
+domains; `strings.xml` retains shared and remaining screen strings. Resource IDs
+and text are unchanged by moving them. Resource tests check completeness,
+duplicates, format arguments, domain placement and supported plural categories.
+Only plural forms Android never selects for their language are omitted.
 
 The two large coordinator files are intentionally reduced in small verified
 steps. New protocol, database, export or reusable UI behavior should not be
@@ -37,9 +79,10 @@ kept per hardware identity. UvirMultiSensorRuntime retains an independent
 authenticated Wi-Fi/Bluetooth/MQTT worker for each associated UID, alongside the
 single physical USB-host transport. Selecting a sensor changes only the visible
 live/settings context and command destination; other devices stay connected and
-continue their autonomous sessions. The explicit no-sensor entry pauses all app
-connections, not the jobs running on the hardware. Multiple USB serial devices
-through a hub are not implemented.
+continue their autonomous sessions. With no associated sensors, the disabled
+em-dash placeholder is not a selectable hardware profile. Mock data uses its
+own phone-only context without stopping real sensors' background jobs.
+Multiple USB serial devices through a hub are not implemented.
 
 UvirSensorEventHub tags every event with its authenticated transport's UID. One
 retained UvirMultiSensorPersistence receiver stores all devices' records before
@@ -164,3 +207,9 @@ DS3231 restores the absolute clock before the durable checkpoint is reconciled.
 Elapsed sessions close, missed intervals are skipped rather than fabricated,
 and still-valid jobs resume with the same ID, counters, conditions and cadence.
 If the RTC is absent or invalid, the existing no-date guard keeps the job paused.
+
+## Independent celestial application
+
+Planet Compass is now a separate Android project. Its celestial screens, assets,
+orbital models and dedicated tests are no longer bundled with UVIR. Shared UI
+helpers stay here only where the sensor/measurement application uses them.

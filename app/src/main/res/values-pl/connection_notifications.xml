@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="connection_notification_connected">Połączono</string>
+    <string name="connection_notification_disconnected">Rozłączono</string>
+    <string name="connection_notification_simulation">Symulacja</string>
+    <string name="connection_notification_selected">wybrany</string>
+    <string name="connection_notification_activity">Aktywność w toku</string>
+    <string name="connection_notification_last_activity">Aktywność w toku (ostatni znany stan)</string>
+    <plurals name="connection_notification_connected_count">
+        <item quantity="one">Połączone czujniki: %1$d</item>
+        <item quantity="few">Połączone czujniki: %1$d</item>
+        <item quantity="many">Połączone czujniki: %1$d</item>
+        <item quantity="other">Połączone czujniki: %1$d</item>
+    </plurals>
+    <plurals name="connection_notification_connecting_count">
+        <item quantity="one">Łączące się czujniki: %1$d</item>
+        <item quantity="few">Łączące się czujniki: %1$d</item>
+        <item quantity="many">Łączące się czujniki: %1$d</item>
+        <item quantity="other">Łączące się czujniki: %1$d</item>
+    </plurals>
+    <plurals name="connection_notification_activity_count">
+        <item quantity="one">Aktywności w toku: %1$d</item>
+        <item quantity="few">Aktywności w toku: %1$d</item>
+        <item quantity="many">Aktywności w toku: %1$d</item>
+        <item quantity="other">Aktywności w toku: %1$d</item>
+    </plurals>
+    <plurals name="connection_notification_simulation_count">
+        <item quantity="one">Symulacje: %1$d</item>
+        <item quantity="few">Symulacje: %1$d</item>
+        <item quantity="many">Symulacje: %1$d</item>
+        <item quantity="other">Symulacje: %1$d</item>
+    </plurals>
+</resources>

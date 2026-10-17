@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rtc_clock_warning_title_single">Проверьте батарейку часов</string>
+    <string name="rtc_clock_warning_title_multiple">Проверьте батарейки часов</string>
+    <string name="rtc_clock_warning_message_single">Часы датчика \"%1$s\" сообщили об остановке. Батарейка могла разрядиться или быть неправильно подключена. Проверьте её и при необходимости замените.</string>
+    <string name="rtc_clock_warning_message_multiple">Следующие датчики сообщили об остановке часов:</string>
+    <string name="rtc_clock_warning_batteries_guidance">Батарейки могли разрядиться или быть неправильно подключены. Проверьте их и при необходимости замените.</string>
+</resources>

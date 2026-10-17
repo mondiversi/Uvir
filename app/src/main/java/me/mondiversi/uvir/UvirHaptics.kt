@@ -31,14 +31,15 @@ internal fun uvirHapticPulse(cue: UvirHapticCue): UvirHapticPulse = when (cue) {
     UvirHapticCue.HOLD_COMPLETE -> UvirHapticPulse(26L, 130)
 }
 
-internal class UvirHapticController(private val context: Context) {
+internal class UvirHapticController(context: Context) {
+    private val contentResolver = context.applicationContext.contentResolver
     private var lastPulseAtMs = 0L
     private val vibrator: Vibrator? =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            context.getSystemService(VibratorManager::class.java)?.defaultVibrator
+            context.applicationContext.getSystemService(VibratorManager::class.java)?.defaultVibrator
         } else {
             @Suppress("DEPRECATION")
-            context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
+            context.applicationContext.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
         }
 
     private val touchAttributes = AudioAttributes.Builder()
@@ -48,7 +49,7 @@ internal class UvirHapticController(private val context: Context) {
     @Suppress("DEPRECATION")
     fun uvirHaptic(cue: UvirHapticCue) {
         if (Settings.System.getInt(
-                context.contentResolver,
+                contentResolver,
                 Settings.System.HAPTIC_FEEDBACK_ENABLED,
                 1
             ) == 0

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_section_display">화면 표시</string>
+    <string name="settings_display_description">화면 크기에 맞게 인터페이스를 조정합니다.</string>
+    <string name="notifications_misc_title">기타</string>
+    <string name="notifications_misc_description">앱의 기타 알림을 관리합니다.</string>
+    <string name="rtc_battery_notification_toggle">시작할 때 배터리 경고 표시</string>
+    <string name="rtc_battery_notification_description">센서 시계가 멈췄으면 경고합니다.</string>
+    <string name="settings_mode_small_screen">작은 화면</string>
+    <string name="settings_mode_small_screen_active">작은 화면 모드</string>
+    <string name="settings_mode_large_screen">큰 화면</string>
+    <string name="settings_mode_large_screen_unavailable">큰 화면 모드는 아직 사용할 수 없습니다.</string>
+    <string name="rtc_clock_warning_show_each_launch">시작할 때마다 표시</string>
+    <string name="settings_theme_title">테마</string>
+    <string name="settings_theme_description">앱의 테마를 선택해 콘텐츠의 표시 스타일을 조정하세요.</string>
+    <string name="settings_theme_default">기본값</string>
+    <string name="settings_theme_light">밝게</string>
+    <string name="settings_theme_dark">어둡게</string>
+    <string name="settings_display_unavailable">이 기능은 아직 사용할 수 없습니다.</string>
+</resources>

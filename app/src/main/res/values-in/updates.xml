@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="update_available">Pembaruan tersedia</string>
+    <string name="update_none">Tidak ada pembaruan tersedia</string>
+    <string name="update_check_failed">Tidak dapat memeriksa pembaruan. Lihat log kesalahan.</string>
+    <string name="update_app">Perbarui aplikasi</string>
+    <string name="update_sensor">Perbarui sensor</string>
+    <string name="update_app_first">Perbarui aplikasi terlebih dahulu.</string>
+    <string name="update_usb_required">Pilih sensor dan hubungkan melalui USB, tanpa sesi aktif dan dengan semua rekaman tersinkronisasi.</string>
+    <string name="update_download">Mengunduh dan memverifikasi…</string>
+    <string name="update_flash">Memperbarui sensor…</string>
+    <string name="update_verify">Memverifikasi sensor…</string>
+    <string name="update_keep_connected">Jangan lepaskan USB atau matikan sensor. Jika perlu, tahan BOOT dan coba lagi.</string>
+    <string name="update_done">Sensor diperbarui</string>
+    <string name="update_failed">Pembaruan gagal. Lihat log kesalahan. Jika sensor tidak lagi menyala, pulihkan firmware melalui USB dari komputer.</string>
+    <string name="update_permission">Izinkan Uvir memasang pembaruan di pengaturan Android.</string>
+    <string name="update_whats_new">Pembaruan bertanda tangan untuk aplikasi dan sensor, unduhan terverifikasi, dan pemasangan firmware melalui USB.</string>
+</resources>

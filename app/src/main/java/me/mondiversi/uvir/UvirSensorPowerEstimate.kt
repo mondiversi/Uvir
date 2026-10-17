@@ -67,7 +67,7 @@ internal fun estimateUvirSensorPower(
         }
 
     val ledBrightness =
-        (sensorInfo.statusLedBrightness ?: 10)
+        (sensorInfo.statusLedBrightness ?: DEFAULT_SENSOR_STATUS_LED_BRIGHTNESS)
             .coerceIn(1, 100) / 100.0
     val statusLedCurrentMilliAmps =
         if (sensorInfo.statusLedEnabled == true) {

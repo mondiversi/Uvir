@@ -6,7 +6,7 @@
     <string name="update_app">Обновить приложение</string>
     <string name="update_sensor">Обновить датчик</string>
     <string name="update_app_first">Сначала обновите приложение.</string>
-    <string name="update_usb_required">Выберите этот датчик и подключите по USB. Активных сеансов быть не должно; все записи должны быть синхронизированы.</string>
+    <string name="update_usb_required">Выберите датчик и подключите по USB. Активных сеансов быть не должно; все записи должны быть синхронизированы.</string>
     <string name="update_download">Загрузка и проверка…</string>
     <string name="update_flash">Обновление датчика…</string>
     <string name="update_verify">Проверка датчика…</string>

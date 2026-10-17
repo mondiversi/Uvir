@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rtc_clock_warning_title_single">घड़ी की बैटरी जाँचें</string>
+    <string name="rtc_clock_warning_title_multiple">घड़ियों की बैटरियाँ जाँचें</string>
+    <string name="rtc_clock_warning_message_single">सेंसर \"%1$s\" की घड़ी ने रुकने की सूचना दी है। बैटरी खत्म हो सकती है या ठीक से जुड़ी नहीं हो सकती। उसकी जाँच करें और ज़रूरत होने पर बदलें।</string>
+    <string name="rtc_clock_warning_message_multiple">इन सेंसरों ने घड़ी के रुकने की सूचना दी है:</string>
+    <string name="rtc_clock_warning_batteries_guidance">बैटरियाँ खत्म हो सकती हैं या ठीक से जुड़ी नहीं हो सकतीं। उनकी जाँच करें और ज़रूरत होने पर बदलें।</string>
+</resources>

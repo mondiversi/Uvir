@@ -143,14 +143,15 @@ internal fun ThresholdAlertLogScreen(
     cardColor: Color,
     primaryText: Color,
     secondaryText: Color,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    filterPreferences: android.content.SharedPreferences? = null
 ) {
     val context = LocalContext.current
     val resources = LocalResources.current
 
     var allEntries by rememberLiveAlertEntries(database)
     val sensorProfiles by rememberLiveSensorProfiles(database)
-    var filters by rememberRecordListFilters()
+    var filters by rememberRecordListFilters(filterPreferences, KEY_ALERT_LIST_FILTERS)
     var showFilters by rememberSaveable { mutableStateOf(false) }
     val entries = remember(allEntries, filters) { filterAlertEntries(allEntries, filters) }
     val filterSensorNames = remember(allEntries, sensorProfiles) {
@@ -633,7 +634,6 @@ internal fun ThresholdAlertLogScreen(
                         onClick = { showFilters = !showFilters }
                     )
                     UvirTitleActionButton(
-                        iconColor = MaterialTheme.colorScheme.primary,
                         contentDescription = shareDescription,
                         onClick = {
                             if (selectedAlertIds.isEmpty()) {
@@ -707,6 +707,7 @@ internal fun ThresholdAlertLogScreen(
                 UvirVerticalReveal(showFilters) {
                     UvirRecordListFilterPanel(
                         filters = filters,
+                        visibleCount = entries.size,
                         recordIds = filterRecordIds,
                         sessionIds = filterSessionIds,
                         notes = filterNotes,
@@ -765,14 +766,7 @@ internal fun ThresholdAlertLogScreen(
                                 },
                                 modifier = Modifier.size(24.dp),
                                 colors =
-                                    CheckboxDefaults.colors(
-                                        checkedColor =
-                                            MaterialTheme.colorScheme.primary,
-                                        uncheckedColor =
-                                            MaterialTheme.colorScheme.primary,
-                                        checkmarkColor =
-                                            MaterialTheme.colorScheme.onPrimary
-                                    )
+                                    uvirCheckboxColors()
                             )
                         }
 
@@ -935,14 +929,7 @@ internal fun ThresholdAlertLogScreen(
                                                         },
                                                     onClick = toggleSessionSelection,
                                                     modifier = Modifier.size(24.dp),
-                                                    colors = CheckboxDefaults.colors(
-                                                        checkedColor =
-                                                            MaterialTheme.colorScheme.primary,
-                                                        uncheckedColor =
-                                                            MaterialTheme.colorScheme.primary,
-                                                        checkmarkColor =
-                                                            MaterialTheme.colorScheme.onPrimary
-                                                    )
+                                                    colors = uvirCheckboxColors()
                                                 )
                                             }
                                             Spacer(Modifier.width(8.dp))
@@ -1076,7 +1063,8 @@ internal fun ThresholdAlertLogScreen(
                                                                 selectedAlertIds - entry.id
                                                             }
                                                     },
-                                                    modifier = Modifier.size(24.dp)
+                                                    modifier = Modifier.size(24.dp),
+                                                    colors = uvirCheckboxColors()
                                                 )
                                             }
                                             Spacer(Modifier.width(12.dp))

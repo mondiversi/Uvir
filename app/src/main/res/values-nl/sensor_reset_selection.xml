@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sensor_reset_selection_title">De geselecteerde sensoren resetten?</string>
+    <string name="sensor_reset_selection_message">Selecteer de sensoren om te resetten. Hun instellingen, inloggegevens en niet-gesynchroniseerde gegevens worden gewist, waarna de sensoren uitschakelen. Gegevens in de app blijven ongewijzigd. Alleen verbonden sensoren zonder lopende activiteit kunnen worden geselecteerd.</string>
+    <string name="sensor_reset_selection_failed">Resetten mislukt: %1$s. Controleer de verbinding en probeer opnieuw.</string>
+</resources>

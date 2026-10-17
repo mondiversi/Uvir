@@ -50,6 +50,7 @@ internal fun UvirSamplingAndAlertSettings(
         remember(acquisitionFeedbackSettings.volume) {
             mutableFloatStateOf(acquisitionFeedbackSettings.volume.toFloat())
         }
+    var alertVolumeDraft by remember(alertVolume) { mutableFloatStateOf(alertVolume) }
     val valueCorrectedText =
         stringResource(R.string.value_out_of_limits_corrected)
 
@@ -206,22 +207,18 @@ internal fun UvirSamplingAndAlertSettings(
     }
     }
     if (!showAlertsSection) return
-    val settingsNavigation = LocalUvirSettingsNavigation.current
-    if (settingsNavigation != null && settingsNavigation.selectedPage == null) {
-        UvirSettingsListGroupHeader(
-            title = stringResource(R.string.settings_category_phone),
-            icon = ConnectivityIconType.PHONE,
-            secondaryText = secondaryText
-        )
+    val warningPreferences = remember(context) {
+        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     }
+    val showClockBatteryWarning by rememberUvirRtcBatteryWarning(warningPreferences)
     SettingsSection(
         settingsPage = UvirSettingsPage.ALERTS,
         title =
             stringResource(
-                R.string.settings_section_sounds_and_alerts
+                R.string.settings_section_notifications
             ),
         titleIcon =
-            ConnectivityIconType.SOUND,
+            ConnectivityIconType.NOTIFICATIONS,
         expanded =
             alertsSectionExpanded,
         onExpandedChange = { expanded ->
@@ -323,7 +320,8 @@ internal fun UvirSamplingAndAlertSettings(
                                 )
                             },
                             valueRange = 0f..100f,
-                            steps = 9
+                            steps = 9,
+                            colors = uvirSliderColors()
                         )
                     }
                 }
@@ -370,6 +368,7 @@ internal fun UvirSamplingAndAlertSettings(
                     listOf(
                         ThresholdAlertSound.SILENT,
                         ThresholdAlertSound.VIBRATION,
+                        ThresholdAlertSound.SINGLE_BEEP,
                         ThresholdAlertSound.TRIPLE_BEEP,
                         ThresholdAlertSound.LONG_BEEP
                     )
@@ -435,13 +434,23 @@ internal fun UvirSamplingAndAlertSettings(
                         )
 
                         Slider(
-                            value = alertVolume,
+                            value = alertVolumeDraft,
                             onValueChange = {
+                                alertVolumeDraft = it
                                 onAlertVolumeChange(it)
                             },
-                            onValueChangeFinished = { commit?.commit() },
+                            onValueChangeFinished = {
+                                commit?.commit()
+                                onPreviewThresholdAlertSound(
+                                    ThresholdAlertSound.entries.firstOrNull {
+                                        it.name == alertSoundValue
+                                    } ?: ThresholdAlertSound.SILENT,
+                                    alertVolumeDraft.roundToInt().coerceIn(0, 100)
+                                )
+                            },
                             valueRange = 0f..100f,
-                            steps = 9
+                            steps = 9,
+                            colors = uvirSliderColors()
                         )
                     }
                 }
@@ -457,7 +466,30 @@ internal fun UvirSamplingAndAlertSettings(
         }
 
         }
-
+        CompositionLocalProvider(LocalSettingsCommit provides null) {
+            SettingsIsland(containerColor = cardColor, contentColor = primaryText) {
+                SettingsIslandHeader(
+                    title = stringResource(R.string.notifications_misc_title),
+                    titleColor = primaryText,
+                    titleIcon = ConnectivityIconType.ACTIONS,
+                    dividerColor = secondaryText
+                )
+                Column(verticalArrangement = Arrangement.spacedBy(UvirSettingsControlGap)) {
+                    SettingsPageDescription(
+                        text = stringResource(R.string.notifications_misc_description),
+                        color = secondaryText
+                    )
+                    UvirDisplayCheckbox(
+                        checked = showClockBatteryWarning,
+                        onCheckedChange = { setUvirRtcBatteryWarning(warningPreferences, it) },
+                        title = stringResource(R.string.rtc_battery_notification_toggle),
+                        primaryText = primaryText,
+                        description = stringResource(R.string.rtc_battery_notification_description),
+                        secondaryText = secondaryText
+                    )
+                }
+            }
+        }
     }
 
 }

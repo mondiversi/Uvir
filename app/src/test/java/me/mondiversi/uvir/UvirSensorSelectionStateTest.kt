@@ -4,6 +4,21 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class UvirSensorSelectionStateTest {
+    @Test fun aSensorIsSelectedWheneverAnyAssociationExists() {
+        assertEquals("", requiredSelectedSensorId("old", emptyList()))
+        assertEquals("sensor-b", requiredSelectedSensorId(" SENSOR-B ", listOf("sensor-a", "sensor-b")))
+        assertEquals("sensor-a", requiredSelectedSensorId("", listOf("sensor-b", "sensor-a")))
+        assertEquals("sensor-b", requiredSelectedSensorId("sensor-a", listOf("sensor-b")))
+        assertEquals("", requiredSelectedSensorId("", listOf("", " ")))
+    }
+
+    @Test fun noAssociationUsesADashButOfflineProfilesKeepTheirName() {
+        assertEquals("—", homeSensorDisplayName("Nessun sensore", ""))
+        assertEquals("—", homeSensorDisplayName("No sensor", " "))
+        assertEquals("Portatile", homeSensorDisplayName("Portatile", "sensor-a"))
+        assertEquals("sensor-a", homeSensorDisplayName("", "sensor-a"))
+    }
+
     @Test fun connectionIconsReadEachProfilesModeWithoutChangingSelectionOrPreferences() {
         val values = mutableMapOf<String, Any?>(
             KEY_SENSOR_CONNECTION_MODE to "WIFI",

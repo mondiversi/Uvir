@@ -69,7 +69,9 @@ internal object UvirSensorRuntimeInfoStore {
     @Synchronized
     fun saveForDevice(context: Context, connectionMode: SensorConnectionMode, info: UvirSensorRuntimeInfo) {
         if (info.deviceId.isBlank()) return
-        if (UvirSensorCredentialStore.load(context).deviceId.equals(info.deviceId, true)) {
+        val appPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        if (selectedUiSensorDeviceId(appPreferences, UvirSensorCredentialStore.load(context).deviceId)
+            .equals(info.deviceId, true)) {
             save(context, connectionMode, info)
             return
         }

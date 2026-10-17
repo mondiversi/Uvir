@@ -1,0 +1,207 @@
+{
+  "format": "uvir-hardware-intake-v1",
+  "source_export_date": "2026-10-05",
+  "prepared_date": "2026-10-17",
+  "status": "development-snapshot-not-approved-for-fabrication",
+  "files": [
+    {
+      "path": "manufacturing/uvir-carrier-v4-copper-gerbers.zip",
+      "bytes": 60015,
+      "sha256": "fdf9e0a3780c684d21d42a8ed803e41c63be285842fbd83ede10775bed315882"
+    },
+    {
+      "path": "pcb/uvir-carrier-v3.json",
+      "bytes": 212597,
+      "sha256": "9468649fafb49e83c10d591c402d922e55cc8f6162f3c709a2a5653abaec6441"
+    },
+    {
+      "path": "pcb/uvir-carrier-v3.pdf",
+      "bytes": 24450,
+      "sha256": "32d8de8a262e96151b4315701facffe3b3cc12c4d6a90b305fcb8977f186634c"
+    },
+    {
+      "path": "pcb/uvir-carrier-v4-copper.json",
+      "bytes": 314426,
+      "sha256": "5b7f83915a353a3948dc1e0917effbb9d7f85e7e0cd414524cd6b856dbf4f152"
+    },
+    {
+      "path": "pcb/uvir-carrier-v4-copper.pdf",
+      "bytes": 48580,
+      "sha256": "7fdd1510177996a2d07892ab331b2e5026a09ce72140fa393d20f3ec7a145669"
+    },
+    {
+      "path": "previews/uvir-carrier-schematic.png",
+      "bytes": 143378,
+      "sha256": "f227172d565cb0a215f1d45004826f95fa44582bdd94c697ba305c7bc18c5272"
+    },
+    {
+      "path": "previews/uvir-carrier-v3.png",
+      "bytes": 114360,
+      "sha256": "7050f6824013b394272c148f49288076a3f0ebf967fd2acaf66141cd2d9a7242"
+    },
+    {
+      "path": "previews/uvir-carrier-v4-copper.png",
+      "bytes": 113670,
+      "sha256": "e33db202f87c63ec79237d3b7646cee1452e3335dd0deb872e20491816571ed3"
+    },
+    {
+      "path": "README.md",
+      "bytes": 3224,
+      "sha256": "3e6391bfda47db0912d0b4d0fcc53384cd69473edc9e7eba33138295ac2d000a"
+    },
+    {
+      "path": "reference/README.md",
+      "bytes": 1378,
+      "sha256": "4b1970cfc58fc03e2513862159300fcabd3e2061bbd302b116d043db783cfa77"
+    },
+    {
+      "path": "reference/uvir-carrier-r1-easyeda-standard-schematic.json",
+      "bytes": 19872,
+      "sha256": "ba1c062c575f4b90d6a1c5824e377d49feda2300b89a2eb8323b215f4449bd98"
+    },
+    {
+      "path": "reference/uvir-carrier-r1-pin-netlist.json",
+      "bytes": 8285,
+      "sha256": "e404003e9d453305db6d4c6e923e79d68c15c7f215026c6ac59dea907fde2a07"
+    },
+    {
+      "path": "REVIEW.md",
+      "bytes": 3952,
+      "sha256": "d26e5bc3609ee6315686f2eb7945c557bba2a09d990df402d11e58bc2c987a07"
+    },
+    {
+      "path": "schematic/uvir-carrier-schematic.json",
+      "bytes": 47663,
+      "sha256": "8532c722188611b15ee572c61d15601bcc86d0164c4b7eea5f4a57d5112a985e"
+    },
+    {
+      "path": "schematic/uvir-carrier-schematic.pdf",
+      "bytes": 23760,
+      "sha256": "99a6c934204de0d3d285e19cada0a3af4b2c8eea1bbe52addbf9126435f416b0"
+    }
+  ],
+  "checks": [
+    {
+      "file": "schematic/uvir-carrier-schematic.json",
+      "electrical_primitives_unchanged": true,
+      "source_shape_count": 121,
+      "output_shape_count": 121
+    },
+    {
+      "file": "pcb/uvir-carrier-v3.json",
+      "electrical_primitives_unchanged": true,
+      "source_shape_count": 92,
+      "output_shape_count": 92
+    },
+    {
+      "file": "pcb/uvir-carrier-v4-copper.json",
+      "electrical_primitives_unchanged": true,
+      "source_shape_count": 96,
+      "output_shape_count": 95
+    },
+    {
+      "file": "reference/uvir-carrier-r1-pin-netlist.json",
+      "byte_identical_reference": true
+    },
+    {
+      "file": "reference/uvir-carrier-r1-easyeda-standard-schematic.json",
+      "byte_identical_reference": true
+    },
+    {
+      "file": "schematic/uvir-carrier-schematic.pdf",
+      "page_count": 1,
+      "privacy_regions": 5,
+      "unrelated_vector_geometry_unchanged": true
+    },
+    {
+      "file": "pcb/uvir-carrier-v3.pdf",
+      "page_count": 1,
+      "privacy_regions": 0,
+      "unrelated_vector_geometry_unchanged": true
+    },
+    {
+      "file": "pcb/uvir-carrier-v4-copper.pdf",
+      "page_count": 1,
+      "privacy_regions": 1,
+      "unrelated_vector_geometry_unchanged": true
+    },
+    {
+      "file": "manufacturing/uvir-carrier-v4-copper-gerbers.zip",
+      "members": [
+        {
+          "file": "Drill_NPTH_Through.DRL",
+          "unchanged": true,
+          "signature_segments_removed": 0,
+          "sha256": "7e7d7436562f729fb8ad5966457512da3fffeaf311d0cf4d08013d5dd023d90b"
+        },
+        {
+          "file": "Drill_PTH_Through.DRL",
+          "unchanged": true,
+          "signature_segments_removed": 0,
+          "sha256": "4378bcf2a7dfe5121c9a8f11558016482fb3ae8b4159bbfff2575c098bf067d1"
+        },
+        {
+          "file": "Drill_PTH_Through_Via.DRL",
+          "unchanged": true,
+          "signature_segments_removed": 0,
+          "sha256": "dfcb3f601125514afbd3edfb54e5e48fd9b45c4011560a6f604b2401bb06b784"
+        },
+        {
+          "file": "Gerber_TopLayer.GTL",
+          "unchanged": true,
+          "signature_segments_removed": 0,
+          "sha256": "ebb003f127b115a6025ba1af3601a90a48a0c942f8a9a1922e8580f75b9e21f7"
+        },
+        {
+          "file": "Gerber_BottomLayer.GBL",
+          "unchanged": true,
+          "signature_segments_removed": 0,
+          "sha256": "53cdd32671045107b117d61ab6f63d246e94fd07bf32cd09edc466bd2d1fa847"
+        },
+        {
+          "file": "Gerber_TopSilkscreenLayer.GTO",
+          "unchanged": false,
+          "signature_segments_removed": 56,
+          "sha256": "acf41f6383d62b0d8ef8fb71159b266fcd0fd211c7a37c1d14375508fdcf8ba5"
+        },
+        {
+          "file": "Gerber_BottomSilkscreenLayer.GBO",
+          "unchanged": true,
+          "signature_segments_removed": 0,
+          "sha256": "a57978aefc33ede66eef32baea22d1b4285391d7984a21e02a3d84a8a2cefb92"
+        },
+        {
+          "file": "Gerber_TopSolderMaskLayer.GTS",
+          "unchanged": true,
+          "signature_segments_removed": 0,
+          "sha256": "cd09c25427d618373553da84e06cd36365b977ebc0cae155d6717807f5f61519"
+        },
+        {
+          "file": "Gerber_BottomSolderMaskLayer.GBS",
+          "unchanged": true,
+          "signature_segments_removed": 0,
+          "sha256": "753efbe4f6a6761266ca48dfa1cde430290e0c55ca1eae0c705bf594f4d5795d"
+        },
+        {
+          "file": "Gerber_BoardOutlineLayer.GKO",
+          "unchanged": true,
+          "signature_segments_removed": 0,
+          "sha256": "3761e89dbb1fe331ac878a60359f25ad44f03146ab1182c16f96c585b410f86c"
+        },
+        {
+          "file": "Gerber_DocumentLayer.GDL",
+          "unchanged": true,
+          "signature_segments_removed": 0,
+          "sha256": "e2621cb67e4260665f91a52de27f78ea8243157d065abf01f5fc417f8afba4ff"
+        },
+        {
+          "file": "How-to-order-PCB.txt",
+          "unchanged": true,
+          "signature_segments_removed": 0,
+          "sha256": "5f555be87030b31f2f796e99bc4cc9484ea7bf3bdff6dd6e0aba98b2412e6c9d"
+        }
+      ],
+      "all_copper_drills_masks_and_outline_byte_identical": true
+    }
+  ]
+}

@@ -6,8 +6,45 @@ import java.time.Instant;
 import java.util.*;
 import java.util.zip.*;
 
-/** Offline signing. Keystore and passwords never leave the local signing machine. */
+/** Offline signing. Private signing material is never included in release assets. */
 public class ReleaseTool {
+    static Path signingDirectory(String home, Map<String, String> environment) {
+        String directory = environment.get("MONDIVERSI_SIGNING_DIR");
+        Path folder = directory != null && !directory.isBlank()
+            ? Path.of(directory)
+            : Path.of(home, "Dropbox", "Mondiversi", "UvirSigning");
+        if (!folder.isAbsolute()) throw new IllegalArgumentException("Signing directory must be an absolute path");
+        return folder.normalize();
+    }
+
+    static Path signingKeyPath(Properties properties, String home, Map<String, String> environment) {
+        String configuredFile = properties.getProperty("storeFile", "").trim();
+        if (!configuredFile.isEmpty()) {
+            Path key = Path.of(configuredFile);
+            if (!key.isAbsolute()) throw new IllegalArgumentException("storeFile must be an absolute path");
+            return key.normalize();
+        }
+        return signingDirectory(home, environment).resolve("uvir-release.jks");
+    }
+
+    static Properties signingProperties(Path root) throws IOException {
+        return signingProperties(root, System.getProperty("user.home"), System.getenv());
+    }
+
+    static Properties signingProperties(Path root, String home, Map<String, String> environment) throws IOException {
+        Properties properties = new Properties();
+        boolean found = false;
+        for (Path source : List.of(signingDirectory(home, environment).resolve("signing.properties"),
+                root.resolve("keystore.properties"))) {
+            if (Files.isRegularFile(source)) {
+                try (InputStream input = Files.newInputStream(source)) { properties.load(input); }
+                found = true;
+            }
+        }
+        if (!found) throw new IOException("Private signing configuration not found in Dropbox or project-local settings");
+        return properties;
+    }
+
     static String digest(Path file) throws Exception {
         MessageDigest sha = MessageDigest.getInstance("SHA-256");
         try (InputStream in = Files.newInputStream(file)) {
@@ -20,10 +57,16 @@ public class ReleaseTool {
         return "\"url\":\"" + base + file.getFileName() + "\",\"bytes\":" + Files.size(file) + ",\"sha256\":\"" + digest(file) + "\"";
     }
     public static void main(String[] args) throws Exception {
+        if (args.length == 2 && args[0].equals("--keystore-path")) {
+            System.out.println(signingKeyPath(signingProperties(Path.of(args[1])),
+                System.getProperty("user.home"), System.getenv()));
+            return;
+        }
         if (args.length != 6) throw new IllegalArgumentException("root output firmware-build app-version app-code firmware-version");
         Path root = Path.of(args[0]), out = Path.of(args[1]), build = Path.of(args[2]);
         String version = args[3], sensor = args[5]; int code = Integer.parseInt(args[4]);
         if (!version.matches("[0-9]+\\.[0-9]+\\.[0-9]+") || !sensor.matches("[0-9]+\\.[0-9]+\\.[0-9]+")) throw new IllegalArgumentException("Invalid release version");
+        Properties properties = signingProperties(root);
         Files.createDirectories(out);
         Path apk = out.resolve("Uvir-" + version + ".apk");
         Path bin = out.resolve("UvirSensor-" + sensor + "-esp32.bin");
@@ -35,10 +78,9 @@ public class ReleaseTool {
         if (partition.length != 3072) throw new IllegalArgumentException("Unexpected partition table size");
         String partitionMd5 = HexFormat.of().formatHex(MessageDigest.getInstance("MD5").digest(partition));
         String payload = "{\"schema\":1,\"repository\":\"mondiversi/Uvir\",\"published_at\":\"" + Instant.now() + "\",\"app\":{\"package\":\"me.mondiversi.uvir\",\"version\":\"" + version + "\",\"code\":" + code + ",\"min_sdk\":26," + asset(apk, base) + "},\"sensor\":{\"version\":\"" + sensor + "\",\"min_app_code\":" + code + ",\"chip\":\"ESP32\",\"layout\":\"uvir-esp32-huge-app-v1\",\"offset\":65536,\"capacity\":3145728,\"partition_md5\":\"" + partitionMd5 + "\"," + asset(bin, base) + "}}";
-        Properties properties = new Properties();
-        try (InputStream input = Files.newInputStream(root.resolve("keystore.properties"))) { properties.load(input); }
         KeyStore keys = KeyStore.getInstance("JKS");
-        try (InputStream input = Files.newInputStream(Path.of(properties.getProperty("storeFile")))) { keys.load(input, properties.getProperty("storePassword").toCharArray()); }
+        Path keyPath = signingKeyPath(properties, System.getProperty("user.home"), System.getenv());
+        try (InputStream input = Files.newInputStream(keyPath)) { keys.load(input, properties.getProperty("storePassword").toCharArray()); }
         String alias = properties.getProperty("keyAlias");
         Signature signer = Signature.getInstance("SHA256withRSA");
         signer.initSign((PrivateKey)keys.getKey(alias, properties.getProperty("keyPassword").toCharArray()));

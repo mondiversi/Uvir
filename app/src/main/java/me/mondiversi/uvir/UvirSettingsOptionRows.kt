@@ -19,7 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-// Keep both dialogs equally tall, including two connection-date lines and a useful touch target.
+// Keep sensor and source choices equally tall, with a useful touch target.
 internal val SensorRadioOptionMinHeight = 48.dp
 internal val SensorRadioOptionHorizontalPadding = 10.dp
 internal val SensorRadioOptionVerticalPadding = 9.dp
@@ -147,9 +147,7 @@ internal fun SensorSourceOptionRow(
                     enabled = enabled,
                     modifier = Modifier.size(24.dp).testTag("home_source_radio_${mode.name}"),
                     colors =
-                        RadioButtonDefaults.colors(
-                            selectedColor =
-                                MaterialTheme.colorScheme.primary,
+                        uvirRadioButtonColors(
                             unselectedColor = secondaryText,
                             disabledSelectedColor = disabledForeground,
                             disabledUnselectedColor = disabledForeground
@@ -301,6 +299,9 @@ internal fun LanguageOptionRow(
                                 AppLanguage.JAPANESE -> "JA"
                                 AppLanguage.KOREAN -> "KO"
                                 AppLanguage.SWAHILI -> "SW"
+                                AppLanguage.POLISH -> "PL"
+                                AppLanguage.DUTCH -> "NL"
+                                AppLanguage.INDONESIAN -> "ID"
                                 AppLanguage.SYSTEM -> ""
                             },
                         fontSize = 9.sp,

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rtc_clock_warning_title_single">باتری ساعت را بررسی کنید</string>
+    <string name="rtc_clock_warning_title_multiple">باتری ساعت‌ها را بررسی کنید</string>
+    <string name="rtc_clock_warning_message_single">ساعت حسگر \"%1$s\" توقف را گزارش کرده است. ممکن است باتری خالی باشد یا درست متصل نشده باشد. آن را بررسی کنید و در صورت نیاز تعویض کنید.</string>
+    <string name="rtc_clock_warning_message_multiple">حسگرهای زیر توقف ساعت را گزارش کرده‌اند:</string>
+    <string name="rtc_clock_warning_batteries_guidance">ممکن است باتری‌ها خالی باشند یا درست متصل نشده باشند. آن‌ها را بررسی کنید و در صورت نیاز تعویض کنید.</string>
+</resources>

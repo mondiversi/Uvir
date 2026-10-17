@@ -5,6 +5,17 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class UvirSensorPowerEstimateTest {
+    @Test fun missingLedBrightnessUsesNewDefaultButStoredTenPercentRemainsUnchanged() {
+        val unknown = UvirSensorRuntimeInfo(statusLedEnabled = true)
+        val default = unknown.copy(statusLedBrightness = 20)
+        val stored = unknown.copy(statusLedBrightness = 10)
+        val unknownEstimate = estimateUvirSensorPower(SensorConnectionMode.USB, unknown)
+        val defaultEstimate = estimateUvirSensorPower(SensorConnectionMode.USB, default)
+        val storedEstimate = estimateUvirSensorPower(SensorConnectionMode.USB, stored)
+        assertEquals(defaultEstimate.currentMilliAmps, unknownEstimate.currentMilliAmps, 0.0001)
+        assertTrue(storedEstimate.currentMilliAmps < defaultEstimate.currentMilliAmps)
+    }
+
     @Test
     fun wifiEstimateIsHigherThanUsbEstimate() {
         val info = UvirSensorRuntimeInfo(

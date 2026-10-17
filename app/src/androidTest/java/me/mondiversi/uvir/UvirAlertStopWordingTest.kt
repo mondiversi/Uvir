@@ -19,7 +19,7 @@ class UvirAlertStopWordingTest {
 
     @Test fun alertConfirmationReusesTheAutomaticAcquisitionStopLabelInEveryLanguage() {
         for (tag in listOf("en", "it", "ar", "de", "el", "es", "fa", "fr", "hi", "he",
-            "ja", "ko", "pt", "ru", "sw", "tr", "zh-CN")) {
+            "ja", "ko", "pt", "ru", "sw", "pl", "nl", "id", "tr", "zh-CN")) {
             val context = localized(tag)
             assertEquals("Both stop confirmations must use the same label: $tag",
                 context.getString(R.string.stop), context.getString(R.string.stop_all_value_alerts_action))

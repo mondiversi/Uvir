@@ -13,8 +13,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -97,16 +95,15 @@ internal fun UvirDataAndRestoreContent(
     onRestoreDefaultsRequested: () -> Unit,
     onSensorRestoreRequested: () -> Unit
 ) {
-    val locale = LocalContext.current.resources.configuration.locales[0]
+    val configuration = LocalConfiguration.current
+    val locale = configuration.locales[0]
     val sensorResetDescription = stringResource(R.string.sensor_restore_action)
     val appResetDescription = stringResource(R.string.restore_app_settings_action)
     val countersResetDescription = stringResource(R.string.reset_all_records_action)
-    val configuration = LocalConfiguration.current
-    val resetTargetFontSize = remember(
-        locale,
-        configuration.screenWidthDp,
-        configuration.fontScale
-    ) { mutableStateOf(14.sp) }
+    val resetTargetLabels = listOf(
+        stringResource(R.string.settings_category_sensor).uppercase(locale),
+        stringResource(R.string.data_management_app_button).uppercase(locale)
+    )
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement =
@@ -161,7 +158,7 @@ internal fun UvirDataAndRestoreContent(
             ) {
                 UvirLabeledButtonContent(
                     text = stringResource(R.string.settings_category_sensor).uppercase(locale),
-                    sharedFontSize = resetTargetFontSize,
+                    sizingTexts = resetTargetLabels,
                     fontWeight = FontWeight.Bold
                 ) {
                     ConnectivitySectionIcon(
@@ -183,7 +180,7 @@ internal fun UvirDataAndRestoreContent(
             ) {
                 UvirLabeledButtonContent(
                     text = stringResource(R.string.data_management_app_button).uppercase(locale),
-                    sharedFontSize = resetTargetFontSize,
+                    sizingTexts = resetTargetLabels,
                     fontWeight = FontWeight.Bold
                 ) {
                     ConnectivitySectionIcon(

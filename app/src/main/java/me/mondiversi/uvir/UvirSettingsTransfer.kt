@@ -33,6 +33,9 @@ internal fun createUvirAppSettingsBackup(
         .forEach { (key, value) ->
             payload.putPreferenceValue(key, value)
         }
+    // Include the default explicitly, even before the checkbox has been touched.
+    payload.putPreferenceValue(KEY_SHOW_RTC_BATTERY_WARNING, showUvirRtcBatteryWarning(preferences))
+    payload.putPreferenceValue(KEY_APP_THEME, readUvirAppTheme(preferences).storedValue)
     return writeUvirSettingsFile(
         context = context,
         scope = "app",
@@ -54,7 +57,7 @@ internal fun createUvirSensorSettingsBackup(
     val preferences =
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     val activeHardwareUid =
-        preferences.getString("active_device_id", "").orEmpty()
+        selectedUiSensorDeviceId(preferences, UvirSensorCredentialStore.load(context).deviceId)
     val recordingPreferenceKey =
         if (normalizeSensorDeviceId(activeHardwareUid) == normalizeSensorDeviceId(normalizedHardwareUid)) {
             KEY_THRESHOLD_ALERT_RECORD_EVENTS
@@ -87,7 +90,7 @@ internal fun createUvirSensorSettingsBackup(
             )
             .put(
                 SENSOR_PHONE_PREFERENCES,
-                preferences.sensorConfigurationToTransferJson(normalizedHardwareUid)
+                preferences.sensorConfigurationToTransferJson(normalizedHardwareUid, activeHardwareUid)
             )
             // Network names are settings; passwords, pairing PINs, MQTT
             // credentials and the device authentication token are never
@@ -148,12 +151,12 @@ private fun readCachedSensorSettings(
                 statusLedEnabled =
                     preferences.getBoolean(KEY_SENSOR_STATUS_LED_ENABLED, true),
                 statusLedBrightness =
-                    preferences.getInt(KEY_SENSOR_STATUS_LED_BRIGHTNESS, 10)
+                    preferences.getInt(KEY_SENSOR_STATUS_LED_BRIGHTNESS, DEFAULT_SENSOR_STATUS_LED_BRIGHTNESS)
                         .coerceIn(1, 100),
                 statusBuzzerEnabled =
                     preferences.getBoolean(KEY_SENSOR_STATUS_BUZZER_ENABLED, true),
                 statusBuzzerVolume =
-                    preferences.getInt(KEY_SENSOR_STATUS_BUZZER_VOLUME, 10)
+                    preferences.getInt(KEY_SENSOR_STATUS_BUZZER_VOLUME, DEFAULT_SENSOR_STATUS_BUZZER_VOLUME)
                         .coerceIn(1, 100),
                 externalCommandEnabled =
                     preferences.getBoolean(
@@ -566,9 +569,9 @@ private fun defaultImportedSensorSettings(
             automaticShutdownEnabled = false,
             automaticShutdownSeconds = 1_800,
             statusLedEnabled = true,
-            statusLedBrightness = 10,
+            statusLedBrightness = DEFAULT_SENSOR_STATUS_LED_BRIGHTNESS,
             statusBuzzerEnabled = true,
-            statusBuzzerVolume = 10,
+            statusBuzzerVolume = DEFAULT_SENSOR_STATUS_BUZZER_VOLUME,
             externalCommandEnabled = true
         ),
         acquisitionParameters = AcquisitionParameters(
@@ -710,13 +713,16 @@ private fun JSONObject.toSensorSettingsSnapshot(
     )
 
 internal fun isTransferableAppPreference(key: String): Boolean =
-    key !in sensorSelectionPreferenceKeys &&
+    key != KEY_SIMULATION_CONTEXT_PREPARED && !isRetiredCameraPreference(key) &&
+        key !in sensorSelectionPreferenceKeys &&
         key !in transientSettingsKeys &&
         !key.startsWith("selected_sensor_context.")
 
-private fun SharedPreferences.sensorConfigurationToTransferJson(hardwareUid: String): JSONObject =
+private fun SharedPreferences.sensorConfigurationToTransferJson(
+    hardwareUid: String,
+    activeHardwareUid: String
+): JSONObject =
     JSONObject().also { payload ->
-        val activeHardwareUid = getString("active_device_id", "").orEmpty()
         val isActive = normalizeSensorDeviceId(activeHardwareUid) == normalizeSensorDeviceId(hardwareUid)
         sensorConfigurationPreferenceKeys.forEach { key ->
             val storedKey = if (isActive) key else sensorContextPreferenceKey(hardwareUid, key)
@@ -732,7 +738,8 @@ private fun importSensorPhonePreferences(
     activeSensor: Boolean
 ) {
     fun destinationKey(key: String): String =
-        if (activeSensor) key else sensorContextPreferenceKey(hardwareUid, key)
+        if (activeSensor && !UvirSensorSimulationSettingsStore.load(preferences).enabled) key
+        else sensorContextPreferenceKey(hardwareUid, key)
     val editor = preferences.edit()
     // Version 2 contains the complete phone-side sensor profile. Clearing
     // first also restores defaults for values that were absent in the source

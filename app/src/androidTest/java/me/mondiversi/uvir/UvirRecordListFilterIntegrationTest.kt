@@ -21,6 +21,17 @@ import org.junit.Assert.*
 /** Real list composables, but a separately resolved private temporary database. */
 class UvirRecordListFilterIntegrationTest {
     @get:Rule val compose = createComposeRule()
+    private fun setTestContent(content: @androidx.compose.runtime.Composable () -> Unit) {
+        compose.setContent {
+            val view = androidx.compose.ui.platform.LocalView.current
+            androidx.compose.runtime.DisposableEffect(view) {
+                val previous = view.keepScreenOn
+                view.keepScreenOn = true
+                onDispose { view.keepScreenOn = previous }
+            }
+            content()
+        }
+    }
     private lateinit var directory: File
     private lateinit var database: UvirDatabaseHelper
     private fun text(id: Int, vararg args: Any) =
@@ -53,10 +64,61 @@ class UvirRecordListFilterIntegrationTest {
         assertTrue(directory.delete())
     }
 
+    @Test fun acquisitionListCombinesTwoSensorsWithoutIncludingAThird() {
+        listOf("A", "B", "C").forEach { suffix ->
+            database.saveAcquisition(SensorSample(), "Only $suffix", automatic = false,
+                sensorDeviceId = "TEST-$suffix")
+        }
+        val summaries = database.readSavedRecords()
+        setTestContent {
+            MaterialTheme {
+                HistoryScreen(database, rememberLazyListState(), ListEdgeAnchor.START, {},
+                    Color.White, Color.White, Color.Black, Color.Gray, {}, {}, {})
+            }
+        }
+        exerciseTwoSensors(summaries.filter { it.note != "Only C" }.map { requireNotNull(it.sensorId).toString() })
+        compose.runOnIdle { assertEquals(3, database.readSavedRecords().size) }
+    }
+
+    @Test fun alertListCombinesTwoSensorsWithoutIncludingAThird() {
+        val rule = ThresholdAlertRule(ThresholdAlertMetric.UVA, true, ThresholdAlertDirection.ABOVE, 1f)
+        listOf("A", "B", "C").forEachIndexed { index, suffix ->
+            database.startAlertSession(10L + index, "Only $suffix", 1000L + index, "TEST-$suffix")
+            database.insertThresholdAlertLog(listOf(ThresholdAlertViolation(rule, 2.0)),
+                timestamp = 1000L + index, sessionId = 10L + index, sensorDeviceId = "TEST-$suffix")
+        }
+        val summaries = database.readThresholdAlertLog()
+        setTestContent {
+            MaterialTheme {
+                ThresholdAlertLogScreen(database, rememberLazyListState(),
+                    Color.White, Color.White, Color.Black, Color.Gray, {})
+            }
+        }
+        exerciseTwoSensors(summaries.filter { it.note != "Only C" }.map { requireNotNull(it.sensorId).toString() })
+        compose.runOnIdle { assertEquals(3, database.readThresholdAlertLog().size) }
+    }
+
+    private fun exerciseTwoSensors(keys: List<String>) {
+        compose.onNodeWithTag("list-filter-toggle").performClick()
+        compose.onNodeWithTag("filter-sensor").performScrollTo().performTouchInput { click(center) }
+        keys.forEach { compose.onNodeWithTag("filter-choice-option-$it").performClick().assertIsOn() }
+        pressBack()
+        assertFieldResultCounts(2)
+        compose.onNodeWithTag("list-filter-toggle").performClick()
+        // Session notes include a sequence prefix. Lazy lists also do not compose
+        // cards outside the viewport until their containing list is scrolled.
+        listOf("Only A", "Only B").forEach { note ->
+            compose.onNode(hasScrollToIndexAction())
+                .performScrollToNode(hasText(note, substring = true))
+            compose.onAllNodesWithText(note, substring = true).onFirst().assertIsDisplayed()
+        }
+        compose.onNodeWithText("Only C", substring = true).assertDoesNotExist()
+    }
+
     @Test fun acquisitionListKeepsChoiceFiltersAccessibleAndResetsWithoutChangingRecords() {
         repeat(3) { database.saveAcquisition(SensorSample(), "Garden", automatic = true,
             sessionId = 10, sessionSequence = it + 1, sensorDeviceId = "TEST-A") }
-        compose.setContent {
+        setTestContent {
             MaterialTheme {
                 HistoryScreen(database, rememberLazyListState(), ListEdgeAnchor.START, {},
                     Color.White, Color.White, Color.Black, Color.Gray, {}, {}, {})
@@ -71,7 +133,7 @@ class UvirRecordListFilterIntegrationTest {
         repeat(3) { database.insertThresholdAlertLog(
             listOf(ThresholdAlertViolation(rule, 2.0)), timestamp = 1000L + it,
             sessionId = 10, sensorDeviceId = "TEST-A") }
-        compose.setContent {
+        setTestContent {
             MaterialTheme {
                 ThresholdAlertLogScreen(database, rememberLazyListState(),
                     Color.White, Color.White, Color.Black, Color.Gray, {})
@@ -84,7 +146,7 @@ class UvirRecordListFilterIntegrationTest {
     @Test fun acquisitionSelectionStillWorksWithoutTheTitleSelectionIcon() {
         repeat(3) { database.saveAcquisition(SensorSample(), "Garden", automatic = true,
             sessionId = 10, sessionSequence = it + 1, sensorDeviceId = "TEST-A") }
-        compose.setContent {
+        setTestContent {
             MaterialTheme {
                 HistoryScreen(database, rememberLazyListState(), ListEdgeAnchor.START, {},
                     Color.White, Color.White, Color.Black, Color.Gray, {}, {}, {})
@@ -96,10 +158,11 @@ class UvirRecordListFilterIntegrationTest {
 
     @Test fun alertSelectionStillWorksWithoutTheTitleSelectionIcon() {
         val rule = ThresholdAlertRule(ThresholdAlertMetric.UVA, true, ThresholdAlertDirection.ABOVE, 1f)
+        database.startAlertSession(10, "Garden", 1000L, "TEST-A")
         repeat(3) { database.insertThresholdAlertLog(
             listOf(ThresholdAlertViolation(rule, 2.0)), timestamp = 1000L + it,
             sessionId = 10, sensorDeviceId = "TEST-A") }
-        compose.setContent {
+        setTestContent {
             MaterialTheme {
                 ThresholdAlertLogScreen(database, rememberLazyListState(),
                     Color.White, Color.White, Color.Black, Color.Gray, {})
@@ -112,11 +175,11 @@ class UvirRecordListFilterIntegrationTest {
     private fun exerciseLongPressSelection(selectionIconLabel: Int) {
         compose.onNodeWithContentDescription(text(selectionIconLabel)).assertDoesNotExist()
         compose.onNodeWithText(text(R.string.select_all)).assertDoesNotExist()
-        val headerLabel = if (selectionIconLabel == R.string.select_alerts)
-            R.string.alert_session_chart_open else R.string.session_chart_open
+        // The session badge has its own long-click action without the header's
+        // description. Target the record note, not the first long-click node.
         compose.onAllNodes(SemanticsMatcher.keyIsDefined(SemanticsActions.OnLongClick)
-            .and(!hasContentDescription(text(headerLabel))))
-            .onFirst().performTouchInput { longClick() }
+            .and(hasText("Garden", substring = true)))
+            .onFirst().performScrollTo().assertIsDisplayed().performTouchInput { longClick() }
         compose.onNodeWithText(text(R.string.select_all)).assertIsDisplayed().performClick()
         compose.onNodeWithText(text(R.string.deselect_all)).assertIsDisplayed().performClick()
         compose.onNodeWithText(text(R.string.select_all)).assertIsDisplayed()
@@ -154,7 +217,7 @@ class UvirRecordListFilterIntegrationTest {
     @Test fun selectingAcquisitionNoteAndIdFiltersDoesNotCrashOrChangeRecords() {
         repeat(30) { database.saveAcquisition(SensorSample(), "Garden", automatic = true,
             sessionId = 10, sessionSequence = it + 1, sensorDeviceId = "TEST-A") }
-        compose.setContent {
+        setTestContent {
             MaterialTheme {
                 HistoryScreen(database, rememberLazyListState(), ListEdgeAnchor.START, {},
                     Color.White, Color.White, Color.Black, Color.Gray, {}, {}, {})
@@ -169,7 +232,7 @@ class UvirRecordListFilterIntegrationTest {
         database.startAlertSession(10, "Garden", 1000L, "TEST-A")
         repeat(30) { database.insertThresholdAlertLog(listOf(ThresholdAlertViolation(rule, 2.0)),
             timestamp = 1000L + it, sessionId = 10, sensorDeviceId = "TEST-A") }
-        compose.setContent {
+        setTestContent {
             MaterialTheme {
                 ThresholdAlertLogScreen(database, rememberLazyListState(),
                     Color.White, Color.White, Color.Black, Color.Gray, {})
@@ -193,7 +256,7 @@ class UvirRecordListFilterIntegrationTest {
     private fun renderAcquisitions(onBack: () -> Unit = {}) {
         repeat(3) { database.saveAcquisition(SensorSample(), "Garden", automatic = true,
             sessionId = 10, sessionSequence = it + 1, sensorDeviceId = "TEST-A") }
-        compose.setContent {
+        setTestContent {
             MaterialTheme {
                 HistoryScreen(database, rememberLazyListState(), ListEdgeAnchor.START, {},
                     Color.White, Color.White, Color.Black, Color.Gray, onBack, {}, {})
@@ -205,7 +268,7 @@ class UvirRecordListFilterIntegrationTest {
         val rule = ThresholdAlertRule(ThresholdAlertMetric.UVA, true, ThresholdAlertDirection.ABOVE, 1f)
         repeat(3) { database.insertThresholdAlertLog(listOf(ThresholdAlertViolation(rule, 2.0)),
             timestamp = 1000L + it, sessionId = 10, sensorDeviceId = "TEST-A") }
-        compose.setContent {
+        setTestContent {
             MaterialTheme {
                 ThresholdAlertLogScreen(database, rememberLazyListState(),
                     Color.White, Color.White, Color.Black, Color.Gray, onBack)
@@ -277,6 +340,7 @@ class UvirRecordListFilterIntegrationTest {
     private fun selectFilterChoice(fieldTag: String, key: String) {
         compose.onNodeWithTag(fieldTag).performScrollTo().performTouchInput { click(center) }
         compose.onNodeWithTag("filter-choice-option-$key").performScrollTo().performClick()
+        pressBack()
         compose.waitForIdle()
         compose.onNodeWithTag(fieldTag)
             .assertContentDescriptionContains(key, substring = true)
@@ -287,5 +351,15 @@ class UvirRecordListFilterIntegrationTest {
         // change the total shown in the list title.
         compose.onNodeWithTag("list-filter-count").assertDoesNotExist()
         compose.onAllNodes(hasText(total.toString(), substring = true)).assertAny(hasText(total.toString(), substring = true))
+        if (compose.onAllNodesWithTag("filter-id").fetchSemanticsNodes().isNotEmpty())
+            assertFieldResultCounts(visible)
+    }
+
+    private fun assertFieldResultCounts(visible: Int) {
+        for (tag in listOf("filter-id", "filter-session-id", "filter-from", "filter-until",
+            "filter-mode", "filter-sensor", "filter-note")) {
+            compose.onNodeWithTag(tag).performScrollTo()
+                .assertContentDescriptionContains(" ($visible)", substring = true)
+        }
     }
 }

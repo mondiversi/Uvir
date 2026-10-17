@@ -2,9 +2,8 @@ package me.mondiversi.uvir
 
 import android.database.sqlite.SQLiteDatabase
 
-/** Repairs old records only; known identities take precedence over the default. */
-internal fun backfillUnassociatedAlertSensors(database: SQLiteDatabase, defaultSensorId: Long): Int {
-    if (defaultSensorId <= 0L) return 0
+/** Repair only provable identities; a record created without a sensor stays unassociated. */
+internal fun backfillUnassociatedAlertSensors(database: SQLiteDatabase): Int {
     database.beginTransaction()
     val changed: Int
     try {
@@ -15,13 +14,16 @@ internal fun backfillUnassociatedAlertSensors(database: SQLiteDatabase, defaultS
                 (SELECT sensor.id FROM sensors AS sensor
                  WHERE sensor.hardware_uid = TRIM(alerts.sensor_device_id)),
                 (SELECT session.sensor_id FROM alert_sessions AS session
-                 WHERE session.session_id = alerts.session_id),
-                ?
+                 WHERE session.session_id = alerts.session_id)
             )
             WHERE sensor_id IS NULL
+              AND (EXISTS (SELECT 1 FROM sensors AS sensor
+                           WHERE sensor.hardware_uid = TRIM(alerts.sensor_device_id))
+                   OR EXISTS (SELECT 1 FROM alert_sessions AS session
+                              WHERE session.session_id = alerts.session_id
+                                AND session.sensor_id IS NOT NULL))
             """.trimIndent()
         ).use { statement ->
-            statement.bindLong(1, defaultSensorId)
             statement.executeUpdateDelete()
         }
         database.execSQL(

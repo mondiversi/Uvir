@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rtc_clock_warning_title_single">Saat pilini kontrol et</string>
+    <string name="rtc_clock_warning_title_multiple">Saat pillerini kontrol et</string>
+    <string name="rtc_clock_warning_message_single">\"%1$s\" sensörünün saati durma bildirdi. Pil bitmiş veya doğru bağlanmamış olabilir. Kontrol et ve gerekirse değiştir.</string>
+    <string name="rtc_clock_warning_message_multiple">Aşağıdaki sensörler saatin durduğunu bildirdi:</string>
+    <string name="rtc_clock_warning_batteries_guidance">Piller bitmiş veya doğru bağlanmamış olabilir. Kontrol et ve gerekirse değiştir.</string>
+</resources>

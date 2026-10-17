@@ -103,7 +103,7 @@ class UvirErrorLogSettingsIslandTest {
             setLocale(Locale.ENGLISH)
         }).getString(R.string.data_management_error_log_group)
         for (language in listOf("en", "it", "ar", "de", "el", "es", "fa", "fr", "hi",
-            "he", "ja", "ko", "pt", "ru", "sw", "tr", "zh")) {
+            "he", "ja", "ko", "pt", "ru", "sw", "pl", "nl", "id", "tr", "zh")) {
             val localized = context.createConfigurationContext(Configuration(context.resources.configuration).apply {
                 setLocale(Locale.forLanguageTag(language))
             })

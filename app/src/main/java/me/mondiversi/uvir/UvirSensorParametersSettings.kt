@@ -19,7 +19,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -78,7 +80,8 @@ internal fun UvirSensorParametersSettings(
     onDisassociateSensor: suspend () -> Boolean,
     cardColor: Color,
     primaryText: Color,
-    secondaryText: Color
+    secondaryText: Color,
+    onPreviewStatusBuzzerVolume: (Int) -> Unit = {}
 ) {
     val resources = context.resources
     val coroutineScope = rememberCoroutineScope()
@@ -309,7 +312,8 @@ internal fun UvirSensorParametersSettings(
                 enabled = sensorSettingsEnabled && statusBuzzerEnabled,
                 primaryText = primaryText,
                 secondaryText = secondaryText,
-                onValueChange = onStatusBuzzerVolumeChange
+                onValueChange = onStatusBuzzerVolumeChange,
+                onPreviewVolume = onPreviewStatusBuzzerVolume
             )
 
         }
@@ -516,10 +520,12 @@ internal fun SensorParameterSlider(
     enabled: Boolean,
     primaryText: Color,
     secondaryText: Color,
-    onValueChange: (Float) -> Unit
+    onValueChange: (Float) -> Unit,
+    onPreviewVolume: ((Int) -> Unit)? = null
 ) {
     val commit = LocalSettingsCommit.current
-    val sliderValue = if (value <= 1f) 0f else value.coerceIn(0f, 100f)
+    var sliderDraft by remember(value) { mutableFloatStateOf(value.coerceIn(1f, 100f)) }
+    val sliderValue = if (sliderDraft <= 1f) 0f else sliderDraft
     Column(verticalArrangement = Arrangement.spacedBy(UvirSettingsRelatedGap)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -542,12 +548,17 @@ internal fun SensorParameterSlider(
         Slider(
             value = sliderValue,
             onValueChange = { sliderPosition ->
-                onValueChange(if (sliderPosition <= 0f) 1f else sliderPosition)
+                sliderDraft = if (sliderPosition <= 0f) 1f else sliderPosition
+                onValueChange(sliderDraft)
             },
-            onValueChangeFinished = { commit?.commit() },
+            onValueChangeFinished = {
+                commit?.commit()
+                onPreviewVolume?.invoke(sliderDraft.roundToInt().coerceIn(1, 100))
+            },
             enabled = enabled,
             valueRange = 0f..100f,
-            steps = 9
+            steps = 9,
+            colors = uvirSliderColors()
         )
     }
 }

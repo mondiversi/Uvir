@@ -4,14 +4,13 @@ import android.content.Context
 import android.content.res.Resources
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -58,7 +57,7 @@ internal fun UvirSensorInfoScreen(
 ) {
     val context = LocalContext.current
     val resources = LocalResources.current
-    val listState = rememberLazyListState()
+    val scrollState = rememberScrollState()
     var showExportDialog by rememberSaveable {
         mutableStateOf(false)
     }
@@ -291,11 +290,10 @@ internal fun UvirSensorInfoScreen(
         },
         containerColor = backgroundColor,
         contentColor = primaryText,
-        lazyListState = listState,
+        scrollState = scrollState,
         scrollbarColor = secondaryText.copy(alpha = 0.46f),
         topActionButton = {
             UvirTitleActionButton(
-                iconColor = MaterialTheme.colorScheme.primary,
                 contentDescription = resources.getString(R.string.export),
                 onClick = {
                     showExportDialog = true
@@ -312,13 +310,11 @@ internal fun UvirSensorInfoScreen(
             }
         },
         text = {
-            LazyColumn(
-                state = listState,
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(bottom = 20.dp),
-                verticalArrangement = Arrangement.spacedBy(UvirIslandSpacing)
+            UvirIslandColumns(
+                modifier = Modifier.fillMaxSize().verticalScroll(scrollState).padding(bottom = 20.dp),
+                spacing = UvirIslandSpacing
             ) {
-                item(key = "device") {
+                key("device") {
                     SensorInfoGroupedSection(
                         title = stringResource(R.string.sensor_info_device),
                         primaryText = primaryText,
@@ -328,7 +324,7 @@ internal fun UvirSensorInfoScreen(
                     )
                 }
 
-                item(key = "connection") {
+                key("connection") {
                     SensorInfoGroupedSection(
                         title = stringResource(R.string.sensor_info_connection),
                         primaryText = primaryText,
@@ -354,7 +350,7 @@ internal fun UvirSensorInfoScreen(
                     )
                 }
 
-                item(key = "measurement") {
+                key("measurement") {
                     SensorInfoGroupedSection(
                         title = stringResource(R.string.sensor_info_measurement),
                         primaryText = primaryText,
@@ -465,7 +461,7 @@ internal fun UvirSensorInfoScreen(
                     )
                 }
 
-                item(key = "scale") {
+                key("scale") {
                     SensorInfoGroupedSection(
                         title = stringResource(R.string.sensor_info_scale_sensitivity),
                         primaryText = primaryText,
@@ -487,7 +483,7 @@ internal fun UvirSensorInfoScreen(
                     )
                 }
 
-                item(key = "memory") {
+                key("memory") {
                     SensorInfoGroupedSection(
                         title = stringResource(R.string.sensor_info_memory),
                         primaryText = primaryText,
@@ -627,7 +623,7 @@ internal fun UvirSensorInfoScreen(
                     )
                 }
 
-                item(key = "power") {
+                key("power") {
                     SensorInfoGroupedSection(
                         title = stringResource(
                             R.string.sensor_info_power_consumption

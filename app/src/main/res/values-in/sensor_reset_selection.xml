@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sensor_reset_selection_title">Reset sensor yang dipilih?</string>
+    <string name="sensor_reset_selection_message">Pilih sensor untuk direset. Pengaturan, kredensial, dan data yang belum disinkronkan akan dihapus, lalu sensor dimatikan. Data aplikasi tetap sama. Hanya sensor terhubung tanpa aktivitas berlangsung yang dapat dipilih.</string>
+    <string name="sensor_reset_selection_failed">Reset gagal: %1$s. Periksa koneksi dan coba lagi.</string>
+</resources>

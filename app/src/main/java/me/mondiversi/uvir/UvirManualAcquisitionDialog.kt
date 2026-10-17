@@ -8,7 +8,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
-import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -100,9 +99,7 @@ internal fun UvirManualAcquisitionDialog(
                                     enabled = enabled,
                                     modifier = Modifier.size(24.dp),
                                     colors =
-                                        RadioButtonDefaults.colors(
-                                            selectedColor =
-                                                MaterialTheme.colorScheme.primary,
+                                        uvirRadioButtonColors(
                                             unselectedColor =
                                                 if (darkMode) {
                                                     primaryText.copy(alpha = 0.82f)

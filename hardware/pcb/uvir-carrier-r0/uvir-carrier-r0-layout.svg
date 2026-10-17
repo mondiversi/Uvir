@@ -52,7 +52,7 @@
 
   <rect class="visible" x="260" y="655" width="240" height="205" rx="16" />
   <circle class="part" cx="380" cy="750" r="22" />
-  <text class="label" x="380" y="710" text-anchor="middle">GY-AS7343</text>
+  <text class="label" x="380" y="710" text-anchor="middle">GY-AS734X</text>
   <text class="small" x="380" y="800" text-anchor="middle">luce / NIR · orizzontale</text>
   <text class="small" x="380" y="833" text-anchor="middle">footprint reale da misurare</text>
 

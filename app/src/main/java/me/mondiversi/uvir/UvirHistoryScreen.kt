@@ -142,7 +142,8 @@ fun HistoryScreen(
     secondaryText: Color,
     onBack: () -> Unit,
     onOpenSessionChart: (Long) -> Unit,
-    onOpenRecord: (SavedRecordDetail) -> Unit
+    onOpenRecord: (SavedRecordDetail) -> Unit,
+    filterPreferences: android.content.SharedPreferences? = null
 ) {
 
     val context =
@@ -156,7 +157,7 @@ fun HistoryScreen(
 
     var allRecords by rememberLiveAcquisitionRecords(database)
     val sensorProfiles by rememberLiveSensorProfiles(database)
-    var filters by rememberRecordListFilters()
+    var filters by rememberRecordListFilters(filterPreferences, KEY_ACQUISITION_LIST_FILTERS)
     var showFilters by rememberSaveable { mutableStateOf(false) }
     val records = remember(allRecords, filters) { filterAcquisitionRecords(allRecords, filters) }
     val filterSensorNames = remember(allRecords, sensorProfiles) {
@@ -726,7 +727,6 @@ fun HistoryScreen(
                         onClick = { showFilters = !showFilters }
                     )
                     UvirTitleActionButton(
-                        iconColor = MaterialTheme.colorScheme.primary,
                         contentDescription = shareDescription,
                         onClick = {
                             if (selectedRecordIds.isEmpty()) {
@@ -805,6 +805,7 @@ fun HistoryScreen(
                 UvirVerticalReveal(showFilters) {
                     UvirRecordListFilterPanel(
                         filters = filters,
+                        visibleCount = records.size,
                         recordIds = filterRecordIds,
                         sessionIds = filterSessionIds,
                         notes = filterNotes,
@@ -872,20 +873,7 @@ fun HistoryScreen(
                                 },
                                 modifier = Modifier.size(24.dp),
                                 colors =
-                                    CheckboxDefaults.colors(
-                                        checkedColor =
-                                            MaterialTheme
-                                                .colorScheme
-                                                .primary,
-                                        uncheckedColor =
-                                            MaterialTheme
-                                                .colorScheme
-                                                .primary,
-                                        checkmarkColor =
-                                            MaterialTheme
-                                                .colorScheme
-                                                .onPrimary
-                                    )
+                                    uvirCheckboxColors()
                             )
                         }
 
@@ -1091,20 +1079,7 @@ fun HistoryScreen(
                                                     onClick = toggleSessionSelection,
                                                     modifier = Modifier.size(24.dp),
                                                     colors =
-                                                        CheckboxDefaults.colors(
-                                                            checkedColor =
-                                                                MaterialTheme
-                                                                    .colorScheme
-                                                                    .primary,
-                                                            uncheckedColor =
-                                                                MaterialTheme
-                                                                    .colorScheme
-                                                                    .primary,
-                                                            checkmarkColor =
-                                                                MaterialTheme
-                                                                    .colorScheme
-                                                                    .onPrimary
-                                                        )
+                                                        uvirCheckboxColors()
                                                 )
                                             }
 
@@ -1242,7 +1217,8 @@ fun HistoryScreen(
                                                     }
                                             },
                                             modifier =
-                                                Modifier.size(24.dp)
+                                                Modifier.size(24.dp),
+                                            colors = uvirCheckboxColors()
                                         )
                                     }
 

@@ -5,7 +5,6 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -24,12 +23,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.TextStyle
@@ -63,15 +59,26 @@ internal fun uvirHomeStatusTextRes(
     sensorActivityInProgress: Boolean,
     statusIsLive: Boolean,
     statusIsInitializing: Boolean,
-    statusIsSearching: Boolean
+    statusIsSearching: Boolean,
+    hasAssociatedSensors: Boolean = true
 ): Int =
     when {
-        useFakeSensorData -> R.string.sensor_status_connected
+        useFakeSensorData -> R.string.sensor_status_simulated
+        !hasAssociatedSensors -> R.string.sensor_status_no_associated_sensor
         sensorActivityInProgress -> R.string.sensor_info_activity
         statusIsLive -> R.string.sensor_status_connected
         statusIsInitializing -> R.string.sensor_info_connecting
         statusIsSearching -> R.string.sensor_info_searching
         else -> R.string.sensor_status_no_sensor
+    }
+
+internal fun uvirHomeStatusIconType(
+    useFakeSensorData: Boolean,
+    connectionMode: SensorConnectionMode
+): ConnectivityIconType =
+    when {
+        useFakeSensorData -> ConnectivityIconType.DEBUG
+        else -> uvirSensorConnectionIconType(connectionMode)
     }
 
 internal enum class UvirStatusDot(val glyph: String, val colorArgb: Int) {
@@ -196,9 +203,10 @@ internal fun UvirHomeHeader(
     sensorSourceEnabled: Boolean = true,
     sensorStatusIndicators: Map<String, UvirStatusIndicator> = emptyMap(),
     sensorAlertMonitoringDeviceIds: Set<String> = emptySet(),
-    sensorDialogColor: Color = MaterialTheme.colorScheme.surface
+    sensorDialogColor: Color = MaterialTheme.colorScheme.surface,
+    onOpenSimulationSettings: () -> Unit = {},
+    onAddSensor: () -> Unit = {}
 ) {
-    val versionInteractionSource = remember { MutableInteractionSource() }
     val selectedConnectionIsConnected =
         if (sensorConnectionMode == SensorConnectionMode.USB) {
             usbSensorStatus == UsbSensorConnectionStatus.CONNECTED
@@ -233,14 +241,15 @@ internal fun UvirHomeHeader(
             sensorConnectionMode != SensorConnectionMode.USB &&
             wirelessSensorMode == sensorConnectionMode &&
             wirelessSensorStatus == WirelessSensorConnectionStatus.CONNECTING
-    val statusTextRes =
-        uvirHomeStatusTextRes(
-            useFakeSensorData = useFakeSensorData,
-            sensorActivityInProgress = sensorActivityInProgress,
-            statusIsLive = statusIsLive,
-            statusIsInitializing = statusIsInitializing,
-            statusIsSearching = statusIsSearching
-        )
+    val noAssociatedSensor = !useFakeSensorData && sensorProfiles.isEmpty()
+    val statusTextRes = uvirHomeStatusTextRes(
+        useFakeSensorData = useFakeSensorData,
+        sensorActivityInProgress = sensorActivityInProgress,
+        statusIsLive = statusIsLive,
+        statusIsInitializing = statusIsInitializing,
+        statusIsSearching = statusIsSearching,
+        hasAssociatedSensors = sensorProfiles.isNotEmpty()
+    )
     val currentOnActivityInProgressChanged by rememberUpdatedState(onActivityInProgressChanged)
     LaunchedEffect(sensorActivityInProgress) {
         currentOnActivityInProgressChanged(sensorActivityInProgress)
@@ -263,65 +272,46 @@ internal fun UvirHomeHeader(
         ),
         label = "homeStatusDotAlpha"
     )
-    val statusDotPulses = statusIndicator.pulses
+    val statusDotPulses = !noAssociatedSensor && statusIndicator.pulses
     // Show the user's current choice even offline; history must not hide a mode change.
     val displayedMode = sensorConnectionMode
-    val connectionLabel = stringResource(uvirSensorConnectionLabelRes(displayedMode))
+    val statusIconType = uvirHomeStatusIconType(useFakeSensorData, displayedMode)
+    val connectionLabel = stringResource(
+        if (useFakeSensorData) R.string.sensor_source_debug_accessibility
+        else uvirSensorConnectionLabelRes(displayedMode)
+    )
+    val statusSensorLabel =
+        if (useFakeSensorData || sensorProfiles.isEmpty() || selectedSensorDeviceId.isBlank()) {
+            stringResource(R.string.sensor_no_selection)
+        } else sensorDisplayName.ifBlank { stringResource(R.string.sensor_no_selection) }
+    val statusTransportDescription =
+        if (!useFakeSensorData && sensorProfiles.isEmpty()) "" else ", " + connectionLabel
 
     Box(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .padding(top = 10.dp)
     ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-            Box(
-                modifier = Modifier
-                    .size(46.dp)
-                    .clip(RoundedCornerShape(13.dp))
-                    .testTag("home_info_logo")
-                    .clickable(
-                        interactionSource = versionInteractionSource,
-                        indication = null,
-                        onClick = onOpenVersionInfo
-                    )
-                    .uvirAccessibleAction(
-                        label = versionInfoDescription,
-                        onClick = onOpenVersionInfo
-                    )
-            ) {
-                Image(
-                    painter = painterResource(R.drawable.uvir_logo),
-                    modifier = Modifier.fillMaxSize(),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop
-                )
-                Text(
-                text = BuildConfig.VERSION_NAME,
-                modifier = Modifier.align(Alignment.BottomCenter)
-                    .padding(bottom = 1.dp).testTag("home_info_version"),
-                color = Color.White,
-                fontSize = 8.sp,
-                lineHeight = 9.sp,
-                maxLines = 1,
-                softWrap = false
-                )
-            }
+        UvirHomeInfoLogo(versionInfoDescription, onOpenVersionInfo)
 
         Spacer(Modifier.width(12.dp))
 
         Column(modifier = Modifier.weight(1f)) {
             UvirSensorSelector(
                 sensorDisplayName = sensorDisplayName,
+                simulationActive = useFakeSensorData,
+                onOpenSimulationSettings = onOpenSimulationSettings,
+                onAddSensor = onAddSensor,
                 sensorSelectionEnabled = sensorSelectionEnabled,
                 sensorInfoEnabled = selectedConnectionIsConfirmed && !useFakeSensorData && selectedSensorDeviceId.isNotBlank(),
                 sensorProfiles = sensorProfiles,
                 sensorConnectionModes = sensorConnectionModes,
                 sensorStatusIndicators = uvirSensorSelectionIndicators(
-                    selectedSensorDeviceId, statusIndicator, sensorStatusIndicators),
+                    if (useFakeSensorData) "" else selectedSensorDeviceId, statusIndicator, sensorStatusIndicators),
                 statusPulseAlpha = activityDotAlpha,
                 alertMonitoringDeviceIds = sensorAlertMonitoringDeviceIds,
                 dialogColor = sensorDialogColor,
@@ -352,15 +342,19 @@ internal fun UvirHomeHeader(
                         )
                         .uvirNestedAccessibleAction(
                             label = stringResource(R.string.sensor_selection_title) + ": " +
-                                sensorDisplayName.ifBlank { stringResource(R.string.sensor_no_selection) } + ", " + connectionLabel + ", " + stringResource(statusTextRes),
+                                statusSensorLabel + statusTransportDescription + ", " + stringResource(statusTextRes),
                             enabled = sensorSelectionEnabled,
                             onClick = { onSensorSelectionExpandedChange(true) }
                         ),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                UvirConnectionLabel(
+                if (noAssociatedSensor) {
+                    Text(stringResource(statusTextRes), color = secondaryText, fontSize = 11.sp,
+                        maxLines = 1, softWrap = false,
+                        modifier = Modifier.weight(1f).testTag("home_sensor_status_text"))
+                } else UvirConnectionLabel(
                     text = stringResource(statusTextRes),
-                    type = uvirSensorConnectionIconType(displayedMode),
+                    type = statusIconType,
                     iconColor = statusIndicatorColor,
                     textColor = secondaryText,
                     iconSize = UvirHomeStatusConnectionIconSize,
@@ -376,12 +370,11 @@ internal fun UvirHomeHeader(
         }
 
         Spacer(Modifier.width(UvirHomeHeaderActionGap))
-        val settingsIconColor = MaterialTheme.colorScheme.primary
         UvirHomeHeaderActionButton(
             contentDescription = stringResource(R.string.acquisition_parameters),
             onClick = onOpenSettings
         ) {
-            UvirHomeSettingsIcon(tint = settingsIconColor)
+            UvirHomeSettingsIcon(tint = primaryText)
         }
     }
     }
@@ -515,6 +508,7 @@ internal fun UvirHomeMenuBar(
                 secondaryText = secondaryText,
                 modifier = Modifier.weight(1f)
             )
+
         }
     }
 }
@@ -523,7 +517,8 @@ internal fun UvirHomeMenuBar(
 internal fun UvirDisconnectedSensorIsland(
     cardColor: Color,
     primaryText: Color,
-    secondaryText: Color
+    secondaryText: Color,
+    onAddSensor: () -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -572,15 +567,12 @@ internal fun UvirDisconnectedSensorIsland(
                     lineHeight = 18.sp,
                     textAlign = TextAlign.Center
                 )
-                Text(
-                    text =
-                        stringResource(
-                            R.string.home_sensor_disconnected_hint
-                        ),
-                    color = secondaryText,
-                    fontSize = 12.sp,
-                    lineHeight = 17.sp,
-                    textAlign = TextAlign.Center
+                UvirAddSensorAction(
+                    onClick = onAddSensor,
+                    primaryText = primaryText,
+                    secondaryText = secondaryText,
+                    centered = true,
+                    modifier = Modifier.testTag("disconnected_add_sensor")
                 )
             }
         }

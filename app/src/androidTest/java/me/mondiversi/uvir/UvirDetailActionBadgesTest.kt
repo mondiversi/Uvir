@@ -31,6 +31,7 @@ class UvirDetailActionBadgesTest : SessionNoteEditingFixture() {
         val night = mutableStateOf(false)
         val rtl = mutableStateOf(false)
         var purple = Color.Unspecified
+        var neutral = Color.Unspecified
         var red = Color.Unspecified
         var background = Color.Unspecified
         compose.setContent {
@@ -44,6 +45,7 @@ class UvirDetailActionBadgesTest : SessionNoteEditingFixture() {
                     UvirActionTheme {
                         val colors = MaterialTheme.colorScheme
                         purple = colors.primary
+                        neutral = uvirTitleActionColor()
                         red = UvirDestructiveActionColor
                         background = colors.background
                         when (screen) {
@@ -82,8 +84,8 @@ class UvirDetailActionBadgesTest : SessionNoteEditingFixture() {
         for (dark in listOf(false, true)) for (rightToLeft in listOf(false, true)) {
             compose.runOnIdle { night.value = dark; rtl.value = rightToLeft }
             compose.waitForIdle()
-            assertCompactBack(purple, background)
-            assertBadge(context.getString(shareRes), purple, background)
+            assertCompactBack(neutral, background)
+            assertBadge(context.getString(shareRes), neutral, background)
             if (screen < 6) {
                 assertBadge(context.getString(if (screen >= 4) R.string.delete_all else R.string.delete), red, background)
             }
@@ -92,7 +94,7 @@ class UvirDetailActionBadgesTest : SessionNoteEditingFixture() {
                 compose.onNodeWithTag("session-cycle-filter-toggle").assertIsSelected()
             }
             if (screen == 4 || screen == 5) {
-                assertBadge(context.getString(R.string.list_filters), purple, background)
+                assertBadge(context.getString(R.string.list_filters), neutral, background)
                 compose.onNodeWithTag("list-filter-toggle").performSemanticsAction(
                     androidx.compose.ui.semantics.SemanticsActions.OnClick) { it() }
                 compose.onNodeWithContentDescription(context.getString(R.string.navigate_back)).performSemanticsAction(
@@ -100,7 +102,7 @@ class UvirDetailActionBadgesTest : SessionNoteEditingFixture() {
                 // Compare the resting palette after the pressed ripple has faded.
                 compose.mainClock.advanceTimeBy(600L)
                 compose.waitForIdle()
-                assertBadge(context.getString(R.string.list_filters), purple, background)
+                assertBadge(context.getString(R.string.list_filters), neutral, background)
             }
             if (screen == 7) {
                 // Activate without a pointer ripple: this test compares the resting palette.
@@ -111,7 +113,7 @@ class UvirDetailActionBadgesTest : SessionNoteEditingFixture() {
                     androidx.compose.ui.semantics.SemanticsActions.OnClick) { it() }
                 compose.mainClock.advanceTimeBy(600L)
                 compose.waitForIdle()
-                assertBadge(context.getString(R.string.export), purple, background)
+                assertBadge(context.getString(R.string.export), neutral, background)
             }
         }
     }

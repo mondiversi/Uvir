@@ -144,7 +144,7 @@ def main() -> None:
          ("U1.GPIO33", "GPIO33 / EXT LOW (J2-8)", "J2-8")],
     )
     symbol(
-        "U2", "GY-AS7343 VISIBLE/NIR", 900, 260, 230,
+        "U2", "GY-AS734X (AS7343)", 900, 260, 230,
         [("U2.VCC", "VCC", "VCC"), ("U2.SDA", "SDA", "SDA"),
          ("U2.SCL", "SCL", "SCL")],
         [("U2.GND", "GND", "GND")],

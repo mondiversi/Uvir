@@ -5,7 +5,6 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -35,6 +34,7 @@ internal fun UvirSensorSelectionDialog(
     connectedSensorDeviceId: String = "",
     onSensorInfoRequested: (String) -> Unit = {}
 ) {
+    val noSensorLabel = stringResource(R.string.sensor_no_selection)
     UvirActionTheme {
     UvirAlertDialog(
         onDismissRequest = onDismissRequest,
@@ -45,15 +45,10 @@ internal fun UvirSensorSelectionDialog(
                     Modifier.fillMaxWidth()
                         .selectableGroup().testTag("sensor_profile_menu")
                 ) {
-                    SensorSelectionRow(
-                        name = stringResource(R.string.sensor_no_selection), activity = null,
-                        selected = selectedSensorDeviceId.isBlank(), enabled = enabled,
-                        primaryText = primaryText, secondaryText = secondaryText,
-                        description = stringResource(R.string.sensor_no_selection),
-                        onClick = {
-                            if (selectedSensorDeviceId.isNotBlank()) onSensorSelected(NO_SENSOR_SELECTED_REQUEST)
-                        }
-                    )
+                    if (sensorProfiles.isEmpty()) {
+                        Text("—", color = primaryText,
+                            modifier = Modifier.semantics { contentDescription = noSensorLabel })
+                    }
                     sensorProfiles.sortedBy { it.displayName.lowercase() }.forEach { profile ->
                         val selected = profile.hardwareUid.equals(selectedSensorDeviceId, ignoreCase = true)
                         SensorSelectionRow(
@@ -106,8 +101,8 @@ private fun SensorSelectionRow(
             verticalAlignment = Alignment.CenterVertically
         ) {
             RadioButton(selected = selected, onClick = null, enabled = enabled,
-                colors = RadioButtonDefaults.colors(
-                    selectedColor = MaterialTheme.colorScheme.primary, unselectedColor = secondaryText,
+                colors = uvirRadioButtonColors(
+                    unselectedColor = secondaryText,
                     disabledSelectedColor = secondaryText.copy(alpha = 0.42f),
                     disabledUnselectedColor = secondaryText.copy(alpha = 0.42f)
                 ))

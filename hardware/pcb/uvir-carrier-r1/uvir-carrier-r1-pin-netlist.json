@@ -44,7 +44,7 @@
     },
     {
       "ref": "U2",
-      "model": "GY-AS7343 visible/NIR breakout",
+      "model": "GY-AS734X visible/NIR breakout (AS7343)",
       "side": "front",
       "approx_size_mm": {"width": 22, "height": 13},
       "mount": "removable female socket; verify the actual header's pin count/order before footprint selection",

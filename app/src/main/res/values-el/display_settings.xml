@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_section_display">Προβολή</string>
+    <string name="settings_display_description">Προσάρμοσε τη διεπαφή στο μέγεθος της οθόνης.</string>
+    <string name="notifications_misc_title">Διάφορα</string>
+    <string name="notifications_misc_description">Διαχείριση άλλων ειδοποιήσεων της εφαρμογής.</string>
+    <string name="rtc_battery_notification_toggle">Εμφάνιση προειδοποίησης μπαταρίας κατά την εκκίνηση</string>
+    <string name="rtc_battery_notification_description">Ειδοποίηση αν έχει σταματήσει το ρολόι ενός αισθητήρα.</string>
+    <string name="settings_mode_small_screen">Μικρή οθόνη</string>
+    <string name="settings_mode_small_screen_active">Λειτουργία μικρής οθόνης</string>
+    <string name="settings_mode_large_screen">Μεγάλη οθόνη</string>
+    <string name="settings_mode_large_screen_unavailable">Η λειτουργία μεγάλης οθόνης δεν είναι ακόμη διαθέσιμη.</string>
+    <string name="rtc_clock_warning_show_each_launch">Εμφάνιση σε κάθε εκκίνηση</string>
+    <string name="settings_theme_title">Θέμα</string>
+    <string name="settings_theme_description">Επίλεξε το θέμα της εφαρμογής για να προσαρμόσεις την εμφάνιση του περιεχομένου.</string>
+    <string name="settings_theme_default">Προεπιλογή</string>
+    <string name="settings_theme_light">Φωτεινό</string>
+    <string name="settings_theme_dark">Σκοτεινό</string>
+    <string name="settings_display_unavailable">Αυτή η λειτουργία δεν είναι ακόμη διαθέσιμη.</string>
+</resources>

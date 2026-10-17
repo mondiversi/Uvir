@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rtc_clock_warning_title_single">Comprobar la pila del reloj</string>
+    <string name="rtc_clock_warning_title_multiple">Comprobar las pilas de los relojes</string>
+    <string name="rtc_clock_warning_message_single">El reloj del sensor \"%1$s\" ha indicado una detención. La pila podría estar agotada o mal conectada. Compruébala y sustitúyela si es necesario.</string>
+    <string name="rtc_clock_warning_message_multiple">Los siguientes sensores han indicado una detención del reloj:</string>
+    <string name="rtc_clock_warning_batteries_guidance">Las pilas podrían estar agotadas o mal conectadas. Compruébalas y sustitúyelas si es necesario.</string>
+</resources>

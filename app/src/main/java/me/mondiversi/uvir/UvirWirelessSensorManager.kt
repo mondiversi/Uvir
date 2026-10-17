@@ -1432,6 +1432,8 @@ class UvirWirelessSensorManager(
                     uvAvailable = json.optBoolean("uv_available", false),
                     error = null
                 )
+                // Preserve the accepted device's OSF before TIME clears it; no cached UI state.
+                UvirSensorEventHub.emitRtcClock(credentials.deviceId, json)
                 if (
                     desiredSampling &&
                     !offlineSyncRequested &&

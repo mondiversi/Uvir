@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_section_display">Affichage</string>
+    <string name="settings_display_description">Adapte l’interface à la taille de l’écran.</string>
+    <string name="notifications_misc_title">Divers</string>
+    <string name="notifications_misc_description">Gérez les autres notifications de l’application.</string>
+    <string name="rtc_battery_notification_toggle">Afficher l’avertissement de batterie au démarrage</string>
+    <string name="rtc_battery_notification_description">Avertir si l’horloge d’un capteur s’est arrêtée.</string>
+    <string name="settings_mode_small_screen">Petit écran</string>
+    <string name="settings_mode_small_screen_active">Mode petit écran</string>
+    <string name="settings_mode_large_screen">Grand écran</string>
+    <string name="settings_mode_large_screen_unavailable">Le mode grand écran n’est pas encore disponible.</string>
+    <string name="rtc_clock_warning_show_each_launch">Afficher à chaque démarrage</string>
+    <string name="settings_theme_title">Thème</string>
+    <string name="settings_theme_description">Choisis le thème de l’application pour personnaliser l’apparence du contenu.</string>
+    <string name="settings_theme_default">Par défaut</string>
+    <string name="settings_theme_light">Clair</string>
+    <string name="settings_theme_dark">Sombre</string>
+    <string name="settings_display_unavailable">Cette fonctionnalité n’est pas encore disponible.</string>
+</resources>

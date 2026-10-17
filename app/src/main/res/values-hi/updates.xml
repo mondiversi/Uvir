@@ -6,7 +6,7 @@
     <string name="update_app">ऐप अपडेट करें</string>
     <string name="update_sensor">सेंसर अपडेट करें</string>
     <string name="update_app_first">पहले ऐप अपडेट करें।</string>
-    <string name="update_usb_required">यह सेंसर चुनें और USB से जोड़ें। कोई सक्रिय सत्र न हो और सभी रिकॉर्ड सिंक हों।</string>
+    <string name="update_usb_required">सेंसर चुनें और USB से जोड़ें। कोई सक्रिय सत्र न हो और सभी रिकॉर्ड सिंक हों।</string>
     <string name="update_download">डाउनलोड और सत्यापन…</string>
     <string name="update_flash">सेंसर अपडेट हो रहा है…</string>
     <string name="update_verify">सेंसर सत्यापन…</string>

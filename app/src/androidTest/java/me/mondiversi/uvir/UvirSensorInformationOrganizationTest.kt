@@ -40,7 +40,7 @@ class UvirSensorInformationOrganizationTest {
 
     @Test fun identityHardwareComponentsAndClockRemainSeparateInEveryLanguage() {
         for (language in listOf("en", "it", "ar", "de", "el", "es", "fa", "fr", "hi",
-            "he", "ja", "ko-KR", "pt", "ru", "sw", "tr", "zh-CN")) {
+            "he", "ja", "ko-KR", "pt", "ru", "sw", "pl", "nl", "id", "tr", "zh-CN")) {
             val res = resources(language)
             val clock = listOf(res.getString(R.string.sensor_info_clock_status) to
                 res.getString(R.string.sensor_info_valid))

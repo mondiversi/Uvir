@@ -87,8 +87,9 @@ class UvirVisibleSensor {
   static constexpr uint16_t kAstep = 999;
   static constexpr uint16_t kSaturationThreshold = 9200;
   static constexpr uint16_t kLowSignalThreshold = 250;
-  static constexpr int kDefaultGainIndex = 4;
-  static constexpr int kMaximumGainIndex = 6;
+  static constexpr int kDefaultGainIndex = 9;  // Preserve the 256x startup gain.
+  static constexpr int kMaximumGainIndex = 11;
+  static constexpr uint8_t kMaximumGainAttempts = 3;
 
   SfeAS7343ArdI2C sensor_;
   TwoWire *wire_ = nullptr;
@@ -97,14 +98,19 @@ class UvirVisibleSensor {
   int gainIndex_ = kDefaultGainIndex;
   bool available_ = false;
 
-  const sfe_as7343_again_t kGainSettings[7] = {
+  const sfe_as7343_again_t kGainSettings[12] = {
+      AGAIN_0_5, AGAIN_1, AGAIN_2, AGAIN_4, AGAIN_8,
       AGAIN_16, AGAIN_32, AGAIN_64, AGAIN_128,
       AGAIN_256, AGAIN_512, AGAIN_1024,
   };
-  const float kGainValues[7] = {
+  const float kGainValues[12] = {
+      0.5f, 1.0f, 2.0f, 4.0f, 8.0f,
       16.0f, 32.0f, 64.0f, 128.0f, 256.0f, 512.0f, 1024.0f,
   };
-  const float kGainCalibrationRatios[7] = {
+  // AS7343 datasheet optical gain ratios, relative to 64x. The published
+  // 0.5x..16x ratios are scaled by 1000 for readability in its table.
+  const float kGainCalibrationRatios[12] = {
+      0.0079f, 0.0158f, 0.0316f, 0.064f, 0.124f,
       0.247f, 0.5f, 1.0f, 2.0f, 4.1f, 8.6f, 16.9f,
   };
 
@@ -166,10 +172,13 @@ class UvirVisibleSensor {
   }
 
   bool acquireWithAutomaticGain(bool &saturated) {
-    for (uint8_t attempt = 0; attempt < 3; ++attempt) {
+    for (uint8_t attempt = 0; attempt < kMaximumGainAttempts; ++attempt) {
       if (!readOnce()) return false;
       const uint16_t maximum = maximumSpectralCount();
       saturated = maximum >= kSaturationThreshold;
+      // Never normalize an existing sample using the next, unmeasured gain.
+      // Further adjustment can happen in the next capture if needed.
+      if (attempt + 1 >= kMaximumGainAttempts) return true;
       if (saturated && gainIndex_ > 0) {
         --gainIndex_;
         continue;

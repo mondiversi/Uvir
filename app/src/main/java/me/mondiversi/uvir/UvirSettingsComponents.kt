@@ -13,7 +13,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
-import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,6 +37,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
+
+internal val UvirSettingsCheckboxLineHeight = 18.sp
 
 internal val UvirSettingsChoiceSpacing = 2.dp
 internal val UvirSettingsChoiceVerticalPadding = 6.dp
@@ -64,10 +65,28 @@ internal fun SettingsPageDescription(
 }
 
 @Composable
-internal fun SettingsGroupDivider(
-    color: Color
+internal fun UvirIslandHeaderDivider(
+    color: Color,
+    modifier: Modifier = Modifier
 ) {
-    HorizontalDivider(color = color.copy(alpha = 0.20f))
+    if (UvirIslandHeaderDividersVisible) {
+        HorizontalDivider(
+            modifier = modifier,
+            color = color,
+            thickness = UvirIslandHeaderDividerThickness
+        )
+    } else {
+        // Hide only the line in this trial, preserving header/content spacing.
+        Spacer(modifier.fillMaxWidth().height(UvirIslandHeaderDividerThickness))
+    }
+}
+
+@Composable
+internal fun SettingsGroupDivider(
+    color: Color,
+    thickness: Dp = 1.dp
+) {
+    HorizontalDivider(color = color.copy(alpha = 0.20f), thickness = thickness)
 }
 
 @Composable
@@ -138,9 +157,7 @@ internal fun SettingsRadioChoiceRow(
                     enabled = enabled,
                     modifier = Modifier.size(24.dp),
                     colors =
-                        RadioButtonDefaults.colors(
-                            selectedColor =
-                                MaterialTheme.colorScheme.primary,
+                        uvirRadioButtonColors(
                             unselectedColor = secondaryText,
                             disabledSelectedColor = secondaryText.copy(alpha = 0.62f),
                             disabledUnselectedColor = secondaryText.copy(alpha = 0.62f)
@@ -160,6 +177,8 @@ enum class UvirSettingsPage {
     SENSOR_CONNECTION,
     SENSOR_PARAMETERS,
     SENSOR_MEASUREMENT,
+    DISPLAY,
+    APPEARANCE,
     ALERTS,
     LANGUAGE,
     LANGUAGE_AND_FORMATS,
@@ -225,7 +244,7 @@ internal fun SettingsIslandHeader(
         }
         Text(title, color = tint, fontSize = 15.sp, fontWeight = FontWeight.Bold)
     }
-    SettingsGroupDivider(dividerColor)
+    UvirIslandHeaderDivider(dividerColor.copy(alpha = 0.20f))
 }
 
 @Composable
@@ -288,11 +307,12 @@ fun SettingsSection(
                     ) {
                         if (!enabled) disabledNotice?.invoke()
                         CompositionLocalProvider(LocalUvirSettingsNavigation provides null) {
-                            Column(
+                            UvirIslandColumns(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .alpha(if (enabled || !dimContentWhenDisabled) 1f else 0.48f),
-                                verticalArrangement = Arrangement.spacedBy(contentSpacing),
+                                spacing = contentSpacing,
+                                twoColumnsEnabled = !wrapDetailContent,
                                 content = content
                             )
                         }
@@ -429,7 +449,8 @@ fun SettingsSection(
                     CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 0.dp) {
                         Checkbox(checked = expanded, onCheckedChange = null,
                             enabled = headerEnabled,
-                            modifier = Modifier.size(24.dp))
+                            modifier = Modifier.size(24.dp),
+                            colors = uvirCheckboxColors())
                     }
                     Spacer(Modifier.width(6.dp))
                 }
@@ -438,6 +459,8 @@ fun SettingsSection(
                     text = title,
                     modifier = Modifier.weight(1f),
                     fontSize = titleFontSize,
+                    lineHeight = if (headerControl == UvirSettingsHeaderControl.CHECKBOX)
+                        UvirSettingsCheckboxLineHeight else TextUnit.Unspecified,
                     fontWeight = if (headerControl == UvirSettingsHeaderControl.CHECKBOX && !expanded)
                         FontWeight.Normal else FontWeight.Bold,
                     color = displayedTitleColor
@@ -467,7 +490,7 @@ fun SettingsSection(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     if (showExpandedDivider) {
-                        HorizontalDivider(
+                        UvirIslandHeaderDivider(
                             modifier =
                                 Modifier.padding(
                                     horizontal = UvirIslandContentPadding
@@ -522,6 +545,7 @@ internal fun UvirSettingsListGroupHeader(
         modifier =
             Modifier
                 .fillMaxWidth()
+                .uvirIslandFullWidth()
                 .padding(horizontal = 8.dp, vertical = 2.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically

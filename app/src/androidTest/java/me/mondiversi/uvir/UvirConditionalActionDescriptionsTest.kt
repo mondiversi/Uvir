@@ -114,7 +114,7 @@ class UvirConditionalActionDescriptionsTest {
     }
 
     @Test fun everySupportedLanguageContainsTheFourExplanations() {
-        for (tag in listOf("en","it","es","fr","pt","de","ar","he","fa","ru","tr","el","hi","ja","zh-CN","ko-KR","sw")) {
+        for (tag in listOf("en","it","es","fr","pt","de","ar","he","fa","ru","tr","el","hi","ja","zh-CN","ko-KR","sw", "pl", "nl", "id")) {
             val configuration = Configuration(context.resources.configuration)
             configuration.setLocales(LocaleList.forLanguageTags(tag))
             val localized = context.createConfigurationContext(configuration)

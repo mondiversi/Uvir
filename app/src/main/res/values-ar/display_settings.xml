@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_section_display">العرض</string>
+    <string name="settings_display_description">اضبط الواجهة حسب حجم الشاشة.</string>
+    <string name="notifications_misc_title">متفرقات</string>
+    <string name="notifications_misc_description">إدارة الإشعارات الأخرى التي يعرضها التطبيق.</string>
+    <string name="rtc_battery_notification_toggle">إظهار تنبيه البطارية عند بدء التشغيل</string>
+    <string name="rtc_battery_notification_description">التنبيه إذا توقفت ساعة أحد المستشعرات.</string>
+    <string name="settings_mode_small_screen">شاشة صغيرة</string>
+    <string name="settings_mode_small_screen_active">وضع الشاشة الصغيرة</string>
+    <string name="settings_mode_large_screen">شاشة كبيرة</string>
+    <string name="settings_mode_large_screen_unavailable">وضع الشاشة الكبيرة غير متاح بعد.</string>
+    <string name="rtc_clock_warning_show_each_launch">الإظهار عند كل تشغيل</string>
+    <string name="settings_theme_title">المظهر</string>
+    <string name="settings_theme_description">اختر مظهر التطبيق لتخصيص طريقة عرض المحتوى.</string>
+    <string name="settings_theme_default">افتراضي</string>
+    <string name="settings_theme_light">فاتح</string>
+    <string name="settings_theme_dark">داكن</string>
+    <string name="settings_display_unavailable">هذه الميزة غير متاحة بعد.</string>
+</resources>

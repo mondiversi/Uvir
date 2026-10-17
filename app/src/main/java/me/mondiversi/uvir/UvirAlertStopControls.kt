@@ -301,12 +301,14 @@ internal fun UvirStartAllAlertsDialog(
                             onCheckedChange = { checked ->
                                 onDoNotRecordChanged(checked)
                             },
-                            modifier = Modifier
+                            modifier = Modifier,
+                            colors = uvirCheckboxColors()
                         )
                         Text(
                             text = stringResource(R.string.alert_session_do_not_record),
                             color = primaryText,
-                            fontSize = 14.sp
+                            fontSize = 14.sp,
+                            lineHeight = UvirSettingsCheckboxLineHeight
                         )
                     }
                     Text(

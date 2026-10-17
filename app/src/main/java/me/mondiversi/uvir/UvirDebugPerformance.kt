@@ -15,7 +15,6 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
-import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -23,6 +22,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
@@ -45,7 +45,7 @@ import kotlinx.coroutines.withContext
 
 private const val DEBUG_PERFORMANCE_MINIMUM_FIRMWARE = "0.5.64"
 private const val DEBUG_PERFORMANCE_COMPLETION_GRACE_MS = 1_000L
-private const val DEBUG_SECRET_MELODY_HOLD_MS = 2_000L
+internal const val DEBUG_SECRET_MELODY_HOLD_MS = 3_000L
 
 internal enum class UvirDebugPerformance(
     val displayName: String,
@@ -101,7 +101,7 @@ internal fun UvirDebugPerformanceContent(
     }
     var playbackJob by remember { mutableStateOf<Job?>(null) }
     var observedCompletionToken by remember {
-        mutableStateOf(completionToken)
+        mutableLongStateOf(completionToken)
     }
     val playing = playbackJob?.isActive == true
     val playbackEnabled = sensorConnected && enabled && firmwareSupported
@@ -243,8 +243,7 @@ internal fun UvirDebugPerformanceContent(
                         enabled = selectorEnabled,
                         modifier = Modifier.size(24.dp),
                         colors =
-                            RadioButtonDefaults.colors(
-                                selectedColor = MaterialTheme.colorScheme.primary,
+                            uvirRadioButtonColors(
                                 unselectedColor = contentSecondaryText,
                                 disabledSelectedColor = contentSecondaryText,
                                 disabledUnselectedColor = contentSecondaryText

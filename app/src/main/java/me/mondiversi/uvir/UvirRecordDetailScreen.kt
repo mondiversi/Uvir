@@ -409,10 +409,16 @@ fun RecordDetailScreen(
         )
     }
 
-    Scaffold(
-        containerColor =
-            backgroundColor,
-
+    UvirMeasurementScaffold(
+        state = detailListState,
+        containerColor = backgroundColor,
+        scrollbarColor = secondaryText.copy(alpha = 0.46f),
+        contentPadding = PaddingValues(
+                    start = UvirScreenHorizontalPadding,
+                    end = UvirScreenHorizontalPadding,
+                    top = 4.dp,
+                    bottom = 40.dp
+                ),
         topBar = {
             UvirCollapsingDetailTitleBar(detailListState) {
                 Surface(
@@ -439,7 +445,6 @@ fun RecordDetailScreen(
                     )
 
                     UvirTitleActionButton(
-                        iconColor = MaterialTheme.colorScheme.primary,
                         contentDescription = shareDescription,
                         onClick = {
                             showShareFormatDialog = true
@@ -480,40 +485,9 @@ fun RecordDetailScreen(
                     }
                 }
             }
+
         }
-    ) { paddingValues ->
-
-        LazyColumn(
-            state =
-                detailListState,
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(
-                        paddingValues
-                    )
-                    .lazyScrollbarOverlay(
-                        state =
-                            detailListState,
-                        color =
-                            secondaryText.copy(
-                                alpha = 0.46f
-                            )
-                    ),
-
-            contentPadding =
-                PaddingValues(
-                    start = UvirScreenHorizontalPadding,
-                    end = UvirScreenHorizontalPadding,
-                    top = 4.dp,
-                    bottom = 40.dp
-                ),
-
-            verticalArrangement =
-                Arrangement.spacedBy(
-                    UvirIslandSpacing
-                )
-        ) {
+    ) {
 
             item {
 
@@ -644,6 +618,6 @@ fun RecordDetailScreen(
                     )
                 }
             }
-        }
+
     }
 }

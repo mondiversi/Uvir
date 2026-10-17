@@ -70,6 +70,72 @@ class UvirMultiSensorPersistenceTest {
     private fun count(table: String): Int = database.readableDatabase.rawQuery("SELECT COUNT(*) FROM $table", null)
         .use { it.moveToFirst(); it.getInt(0) }
 
+    @Test fun aProfileIsAlwaysSelectedUntilEveryAssociationIsRemoved() {
+        assertTrue(UvirSensorCredentialStore.activateAssociatedSensor(context, b.deviceId))
+        assertEquals("test-b", UvirSensorCredentialStore.ensureAssociatedSensorSelected(context))
+        assertTrue(UvirSensorCredentialStore.deactivateSensorSelection(context))
+        val preferences = context.getSharedPreferences(PREFS_NAME, 0)
+        preferences.edit().putString(sensorContextPreferenceKey(a.deviceId, KEY_SENSOR_CONNECTION_MODE), "WIFI").commit()
+        assertEquals("test-a", UvirSensorCredentialStore.ensureAssociatedSensorSelected(context))
+        assertFalse(UvirSensorCredentialStore.isSensorSelectionDisabled(context))
+        assertEquals("WIFI", preferences.getString(KEY_SENSOR_CONNECTION_MODE, ""))
+        assertTrue(UvirSensorCredentialStore.disassociate(context))
+        assertEquals("test-b", UvirSensorCredentialStore.ensureAssociatedSensorSelected(context))
+        assertTrue(UvirSensorCredentialStore.disassociate(context))
+        assertEquals("", UvirSensorCredentialStore.ensureAssociatedSensorSelected(context))
+        assertEquals("—", homeSensorDisplayName("", UvirSensorCredentialStore.load(context).deviceId))
+    }
+
+    @Test fun recordsCreatedWithoutASensorKeepADashAfterAssociation() {
+        val id = database.saveAcquisition(SensorSample(uva = 10.0), "demo", false)
+        val violations = listOf(ThresholdAlertViolation(
+            ThresholdAlertRule(ThresholdAlertMetric.UVA, true, ThresholdAlertDirection.ABOVE, 1f), 10.0))
+        val alertId = database.insertThresholdAlertLog(violations)
+        database.repairKnownAlertSensorAssociations()
+        val record = database.readRecord(id)!!
+        assertNull(record.sensorId)
+        assertEquals("—", detailSensorDisplayName(record.sensorId?.let(database::findSensorProfile)))
+        val alert = database.readThresholdAlertLog().single { it.id == alertId }
+        assertNull(alert.sensorId)
+        assertEquals("—", detailSensorDisplayName(alert.sensorId?.let(database::findSensorProfile)))
+        val simulated = database.saveAcquisition(SensorSample(uva = 20.0), "demo", false, sensorDeviceId = a.deviceId)
+        val real = database.saveAcquisition(SensorSample(uva = 30.0), "real", false, sensorDeviceId = a.deviceId)
+        assertEquals(database.readRecord(real)!!.sensorId, database.readRecord(simulated)!!.sensorId)
+    }
+
+    @Test fun realManualSessionReceivesExternalEventsDuringSimulationWithoutJoiningDemoSession() = runBlocking {
+        val preferences = context.getSharedPreferences(PREFS_NAME, 0)
+        val realSession = database.nextSessionId()
+        database.saveAcquisition(SensorSample(), "real", false, sessionId = realSession,
+            sessionSequence = 1, sensorDeviceId = a.deviceId, timestamp = 1_699_999_999_000L)
+        preferences.edit().putLong(KEY_LAST_MANUAL_SESSION_ID, realSession).commit()
+        switchSimulationContext(preferences, a.deviceId, true)
+        val demoSession = database.nextSessionId()
+        database.startAcquisitionSession(demoSession, "demo", 1_699_999_999_000L, "")
+        preferences.edit().putLong(KEY_LAST_MANUAL_SESSION_ID, demoSession).commit()
+        val uid = selectedUiSensorDeviceId(preferences, UvirSensorCredentialStore.load(context).deviceId)
+        val demoRecord = database.saveAcquisition(SensorSample(uva = 5.0), "demo", false,
+            sessionId = demoSession, sessionSequence = 1, sensorDeviceId = uid)
+        persistence.handle(acquisition(a.deviceId, 101L))
+        persistence.handle(acquisition(b.deviceId, 102L))
+        assertNull(database.readRecord(demoRecord)!!.sensorId)
+        database.readableDatabase.rawQuery(
+            "SELECT acquisition.session_id FROM acquisitions acquisition " +
+                "JOIN sensors sensor ON sensor.id = acquisition.sensor_id " +
+                "WHERE acquisition.sensor_record_id = ? AND sensor.hardware_uid = ? COLLATE NOCASE",
+            arrayOf("101", normalizeSensorDeviceId(a.deviceId))).use {
+            assertTrue(it.moveToFirst()); assertEquals(realSession, it.getLong(0))
+        }
+        assertEquals(demoSession, preferences.getLong(KEY_LAST_MANUAL_SESSION_ID, 0L))
+        assertEquals(a.deviceId, UvirSensorCredentialStore.load(context).deviceId)
+        assertEquals(listOf(a.deviceId, b.deviceId), acknowledgements.map { it.first })
+        switchSimulationContext(preferences, a.deviceId, false)
+        assertEquals(realSession, preferences.getLong(KEY_LAST_MANUAL_SESSION_ID, 0L))
+        database.repairKnownAlertSensorAssociations()
+        assertNull(database.readRecord(demoRecord)!!.sensorId)
+        assertEquals("—", detailSensorDisplayName(null))
+    }
+
     @Test fun backgroundAlertCompletionClosesOnlyItsOwnSessionWithoutChangingSelection() {
         fun snapshot(session: Long, active: Boolean) = UvirSensorSettingsSnapshot(
             schemaVersion = 2, firmwareVersion = SENSOR_SETTINGS_SYNC_MIN_FIRMWARE,
@@ -225,10 +291,10 @@ class UvirMultiSensorPersistenceTest {
                     }
                     second.emitAcquisition(201L, sessionId = 701L)
                     withTimeout(5_000L) { while (database.acquisitionCountForSession(701L) != 1) delay(30L) }
-                    UvirSensorSimulationSettingsStore.setEnabled(prefs, a.deviceId, true)
+                    switchSimulationContext(prefs, a.deviceId, true)
                     UvirSensorSimulationSettingsStore.setOutOfRange(prefs, a.deviceId, true)
                     withTimeout(5_000L) {
-                        while (runtime.indicators.value[normalizeSensorDeviceId(a.deviceId)]?.dot != UvirStatusDot.DEBUG) delay(30L)
+                        while (runtime.indicators.value.values.count { it.dot == UvirStatusDot.GREEN } != 2) delay(30L)
                     }
                     second.emitAcquisition(202L, sessionId = 701L)
                     withTimeout(5_000L) {
@@ -239,9 +305,12 @@ class UvirMultiSensorPersistenceTest {
                     assertEquals(1, second.connections.get())
                     assertTrue(runtime.resources.value.active)
                     assertTrue(runtime.resources.value.wifiRequired)
-                    assertFalse(UvirSensorSimulationSettingsStore.load(prefs, b.deviceId).enabled)
+                    assertTrue(UvirSensorSimulationSettingsStore.load(prefs).enabled)
+                    assertEquals(UvirStatusDot.GREEN, runtime.indicators.value[normalizeSensorDeviceId(a.deviceId)]?.dot)
+                    assertEquals(1, first.connections.get())
                     assertTrue(prefs.getBoolean(sensorContextPreferenceKey(b.deviceId, KEY_AUTO_ENABLED), false))
                     assertEquals(701L, prefs.getLong(sensorContextPreferenceKey(b.deviceId, KEY_AUTO_SESSION_ID), 0L))
+                    switchSimulationContext(prefs, a.deviceId, false)
                     assertTrue(saveSelectedSensorContext(prefs, a.deviceId))
                     assertTrue(UvirSensorCredentialStore.activateAssociatedSensor(context, b.deviceId))
                     assertTrue(restoreSelectedSensorContext(prefs, b.deviceId))
@@ -259,21 +328,94 @@ class UvirMultiSensorPersistenceTest {
         }
     }
 
-    @Test fun encryptedAppBackupRestoresIndependentSimulationChoices() {
+    @Test fun encryptedAppBackupRestoresSeparateSimulationChoiceWithoutChangingRealAssociation() {
         val prefs = context.getSharedPreferences(PREFS_NAME, 0)
-        UvirSensorSimulationSettingsStore.setEnabled(prefs, a.deviceId, true)
+        prefs.edit().putLong(KEY_LAST_MANUAL_SESSION_ID, 42L).commit()
+        switchSimulationContext(prefs, a.deviceId, true)
         UvirSensorSimulationSettingsStore.setOutOfRange(prefs, a.deviceId, true)
-        UvirSensorSimulationSettingsStore.setEnabled(prefs, b.deviceId, false)
         val password = "simulation-backup-test".toCharArray()
         val file = createUvirAppSettingsBackup(context, password)
-        UvirSensorSimulationSettingsStore.setEnabled(prefs, a.deviceId, false)
+        switchSimulationContext(prefs, a.deviceId, false)
         UvirSensorSimulationSettingsStore.setOutOfRange(prefs, a.deviceId, false)
-        UvirSensorSimulationSettingsStore.setEnabled(prefs, b.deviceId, true)
         val imported = importUvirSettingsFiles(context, database, listOf(android.net.Uri.fromFile(file)), password)
         assertEquals(1, imported.importedAppFiles)
         assertEquals(UvirSensorSimulationSettings(true, true), UvirSensorSimulationSettingsStore.load(prefs, a.deviceId))
-        assertEquals(UvirSensorSimulationSettings(), UvirSensorSimulationSettingsStore.load(prefs, b.deviceId))
+        assertFalse(prefs.getBoolean(KEY_SIMULATION_CONTEXT_PREPARED, false))
         assertEquals(a.deviceId, UvirSensorCredentialStore.load(context).deviceId)
+        switchSimulationContext(prefs, a.deviceId, UvirSensorSimulationSettingsStore.load(prefs).enabled)
+        assertEquals("", selectedUiSensorDeviceId(prefs, a.deviceId))
+        assertEquals(0L, prefs.getLong(KEY_LAST_MANUAL_SESSION_ID, 0L))
+        switchSimulationContext(prefs, a.deviceId, false)
+        assertEquals(42L, prefs.getLong(KEY_LAST_MANUAL_SESSION_ID, 0L))
+    }
+
+    @Test fun feedbackDefaultsAreTwentyPercentAndStoredTenPercentSurvivesBackup() {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val password = "feedback-defaults-test".toCharArray()
+        val defaultBackup = createUvirSensorSettingsBackup(context, database, a.deviceId,
+            includeSensitiveInformation = true, encryptionPassword = password)
+        val defaultSettings = importUvirSettingsFiles(context, database,
+            listOf(android.net.Uri.fromFile(defaultBackup)), password).importedSensors.single().settings
+        assertEquals(20, defaultSettings.sensorParameters.statusLedBrightness)
+        assertEquals(20, defaultSettings.sensorParameters.statusBuzzerVolume)
+        assertEquals(20, prefs.getInt(KEY_SENSOR_STATUS_LED_BRIGHTNESS, -1))
+        assertEquals(20, prefs.getInt(KEY_SENSOR_STATUS_BUZZER_VOLUME, -1))
+
+        val stored = defaultSettings.copy(sensorParameters = defaultSettings.sensorParameters.copy(
+            statusLedBrightness = 10, statusBuzzerVolume = 10))
+        assertTrue(database.upsertSensorSettings(a.deviceId, stored))
+        prefs.edit().putInt(KEY_SENSOR_STATUS_LED_BRIGHTNESS, 10)
+            .putInt(KEY_SENSOR_STATUS_BUZZER_VOLUME, 10).commit()
+        val storedBackup = createUvirSensorSettingsBackup(context, database, a.deviceId,
+            includeSensitiveInformation = true, encryptionPassword = password)
+        prefs.edit().putInt(KEY_SENSOR_STATUS_LED_BRIGHTNESS, 73)
+            .putInt(KEY_SENSOR_STATUS_BUZZER_VOLUME, 73).commit()
+        val restored = importUvirSettingsFiles(context, database,
+            listOf(android.net.Uri.fromFile(storedBackup)), password).importedSensors.single().settings
+        assertEquals(10, restored.sensorParameters.statusLedBrightness)
+        assertEquals(10, restored.sensorParameters.statusBuzzerVolume)
+        assertEquals(10, prefs.getInt(KEY_SENSOR_STATUS_LED_BRIGHTNESS, -1))
+        assertEquals(10, prefs.getInt(KEY_SENSOR_STATUS_BUZZER_VOLUME, -1))
+    }
+
+    @Test fun singleAlertBeepSurvivesEncryptedSensorSettingsExportAndImport() {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        saveThresholdAlertSettings(prefs, loadThresholdAlertSettings(prefs).copy(
+            sound = ThresholdAlertSound.SINGLE_BEEP, volume = 60))
+        val password = "single-alert-beep-test".toCharArray()
+        val file = createUvirSensorSettingsBackup(context, database, a.deviceId,
+            includeSensitiveInformation = true, encryptionPassword = password)
+        saveThresholdAlertSettings(prefs, loadThresholdAlertSettings(prefs).copy(
+            sound = ThresholdAlertSound.TRIPLE_BEEP, volume = 20))
+        val imported = importUvirSettingsFiles(context, database,
+            listOf(android.net.Uri.fromFile(file)), password)
+        assertEquals(1, imported.importedSensors.size)
+        assertEquals(a.deviceId, imported.importedSensors.single().hardwareUid)
+        val restored = loadThresholdAlertSettings(prefs)
+        assertEquals(ThresholdAlertSound.SINGLE_BEEP, restored.sound)
+        assertEquals(60, restored.volume)
+        assertEquals(a.deviceId, UvirSensorCredentialStore.load(context).deviceId)
+
+        // Restoring another sensor's backup must not change the selected one's sound.
+        assertTrue(UvirSensorCredentialStore.activateAssociatedSensor(context, b.deviceId))
+        assertTrue(restoreSelectedSensorContext(prefs, b.deviceId))
+        saveThresholdAlertSettings(prefs, loadThresholdAlertSettings(prefs).copy(
+            sound = ThresholdAlertSound.LONG_BEEP, volume = 40))
+        val backgroundFile = createUvirSensorSettingsBackup(context, database, a.deviceId,
+            includeSensitiveInformation = true, encryptionPassword = password)
+        prefs.edit().putString(sensorContextPreferenceKey(a.deviceId, KEY_THRESHOLD_ALERT_SOUND),
+            ThresholdAlertSound.TRIPLE_BEEP.name).commit()
+        importUvirSettingsFiles(context, database,
+            listOf(android.net.Uri.fromFile(backgroundFile)), password)
+        assertEquals(b.deviceId, UvirSensorCredentialStore.load(context).deviceId)
+        assertEquals(ThresholdAlertSound.LONG_BEEP, loadThresholdAlertSettings(prefs).sound)
+        assertEquals(40, loadThresholdAlertSettings(prefs).volume)
+        assertEquals(ThresholdAlertSound.SINGLE_BEEP.name,
+            prefs.getString(sensorContextPreferenceKey(a.deviceId, KEY_THRESHOLD_ALERT_SOUND), null))
+        assertTrue(UvirSensorCredentialStore.activateAssociatedSensor(context, a.deviceId))
+        assertTrue(restoreSelectedSensorContext(prefs, a.deviceId))
+        assertEquals(ThresholdAlertSound.SINGLE_BEEP, loadThresholdAlertSettings(prefs).sound)
+        assertEquals(60, loadThresholdAlertSettings(prefs).volume)
     }
 
     /** Real UDP discovery + authenticated TCP, never touches the user's sensor. */

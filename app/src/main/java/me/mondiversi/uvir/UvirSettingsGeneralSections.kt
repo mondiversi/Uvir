@@ -1,22 +1,31 @@
 package me.mondiversi.uvir
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDirection
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.Dispatchers
@@ -36,7 +45,7 @@ private fun uvirLanguagesInMenuOrder(): List<AppLanguage> =
             .filterNot { it == AppLanguage.SYSTEM }
             .sortedBy { it.storedValue }
 
-private fun resolvedUvirAppLanguage(
+internal fun resolvedUvirAppLanguage(
     selectedLanguage: AppLanguage,
     currentLocale: Locale
 ): AppLanguage {
@@ -46,6 +55,7 @@ private fun resolvedUvirAppLanguage(
     val currentCode =
         when (currentLocale.language.lowercase(Locale.ROOT)) {
             "iw" -> "he"
+            "in" -> "id"
             else -> currentLocale.language.lowercase(Locale.ROOT)
         }
     return AppLanguage.entries.firstOrNull {
@@ -75,6 +85,9 @@ private fun uvirLanguageLabel(language: AppLanguage): String =
             AppLanguage.KOREAN -> R.string.language_korean
             AppLanguage.SWAHILI -> R.string.language_swahili
             AppLanguage.TURKISH -> R.string.language_turkish
+            AppLanguage.POLISH -> R.string.language_polish
+            AppLanguage.DUTCH -> R.string.language_dutch
+            AppLanguage.INDONESIAN -> R.string.language_indonesian
         }
     )
 
@@ -111,40 +124,50 @@ private fun uvirTimeFormatLabel(format: UvirTimeFormat): String =
     )
 
 @Composable
-private fun UvirSettingsRadioOption(
+internal fun UvirSettingsRadioOption(
     selected: Boolean,
     title: String,
     example: String? = null,
     primaryText: Color,
     secondaryText: Color,
+    centerExample: Boolean = false,
+    enabled: Boolean = true,
     onClick: () -> Unit
 ) {
     SettingsRadioChoiceRow(
         selected = selected,
         primaryText = primaryText,
         secondaryText = secondaryText,
+        enabled = enabled,
         onClick = onClick
     ) {
         Text(
             text = title,
             modifier = Modifier.weight(1f),
-            color = primaryText,
+            color = if (enabled) primaryText else secondaryText.copy(alpha = 0.62f),
             fontSize = 14.sp,
             fontWeight = FontWeight.Medium
         )
         example?.let {
             Text(
                 text = it,
-                color = secondaryText,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium
+                modifier = if (centerExample) {
+                    Modifier.width(with(LocalDensity.current) { 36.sp.toDp() })
+                } else Modifier.widthIn(max = 132.dp).padding(start = 8.dp),
+                color = if (enabled) secondaryText else secondaryText.copy(alpha = 0.62f),
+                fontSize = if (centerExample) 14.sp else 11.sp,
+                lineHeight = if (centerExample) 20.sp else 14.sp,
+                style = TextStyle(textDirection = TextDirection.ContentOrLtr),
+                fontWeight = FontWeight.Medium,
+                textAlign = if (centerExample) TextAlign.Center else TextAlign.End,
+                maxLines = if (centerExample) 1 else Int.MAX_VALUE
             )
         }
     }
 }
 
 @Composable
-private fun UvirFormatDescription(
+internal fun UvirFormatDescription(
     text: String,
     secondaryText: Color
 ) {
@@ -216,7 +239,10 @@ internal fun UvirSettingsGeneralSections(
     onDiagnosticProbe: suspend (String, SensorConnectionMode) -> UvirDiagnosticProbe,
     cardColor: Color,
     primaryText: Color,
-    secondaryText: Color
+    secondaryText: Color,
+    scrollToSimulation: Boolean = false,
+    onSimulationShown: () -> Unit = {},
+    notificationsSection: @Composable () -> Unit = {}
 ) {
     val context = LocalContext.current
     val resources = LocalResources.current
@@ -349,7 +375,6 @@ internal fun UvirSettingsGeneralSections(
                                 runCatching {
                                     withContext(Dispatchers.IO) {
                                         database.insertDebugSimulationEvents(
-                                            selectedSensorDeviceId = diagnosticSensorDeviceId,
                                             note =
                                                 resources.getString(
                                                     R.string.debug_simulation_note
@@ -408,6 +433,23 @@ internal fun UvirSettingsGeneralSections(
     }
 
     SettingsSection(
+        settingsPage = UvirSettingsPage.APPEARANCE,
+        title = stringResource(R.string.settings_section_appearance),
+        titleIcon = ConnectivityIconType.PALETTE,
+        containerColor = cardColor,
+        titleColor = primaryText,
+        chevronColor = secondaryText,
+        dividerColor = secondaryText.copy(alpha = 0.28f),
+        contentSpacing = UvirIslandSpacing,
+        wrapDetailContent = false
+    ) {
+        UvirThemeSettingsIsland(cardColor, primaryText, secondaryText)
+        UvirDisplaySettingsIsland(cardColor, primaryText, secondaryText)
+    }
+
+    notificationsSection()
+
+    SettingsSection(
         settingsPage = UvirSettingsPage.LANGUAGE,
         title = stringResource(R.string.settings_section_language),
         titleIcon = ConnectivityIconType.LANGUAGE,
@@ -435,20 +477,24 @@ internal fun UvirSettingsGeneralSections(
             Column(
                 verticalArrangement = Arrangement.spacedBy(UvirSettingsChoiceSpacing)
             ) {
-                val systemLanguageCode =
-                    Locale.getDefault().language.uppercase(Locale.ROOT)
+                // Android resolves resource fallbacks from the device's full locale list.
+                // The application context is unaffected by UVIR's explicit language choice.
+                val systemLanguage = AppLanguage.fromStoredValue(
+                    context.applicationContext.getString(R.string.settings_resource_language_tag)
+                )
                 uvirLanguagesInMenuOrder().forEach { language ->
                     UvirSettingsRadioOption(
                         selected = appLanguage == language,
                         title = uvirLanguageLabel(language),
                         example =
                             if (language == AppLanguage.SYSTEM) {
-                                systemLanguageCode
+                                uvirLanguageLabel(systemLanguage)
                             } else {
                                 language.storedValue.uppercase(Locale.ROOT)
                             },
                         primaryText = primaryText,
                         secondaryText = secondaryText,
+                        centerExample = language != AppLanguage.SYSTEM,
                         onClick = {
                             if (appLanguage != language) {
                                 onAppLanguageChanged(language)
@@ -480,8 +526,8 @@ internal fun UvirSettingsGeneralSections(
         contentSpacing = UvirIslandSpacing,
         wrapDetailContent = false
     ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(UvirIslandSpacing)
+        UvirIslandColumns(
+            spacing = UvirIslandSpacing
         ) {
             SettingsIsland(
                 containerColor = cardColor,
@@ -620,7 +666,8 @@ internal fun UvirSettingsGeneralSections(
     val settingsNavigation = LocalUvirSettingsNavigation.current
     if (settingsNavigation != null && settingsNavigation.selectedPage == null) {
         HorizontalDivider(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 3.dp),
+            modifier = Modifier.fillMaxWidth().uvirIslandFullWidth()
+                .padding(horizontal = 8.dp, vertical = 3.dp),
             color = secondaryText.copy(alpha = 0.24f)
         )
     }
@@ -845,29 +892,12 @@ internal fun UvirSettingsGeneralSections(
                     verticalArrangement =
                         Arrangement.spacedBy(UvirSettingsRelatedGap)
                 ) {
-                    OutlinedButton(
-                        onClick = {
-                            showSimulateEventsConfirmation = true
-                        },
-                        enabled = !simulatingEvents && diagnosticSensorDeviceId.isNotBlank(),
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = uvirOutlinedActionColors(primaryText),
-                        border =
-                            uvirOutlinedActionBorder(
-                                enabled = !simulatingEvents && diagnosticSensorDeviceId.isNotBlank(),
-                                secondaryText = secondaryText
-                            )
-                    ) {
-                        UvirLabeledButtonContent(
-                            text = stringResource(R.string.debug_simulate_events)
-                        ) {
-                            UvirMenuIcon(
-                                type = MenuIconType.SAVED_MEASUREMENTS,
-                                modifier = Modifier.size(20.dp),
-                                tint = LocalContentColor.current
-                            )
-                        }
-                    }
+                    UvirSimulateEventsButton(
+                        preparing = simulatingEvents,
+                        onClick = { showSimulateEventsConfirmation = true },
+                        primaryText = primaryText,
+                        secondaryText = secondaryText
+                    )
 
                     Text(
                         text = stringResource(R.string.debug_simulate_events_description),
@@ -883,7 +913,9 @@ internal fun UvirSettingsGeneralSections(
                     onEnabledChange = onFakeSensorDataEnabledChange,
                     onOutOfRangeChange = onFakeSensorOutOfRangeEnabledChange,
                     primaryText = primaryText,
-                    secondaryText = secondaryText
+                    secondaryText = secondaryText,
+                    scrollIntoView = scrollToSimulation,
+                    onShown = onSimulationShown
                 )
             },
             concert = {
@@ -932,32 +964,74 @@ internal fun UvirDiagnosticsIslands(
 }
 
 @Composable
+internal fun UvirSimulateEventsButton(
+    preparing: Boolean,
+    onClick: () -> Unit,
+    primaryText: Color,
+    secondaryText: Color
+) {
+    val enabled = uvirDebugEventSimulationAvailable(preparing)
+    OutlinedButton(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = Modifier.fillMaxWidth().testTag("simulate_events_button"),
+        colors = uvirOutlinedActionColors(primaryText),
+        border = uvirOutlinedActionBorder(enabled, secondaryText)
+    ) {
+        UvirLabeledButtonContent(text = stringResource(R.string.debug_simulate_events)) {
+            UvirMenuIcon(
+                type = MenuIconType.SAVED_MEASUREMENTS,
+                modifier = Modifier.size(20.dp),
+                tint = LocalContentColor.current
+            )
+        }
+    }
+}
+
+@Composable
 internal fun UvirSensorSimulationSettingsContent(
     enabled: Boolean,
     outOfRange: Boolean,
     onEnabledChange: (Boolean) -> Unit,
     onOutOfRangeChange: (Boolean) -> Unit,
     primaryText: Color,
-    secondaryText: Color
+    secondaryText: Color,
+    scrollIntoView: Boolean = false,
+    onShown: () -> Unit = {}
 ) {
-    // These phone-only switches belong to the selected UID, not to its running job.
-    SettingsCheckboxWithDescription(
-        checked = enabled,
-        onCheckedChange = onEnabledChange,
-        title = stringResource(R.string.debug_fake_data),
-        description = stringResource(R.string.debug_fake_data_description),
-        primaryText = primaryText,
-        secondaryText = secondaryText
-    )
-    SettingsCheckboxWithDescription(
-        checked = outOfRange,
-        onCheckedChange = onOutOfRangeChange,
-        enabled = enabled,
-        title = stringResource(R.string.debug_fake_out_of_range),
-        description = stringResource(R.string.debug_fake_out_of_range_description),
-        primaryText = primaryText,
-        secondaryText = secondaryText
-    )
+    val requester = remember { BringIntoViewRequester() }
+    LaunchedEffect(scrollIntoView) {
+        if (scrollIntoView) {
+            // Wait for layout before scrolling to the actual controls, not the page top.
+            withFrameNanos { }
+            requester.bringIntoView()
+            onShown()
+        }
+    }
+    Column(
+        modifier = Modifier.fillMaxWidth().bringIntoViewRequester(requester)
+            .testTag("simulation_settings_controls"),
+        verticalArrangement = Arrangement.spacedBy(UvirSettingsGroupGap)
+    ) {
+        // These switches control the separate phone-only simulation context.
+        SettingsCheckboxWithDescription(
+            checked = enabled,
+            onCheckedChange = onEnabledChange,
+            title = stringResource(R.string.debug_fake_data),
+            description = stringResource(R.string.debug_fake_data_description),
+            primaryText = primaryText,
+            secondaryText = secondaryText
+        )
+        SettingsCheckboxWithDescription(
+            checked = outOfRange,
+            onCheckedChange = onOutOfRangeChange,
+            enabled = enabled,
+            title = stringResource(R.string.debug_fake_out_of_range),
+            description = stringResource(R.string.debug_fake_out_of_range_description),
+            primaryText = primaryText,
+            secondaryText = secondaryText
+        )
+    }
 }
 
 @Composable

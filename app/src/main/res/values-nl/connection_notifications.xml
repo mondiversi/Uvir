@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="connection_notification_connected">Verbonden</string>
+    <string name="connection_notification_disconnected">Niet verbonden</string>
+    <string name="connection_notification_simulation">Simulatie</string>
+    <string name="connection_notification_selected">geselecteerd</string>
+    <string name="connection_notification_activity">Activiteit bezig</string>
+    <string name="connection_notification_last_activity">Activiteit bezig (laatst bekende status)</string>
+    <plurals name="connection_notification_connected_count">
+        <item quantity="one">%1$d sensor verbonden</item>
+        <item quantity="other">%1$d sensoren verbonden</item>
+    </plurals>
+    <plurals name="connection_notification_connecting_count">
+        <item quantity="one">%1$d sensor maakt verbinding</item>
+        <item quantity="other">%1$d sensoren maken verbinding</item>
+    </plurals>
+    <plurals name="connection_notification_activity_count">
+        <item quantity="one">%1$d activiteit bezig</item>
+        <item quantity="other">%1$d activiteiten bezig</item>
+    </plurals>
+    <plurals name="connection_notification_simulation_count">
+        <item quantity="one">%1$d simulatie</item>
+        <item quantity="other">%1$d simulaties</item>
+    </plurals>
+</resources>

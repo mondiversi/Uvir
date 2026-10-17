@@ -15,7 +15,7 @@ internal class UvirMultiSensorPersistence(
     private val progress = mutableMapOf<Pair<String, SensorSyncSource>, Progress>()
 
     private fun key(id: String, name: String): String =
-        if (UvirSensorCredentialStore.load(context).deviceId.equals(id, true)) name
+        if (selectedUiSensorDeviceId(preferences, UvirSensorCredentialStore.load(context).deviceId).equals(id, true)) name
         else sensorContextPreferenceKey(id, name)
 
     private fun storeAcquisition(id: String, recordId: Long, timestamp: Long, sessionId: Long,
@@ -69,6 +69,7 @@ internal class UvirMultiSensorPersistence(
         val id = frame.deviceId
         if (normalizeSensorDeviceId(id) !in UvirSensorCredentialStore.associatedDeviceIds(context)) return
         when (frame) {
+            is UvirDeviceFrame.Clock -> Unit // Launch checks are transient, not database records.
             is UvirDeviceFrame.Runtime -> when (val event = frame.event) {
                 is SensorRuntimeEvent.Acquisition -> {
                     val saved = storeAcquisition(id, event.recordId, event.timestamp, event.sessionId,

@@ -28,6 +28,9 @@ class UvirSensorStatusWordingTest {
             "pt" to listOf("Não conectado", "Conectando…", "Pesquisa em curso…", "Nenhum sensor"),
             "ru" to listOf("Не подключён", "Подключение…", "Поиск выполняется…", "Нет датчика"),
             "sw" to listOf("Haijaunganishwa", "Inaunganisha…", "Utafutaji unaendelea…", "Hakuna kihisi"),
+            "pl" to listOf("Nie połączono", "Łączenie…", "Wyszukiwanie w toku…", "Brak czujnika"),
+            "nl" to listOf("Niet verbonden", "Verbinden…", "Zoeken…", "Geen sensor"),
+            "id" to listOf("Tidak terhubung", "Menghubungkan…", "Pencarian berlangsung…", "Tidak ada sensor"),
             "tr" to listOf("Bağlı değil", "Bağlanıyor…", "Arama devam ediyor…", "Sensör yok"),
             "zh-CN" to listOf("未连接", "正在连接…", "正在搜索…", "无传感器")
         )

@@ -63,6 +63,7 @@ data class UvirSensorRuntimeInfo(
     val statusLedGreenPin: Int? = null,
     val operationLedBluePin: Int? = null,
     val statusBuzzerControlAvailable: Boolean? = null,
+    val statusBuzzerPreviewAvailable: Boolean? = null,
     val statusBuzzerPin: Int? = null,
     val externalInputReadOk: Boolean? = null,
     val externalInputPin: Int? = null,
@@ -543,6 +544,9 @@ internal fun UvirSensorRuntimeInfo.updatedFrom(
                 "status_buzzer_volume",
                 statusBuzzerVolume
             ),
+        statusBuzzerPreviewAvailable = json.booleanOrPrevious(
+            "buzzer_preview_supported", statusBuzzerPreviewAvailable
+        ),
         externalCommandEnabled =
             json.booleanOrPrevious(
                 "external_command_enabled",

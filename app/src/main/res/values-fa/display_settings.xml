@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_section_display">نمایش</string>
+    <string name="settings_display_description">رابط کاربری را با اندازه صفحه تطبیق بده.</string>
+    <string name="notifications_misc_title">موارد دیگر</string>
+    <string name="notifications_misc_description">مدیریت سایر اعلان‌های برنامه.</string>
+    <string name="rtc_battery_notification_toggle">نمایش هشدار باتری هنگام شروع برنامه</string>
+    <string name="rtc_battery_notification_description">اگر ساعت حسگری متوقف شده باشد هشدار داده شود.</string>
+    <string name="settings_mode_small_screen">صفحه کوچک</string>
+    <string name="settings_mode_small_screen_active">حالت صفحه کوچک</string>
+    <string name="settings_mode_large_screen">صفحه بزرگ</string>
+    <string name="settings_mode_large_screen_unavailable">حالت صفحه بزرگ هنوز در دسترس نیست.</string>
+    <string name="rtc_clock_warning_show_each_launch">نمایش در هر بار اجرا</string>
+    <string name="settings_theme_title">پوسته</string>
+    <string name="settings_theme_description">برای شخصی‌سازی ظاهر محتوا، پوسته برنامه را انتخاب کنید.</string>
+    <string name="settings_theme_default">پیش‌فرض</string>
+    <string name="settings_theme_light">روشن</string>
+    <string name="settings_theme_dark">تیره</string>
+    <string name="settings_display_unavailable">این قابلیت هنوز در دسترس نیست.</string>
+</resources>

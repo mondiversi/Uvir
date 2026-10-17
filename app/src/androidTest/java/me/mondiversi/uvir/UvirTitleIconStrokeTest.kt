@@ -1,5 +1,6 @@
 package me.mondiversi.uvir
 
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -16,6 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PixelMap
 import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assertIsDisplayed
@@ -38,11 +40,16 @@ import org.junit.Test
 class UvirTitleIconStrokeTest {
     @get:Rule val compose = createComposeRule()
 
-    private fun ink(pixels: PixelMap, x: Int, y: Int): Float {
+    private fun ink(pixels: PixelMap, x: Int, y: Int, foreground: Color = Color.Red): Float {
         val background = pixels[0, 0]
-        val baseline = background.red - background.green
         val color = pixels[x, y]
-        return ((color.red - color.green - baseline) / (1f - baseline)).coerceIn(0f, 1f)
+        val channels = listOf(
+            Triple(background.red, foreground.red, color.red),
+            Triple(background.green, foreground.green, color.green),
+            Triple(background.blue, foreground.blue, color.blue)
+        )
+        val (baseline, ink, actual) = channels.maxBy { kotlin.math.abs(it.second - it.first) }
+        return ((actual - baseline) / (ink - baseline)).coerceIn(0f, 1f)
     }
 
     @Test
@@ -95,7 +102,12 @@ class UvirTitleIconStrokeTest {
         val direction = mutableStateOf(LayoutDirection.Ltr)
         val type = mutableStateOf(0)
         compose.setContent {
-            CompositionLocalProvider(LocalDensity provides Density(4f), LocalLayoutDirection provides direction.value) {
+            val configuration = Configuration(LocalConfiguration.current).apply {
+                uiMode = (uiMode and Configuration.UI_MODE_NIGHT_MASK.inv()) or
+                    if (dark.value) Configuration.UI_MODE_NIGHT_YES else Configuration.UI_MODE_NIGHT_NO
+            }
+            CompositionLocalProvider(LocalDensity provides Density(4f), LocalLayoutDirection provides direction.value,
+                LocalConfiguration provides configuration) {
                 MaterialTheme(colorScheme = if (dark.value) darkColorScheme(primary = Color.Red) else lightColorScheme(primary = Color.Red)) {
                     Box(Modifier.size(56.dp).background(MaterialTheme.colorScheme.surface).testTag("open_drawing"), Alignment.Center) {
                         when (type.value) {
@@ -125,7 +137,9 @@ class UvirTitleIconStrokeTest {
                         1 -> 0..(inset + size / 2)
                         else -> 0 until pixels.width
                     }
-                    val diagonal = range.sumOf { x -> ink(pixels, x, y).toDouble() }.toFloat()
+                    val foreground = if (icon != 2) Color.Red
+                        else if (darkTheme) Color.White else Color(0xFF101418)
+                    val diagonal = range.sumOf { x -> ink(pixels, x, y, foreground).toDouble() }.toFloat()
                     val ratio = when (icon) {
                         0 -> 9f / 10f
                         1 -> 0.23f / 0.16f

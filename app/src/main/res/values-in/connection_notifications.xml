@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="connection_notification_connected">Terhubung</string>
+    <string name="connection_notification_disconnected">Terputus</string>
+    <string name="connection_notification_simulation">Simulasi</string>
+    <string name="connection_notification_selected">dipilih</string>
+    <string name="connection_notification_activity">Aktivitas berlangsung</string>
+    <string name="connection_notification_last_activity">Aktivitas berlangsung (status terakhir diketahui)</string>
+    <plurals name="connection_notification_connected_count">
+        <item quantity="other">%1$d sensor terhubung</item>
+    </plurals>
+    <plurals name="connection_notification_connecting_count">
+        <item quantity="other">%1$d sensor sedang menghubungkan</item>
+    </plurals>
+    <plurals name="connection_notification_activity_count">
+        <item quantity="other">%1$d aktivitas berlangsung</item>
+    </plurals>
+    <plurals name="connection_notification_simulation_count">
+        <item quantity="other">%1$d simulasi</item>
+    </plurals>
+</resources>

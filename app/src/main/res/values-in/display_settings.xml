@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_section_display">Tampilan</string>
+    <string name="settings_display_description">Sesuaikan antarmuka dengan ukuran layar.</string>
+    <string name="notifications_misc_title">Lainnya</string>
+    <string name="notifications_misc_description">Kelola notifikasi lain yang ditampilkan aplikasi.</string>
+    <string name="rtc_battery_notification_toggle">Tampilkan peringatan baterai saat mulai</string>
+    <string name="rtc_battery_notification_description">Beri peringatan jika jam sensor berhenti.</string>
+    <string name="settings_mode_small_screen">Layar kecil</string>
+    <string name="settings_mode_small_screen_active">Mode layar kecil</string>
+    <string name="settings_mode_large_screen">Layar besar</string>
+    <string name="settings_mode_large_screen_unavailable">Mode layar besar belum tersedia.</string>
+    <string name="rtc_clock_warning_show_each_launch">Tampilkan setiap kali aplikasi dibuka</string>
+    <string name="settings_theme_title">Tema</string>
+    <string name="settings_theme_description">Pilih tema aplikasi untuk menyesuaikan tampilan konten.</string>
+    <string name="settings_theme_default">Bawaan</string>
+    <string name="settings_theme_light">Terang</string>
+    <string name="settings_theme_dark">Gelap</string>
+    <string name="settings_display_unavailable">Fitur ini belum tersedia.</string>
+</resources>

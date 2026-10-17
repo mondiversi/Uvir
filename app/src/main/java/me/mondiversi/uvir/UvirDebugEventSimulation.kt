@@ -5,17 +5,20 @@ internal data class UvirDebugSimulationResult(
     val alerts: Int
 )
 
+// Debug events always belong to the phone-only mock context, never to selected hardware.
+internal const val UVIR_SIMULATED_EVENT_SENSOR_ID = ""
+
+internal fun uvirDebugEventSimulationAvailable(preparing: Boolean): Boolean = !preparing
+
 /**
  * Adds a compact but representative history without changing live jobs or
  * sensor settings. IDs still come from the normal global counters.
  */
 internal fun UvirDatabaseHelper.insertDebugSimulationEvents(
-    selectedSensorDeviceId: String,
     note: String,
     now: Long = System.currentTimeMillis()
 ): UvirDebugSimulationResult {
-    val sensorDeviceId = selectedSensorDeviceId.trim()
-    require(sensorDeviceId.isNotBlank()) { "Debug events require an explicitly selected sensor" }
+    val sensorDeviceId = UVIR_SIMULATED_EVENT_SENSOR_ID
     val base = now - 6L * 60L * 60L * 1_000L
     var acquisitionCount = 0
     var alertCount = 0

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rtc_clock_warning_title_single">Controleer de klokbatterij</string>
+    <string name="rtc_clock_warning_title_multiple">Controleer de klokbatterijen</string>
+    <string name="rtc_clock_warning_message_single">De klok van sensor \"%1$s\" heeft een stop gemeld. De batterij kan leeg of verkeerd aangesloten zijn. Controleer deze en vervang deze indien nodig.</string>
+    <string name="rtc_clock_warning_message_multiple">De volgende sensoren hebben een klokstop gemeld:</string>
+    <string name="rtc_clock_warning_batteries_guidance">De batterijen kunnen leeg of verkeerd aangesloten zijn. Controleer ze en vervang ze indien nodig.</string>
+</resources>

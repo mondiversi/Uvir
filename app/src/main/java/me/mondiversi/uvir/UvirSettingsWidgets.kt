@@ -15,7 +15,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -144,47 +143,11 @@ internal fun DoubleExpansionChevron(
 }
 
 @Composable
-internal fun AdaptiveSingleLineButtonText(
-    text: String,
-    maxFontSize: TextUnit = 14.sp,
-    minFontSize: TextUnit = 10.sp,
-    sharedFontSize: MutableState<TextUnit>? = null,
-    fontWeight: FontWeight? = null
-) {
-    val localFontSize = remember(text, maxFontSize, minFontSize) {
-        mutableStateOf(maxFontSize)
-    }
-    val fontSizeState = sharedFontSize ?: localFontSize
-    val fontSize = fontSizeState.value
-
-    Text(
-        text = text,
-        modifier = Modifier.fillMaxWidth(),
-        fontSize = fontSize,
-        fontWeight = fontWeight,
-        maxLines = 1,
-        softWrap = false,
-        textAlign = TextAlign.Center,
-        onTextLayout = { result ->
-            if (
-                result.hasVisualOverflow &&
-                fontSize.value > minFontSize.value
-            ) {
-                fontSizeState.value =
-                    (fontSize.value - 0.5f)
-                        .coerceAtLeast(minFontSize.value)
-                        .sp
-            }
-        }
-    )
-}
-
-@Composable
 internal fun RowScope.UvirLabeledButtonContent(
     text: String,
     maxFontSize: TextUnit = 14.sp,
     minFontSize: TextUnit = 10.sp,
-    sharedFontSize: MutableState<TextUnit>? = null,
+    sizingTexts: List<String> = listOf(text),
     fontWeight: FontWeight? = null,
     icon: @Composable () -> Unit
 ) {
@@ -201,7 +164,7 @@ internal fun RowScope.UvirLabeledButtonContent(
         text = text,
         maxFontSize = maxFontSize,
         minFontSize = minFontSize,
-        sharedFontSize = sharedFontSize,
+        sizingTexts = sizingTexts,
         fontWeight = if (settingsStyle) FontWeight.SemiBold else fontWeight
     )
 }
@@ -263,7 +226,8 @@ fun CheckSettingRow(
                         change,
                     enabled = enabled,
                     modifier =
-                        Modifier.size(24.dp)
+                        Modifier.size(24.dp),
+                    colors = uvirCheckboxColors()
                 )
             }
 
@@ -274,7 +238,8 @@ fun CheckSettingRow(
                     checked,
                 onCheckedChange =
                     change,
-                enabled = enabled
+                enabled = enabled,
+                colors = uvirCheckboxColors()
             )
         }
 
@@ -292,6 +257,7 @@ fun CheckSettingRow(
                 ),
             fontSize =
                 14.sp,
+            lineHeight = UvirSettingsCheckboxLineHeight,
             fontWeight =
                 if (emphasized)
                     FontWeight.Bold

@@ -1540,6 +1540,8 @@ class UvirUsbSensorManager(
 
         // Synchronize before enabling periodic samples so live frames cannot
         // compete with queued records and control acknowledgements.
+        // Capture OSF before TIME clears it on the RTC, even if the UI is not ready yet.
+        UvirSensorEventHub.emitRtcClock(credentials.deviceId, json)
         if (desiredStreaming && !offlineSyncRequested) {
             offlineSyncRequested = true
             offlineSyncCompleted = false

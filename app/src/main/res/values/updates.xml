@@ -6,7 +6,7 @@
     <string name="update_app">Update app</string>
     <string name="update_sensor">Update sensor</string>
     <string name="update_app_first">Update the app first.</string>
-    <string name="update_usb_required">Select this sensor and connect it by USB, with no active session and all records synchronized.</string>
+    <string name="update_usb_required">Select the sensor and connect it by USB, with no active session and all records synchronized.</string>
     <string name="update_download">Downloading and verifying…</string>
     <string name="update_flash">Updating sensor…</string>
     <string name="update_verify">Verifying sensor…</string>

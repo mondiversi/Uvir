@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rtc_clock_warning_title_single">检查时钟电池</string>
+    <string name="rtc_clock_warning_title_multiple">检查时钟电池</string>
+    <string name="rtc_clock_warning_message_single">传感器“%1$s”的时钟报告了停止。电池可能已耗尽或未正确连接。请检查，必要时更换。</string>
+    <string name="rtc_clock_warning_message_multiple">以下传感器报告了时钟停止：</string>
+    <string name="rtc_clock_warning_batteries_guidance">电池可能已耗尽或未正确连接。请检查，必要时更换。</string>
+</resources>

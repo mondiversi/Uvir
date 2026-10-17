@@ -36,7 +36,7 @@ class UvirActivityLegendTranslationTest {
                 }
             }
         }
-        for (language in listOf("en", "it", "ar", "de", "el", "es", "fa", "fr", "hi", "he", "ja", "ko-KR", "pt", "ru", "sw", "tr", "zh-CN")) {
+        for (language in listOf("en", "it", "ar", "de", "el", "es", "fa", "fr", "hi", "he", "ja", "ko-KR", "pt", "ru", "sw", "pl", "nl", "id", "tr", "zh-CN")) {
             val config = Configuration(context.resources.configuration).apply {
                 setLocale(Locale.forLanguageTag(language))
             }

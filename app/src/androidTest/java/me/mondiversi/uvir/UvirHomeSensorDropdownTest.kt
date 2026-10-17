@@ -33,6 +33,9 @@ import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.click
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
@@ -50,6 +53,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -91,6 +95,7 @@ class UvirHomeSensorDropdownTest {
     private val profileModes = mutableStateOf(mapOf("a" to SensorConnectionMode.WIFI,
         "b" to SensorConnectionMode.BLUETOOTH))
     private var infoRequests = 0
+    private var simulationSettingsRequests = 0
     private val sensorRequests = mutableListOf<String>()
     private val modes = mutableListOf<SensorConnectionMode>()
     private val profiles = mutableStateOf(listOf(
@@ -145,6 +150,7 @@ class UvirHomeSensorDropdownTest {
                             primaryText = if (night.value) Color.White else Color.Black,
                             secondaryText = colors.onSurfaceVariant,
                             onOpenVersionInfo = {}, onOpenSettings = {},
+                            onOpenSimulationSettings = { simulationSettingsRequests++ },
                             sensorSelectionExpanded = selectionExpanded.value,
                             onSensorSelectionExpandedChange = { selectionExpanded.value = it },
                             sensorDisplayName = if (selectedId.value.isBlank()) "" else selectedDisplayName.value,
@@ -170,7 +176,7 @@ class UvirHomeSensorDropdownTest {
         compose.onNodeWithTag("home_sensor_glyph", true).assertIsDisplayed()
         compose.onNodeWithTag("home_sensor_name").performClick()
         assertEquals(0, infoRequests)
-        compose.onNodeWithTag("home_sensor_option_none").assertIsDisplayed()
+        compose.onNodeWithTag("home_sensor_option_none").assertDoesNotExist()
         compose.onNodeWithText(context.getString(R.string.sensor_associate_action)).assertDoesNotExist()
         compose.onNodeWithContentDescription(context.getString(R.string.close)).assertIsDisplayed()
         compose.onNodeWithText(context.getString(R.string.sensor_selection_title)).assertIsDisplayed()
@@ -178,8 +184,7 @@ class UvirHomeSensorDropdownTest {
         compose.onNodeWithTag("home_sensor_logo").assertDoesNotExist()
         compose.onNodeWithTag("home_sensor_option_A").assertIsSelected()
         compose.onNodeWithTag("home_sensor_option_B").assertIsNotSelected()
-        compose.onNodeWithTag("home_sensor_option_none").assertIsNotSelected()
-        for (id in listOf("none", "A", "B")) {
+        for (id in listOf("A", "B")) {
             compose.onNodeWithTag("home_sensor_radio_$id", true).assertIsDisplayed()
         }
         compose.onNodeWithTag("home_sensor_info").assertDoesNotExist()
@@ -200,8 +205,9 @@ class UvirHomeSensorDropdownTest {
         compose.onNodeWithTag("sensor_profile_info_B").assertIsNotEnabled().performTouchInput { click() }
         assertEquals(1, infoRequests)
         assertEquals(listOf("B"), sensorRequests)
-        compose.onNodeWithTag("home_sensor_option_none").performClick()
-        assertEquals(listOf("B", NO_SENSOR_SELECTED_REQUEST), sensorRequests)
+        compose.onNodeWithTag("home_sensor_option_none").assertDoesNotExist()
+        compose.onNodeWithContentDescription(context.getString(R.string.close)).performClick()
+        assertEquals(listOf("B"), sensorRequests)
         compose.onNodeWithTag("home_sensor_name").assertIsEnabled()
         compose.onNodeWithTag("home_sensor_selection_menu").assertDoesNotExist()
     }
@@ -296,7 +302,7 @@ class UvirHomeSensorDropdownTest {
         }
     }
 
-    @Test fun menuInfoPrecedesDateAndKeepsIndependentNormalAndDisabledAppearance() {
+    @Test fun menuInfoPrecedesRadioAndKeepsIndependentNormalAndDisabledAppearance() {
         showHeader()
         for (dark in listOf(false, true)) for (layout in listOf(LayoutDirection.Ltr, LayoutDirection.Rtl)) {
             compose.runOnIdle { night.value = dark; direction.value = layout }
@@ -304,15 +310,11 @@ class UvirHomeSensorDropdownTest {
             compose.onNodeWithTag("home_sensor_name").performClick()
             val info = compose.onNodeWithTag("sensor_profile_info_A").assertIsDisplayed().assertIsEnabled()
             val infoBounds = info.fetchSemanticsNode().boundsInRoot
-            val date = compose.onNodeWithTag("home_sensor_last_connection_A", true)
-                .fetchSemanticsNode().boundsInRoot
-            assertEquals(date.center.y, infoBounds.center.y, 1f)
-            assertTrue("Info is before the connection date",
-                if (layout == LayoutDirection.Ltr) infoBounds.right <= date.left else infoBounds.left >= date.right)
+            compose.onNodeWithTag("home_sensor_last_connection_A", true).assertDoesNotExist()
             val mark = compose.onNodeWithTag("home_sensor_radio_A", true).fetchSemanticsNode().boundsInRoot
             assertEquals(infoBounds.center.y, mark.center.y, 1f)
-            assertTrue("The radio remains after the connection date",
-                if (layout == LayoutDirection.Ltr) mark.left > date.right else mark.right < date.left)
+            assertTrue("The radio remains after info",
+                if (layout == LayoutDirection.Ltr) mark.left > infoBounds.right else mark.right < infoBounds.left)
             val enabledPixels = info.captureToImage().toPixelMap()
             compose.runOnIdle { confirmed.value = false }
             val disabledPixels = info.assertIsNotEnabled().captureToImage().toPixelMap()
@@ -322,11 +324,10 @@ class UvirHomeSensorDropdownTest {
             }
             assertTrue("Disconnected info must be visibly muted", different > 0)
             compose.runOnIdle { confirmed.value = true }
-            for (id in listOf("none", "B")) {
-                val other = compose.onNodeWithTag("home_sensor_radio_$id", true)
-                    .fetchSemanticsNode().boundsInRoot
-                assertEquals("Every selection radio uses the same trailing alignment", mark.center.x, other.center.x, 1f)
-            }
+            compose.onNodeWithTag("home_sensor_radio_none", true).assertDoesNotExist()
+            val other = compose.onNodeWithTag("home_sensor_radio_B", true)
+                .fetchSemanticsNode().boundsInRoot
+            assertEquals("Every selection radio uses the same trailing alignment", mark.center.x, other.center.x, 1f)
             info.performClick()
             compose.onNodeWithTag("home_sensor_selection_menu").assertDoesNotExist()
             compose.onNodeWithContentDescription(context.getString(R.string.navigate_back)).performClick()
@@ -420,6 +421,22 @@ class UvirHomeSensorDropdownTest {
             val expectedFill = uvirSegmentedSelectedContainerColor(primary).compositeOver(barColor)
             assertColor("Selected frame uses the shared measurement palette", expectedFill,
                 selected[(density * 5f).toInt(), selected.height / 2])
+            for (mode in SensorConnectionMode.entries) {
+                compose.runOnIdle { connectionMode.value = mode }
+                val option = compose.onNodeWithTag("home_source_option_${mode.name}").assertIsSelected()
+                val optionPixels = option.captureToImage().toPixelMap()
+                var selectedInkPixels = 0
+                for (y in 0 until optionPixels.height) for (x in 0 until optionPixels.width) {
+                    val pixel = optionPixels[x, y]
+                    if (kotlin.math.abs(pixel.red - primary.red) < .035f &&
+                        kotlin.math.abs(pixel.green - primary.green) < .035f &&
+                        kotlin.math.abs(pixel.blue - primary.blue) < .035f) selectedInkPixels++
+                }
+                assertTrue("Selected connection icon and label stay neutral: $mode, night=$dark, layout=$layout",
+                    selectedInkPixels > 4)
+                assertColor("Every connection retains the same selected surface", expectedFill,
+                    optionPixels[(density * 5f).toInt(), optionPixels.height / 2])
+            }
             compose.onNodeWithContentDescription(context.getString(R.string.close)).performClick()
         }
         assertTrue(modes.isEmpty())
@@ -500,26 +517,73 @@ class UvirHomeSensorDropdownTest {
         assertEquals(0, infoRequests)
     }
 
-    @Test fun sensorRadioAndTransportTileSelectOnceAndNoSensorDisablesTheGrid() {
+    @Test fun sensorRadioAndTransportTileSelectOnceWithoutAnEmptySelection() {
         showHeader()
         compose.onNodeWithTag("home_sensor_name").performClick()
-        compose.onNodeWithText(context.getString(R.string.sensor_no_selection)).assertIsDisplayed()
+        compose.onNodeWithText(context.getString(R.string.sensor_no_selection)).assertDoesNotExist()
         compose.onNodeWithTag("home_sensor_radio_B", true).performTouchInput { click() }
         assertEquals(listOf("B"), sensorRequests)
         compose.onNodeWithTag("home_sensor_name").performClick()
-        compose.onNodeWithTag("home_sensor_radio_none", true).performTouchInput { click() }
-        assertEquals(listOf("B", NO_SENSOR_SELECTED_REQUEST), sensorRequests)
-        // The name is exposed as one accessible button, not as a separate text node.
-        compose.onNodeWithContentDescription(context.getString(R.string.sensor_selection_title) +
-            ": " + context.getString(R.string.sensor_no_selection)).assertIsDisplayed()
-        compose.onNodeWithTag("home_sensor_name").performClick()
-        SensorConnectionMode.entries.forEach { compose.onNodeWithTag("home_source_option_${it.name}").assertIsNotEnabled() }
+        compose.onNodeWithTag("home_sensor_radio_none", true).assertDoesNotExist()
+        assertEquals(listOf("B"), sensorRequests)
         compose.onNodeWithTag("home_sensor_option_A").performClick()
         compose.onNodeWithTag("home_sensor_name").performClick()
         compose.onNodeWithTag("home_source_option_USB").performTouchInput { click() }
         assertEquals(listOf(SensorConnectionMode.USB), modes)
         compose.onNodeWithContentDescription(context.getString(R.string.close)).performClick()
         assertEquals(0, infoRequests)
+    }
+
+    @Test fun noAssociatedSensorsShowADashUntilTheFirstProfileAppears() {
+        profiles.value = emptyList()
+        selectedId.value = ""
+        showHeader()
+        for (dark in listOf(false, true)) for (layout in listOf(LayoutDirection.Ltr, LayoutDirection.Rtl)) {
+            compose.runOnIdle { night.value = dark; direction.value = layout }
+            compose.onNode(hasText("—") and hasAnyAncestor(hasTestTag("home_sensor_name_text")),
+                useUnmergedTree = true).assertIsDisplayed()
+            compose.onNodeWithTag("home_sensor_glyph", true).assertDoesNotExist()
+            compose.onNodeWithTag("home_sensor_status_text", true)
+                .assertTextEquals(context.getString(R.string.sensor_status_no_associated_sensor))
+            val statusLayouts = mutableListOf<androidx.compose.ui.text.TextLayoutResult>()
+            compose.onNodeWithTag("home_sensor_status_text", true).performSemanticsAction(
+                androidx.compose.ui.semantics.SemanticsActions.GetTextLayoutResult) { it(statusLayouts) }
+            assertFalse("Unassociated status fits without truncation", statusLayouts.single().isLineEllipsized(0))
+            compose.onNodeWithTag("home_sensor_name").performClick()
+            compose.onNodeWithTag("home_sensor_add").assertIsDisplayed().assertIsEnabled()
+            compose.onNodeWithTag("home_sensor_option_none").assertDoesNotExist()
+            compose.onNodeWithTag("home_sensor_label_none", true).assertDoesNotExist()
+            compose.onNodeWithTag("home_sensor_radio_none", true).assertDoesNotExist()
+            compose.onNodeWithTag("sensor_profile_info_none", true).assertDoesNotExist()
+            compose.onNodeWithTag("home_sensor_status_none", true).assertDoesNotExist()
+            SensorConnectionMode.entries.forEach {
+                compose.onNodeWithTag("home_source_option_${it.name}").assertIsNotEnabled().assertIsNotSelected()
+            }
+            assertTrue(sensorRequests.isEmpty())
+            assertEquals(0, infoRequests)
+            compose.onNodeWithContentDescription(context.getString(R.string.close)).performClick()
+        }
+        // Dissociation can briefly leave the old UID/name in the enclosing UI state.
+        compose.runOnIdle { selectedId.value = "A"; selectedDisplayName.value = "Old sensor" }
+        compose.onNodeWithText("—", useUnmergedTree = true).assertIsDisplayed()
+        compose.onNodeWithTag("home_sensor_name").performClick()
+        SensorConnectionMode.entries.forEach {
+            compose.onNodeWithTag("home_source_option_${it.name}").assertIsNotEnabled().assertIsNotSelected()
+        }
+        compose.onNodeWithContentDescription(context.getString(R.string.close)).performClick()
+        compose.runOnIdle {
+            profiles.value = listOf(UvirSensorProfile(1, "A", "Portatile", 0, 0))
+            selectedId.value = "A"
+            selectedDisplayName.value = "Portatile"
+        }
+        compose.onNodeWithText("Portatile", useUnmergedTree = true).assertIsDisplayed()
+        compose.onNodeWithTag("home_sensor_name").performClick()
+        compose.onNodeWithTag("home_sensor_option_A").assertIsSelected()
+        compose.onNodeWithTag("home_sensor_option_none").assertDoesNotExist()
+        compose.onNodeWithTag("sensor_profile_info_A", true).assertIsDisplayed()
+        compose.onNodeWithContentDescription(context.getString(R.string.close)).performClick()
+        compose.runOnIdle { profiles.value = emptyList(); selectedId.value = "" }
+        compose.onNodeWithText("—", useUnmergedTree = true).assertIsDisplayed()
     }
 
     @Test fun headerActionPressedCircleUsesFullFortyDpTargetInBothThemes() {
@@ -626,42 +690,46 @@ class UvirHomeSensorDropdownTest {
         assertEquals(0, modes.size)
     }
 
-    @Test fun noSensorRowHasSameHeightAndNoStatusDot() {
+    @Test fun noAssociatedSensorsOfferOnlyAddSensorWithoutAnEmptyRow() {
+        profiles.value = emptyList()
+        selectedId.value = ""
         showHeader()
         for (dark in listOf(false, true)) for (layout in listOf(LayoutDirection.Ltr, LayoutDirection.Rtl)) {
             compose.runOnIdle { night.value = dark; direction.value = layout }
             compose.onNodeWithTag("home_sensor_name").performClick()
-            val none = compose.onNodeWithTag("home_sensor_option_none").fetchSemanticsNode().boundsInRoot
-            val sensor = compose.onNodeWithTag("home_sensor_row_A", true).fetchSemanticsNode().boundsInRoot
-            assertEquals(sensor.height, none.height, 1f)
-            assertEquals(SensorRadioOptionGap.value * context.resources.displayMetrics.density, sensor.top - none.bottom, 1f)
+            compose.onNodeWithTag("home_sensor_add").assertIsDisplayed()
+            compose.onNodeWithTag("home_sensor_option_camera").assertDoesNotExist()
             compose.onNodeWithTag("home_sensor_status_none", true).assertDoesNotExist()
-            compose.onNodeWithTag("home_sensor_option_A").performClick()
+            compose.onNodeWithTag("home_sensor_option_none").assertDoesNotExist()
+            compose.onNodeWithTag("home_sensor_profiles").assertDoesNotExist()
+            compose.runOnIdle { selectionExpanded.value = false }
         }
     }
 
-    @Test fun connectionStartUsesTwoLinesAndRemainsAvailableOfflineInsteadOfLastTraffic() {
+    @Test fun connectionHistoryRemainsStoredButIsNotDisplayedInTheSensorMenu() {
         val wifiStart = 1_700_000_000_000L
         val usbStart = wifiStart + 60_000L
         val otherStart = wifiStart + 120_000L
         UvirSensorConnectionHistory.recordIfStarted(menuContext, "A", SensorConnectionMode.WIFI, false, true, wifiStart)
         UvirSensorConnectionHistory.recordIfStarted(menuContext, "A", SensorConnectionMode.USB, false, true, usbStart)
         UvirSensorConnectionHistory.recordIfStarted(menuContext, "B", SensorConnectionMode.BLUETOOTH, false, true, otherStart)
-        fun stamp(time: Long) = formatUvirDateTime(time, UvirDateFormat.INTERNATIONAL,
-            separator = "\n", timeFormat = UvirTimeFormat.H24)
         showHeader()
         for (dark in listOf(false, true)) {
             compose.runOnIdle { night.value = dark; confirmed.value = true }
             compose.onNodeWithTag("home_sensor_name").performClick()
-            compose.onNodeWithTag("home_sensor_last_connection_A", true).assertTextEquals(stamp(wifiStart))
-            compose.onNodeWithTag("home_sensor_last_connection_B", true).assertTextEquals(stamp(otherStart))
-            val layouts = mutableListOf<TextLayoutResult>()
-            compose.onNodeWithTag("home_sensor_last_connection_A", true)
-                .performSemanticsAction(SemanticsActions.GetTextLayoutResult) { it(layouts) }
-            assertEquals(2, layouts.single().lineCount)
+            for (id in listOf("A", "B")) {
+                compose.onNodeWithTag("home_sensor_last_connection_$id", true).assertDoesNotExist()
+                val description = compose.onNodeWithTag("home_sensor_option_$id").fetchSemanticsNode()
+                    .config[SemanticsProperties.ContentDescription].joinToString()
+                assertFalse("Removed dates are not announced by the screen reader either",
+                    description.contains(context.getString(R.string.sensor_info_last_connection)))
+            }
             val sensorHeight = compose.onNodeWithTag("home_sensor_option_A").fetchSemanticsNode().boundsInRoot.height
             compose.runOnIdle { confirmed.value = false }
-            compose.onNodeWithTag("home_sensor_last_connection_A", true).assertTextEquals(stamp(usbStart))
+            compose.onNodeWithTag("home_sensor_last_connection_A", true).assertDoesNotExist()
+            assertEquals(wifiStart, UvirSensorConnectionHistory.lastConnectedAt(menuContext, "A", SensorConnectionMode.WIFI))
+            assertEquals(usbStart, UvirSensorConnectionHistory.lastConnectedAt(menuContext, "A", SensorConnectionMode.USB))
+            assertEquals(otherStart, UvirSensorConnectionHistory.lastConnectedAt(menuContext, "B"))
             assertEquals(SensorRadioOptionMinHeight.value * context.resources.displayMetrics.density, sensorHeight, 1.5f)
             assertEquals(SensorConnectionMode.USB, UvirSensorConnectionHistory.lastConnectedMode(menuContext, "A"))
             compose.onNodeWithTag("home_sensor_connection_grid").assertIsDisplayed()
@@ -805,16 +873,131 @@ class UvirHomeSensorDropdownTest {
         assertEquals(listOf("B"), sensorRequests)
     }
 
-    @Test fun selectedStatusAndPulseMatchHomeAndOtherStatesAreIndependent() {
+    @Test fun unselectedSensorsPulseForTheirOwnActivityIncludingAfterDisconnection() {
+        // Disable automatic idling before composition, otherwise the test policy cancels
+        // infinite animations permanently and later clock advances cannot restart them.
+        compose.mainClock.autoAdvance = false
         showHeader()
+        compose.mainClock.advanceTimeBy(32)
+        compose.onNodeWithTag("home_sensor_name").performClick()
+        compose.mainClock.advanceTimeBy(400)
+        compose.onNodeWithTag("home_sensor_selection_menu").captureToImage()
+        for (dark in listOf(false, true)) for (indicator in listOf(
+            UvirStatusIndicator(UvirStatusDot.GREEN, true),
+            UvirStatusIndicator(UvirStatusDot.RED, true),
+            UvirStatusIndicator(UvirStatusDot.YELLOW, true),
+            UvirStatusIndicator(UvirStatusDot.RED, false))) {
+            compose.runOnIdle { night.value = dark; otherStatuses.value = mapOf("b" to indicator) }
+            compose.mainClock.advanceTimeBy(100)
+            if (indicator.pulses && indicator.dot != UvirStatusDot.YELLOW) {
+                val description = compose.onNodeWithTag("home_sensor_option_B").fetchSemanticsNode()
+                    .config[SemanticsProperties.ContentDescription].joinToString()
+                assertTrue("The unselected row receives its activity state",
+                    description.contains(context.getString(R.string.sensor_info_activity)))
+            }
+            val alphas = mutableListOf<Float>()
+            repeat(7) {
+                compose.mainClock.advanceTimeBy(300)
+                compose.waitForIdle()
+                val pixels = compose.onNodeWithTag("home_sensor_status_B", true).captureToImage().toPixelMap()
+                val background = pixels[0, 0]
+                val ink = inkColor(pixels)
+                val expected = Color(indicator.dot.colorArgb)
+                val components = listOf(expected.red - background.red, expected.green - background.green,
+                    expected.blue - background.blue)
+                val actual = listOf(ink.red - background.red, ink.green - background.green, ink.blue - background.blue)
+                val component = components.indices.maxBy { kotlin.math.abs(components[it]) }
+                val alpha = actual[component] / components[component]
+                alphas.add(alpha)
+                for (index in components.indices) assertEquals("Correct unselected status tint",
+                    components[index] * alpha, actual[index], .025f)
+                // Sensor A is selected and idle: B's activity must not make A pulse.
+                assertEquals(Color(UvirStatusDot.GREEN.colorArgb).green, menuDotColor("A").green, .02f)
+            }
+            val variation = alphas.max() - alphas.min()
+            if (indicator.pulses) assertTrue("Unselected $indicator must pulse, night=$dark, alphas=$alphas", variation > .20f)
+            else assertTrue("Idle unselected sensor must stay fixed, night=$dark", variation < .03f)
+        }
+        assertTrue(sensorRequests.isEmpty())
+        assertTrue(modes.isEmpty())
+    }
+
+    @Test fun simulationHidesRealSensorListAndConnectionsUntilTurnedOff() {
+        compose.mainClock.autoAdvance = false
+        fakeData.value = true
+        otherStatuses.value = mapOf(
+            "a" to UvirStatusIndicator(UvirStatusDot.GREEN, false),
+            "b" to UvirStatusIndicator(UvirStatusDot.RED, true))
+        showHeader()
+        compose.onNodeWithTag("home_sensor_name").performClick()
+        for (dark in listOf(false, true)) for (layout in listOf(LayoutDirection.Ltr, LayoutDirection.Rtl)) {
+            compose.runOnIdle { night.value = dark; direction.value = layout }
+            compose.mainClock.advanceTimeBy(100)
+            compose.onNode(hasText("—") and hasAnyAncestor(hasTestTag("home_sensor_name_text")),
+                useUnmergedTree = true).assertIsDisplayed()
+            compose.onNodeWithTag("home_sensor_simulation_warning").assertIsDisplayed()
+            compose.onNodeWithTag("home_sensor_simulation_settings").assertIsDisplayed().assertIsEnabled()
+            val layouts = mutableListOf<androidx.compose.ui.text.TextLayoutResult>()
+            compose.onNodeWithTag("home_sensor_simulation_warning").performSemanticsAction(
+                androidx.compose.ui.semantics.SemanticsActions.GetTextLayoutResult) { it(layouts) }
+            assertEquals(if (dark) Color.White else Color.Black, layouts.single().layoutInput.style.color)
+            compose.onNodeWithTag("home_sensor_dialog").assertIsDisplayed()
+            compose.onNodeWithTag("home_sensor_profiles").assertDoesNotExist()
+            compose.onNodeWithTag("home_sensor_connection_footer").assertDoesNotExist()
+            for (id in listOf("A", "B")) {
+                compose.onNodeWithTag("home_sensor_option_$id").assertDoesNotExist()
+                compose.onNodeWithTag("sensor_profile_info_$id").assertDoesNotExist()
+            }
+            for (mode in SensorConnectionMode.entries) {
+                compose.runOnIdle { connectionMode.value = mode; profileModes.value = mapOf("a" to mode, "b" to mode) }
+                compose.mainClock.advanceTimeBy(100)
+                compose.onNodeWithTag("home_source_option_${mode.name}").assertDoesNotExist()
+            }
+        }
+        assertTrue(sensorRequests.isEmpty())
+        assertTrue(modes.isEmpty())
+        assertEquals(0, infoRequests)
+        compose.runOnIdle { fakeData.value = false }
+        compose.mainClock.advanceTimeBy(100)
+        compose.onNodeWithTag("home_sensor_simulation_warning").assertDoesNotExist()
+        compose.onNodeWithTag("home_sensor_simulation_settings").assertDoesNotExist()
+        compose.onNodeWithTag("home_sensor_profiles").assertIsDisplayed()
+        compose.onNodeWithTag("home_sensor_connection_footer").assertIsDisplayed()
+        compose.onNodeWithTag("home_sensor_option_A").assertIsEnabled().assertIsSelected()
+        compose.onNodeWithTag("home_sensor_option_B").assertIsEnabled().assertIsNotSelected()
+        for (mode in SensorConnectionMode.entries) {
+            compose.onNodeWithTag("home_source_option_${mode.name}").assertIsEnabled()
+        }
+    }
+
+    @Test fun simulationShortcutClosesMenuWithoutDisablingDataOrChangingSensors() {
+        fakeData.value = true
+        compactDialog.value = true
+        fontScale.value = 1.6f
+        showHeader()
+        compose.onNodeWithTag("home_sensor_name").performClick()
+        compose.onNodeWithTag("home_sensor_simulation_settings").assertIsDisplayed().performClick()
+        compose.onNodeWithTag("home_sensor_dialog").assertDoesNotExist()
+        compose.runOnIdle {
+            assertEquals(1, simulationSettingsRequests)
+            assertTrue(fakeData.value)
+            assertEquals("A", selectedId.value)
+            assertTrue(sensorRequests.isEmpty())
+            assertTrue(modes.isEmpty())
+        }
+    }
+
+    @Test fun selectedStatusAndPulseMatchHomeAndOtherStatesAreIndependent() {
+        compose.mainClock.autoAdvance = false
+        showHeader()
+        compose.mainClock.advanceTimeBy(32)
         compose.runOnIdle {
             otherStatuses.value = mapOf("b" to UvirStatusIndicator(UvirStatusDot.GREEN, false))
         }
         compose.onNodeWithTag("home_sensor_name").performClick()
-        // Finish the popup's entrance before freezing time to compare pulse phases.
+        compose.mainClock.advanceTimeBy(400)
         compose.onNodeWithTag("home_sensor_selection_menu").captureToImage()
-        compose.mainClock.autoAdvance = false
-        for (state in listOf("handshake", "offline", "activity", "debug")) {
+        for (state in listOf("handshake", "offline", "activity")) {
             compose.runOnIdle {
                 confirmed.value = false
                 wirelessStatus.value = if (state == "handshake") WirelessSensorConnectionStatus.CONNECTED
@@ -823,12 +1006,28 @@ class UvirHomeSensorDropdownTest {
                 fakeData.value = state == "debug"
             }
             compose.mainClock.advanceTimeBy(600)
-            val homeDot = compose.onNodeWithTag("home_sensor_glyph", true).captureToImage().toPixelMap()
-            val rowColor = menuDotColor("A")
-            val homeColor = inkColor(homeDot)
-            assertEquals("Same colour and animation: $state", homeColor.red, rowColor.red, 0.02f)
-            assertEquals(homeColor.green, rowColor.green, 0.02f)
-            assertEquals(homeColor.blue, rowColor.blue, 0.02f)
+            val expected = Color(when (state) {
+                "handshake" -> UvirStatusDot.YELLOW.colorArgb
+                "debug" -> UvirStatusDot.DEBUG.colorArgb
+                else -> UvirStatusDot.RED.colorArgb
+            })
+            val pulseAlphas = mutableListOf<Float>()
+            // Alpha is composited onto different home/dialog backgrounds; compare the
+            // original hue and recovered opacity, not the two raw screenshot colours.
+            for (tag in listOf("home_sensor_glyph", "home_sensor_status_A")) {
+                val pixels = compose.onNodeWithTag(tag, true).captureToImage().toPixelMap()
+                val background = pixels[0, 0]
+                val ink = inkColor(pixels)
+                val components = listOf(expected.red - background.red, expected.green - background.green,
+                    expected.blue - background.blue)
+                val actual = listOf(ink.red - background.red, ink.green - background.green, ink.blue - background.blue)
+                val component = components.indices.maxBy { kotlin.math.abs(components[it]) }
+                val alpha = actual[component] / components[component]
+                pulseAlphas.add(alpha)
+                assertTrue("Same status tint: $state/$tag", alpha in .45f..1.03f)
+                for (index in components.indices) assertEquals(components[index] * alpha, actual[index], .025f)
+            }
+            assertEquals("Same pulse phase: $state", pulseAlphas[0], pulseAlphas[1], .05f)
             val otherColor = menuDotColor("B")
             assertEquals(Color(UvirStatusDot.GREEN.colorArgb).green, otherColor.green, 0.02f)
         }
@@ -871,7 +1070,7 @@ class UvirHomeSensorDropdownTest {
     }
 
     @Test fun longListNameIsSingleLineCappedAtFiftyFivePercentWithFixedDetails() {
-        val longName = "Sensore con un nome lungo per verificare che data informazioni e selezione rimangano visibili"
+        val longName = "Sensore con un nome lungo per verificare che informazioni e selezione rimangano visibili"
         profiles.value = profiles.value.map { if (it.hardwareUid == "A") it.copy(displayName = longName) else it }
         showHeader()
         for (dark in listOf(false, true)) for (layout in listOf(LayoutDirection.Ltr, LayoutDirection.Rtl))
@@ -889,12 +1088,11 @@ class UvirHomeSensorDropdownTest {
                 text.performSemanticsAction(SemanticsActions.GetTextLayoutResult) { it(layouts) }
                 assertEquals(1, layouts.single().lineCount)
                 val info = compose.onNodeWithTag("sensor_profile_info_A").assertIsDisplayed().fetchSemanticsNode().boundsInRoot
-                val date = compose.onNodeWithTag("home_sensor_last_connection_A", true).assertIsDisplayed().fetchSemanticsNode().boundsInRoot
+                compose.onNodeWithTag("home_sensor_last_connection_A", true).assertDoesNotExist()
                 val radio = compose.onNodeWithTag("home_sensor_radio_A", true).assertIsDisplayed().fetchSemanticsNode().boundsInRoot
                 assertTrue("Name never invades info", if (layout == LayoutDirection.Ltr) nameBounds.right <= info.left else nameBounds.left >= info.right)
-                assertTrue("Info precedes the date", if (layout == LayoutDirection.Ltr) info.right <= date.left else info.left >= date.right)
-                assertTrue("Radio remains after the date", if (layout == LayoutDirection.Ltr) date.right < radio.left else date.left > radio.right)
-                assertEquals(date.center.y, info.center.y, 1f)
+                assertTrue("Info precedes the radio", if (layout == LayoutDirection.Ltr) info.right < radio.left else info.left > radio.right)
+                assertEquals(radio.center.y, info.center.y, 1f)
                 compose.onNodeWithContentDescription(context.getString(R.string.close)).performClick()
             }
         assertTrue(sensorRequests.isEmpty())

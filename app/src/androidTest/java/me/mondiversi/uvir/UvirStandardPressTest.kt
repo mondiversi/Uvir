@@ -2,7 +2,7 @@ package me.mondiversi.uvir
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import org.junit.Assert.assertEquals
@@ -30,13 +30,13 @@ class UvirStandardPressTest {
     }
 
     private fun down() {
-        compose.onNodeWithText("Hold test").performTouchInput { down(center) }
+        compose.onNodeWithContentDescription("Hold test").performTouchInput { down(center) }
         compose.mainClock.advanceTimeByFrame()
     }
 
     @Test fun shortClickDoesNotConfirm() {
         showButton()
-        compose.onNodeWithText("Hold test").performClick()
+        compose.onNodeWithContentDescription("Hold test").performClick()
         compose.mainClock.advanceTimeBy(3_000L)
         compose.runOnIdle { assertEquals(0, confirmations.get()) }
     }
@@ -45,7 +45,7 @@ class UvirStandardPressTest {
         showButton()
         down()
         compose.mainClock.advanceTimeBy(800L)
-        compose.onNodeWithText("Hold test").performTouchInput { up() }
+        compose.onNodeWithContentDescription("Hold test").performTouchInput { up() }
         compose.mainClock.advanceTimeBy(3_000L)
         compose.runOnIdle { assertEquals(0, confirmations.get()) }
     }
@@ -54,7 +54,7 @@ class UvirStandardPressTest {
         showButton()
         down()
         compose.mainClock.advanceTimeBy(800L)
-        compose.onNodeWithText("Hold test").performTouchInput { cancel() }
+        compose.onNodeWithContentDescription("Hold test").performTouchInput { cancel() }
         compose.mainClock.advanceTimeBy(3_000L)
         compose.runOnIdle { assertEquals(0, confirmations.get()) }
     }
@@ -66,6 +66,6 @@ class UvirStandardPressTest {
         compose.runOnIdle { assertEquals(1, confirmations.get()) }
         compose.mainClock.advanceTimeBy(3_000L)
         compose.runOnIdle { assertEquals(1, confirmations.get()) }
-        compose.onNodeWithText("Hold test").performTouchInput { up() }
+        compose.onNodeWithContentDescription("Hold test").performTouchInput { up() }
     }
 }

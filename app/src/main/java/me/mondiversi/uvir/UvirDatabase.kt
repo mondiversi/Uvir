@@ -15,7 +15,7 @@ class UvirDatabaseHelper(
     context.applicationContext,
     "uvir.db",
     null,
-    20
+    21
 ) {
 
     private val appContext =
@@ -258,6 +258,7 @@ class UvirDatabaseHelper(
         createAlertsTable(db)
         createSessionTables(db)
         createSensorSettingsTables(db)
+        UvirLegacyCameraArchive.createTable(db)
     }
 
     override fun onUpgrade(
@@ -410,6 +411,7 @@ class UvirDatabaseHelper(
             addColumnIfMissing(db, "sensor_settings", "alert_duration_seconds", "INTEGER NOT NULL DEFAULT 0")
             addColumnIfMissing(db, "sensor_settings", "alert_max_registrations", "INTEGER NOT NULL DEFAULT 0")
         }
+        if (oldVersion < 21) UvirLegacyCameraArchive.createTable(db)
         if (oldVersion < 20) {
             addColumnIfMissing(db, "sensor_settings", "settings_updated_at_ms", "INTEGER NOT NULL DEFAULT 0")
             addColumnIfMissing(db, "sensor_settings", "alert_recording_enabled", "INTEGER")
@@ -794,12 +796,8 @@ class UvirDatabaseHelper(
         }
     }
 
-    fun assignDefaultSensorToUnassociatedAlerts(defaultHardwareUid: String): Int {
-        val defaultProfile =
-            findSensorProfile(defaultHardwareUid)
-                ?: readSensorProfiles().singleOrNull()
-                ?: return 0
-        val changed = backfillUnassociatedAlertSensors(writableDatabase, defaultProfile.id)
+    fun repairKnownAlertSensorAssociations(): Int {
+        val changed = backfillUnassociatedAlertSensors(writableDatabase)
         if (changed > 0) notifyAlertsChanged()
         return changed
     }
@@ -2628,7 +2626,8 @@ class UvirDatabaseHelper(
 
         database.beginTransaction()
         try {
-            deletedRows = database.delete(
+            deletedRows += database.delete("camera_estimates", null, null)
+            deletedRows += database.delete(
                 "acquisitions",
                 null,
                 null
@@ -2636,7 +2635,7 @@ class UvirDatabaseHelper(
             database.delete("acquisition_sessions", null, null)
             database.execSQL(
                 "DELETE FROM sqlite_sequence " +
-                    "WHERE name IN ('acquisitions', 'alerts')"
+                    "WHERE name IN ('acquisitions', 'alerts', 'camera_estimates')"
             )
             deletedRows += database.delete(
                 "alerts",

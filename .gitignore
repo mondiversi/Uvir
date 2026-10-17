@@ -38,6 +38,7 @@ render.experimental.xml
 *.jks
 *.keystore
 keystore.properties
+signing.properties
 !keystore.properties.example
 .android-user/
 .android-user-codex/

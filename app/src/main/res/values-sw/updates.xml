@@ -6,7 +6,7 @@
     <string name="update_app">Sasisha programu</string>
     <string name="update_sensor">Sasisha kihisi</string>
     <string name="update_app_first">Sasisha programu kwanza.</string>
-    <string name="update_usb_required">Chagua kihisi hiki na ukiunganishe kwa USB bila kipindi kinachoendelea na rekodi zote zikiwa zimesawazishwa.</string>
+    <string name="update_usb_required">Chagua kihisi na ukiunganishe kwa USB bila kipindi kinachoendelea na rekodi zote zikiwa zimesawazishwa.</string>
     <string name="update_download">Inapakua na kuthibitisha…</string>
     <string name="update_flash">Inasasisha kihisi…</string>
     <string name="update_verify">Inathibitisha kihisi…</string>

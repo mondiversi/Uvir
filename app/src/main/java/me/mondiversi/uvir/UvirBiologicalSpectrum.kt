@@ -132,7 +132,7 @@ fun BiologicalEffectsContent(
                     ),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                HorizontalDivider(
+                UvirIslandHeaderDivider(
                     color = secondaryText.copy(alpha = 0.20f)
                 )
 

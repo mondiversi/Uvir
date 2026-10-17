@@ -1,6 +1,7 @@
 package me.mondiversi.uvir
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -14,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.AccessibilityAction
 import androidx.compose.ui.semantics.SemanticsActions
@@ -43,6 +45,7 @@ internal fun UvirAccessibleIconButton(
     badgeColor: androidx.compose.ui.graphics.Color? = null,
     badgeSize: Dp = UvirActionIconBadgeSize,
     visualScale: Float = 1f,
+    restingContainerColor: Color = Color.Transparent,
     content: @Composable () -> Unit
 ) {
     val pressSource = interactionSource ?: remember { MutableInteractionSource() }
@@ -64,6 +67,7 @@ internal fun UvirAccessibleIconButton(
             modifier
                 .uvirHapticOnPress(enabled && hapticOnPress)
                 .clip(CircleShape)
+                .background(restingContainerColor)
                 .clickable(
                     enabled = enabled,
                     interactionSource = pressSource,
@@ -101,6 +105,7 @@ internal fun UvirAccessibleIconButton(
                         .size(visualSize)
                         .graphicsLayer { scaleX = visualScale; scaleY = visualScale }
                         .clip(CircleShape)
+                        .background(restingContainerColor)
                         .indication(
                             interactionSource = pressSource,
                             indication = pressedIndication

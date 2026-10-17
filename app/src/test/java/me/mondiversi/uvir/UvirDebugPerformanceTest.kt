@@ -6,6 +6,9 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class UvirDebugPerformanceTest {
+    @Test fun hiddenMelodyRequiresThreeSeconds() {
+        assertEquals(3_000L, DEBUG_SECRET_MELODY_HOLD_MS)
+    }
     @Test
     fun ordinaryChoicesHideTheSecretMelodyAndKeepEnglishAlphabeticalOrder() {
         assertEquals(

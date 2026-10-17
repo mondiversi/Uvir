@@ -44,7 +44,8 @@ private val UVIR_DATABASE_TABLES = listOf(
     "sensor_settings",
     "sensor_alert_rules",
     "acquisitions",
-    "alerts"
+    "alerts",
+    "camera_estimates"
 )
 
 internal fun extractEncryptedUvirDatabaseArchive(
@@ -126,8 +127,16 @@ internal suspend fun importEncryptedUvirDatabaseArchive(
         SQLiteDatabase.openDatabase(
             importedFile.absolutePath,
             null,
-            SQLiteDatabase.OPEN_READONLY
-        ).use { source -> validateImportedDatabase(source, target) }
+            SQLiteDatabase.OPEN_READWRITE
+        ).use { source ->
+            // Upgrade only the private extracted copy of the previous schema.
+            // Never mutate the user's original ZIP/database or app preferences.
+            if (source.version == 20 && target.version == 21) {
+                UvirLegacyCameraArchive.createTable(source)
+                source.version = 21
+            }
+            validateImportedDatabase(source, target)
+        }
 
         // A single transaction makes the replacement all-or-nothing. The active database
         // connection and its WAL stay in place, avoiding a partially replaced database file.
@@ -143,12 +152,12 @@ internal suspend fun importEncryptedUvirDatabaseArchive(
                 }
                 target.execSQL(
                     "DELETE FROM main.sqlite_sequence " +
-                        "WHERE name IN ('sensors', 'acquisitions', 'alerts')"
+                        "WHERE name IN ('sensors', 'acquisitions', 'alerts', 'camera_estimates')"
                 )
                 target.execSQL(
                     "INSERT INTO main.sqlite_sequence(name, seq) " +
                         "SELECT name, seq FROM uvir_import.sqlite_sequence " +
-                        "WHERE name IN ('sensors', 'acquisitions', 'alerts')"
+                        "WHERE name IN ('sensors', 'acquisitions', 'alerts', 'camera_estimates')"
                 )
                 target.setTransactionSuccessful()
             } finally {

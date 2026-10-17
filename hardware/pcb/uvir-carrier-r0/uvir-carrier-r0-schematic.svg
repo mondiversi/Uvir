@@ -46,7 +46,7 @@
   <text class="label" x="465" y="559">I2C SCL</text>
 
   <rect class="sensor" x="520" y="145" width="310" height="255" rx="12" />
-  <text class="label" x="675" y="180" text-anchor="middle">U2 · GY-AS7343</text>
+  <text class="label" x="675" y="180" text-anchor="middle">U2 · GY-AS734X</text>
   <text class="small" x="675" y="205" text-anchor="middle">luce visibile / far-red / NIR · I2C 0x39</text>
   <text x="555" y="270">VCC / VIN</text>
   <text x="555" y="320">GND</text>
@@ -97,5 +97,5 @@
   <path class="ground" d="M1270 730 H1300 V330 H1190" />
 
   <text class="small" x="70" y="830">R4/R5: piazzole opzionali 4.7 kΩ per pull-up I2C, non montare se i breakout hanno già i propri pull-up.</text>
-  <text class="small" x="70" y="855">C1/C2: 100 nF vicino ai moduli; C3: 10 µF sul ramo 3V3. Verificare sempre alimentazione e level shifting del GY-AS7343 reale.</text>
+  <text class="small" x="70" y="855">C1/C2: 100 nF vicino ai moduli; C3: 10 µF sul ramo 3V3. Verificare sempre alimentazione e level shifting del GY-AS734X reale.</text>
 </svg>

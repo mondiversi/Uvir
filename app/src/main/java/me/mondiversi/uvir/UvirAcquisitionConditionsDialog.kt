@@ -92,7 +92,8 @@ internal fun UvirAcquisitionConditionsDialog(
                                 checked = enabled[metric] == true,
                                 onCheckedChange = { checked -> setConditionEnabled(metric, checked) },
                                 enabled = controlsEnabled,
-                                modifier = Modifier.size(40.dp).testTag("acquisition_condition_check_${metric.name}")
+                                modifier = Modifier.size(40.dp).testTag("acquisition_condition_check_${metric.name}"),
+                                colors = uvirCheckboxColors()
                             )
                             ThresholdAlertMetricLabel(metric, primaryText, secondaryText,
                                 enabled = controlsEnabled, modifier = Modifier.weight(1f))

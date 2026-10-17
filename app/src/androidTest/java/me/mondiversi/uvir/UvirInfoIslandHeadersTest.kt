@@ -47,8 +47,7 @@ class UvirInfoIslandHeadersTest {
         }
         val headers = listOf(
             context.getString(R.string.about_whats_new_title, BuildConfig.VERSION_NAME),
-            context.getString(R.string.github_repository_title),
-            context.getString(R.string.project_numbers_title)
+            context.getString(R.string.github_repository_title)
         )
         for (dark in listOf(false, true)) for (rightToLeft in listOf(false, true)) {
             compose.runOnIdle { night.value = dark; rtl.value = rightToLeft }
@@ -63,8 +62,6 @@ class UvirInfoIslandHeadersTest {
                 header.performTouchInput { click() }
                 header.assertIsDisplayed()
             }
-            compose.onNodeWithText(context.getString(R.string.project_numbers_description))
-                .performScrollTo().assertIsDisplayed()
             compose.onNodeWithText(context.getString(R.string.open_github_repository))
                 .performScrollTo().assertIsDisplayed()
             compose.onNodeWithText("• ${context.getString(R.string.about_whats_new_connectivity)}")

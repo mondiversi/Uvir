@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="data_management_error_log_group">Foutenlogboek</string>
+    <string name="data_management_error_log_description">Exporteer geregistreerde fouten met technische informatie over de app, telefoon en sensoren.</string>
+</resources>

@@ -36,6 +36,11 @@ class UvirMultiSensorRuntime(
     internal val resources = mutableResources.asStateFlow()
     private val mutableChanges = MutableSharedFlow<Pair<String, Boolean>>(extraBufferCapacity = 64)
     internal val connectionChanges = mutableChanges.asSharedFlow()
+    private val rtcCheckLock = Any()
+    private val rtcStartupCheck = UvirRtcStartupCheck(android.os.SystemClock.elapsedRealtime())
+    private val mutableRtcWarnings = MutableStateFlow<List<String>>(emptyList())
+    internal val rtcWarnings = mutableRtcWarnings.asStateFlow()
+    private var rtcWarningBatch: Job? = null
     private var receiver: Job? = null
     private var refresh: Job? = null
 
@@ -52,7 +57,10 @@ class UvirMultiSensorRuntime(
         val persistence = UvirMultiSensorPersistence(appContext, database, ::send, ::completeSync)
         receiver = scope.launch {
             UvirSensorEventHub.frames.collect { frame ->
-                try { persistence.handle(frame) }
+                try {
+                    if (frame is UvirDeviceFrame.Clock) observeRtcClock(frame.observation)
+                    else persistence.handle(frame)
+                }
                 catch (error: Exception) {
                     if (error is CancellationException) throw error
                     // No ACK on failure: the durable sensor queue remains the recovery source.
@@ -70,8 +78,37 @@ class UvirMultiSensorRuntime(
         }
     }
 
+    private fun observeRtcClock(observation: UvirRtcClockObservation) {
+        if (normalizeSensorDeviceId(observation.deviceId) !in
+            UvirSensorCredentialStore.associatedDeviceIds(appContext)) return
+        synchronized(rtcCheckLock) {
+            if (!rtcStartupCheck.observe(observation)) return
+            if (mutableRtcWarnings.value.isNotEmpty()) {
+                // Update the open warning rather than stacking another dialog.
+                mutableRtcWarnings.value = rtcStartupCheck.pendingDeviceIds()
+            } else if (rtcWarningBatch == null) {
+                // Fixed collection window: healthy periodic HELLOs cannot postpone delivery.
+                rtcWarningBatch = scope.launch {
+                    delay(1_200L)
+                    synchronized(rtcCheckLock) {
+                        mutableRtcWarnings.value = rtcStartupCheck.pendingDeviceIds()
+                        rtcWarningBatch = null
+                    }
+                }
+            }
+        }
+    }
+
+    internal fun dismissRtcWarnings(deviceIds: List<String>) {
+        synchronized(rtcCheckLock) {
+            rtcStartupCheck.dismiss(deviceIds)
+            mutableRtcWarnings.value = rtcStartupCheck.pendingDeviceIds()
+        }
+    }
+
     /** The UI never stops the physical USB transport just because another UID is selected. */
     internal fun configureSelected(mode: SensorConnectionMode, enabled: Boolean, intervalMs: Long) {
+        if (UvirSensorSimulationSettingsStore.load(preferences).enabled) return
         val selected = UvirSensorCredentialStore.load(appContext).deviceId
         val usbId = usb.state.value.deviceId.orEmpty()
         if (usbId.isBlank() || usbId.equals(selected, ignoreCase = true)) {
@@ -88,7 +125,7 @@ class UvirMultiSensorRuntime(
     private suspend fun refreshConnections() {
         val associated = UvirSensorCredentialStore.associatedDeviceIds(appContext)
         val paused = UvirSensorCredentialStore.isSensorSelectionDisabled(appContext)
-        val selected = UvirSensorCredentialStore.load(appContext).deviceId
+        val selected = selectedUiSensorDeviceId(preferences, UvirSensorCredentialStore.load(appContext).deviceId)
         wireless.keys.filter { it.isNotBlank() && it !in associated }.forEach { id ->
             wireless.remove(id)?.stop()
             announced.remove(id)
@@ -107,7 +144,6 @@ class UvirMultiSensorRuntime(
         val usbUid = normalizeSensorDeviceId(usbState.deviceId.orEmpty())
         for (id in associated) {
             val transportEnabled = uvirSensorRealTransportEnabled(preferences, id, paused)
-            val simulated = UvirSensorSimulationSettingsStore.load(preferences, id).enabled
             realTransportActive = realTransportActive || transportEnabled
             val worker = wirelessFor(id)
             val currentMode = SensorConnectionMode.fromStoredValue(preferences.getString(KEY_SENSOR_CONNECTION_MODE, null))
@@ -136,11 +172,7 @@ class UvirMultiSensorRuntime(
             val previousAlerts = lastAlertMonitoring.getOrPut(id) {
                 database.readSensorSettings(id)?.alertMonitoringEnabled == true
             }
-            val alertsActive = if (simulated) {
-                val enabledKey = if (id.equals(selected, true)) KEY_THRESHOLD_ALERT_ENABLED
-                    else sensorContextPreferenceKey(id, KEY_THRESHOLD_ALERT_ENABLED)
-                preferences.getBoolean(enabledKey, false)
-            } else uvirSensorAlertMonitoringActive(id, info, previousAlerts)
+            val alertsActive = uvirSensorAlertMonitoringActive(id, info, previousAlerts)
             lastAlertMonitoring[id] = alertsActive
             if (alertsActive) alertIds.add(id)
             if (info.deviceId.equals(id, true) &&
@@ -150,7 +182,7 @@ class UvirMultiSensorRuntime(
             val initializing = transportEnabled && !connected && if (usbOwnsDevice) {
                 usbState.status == UsbSensorConnectionStatus.CONNECTED
             } else wirelessState.status == WirelessSensorConnectionStatus.CONNECTED
-            val connectionState = uvirConnectionSensorState(id, !paused && simulated, connected,
+            val connectionState = uvirConnectionSensorState(id, false, connected,
                 initializing, connecting && !initializing,
                 lastActivity[id] == true || (connected && info.operationActive == true))
             // The menu and notification must distinguish search (red) from handshake (yellow).

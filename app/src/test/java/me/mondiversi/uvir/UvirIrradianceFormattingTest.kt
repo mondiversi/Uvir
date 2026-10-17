@@ -12,11 +12,18 @@ class UvirIrradianceFormattingTest {
     }
 
     @Test
-    fun missingPreferenceUsesMilliwattsPerSquareCentimetre() {
+    fun missingPreferenceUsesWattsPerSquareMetre() {
         assertEquals(
-            UvirIrradianceUnit.MW_CM2,
+            UvirIrradianceUnit.W_M2,
             UvirIrradianceUnit.fromStoredValue(null)
         )
+    }
+
+    @Test
+    fun savedUserUnitsAreNotReplacedByTheNewDefault() {
+        for (unit in UvirIrradianceUnit.entries) {
+            assertEquals(unit, UvirIrradianceUnit.fromStoredValue(unit.storedValue))
+        }
     }
 
     @Test

@@ -89,7 +89,7 @@ class UvirConnectionNotificationTest {
     }
 
     @Test fun allSupportedLocalesFormatCountsAndNamedRows() {
-        for (tag in listOf("en", "it", "ar", "de", "el", "es", "fa", "fr", "hi", "he", "ja", "ko", "pt", "ru", "sw", "tr", "zh-CN")) {
+        for (tag in listOf("en", "it", "ar", "de", "el", "es", "fa", "fr", "hi", "he", "ja", "ko", "pt", "ru", "sw", "pl", "nl", "id", "tr", "zh-CN")) {
             val res = context(tag).resources
             for (count in listOf(0, 1, 2, 5, 21, 1_000_000)) for (plural in listOf(
                 R.plurals.connection_notification_connected_count, R.plurals.connection_notification_connecting_count,

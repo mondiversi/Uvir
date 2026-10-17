@@ -29,8 +29,9 @@ class UvirEsp32RomUpdaterTest {
             fun word(at: Int) = ByteBuffer.wrap(packet, at, 4).order(ByteOrder.LITTLE_ENDIAN).int
             val value = if (opcode == 0x0A) when(word(8)) {
                 0x40001000 -> 0x00F01D83
-                0x3FF5A008 -> if (wrongUid) 0x1234 else 0x20E7
-                0x3FF5A004 -> 0xC8AC9F68.toInt()
+                // Synthetic eFuse identity: never embed a real sensor's MAC in tests.
+                0x3FF5A008 -> if (wrongUid) 0x1234 else 0x6655
+                0x3FF5A004 -> 0x44332211
                 0x3FF5A018 -> if (secure) 0x10 else 0
                 else -> 0
             } else 0
@@ -47,7 +48,7 @@ class UvirEsp32RomUpdaterTest {
     private fun image() = ByteArray(1025).apply { this[0] = 0xE9.toByte() }
     @Test fun fragmentedTransferOnlyWritesApplication() {
         val serial = Serial()
-        UvirEsp32RomUpdater(serial).flash(image(), "689FACC8E720", 0x400000, "a".repeat(32)) {}
+        UvirEsp32RomUpdater(serial).flash(image(), "112233445566", 0x400000, "a".repeat(32)) {}
         assertEquals(0x10000, serial.offset)
         assertEquals(2, serial.commands.count { it == 3 })
         assertFalse(serial.commands.contains(0xD0))
@@ -56,22 +57,22 @@ class UvirEsp32RomUpdaterTest {
     }
     @Test fun foreignIdentityNeverErases() {
         val serial = Serial(wrongUid = true)
-        assertThrows(IllegalArgumentException::class.java) { UvirEsp32RomUpdater(serial).flash(image(), "689FACC8E720", 0x400000, "a".repeat(32)) {} }
+        assertThrows(IllegalArgumentException::class.java) { UvirEsp32RomUpdater(serial).flash(image(), "112233445566", 0x400000, "a".repeat(32)) {} }
         assertFalse(serial.commands.contains(2))
     }
     @Test fun secureBootNeverErases() {
         val serial = Serial(secure = true)
-        assertThrows(IllegalArgumentException::class.java) { UvirEsp32RomUpdater(serial).flash(image(), "689FACC8E720", 0x400000, "a".repeat(32)) {} }
+        assertThrows(IllegalArgumentException::class.java) { UvirEsp32RomUpdater(serial).flash(image(), "112233445566", 0x400000, "a".repeat(32)) {} }
         assertFalse(serial.commands.contains(2))
     }
     @Test fun badFlashDigestNeverReportsSuccess() {
         val serial = Serial(wrongMd5 = true)
-        assertThrows(IllegalArgumentException::class.java) { UvirEsp32RomUpdater(serial).flash(image(), "689FACC8E720", 0x400000, "a".repeat(32)) {} }
+        assertThrows(IllegalArgumentException::class.java) { UvirEsp32RomUpdater(serial).flash(image(), "112233445566", 0x400000, "a".repeat(32)) {} }
         assertFalse(serial.commands.contains(4))
     }
     @Test fun unknownPartitionTableNeverErases() {
         val serial = Serial()
-        assertThrows(IllegalArgumentException::class.java) { UvirEsp32RomUpdater(serial).flash(image(), "689FACC8E720", 0x400000, "b".repeat(32)) {} }
+        assertThrows(IllegalArgumentException::class.java) { UvirEsp32RomUpdater(serial).flash(image(), "112233445566", 0x400000, "b".repeat(32)) {} }
         assertFalse(serial.commands.contains(2))
     }
 }

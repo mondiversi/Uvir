@@ -49,12 +49,12 @@ enum class UvirIrradianceUnit(
 
     companion object {
         fun fromStoredValue(value: String?): UvirIrradianceUnit =
-            entries.firstOrNull { it.storedValue == value } ?: MW_CM2
+            entries.firstOrNull { it.storedValue == value } ?: W_M2
     }
 }
 
 internal val LocalUvirIrradianceUnit =
-    staticCompositionLocalOf { UvirIrradianceUnit.MW_CM2 }
+    staticCompositionLocalOf { UvirIrradianceUnit.W_M2 }
 
 internal fun loadUvirIrradianceUnit(context: Context): UvirIrradianceUnit =
     UvirIrradianceUnit.fromStoredValue(
@@ -63,7 +63,7 @@ internal fun loadUvirIrradianceUnit(context: Context): UvirIrradianceUnit =
             Context.MODE_PRIVATE
         ).getString(
             UVIR_IRRADIANCE_UNIT_KEY,
-            UvirIrradianceUnit.MW_CM2.storedValue
+            UvirIrradianceUnit.W_M2.storedValue
         )
     )
 

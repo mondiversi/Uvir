@@ -32,14 +32,17 @@ internal fun sensorSyncSourceMatchesSelection(
     }
 }
 
+internal const val DEFAULT_SENSOR_STATUS_LED_BRIGHTNESS = 20
+internal const val DEFAULT_SENSOR_STATUS_BUZZER_VOLUME = 20
+
 data class SensorParameters(
     val autonomousRecordingEnabled: Boolean = true,
     val automaticShutdownEnabled: Boolean = false,
     val automaticShutdownSeconds: Int = 1_800,
     val statusLedEnabled: Boolean = true,
-    val statusLedBrightness: Int = 10,
+    val statusLedBrightness: Int = DEFAULT_SENSOR_STATUS_LED_BRIGHTNESS,
     val statusBuzzerEnabled: Boolean = true,
-    val statusBuzzerVolume: Int = 10,
+    val statusBuzzerVolume: Int = DEFAULT_SENSOR_STATUS_BUZZER_VOLUME,
     val externalCommandEnabled: Boolean = true
 )
 

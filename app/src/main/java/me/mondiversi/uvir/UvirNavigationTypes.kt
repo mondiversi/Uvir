@@ -41,6 +41,8 @@ internal fun resolveListEdgeAnchor(
 
 internal val UvirIslandSpacing = 9.dp
 internal val UvirIslandContentPadding = 12.dp
+internal val UvirIslandHeaderDividerThickness = 1.dp
+internal const val UvirIslandHeaderDividersVisible = true
 internal val UvirScreenHorizontalPadding = 10.dp
 private val UvirSessionIndicatorLight =
     Color(0xFF4FC36B)

@@ -1,9 +1,9 @@
 # Hardware
 
-This directory is reserved for the physical design and assembly documentation
-used by Uvir.
+This directory contains the physical design and assembly documentation used
+by Uvir.
 
-Planned contents:
+Contents include:
 
 - breadboard wiring diagrams;
 - pin assignments and I2C addresses;
@@ -12,10 +12,46 @@ Planned contents:
 - bill of materials;
 - assembly photos and sensor test notes.
 
-The first carrier-board engineering draft is in
-`pcb/uvir-carrier-r0`. It contains the verified logical schematic, preliminary
-placement, BOM and fabrication profile. Gerbers remain intentionally blocked
-until the exact physical modules have been measured.
+## Current optical modules
+
+| Area | Breakout board | Sensor chip |
+|---|---|---|
+| Visible / far-red / NIR | Generic GY-AS734X | AS7343 |
+| UVA / UVB / UVC | MIKROE UV 5 Click | AS7331 |
+
+On 2026-10-12, the replacement visible-light board was identified from its
+GY-AS734X silkscreen and successful AS7343 driver initialization over USB.
+The driver checks the AS7343 device ID (`0x81`) at I2C address `0x39`;
+this is not an identification based only on the firmware's model label.
+Firmware `0.5.104` also reports the AS7331 as available. This confirms detection,
+not measurement accuracy or a completed optical calibration.
+
+The replacement board has the same dimensions as the previous board according
+to the owner: approximately **22 × 13 mm**, mounted horizontally. Retain this
+placement estimate; the exact socket geometry and electrical design still
+require verification on the physical board. GY-AS734X is the board marking,
+not a substitute for the chip model or an identified manufacturer. Driver,
+logical GPIO assignments, I2C address and calibration settings are unchanged.
+
+## Carrier board and validation
+
+The current connected EasyEDA Standard schematic, logical pin map and
+provisional front/back placement are in [carrier R1](pcb/uvir-carrier-r1/README.md).
+The earlier [R0 draft](pcb/uvir-carrier-r0/README.md) is retained for reference;
+its SparkFun UV-board footprint is not the current UV 5 Click footprint.
+The [design exports dated 2026-10-05](pcb/uvir-carrier-2026-10-05/README.md)
+add a supplied schematic, two physical-layout versions, PDF/PNG references
+and a Gerber/drill archive. Publication copies have been anonymized locally;
+the originals are not included. This is a separate intake collection, not a
+replacement for the maintained R1 logical references. The presence of a
+manufacturing archive does not mean fabrication is approved: footprint,
+outline, firmware/net compatibility, library licensing and ERC/DRC review
+remain required. See its [review checklist](pcb/uvir-carrier-2026-10-05/REVIEW.md).
+
+Repeat the functional tests, dark readings and optical calibration after PCB
+assembly, with the final optical isolation, enclosure/windows and normal LED
+operation. Breadboard tests are provisional. See the
+[calibration checklist](calibration/README.md).
 
 Firmware source code belongs in `firmware/esp32/UvirSensor`. Keeping hardware
 documents separate from firmware makes the repository easier to navigate as

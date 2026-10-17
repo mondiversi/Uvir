@@ -1,6 +1,6 @@
 Designator,Quantity,Description,Value_or_part,Footprint,Assembly,Verification
 U1,1,ESP32 development board 38 pin,ESP-WROOM-32 Dev Module,Two rows 1x19 P2.54 mm,Hand fitted,MEASURE EXACT BOARD
-U2,1,Visible and NIR spectral sensor module,GY-AS7343,Module footprint TBD,Hand fitted,MEASURE MODULE AND PIN ORDER
+U2,1,Visible and NIR spectral sensor module,GY-AS734X (AS7343),Module footprint TBD,Hand fitted,MEASURE MODULE AND PIN ORDER
 U3,1,UV spectral sensor breakout,SparkFun SEN-23517 AS7331,25.4 x 25.4 mm module footprint,Hand fitted,CONFIRM STANDARD VERSION
 D1,1,Right-angle common-cathode RGB LED,Red and green channels used,Package TBD,Hand fitted,MEASURE PACKAGE
 D2,1,Right-angle blue operation LED,Blue,Package TBD,Hand fitted,MEASURE PACKAGE

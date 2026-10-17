@@ -17,6 +17,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 internal val UvirTitleActionButtonSize = 40.dp
+// Use the existing target more fully, without increasing toolbar spacing.
+internal val UvirTitleActionPressedVisualSize = 38.dp
 internal const val UvirTitleActionVisualScale = 0.96f
 internal val UvirTitleActionIconSize = 24.dp
 internal val UvirTitleActionIconStrokeWidth = 2.21.dp
@@ -36,6 +38,17 @@ internal val UvirTitleBarContentPadding = PaddingValues(
     bottom = 4.dp
 )
 
+/** Ordinary title actions use the same neutral color in both states. */
+@Composable
+internal fun uvirTitleActionColor(enabled: Boolean = true): Color {
+    val neutral = uvirNeutralContentColor()
+    return if (enabled) neutral else neutral.copy(alpha = 0.38f)
+}
+
+@Composable
+internal fun uvirTitleActionStateColor(active: Boolean, enabled: Boolean = true): Color =
+    if (active && enabled) MaterialTheme.colorScheme.primary else uvirTitleActionColor(enabled)
+
 /** Bare themed glyph and circular pressed feedback, with the full touch target. */
 @Composable
 internal fun UvirTitleActionButton(
@@ -43,7 +56,7 @@ internal fun UvirTitleActionButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    iconColor: Color = MaterialTheme.colorScheme.primary,
+    iconColor: Color = uvirTitleActionColor(),
     content: @Composable () -> Unit
 ) {
     UvirAccessibleIconButton(
@@ -52,12 +65,12 @@ internal fun UvirTitleActionButton(
         modifier = modifier.size(UvirTitleActionButtonSize),
         enabled = enabled,
         pressedColor = iconColor,
-        pressedVisualSize = UvirActionIconBadgeSize,
+        pressedVisualSize = UvirTitleActionPressedVisualSize,
         visualScale = UvirTitleActionVisualScale,
     ) {
         CompositionLocalProvider(
             LocalContentColor provides if (enabled) iconColor
-                else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                else uvirTitleActionColor(enabled = false),
             content = content
         )
     }
@@ -83,14 +96,13 @@ fun UvirBackButton(
             R.string.navigate_back
         )
 
-    val accent = MaterialTheme.colorScheme.primary
-    val tint = accent
+    val tint = uvirTitleActionColor()
 
     UvirAccessibleIconButton(
         contentDescription = description,
         onClick = onClick,
         modifier = Modifier.size(UvirTitleBackButtonSize),
-        pressedColor = accent,
+        pressedColor = tint,
         pressedVisualSize = UvirTitleBackPressedVisualSize
     ) {
         Canvas(

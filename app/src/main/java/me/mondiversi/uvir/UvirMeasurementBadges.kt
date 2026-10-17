@@ -378,8 +378,8 @@ private fun UvirDetailDateTimeRow(
             fontSize = 12.sp,
             lineHeight = 15.sp,
             fontWeight = FontWeight.Normal,
-            maxLines = 1,
-            softWrap = false,
+            maxLines = if (LocalUvirMeasurementPanels.current) 3 else 1,
+            softWrap = LocalUvirMeasurementPanels.current,
             overflow = TextOverflow.Ellipsis
         )
     }

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="diagnostics_test_group">Diagnosetest</string>
+    <string name="diagnostics_simulation_group">Simulatie</string>
+    <string name="diagnostics_simulation_description">Simuleert metingen, waarschuwingen en livewaarden.</string>
+</resources>

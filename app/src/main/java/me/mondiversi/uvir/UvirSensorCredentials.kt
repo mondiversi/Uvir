@@ -177,6 +177,38 @@ object UvirSensorCredentialStore {
             context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         )
 
+    /** Migrate the old optional selection and restore the chosen profile's own context. */
+    @Synchronized
+    fun ensureAssociatedSensorSelected(context: Context): String {
+        val current = load(context)
+        val preferences = context.applicationContext.getSharedPreferences(me.mondiversi.uvir.PREFS_NAME, Context.MODE_PRIVATE)
+        val demoPrepared = preferences.getBoolean(KEY_SIMULATION_CONTEXT_PREPARED, false)
+        val available = associatedDeviceIds(context).filter {
+            loadForDevice(context, it)?.isProvisioned == true
+        }
+        val target = requiredSelectedSensorId(current.deviceId, available)
+        if (target.isBlank()) {
+            if (current.deviceId.isNotBlank()) {
+                val preferences = context.applicationContext.getSharedPreferences(me.mondiversi.uvir.PREFS_NAME, Context.MODE_PRIVATE)
+                if (!demoPrepared) check(saveSelectedSensorContext(preferences, current.deviceId, preserveSensorReadback = true))
+                check(releaseActiveSensor(context))
+                if (!demoPrepared) check(restoreSelectedSensorContext(preferences, ""))
+                check(UvirSensorRuntimeInfoStore.activate(context, ""))
+            } else if (isSensorSelectionDisabled(context)) {
+                check(releaseActiveSensor(context))
+            }
+            return ""
+        }
+        if (target.isNotBlank() && (!target.equals(current.deviceId, true) || isSensorSelectionDisabled(context))) {
+            val preferences = context.applicationContext.getSharedPreferences(me.mondiversi.uvir.PREFS_NAME, Context.MODE_PRIVATE)
+            if (!demoPrepared) check(saveSelectedSensorContext(preferences, current.deviceId, preserveSensorReadback = true))
+            check(activateAssociatedSensor(context, target))
+            if (!demoPrepared) check(restoreSelectedSensorContext(preferences, target))
+            check(UvirSensorRuntimeInfoStore.activate(context, target))
+        }
+        return target
+    }
+
     @Synchronized
     fun activateAssociatedSensor(context: Context, deviceId: String): Boolean {
         if (normalizeSensorDeviceId(deviceId) !in associatedDeviceIds(context)) return false

@@ -138,7 +138,7 @@ class UvirAlertAndSensorMenuColorsTest {
         }
     }
 
-    @Test fun sensorPopupKeepsNoSensorAndDisabledGuardsWithoutAssociationAction() {
+    @Test fun sensorPopupKeepsASelectionAndDisabledGuardsWithoutAssociationAction() {
         compose.setContent {
             Fixture { primary, secondary, card ->
                 UvirSensorSelectionDialog(
@@ -157,13 +157,12 @@ class UvirAlertAndSensorMenuColorsTest {
         compose.onNodeWithText("Guard sensor").performClick()
         assertEquals("Current selection does not reconnect", 0, calls.get())
         val none = context.getString(R.string.sensor_no_selection)
-        compose.onNodeWithContentDescription(none).performClick().assertIsSelected()
-        assertEquals(NO_SENSOR_SELECTED_REQUEST, selected.get())
-        assertEquals(1, calls.get())
+        compose.onNodeWithContentDescription(none).assertDoesNotExist()
+        assertEquals(0, calls.get())
         compose.onNodeWithText(context.getString(R.string.sensor_associate_action)).assertDoesNotExist()
         compose.runOnIdle { enabled.value = false }
         compose.onNodeWithText("Guard sensor").performClick()
-        assertEquals("Disabled rows cannot issue sensor changes", 1, calls.get())
+        assertEquals("Disabled rows cannot issue sensor changes", 0, calls.get())
     }
 
     @Test fun alertNamesUseNormalTextAndDotsKeepEveryMetricColorAndRtlOrder() {

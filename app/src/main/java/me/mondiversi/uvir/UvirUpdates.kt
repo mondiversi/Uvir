@@ -1,6 +1,7 @@
 package me.mondiversi.uvir
 
 import android.content.Context
+import android.content.ClipData
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -33,7 +34,6 @@ internal object UvirUpdates {
     val state = mutableState.asStateFlow()
     private var started = false
     private var encodedCatalog = ""
-    private var downloadedApk: File? = null
     fun start(context: Context) { if (!started) { started = true; check(context, manual = false) } }
     fun dismiss() { if (!mutableState.value.busy) mutableState.value = mutableState.value.copy(dialog = false, message = null) }
     fun check(context: Context, manual: Boolean) {
@@ -86,14 +86,24 @@ internal object UvirUpdates {
             // Keep the plan before the installer can replace this process.
             check(context.getSharedPreferences("uvir_updates", Context.MODE_PRIVATE).edit()
                 .putString("pending_catalog", encodedCatalog).commit()) { "Cannot persist update plan" }
-            val shared = File(context.cacheDir, "updates").apply { mkdirs() }
-            downloadedApk = file.copyTo(File(shared, "Uvir-${catalog.app.version}.apk"), overwrite = true)
-            withContext(Dispatchers.Main) { install(downloadedApk!!) }
+            val client = UvirUpdateClient(context)
+            client.savePendingInstaller(encodedCatalog)
+            val shared = client.pendingInstaller()
+            withContext(Dispatchers.Main) { install(shared) }
+        }
+    }
+
+    fun continueInstall(context: Context, install: (File) -> Unit) {
+        if (mutableState.value.busy) return
+        run(context, R.string.update_verify, "update_install") {
+            val file = UvirUpdateClient(context).pendingInstaller()
+            withContext(Dispatchers.Main) { install(file) }
         }
     }
 
     @Suppress("DEPRECATION")
     internal fun verifyApk(context: Context, file: File, release: UvirAppRelease) {
+        require(UvirUpdatePolicy.matches(file, release.asset)) { "APK checksum/size mismatch" }
         val flags = if (Build.VERSION.SDK_INT >= 28) android.content.pm.PackageManager.GET_SIGNING_CERTIFICATES else android.content.pm.PackageManager.GET_SIGNATURES
         val info = context.packageManager.getPackageArchiveInfo(file.absolutePath, flags) ?: error("Invalid APK")
         val versionCode = if (Build.VERSION.SDK_INT >= 28) info.longVersionCode else info.versionCode.toLong()
@@ -109,7 +119,9 @@ internal object UvirUpdates {
     }
 
     fun installIntent(context: Context, file: File): Intent = Intent(Intent.ACTION_INSTALL_PACKAGE).apply {
-        data = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+        val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+        setDataAndType(uri, "application/vnd.android.package-archive")
+        clipData = ClipData.newRawUri("Uvir update", uri)
         flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
         putExtra(Intent.EXTRA_RETURN_RESULT, true)
     }
@@ -117,7 +129,6 @@ internal object UvirUpdates {
     fun installerReturned(context: Context, result: Int) {
         if (result != android.app.Activity.RESULT_OK) UvirErrorLog.record(context, "update_install", "Android installer cancelled or failed (result=$result)")
     }
-    fun downloadedInstaller(): File? = downloadedApk
 
     fun firmware(context: Context, manager: UvirUsbSensorManager, target: UvirSensorUpdate) {
         val catalog = mutableState.value.catalog ?: return

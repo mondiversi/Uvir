@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rtc_clock_warning_title_single">Batteria dell\'orologio da verificare</string>
+    <string name="rtc_clock_warning_title_multiple">Batterie degli orologi da verificare</string>
+    <string name="rtc_clock_warning_message_single">L\'orologio del sensore \"%1$s\" ha segnalato un arresto. La batteria potrebbe essere scarica o non collegata correttamente. Controllala e, se necessario, sostituiscila.</string>
+    <string name="rtc_clock_warning_message_multiple">I seguenti sensori hanno segnalato un arresto dell\'orologio:</string>
+    <string name="rtc_clock_warning_batteries_guidance">Le batterie potrebbero essere scariche o non collegate correttamente. Controllale e, se necessario, sostituiscile.</string>
+</resources>

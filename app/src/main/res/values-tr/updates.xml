@@ -6,7 +6,7 @@
     <string name="update_app">Uygulamayı güncelle</string>
     <string name="update_sensor">Sensörü güncelle</string>
     <string name="update_app_first">Önce uygulamayı güncelleyin.</string>
-    <string name="update_usb_required">Bu sensörü seçin ve USB ile bağlayın. Etkin oturum olmamalı, tüm kayıtlar eşitlenmiş olmalıdır.</string>
+    <string name="update_usb_required">Sensörü seçin ve USB ile bağlayın. Etkin oturum olmamalı, tüm kayıtlar eşitlenmiş olmalıdır.</string>
     <string name="update_download">İndirme ve doğrulama…</string>
     <string name="update_flash">Sensör güncelleniyor…</string>
     <string name="update_verify">Sensör doğrulanıyor…</string>

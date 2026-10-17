@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rtc_clock_warning_title_single">Sprawdź baterię zegara</string>
+    <string name="rtc_clock_warning_title_multiple">Sprawdź baterie zegarów</string>
+    <string name="rtc_clock_warning_message_single">Zegar czujnika \"%1$s\" zgłosił zatrzymanie. Bateria może być wyczerpana lub nieprawidłowo podłączona. Sprawdź ją i w razie potrzeby wymień.</string>
+    <string name="rtc_clock_warning_message_multiple">Następujące czujniki zgłosiły zatrzymanie zegara:</string>
+    <string name="rtc_clock_warning_batteries_guidance">Baterie mogą być wyczerpane lub nieprawidłowo podłączone. Sprawdź je i w razie potrzeby wymień.</string>
+</resources>

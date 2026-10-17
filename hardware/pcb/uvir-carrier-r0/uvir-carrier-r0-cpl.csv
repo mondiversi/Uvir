@@ -1,6 +1,6 @@
 Designator,Mid_X_mm,Mid_Y_mm,Layer,Rotation_deg,Comment,Status
 U1,20.0,95.0,Top,0,ESP32 USB toward lower edge,PROVISIONAL
-U2,20.0,50.0,Top,0,GY-AS7343 horizontal and front-facing,PROVISIONAL
+U2,20.0,50.0,Top,0,GY-AS734X (AS7343) horizontal and front-facing,PROVISIONAL
 U3,20.0,25.0,Top,0,AS7331 horizontal and front-facing,PROVISIONAL
 D1,13.0,5.0,Top,90,RGB output toward top enclosure face,PROVISIONAL
 D2,7.0,5.0,Top,90,Blue output toward top enclosure face,PROVISIONAL

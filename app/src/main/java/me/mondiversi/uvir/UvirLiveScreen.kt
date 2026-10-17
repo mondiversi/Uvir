@@ -87,6 +87,8 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalConfiguration
@@ -179,6 +181,7 @@ internal fun LiveScreen(
         suspend () -> Boolean,
     onTestSensorStatusBuzzer:
         suspend () -> Boolean,
+    onPreviewSensorStatusBuzzerVolume: (Int) -> Unit = {},
     onStartDebugPerformance:
         suspend (String) -> Boolean,
     onStopDebugPerformance:
@@ -293,7 +296,8 @@ internal fun LiveScreen(
     secondaryText: Color,
     trackColor: Color,
 
-    onOpenHistory: () -> Unit
+    onOpenHistory: () -> Unit,
+    settingsRouteState: UvirSettingsRouteState = rememberUvirSettingsRouteState()
 ) {
 
     DisposableEffect(Unit) {
@@ -348,7 +352,9 @@ internal fun LiveScreen(
     }
 
     val sensorCredentials =
-        if (usbSensorState.credentials.isProvisioned) {
+        if (useFakeSensorData) {
+            UvirSensorCredentials()
+        } else if (usbSensorState.credentials.isProvisioned) {
             usbSensorState.credentials
         } else {
             UvirSensorCredentialStore.load(
@@ -360,7 +366,7 @@ internal fun LiveScreen(
         sensorProfiles.firstOrNull {
             it.hardwareUid.equals(selectedSensorDeviceId, ignoreCase = true)
         } ?: if (
-            selectedSensorDeviceId.isBlank() &&
+            !useFakeSensorData && selectedSensorDeviceId.isBlank() &&
             sensorCredentials.isProvisioned
         ) {
             sensorProfiles.firstOrNull {
@@ -389,7 +395,7 @@ internal fun LiveScreen(
         selectedSensorProfile?.displayName
             ?.takeIf { it.isNotBlank() }
             ?: sensorProfileHardwareUid.takeIf { it.isNotBlank() }
-            ?: stringResource(R.string.sensor_no_selection)
+            ?: "—"
     var sensorNameText by rememberSaveable(sensorProfileHardwareUid) {
         mutableStateOf(sensorDisplayName)
     }
@@ -741,12 +747,11 @@ internal fun LiveScreen(
         mutableStateOf(thresholdAlertSessionNote)
     }
 
-    var showParametersDialog by rememberSaveable {
-        mutableStateOf(false)
-    }
-
-    var selectedSettingsPage by rememberSaveable {
-        mutableStateOf<UvirSettingsPage?>(null)
+    var showParametersDialog by settingsRouteState.isOpen
+    var selectedSettingsPage by settingsRouteState.page
+    LaunchedEffect(selectedSettingsPage) {
+        // A page restored from an older app version must return to the settings list.
+        if (selectedSettingsPage == UvirSettingsPage.DISPLAY) selectedSettingsPage = null
     }
 
     var showSettingsExportDialog by rememberSaveable {
@@ -768,6 +773,7 @@ internal fun LiveScreen(
     var showSensorInfoScreen by rememberSaveable {
         mutableStateOf(false)
     }
+
 
     // Keep the selection dialog open while its sensor information page replaces the home UI.
     var sensorSelectionExpanded by rememberSaveable {
@@ -1478,13 +1484,17 @@ internal fun LiveScreen(
             label = "threshold-alert-edge-glow-alpha"
         )
 
+    val liveUsesLandscapeIslands = uvirLandscapeMeasurementPanels()
+    val liveIslandBounds = remember { mutableStateMapOf<SensorGroup, UvirLiveIslandBounds>() }
+    var liveViewportBounds by remember { mutableStateOf<UvirLiveIslandBounds?>(null) }
     val alertEdgeGlowDirections by
         remember(
             monitoringAlertMetrics,
             sensorOperationsAvailable,
             viewMode,
             groups,
-            liveListState
+            liveListState,
+            liveUsesLandscapeIslands
         ) {
             derivedStateOf {
                 if (
@@ -1493,6 +1503,12 @@ internal fun LiveScreen(
                     monitoringAlertMetrics.isEmpty()
                 ) {
                     false to false
+                } else if (liveUsesLandscapeIslands) {
+                    uvirLiveIslandEdgeGlow(
+                        monitoringAlertMetrics.mapNotNull { it.sensorGroup() }.distinct(),
+                        liveIslandBounds,
+                        liveViewportBounds
+                    )
                 } else {
                     val layoutInfo =
                         liveListState.layoutInfo
@@ -2743,7 +2759,8 @@ editingAlertGroup?.let { group ->
                                     )
                                 },
                                 modifier =
-                                    Modifier.size(40.dp)
+                                    Modifier.size(40.dp),
+                                colors = uvirCheckboxColors()
                             )
 
                             ThresholdAlertMetricLabel(
@@ -3087,7 +3104,8 @@ if (editingAlertGroup == null) editingAlertMetric?.let { metric ->
                             editingAlertEnabled = it
                             editingAlertError = null
                         },
-                        modifier = Modifier.size(40.dp)
+                        modifier = Modifier.size(40.dp),
+                        colors = uvirCheckboxColors()
                     )
 
                     ThresholdAlertMetricLabel(
@@ -3341,6 +3359,7 @@ if (editingAlertGroup == null) editingAlertMetric?.let { metric ->
 if (showAlertLogDialog) {
     ThresholdAlertLogScreen(
         database = database,
+        filterPreferences = remember(context) { context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE) },
         listState = thresholdAlertLogListState,
         backgroundColor = backgroundColor,
         cardColor = cardColor,
@@ -3625,8 +3644,12 @@ if (showParametersDialog) {
                             R.string.settings_section_sensor_parameters
                         UvirSettingsPage.SENSOR_MEASUREMENT ->
                             R.string.sensor_info_measurement
+                        UvirSettingsPage.DISPLAY ->
+                            R.string.settings_section_display
+                        UvirSettingsPage.APPEARANCE ->
+                            R.string.settings_section_appearance
                         UvirSettingsPage.ALERTS ->
-                            R.string.settings_section_sounds_and_alerts
+                            R.string.settings_section_notifications
                         UvirSettingsPage.LANGUAGE ->
                             R.string.settings_section_language
                         UvirSettingsPage.LANGUAGE_AND_FORMATS ->
@@ -3658,8 +3681,22 @@ if (showParametersDialog) {
             ),
 
         topActionButton =
-            if (selectedSettingsPage != null &&
-                selectedSettingsPage != UvirSettingsPage.DATA_RESTORE &&
+            if (selectedSettingsPage == null && !UVIR_SETTINGS_MODE_SELECTOR_VISIBLE) {
+                null
+            } else if (selectedSettingsPage == null) {
+                {
+                    UvirSettingsModeSelector(
+                        primaryText = primaryText,
+                        secondaryText = secondaryText,
+                        onPhoneClick = {
+                            showUvirBottomMessage(context, resources.getString(R.string.settings_mode_small_screen_active))
+                        },
+                        onTabletClick = {
+                            showUvirBottomMessage(context, resources.getString(R.string.settings_mode_large_screen_unavailable))
+                        }
+                    )
+                }
+            } else if (selectedSettingsPage != UvirSettingsPage.DATA_RESTORE &&
                 selectedSettingsPage != UvirSettingsPage.DEBUG
             ) {
                 val page = selectedSettingsPage!!
@@ -3670,7 +3707,7 @@ if (showParametersDialog) {
                                     UvirSettingsPage.SENSOR_CONNECTION,
                                     UvirSettingsPage.SENSOR_PARAMETERS,
                                     UvirSettingsPage.SENSOR_MEASUREMENT -> ConnectivityIconType.SENSOR
-                                    else -> ConnectivityIconType.PHONE
+                                    else -> ConnectivityIconType.APP
                                 }
                     )
                 }
@@ -3694,7 +3731,7 @@ if (showParametersDialog) {
                 )
             ) {
 
-            Column(
+            UvirIslandColumns(
                 modifier =
                     Modifier
                         .fillMaxSize()
@@ -3704,10 +3741,8 @@ if (showParametersDialog) {
                         .verticalScroll(
                             parametersScrollState
                         ),
-                verticalArrangement =
-                    Arrangement.spacedBy(
-                        UvirSettingsListIslandGap
-                    )
+                spacing = UvirSettingsListIslandGap,
+                twoColumnsEnabled = selectedSettingsPage == null
             ) {
 
                 if (selectedSettingsPage == null) {
@@ -3781,6 +3816,7 @@ if (showParametersDialog) {
                     onTestStatusLed = onTestSensorStatusLed,
                     statusBuzzerTestEnabled = statusBuzzerTestEnabled,
                     onTestStatusBuzzer = onTestSensorStatusBuzzer,
+                    onPreviewStatusBuzzerVolume = onPreviewSensorStatusBuzzerVolume,
                     sensorAssociated =
                         sensorCredentials.isProvisioned,
                     sensorPowerOffEnabled = sensorPowerOffEnabled,
@@ -3932,9 +3968,14 @@ if (showParametersDialog) {
                     UvirSettingsDiagnosticsListEntry(cardColor, primaryText, secondaryText)
                 }
 
-                SettingsAutoSaveGroup(SettingsSaveGroup.ALERTS) {
-                    renderSamplingAndAlerts(false, true)
+                if (selectedSettingsPage == null) {
+                    UvirSettingsListGroupHeader(
+                        title = stringResource(R.string.data_management_app_button),
+                        icon = ConnectivityIconType.APP,
+                        secondaryText = secondaryText
+                    )
                 }
+                val appSettingsCommit = LocalSettingsCommit.current
                 CompositionLocalProvider(LocalSettingsCommit provides null) {
                 UvirSettingsGeneralSections(
                     database = database,
@@ -4076,6 +4117,17 @@ if (showParametersDialog) {
                         }
                     ),
                     onDiagnosticProbe = onDiagnosticProbe,
+                    scrollToSimulation = settingsRouteState.simulationFocusRequested.value,
+                    onSimulationShown = { settingsRouteState.simulationFocusRequested.value = false },
+                    notificationsSection = {
+                        // Restore the parent commit context: formats use explicit
+                        // callbacks, but notification controls still autosave.
+                        CompositionLocalProvider(LocalSettingsCommit provides appSettingsCommit) {
+                            SettingsAutoSaveGroup(SettingsSaveGroup.ALERTS) {
+                                renderSamplingAndAlerts(false, true)
+                            }
+                        }
+                    },
                     cardColor = cardColor,
                     primaryText = primaryText,
                     secondaryText = secondaryText
@@ -4095,6 +4147,7 @@ if (showParametersDialog) {
 // -------------------------------------------------
 
 val openSettingsFromHome: () -> Unit = {
+    settingsRouteState.simulationFocusRequested.value = false
     sensorNameText = sensorDisplayName
     autonomousRecordingEnabled = sensorParameters.autonomousRecordingEnabled
     automaticShutdownEnabled = sensorParameters.automaticShutdownEnabled
@@ -4139,10 +4192,17 @@ val openSettingsFromHome: () -> Unit = {
     showParametersDialog = true
 }
 
+val addSensorFromHome: () -> Unit = {
+    sensorSelectionExpanded = false
+    openSettingsFromHome()
+    selectedSettingsPage = UvirSettingsPage.SENSOR_CONNECTION
+}
+
 val homeHeaderContent: @Composable () -> Unit = {
     UvirHomeHeader(
         sensorConnectionMode = sensorConnectionMode,
         useFakeSensorData = useFakeSensorData,
+        onAddSensor = addSensorFromHome,
         usbSensorStatus = usbSensorState.status,
         usbAppConnectionConfirmed =
             usbSensorState.appConnectionConfirmed,
@@ -4167,8 +4227,7 @@ val homeHeaderContent: @Composable () -> Unit = {
         sensorSelectionExpanded = sensorSelectionExpanded,
         onSensorSelectionExpandedChange = { sensorSelectionExpanded = it },
         sensorDialogColor = cardColor,
-        sensorSelectionEnabled = sourceDialogSnapshot.sensorSelectionEnabled &&
-            sourceDialogSnapshot.sensorProfiles.isNotEmpty(),
+        sensorSelectionEnabled = sourceDialogSnapshot.sensorSelectionEnabled,
         sensorProfiles = sourceDialogSnapshot.sensorProfiles,
         sensorStatusIndicators = sensorStatusIndicators,
         sensorAlertMonitoringDeviceIds = uvirSensorAlertDeviceIds(
@@ -4190,7 +4249,11 @@ val homeHeaderContent: @Composable () -> Unit = {
         onOpenVersionInfo = {
             showVersionInfoDialog = true
         },
-        onOpenSettings = openSettingsFromHome
+        onOpenSettings = openSettingsFromHome,
+        onOpenSimulationSettings = {
+            openSettingsFromHome()
+            settingsRouteState.openSimulationSettings()
+        }
     )
 }
 
@@ -4395,7 +4458,8 @@ floatingActionButton = {
                         UvirDisconnectedSensorIsland(
                             cardColor = cardColor,
                             primaryText = primaryText,
-                            secondaryText = secondaryText
+                            secondaryText = secondaryText,
+                            onAddSensor = addSensorFromHome
                         )
                     }
                 }
@@ -4453,6 +4517,10 @@ floatingActionButton = {
                 .padding(
                     paddingValues
                 )
+                .onGloballyPositioned { coordinates ->
+                    val top = coordinates.positionInWindow().y
+                    liveViewportBounds = UvirLiveIslandBounds(top, top + coordinates.size.height)
+                }
                 .drawWithContent {
                     drawContent()
 
@@ -4509,14 +4577,7 @@ floatingActionButton = {
                         )
                     }
                 }
-                .lazyScrollbarOverlay(
-                    state =
-                        liveListState,
-                    color =
-                        secondaryText.copy(
-                            alpha = 0.46f
-                        )
-                ),
+                .lazyScrollbarOverlay(liveListState, secondaryText.copy(alpha = 0.46f)),
 
         contentPadding =
             PaddingValues(
@@ -4550,14 +4611,7 @@ floatingActionButton = {
             ViewMode.IRRADIANCE
         ) {
 
-            itemsIndexed(
-                items = groups,
-
-                key = { _, group ->
-                    group.name
-                }
-            ) { _, group ->
-
+            val drawIsland: @Composable (SensorGroup) -> Unit = { group ->
                 SensorGroupContent(
                     group = group,
 
@@ -4623,6 +4677,18 @@ floatingActionButton = {
                     trackColor =
                         trackColor
                 )
+            }
+            if (liveUsesLandscapeIslands) {
+                item(key = "landscape_irradiance_islands") {
+                    UvirLiveLandscapeIslands(
+                        onGroupBounds = { group, bounds -> liveIslandBounds[group] = bounds },
+                        content = drawIsland
+                    )
+                }
+            } else {
+                itemsIndexed(items = groups, key = { _, group -> group.name }) { _, group ->
+                    drawIsland(group)
+                }
             }
 
         } else {

@@ -6,7 +6,7 @@
     <string name="update_app">Ενημέρωση εφαρμογής</string>
     <string name="update_sensor">Ενημέρωση αισθητήρα</string>
     <string name="update_app_first">Ενημερώστε πρώτα την εφαρμογή.</string>
-    <string name="update_usb_required">Επιλέξτε αυτόν τον αισθητήρα και συνδέστε τον με USB, χωρίς ενεργή συνεδρία και με όλες τις εγγραφές συγχρονισμένες.</string>
+    <string name="update_usb_required">Επιλέξτε τον αισθητήρα και συνδέστε τον με USB, χωρίς ενεργή συνεδρία και με όλες τις εγγραφές συγχρονισμένες.</string>
     <string name="update_download">Λήψη και επαλήθευση…</string>
     <string name="update_flash">Ενημέρωση αισθητήρα…</string>
     <string name="update_verify">Επαλήθευση αισθητήρα…</string>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rtc_clock_warning_title_single">Uhrbatterie überprüfen</string>
+    <string name="rtc_clock_warning_title_multiple">Uhrbatterien überprüfen</string>
+    <string name="rtc_clock_warning_message_single">Die Uhr des Sensors \"%1$s\" hat einen Stillstand gemeldet. Die Batterie könnte leer oder nicht richtig angeschlossen sein. Überprüfe sie und ersetze sie bei Bedarf.</string>
+    <string name="rtc_clock_warning_message_multiple">Die folgenden Sensoren haben einen Stillstand der Uhr gemeldet:</string>
+    <string name="rtc_clock_warning_batteries_guidance">Die Batterien könnten leer oder nicht richtig angeschlossen sein. Überprüfe sie und ersetze sie bei Bedarf.</string>
+</resources>

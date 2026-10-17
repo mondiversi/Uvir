@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rtc_clock_warning_title_single">Vérifier la pile de l\'horloge</string>
+    <string name="rtc_clock_warning_title_multiple">Vérifier les piles des horloges</string>
+    <string name="rtc_clock_warning_message_single">L\'horloge du capteur \"%1$s\" a signalé un arrêt. La pile pourrait être déchargée ou mal connectée. Vérifie-la et remplace-la si nécessaire.</string>
+    <string name="rtc_clock_warning_message_multiple">Les capteurs suivants ont signalé un arrêt de l\'horloge :</string>
+    <string name="rtc_clock_warning_batteries_guidance">Les piles pourraient être déchargées ou mal connectées. Vérifie-les et remplace-les si nécessaire.</string>
+</resources>

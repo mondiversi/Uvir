@@ -4,6 +4,43 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class UvirHomeStatusTextTest {
+    @Test fun noAssociatedSensorHasItsOwnMessageEvenWithStaleConnectionState() {
+        for (busy in listOf(false, true)) for (live in listOf(false, true))
+            for (initializing in listOf(false, true)) for (searching in listOf(false, true)) {
+                assertEquals(R.string.sensor_status_no_associated_sensor,
+                    uvirHomeStatusTextRes(false, busy, live, initializing, searching, false))
+                assertEquals(R.string.sensor_status_simulated,
+                    uvirHomeStatusTextRes(true, busy, live, initializing, searching, false))
+            }
+    }
+
+    @Test fun simulatedStatusTakesPrecedenceOverEveryTransportAndActivityState() {
+        for (busy in listOf(false, true)) for (live in listOf(false, true))
+            for (initializing in listOf(false, true)) for (searching in listOf(false, true)) {
+                assertEquals(R.string.sensor_status_simulated,
+                    uvirHomeStatusTextRes(true, busy, live, initializing, searching))
+            }
+    }
+
+    @Test fun otherSensorsKeepTheirActivityAndConnectionStateWhenSelectionChanges() {
+        val busy = UvirConnectionSensorState("B", UvirConnectionState.CONNECTED, true)
+        val offline = busy.copy(state = UvirConnectionState.DISCONNECTED)
+        val idle = UvirStatusIndicator(UvirStatusDot.GREEN, false)
+        for (other in listOf(busy, offline)) {
+            val result = uvirSensorSelectionIndicators("A", idle, mapOf("B" to other.indicator))
+            assertEquals(other.indicator, result.getValue("b"))
+            assertEquals(true, result.getValue("b").pulses)
+        }
+        assertEquals(UvirStatusIndicator(UvirStatusDot.RED, true), offline.indicator)
+    }
+
+    @Test fun simulationUsesTheBugIconInsteadOfEveryPhysicalConnectionIcon() {
+        for (mode in SensorConnectionMode.entries) {
+            assertEquals(ConnectivityIconType.DEBUG, uvirHomeStatusIconType(true, mode))
+            assertEquals(uvirSensorConnectionIconType(mode), uvirHomeStatusIconType(false, mode))
+        }
+    }
+
     @Test fun selectionStatesAreKeyedByNormalizedSensorIdentity() {
         val live = UvirStatusIndicator(UvirStatusDot.YELLOW, true)
         val other = UvirStatusIndicator(UvirStatusDot.GREEN, false)

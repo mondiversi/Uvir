@@ -81,7 +81,7 @@ class UvirSecretMelodyTest {
     @Test fun fullHoldPlaysOnceWithoutOpeningADialog() {
         showContent()
         down()
-        compose.mainClock.advanceTimeBy(1_800L)
+        compose.mainClock.advanceTimeBy(2_800L)
         assertEquals(emptyList<String>(), commands.toList())
         compose.mainClock.advanceTimeBy(400L)
         compose.waitUntil(2_000L) { commands.size == 1 }
@@ -97,7 +97,7 @@ class UvirSecretMelodyTest {
         showContent(connected = false)
         compose.onNodeWithText(title).assertIsNotEnabled()
         down()
-        compose.mainClock.advanceTimeBy(2_500L)
+        compose.mainClock.advanceTimeBy(3_500L)
         compose.onNodeWithText(title).performTouchInput { up() }
         assertEquals(emptyList<String>(), commands.toList())
     }
@@ -106,7 +106,7 @@ class UvirSecretMelodyTest {
         showContent(enabled = false)
         compose.onNodeWithText(title).assertIsNotEnabled()
         down()
-        compose.mainClock.advanceTimeBy(2_500L)
+        compose.mainClock.advanceTimeBy(3_500L)
         compose.onNodeWithText(title).performTouchInput { up() }
         assertEquals(emptyList<String>(), commands.toList())
     }
@@ -115,7 +115,7 @@ class UvirSecretMelodyTest {
         showContent(firmwareSupported = false)
         compose.onNodeWithText(title).assertIsNotEnabled()
         down()
-        compose.mainClock.advanceTimeBy(2_500L)
+        compose.mainClock.advanceTimeBy(3_500L)
         compose.onNodeWithText(title).performTouchInput { up() }
         assertEquals(emptyList<String>(), commands.toList())
     }

@@ -7,6 +7,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -29,6 +30,8 @@ internal fun SensorRestoreConfirmation(
     secondaryText: Color
 ) {
     val context = LocalContext.current
+    val resetFailureTemplate by rememberUpdatedState(stringResource(R.string.sensor_reset_selection_failed))
+    val resetFailureLocale by rememberUpdatedState(LocalConfiguration.current.locales[0])
     var selectedIds by remember { mutableStateOf(emptySet<String>()) }
     var completedIds by remember { mutableStateOf(emptySet<String>()) }
     val targets = uvirSensorResetTargets(selectedIds, sensorProfiles, sensorIndicators)
@@ -103,7 +106,7 @@ internal fun SensorRestoreConfirmation(
                                             ?.displayName ?: id
                                     }.joinToString(", ")
                                     showUvirBottomMessage(context,
-                                        context.getString(R.string.sensor_reset_selection_failed, names))
+                                        String.format(resetFailureLocale, resetFailureTemplate, names))
                                 }
                             }
                         }

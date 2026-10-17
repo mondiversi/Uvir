@@ -6,7 +6,7 @@
     <string name="update_app">アプリを更新</string>
     <string name="update_sensor">センサーを更新</string>
     <string name="update_app_first">先にアプリを更新してください。</string>
-    <string name="update_usb_required">このセンサーを選択し USB で接続してください。実行中のセッションを終了し、すべての記録を同期してください。</string>
+    <string name="update_usb_required">センサーを選択し USB で接続してください。実行中のセッションを終了し、すべての記録を同期してください。</string>
     <string name="update_download">ダウンロードと検証中…</string>
     <string name="update_flash">センサーを更新中…</string>
     <string name="update_verify">センサーを検証中…</string>

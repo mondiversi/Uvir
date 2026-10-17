@@ -17,6 +17,9 @@ internal data class UvirStoredDeviceEvent<T>(
 
 internal sealed interface UvirDeviceFrame {
     val deviceId: String
+    data class Clock(val observation: UvirRtcClockObservation) : UvirDeviceFrame {
+        override val deviceId: String get() = observation.deviceId
+    }
     data class Runtime(override val deviceId: String, val event: SensorRuntimeEvent) : UvirDeviceFrame
     data class Sync(override val deviceId: String, val event: SensorSyncEvent) : UvirDeviceFrame
     data class Alert(override val deviceId: String, val source: SensorSyncSource,
@@ -29,6 +32,11 @@ internal object UvirSensorEventHub {
     val frames = incoming.receiveAsFlow()
     private val liveAlerts = MutableSharedFlow<UvirStoredDeviceEvent<SensorLiveAlertEvent>>(extraBufferCapacity = 128)
     val alerts = liveAlerts.asSharedFlow()
+    fun emitRtcClock(deviceId: String, hello: JSONObject) {
+        hello.toUvirRtcClockObservation(deviceId, android.os.SystemClock.elapsedRealtime())?.let {
+            incoming.trySend(UvirDeviceFrame.Clock(it))
+        }
+    }
     fun emitRuntime(deviceId: String, event: SensorRuntimeEvent) {
         if (deviceId.isNotBlank()) incoming.trySend(UvirDeviceFrame.Runtime(deviceId, event))
     }

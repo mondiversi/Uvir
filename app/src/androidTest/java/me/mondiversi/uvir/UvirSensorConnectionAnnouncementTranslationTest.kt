@@ -12,7 +12,7 @@ class UvirSensorConnectionAnnouncementTranslationTest {
     @Test fun bothAnnouncementsIncludeTheNameInEveryAppLanguage() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         for (language in listOf("en", "it", "ar", "de", "el", "es", "fa", "fr",
-            "hi", "he", "ja", "ko-KR", "pt", "ru", "sw", "tr", "zh-CN")) {
+            "hi", "he", "ja", "ko-KR", "pt", "ru", "sw", "pl", "nl", "id", "tr", "zh-CN")) {
             val configuration = Configuration(context.resources.configuration).apply {
                 setLocale(Locale.forLanguageTag(language))
             }

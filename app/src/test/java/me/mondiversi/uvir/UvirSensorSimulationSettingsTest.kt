@@ -4,110 +4,150 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class UvirSensorSimulationSettingsTest {
-    @Test fun threeSensorsKeepIndependentSimulationAndSaturationChoices() {
-        val preferences = memoryPreferences(mutableMapOf())
-        UvirSensorSimulationSettingsStore.setEnabled(preferences, " Sensor-A ", true)
-        UvirSensorSimulationSettingsStore.setOutOfRange(preferences, "sensor-a", true)
-        UvirSensorSimulationSettingsStore.setEnabled(preferences, "sensor-b", true)
-        assertEquals(UvirSensorSimulationSettings(true, true), UvirSensorSimulationSettingsStore.load(preferences, "SENSOR-A"))
-        assertEquals(UvirSensorSimulationSettings(true, false), UvirSensorSimulationSettingsStore.load(preferences, "sensor-b"))
-        assertEquals(UvirSensorSimulationSettings(), UvirSensorSimulationSettingsStore.load(preferences, "sensor-c"))
-        UvirSensorSimulationSettingsStore.setEnabled(preferences, "sensor-b", false)
-        assertTrue(UvirSensorSimulationSettingsStore.load(preferences, "sensor-a").enabled)
-        assertFalse(UvirSensorSimulationSettingsStore.load(preferences, "sensor-b").enabled)
-        saveSelectedSensorContext(preferences, "sensor-a")
-        restoreSelectedSensorContext(preferences, "sensor-b")
-        restoreSelectedSensorContext(preferences, "sensor-a")
-        assertEquals(UvirSensorSimulationSettings(true, true), UvirSensorSimulationSettingsStore.load(preferences, "sensor-a"))
-    }
-
-    @Test fun simulatingAOnlyPausesAAndNeverChangesBsRunningSession() {
-        val values = mutableMapOf<String, Any?>(
-            "active_device_id" to "sensor-a",
-            sensorContextPreferenceKey("sensor-b", KEY_AUTO_ENABLED) to true,
-            sensorContextPreferenceKey("sensor-b", KEY_AUTO_SESSION_ID) to 42L,
-            sensorContextPreferenceKey("sensor-b", KEY_AUTO_COMPLETED_COUNT) to 8
-        )
-        val preferences = memoryPreferences(values)
-        val runningSession = values.toMap()
-        UvirSensorSimulationSettingsStore.setEnabled(preferences, "sensor-a", true)
-        assertFalse(uvirSensorRealTransportEnabled(preferences, "sensor-a", false))
-        assertTrue(uvirSensorRealTransportEnabled(preferences, "sensor-b", false))
-        assertTrue(uvirSensorRealTransportEnabled(preferences, "sensor-c", false))
-        runningSession.forEach { (key, value) -> assertEquals(value, values[key]) }
-        assertFalse(uvirSensorRealTransportEnabled(preferences, "sensor-a", true))
-        assertFalse(uvirSensorRealTransportEnabled(preferences, "sensor-b", true))
-    }
-
-    @Test fun legacyGlobalSimulationMigratesOnlyToItsOwnerEvenWhenAnotherSensorIsReadFirst() {
-        val values = mutableMapOf<String, Any?>(
-            "active_device_id" to "SENSOR-A",
-            KEY_USE_FAKE_SENSOR_DATA to true,
-            KEY_FAKE_SENSOR_OUT_OF_RANGE to true
-        )
-        val preferences = memoryPreferences(values)
-        assertEquals(UvirSensorSimulationSettings(), UvirSensorSimulationSettingsStore.load(preferences, "sensor-b"))
-        assertEquals(UvirSensorSimulationSettings(true, true), UvirSensorSimulationSettingsStore.load(preferences, "sensor-a"))
-        assertFalse(preferences.contains(KEY_USE_FAKE_SENSOR_DATA))
-        assertFalse(preferences.contains(KEY_FAKE_SENSOR_OUT_OF_RANGE))
-        assertEquals(UvirSensorSimulationSettings(), UvirSensorSimulationSettingsStore.load(preferences, "sensor-c"))
-    }
-
-    @Test fun legacyBackupDoesNotOverwriteAnExistingPerSensorChoice() {
-        val preferences = memoryPreferences(mutableMapOf(
-            "active_device_id" to "sensor-a",
-            KEY_USE_FAKE_SENSOR_DATA to true,
-            UvirSensorSimulationSettingsStore.preferenceKey("sensor-a", KEY_USE_FAKE_SENSOR_DATA) to false
-        ))
-        assertFalse(UvirSensorSimulationSettingsStore.load(preferences, "sensor-a").enabled)
-    }
-
-    @Test fun demoDoesNotLeakToFirstAssociatedHardwareOrExplicitNoSensorSelection() {
-        val preferences = memoryPreferences(mutableMapOf())
-        assertTrue(UvirSensorSimulationSettingsStore.load(preferences, "").enabled)
-        assertFalse(UvirSensorSimulationSettingsStore.load(preferences, "new-sensor").enabled)
-        preferences.edit().putStringSet(ASSOCIATED_SENSOR_IDS_KEY, setOf("new-sensor"))
-            .putBoolean("sensor_selection_disabled", true).commit()
-        assertFalse(UvirSensorSimulationSettingsStore.load(preferences, "").enabled)
-    }
-
-    @Test fun simulationSettingsAreAppBackupDataAndNeverFirmwareSettings() {
+    @Test fun firstLaunchIsOptInAndHasNoHardwareIdentity() {
         val values = mutableMapOf<String, Any?>()
-        val preferences = memoryPreferences(values)
-        UvirSensorSimulationSettingsStore.setEnabled(preferences, "sensor-a", true)
-        UvirSensorSimulationSettingsStore.setOutOfRange(preferences, "sensor-b", true)
-        assertTrue(values.keys.all(::isTransferableAppPreference))
-        assertTrue(values.keys.none { it in sensorConfigurationPreferenceKeys })
-        val reopenedPreferences = memoryPreferences(values.toMutableMap())
-        assertTrue(UvirSensorSimulationSettingsStore.load(reopenedPreferences, "sensor-a").enabled)
-        assertFalse(UvirSensorSimulationSettingsStore.load(reopenedPreferences, "sensor-b").enabled)
-        assertTrue(UvirSensorSimulationSettingsStore.load(reopenedPreferences, "sensor-b").outOfRange)
+        val prefs = memoryPreferences(values)
+        assertEquals(UvirSensorSimulationSettings(), UvirSensorSimulationSettingsStore.load(prefs))
+        assertTrue(values.isEmpty())
+        assertEquals("sensor-a", selectedUiSensorDeviceId(prefs, "sensor-a"))
+        switchSimulationContext(prefs, "sensor-a", true)
+        assertEquals("", selectedUiSensorDeviceId(prefs, "sensor-a"))
+        assertEquals("—", homeSensorDisplayName("Portable", selectedUiSensorDeviceId(prefs, "sensor-a")))
     }
 
-    @Test fun changesDuringSessionsPreserveEverySensorsJobAndOnlyUpdateSelectedUid() {
-        for (acquisitionActive in listOf(false, true)) for (alertsActive in listOf(false, true)) {
-            val values = mutableMapOf<String, Any?>(
-                "active_device_id" to "sensor-a",
-                KEY_AUTO_ENABLED to acquisitionActive,
-                KEY_AUTO_SESSION_ID to 12L,
-                KEY_THRESHOLD_ALERT_ENABLED to alertsActive,
-                KEY_THRESHOLD_ALERT_SESSION_ID to 14L,
-                sensorContextPreferenceKey("sensor-b", KEY_AUTO_ENABLED) to true,
-                sensorContextPreferenceKey("sensor-b", KEY_AUTO_SESSION_ID) to 42L
-            )
-            val preferences = memoryPreferences(values)
-            val jobs = values.toMap()
-            for (enabled in listOf(true, false, true)) {
-                UvirSensorSimulationSettingsStore.setEnabled(preferences, "sensor-a", enabled)
-                for (outOfRange in listOf(true, false)) {
-                    UvirSensorSimulationSettingsStore.setOutOfRange(preferences, "sensor-a", outOfRange)
-                    assertEquals(UvirSensorSimulationSettings(enabled, outOfRange),
-                        UvirSensorSimulationSettingsStore.load(preferences, "sensor-a"))
-                    assertEquals(UvirSensorSimulationSettings(),
-                        UvirSensorSimulationSettingsStore.load(preferences, "sensor-b"))
-                    jobs.forEach { (key, value) -> assertEquals(value, values[key]) }
-                }
-            }
+    @Test fun simulationNeverPausesAnyPhysicalTransport() {
+        val prefs = memoryPreferences(mutableMapOf())
+        switchSimulationContext(prefs, "sensor-a", true)
+        for (uid in listOf("sensor-a", "sensor-b", "sensor-c")) {
+            assertTrue(uvirSensorRealTransportEnabled(prefs, uid, false))
+            assertFalse(uvirSensorRealTransportEnabled(prefs, uid, true))
         }
+    }
+
+    @Test fun realAndDemoJobsNotesAndDraftsStaySeparateAcrossRoundTrips() {
+        val values = mutableMapOf<String, Any?>(
+            KEY_AUTO_ENABLED to true, KEY_AUTO_SESSION_ID to 12L,
+            KEY_AUTO_COMPLETED_COUNT to 3, KEY_AUTO_NOTE to "Real note",
+            KEY_LAST_MANUAL_SESSION_ID to 22L,
+            KEY_SENSOR_CONNECTION_MODE to "WIFI",
+            sensorContextPreferenceKey("sensor-b", KEY_AUTO_ENABLED) to true,
+            sensorContextPreferenceKey("sensor-b", KEY_AUTO_SESSION_ID) to 42L)
+        val prefs = memoryPreferences(values)
+        switchSimulationContext(prefs, "sensor-a", true)
+        assertFalse(prefs.getBoolean(KEY_AUTO_ENABLED, false))
+        assertEquals(0L, prefs.getLong(KEY_AUTO_SESSION_ID, 0L))
+        prefs.edit().putBoolean(KEY_AUTO_ENABLED, true).putLong(KEY_AUTO_SESSION_ID, 55L)
+            .putBoolean(KEY_AUTO_SIMULATED, true).putString(KEY_AUTO_NOTE, "Demo note")
+            .putLong(KEY_LAST_MANUAL_SESSION_ID, 56L).commit()
+        // Real reports continue while the demo screen is visible.
+        prefs.edit().putInt(sensorContextPreferenceKey("sensor-a", KEY_AUTO_COMPLETED_COUNT), 4).commit()
+        switchSimulationContext(prefs, "sensor-a", false)
+        assertEquals(12L, prefs.getLong(KEY_AUTO_SESSION_ID, 0L))
+        assertEquals(4, prefs.getInt(KEY_AUTO_COMPLETED_COUNT, 0))
+        assertEquals("Real note", prefs.getString(KEY_AUTO_NOTE, ""))
+        assertEquals("WIFI", prefs.getString(KEY_SENSOR_CONNECTION_MODE, ""))
+        assertEquals(22L, prefs.getLong(KEY_LAST_MANUAL_SESSION_ID, 0L))
+        assertFalse(prefs.getBoolean(KEY_AUTO_SIMULATED, false))
+        assertTrue(prefs.getBoolean(sensorContextPreferenceKey("sensor-b", KEY_AUTO_ENABLED), false))
+        assertEquals(42L, prefs.getLong(sensorContextPreferenceKey("sensor-b", KEY_AUTO_SESSION_ID), 0L))
+        switchSimulationContext(prefs, "sensor-a", true)
+        assertEquals(55L, prefs.getLong(KEY_AUTO_SESSION_ID, 0L))
+        assertEquals(56L, prefs.getLong(KEY_LAST_MANUAL_SESSION_ID, 0L))
+        assertEquals("Demo note", prefs.getString(KEY_AUTO_NOTE, ""))
+        assertTrue(prefs.getBoolean(KEY_AUTO_SIMULATED, false))
+    }
+
+    @Test fun finalRealReadbackWinsOverOldUiStateWhenEnteringSimulation() {
+        val prefs = memoryPreferences(mutableMapOf(
+            KEY_AUTO_ENABLED to true, KEY_AUTO_SESSION_ID to 10L, KEY_AUTO_COMPLETED_COUNT to 1,
+            sensorContextPreferenceKey("sensor-a", KEY_AUTO_ENABLED) to false,
+            sensorContextPreferenceKey("sensor-a", KEY_AUTO_SESSION_ID) to 10L,
+            sensorContextPreferenceKey("sensor-a", KEY_AUTO_COMPLETED_COUNT) to 2))
+        switchSimulationContext(prefs, "sensor-a", true)
+        switchSimulationContext(prefs, "sensor-a", false)
+        assertFalse(prefs.getBoolean(KEY_AUTO_ENABLED, true))
+        assertEquals(2, prefs.getInt(KEY_AUTO_COMPLETED_COUNT, 0))
+    }
+
+    @Test fun restartKeepsDemoContextAndDoesNotRestoreRealJobsIntoIt() {
+        val values = mutableMapOf<String, Any?>(KEY_AUTO_SESSION_ID to 10L)
+        val prefs = memoryPreferences(values)
+        switchSimulationContext(prefs, "sensor-a", true)
+        prefs.edit().putLong(KEY_AUTO_SESSION_ID, 20L).commit()
+        val reopened = memoryPreferences(values.toMutableMap())
+        switchSimulationContext(reopened, "sensor-a", UvirSensorSimulationSettingsStore.load(reopened).enabled)
+        assertEquals(20L, reopened.getLong(KEY_AUTO_SESSION_ID, 0L))
+        switchSimulationContext(reopened, "sensor-a", false)
+        assertEquals(10L, reopened.getLong(KEY_AUTO_SESSION_ID, 0L))
+    }
+
+    @Test fun noHardwareDemoAndLaterAssociationNeverBecomeTheSameContext() {
+        val prefs = memoryPreferences(mutableMapOf())
+        switchSimulationContext(prefs, "", true)
+        prefs.edit().putLong(KEY_LAST_MANUAL_SESSION_ID, 88L).commit()
+        switchSimulationContext(prefs, "new-sensor", false)
+        assertEquals(0L, prefs.getLong(KEY_LAST_MANUAL_SESSION_ID, 0L))
+        assertEquals("new-sensor", selectedUiSensorDeviceId(prefs, "new-sensor"))
+        switchSimulationContext(prefs, "new-sensor", true)
+        assertEquals(88L, prefs.getLong(KEY_LAST_MANUAL_SESSION_ID, 0L))
+    }
+
+    @Test fun repeatedSameSwitchIsIdempotent() {
+        val values = mutableMapOf<String, Any?>(KEY_AUTO_NOTE to "Real")
+        val prefs = memoryPreferences(values)
+        switchSimulationContext(prefs, "sensor-a", true)
+        prefs.edit().putString(KEY_AUTO_NOTE, "Demo").commit()
+        val before = values.toMap()
+        switchSimulationContext(prefs, "sensor-a", true)
+        assertEquals(before, values)
+    }
+
+    @Test fun saturationIsAnIndependentDemoChoiceNotASensorSetting() {
+        val prefs = memoryPreferences(mutableMapOf())
+        UvirSensorSimulationSettingsStore.setOutOfRange(prefs, "", true)
+        assertEquals(UvirSensorSimulationSettings(false, true), UvirSensorSimulationSettingsStore.load(prefs))
+        switchSimulationContext(prefs, "sensor-a", true)
+        assertEquals(UvirSensorSimulationSettings(true, true), UvirSensorSimulationSettingsStore.load(prefs))
+        switchSimulationContext(prefs, "sensor-a", false)
+        assertTrue(UvirSensorSimulationSettingsStore.load(prefs).outOfRange)
+    }
+
+    @Test fun migrateOnlySelectedLegacyChoiceNotAnInactiveSensorsChoice() {
+        val prefs = memoryPreferences(mutableMapOf(
+            UvirSensorSimulationSettingsStore.preferenceKey("sensor-a", KEY_USE_FAKE_SENSOR_DATA) to false,
+            UvirSensorSimulationSettingsStore.preferenceKey("sensor-b", KEY_USE_FAKE_SENSOR_DATA) to true))
+        UvirSensorSimulationSettingsStore.migrateLegacy(prefs, "sensor-a")
+        assertFalse(UvirSensorSimulationSettingsStore.load(prefs).enabled)
+    }
+
+    @Test fun selectedLegacySimulationEntersAnEmptySeparateContext() {
+        val prefs = memoryPreferences(mutableMapOf(
+            KEY_AUTO_SESSION_ID to 11L,
+            UvirSensorSimulationSettingsStore.preferenceKey("sensor-a", KEY_USE_FAKE_SENSOR_DATA) to true,
+            UvirSensorSimulationSettingsStore.preferenceKey("sensor-a", KEY_FAKE_SENSOR_OUT_OF_RANGE) to true))
+        UvirSensorSimulationSettingsStore.migrateLegacy(prefs, "sensor-a")
+        switchSimulationContext(prefs, "sensor-a", UvirSensorSimulationSettingsStore.load(prefs).enabled)
+        assertEquals(UvirSensorSimulationSettings(true, true), UvirSensorSimulationSettingsStore.load(prefs))
+        assertEquals(0L, prefs.getLong(KEY_AUTO_SESSION_ID, 0L))
+        assertEquals(11L, prefs.getLong(sensorContextPreferenceKey("sensor-a", KEY_AUTO_SESSION_ID), 0L))
+    }
+
+    @Test fun oldNoHardwareAndGlobalChoicesMigrateWithoutReenablingStaleFlagsLater() {
+        for (legacyKey in listOf(KEY_USE_FAKE_SENSOR_DATA,
+            UvirSensorSimulationSettingsStore.preferenceKey("", KEY_USE_FAKE_SENSOR_DATA))) {
+            val prefs = memoryPreferences(mutableMapOf(legacyKey to true))
+            UvirSensorSimulationSettingsStore.migrateLegacy(prefs, "")
+            assertTrue(UvirSensorSimulationSettingsStore.load(prefs).enabled)
+            UvirSensorSimulationSettingsStore.setEnabled(prefs, "", false)
+            UvirSensorSimulationSettingsStore.migrateLegacy(prefs, "")
+            assertFalse(UvirSensorSimulationSettingsStore.load(prefs).enabled)
+        }
+    }
+
+    @Test fun backupTransfersChoicesButNeverContextOwnershipOrJobIds() {
+        assertTrue(isTransferableAppPreference(KEY_SIMULATION_CONTEXT_ACTIVE))
+        assertFalse(isTransferableAppPreference(KEY_SIMULATION_CONTEXT_PREPARED))
+        assertFalse(isTransferableAppPreference(sensorContextPreferenceKey(SIMULATION_SENSOR_CONTEXT, KEY_AUTO_SESSION_ID)))
+        assertFalse(KEY_SIMULATION_CONTEXT_ACTIVE in sensorConfigurationPreferenceKeys)
     }
 }

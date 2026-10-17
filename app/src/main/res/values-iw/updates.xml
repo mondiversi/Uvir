@@ -6,7 +6,7 @@
     <string name="update_app">עדכון האפליקציה</string>
     <string name="update_sensor">עדכון החיישן</string>
     <string name="update_app_first">יש לעדכן קודם את האפליקציה.</string>
-    <string name="update_usb_required">יש לבחור בחיישן זה ולחבר אותו דרך USB, ללא הפעלה פעילה ולאחר סנכרון כל הרשומות.</string>
+    <string name="update_usb_required">יש לבחור בחיישן ולחבר אותו דרך USB, ללא הפעלה פעילה ולאחר סנכרון כל הרשומות.</string>
     <string name="update_download">הורדה ואימות…</string>
     <string name="update_flash">עדכון החיישן…</string>
     <string name="update_verify">אימות החיישן…</string>

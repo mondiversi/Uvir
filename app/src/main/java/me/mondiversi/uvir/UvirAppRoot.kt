@@ -153,31 +153,37 @@ internal fun UvirAppContent(
     onRequestCurrentWifiSsid: () -> Unit,
     openHomeRequestId: Long = 0L,
     onSensorSelected: (String) -> Unit,
-    multiSensorRuntime: UvirMultiSensorRuntime? = null
+    multiSensorRuntime: UvirMultiSensorRuntime? = null,
+    simulationActive: Boolean = false,
+    onSimulationChanged: (Boolean) -> Unit = {},
+    settingsRouteState: UvirSettingsRouteState = rememberUvirSettingsRouteState()
 ) {
 
     val context = LocalContext.current
     val resources = LocalResources.current
 
     val physicalUsbState by usbSensorManager.state.collectAsState()
-    val intendedDeviceId = UvirSensorCredentialStore.load(context).deviceId
-    val usbSensorState = if (
+    val intendedDeviceId = if (simulationActive) "" else UvirSensorCredentialStore.load(context).deviceId
+    val usbSensorState = if (!simulationActive && (
         physicalUsbState.deviceId.isNullOrBlank() ||
         physicalUsbState.deviceId.orEmpty().equals(intendedDeviceId, ignoreCase = true) ||
         (intendedDeviceId.isBlank() && !UvirSensorCredentialStore.isSensorSelectionDisabled(context))
-    ) physicalUsbState else UvirUsbSensorState()
+    )) physicalUsbState else UvirUsbSensorState()
     val sensorIndicators by (multiSensorRuntime?.indicators
         ?: kotlinx.coroutines.flow.MutableStateFlow(emptyMap<String, UvirStatusIndicator>())).collectAsState()
     val sensorConnectionStates by (multiSensorRuntime?.connectionStates
         ?: kotlinx.coroutines.flow.MutableStateFlow(emptyList<UvirConnectionSensorState>())).collectAsState()
     val sensorAlertMonitoringDeviceIds by (multiSensorRuntime?.alertMonitoringDeviceIds
         ?: kotlinx.coroutines.flow.MutableStateFlow(emptySet<String>())).collectAsState()
+    val rtcWarningDeviceIds by (multiSensorRuntime?.rtcWarnings
+        ?: kotlinx.coroutines.flow.MutableStateFlow(emptyList<String>())).collectAsState()
 
     val connectionResources by (multiSensorRuntime?.resources
         ?: kotlinx.coroutines.flow.MutableStateFlow(UvirConnectionResources())).collectAsState()
 
-    val wirelessSensorState by
+    val physicalWirelessState by
         wirelessSensorManager.state.collectAsState()
+    val wirelessSensorState = if (simulationActive) UvirWirelessSensorState() else physicalWirelessState
 
     val database = remember {
         multiSensorRuntime?.database ?: UvirDatabaseHelper(
@@ -334,7 +340,7 @@ internal fun UvirAppContent(
     }
 
     var storedSensorRuntimeSnapshot by remember {
-        mutableStateOf(UvirSensorRuntimeInfoStore.load(context))
+        mutableStateOf(if (simulationActive) null else UvirSensorRuntimeInfoStore.load(context))
     }
     var pendingOfflineReopenState by remember {
         mutableStateOf(consumeOfflineReopenState(preferences))
@@ -371,11 +377,7 @@ internal fun UvirAppContent(
     val simulationDeviceId = normalizeSensorDeviceId(intendedDeviceId)
     // Preferences own this state: an old Activity snapshot must not restore
     // another sensor's simulation choice after selection, import or recreation.
-    var useFakeSensorData by remember(simulationDeviceId) {
-        mutableStateOf(
-            UvirSensorSimulationSettingsStore.load(preferences, simulationDeviceId).enabled
-        )
-    }
+    val useFakeSensorData = simulationActive
 
     var fakeSensorOutOfRangeEnabled by remember(simulationDeviceId) {
         mutableStateOf(
@@ -585,12 +587,7 @@ internal fun UvirAppContent(
             ScrollState(0)
         }
 
-    val parametersScrollState =
-        rememberSaveable(
-            saver = ScrollState.Saver
-        ) {
-            ScrollState(0)
-        }
+    val parametersScrollState = settingsRouteState.scrollState
 
     var viewMode by remember {
         mutableStateOf(
@@ -698,7 +695,7 @@ internal fun UvirAppContent(
                 statusLedBrightness =
                     preferences.getInt(
                         KEY_SENSOR_STATUS_LED_BRIGHTNESS,
-                        10
+                        DEFAULT_SENSOR_STATUS_LED_BRIGHTNESS
                     ).coerceIn(1, 100),
                 statusBuzzerEnabled =
                     preferences.getBoolean(
@@ -708,7 +705,7 @@ internal fun UvirAppContent(
                 statusBuzzerVolume =
                     preferences.getInt(
                         KEY_SENSOR_STATUS_BUZZER_VOLUME,
-                        10
+                        DEFAULT_SENSOR_STATUS_BUZZER_VOLUME
                     ).coerceIn(1, 100),
                 externalCommandEnabled =
                     preferences.getBoolean(
@@ -869,6 +866,7 @@ internal fun UvirAppContent(
     }
 
     fun sendSensorControlCommands(commands: List<String>): Boolean {
+        if (useFakeSensorData) return false // Demo settings must not reach the retained hardware.
         val selectedMode =
             SensorConnectionMode.fromStoredValue(
                 sensorConnectionModeValue
@@ -976,7 +974,8 @@ internal fun UvirAppContent(
                 context = context,
                 sound = settings.sound,
                 volume = settings.volume,
-                vibrationPulses = 1
+                vibrationPulses = 1,
+                toneProfile = UvirFeedbackToneProfile.ACQUISITION
             )
         }
     }
@@ -1097,7 +1096,7 @@ internal fun UvirAppContent(
         } else {
             wirelessSensorState.runtimeInfo
         }
-    val selectedSensorDeviceId =
+    val selectedSensorDeviceId = if (useFakeSensorData) "" else
         selectedRuntimeInfo.deviceId
             .ifBlank {
                 if (selectedSensorConnectionMode == SensorConnectionMode.USB) {
@@ -1351,10 +1350,7 @@ internal fun UvirAppContent(
         }
     LaunchedEffect(database, selectedSensorDeviceId) {
         withContext(Dispatchers.IO) {
-            database.assignDefaultSensorToUnassociatedAlerts(
-                UvirSensorCredentialStore.load(context).deviceId
-                    .ifBlank { selectedSensorDeviceId }
-            )
+            database.repairKnownAlertSensorAssociations()
         }
     }
     val sensorProfileRevision by
@@ -1488,6 +1484,7 @@ internal fun UvirAppContent(
         usbSensorState.attached,
         sampleSpacingMs
     ) {
+        if (useFakeSensorData) return@LaunchedEffect // Keep real transports running unchanged.
         val fallbackWirelessMode =
             SensorConnectionMode.fromStoredValue(
                 lastWirelessSensorConnectionModeValue
@@ -4130,6 +4127,7 @@ internal fun UvirAppContent(
                     versionInfoScrollState,
                 parametersScrollState =
                     parametersScrollState,
+                settingsRouteState = settingsRouteState,
 
                 viewMode = viewMode,
                 onViewModeChanged = {
@@ -4189,8 +4187,7 @@ internal fun UvirAppContent(
                     onSensorSelected(deviceId)
                 },
                 onUseFakeSensorDataChanged = { enabled ->
-                    UvirSensorSimulationSettingsStore.setEnabled(preferences, simulationDeviceId, enabled)
-                    useFakeSensorData = enabled
+                    onSimulationChanged(enabled)
                 },
                 onFakeSensorOutOfRangeChanged = { enabled ->
                     UvirSensorSimulationSettingsStore.setOutOfRange(preferences, simulationDeviceId, enabled)
@@ -4411,6 +4408,22 @@ internal fun UvirAppContent(
                     }
                     if (!accepted) finishAuxiliarySensorCommand()
                     accepted
+                },
+                onPreviewSensorStatusBuzzerVolume = { volume ->
+                    // A preview is ephemeral: no extra settings writes and no
+                    // fallback to a different sensor if selection/link changes.
+                    if (selectedRuntimeInfo.statusBuzzerPreviewAvailable == true) {
+                        val hardwareId = intendedDeviceId
+                        val mode = SensorConnectionMode.fromStoredValue(sensorConnectionModeValue)
+                        sensorConnectionScope.launch(Dispatchers.IO) {
+                            val commands = listOf("BUZZER_PREVIEW ${volume.coerceIn(1, 100)}")
+                            if (mode == SensorConnectionMode.USB) {
+                                usbSensorManager.sendDiagnosticControlCommands(hardwareId, commands)
+                            } else {
+                                wirelessSensorManager.sendDiagnosticControlCommands(hardwareId, mode, commands)
+                            }
+                        }
+                    }
                 },
                 onTestSensorStatusBuzzer = {
                     beginAuxiliarySensorCommand(9_530L)
@@ -4955,7 +4968,8 @@ internal fun UvirAppContent(
                             context = context,
                             sound = sound,
                             volume = volume,
-                            vibrationPulses = 1
+                            vibrationPulses = 1,
+                            toneProfile = UvirFeedbackToneProfile.ACQUISITION
                         )
                     }
                 },
@@ -5105,6 +5119,7 @@ internal fun UvirAppContent(
 
             HistoryScreen(
                 database = database,
+                filterPreferences = preferences,
                 historyListState =
                     historyListState,
                 historyScrollAnchor =
@@ -5280,6 +5295,16 @@ internal fun UvirAppContent(
             }
         }
     }
+
+    UvirRtcClockWarningHost(
+        deviceIds = rtcWarningDeviceIds,
+        profiles = sensorProfiles,
+        preferences = preferences,
+        cardColor = cardColor,
+        primaryText = primaryText,
+        blocked = sensorSyncSummary != null || sensorSyncIncompleteSummary != null,
+        onDismiss = { multiSensorRuntime?.dismissRtcWarnings(it) }
+    )
 
     sensorSyncSummary?.let { summary ->
         SensorSyncCompleteDialog(

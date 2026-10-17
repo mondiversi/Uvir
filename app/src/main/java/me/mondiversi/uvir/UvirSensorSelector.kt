@@ -47,10 +47,16 @@ internal fun UvirSensorSelector(
     connectionSelectionEnabled: Boolean = true,
     wifiEnabled: Boolean = true,
     bluetoothEnabled: Boolean = true,
-    internetEnabled: Boolean = true
+    internetEnabled: Boolean = true,
+    simulationActive: Boolean = false,
+    onOpenSimulationSettings: () -> Unit = {},
+    onAddSensor: () -> Unit = {}
 ) {
     val menuEnabled = sensorSelectionEnabled
-    val displayName = sensorDisplayName.ifBlank { stringResource(R.string.sensor_no_selection) }
+    val noHardwareSelection = simulationActive || sensorProfiles.isEmpty() || selectedSensorDeviceId.isBlank()
+    val displayName = homeSensorDisplayName(sensorDisplayName, if (noHardwareSelection) "" else selectedSensorDeviceId)
+    val accessibleName = if (noHardwareSelection)
+        stringResource(R.string.sensor_no_selection) else displayName
     val alertIds = remember(alertMonitoringDeviceIds) {
         alertMonitoringDeviceIds.map(::normalizeSensorDeviceId).filter { it.isNotBlank() }.toSet()
     }
@@ -71,7 +77,7 @@ internal fun UvirSensorSelector(
                         onClick = { onSelectionExpandedChange(true) }
                     )
                     .uvirAccessibleAction(
-                        label = stringResource(R.string.sensor_selection_title) + ": " + displayName,
+                        label = stringResource(R.string.sensor_selection_title) + ": " + accessibleName,
                         enabled = menuEnabled,
                         onClick = { onSelectionExpandedChange(true) }),
                 verticalAlignment = Alignment.CenterVertically
@@ -103,14 +109,21 @@ internal fun UvirSensorSelector(
             containerColor = dialogColor,
             onSensorSelected = { request ->
                 onSelectionExpandedChange(false)
-                if (request == NO_SENSOR_SELECTED_REQUEST) {
-                    if (selectedSensorDeviceId.isNotBlank()) onSensorSelected(request)
-                } else if (!request.equals(selectedSensorDeviceId, ignoreCase = true)) onSensorSelected(request)
+                if (request.isNotBlank() && !request.equals(selectedSensorDeviceId, ignoreCase = true)) onSensorSelected(request)
             },
             selectionEnabled = menuEnabled,
             onConnectionModeSelected = onConnectionModeSelected,
             connectionSelectionEnabled = connectionSelectionEnabled,
-            wifiEnabled = wifiEnabled, bluetoothEnabled = bluetoothEnabled, internetEnabled = internetEnabled
+            wifiEnabled = wifiEnabled, bluetoothEnabled = bluetoothEnabled, internetEnabled = internetEnabled,
+            simulationActive = simulationActive,
+            onOpenSimulationSettings = {
+                onSelectionExpandedChange(false)
+                onOpenSimulationSettings()
+            },
+            onAddSensor = {
+                onSelectionExpandedChange(false)
+                onAddSensor()
+            }
         )
     }
 }

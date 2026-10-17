@@ -35,6 +35,7 @@ private const val UvirDetailSelectorItemIndex = 2
 
 @Composable
 internal fun uvirDetailSelectorPinned(listState: LazyListState): Boolean {
+    if (LocalUvirMeasurementPanels.current) return false
     val pinned by remember(listState) {
         derivedStateOf {
             listState.firstVisibleItemIndex >= UvirDetailSelectorItemIndex
@@ -60,6 +61,10 @@ internal fun UvirCollapsingDetailTitleBar(
     listState: LazyListState,
     content: @Composable () -> Unit
 ) {
+    if (LocalUvirMeasurementPanels.current) {
+        content()
+        return
+    }
     val visible by remember(listState) {
         derivedStateOf {
             listState.firstVisibleItemIndex < UvirDetailSelectorItemIndex

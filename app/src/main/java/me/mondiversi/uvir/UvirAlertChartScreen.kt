@@ -249,8 +249,15 @@ internal fun AlertChartScreen(
         )
     }
 
-    Scaffold(
+    UvirMeasurementScaffold(
+        state = scrollState,
         containerColor = backgroundColor,
+        scrollbarColor = secondaryText.copy(alpha = 0.46f),
+        contentPadding = PaddingValues(
+                start = UvirScreenHorizontalPadding,
+                end = UvirScreenHorizontalPadding,
+                bottom = 20.dp
+            ),
         topBar = {
             UvirCollapsingDetailTitleBar(scrollState) {
                 Surface(color = backgroundColor) {
@@ -269,7 +276,6 @@ internal fun AlertChartScreen(
                         color = primaryText
                     )
                     UvirTitleActionButton(
-                        iconColor = MaterialTheme.colorScheme.primary,
                         contentDescription = shareDescription,
                         onClick = {
                             showShareDialog = true
@@ -305,25 +311,9 @@ internal fun AlertChartScreen(
                     }
                 }
             }
+
         }
-    ) { paddingValues ->
-        LazyColumn(
-            state = scrollState,
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .lazyScrollbarOverlay(
-                        state = scrollState,
-                        color = secondaryText.copy(alpha = 0.46f)
-                    ),
-            contentPadding = PaddingValues(
-                start = UvirScreenHorizontalPadding,
-                end = UvirScreenHorizontalPadding,
-                bottom = 20.dp
-            ),
-            verticalArrangement = Arrangement.spacedBy(UvirIslandSpacing)
-        ) {
+    ) {
             item { UvirDetailIdentityCard(
                 primaryId = entry.id,
                 sessionId = entry.sessionId,
@@ -433,7 +423,7 @@ internal fun AlertChartScreen(
                     secondaryText = secondaryText
                 ) }
             }
-        }
+
     }
 }
 

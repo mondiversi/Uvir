@@ -6,7 +6,7 @@
     <string name="update_app">تحديث التطبيق</string>
     <string name="update_sensor">تحديث المستشعر</string>
     <string name="update_app_first">حدّث التطبيق أولاً.</string>
-    <string name="update_usb_required">اختر هذا المستشعر وصله عبر USB دون جلسة نشطة وبعد مزامنة جميع السجلات.</string>
+    <string name="update_usb_required">اختر المستشعر وصله عبر USB دون جلسة نشطة وبعد مزامنة جميع السجلات.</string>
     <string name="update_download">التنزيل والتحقق…</string>
     <string name="update_flash">جارٍ تحديث المستشعر…</string>
     <string name="update_verify">جارٍ التحقق من المستشعر…</string>

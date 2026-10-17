@@ -99,6 +99,45 @@ class UvirDatabaseImportTest {
         assertEquals("keep this record", target.readSavedRecords().single().note)
     }
 
+    @Test fun retiredCameraArchiveAndCounterRoundTripWithoutMixingSpectralRecords() = runBlocking {
+        assertEquals(1L, insertLegacyCameraRow(source, "camera:source"))
+        insertLegacyCameraRow(target, "camera:target")
+        val archive = createEncryptedUvirDatabaseArchive(File(source.writableDatabase.path), File(root, "camera-backup.zip"), "correct-password".toCharArray())
+        importEncryptedUvirDatabaseArchive(context, target, Uri.fromFile(archive), "correct-password".toCharArray())
+        assertEquals(legacyCameraRows(source), legacyCameraRows(target))
+        assertEquals(2L, insertLegacyCameraRow(target, "camera:source"))
+        assertTrue(target.readSavedRecords().isEmpty())
+        target.resetAllCounters()
+        assertTrue(legacyCameraRows(target).isEmpty())
+        assertEquals(1L, insertLegacyCameraRow(target, "camera:source"))
+    }
+
+    @Test fun previousVersionTwentyBackupStillImportsWithoutCameraTable() = runBlocking {
+        source.saveAcquisition(SensorSample(), "previous-version-record", false, sensorDeviceId = "fixture", timestamp = 1_000L)
+        source.writableDatabase.execSQL("DROP TABLE camera_estimates")
+        source.writableDatabase.version = 20
+        val archive = createEncryptedUvirDatabaseArchive(File(source.writableDatabase.path), File(root, "version-twenty.zip"), "correct-password".toCharArray())
+        importEncryptedUvirDatabaseArchive(context, target, Uri.fromFile(archive), "correct-password".toCharArray())
+        assertEquals("previous-version-record", target.readSavedRecords().single().note)
+        assertTrue(legacyCameraRows(target).isEmpty())
+        assertEquals(20, source.writableDatabase.version)
+    }
+
+    // Opaque legacy data: no runtime Camera model or recording API is retained.
+    private fun insertLegacyCameraRow(helper: UvirDatabaseHelper, sourceId: String): Long =
+        helper.writableDatabase.insertOrThrow("camera_estimates", null, android.content.ContentValues().apply {
+            put("source_id", sourceId)
+            put("timestamp", 1_800_000_000_000L)
+            put("data_origin", "estimated")
+            put("model_version", "retired-prototype")
+            put("estimate_csv", "Source,Data_Origin\nCamera,Estimated\n")
+        })
+
+    private fun legacyCameraRows(helper: UvirDatabaseHelper): List<List<String>> =
+        helper.readableDatabase.rawQuery("SELECT * FROM camera_estimates ORDER BY id", null).use { cursor ->
+            buildList { while (cursor.moveToNext()) add((0 until cursor.columnCount).map { cursor.getString(it) }) }
+        }
+
     private fun isolatedContext(name: String): Context {
         val directory = File(root, name).apply { assertTrue(mkdir()) }
         return object : ContextWrapper(context) {

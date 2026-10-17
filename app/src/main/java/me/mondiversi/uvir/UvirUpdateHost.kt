@@ -25,7 +25,9 @@ internal fun UvirUpdateHost(manager: UvirUsbSensorManager) {
     }
     val permission = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         if (context.packageManager.canRequestPackageInstalls()) {
-            UvirUpdates.downloadedInstaller()?.let { apk -> installer.launch(UvirUpdates.installIntent(context, apk)) }
+            UvirUpdates.continueInstall(context) { apk ->
+                installer.launch(UvirUpdates.installIntent(context, apk))
+            }
         } else {
             UvirErrorLog.record(context, "update_install", "Android installation permission denied")
             android.widget.Toast.makeText(context, R.string.update_permission, android.widget.Toast.LENGTH_LONG).show()

@@ -72,7 +72,8 @@ internal fun formatUvirNumber(
     value: Double,
     fractionDigits: Int,
     format: UvirNumericFormat,
-    grouping: Boolean = true
+    grouping: Boolean = true,
+    minimumDigits: Int = fractionDigits
 ): String {
     if (!value.isFinite()) {
         return value.toString()
@@ -95,7 +96,7 @@ internal fun formatUvirNumber(
         symbols
     ).apply {
         isGroupingUsed = grouping
-        minimumFractionDigits = fractionDigits
+        minimumFractionDigits = minimumDigits
         maximumFractionDigits = fractionDigits
         roundingMode = RoundingMode.HALF_UP
     }.format(value)

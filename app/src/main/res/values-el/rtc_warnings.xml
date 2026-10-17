@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rtc_clock_warning_title_single">Έλεγχος μπαταρίας ρολογιού</string>
+    <string name="rtc_clock_warning_title_multiple">Έλεγχος μπαταριών ρολογιών</string>
+    <string name="rtc_clock_warning_message_single">Το ρολόι του αισθητήρα \"%1$s\" ανέφερε διακοπή λειτουργίας. Η μπαταρία μπορεί να είναι άδεια ή να μην έχει συνδεθεί σωστά. Έλεγξέ την και αντικατάστησέ την αν χρειάζεται.</string>
+    <string name="rtc_clock_warning_message_multiple">Οι ακόλουθοι αισθητήρες ανέφεραν διακοπή λειτουργίας του ρολογιού:</string>
+    <string name="rtc_clock_warning_batteries_guidance">Οι μπαταρίες μπορεί να είναι άδειες ή να μην έχουν συνδεθεί σωστά. Έλεγξέ τες και αντικατάστησέ τες αν χρειάζεται.</string>
+</resources>

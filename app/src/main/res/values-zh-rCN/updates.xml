@@ -6,7 +6,7 @@
     <string name="update_app">更新应用</string>
     <string name="update_sensor">更新传感器</string>
     <string name="update_app_first">请先更新应用。</string>
-    <string name="update_usb_required">选择此传感器并通过 USB 连接。请先结束活动会话并同步所有记录。</string>
+    <string name="update_usb_required">选择传感器并通过 USB 连接。请先结束活动会话并同步所有记录。</string>
     <string name="update_download">正在下载并验证…</string>
     <string name="update_flash">正在更新传感器…</string>
     <string name="update_verify">正在验证传感器…</string>

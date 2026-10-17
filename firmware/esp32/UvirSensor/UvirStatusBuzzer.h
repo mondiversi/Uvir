@@ -4,6 +4,7 @@
 
 #include "UvirStatusLed.h"
 #include "UvirBuzzerRecordPattern.h"
+#include "UvirBuzzerVolume.h"
 
 struct UvirBuzzerPerformanceNote {
   uint16_t frequencyHz;
@@ -26,7 +27,7 @@ class UvirStatusBuzzer {
  public:
   void begin(uint8_t pin) {
     pin_ = pin;
-    ledcAttach(pin_, 1000, 8);
+    ledcAttach(pin_, 1000, kUvirBuzzerPwmResolution);
     silence();
     if (taskHandle_ == nullptr) {
       xTaskCreate(
@@ -136,15 +137,29 @@ class UvirStatusBuzzer {
   }
 
   bool requestDebugTone(uint32_t frequency, uint32_t durationMs) {
+    return requestTone(frequency, durationMs, volumePercent_);
+  }
+
+  // Preview the requested level without changing the persistent configuration.
+  bool requestVolumePreview(uint8_t volumePercent) {
+    if (volumePercent < 1 || volumePercent > 100) return false;
+    return requestTone(
+        kUvirAcquisitionBeep.frequencyHz,
+        kUvirAcquisitionBeep.toneMs,
+        volumePercent);
+  }
+
+  bool requestTone(uint32_t frequency, uint32_t durationMs, uint8_t volumePercent) {
     if (!enabled_ || selfTestActive_ ||
         frequency < 40 || frequency > 5000) {
       return false;
     }
     bool accepted = false;
     portENTER_CRITICAL(&requestMux_);
-    if (!debugPerformanceActive_) {
+    if (!debugPerformanceActive_ && !selfTestRequestedUnsafe()) {
       debugToneFrequency_ = frequency;
       debugToneDurationMs_ = constrain(durationMs, 40UL, 3000UL);
+      debugToneVolumePercent_ = volumePercent;
       debugToneStopRequested_ = false;
       debugTonePending_ = true;
       accepted = true;
@@ -182,8 +197,9 @@ class UvirStatusBuzzer {
       }
       uint32_t debugFrequency = 0;
       uint32_t debugDurationMs = 0;
-      if (buzzer->takeDebugTone(debugFrequency, debugDurationMs)) {
-        buzzer->playDebugTone(debugFrequency, debugDurationMs);
+      uint8_t debugVolumePercent = 0;
+      if (buzzer->takeDebugTone(debugFrequency, debugDurationMs, debugVolumePercent)) {
+        buzzer->playDebugTone(debugFrequency, debugDurationMs, debugVolumePercent);
         continue;
       }
       const UvirBuzzerSignal signal = buzzer->takeRequest();
@@ -387,12 +403,13 @@ class UvirStatusBuzzer {
     return signal;
   }
 
-  bool takeDebugTone(uint32_t &frequency, uint32_t &durationMs) {
+  bool takeDebugTone(uint32_t &frequency, uint32_t &durationMs, uint8_t &volumePercent) {
     bool pending = false;
     portENTER_CRITICAL(&requestMux_);
     if (debugTonePending_) {
       frequency = debugToneFrequency_;
       durationMs = debugToneDurationMs_;
+      volumePercent = debugToneVolumePercent_;
       debugTonePending_ = false;
       pending = true;
     }
@@ -400,9 +417,9 @@ class UvirStatusBuzzer {
     return pending;
   }
 
-  void playDebugTone(uint32_t frequency, uint32_t durationMs) {
+  void playDebugTone(uint32_t frequency, uint32_t durationMs, uint8_t volumePercent) {
     if (!enabled_) return;
-    startTone(frequency);
+    startTone(frequency, volumePercent);
     const uint32_t startedAtMs = millis();
     while (enabled_ &&
            !debugToneStopRequested_ &&
@@ -493,7 +510,15 @@ class UvirStatusBuzzer {
 
   void playRecordPattern(const UvirBuzzerRecordPattern &pattern) {
     for (uint8_t index = 0; index < pattern.beepCount && enabled_; ++index) {
-      toneFor(pattern.frequencyHz, pattern.toneMs);
+      if (pattern.endFrequencyHz == 0) {
+        toneFor(pattern.frequencyHz, pattern.toneMs);
+      } else {
+        startTone(pattern.frequencyHz);
+        vTaskDelay(pdMS_TO_TICKS(pattern.toneMs / 2));
+        if (enabled_) startTone(pattern.endFrequencyHz);
+        vTaskDelay(pdMS_TO_TICKS(pattern.toneMs - pattern.toneMs / 2));
+        silence();
+      }
       if (index + 1 < pattern.beepCount && enabled_) pauseFor(pattern.pauseMs);
     }
   }
@@ -506,10 +531,12 @@ class UvirStatusBuzzer {
   }
 
   void startTone(uint32_t frequency) {
-    ledcChangeFrequency(pin_, frequency, 8);
-    const uint8_t duty = static_cast<uint8_t>(
-        max(1, (127 * static_cast<int>(volumePercent_)) / 100));
-    ledcWrite(pin_, duty);
+    startTone(frequency, volumePercent_);
+  }
+
+  void startTone(uint32_t frequency, uint8_t volumePercent) {
+    ledcChangeFrequency(pin_, frequency, kUvirBuzzerPwmResolution);
+    ledcWrite(pin_, uvirBuzzerDutyForVolume(volumePercent));
   }
 
   void pauseFor(uint32_t durationMs) {
@@ -521,7 +548,7 @@ class UvirStatusBuzzer {
 
   uint8_t pin_ = 32;
   volatile bool enabled_ = true;
-  volatile uint8_t volumePercent_ = 10;
+  volatile uint8_t volumePercent_ = kUvirDefaultStatusBuzzerVolume;
   volatile UvirBuzzerSignal pendingSignal_ = UvirBuzzerSignal::None;
   volatile uint8_t pendingSavedSignals_ = 0;
   volatile uint8_t pendingAlertSavedSignals_ = 0;
@@ -530,6 +557,7 @@ class UvirStatusBuzzer {
   volatile bool debugToneStopRequested_ = false;
   uint32_t debugToneFrequency_ = 0;
   uint32_t debugToneDurationMs_ = 0;
+  uint8_t debugToneVolumePercent_ = kUvirDefaultStatusBuzzerVolume;
   volatile bool debugPerformancePending_ = false;
   volatile bool debugPerformanceActive_ = false;
   volatile uint32_t debugPerformanceGeneration_ = 0;

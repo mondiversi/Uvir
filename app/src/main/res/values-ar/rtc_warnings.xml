@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rtc_clock_warning_title_single">تحقق من بطارية الساعة</string>
+    <string name="rtc_clock_warning_title_multiple">تحقق من بطاريات الساعات</string>
+    <string name="rtc_clock_warning_message_single">أبلغت ساعة المستشعر \"%1$s\" عن توقف. قد تكون البطارية فارغة أو غير موصولة بشكل صحيح. تحقق منها واستبدلها إذا لزم الأمر.</string>
+    <string name="rtc_clock_warning_message_multiple">أبلغت المستشعرات التالية عن توقف الساعة:</string>
+    <string name="rtc_clock_warning_batteries_guidance">قد تكون البطاريات فارغة أو غير موصولة بشكل صحيح. تحقق منها واستبدلها إذا لزم الأمر.</string>
+</resources>

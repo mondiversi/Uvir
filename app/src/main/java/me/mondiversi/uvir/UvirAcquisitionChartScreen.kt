@@ -116,7 +116,6 @@ internal fun AcquisitionChartScreen(
                     )
 
                     UvirTitleActionButton(
-                        iconColor = MaterialTheme.colorScheme.primary,
                         contentDescription = shareDescription,
                         onClick = {
                             showShareDialog = true
@@ -292,13 +291,7 @@ internal fun AcquisitionChartScreen(
                             )
                         },
                         colors =
-                            FilterChipDefaults.filterChipColors(
-                                selectedContainerColor =
-                                    MaterialTheme.colorScheme.primary,
-                                selectedLabelColor =
-                                    MaterialTheme.colorScheme.onPrimary,
-                                labelColor = secondaryText
-                            )
+                            uvirSelectionChipColors(labelColor = secondaryText)
                     )
                 }
             }

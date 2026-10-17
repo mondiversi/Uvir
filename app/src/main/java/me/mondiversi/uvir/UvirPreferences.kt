@@ -109,7 +109,10 @@ enum class AppLanguage(
     CHINESE("zh", "zh-CN"),
     JAPANESE("ja", "ja"),
     KOREAN("ko", "ko-KR"),
-    SWAHILI("sw", "sw");
+    SWAHILI("sw", "sw"),
+    POLISH("pl", "pl"),
+    DUTCH("nl", "nl"),
+    INDONESIAN("id", "id");
 
     companion object {
         fun fromStoredValue(

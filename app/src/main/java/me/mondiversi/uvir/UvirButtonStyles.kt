@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 internal val UvirDestructiveActionBaseColor = Color(0xFFD32F2F)
 internal val UvirDestructiveOutlinedBorderWidth = 1.5.dp
 internal const val UvirDestructiveOutlinedIconStrokeScale = 1.25f
-/** Scoped to Settings and About bodies, never to dialog actions or toolbars. */
+/** Scoped to Settings/About bodies and data-export bottom buttons, never to dialog text actions or toolbars. */
 internal val LocalUvirSettingsActionButtons = staticCompositionLocalOf { false }
 internal val LocalUvirActionGlyphStrokeScale = staticCompositionLocalOf { 1f }
 

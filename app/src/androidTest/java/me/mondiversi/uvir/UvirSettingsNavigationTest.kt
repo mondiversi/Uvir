@@ -4,6 +4,7 @@ import android.content.res.Configuration
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.background
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.CompositionLocalProvider
@@ -31,6 +32,61 @@ import org.junit.runner.RunWith
 class UvirSettingsNavigationTest {
     @get:Rule
     val compose = createComposeRule()
+
+    @Test
+    fun islandHeadersShowOriginalDividersWithoutChangingSpacingOrContentSeparators() {
+        val night = mutableStateOf(false)
+        val rtl = mutableStateOf(false)
+        compose.setContent {
+            MaterialTheme {
+                val card = if (night.value) Color(0xFF1C242B) else Color.White
+                val text = if (night.value) Color.White else Color(0xFF101418)
+                CompositionLocalProvider(LocalLayoutDirection provides
+                    if (rtl.value) LayoutDirection.Rtl else LayoutDirection.Ltr) {
+                    Column(Modifier.width(240.dp)) {
+                        Box(Modifier.background(card).testTag("shared-header-divider")) {
+                            UvirIslandHeaderDivider(text)
+                        }
+                        Box(Modifier.testTag("static-header-divider")) {
+                            SettingsIsland(card, text) {
+                                SettingsIslandHeader("S", text)
+                                androidx.compose.material3.Text("Body", color = text)
+                            }
+                        }
+                        Box(Modifier.testTag("section-header-divider")) {
+                            SettingsSection("E", card, text, text.copy(alpha = 0.20f),
+                                highlightExpandedHeader = false, showExpandedDivider = true) {
+                                androidx.compose.material3.Text("Body", color = text)
+                            }
+                        }
+                        Box(Modifier.background(card).testTag("content-divider")) {
+                            SettingsGroupDivider(text)
+                        }
+                    }
+                }
+            }
+        }
+        for (dark in listOf(false, true)) for (rightToLeft in listOf(false, true)) {
+            compose.runOnIdle { night.value = dark; rtl.value = rightToLeft }
+            val card = if (dark) Color(0xFF1C242B) else Color.White
+            val expectedHeight = with(compose.density) { 1.dp.roundToPx() }
+            for (tag in listOf("shared-header-divider", "static-header-divider", "section-header-divider")) {
+                val pixels = compose.onNodeWithTag(tag).captureToImage().toPixelMap()
+                // At the center, short labels leave the header/content boundary clear.
+                val lineHeight = (0 until pixels.height).count { y ->
+                    val pixel = pixels[pixels.width / 2, y]
+                    kotlin.math.abs(pixel.red - card.red) > 0.02f
+                }
+                org.junit.Assert.assertEquals("$tag: night=$dark, rtl=$rightToLeft",
+                    expectedHeight.toFloat(), lineHeight.toFloat(), 1f)
+            }
+            compose.onNodeWithTag("shared-header-divider").assertHeightIsEqualTo(1.dp)
+            val contentDivider = compose.onNodeWithTag("content-divider").assertHeightIsEqualTo(1.dp)
+            val pixels = contentDivider.captureToImage().toPixelMap()
+            org.junit.Assert.assertTrue("Content separators must remain visible: night=$dark",
+                kotlin.math.abs(pixels[pixels.width / 2, pixels.height / 2].red - card.red) > 0.02f)
+        }
+    }
 
     @Test
     fun settingsListShowsOnlyPageRowsAndOpensTheSelectedContent() {

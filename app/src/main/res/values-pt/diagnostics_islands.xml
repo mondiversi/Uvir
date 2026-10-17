@@ -2,5 +2,5 @@
 <resources>
     <string name="diagnostics_test_group">Teste de diagnóstico</string>
     <string name="diagnostics_simulation_group">Simulação</string>
-    <string name="diagnostics_simulation_description">Simula aquisições, alertas e valores ao vivo para o sensor.</string>
+    <string name="diagnostics_simulation_description">Simula aquisições, alertas e valores ao vivo.</string>
 </resources>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rtc_clock_warning_title_single">Kagua betri ya saa</string>
+    <string name="rtc_clock_warning_title_multiple">Kagua betri za saa</string>
+    <string name="rtc_clock_warning_message_single">Saa ya kihisi \"%1$s\" imeripoti kusimama. Betri huenda imeisha au haijaunganishwa vizuri. Ikague na uibadilishe ikiwa ni lazima.</string>
+    <string name="rtc_clock_warning_message_multiple">Vihisi vifuatavyo vimeripoti kusimama kwa saa:</string>
+    <string name="rtc_clock_warning_batteries_guidance">Betri huenda zimeisha au hazijaunganishwa vizuri. Zikague na uzibadilishe ikiwa ni lazima.</string>
+</resources>

@@ -8,6 +8,16 @@ internal const val KEY_MANUAL_ACQUISITION_NOTE = "manual_acquisition_note"
 internal const val ASSOCIATE_NEW_SENSOR_REQUEST = "__associate_new_sensor__"
 internal const val NO_SENSOR_SELECTED_REQUEST = "__no_sensor_selected__"
 
+/** Keep an associated profile selected, irrespective of its connection state. */
+internal fun requiredSelectedSensorId(currentId: String, associatedIds: Collection<String>): String {
+    val ids = associatedIds.map(::normalizeSensorDeviceId).filter(String::isNotBlank).distinct().sorted()
+    val current = normalizeSensorDeviceId(currentId)
+    return current.takeIf { it in ids } ?: ids.firstOrNull().orEmpty()
+}
+
+internal fun homeSensorDisplayName(name: String, deviceId: String): String =
+    if (deviceId.isBlank()) "—" else name.ifBlank { deviceId }
+
 internal fun normalizeSensorDeviceId(deviceId: String): String =
     deviceId.trim().lowercase(Locale.ROOT)
 
@@ -126,7 +136,7 @@ internal fun clearCachedSensorOperationalContexts(preferences: SharedPreferences
     return editor.commit()
 }
 
-private fun SharedPreferences.Editor.putSensorContextValue(key: String, value: Any) {
+internal fun SharedPreferences.Editor.putSensorContextValue(key: String, value: Any) {
     when (value) {
         is String -> putString(key, value)
         is Boolean -> putBoolean(key, value)

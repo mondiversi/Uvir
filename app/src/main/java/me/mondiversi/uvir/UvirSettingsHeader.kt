@@ -36,7 +36,6 @@ internal fun UvirSettingsHeader(
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             UvirTitleActionButton(
-                iconColor = MaterialTheme.colorScheme.primary,
                 contentDescription = collapseDescription,
                 onClick = onCollapseAll,
                 modifier =

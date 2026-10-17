@@ -6,7 +6,7 @@
     <string name="update_app">Mettre à jour l’application</string>
     <string name="update_sensor">Mettre à jour le capteur</string>
     <string name="update_app_first">Mettez d’abord l’application à jour.</string>
-    <string name="update_usb_required">Sélectionnez ce capteur et connectez-le par USB, sans session active et avec tous les enregistrements synchronisés.</string>
+    <string name="update_usb_required">Sélectionnez le capteur et connectez-le par USB, sans session active et avec tous les enregistrements synchronisés.</string>
     <string name="update_download">Téléchargement et vérification…</string>
     <string name="update_flash">Mise à jour du capteur…</string>
     <string name="update_verify">Vérification du capteur…</string>

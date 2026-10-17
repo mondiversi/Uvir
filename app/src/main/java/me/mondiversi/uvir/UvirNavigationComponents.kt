@@ -309,14 +309,7 @@ fun MeasurementViewSelector(
             ElectromagneticWaveIcon(
                 modifier =
                     Modifier.size(UvirMeasurementSelectorIconSize),
-                color =
-                    if (
-                        selectedMode ==
-                        ViewMode.IRRADIANCE
-                    )
-                        primaryText
-                    else
-                        secondaryText
+                color = LocalContentColor.current
             )
         }
 
@@ -348,14 +341,7 @@ fun MeasurementViewSelector(
             DnaIcon(
                 modifier =
                     Modifier.size(UvirMeasurementSelectorIconSize),
-                color =
-                    if (
-                        selectedMode ==
-                        ViewMode.BIOLOGICAL_EFFECTS
-                    )
-                        primaryText
-                    else
-                        secondaryText
+                color = LocalContentColor.current
             )
         }
     }
@@ -373,10 +359,9 @@ internal fun MeasurementDetailViewSelector(
     middleContent: (@Composable () -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
-    Row(
+    UvirMeasurementControls(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(6.dp)
-    ) {
+        leading = {
         Box(modifier = Modifier.weight(1f)) {
             MeasurementViewSelector(
                 selectedMode = selectedMode,
@@ -386,13 +371,15 @@ internal fun MeasurementDetailViewSelector(
                 secondaryText = secondaryText
             )
         }
-
+        },
+        middle = {
         middleContent?.let { content ->
             Box(modifier = Modifier.width(UvirSessionCyclePositionSelectorWidth)) {
                 content()
             }
         }
-
+        },
+        trailing = {
         MeasurementDataChartSelector(
             showChart = showChart,
             onShowChartChanged = onShowChartChanged,
@@ -401,7 +388,8 @@ internal fun MeasurementDetailViewSelector(
             secondaryText = secondaryText,
             modifier = Modifier.weight(1f)
         )
-    }
+        }
+    )
 }
 
 @Composable
@@ -433,7 +421,7 @@ internal fun MeasurementDataChartSelector(
         ) {
             LiveIslandModeIcon(
                 showChart = false,
-                tint = if (!showChart) primaryText else secondaryText,
+                tint = LocalContentColor.current,
                 modifier = Modifier.size(UvirMeasurementSelectorIconSize)
             )
         }
@@ -449,7 +437,7 @@ internal fun MeasurementDataChartSelector(
         ) {
             LiveIslandModeIcon(
                 showChart = true,
-                tint = if (showChart) primaryText else secondaryText,
+                tint = LocalContentColor.current,
                 modifier = Modifier.size(UvirMeasurementSelectorIconSize).testTag("measurement_chart_glyph")
             )
         }
@@ -475,10 +463,13 @@ fun ViewModeButton(
         onClick()
     }
 
-    val selectedColor =
-        uvirSegmentedSelectedContainerColor(
-            primaryText
-        )
+    // Navigation modes stay neutral; purple is reserved for form controls and actions.
+    val selectedColor = uvirSegmentedSelectedContainerColor(primaryText)
+    val contentColor = when {
+        !enabled -> secondaryText.copy(alpha = 0.46f)
+        selected -> primaryText
+        else -> secondaryText
+    }
 
     Box(
         modifier =
@@ -531,17 +522,19 @@ fun ViewModeButton(
             Alignment.Center
     ) {
 
-        content()
+        CompositionLocalProvider(LocalContentColor provides contentColor) {
+            content()
+        }
     }
 }
 
 internal fun uvirSegmentedSelectedContainerColor(
-    primaryText: Color
-): Color = primaryText.copy(alpha = 0.12f)
+    selectionColor: Color
+): Color = selectionColor.copy(alpha = 0.12f)
 
 internal fun uvirSegmentedSelectedBorderColor(
-    secondaryText: Color
-): Color = secondaryText.copy(alpha = 0.45f)
+    selectionColor: Color
+): Color = selectionColor.copy(alpha = 0.45f)
 
 @Composable
 fun ElectromagneticWaveIcon(

@@ -169,6 +169,21 @@ Time-related fields are `time_synced`, `current_time_ms`, `rtc_available`,
 `rtc_valid`, `rtc_oscillator_stopped`, `rtc_read_ok`, `rtc_current_time_ms`,
 `time_source`, `rtc_read_errors`, and `rtc_write_errors`.
 
+`rtc_oscillator_stopped` is the DS3231 oscillator-stop flag (OSF). It means
+that the clock stopped at some point; it is not a battery voltage, charge level,
+or reliable early low-battery warning. Causes include first use, a missing or
+depleted backup cell, poor contacts, or other clock faults. A successful `TIME`
+clears OSF after setting the clock. Hosts needing to warn users must capture the
+accepted `HELLO` flag before sending `TIME`, not consult a cached snapshot later.
+
+Android checks each associated sensor on its first accepted `HELLO` in every
+app launch, including background sensors. Stops are grouped in one closable,
+scrollable warning; reconnections and Activity recreation do not repeat a
+dismissed warning during that launch. Missing RTC modules, missing protocol
+fields, and failed reads without an OSF indication do not imply a depleted
+battery. No battery model or chemistry is assumed, and no new hardware or
+database fields are required.
+
 Use capability fields such as `conditional_acquisition_supported` and
 `external_command_supported` before presenting related controls.
 
@@ -298,6 +313,19 @@ reset. Firmware 0.5.83 and later also accept the previous command without the
 last token and leave the saved external-command setting unchanged. Configuration commands
 may evolve as hardware capabilities are added; read back `HELLO` after changing
 them.
+
+### `BUZZER_PREVIEW`
+
+```text
+BUZZER_PREVIEW <volume_1_100>
+```
+
+When `HELLO` advertises `buzzer_preview_supported: true`, the authenticated
+active app connection can preview the selected buzzer volume with one 90 ms
+acquisition beep. The buzzer must be enabled. This does not change any saved
+settings, create a record, or stop an acquisition/alert session. Requests during
+a buzzer self-test or diagnostic performance are rejected. A newer pending
+preview replaces the previous pending preview instead of accumulating a queue.
 
 ## Automatic acquisition jobs
 

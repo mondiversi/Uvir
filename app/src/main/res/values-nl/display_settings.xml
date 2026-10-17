@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_section_display">Weergave</string>
+    <string name="settings_display_description">Pas de interface aan de schermgrootte aan.</string>
+    <string name="notifications_misc_title">Overige</string>
+    <string name="notifications_misc_description">Beheer andere meldingen van de app.</string>
+    <string name="rtc_battery_notification_toggle">Batterijwaarschuwing tonen bij opstarten</string>
+    <string name="rtc_battery_notification_description">Waarschuw als de klok van een sensor is gestopt.</string>
+    <string name="settings_mode_small_screen">Klein scherm</string>
+    <string name="settings_mode_small_screen_active">Modus voor klein scherm</string>
+    <string name="settings_mode_large_screen">Groot scherm</string>
+    <string name="settings_mode_large_screen_unavailable">De modus voor grote schermen is nog niet beschikbaar.</string>
+    <string name="rtc_clock_warning_show_each_launch">Bij elke start tonen</string>
+    <string name="settings_theme_title">Thema</string>
+    <string name="settings_theme_description">Kies het thema van de app om de weergave van de inhoud aan te passen.</string>
+    <string name="settings_theme_default">Standaard</string>
+    <string name="settings_theme_light">Licht</string>
+    <string name="settings_theme_dark">Donker</string>
+    <string name="settings_display_unavailable">Deze functie is nog niet beschikbaar.</string>
+</resources>

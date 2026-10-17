@@ -11,6 +11,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -89,19 +90,23 @@ internal fun UvirFloatingActionHint(text: String, visible: Boolean) {
             dismissOnClickOutside = false
         )
     ) {
-        Surface(
-            modifier = Modifier.width(280.dp).heightIn(min = 56.dp).testTag("floating_action_hint"),
-            shape = RoundedCornerShape(8.dp),
-            color = MaterialTheme.colorScheme.inverseSurface,
-            contentColor = MaterialTheme.colorScheme.inverseOnSurface,
-            shadowElevation = 3.dp
-        ) {
-            Box(Modifier.padding(horizontal = 12.dp, vertical = 8.dp), contentAlignment = Alignment.Center) {
-                Text(
-                    text = text,
-                    style = MaterialTheme.typography.labelLarge,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                )
+        // Popup creates its own Android view, which otherwise replaces the
+        // parent's adaptive density with the device's unscaled density.
+        CompositionLocalProvider(LocalDensity provides density) {
+            Surface(
+                modifier = Modifier.width(280.dp).heightIn(min = 56.dp).testTag("floating_action_hint"),
+                shape = RoundedCornerShape(8.dp),
+                color = MaterialTheme.colorScheme.inverseSurface,
+                contentColor = MaterialTheme.colorScheme.inverseOnSurface,
+                shadowElevation = 3.dp
+            ) {
+                Box(Modifier.padding(horizontal = 12.dp, vertical = 8.dp), contentAlignment = Alignment.Center) {
+                    Text(
+                        text = text,
+                        style = MaterialTheme.typography.labelLarge,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    )
+                }
             }
         }
     }

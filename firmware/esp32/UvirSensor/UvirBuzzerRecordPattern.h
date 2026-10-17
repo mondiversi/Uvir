@@ -8,6 +8,7 @@ struct UvirBuzzerRecordPattern {
   uint16_t toneMs;
   uint16_t pauseMs;
   uint8_t beepCount;
+  uint16_t endFrequencyHz = 0;
 
   constexpr uint32_t durationMs() const {
     return static_cast<uint32_t>(toneMs) * beepCount +
@@ -16,4 +17,4 @@ struct UvirBuzzerRecordPattern {
 };
 
 constexpr UvirBuzzerRecordPattern kUvirAcquisitionBeep{1400, 90, 0, 1};
-constexpr UvirBuzzerRecordPattern kUvirAlertBeep{1400, 70, 40, 3};
+constexpr UvirBuzzerRecordPattern kUvirAlertBeep{1800, 70, 40, 3, 2400};

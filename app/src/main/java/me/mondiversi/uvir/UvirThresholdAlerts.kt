@@ -2,8 +2,6 @@ package me.mondiversi.uvir
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.media.AudioManager
-import android.media.ToneGenerator
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
@@ -185,7 +183,7 @@ internal fun loadThresholdAlertSettings(
                 ThresholdAlertSound.SILENT.name ->
                     ThresholdAlertSound.SILENT
                 ThresholdAlertSound.SINGLE_BEEP.name ->
-                    ThresholdAlertSound.TRIPLE_BEEP
+                    ThresholdAlertSound.SINGLE_BEEP
                 ThresholdAlertSound.VIBRATION.name ->
                     ThresholdAlertSound.VIBRATION
                 ThresholdAlertSound.DOUBLE_BEEP.name ->
@@ -445,7 +443,8 @@ internal suspend fun playThresholdAlertTone(
     context: Context,
     sound: ThresholdAlertSound,
     volume: Int,
-    vibrationPulses: Int = 3
+    vibrationPulses: Int = 3,
+    toneProfile: UvirFeedbackToneProfile = UvirFeedbackToneProfile.ALERT
 ) {
     if (sound == ThresholdAlertSound.SILENT) {
         return
@@ -489,51 +488,7 @@ internal suspend fun playThresholdAlertTone(
         return
     }
 
-    val toneGenerator =
-        runCatching {
-            ToneGenerator(
-                AudioManager.STREAM_ALARM,
-                volume.coerceIn(0, 100)
-            )
-        }.getOrNull()
-
-    try {
-        val beepCount =
-            when (sound) {
-                ThresholdAlertSound.SILENT -> 0
-                ThresholdAlertSound.VIBRATION -> 0
-                ThresholdAlertSound.SINGLE_BEEP -> 1
-                ThresholdAlertSound.DOUBLE_BEEP -> 2
-                ThresholdAlertSound.TRIPLE_BEEP -> 3
-                ThresholdAlertSound.LONG_BEEP -> 8
-            }
-
-        val beepDurationMs =
-            if (
-                sound ==
-                ThresholdAlertSound.LONG_BEEP
-            ) {
-                620
-            } else {
-                430
-            }
-
-        repeat(beepCount) { index ->
-            toneGenerator?.startTone(
-                ToneGenerator.TONE_SUP_ERROR,
-                beepDurationMs
-            )
-            delay(beepDurationMs.toLong())
-            toneGenerator?.stopTone()
-
-            if (index < beepCount - 1) {
-                delay(170L)
-            }
-        }
-    } finally {
-        toneGenerator?.stopTone()
-        toneGenerator?.release()
-    }
+    playUvirFeedbackTone(context, toneProfile, sound, volume)
 }
 
 internal fun thresholdAlertMetricLabelResource(

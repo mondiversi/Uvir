@@ -2,9 +2,14 @@
 
 Status: **engineering draft — not ready to order**.
 
+This earlier draft is retained for reference. Use
+[carrier R1](../uvir-carrier-r1/README.md) for the current connected schematic
+and full module list. R0's SparkFun AS7331 footprint is not the MIKROE UV 5
+Click footprint fitted to the current prototype.
+
 This package fixes the electrical architecture and the intended physical
 arrangement of the first Uvir carrier board. It deliberately does not contain
-Gerber or drill production files yet: the exact physical ESP32 and GY-AS7343
+Gerber or drill production files yet: the exact physical ESP32 and GY-AS734X
 module dimensions have not been verified. A correct logical pinout is not a
 substitute for a mechanical footprint.
 
@@ -16,8 +21,8 @@ From the USB edge toward the top edge:
    enclosure opening;
 2. antenna keep-out, with no copper, ground plane, traces or components below
    the ESP32 antenna;
-3. GY-AS7343 visible/NIR sensor, mounted horizontally and facing the front
-   optical window;
+3. GY-AS734X breakout with AS7343 visible/NIR chip, mounted horizontally and
+   facing the front optical window;
 4. SparkFun AS7331 UV sensor, mounted horizontally and facing its own front
    optical window;
 5. opaque optical divider;
@@ -61,7 +66,7 @@ Measure the physical parts with a caliper and record:
 - ESP32 board width and length;
 - center-to-center distance between its two 19-pin rows;
 - location of pin 1, first/last pin and USB overhang;
-- GY-AS7343 board width/length and exact order/position of its six pins;
+- GY-AS734X board width/length and exact order/position of its header pins/pads;
 - confirmation that the AS7331 is SEN-23517 Standard (25.4 x 25.4 mm), not the
   25.4 x 12.7 mm Mini version;
 - buzzer diameter, height and lead spacing;

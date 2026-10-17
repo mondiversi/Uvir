@@ -1,5 +1,6 @@
 package me.mondiversi.uvir
 
+import android.content.SharedPreferences
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -24,23 +25,53 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.toggleableState
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.json.JSONArray
+
+internal const val KEY_ACQUISITION_LIST_FILTERS = "acquisition_list_filters"
+internal const val KEY_ALERT_LIST_FILTERS = "alert_list_filters"
 
 private val RecordListFilterSaver = listSaver<UvirRecordListFilters, String>(
-    save = { listOf(it.fromInclusive?.toString().orEmpty(), it.untilInclusive?.toString().orEmpty(),
-        it.note, it.sensorKey, it.automatic?.toString().orEmpty(), it.recordId, it.sessionId,
-        it.externalCommand?.toString().orEmpty(), it.variantCount?.toString().orEmpty()) },
-    restore = { UvirRecordListFilters(it[0].toLongOrNull(), it[1].toLongOrNull(), it[2],
-        it[3], it[4].takeIf(String::isNotEmpty)?.toBooleanStrictOrNull(), it[5], it[6],
-        it.getOrNull(7)?.takeIf(String::isNotEmpty)?.toBooleanStrictOrNull(),
-        it.getOrNull(8)?.toIntOrNull()) }
+    save = { it.savedValues() }, restore = UvirRecordListFilters::fromSavedValues
 )
 
 @Composable
-internal fun rememberRecordListFilters(): MutableState<UvirRecordListFilters> =
-    rememberSaveable(stateSaver = RecordListFilterSaver) { mutableStateOf(UvirRecordListFilters()) }
+internal fun rememberRecordListFilters(
+    preferences: SharedPreferences? = null, preferenceKey: String = ""
+): MutableState<UvirRecordListFilters> {
+    val state = rememberSaveable(preferences, preferenceKey, stateSaver = RecordListFilterSaver) {
+        mutableStateOf(readRecordListFilters(preferences, preferenceKey))
+    }
+    LaunchedEffect(preferences, preferenceKey, state.value) {
+        if (preferences != null && preferenceKey.isNotEmpty()) {
+            saveRecordListFilters(preferences, preferenceKey, state.value)
+        }
+    }
+    return state
+}
+
+internal fun readRecordListFilters(preferences: SharedPreferences?, key: String): UvirRecordListFilters =
+    runCatching {
+        val serialized = preferences?.getString(key, null) ?: return@runCatching UvirRecordListFilters()
+        val values = JSONArray(serialized)
+        UvirRecordListFilters.fromSavedValues(List(values.length()) { values.getString(it) })
+            ?: UvirRecordListFilters()
+    }.getOrDefault(UvirRecordListFilters())
+
+internal fun saveRecordListFilters(preferences: SharedPreferences, key: String, filters: UvirRecordListFilters) {
+    if (!filters.isActive) {
+        if (preferences.contains(key)) preferences.edit().remove(key).apply()
+    } else {
+        val serialized = JSONArray(filters.savedValues()).toString()
+        if (preferences.all[key] != serialized) preferences.edit().putString(key, serialized).apply()
+    }
+}
 
 @Composable
 internal fun UvirRecordListFilterButton(
@@ -52,13 +83,7 @@ internal fun UvirRecordListFilterButton(
     active: Boolean, enabled: Boolean, compact: Boolean, onClick: () -> Unit
 ) {
     val description = stringResource(R.string.list_filters)
-    val fieldColors = UvirOutlinedTextFieldColors()
-    val tint = if (compact) {
-        if (enabled) MaterialTheme.colorScheme.primary
-        else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-    } else {
-        if (enabled) fieldColors.focusedIndicatorColor else fieldColors.disabledTextColor
-    }
+    val tint = uvirTitleActionStateColor(active, enabled)
     Box(
         modifier = Modifier.size(UvirTitleActionButtonSize),
         contentAlignment = Alignment.Center
@@ -71,7 +96,7 @@ internal fun UvirRecordListFilterButton(
             selected = active,
             visualScale = if (compact) UvirTitleActionVisualScale else 1f,
             pressedColor = tint,
-            pressedVisualSize = UvirActionIconBadgeSize
+            pressedVisualSize = UvirTitleActionPressedVisualSize
         ) {
             val glyphTint = tint
             Canvas(
@@ -90,12 +115,6 @@ internal fun UvirRecordListFilterButton(
                 }
             }
         }
-        if (active) UvirTitleActionActiveDot(
-            color = tint,
-            modifier = Modifier.align(Alignment.BottomEnd)
-                .padding(end = UvirTitleActionActiveDotInset, bottom = UvirTitleActionActiveDotInset)
-                .testTag("list-filter-active-dot")
-        )
     }
 }
 
@@ -114,10 +133,14 @@ internal fun UvirRecordListFilterPanel(
     notes: List<String> = emptyList(),
     dates: List<Long> = emptyList(),
     variantCounts: List<Int> = emptyList(),
-    variantFilterEnabled: Boolean = true
+    variantFilterEnabled: Boolean = true,
+    visibleCount: Int? = null
 ) {
     val fieldColors = UvirOutlinedTextFieldColors()
     val all = stringResource(R.string.list_filter_all)
+    val resultCount = visibleCount?.let {
+        formatUvirNumber(it.toDouble(), 0, LocalUvirNumericFormat.current, grouping = false)
+    }
     val allModes = stringResource(R.string.list_filter_all_modes)
     val allNotes = stringResource(R.string.list_filter_all_notes)
     val noVariants = stringResource(R.string.list_filter_no_variants)
@@ -137,14 +160,14 @@ internal fun UvirRecordListFilterPanel(
             .padding(horizontal = UvirScreenHorizontalPadding, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FilterChoice(stringResource(R.string.list_filter_id),
-                    filters.recordId.ifEmpty { all },
+                FilterMultiChoice(stringResource(R.string.list_filter_id),
+                    filters.recordIds,
                     listOf("" to all) + recordIds.map { it.toString() to it.toString() },
-                    Modifier.weight(1f).testTag("filter-id"), icon = FilterLabelIcon.ID) { onChange(filters.copy(recordId = it)) }
-                FilterChoice(stringResource(R.string.share_session_id_label),
-                    filters.sessionId.ifEmpty { all },
+                    Modifier.weight(1f).testTag("filter-id"), icon = FilterLabelIcon.ID, resultCount = resultCount) { onChange(filters.copy(recordIds = it)) }
+                FilterMultiChoice(stringResource(R.string.share_session_id_label),
+                    filters.sessionIds,
                     listOf("" to all) + sessionIds.map { it.toString() to it.toString() },
-                    Modifier.weight(1f).testTag("filter-session-id"), icon = FilterLabelIcon.SESSION) { onChange(filters.copy(sessionId = it)) }
+                    Modifier.weight(1f).testTag("filter-session-id"), icon = FilterLabelIcon.SESSION, resultCount = resultCount) { onChange(filters.copy(sessionIds = it)) }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 FilterChoice(stringResource(R.string.list_filter_from),
@@ -152,7 +175,7 @@ internal fun UvirRecordListFilterPanel(
                         formatUvirDateOnly(it, dateFormat)
                     } ?: allDates,
                     listOf("" to allDates) + formattedDates,
-                    Modifier.weight(1f).testTag("filter-from"), icon = FilterLabelIcon.FROM) { selected ->
+                    Modifier.weight(1f).testTag("filter-from"), icon = FilterLabelIcon.FROM, resultCount = resultCount) { selected ->
                     onChange(if (selected.isEmpty()) filters.copy(fromInclusive = null)
                         else filters.withFromDay(selected.toLong()))
                 }
@@ -161,49 +184,38 @@ internal fun UvirRecordListFilterPanel(
                         formatUvirDateOnly(it, dateFormat)
                     } ?: allDates,
                     listOf("" to allDates) + formattedDates,
-                    Modifier.weight(1f).testTag("filter-until"), icon = FilterLabelIcon.UNTIL) { selected ->
+                    Modifier.weight(1f).testTag("filter-until"), icon = FilterLabelIcon.UNTIL, resultCount = resultCount) { selected ->
                     onChange(if (selected.isEmpty()) filters.copy(untilInclusive = null)
                         else filters.withUntilDay(selected.toLong()))
                 }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 val modeNames = buildList {
-                    if (false in modes) add("manual" to stringResource(R.string.share_manual))
-                    if (true in modes) add("automatic" to stringResource(R.string.share_automatic))
-                    if (externalModeAvailable) {
-                        add("external" to stringResource(R.string.external_measurement))
+                    if (false in modes || UvirRecordFilterMode.MANUAL in filters.modes)
+                        add(UvirRecordFilterMode.MANUAL.name to stringResource(R.string.share_manual))
+                    if (true in modes || UvirRecordFilterMode.AUTOMATIC in filters.modes)
+                        add(UvirRecordFilterMode.AUTOMATIC.name to stringResource(R.string.share_automatic))
+                    if (externalModeAvailable || UvirRecordFilterMode.EXTERNAL in filters.modes) {
+                        add(UvirRecordFilterMode.EXTERNAL.name to stringResource(R.string.external_measurement))
                     }
                 }
-                val selectedMode = when {
-                    filters.externalCommand == true -> "external"
-                    filters.automatic == true -> "automatic"
-                    filters.automatic == false -> "manual"
-                    else -> ""
-                }
-                FilterChoice(stringResource(R.string.acquisition_mode_label),
-                    modeNames.firstOrNull { it.first == selectedMode }?.second ?: allModes,
+                FilterMultiChoice(stringResource(R.string.acquisition_mode_label),
+                    filters.modes.map { it.name }.toSet(),
                     listOf("" to allModes) + modeNames,
-                    Modifier.weight(1f).testTag("filter-mode"), icon = FilterLabelIcon.MODE) {
-                    onChange(
-                        when (it) {
-                            "manual" -> filters.copy(automatic = false, externalCommand = false)
-                            "automatic" -> filters.copy(automatic = true, externalCommand = false)
-                            "external" -> filters.copy(automatic = null, externalCommand = true)
-                            else -> filters.copy(automatic = null, externalCommand = null)
-                        }
-                    )
+                    Modifier.weight(1f).testTag("filter-mode"), icon = FilterLabelIcon.MODE, resultCount = resultCount) {
+                    onChange(filters.copy(modes = it.map { mode -> UvirRecordFilterMode.valueOf(mode) }.toSet()))
                 }
-                FilterChoice(stringResource(R.string.sensor_selector_label),
-                    sensorNames[filters.sensorKey] ?: all,
+                FilterMultiChoice(stringResource(R.string.sensor_selector_label),
+                    filters.sensorKeys,
                     listOf("" to all) + sensorNames.toList(),
-                    Modifier.weight(1f).testTag("filter-sensor"), icon = FilterLabelIcon.SENSOR) { onChange(filters.copy(sensorKey = it)) }
+                    Modifier.weight(1f).testTag("filter-sensor"), icon = FilterLabelIcon.SENSOR, resultCount = resultCount) { onChange(filters.copy(sensorKeys = it)) }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FilterChoice(stringResource(R.string.share_note_label),
-                    filters.note.ifEmpty { allNotes },
+                FilterMultiChoice(stringResource(R.string.share_note_label),
+                    filters.notes,
                     listOf("" to allNotes) + notes.map { it to it },
-                    Modifier.weight(1f).testTag("filter-note"), icon = FilterLabelIcon.NOTE) {
-                    onChange(filters.copy(note = it))
+                    Modifier.weight(1f).testTag("filter-note"), icon = FilterLabelIcon.NOTE, resultCount = resultCount) {
+                    onChange(filters.copy(notes = it))
                 }
                 val variantChoices = buildList {
                     add("" to "—")
@@ -213,21 +225,15 @@ internal fun UvirRecordListFilterPanel(
                         add(count.toString() to count.toString())
                     }
                 }
-                val selectedVariant = when (filters.variantCount) {
-                    null -> "—"
-                    0 -> noVariants
-                    -1 -> onlyVariants
-                    else -> filters.variantCount.toString()
-                }
-                FilterChoice(
+                FilterMultiChoice(
                     label = stringResource(R.string.list_filter_variant),
-                    selected = selectedVariant,
+                    selectedKeys = filters.variantCounts.map { it.toString() }.toSet(),
                     choices = variantChoices,
                     modifier = Modifier.weight(1f).testTag("filter-variant"),
                     icon = FilterLabelIcon.VARIANT,
-                    enabled = variantFilterEnabled
+                    enabled = variantFilterEnabled, resultCount = resultCount
                 ) { selected ->
-                    onChange(filters.copy(variantCount = selected.toIntOrNull()))
+                    onChange(filters.copy(variantCounts = selected.map { it.toInt() }.toSet()))
                 }
             }
             TextButton(onClick = { onChange(UvirRecordListFilters()) },
@@ -243,6 +249,26 @@ internal fun UvirRecordListFilterPanel(
 }
 
 private enum class FilterLabelIcon { ID, SESSION, FROM, UNTIL, MODE, SENSOR, NOTE, VARIANT }
+
+@Composable
+private fun FilterMultiChoice(
+    label: String, selectedKeys: Set<String>, choices: List<Pair<String, String>>,
+    modifier: Modifier, icon: FilterLabelIcon, enabled: Boolean = true,
+    resultCount: String? = null, onSelect: (Set<String>) -> Unit
+) {
+    // Retain unavailable selections after a source refresh so they can still be unticked.
+    val available = choices.distinctBy { it.first } +
+        selectedKeys.filter { key -> choices.none { it.first == key } }.map { it to it }
+    val selected = if (selectedKeys.isEmpty()) available.first().second else
+        available.filter { it.first in selectedKeys }.joinToString(", ") { it.second }
+    FilterChoice(label, selected, available, modifier, icon, enabled, selectedKeys, resultCount) { key ->
+        onSelect(when {
+            key.isEmpty() -> emptySet()
+            key in selectedKeys -> selectedKeys - key
+            else -> selectedKeys + key
+        })
+    }
+}
 
 /** Decorative label icons use the same tint as their label, including disabled fields. */
 @Composable
@@ -280,16 +306,18 @@ private fun FilterLabelIcon(icon: FilterLabelIcon, tint: Color) {
 @Composable
 private fun FilterChoice(
     label: String, selected: String, choices: List<Pair<String, String>>,
-    modifier: Modifier, icon: FilterLabelIcon, enabled: Boolean = true, onSelect: (String) -> Unit
+    modifier: Modifier, icon: FilterLabelIcon, enabled: Boolean = true,
+    selectedKeys: Set<String>? = null, resultCount: String? = null, onSelect: (String) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
     val fieldColors = UvirOutlinedTextFieldColors()
     val nightMode = androidx.compose.foundation.isSystemInDarkTheme()
     val menuScrollState = rememberScrollState()
-    // Expose the visible label and selected value as one accessible field.
+    val count = resultCount.takeIf { enabled }
+    // Expose the selected value and the final intersected result count as one field.
     Box(
         modifier.semantics(mergeDescendants = true) {
-            contentDescription = "$label: $selected"
+            contentDescription = "$label: $selected" + (count?.let { " ($it)" } ?: "")
             if (!enabled) disabled()
         }
     ) {
@@ -308,9 +336,14 @@ private fun FilterChoice(
                         FilterLabelIcon(icon, labelTint)
                         Text(label, modifier = Modifier.weight(1f), fontSize = 11.sp, color = labelTint)
                     }
-                    Text(selected, fontSize = 13.sp, color = if (enabled) fieldColors.unfocusedTextColor
-                        else fieldColors.disabledTextColor,
-                        maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    // Keep the count visible when selected names use the available width.
+                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        Text(selected, modifier = Modifier.weight(1f, fill = false), fontSize = 13.sp,
+                            color = if (enabled) fieldColors.unfocusedTextColor else fieldColors.disabledTextColor,
+                            maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        count?.let { Text("($it)", modifier = Modifier.padding(start = 4.dp), fontSize = 13.sp,
+                            color = fieldColors.unfocusedTextColor, maxLines = 1) }
+                    }
                 }
                 val arrowTint = if (enabled) fieldColors.unfocusedTextColor else fieldColors.disabledTextColor
                 Canvas(
@@ -327,26 +360,35 @@ private fun FilterChoice(
                 }
             }
         }
-        DropdownMenu(expanded && enabled, { expanded = false },
+        UvirAdaptiveDropdownMenu(expanded && enabled, { expanded = false },
             scrollState = menuScrollState,
             modifier = Modifier
-                .testTag("filter-choice-menu")
-                .scrollbarOverlay(
-                    menuScrollState,
-                    fieldColors.unfocusedLabelColor.copy(alpha = 0.45f)
-                ),
+                .testTag("filter-choice-menu"),
+            scrollbarColor = fieldColors.unfocusedLabelColor.copy(alpha = 0.45f),
             containerColor =
                 if (nightMode) UvirDropdownNightContainerColor
                 else UvirDropdownDayContainerColor,
             tonalElevation = UvirDropdownTonalElevation) {
             choices.forEach { (key, title) ->
-                DropdownMenuItem(text = { Text(title, color = fieldColors.unfocusedTextColor) },
+                val checked = selectedKeys?.let { if (key.isEmpty()) it.isEmpty() else key in it }
+                DropdownMenuItem(text = { Text(title, color = fieldColors.unfocusedTextColor,
+                        maxLines = 3, overflow = TextOverflow.Ellipsis) },
+                    trailingIcon = checked?.let { value ->
+                        { Checkbox(value, onCheckedChange = null, colors = uvirCheckboxColors(),
+                            modifier = Modifier.clearAndSetSemantics {}) }
+                    },
                     onClick = {
-                        expanded = false
+                        if (selectedKeys == null) expanded = false
                         onSelect(key)
                     },
                     modifier = Modifier
-                        .testTag("filter-choice-option-" + key.ifEmpty { "all" }))
+                        .testTag("filter-choice-option-" + key.ifEmpty { "all" })
+                        .semantics {
+                            if (checked != null) {
+                                role = Role.Checkbox
+                                toggleableState = if (checked) ToggleableState.On else ToggleableState.Off
+                            }
+                        })
             }
         }
     }

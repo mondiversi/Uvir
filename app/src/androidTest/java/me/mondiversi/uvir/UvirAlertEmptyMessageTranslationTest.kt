@@ -27,6 +27,9 @@ class UvirAlertEmptyMessageTranslationTest {
             "pt" to "Nenhum alerta registrado.",
             "ru" to "Нет зарегистрированных оповещений.",
             "sw" to "Hakuna tahadhari zilizorekodiwa.",
+            "pl" to "Brak zarejestrowanych alertów.",
+            "nl" to "Geen waarschuwingen geregistreerd.",
+            "id" to "Tidak ada peringatan tercatat.",
             "tr" to "Kaydedilmiş uyarı yok.",
             "zh-CN" to "没有已记录的警报。"
         )

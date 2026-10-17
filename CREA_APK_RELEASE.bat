@@ -2,12 +2,14 @@
 setlocal
 
 set "PROJECT_DIR=%~dp0"
-set "JAVA_HOME=C:\Program Files\Android\Android Studio\jbr"
+if not defined JAVA_HOME set "JAVA_HOME=C:\Program Files\Android\Android Studio\jbr"
 set "GRADLE_USER_HOME=%USERPROFILE%\.gradle"
 set "GRADLE_OPTS=-Duser.home=%USERPROFILE% %GRADLE_OPTS%"
 
-if not exist "%PROJECT_DIR%keystore.properties" (
-    echo Signing configuration missing: keystore.properties
+set "SIGNING_DIR=%MONDIVERSI_SIGNING_DIR%"
+if not defined SIGNING_DIR set "SIGNING_DIR=%USERPROFILE%\Dropbox\Mondiversi\UvirSigning"
+if not exist "%PROJECT_DIR%keystore.properties" if not exist "%SIGNING_DIR%\signing.properties" (
+    echo Private signing configuration missing from Dropbox and project-local settings.
     echo Read RELEASE.md before building a public APK.
     pause
     exit /b 1

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_section_display">Mwonekano</string>
+    <string name="settings_display_description">Rekebisha kiolesura kulingana na ukubwa wa skrini.</string>
+    <string name="notifications_misc_title">Mengineyo</string>
+    <string name="notifications_misc_description">Dhibiti arifa nyingine zinazoonyeshwa na programu.</string>
+    <string name="rtc_battery_notification_toggle">Onyesha onyo la betri programu inapoanza</string>
+    <string name="rtc_battery_notification_description">Onya ikiwa saa ya sensa imesimama.</string>
+    <string name="settings_mode_small_screen">Skrini ndogo</string>
+    <string name="settings_mode_small_screen_active">Hali ya skrini ndogo</string>
+    <string name="settings_mode_large_screen">Skrini kubwa</string>
+    <string name="settings_mode_large_screen_unavailable">Hali ya skrini kubwa bado haipatikani.</string>
+    <string name="rtc_clock_warning_show_each_launch">Onyesha kila programu inapoanza</string>
+    <string name="settings_theme_title">Mandhari</string>
+    <string name="settings_theme_description">Chagua mandhari ya programu ili kubinafsisha mwonekano wa maudhui.</string>
+    <string name="settings_theme_default">Chaguomsingi</string>
+    <string name="settings_theme_light">Angavu</string>
+    <string name="settings_theme_dark">Giza</string>
+    <string name="settings_display_unavailable">Kipengele hiki bado hakipatikani.</string>
+</resources>

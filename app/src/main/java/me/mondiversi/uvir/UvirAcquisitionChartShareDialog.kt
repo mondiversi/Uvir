@@ -110,6 +110,7 @@ internal fun AcquisitionChartShareDialog(
                     text = stringResource(R.string.data_export_description),
                     color = secondaryText
                 )
+                UvirExportFilesHeading(primaryText)
                 SessionChartShareOption(
                     selected =
                         shareScope == AcquisitionChartShareScope.CURRENT,
@@ -166,7 +167,6 @@ internal fun AcquisitionChartShareDialog(
                 Spacer(Modifier.height(8.dp))
                 UvirExportBottomActions(
                     enabled = !exportRequest.inProgress,
-                    primaryText = primaryText,
                     secondaryText = secondaryText,
                     onSave = {
                         exportRequest.request(UvirExportDestination.SAVE)

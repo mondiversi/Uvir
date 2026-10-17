@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rtc_clock_warning_title_single">בדיקת סוללת השעון</string>
+    <string name="rtc_clock_warning_title_multiple">בדיקת סוללות השעונים</string>
+    <string name="rtc_clock_warning_message_single">השעון של החיישן \"%1$s\" דיווח על עצירה. ייתכן שהסוללה התרוקנה או אינה מחוברת כראוי. יש לבדוק אותה ולהחליפה במידת הצורך.</string>
+    <string name="rtc_clock_warning_message_multiple">החיישנים הבאים דיווחו על עצירת השעון:</string>
+    <string name="rtc_clock_warning_batteries_guidance">ייתכן שהסוללות התרוקנו או אינן מחוברות כראוי. יש לבדוק אותן ולהחליפן במידת הצורך.</string>
+</resources>

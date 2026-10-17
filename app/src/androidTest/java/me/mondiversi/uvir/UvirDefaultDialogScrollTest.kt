@@ -58,7 +58,8 @@ class UvirDefaultDialogScrollTest {
                             title = { Text("Popup") },
                             text = {
                                 Column(verticalArrangement = Arrangement.spacedBy(UvirSettingsControlGap)) {
-                                    repeat(if (long.value) 40 else 1) { Text("Body ${it + 1}") }
+                                    // Force overflow even on a native-density tablet viewport.
+                                    repeat(if (long.value) 200 else 1) { Text("Body ${it + 1}") }
                                 }
                             },
                             confirmButton = { TextButton({}) { Text("Action") } },
@@ -83,8 +84,9 @@ class UvirDefaultDialogScrollTest {
                 val title = compose.onNodeWithText("Popup").getUnclippedBoundsInRoot()
                 val action = compose.onNodeWithText("Action").getUnclippedBoundsInRoot()
                 scroll.performTouchInput { swipeUp() }
-                assertTrue(scroll.fetchSemanticsNode().config[SemanticsProperties.VerticalScrollAxisRange].value() > 0f)
-                compose.onNodeWithText("Body 40").performScrollTo().assertIsDisplayed()
+                assertTrue("Finger scrolling works: night=$dark, rtl=$rightToLeft, compact=$short, large=$large, viewport=${scroll.fetchSemanticsNode().boundsInRoot}",
+                    scroll.fetchSemanticsNode().config[SemanticsProperties.VerticalScrollAxisRange].value() > 0f)
+                compose.onNodeWithText("Body 200").performScrollTo().assertIsDisplayed()
                 assertEquals(title, compose.onNodeWithText("Popup").getUnclippedBoundsInRoot())
                 assertEquals(action, compose.onNodeWithText("Action").getUnclippedBoundsInRoot())
                 compose.onNodeWithText("Action").assertIsDisplayed()

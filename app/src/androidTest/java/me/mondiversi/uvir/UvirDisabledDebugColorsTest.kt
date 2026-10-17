@@ -159,16 +159,18 @@ class UvirDisabledDebugColorsTest {
         assertEquals(0, calls.get())
     }
 
-    @Test fun exportSaveAndShareUseSharedDisabledColorsAndKeepTheirEnabledStyle() {
+    @Test fun exportSaveAndShareMatchSettingsWithTransparentPurpleEnabledStyle() {
         compose.setContent {
-            Fixture { primary, secondary, card ->
-                Column(Modifier.fillMaxWidth().background(card)) {
-                    // Each palette gets fresh controls, without a prior test click's ripple.
-                    key(dark.value) {
-                        UvirExportBottomActions(
-                            enabled = enabled.value, primaryText = primary, secondaryText = secondary,
-                            onSave = { calls.incrementAndGet() }, onShare = { calls.incrementAndGet() }
-                        )
+            Fixture { _, secondary, card ->
+                UvirActionTheme {
+                    Column(Modifier.fillMaxWidth().background(card)) {
+                        // Each palette gets fresh controls, without a prior test click's ripple.
+                        key(dark.value) {
+                            UvirExportBottomActions(
+                                enabled = enabled.value, secondaryText = secondary,
+                                onSave = { calls.incrementAndGet() }, onShare = { calls.incrementAndGet() }
+                            )
+                        }
                     }
                 }
             }
@@ -178,9 +180,8 @@ class UvirDisabledDebugColorsTest {
             compose.runOnIdle { dark.value = night; enabled.value = false }
             compose.mainClock.advanceTimeBy(400)
             compose.waitForIdle()
-            val container = if (night) Color(0xFF6B6B74) else Color(0xFFE2E3E4)
-            val foreground = if (night) Color(0xFFF4F4F6) else
-                lightColorScheme().onSurface.copy(alpha = 0.38f).compositeOver(container)
+            val container = if (night) Color(0xFF33343C) else Color(0xFFECEDEF)
+            val foreground = if (night) Color(0xFFA1A5AE) else Color(0xFF808790)
             for (key in listOf(R.string.save, R.string.share)) {
                 val button = compose.onNodeWithText(context.getString(key)).assertIsNotEnabled()
                 val pixels = button.captureToImage().toPixelMap()
@@ -206,17 +207,23 @@ class UvirDisabledDebugColorsTest {
             compose.runOnIdle { assertEquals(expectedCalls, calls.get()); enabled.value = true }
             compose.mainClock.advanceTimeBy(400)
             compose.waitForIdle()
-            val primary = if (night) Color(0xFFF5F7F8) else Color(0xFF101418)
+            val primary = uvirActionColorScheme(lightColorScheme(), night).primary
             val card = if (night) Color(0xFF202226) else Color.White
-            val activeContainer = primary.copy(alpha = if (night) 0.16f else 0.04f).compositeOver(card)
+            val activeContainer = card
             for (key in listOf(R.string.save, R.string.share)) {
                 val button = compose.onNodeWithText(context.getString(key)).assertIsEnabled()
                 val pixels = button.captureToImage().toPixelMap()
                 var activeSurfacePixels = 0
+                var activeForegroundPixels = 0
                 for (y in 0 until pixels.height) for (x in 0 until pixels.width) {
                     if (matches(pixels[x, y], activeContainer)) activeSurfacePixels++
+                    if (matches(pixels[x, y], primary)) activeForegroundPixels++
                 }
-                assertTrue("Enabled export style unchanged: $key, night=$night", activeSurfacePixels > 100)
+                assertTrue(
+                    "Transparent enabled export surface: $key, night=$night",
+                    activeSurfacePixels > pixels.width * pixels.height * 3 / 4
+                )
+                assertTrue("Purple enabled export text/icons: $key, night=$night", activeForegroundPixels > 4)
                 button.performClick()
                 expectedCalls++
                 compose.runOnIdle { assertEquals(expectedCalls, calls.get()) }

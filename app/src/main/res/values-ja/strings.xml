@@ -5,7 +5,6 @@
     <string name="data_management_app_button">アプリ</string>
     <string name="data_management_counters_button">すべてのカウンター</string>
     <string name="launch_spectral_subtitle">スペクトルセンシング</string>
-
     <string name="save_measurement">手動取得</string>
     <string name="add_note_or_leave_empty">任意のメモを追加します。</string>
     <string name="optional_note">取得メモ</string>
@@ -30,7 +29,6 @@
     <string name="cancel">キャンセル</string>
     <string name="apply">適用</string>
     <string name="save_settings_content_description">設定を保存</string>
-
     <string name="live_status">%1$d • %2$d ms</string>
     <string name="initializing">接続中...</string>
     <string name="sensor_synchronizing">同期中...</string>
@@ -55,31 +53,20 @@
     <string name="auto_waiting">自動 • 0 件保存 • %1$s 後に開始</string>
     <string name="automatic_completed_count">自動取得を %1$d 件保存しました</string>
     <plurals name="automatic_session_details">
-        <item quantity="one">%1$s · (%2$d)</item>
-        <item quantity="other">%1$s · (%2$d)</item>
+                <item quantity="other">%1$s · (%2$d)</item>
     </plurals>
     <string name="session_label">セッション</string>
     <plurals name="alert_session_details">
-        <item quantity="one">%1$s · (%2$d)</item>
-        <item quantity="other">%1$s · (%2$d)</item>
+                <item quantity="other">%1$s · (%2$d)</item>
     </plurals>
-
     <string name="saved_measurements">取得データ</string>
     <string name="select_measurements">取得データを選択</string>
     <string name="exit_selection_mode">選択モードを終了</string>
     <string name="select_all">すべて選択</string>
     <string name="deselect_all">すべて選択解除</string>
-    <string name="share_measurements">取得データを共有</string>
-    <string name="share_all_measurements_question">保存済みの取得データをすべて共有しますか？</string>
-    <string name="share_all_measurements_warning">取得データが選択されていないため、保存済みのすべての取得データを共有します。</string>
     <string name="choose_share_format">エクスポート形式を選択</string>
     <string name="data_export_title">データのエクスポート</string>
     <string name="data_export_description">データのエクスポートに使用する形式とオプションを選択します。</string>
-    <string name="share_as_csv">スプレッドシート (CSV)</string>
-    <string name="share_as_readable_table">読みやすい表 (TXT)</string>
-    <string name="share_readable_table_by_acquisition">取得別</string>
-    <string name="share_readable_table_by_spectral_area">スペクトル領域別</string>
-    <string name="share_readable_grouping_complete_sessions_only">完全なセッションにのみ適用されます。</string>
     <string name="acquisition_position_label">位置</string>
     <string name="session_variant_heading">バリエーション %1$s</string>
     <string name="record_variant_compact">%1$s-%2$d</string>
@@ -89,49 +76,25 @@
         <item quantity="other">（%2$dバリエーションあたり%1$d件の取得）</item>
     </plurals>
     <string name="session_variant_chart_files_info">バリエーションごとに1つ、%1$d個のPNGファイルを生成します。</string>
-    <string name="export_total_label">合計</string>
-    <string name="share_as_charts">グラフ (PNG)</string>
-    <string name="share_as_charts_description">3 つの放射照度グラフと 1 つの生物学的影響グラフを、4 個の PNG 画像として書き出します。</string>
-    <string name="share_acquisition_list_charts_description">選択した個別の取得またはセッションごとに、3 つの放射照度グラフと 1 つの生物学的影響グラフを 4 個の PNG 画像として書き出します。</string>
-    <string name="share_alert_list_charts_description">選択した個別のアラートまたはセッションごとに、3 つの放射照度グラフと 1 つの生物学的影響グラフを 4 個の PNG 画像として書き出します。</string>
-    <string name="share_partial_session_warning">一部だけ選択されたセッションは個別取得として書き出されます。各取得は、セッション全体のグラフではなく、放射照度と生物学的影響をまとめた独自のグラフを生成します。</string>
-    <string name="share_partial_alert_session_warning">不完全なアラートセッション選択は個別アラートとして書き出され、アラートごとにグラフが生成されます。</string>
-    <string name="share_as_both">両方</string>
     <string name="share">共有</string>
-    <string name="share_all">すべて共有</string>
     <string name="delete_selected_measurements_question">選択した取得データを削除しますか？</string>
     <plurals name="delete_selected_measurements_warning">
-        <item quantity="one">選択した %1$d 件の取得データを完全に削除します。</item>
-        <item quantity="other">選択した %1$d 件の取得データを完全に削除します。</item>
+                <item quantity="other">選択した %1$d 件の取得データを完全に削除します。</item>
     </plurals>
-    <string name="share_measurement_id_label">取得 ID</string>
-    <string name="share_session_id_label">セッション ID</string>
     <string name="acquisition_session_id_label">取得 / セッション ID</string>
-    <string name="share_date_label">日時</string>
     <string name="session_date_duration_events_label">日付と時刻</string>
     <string name="session_start_end_duration_label">開始、終了、継続時間</string>
     <string name="acquisition_date_label">取得日時</string>
     <string name="session_date_label">セッション日時</string>
     <string name="alert_date_label">アラート日時</string>
-    <string name="share_acquisition_label">取得</string>
     <string name="acquisition_mode_label">モード</string>
-    <string name="share_automatic">自動</string>
-    <string name="share_manual">手動</string>
-    <string name="share_note_label">メモ</string>
-    <string name="share_biological_effects_heading">生物学的影響 · モデル %1$s</string>
-    <string name="share_biological_effects_disclaimer">取得チャンネルから算出した実験的な広帯域推定値です。医療、診断、安全性の評価ではありません。モデルは実センサーの校正後に改良されます。</string>
-    <string name="share_biological_effect_values">加重放射照度: %1$s µW/cm² 相当 · スペクトル関連度: %2$s/100</string>
-    <string name="share_subject">Uvir 取得データ</string>
-    <string name="share_error">取得データを共有できません。</string>
-
     <string name="automatic_acquisition">自動取得</string>
     <string name="automatic_acquisition_title">自動取得</string>
     <string name="automatic_notification_channel_name">自動取得</string>
     <string name="automatic_notification_channel_description">自動取得中の進行状況。</string>
     <string name="automatic_notification_title">自動取得を実行中</string>
     <plurals name="automatic_notification_saved">
-        <item quantity="one">%1$d 件の取得を保存</item>
-        <item quantity="other">%1$d 件の取得を保存</item>
+                <item quantity="other">%1$d 件の取得を保存</item>
     </plurals>
     <string name="threshold_notification_channel_name">アラート</string>
     <string name="threshold_notification_channel_description">設定した値に対するアクティブなアラート。</string>
@@ -168,7 +131,6 @@
     <string name="stop_automatic_confirmation_title">自動取得を停止しますか？</string>
     <string name="stop_automatic_confirmation_message">現在の自動取得を停止します。続行しますか？</string>
     <string name="continue_acquisition">継続する</string>
-
     <string name="acquisition_parameters">設定</string>
     <string name="connectivity">接続</string>
     <string name="settings_section_sensor_connection">接続</string>
@@ -179,7 +141,7 @@
     <string name="sensor_settings_connection_required">これらの設定を変更するにはセンサーを接続してください。</string>
     <string name="sensor_parameters_description">センサーの一般設定を行います。</string>
     <string name="home_sensor_disconnected_title">センサー未接続</string>
-    <string name="home_sensor_disconnected_description">データ取得、アラート記録、センサー設定の変更を行うにはセンサーを接続してください。</string>
+    <string name="home_sensor_disconnected_description">データ取得、アラート記録、設定の変更を行うにはセンサーを接続してください。</string>
     <string name="home_sensor_disconnected_hint">設定 › センサー › 接続を開き、USB、Wi-Fi、Bluetooth、またはインターネットを選択して手順を確認してください。</string>
     <string name="sensor_connection_provisioning_reminder">Wi-Fi または Bluetooth を使用するには、センサーを一度 USB で接続してください。アプリがセンサーの固有 ID とアクセス資格情報を安全に取得します。</string>
     <string name="sensor_connection_usb">USB</string>
@@ -194,9 +156,8 @@
     <string name="sensor_source_title">センサーソース</string>
     <string name="sensor_source_accessibility">センサーソース: %1$s</string>
     <string name="sensor_source_debug_accessibility">模擬データの上書きが有効</string>
-    <string name="sensor_source_debug_hint">このセンサーでは模擬データが有効です。選択した実際の接続方法は保存され、シミュレーションを無効にすると再び使用されます。</string>
+    <string name="sensor_source_debug_hint">模擬データが有効です：センサーを選択するには、設定 → センサー → 診断で無効にしてください。</string>
     <string name="sensor_source_disabled_hint">無効なソースは、もう一方の有効なワイヤレス接続から再有効化できます。両方が無効なら USB で接続してください。</string>
-    <string name="sensor_info_action">センサー情報</string>
     <string name="sensor_power_off">センサー電源オフ</string>
     <string name="sensor_power_off_title">センサーの電源を切りますか？</string>
     <string name="sensor_power_off_message">センサーは低消費電力シャットダウンに入り、アプリから再起動できません。再度オンにするには EN/RESET を押すか、電源を抜き差ししてください。確認するには「電源オフ」を 5 秒間押し続けます。</string>
@@ -217,84 +178,11 @@
     <string name="restore_defaults_message">アプリとセンサーのすべての設定を既定値に戻します。保存済み取得、記録済みアラート、エラーログは完全に削除され、その後センサーの電源が切れます。確認するには「すべて復元」を 10 秒間押し続けます。</string>
     <string name="restore_defaults_confirm">すべて復元</string>
     <string name="restore_defaults_failed">完全な復元を実行できませんでした。センサー接続を確認して再試行してください。</string>
-    <string name="sensor_info_title">センサー情報</string>
-    <string name="sensor_info_device">デバイス</string>
-    <string name="sensor_info_general_information">基本情報</string>
-    <string name="sensor_info_hardware">ハードウェア</string>
-    <string name="sensor_info_components">コンポーネント</string>
-    <string name="sensor_info_date_time">日付と時刻</string>
-    <string name="sensor_info_rtc_status">RTC の状態</string>
-    <string name="sensor_info_clock_status">時計の状態</string>
-    <string name="sensor_info_time_source">時刻の取得元</string>
-    <string name="sensor_info_rtc_time">RTC 時刻</string>
-    <string name="sensor_info_time_source_phone">スマートフォン</string>
-    <string name="sensor_info_valid">有効</string>
-    <string name="sensor_info_invalid">無効</string>
-    <string name="sensor_info_rtc_read_test">RTC 読み取りテスト</string>
-    <string name="sensor_info_connection">接続</string>
-    <string name="sensor_info_measurement">測定</string>
-    <string name="sensor_info_sensors_and_calibration">センサーと校正</string>
-    <string name="sensor_info_sampling">サンプリング</string>
-    <string name="sensor_info_synchronization">同期</string>
-    <string name="sensor_info_sensor">センサー</string>
-    <string name="sensor_info_board">ボード</string>
-    <string name="sensor_info_chip">マイクロコントローラー</string>
-    <string name="sensor_info_cpu">プロセッサー</string>
-    <string name="sensor_info_cpu_value">%1$d MHz · %2$d コア</string>
-    <string name="sensor_info_firmware">ファームウェア</string>
-    <string name="sensor_info_identifier">センサー ID</string>
-    <string name="sensor_info_source">ソース</string>
-    <string name="sensor_info_signal">信号</string>
-    <string name="sensor_info_relative_signal">相対 %1$s</string>
-    <string name="sensor_info_network">ネットワーク</string>
-    <string name="sensor_info_ip_address">IP アドレス</string>
-    <string name="sensor_info_device_name">デバイス名</string>
-    <string name="sensor_info_visible_sensor">VIS/NIR センサー</string>
-    <string name="sensor_info_uv_sensor">UV センサー</string>
-    <string name="sensor_info_unit">単位</string>
-    <string name="sensor_info_calibration">校正</string>
-    <string name="sensor_info_stream_interval">送信間隔</string>
-    <string name="sensor_info_integration">積分時間</string>
-    <string name="sensor_info_gain">ゲイン</string>
-    <string name="sensor_info_samples_sent">起動後の送信サンプル数</string>
-    <string name="sensor_info_free_memory">空きメモリ</string>
-    <string name="sensor_info_memory">メモリ</string>
-    <string name="sensor_info_flash_memory">フラッシュメモリ</string>
-    <string name="sensor_info_ram_memory">RAM</string>
-    <string name="sensor_info_offline_storage">オフラインストレージ</string>
-    <string name="sensor_info_flash_capacity">フラッシュ総容量</string>
-    <string name="sensor_info_program_capacity">プログラム領域</string>
-    <string name="sensor_info_firmware_storage">Uvir ファームウェア</string>
-    <string name="sensor_info_program_space_free">プログラム空き領域</string>
-    <string name="sensor_info_ram_capacity">動的 RAM</string>
-    <string name="sensor_info_ram_used">使用 RAM</string>
-    <string name="sensor_info_ram_free">空き RAM</string>
-    <string name="sensor_info_offline_storage_used">使用済みオフラインストレージ</string>
-    <string name="sensor_info_offline_storage_free">空きオフラインストレージ</string>
-    <string name="sensor_info_offline_storage_capacity">オフラインストレージ総容量</string>
-    <string name="sensor_info_detected">検出済み</string>
-    <string name="sensor_info_not_detected">未検出</string>
-    <string name="sensor_info_unavailable">利用不可</string>
-    <string name="sensor_info_datasheet_estimate">データシート推定値</string>
-    <string name="sensor_info_milliseconds">%1$.1f ms</string>
-    <string name="sensor_info_kilobytes">%1$s KB</string>
-    <string name="sensor_info_power_consumption">消費電力</string>
-    <string name="sensor_info_power_current_estimate">電流推定</string>
-    <string name="sensor_info_power_operating_range">推定動作範囲</string>
-    <string name="sensor_info_estimated_current">推定電流</string>
-    <string name="sensor_info_estimated_power">推定電力</string>
-    <string name="sensor_info_energy_one_hour">1 時間のエネルギー</string>
-    <string name="sensor_info_minimum_current">最小電流</string>
-    <string name="sensor_info_minimum_power">最小電力</string>
-    <string name="sensor_info_peak_current">ピーク電流</string>
-    <string name="sensor_info_peak_power">ピーク電力</string>
-    <string name="sensor_info_reference_voltage">基準電圧</string>
-    <string name="sensor_info_power_estimate_note">有効な接続、サンプリング、インジケーターに基づくソフトウェア推定値です。実際の消費量の測定には外部電力計が必要です。</string>
     <string name="sensor_wifi_esp32_description">アプリとセンサーが同じ Wi-Fi ネットワークを使用しているときに通信できます。</string>
     <string name="sensor_connection_configuration_paths_description">USB、またはすでに有効で認証済みのワイヤレス接続からワイヤレスネットワークを保存・変更できます。ワイヤレス接続がなければ USB を使用してください。</string>
     <string name="sensor_bluetooth_esp32_description">Android の Bluetooth 設定からセンサーをペアリングしてください。アプリとの接続は直接かつ認証済みです。</string>
     <string name="sensor_calibration_estimate_description">VIS/NIR 値は、一般的な AS7343 データシートの応答性から算出した µW/cm² の推定値です。この物理モジュールの絶対校正には、校正済み光学基準器が必要です。</string>
-    <string name="sensor_provisioning_hint">このセンサーを一度 USB で接続し、固有名とアクセス資格情報を安全に取得してください。</string>
+    <string name="sensor_provisioning_hint">センサーを一度 USB で接続し、固有名とアクセス資格情報を安全に取得してください。</string>
     <string name="sensor_associated_value">関連付け済みセンサー ID: %1$s</string>
     <string name="sensor_wifi_network_label">Wi-Fi ネットワーク名</string>
     <string name="sensor_wifi_password_label">Wi-Fi パスワード</string>
@@ -310,14 +198,6 @@
     <string name="open_wifi_settings">Wi-Fi 設定</string>
     <string name="open_bluetooth_settings">Bluetooth 設定</string>
     <string name="settings_section_debug">診断</string>
-    <string name="debug_description">アプリのテストと診断用ツールです。</string>
-    <string name="debug_fake_data">模擬データ</string>
-    <string name="debug_fake_data_description">未接続でもセンサーのランダムな値をシミュレートします。</string>
-    <string name="debug_error_log">エラーログを書き出す</string>
-    <string name="debug_error_log_description">アプリ、スマートフォン、最後に確認したセンサー、記録されたエラー情報を含む技術ファイルを書き出します。保存済み取得、パスワード、PIN、認証資格情報は含みません。256 KB を超えると古いエラーが自動削除され、最新分が保持されます。</string>
-    <string name="debug_error_log_empty">エラーは記録されていません。</string>
-    <string name="debug_error_log_share_error">エラーログを共有できません。</string>
-    <string name="debug_error_log_subject">Uvir エラーログ</string>
     <string name="settings_section_acquisition">サンプリング</string>
     <string name="sampling_sensor_processing_description">サンプリングはセンサー内で直接行われ、アプリは処理済みの最終結果だけを受信します。</string>
     <string name="samples_per_measurement">取得あたりのサンプル数</string>
@@ -363,7 +243,7 @@
     <string name="threshold_sound_triple_beep">ビープ 3 回</string>
     <string name="threshold_sound_long_beep">複数ビープ</string>
     <string name="threshold_volume_label">音量: %1$d%%</string>
-    <string name="threshold_sound_preview_hint">選択肢をタップして試聴します。無音では音も振動も出ませんが、アラートは記録されます。最終音量はスマートフォンのアラーム音量にも依存します。</string>
+    <string name="threshold_sound_preview_hint">最終音量はスマートフォンのアラーム音量にも依存します。</string>
     <string name="invalid_threshold_alert">0 以上のしきい値と、1 秒～24 時間の繰り返し間隔を設定してください。</string>
     <string name="stop_all_value_alerts_accessibility">アラートセッションを停止</string>
     <string name="stop_all_value_alerts_title">アラートセッションを停止しますか？</string>
@@ -399,17 +279,13 @@
     <string name="threshold_alert_id_label">アラート ID</string>
     <string name="threshold_alert_log_share">アラートを共有</string>
     <string name="select_alerts">アラートを選択</string>
-    <string name="share_all_alerts_question">記録されたアラートをすべて共有しますか？</string>
-    <string name="share_all_alerts_warning">アラートが選択されていないため、記録されたすべてのアラートを共有します。</string>
     <string name="delete_selected_alerts_question">選択したアラートを削除しますか？</string>
     <plurals name="delete_selected_alerts_warning">
-        <item quantity="one">選択したアラートを完全に削除します。</item>
-        <item quantity="other">選択した %1$d 件のアラートを完全に削除します。</item>
+                <item quantity="other">選択した %1$d 件のアラートを完全に削除します。</item>
     </plurals>
     <string name="threshold_alerts_deleted">アラートを削除しました</string>
     <plurals name="threshold_alert_count_since">
-        <item quantity="one">%1$d 件保存 · %2$s 以降</item>
-        <item quantity="other">%1$d 件保存 · %2$s 以降</item>
+                <item quantity="other">%1$d 件保存 · %2$s 以降</item>
     </plurals>
     <string name="threshold_alert_export_subject">Uvir アラートログ</string>
     <string name="threshold_alert_log_delete_title">記録済みアラートをすべて削除しますか？</string>
@@ -474,8 +350,6 @@
     <string name="reset_counters_stop_auto">カウンターをリセットする前に自動取得を停止してください。</string>
     <string name="acquisition_counters_reset_complete">取得カウンターをリセットしました</string>
     <string name="alert_counters_reset_complete">アラートカウンターをリセットしました</string>
-    <string name="export_database_title">データベースを書き出す</string>
-    <string name="export_database">データベースを書き出す</string>
     <string name="settings_transfer_description">暗号化バックアップでアプリとセンサーの設定を書き出し／読み込みます。</string>
     <string name="import_database">データベースをインポート</string>
     <string name="database_transfer_description">暗号化 ZIP バックアップでデータベース全体を書き出し／復元します。</string>
@@ -484,10 +358,7 @@
     <string name="import_database_confirm">インポート</string>
     <string name="import_database_failed">データベースをインポートできません。パスワード、アーカイブ、データベースのバージョンを確認してください。</string>
     <string name="import_database_success">データベースをインポートしました。</string>
-    <string name="export_database_subject">Uvir データベース</string>
-    <string name="export_database_error">データベースを書き出せません。</string>
     <string name="close">閉じる</string>
-
     <string name="irradiance_view">放射照度</string>
     <string name="biological_effects_view">生物学的影響¹</string>
     <string name="biological_effects_group_name">生物学的影響</string>
@@ -505,16 +376,13 @@
     <string name="biological_compact_relevance">%1$.0f%%</string>
     <string name="relative_spectral_index">スペクトル関連度</string>
     <string name="relative_spectral_index_explanation">0～100 は、取得スペクトルがこの推定で重み付けされた波長にどの程度集中しているかを示します。総強度ではなくスペクトル構成を表し、損傷率や安全しきい値ではありません。</string>
-
     <string name="delete_all_measurements_question">保存済み取得をすべて削除しますか？</string>
     <string name="delete_all_measurements_warning">保存済み取得をすべて完全に削除します。確認するには「すべて削除」を 2 秒間押し続けます。</string>
     <string name="delete_all">すべて削除</string>
     <plurals name="measurement_count_since">
-        <item quantity="one">%1$d 件保存 · %2$s 以降</item>
-        <item quantity="other">%1$d 件保存 · %2$s 以降</item>
+                <item quantity="other">%1$d 件保存 · %2$s 以降</item>
     </plurals>
     <string name="no_saved_measurements">保存済みの取得データはありません。</string>
-
     <string name="delete_measurement_question">この取得データを削除しますか？</string>
     <string name="delete_measurement_warning">この取得データを完全に削除します。</string>
     <string name="measurement_deleted">取得データを削除しました</string>
@@ -524,7 +392,6 @@
     <string name="note">メモ</string>
     <string name="edit_note">メモを編集</string>
     <string name="no_note">メモなし</string>
-
     <string name="automatic_badge">A</string>
     <string name="manual_badge">M</string>
     <string name="automatic_badge_description">自動取得</string>
@@ -532,7 +399,6 @@
     <string name="automatic_measurement">自動</string>
     <string name="manual_measurement">手動</string>
     <string name="external_measurement">外部</string>
-
     <string name="uv_radiation">紫外線</string>
     <string name="hev_description">高エネルギー可視光</string>
     <string name="high_energy_visible_total_label">高エネルギー可視光 / HEV</string>
@@ -542,14 +408,12 @@
     <string name="far_red_nir">赤外線</string>
     <string name="infrared_sensor_footnote">¹ 最大感度の半分での帯域幅：約 60 nm（Far-red）と 54 nm（NIR）。</string>
     <string name="infrared_peak_band">ピーク¹ %1$d nm</string>
-
     <string name="violet">紫</string>
     <string name="blue">青</string>
     <string name="green">緑</string>
     <string name="yellow">黄</string>
     <string name="orange">オレンジ</string>
     <string name="red">赤</string>
-
     <string name="percent_of_visible">可視光の %1$s%%</string>
     <string name="version_info">バージョンと情報</string>
     <string name="version_info_title">Uvir %1$s</string>
@@ -572,20 +436,6 @@
     <string name="github_repository_pending">GitHub リポジトリはまだ設定されていません。プロジェクト公開後にリンクが利用可能になります。</string>
     <string name="open_github_repository">リポジトリを開く</string>
     <string name="check_for_updates">更新を確認</string>
-    <string name="project_numbers_title">数字で見るプロジェクト</string>
-    <string name="project_numbers_description">Uvir の開発状況をまとめた最新の概要です。</string>
-    <string name="project_numbers_development_time">支援付き開発</string>
-    <string name="project_numbers_development_time_value">約 4 週間</string>
-    <string name="project_numbers_ai_use">ChatGPT / Codex</string>
-    <string name="project_numbers_ai_use_value">継続的な支援</string>
-    <string name="project_numbers_prototype_cost">プロトタイプ費用</string>
-    <string name="project_numbers_prototype_cost_value">300 ユーロ未満</string>
-    <string name="project_numbers_languages">対応言語</string>
-    <string name="project_numbers_languages_value">17</string>
-    <string name="project_numbers_automated_tests">自動テスト</string>
-    <string name="project_numbers_automated_tests_value">352 件合格</string>
-    <string name="project_numbers_snapshot_note">数値はバージョン %1$s 時点のもので、プロジェクトの進展に合わせて更新されます。</string>
-
     <string name="navigate_back">戻る</string>
     <string name="session_chart_title">取得セッション</string>
     <string name="session_chart_open">取得セッションを開く</string>
@@ -616,8 +466,7 @@
     <string name="acquisition_chart_unit_biological">加重放射照度 · µW/cm² equiv.</string>
     <string name="chart_biological_unit">µW/cm² equiv.</string>
     <plurals name="session_chart_acquisition_count">
-        <item quantity="one">%1$d 件の取得</item>
-        <item quantity="other">%1$d 件の取得</item>
+                <item quantity="other">%1$d 件の取得</item>
     </plurals>
     <string name="alert_session_chart_title">アラートセッション</string>
     <string name="alert_session_chart_open">アラートセッションを開く</string>
@@ -639,8 +488,7 @@
     <string name="alert_chart_percentage_value">パーセント値 · %</string>
     <string name="alert_session_chart_threshold">しきい値 %1$s %2$s %3$s</string>
     <plurals name="alert_session_chart_alert_count">
-        <item quantity="one">%1$d 件のアラート</item>
-        <item quantity="other">%1$d 件のアラート</item>
+                <item quantity="other">%1$d 件のアラート</item>
     </plurals>
     <string name="alert_chart_title">アラート</string>
     <string name="alert_chart_open">アラートを開く</string>
@@ -782,10 +630,6 @@
     <string name="sensor_firmware_update_required">センサーにインストールされたファームウェアはこれらの設定に対応していません。ファームウェアを更新して再試行してください。</string>
     <string name="value_out_of_limits_corrected">値が許容範囲外だったため、自動修正しました。</string>
     <string name="invalid_sensor_calibration">0.100～10.000 の校正係数を入力してください。</string>
-    <string name="sensor_info_visible_calibration_factor">VIS/NIR 補正係数</string>
-    <string name="sensor_info_uv_calibration_factor">UV 補正係数</string>
-    <string name="sensor_info_offline_alert_interval">オフラインアラート間隔</string>
-    <string name="sensor_info_user_adjusted_calibration">ユーザー調整済み</string>
     <string name="language_greek">Ελληνικά</string>
     <string name="language_persian">فارسی</string>
     <string name="language_russian">Русский</string>
@@ -806,16 +650,6 @@
     <string name="sensor_selection_title">センサー選択</string>
     <string name="sensor_name_label">センサー名</string>
     <string name="sensor_name_description">このアプリ内だけで表示される名前です。センサーのハードウェア ID は変更されません。</string>
-    <string name="debug_performance_title">センサーコンサート</string>
-    <string name="debug_performance_description">ブザーと LED でセンサーに保存された診断用メロディーを再生します。</string>
-    <string name="debug_performance_play">再生</string>
-    <string name="debug_performance_stop">停止</string>
-    <string name="debug_performance_firmware_required">この診断テストを使用するにはセンサーのファームウェアを更新してください。</string>
-    <string name="debug_performance_connection_lost">センサーが利用できなくなったため再生を停止しました。</string>
-    <string name="debug_performance_happy_birthday">ハッピーバースデー</string>
-    <string name="debug_performance_indiana_jones">Indiana Jones</string>
-    <string name="debug_performance_jurassic_park">Jurassic Park</string>
-    <string name="debug_performance_star_wars">Star Wars</string>
     <string name="data_and_restore_description_split">エクスポート、インポート、リセットの設定を管理します。</string>
     <string name="data_management_settings_group">設定</string>
     <string name="data_management_database_group">データベース</string>
@@ -826,6 +660,9 @@
     <string name="language_hindi">हिन्दी</string>
     <string name="language_korean">한국어</string>
     <string name="language_swahili">Kiswahili</string>
+    <string name="language_polish">Polski</string>
+    <string name="language_dutch">Nederlands</string>
+    <string name="language_indonesian">Bahasa Indonesia</string>
     <string name="note_length_counter">%1$d/%2$d</string>
     <string name="restore_app_settings_action">アプリをリセット</string>
     <string name="restore_app_settings_confirm">リセット</string>
@@ -833,12 +670,8 @@
     <string name="restore_app_settings_inline_warning">アプリに保存されているすべての設定とデータを削除します。センサーとセンサー内のデータは変更されません。</string>
     <string name="restore_app_settings_message">測定、記録されたアラート、エラーログ、カウンター、センサープロファイル、保存済み接続情報を含む、Uvirアプリのすべての設定とローカルデータが削除されます。センサー自体は変更も電源オフもされません。確認するには「リセット」を5秒間長押ししてください。</string>
     <string name="restore_app_settings_title">アプリをリセットしますか？</string>
-    <string name="sensor_info_connected">接続済み</string>
-    <string name="sensor_info_mqtt_broker">MQTTブローカー</string>
-    <string name="sensor_info_mqtt_status">MQTT状態</string>
-    <string name="sensor_info_not_connected">未接続</string>
     <string name="sensor_status_no_sensor">未接続</string>
-    <string name="sensor_info_tls_port">TLSポート</string>
+    <string name="sensor_status_no_associated_sensor">ペアリング済みのセンサーなし</string>
     <string name="sensor_restore_action">センサーをリセット</string>
     <string name="sensor_restore_confirm">リセット</string>
     <string name="sensor_restore_failed">センサーをリセットできませんでした。接続を確認してもう一度お試しください。</string>
@@ -847,34 +680,9 @@
     <string name="sensor_restore_title">センサーをリセットしますか？</string>
     <string name="sensor_usb_identity_mismatch">未承認のUSBセンサーです。別のセンサーがすでにアプリに関連付けられています。</string>
     <string name="show_password">パスワードを表示</string>
-    <string name="sensor_info_connecting">接続中…</string>
-    <string name="sensor_info_searching">検索中…</string>
-    <string name="sensor_info_activity">処理中…</string>
     <string name="note_and_sensor">モード、センサー、その他</string>
     <string name="sensor_status_connected">センサー接続済み</string>
-    <string name="debug_diagnostic">診断テスト</string>
-    <string name="diagnostic_description">センサーの完全な診断テストを実行します。</string>
-    <string name="diagnostic_title">センサー診断</string>
-    <string name="diagnostic_progress">%1$d/%2$d 件の要求が完了</string>
-    <string name="diagnostic_summary">%1$d/%2$d 件の応答を受信</string>
-    <string name="diagnostic_success">テスト要求に異常はありませんでした。</string>
-    <string name="diagnostic_warning">一部の要求が失敗したか、接続が変わりました。</string>
-    <string name="diagnostic_latency">応答 最短 / 平均 / 最長</string>
-    <string name="diagnostic_sample_age">サンプル経過時間</string>
-    <string name="diagnostic_request">要求</string>
-    <string name="diagnostic_timeout">制限時間内に応答がありません</string>
-    <string name="diagnostic_write_failed">送信できませんでした</string>
-    <string name="diagnostic_connection_changed">センサーまたは接続が変わりました</string>
-    <string name="diagnostic_notes">時間には接続とセンサーの負荷が含まれます。完全なハードウェアテストではありません。パスワードや認証情報は含まれません。</string>
-    <string name="diagnostic_generated">実行日時</string>
-    <string name="diagnostic_duration">テスト時間</string>
-    <string name="diagnostic_auto_session">自動測定</string>
-    <string name="diagnostic_alert_session">アラートセッション</string>
-    <string name="diagnostic_active">実行中</string>
-    <string name="diagnostic_inactive">実行していません</string>
-    <string name="diagnostic_share_error">診断レポートを共有できませんでした。</string>
-    <string name="diagnostic_failed">診断テストを完了できませんでした。</string>
-    <string name="debug_secret_melody_found">秘密のメロディーを見つけました</string>
+    <string name="sensor_status_simulated">模擬データ有効</string>
     <string name="conditional_acquisition">条件付き取得</string>
     <string name="external_command">外部コマンド</string>
     <string name="external_command_description">センサーが外部入力のコマンドを検出したときだけ取得を保存します。セッションメモは保持され、間隔、予約開始、終了、上限、取得条件は無視されます。</string>
@@ -915,66 +723,29 @@
     <string name="list_filter_count">%2$d件中%1$d件を表示</string>
     <string name="list_filter_share_question">表示中のすべての結果を共有しますか？</string>
     <string name="list_filter_share_warning">記録が選択されていません。現在のフィルターに一致するすべての記録を共有します。</string>
-    <string name="settings_section_language_formats">単位と形式</string>
+    <string name="settings_section_appearance">外観</string>
+    <string name="settings_section_language_formats">単位</string>
     <string name="settings_section_sharing_export">エクスポート</string>
-    <string name="export">エクスポート</string><string name="import_settings">設定をインポート</string>
-    <string name="export_saved_successfully">ファイルを保存しました。</string><string name="export_save_failed">ファイルを保存できませんでした。</string>
-    <string name="export_destination_description">ファイルをこの端末に保存するか、別のアプリと共有します。</string>
-    <string name="export_settings_title">設定をエクスポート</string><string name="export_app_settings">アプリ設定</string>
-    <string name="export_app_settings_description">画面、形式、端末上の設定。記録は含まれません。</string>
-    <string name="export_sensor_settings">センサー設定</string><string name="export_sensor_settings_description">校正、サンプリング、動作設定。認証情報とネットワークアドレスは含まれません。</string>
-    <string name="settings_export_failed">設定をエクスポートできませんでした。</string><string name="settings_import_failed">選択した設定ファイルは無効か、インポートできません。</string>
+    <string name="export">エクスポート</string>
+    <string name="import_settings">設定をインポート</string>
+    <string name="settings_export_failed">設定をエクスポートできませんでした。</string>
+    <string name="settings_import_failed">選択した設定ファイルは無効か、インポートできません。</string>
     <string name="sensor_settings_restore_requires_connection">センサーを関連付けました。接続されていないため、設定は復元されませんでした。</string>
     <string name="sensor_settings_restore_failed">センサーを関連付けましたが、設定を復元できませんでした。</string>
     <plurals name="settings_imported_count"><item quantity="other">設定ファイルを %d 件インポートしました。</item></plurals>
     <string name="language_formats_description">アプリでのデータの表示方法と書式を選択します。</string>
-    <string name="export_format_heading">書き出し</string>
     <string name="irradiance_measurement_heading">放射照度の測定</string>
     <string name="irradiance_measurement_description">放射照度の表示単位を選択します。保存値はセンサー本来の精度を維持します。</string>
-    <string name="export_format_description">CSV、読みやすい表、グラフに選択中の設定または国際科学形式を使用するか選択します。</string>
-    <string name="export_profile_heading">データ形式</string>
-    <string name="export_format_selected">設定済みの言語と形式</string>
-    <string name="export_format_international">国際科学形式</string>
-    <string name="export_format_preview_heading">プレビュー</string>
-    <string name="export_format_profile_summary">言語: %1$s · 数値: %2$s · 日付: %3$s · 時刻: %4$s · 放射照度: %5$s</string>
     <string name="out_of_range_short">OL - 測定範囲外</string>
     <string name="out_of_range_csv_header">測定範囲外</string>
-    <string name="debug_fake_out_of_range">測定範囲外の値</string>
-    <string name="debug_fake_out_of_range_description">測定範囲外の値をときどき模擬します。</string>
     <string name="language_english_localized">英語</string>
-    <string name="sensor_info_scale_sensitivity">測定範囲と感度</string>
-    <string name="sensor_info_display_scale">表示スケール</string>
-    <string name="sensor_info_selected_unit">選択中の単位</string>
-    <string name="sensor_info_scale_equivalence">スケール換算</string>
-    <string name="sensor_info_scale_levels">レンジ段階</string>
-    <string name="sensor_info_as7343_scale_levels">自動ゲインは16×、32×、64×、128×、256×、512×、1024×で、測定は256×から開始します。積分時間はSMUX 1周期あたり27.8 msで、全スペクトルには3周期を使用します。</string>
-    <string name="sensor_info_range_control">測定範囲制御</string>
-    <string name="sensor_info_as7343_range_control">生カウントが250未満ならゲインを上げ、9,200以上なら下げます。最大3回の読み取りで適切なレンジを選択します。</string>
-    <string name="sensor_info_precision">精度</string>
-    <string name="sensor_info_precision_note">ゲインを2倍にするごとに弱い光への生応答は2倍になりますが、飽和までの余裕はおよそ半分になります。感度と分解能は向上しますが、校正精度は向上しません。表示単位の影響はありません。</string>
-    <string name="sensor_info_status">状態</string>
-    <string name="sensor_info_as7331_scale_pending">現在のファームウェアはドライバーの固定測定プロファイルを使用しており、自動レンジ調整はまだ有効ではありません。</string>
-    <string name="sensor_info_as7331_precision_note">ゲインまたは変換時間を増やすと弱いUVの分解能が向上する一方、飽和までの余裕が減ります。正確な自動段階はAS7331実機で検証後に表示します。</string>
-    <string name="settings_section_sounds_and_alerts">サウンドと通知</string>
-    <string name="export_database_dialog_title">データベースをエクスポート</string>
-    <string name="export_database_dialog_description">この端末に保存されているアプリのデータベース全体（保存済みの測定値とアラートを含む）をエクスポートします。</string>
-    <string name="export_error_log_dialog_title">エラーログをエクスポート</string>
-    <string name="export_error_log_dialog_description">この端末に保存されているアプリのエラーログを技術ファイルとしてエクスポートします。保存済みの測定値や認証情報は含まれません。</string>
-    <string name="export_diagnostic_dialog_title">診断レポートをエクスポート</string>
-    <string name="export_diagnostic_dialog_description">センサーの診断レポートをエクスポートします。技術的なテスト結果は含まれますが、パスワードや認証情報は含まれません。</string>
-    <string name="export_sensor_info_dialog_title">センサー情報をエクスポート</string>
-    <string name="export_sensor_info_dialog_description">このセンサーについて表示されているすべての情報をテキストファイルとしてエクスポートします。</string>
+    <string name="settings_section_notifications">通知</string>
     <string name="acquisition_feedback_description">手動または自動の測定を保存したときにアプリが再生する通知を選択します。</string>
-    <string name="acquisition_feedback_preview_hint">選択肢をタップして試聴します。最終音量はスマートフォンのアラーム音量にも依存します。</string>
+    <string name="acquisition_feedback_preview_hint">最終音量はスマートフォンのアラーム音量にも依存します。</string>
     <string name="confirmation_question_suffix">?</string>
     <string name="threshold_alerts_sound_description_v2">アラートを記録したときにアプリが再生する通知を選択します。</string>
-    <string name="export_all_measurements_question">保存済みの測定をすべてエクスポートしますか？</string>
-    <string name="export_all_measurements_warning">測定が選択されていないため、保存済みの測定をすべてエクスポートします。</string>
-    <string name="export_all_alerts_question">記録済みのアラートをすべてエクスポートしますか？</string>
-    <string name="export_all_alerts_warning">アラートが選択されていないため、記録済みのアラートをすべてエクスポートします。</string>
     <string name="list_filter_export_question">表示中の結果をすべてエクスポートしますか？</string>
     <string name="list_filter_export_warning">レコードが選択されていません。現在のフィルターに一致するすべてのレコードをエクスポートします。</string>
-    <string name="export_all">すべてエクスポート</string>
     <string name="settings_include_sensitive_information">機密データを含める</string>
     <string name="settings_include_sensitive_information_description">接続認証情報とセンサーの関連付けを含め、USBなしで復元できるようにします。暗号化パスワードの入力が必要です。</string>
     <string name="settings_encryption_password_title">暗号化パスワード</string>
@@ -988,7 +759,6 @@
     <string name="settings_decryption_password_description">このバックアップは暗号化されています。エクスポート時のパスワードを入力してください。</string>
     <string name="settings_decryption_password_incorrect">パスワードが違うか、ファイルが破損しています。</string>
     <string name="settings_decrypt">解除</string>
-    <string name="export_sensor_settings_description_complete">較正、サンプリング、動作オプション、接続設定。</string>
     <string name="sensor_external_command_description">外部入力から受けたコマンドに対するセンサーの動作を表示します。</string>
     <string name="sensor_external_command_info_action">外部入力コマンドの説明</string>
     <string name="sensor_external_command_info_description">外部入力でデータを取得し、セッションを制御します。センサーに有効な日時が必要です。</string>
@@ -1007,45 +777,15 @@
     <string name="session_sequence_filter_settings_title">バリエーション設定</string>
     <string name="session_sequence_filter_cycle_size">各測定のバリエーション：</string>
     <string name="session_sequence_filter_position">バリエーション</string>
-    <string name="export_variant_count_label">バリエーション数</string>
     <string name="session_sequence_filter_preview">バリエーションごとの取得：%1$d</string>
     <string name="session_sequence_filter_preview_total">バリエーションは無効です</string>
     <string name="session_sequence_filter_export_note">各バリエーションは別のグループとして表示・エクスポートされるため、生成されるファイル数が増える場合があります。</string>
     <string name="session_sequence_filter_example">表示する取得：%1$d、%2$d、%3$d…</string>
-    <string name="share_charts_combined_groups">すべてのグラフを1ファイルに</string>
-    <string name="share_charts_separate_groups">グラフごとに1ファイル</string>
-    <string name="share_variant_charts_by_variant">バリエーション別</string>
-    <string name="share_variant_charts_by_group">スペクトル領域別</string>
-    <string name="share_variant_grouping_complete_sessions_only">バリエーションを含む完全なセッションにのみ適用されます。</string>
-    <string name="share_chart_file_count">PNGファイル: %1$d</string>
-    <string name="share_readable_table_file_count">TXTファイル: %1$d</string>
-    <string name="export_file_count">%1$sファイル: %2$d</string>
     <string name="confirm">確認</string>
-    <string name="debug_simulate_events">イベントをシミュレート</string>
-    <string name="debug_simulate_events_description">模擬測定とアラートを追加します。</string>
-    <string name="debug_simulate_events_question">テストイベントをシミュレートしますか？</string>
-    <string name="debug_simulate_events_confirmation">テスト用の測定値とアラートがデータベースに追加されます。既存の記録は変更されません。</string>
-    <string name="debug_simulate_events_completed">測定値%1$d件とアラート%2$d件を追加しました</string>
-    <string name="debug_simulation_note">デバッグシミュレーション</string>
     <string name="hold_action_seconds_confirmation">確認するには%1$sを%2$d秒間長押ししてください。</string>
     <string name="accessibility_expanded">展開</string>
     <string name="accessibility_collapsed">折りたたみ</string>
     <string name="accessibility_activate_again_to_confirm">もう一度有効にして確認</string>
-    <string name="sensor_info_micro_sd">microSD</string>
-    <string name="sensor_info_micro_sd_status">カードの状態</string>
-    <string name="sensor_info_storage_backend">使用中のストレージ</string>
-    <string name="sensor_info_micro_sd_type">カード種別</string>
-    <string name="sensor_info_file_system">ファイルシステム</string>
-    <string name="sensor_info_record_capacity_total">総レコード容量</string>
-    <string name="sensor_info_record_capacity_free">残りのレコード数</string>
-    <string name="sensor_info_record_size">レコードサイズ</string>
-    <string name="sensor_info_pending_records">同期待ちレコード</string>
-    <string name="sensor_info_storage_backend_micro_sd">microSD</string>
-    <string name="sensor_info_storage_backend_internal">内部緊急メモリ</string>
-    <string name="sensor_info_storage_backend_none">ストレージなし</string>
-    <string name="sensor_info_read_write_test">読み書きテスト</string>
-    <string name="sensor_info_test_passed">成功</string>
-    <string name="sensor_info_test_failed">失敗</string>
     <string name="sensor_no_selection">センサーなし</string>
     <string name="alert_registration_title">アラートの記録</string>
     <string name="alert_configure_values">しきい値を設定</string>
@@ -1054,5 +794,5 @@
     <string name="alert_max_registrations">最大記録数</string>
     <string name="alert_registration_count">記録数</string>
     <string name="alert_configure_first">開始する前に少なくとも1つの値を設定してください。</string>
-    <string name="sensor_info_last_connection">最終接続</string>
+    <string name="sensor_simulation_open_settings">設定を開く</string>
 </resources>

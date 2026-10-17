@@ -160,7 +160,7 @@ class UvirDateFormattingTest {
             UvirExportMode.fromStoredValue(null)
         )
         assertEquals(
-            UvirIrradianceUnit.MW_CM2,
+            UvirIrradianceUnit.W_M2,
             UvirIrradianceUnit.fromStoredValue(null)
         )
         assertEquals(

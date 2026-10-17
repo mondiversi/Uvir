@@ -2,18 +2,37 @@
 
 Android app for spectral irradiance acquisition and estimated biological effects.
 
+Planet Compass has been extracted into an independent Android project. Celestial
+screens and the hidden logo-entry gesture are no longer included in UVIR.
+
 ## Status
 
 Uvir is under active development. ESP32/AS7343 acquisition works over USB,
-local Wi-Fi, Bluetooth and Internet through a standard MQTT broker over TLS. Optional AS7331
-UVA/UVB/UVC acquisition is implemented in
-energy-saving one-shot mode and awaits hardware validation and traceable
-calibration when the UV board arrives.
+local Wi-Fi, Bluetooth and Internet through a standard MQTT broker over TLS.
+The current visible/NIR breakout is marked **GY-AS734X** and contains an
+**AS7343** chip. The **MIKROE UV 5 Click / AS7331** board is also installed and
+detected; its UVA/UVB/UVC acquisition uses energy-saving one-shot mode.
+Final-assembly testing and traceable calibration of both optical sensors will
+follow PCB assembly. See [hardware identification](hardware/README.md) and the
+[calibration plan](hardware/calibration/README.md).
+
+## Start here
+
+- [Setup and assembly tutorial](docs/GETTING_STARTED.md): components, GPIO map,
+  app/firmware builds, first association, diagnostics and backups.
+- [Schematics, PCB versions and Gerbers](hardware/pcb/uvir-carrier-2026-10-05/README.md):
+  anonymized design files and previews, shared as a development snapshot for
+  review, **not a production-approved board**.
+- [Direct sensor integration](docs/USB_SERIAL_PROTOCOL.md) and
+  [signed app/sensor updates](docs/UPDATES.md).
+
+This push updates development sources and documentation. It does not replace
+the APKs or signed update indexes already attached to GitHub Releases.
 
 ## Android app
 
 - Package: `me.mondiversi.uvir`
-- Current version: `1.3.0` (sensor firmware `0.5.103`)
+- Current version: `1.3.0` (sensor firmware `0.5.104`)
 - Signed GitHub update checks at startup and from Info, verified APK downloads,
   and identity-checked USB sensor updates. The app is updated before the sensor.
   See [update and recovery documentation](docs/UPDATES.md).
@@ -21,8 +40,8 @@ calibration when the UV board arrives.
   while one is selected for live display, settings and commands. Switching the
   selection keeps other sensors connected and continues saving their records.
   A single USB serial device can coexist with these wireless connections; USB
-  hubs with multiple serial sensors are not yet supported. The no-sensor entry
-  deliberately pauses all app connections without stopping hardware sessions.
+  hubs with multiple serial sensors are not yet supported. With no associated
+  hardware, the home name is an em dash and **Add sensor** opens initial setup.
 - Spectral acquisitions, automatic acquisition, saved acquisitions, sharing and export, and estimated biological effects.
 - Automatic acquisition can request unrestricted battery use and holds a partial wake lock while active, improving reliability when the screen is off. Force-closing the app can still stop the session.
 - Firmware 0.5.95 makes the ESP32 the single authority for real-sensor
@@ -39,11 +58,45 @@ calibration when the UV board arrives.
   autonomously without inventing records for the period in which the sensor
   was unpowered. The app corrects the RTC from the phone on every connection;
   invalid or uninitialized time still blocks every durable record.
+  On every app launch, fresh RTC oscillator-stop reports are captured before
+  time synchronization and grouped in one dismissible warning listing the
+  affected sensors. This suggests checking the backup cells; it does not claim
+  to measure their charge or predict a nearly depleted battery.
+  Phone settings include a Notifications page with Acquisition, Alerts and
+  Miscellaneous sections, in that order. The clock-battery warning is enabled by
+  default and can be disabled there or by unchecking the warning's "Show on
+  every launch" checkbox. Both controls share one preference, included in
+  encrypted app-settings backups. The Small screen/Large screen mode selector
+  remains implemented but is hidden from the Settings title until both layouts
+  are ready; this does not disable automatic display scaling.
+  On wider displays, text, icons, spacing and touch targets scale together
+  automatically while retaining the phone layout and system font scale. The
+  future tablet layout will allow side-by-side sensor views when ready.
 - The in-app diagnostic performs six correlated probes and reports the complete
   hardware chain: processor and memory, AS7343/AS7331/DS3231/FRAM I²C state,
   FRAM and microSD read/write health, connection transports, LED and buzzer control
   paths, and the external-input GPIO. It does not create records or change
   settings and excludes every credential.
+  Live-data simulation is disabled by default, including the first launch
+  without an associated sensor. When enabled, it uses a separate phone-only
+  context: the home name is `—`, the status is an orange bug with "Mock data
+  active", and new acquisitions/alerts have no hardware association. Their
+  manual/automatic/external modes are unchanged. The sensor-selection dialog
+  shows a plain explanation and an **Open settings**
+  shortcut directly to the mock-data controls in Diagnostics until mock data
+  is turned off; the hardware list and connection choices are hidden. The shortcut
+  does not change any settings. **Simulate events** is always available, whether
+  live-data simulation is on or off and whether real hardware is connected or not.
+  Its generated acquisitions, alerts and sessions always have no sensor association
+  and display `—`, even after returning to a real sensor. Changing either simulation
+  switch keeps the current settings page and scroll position. Real connections
+  and autonomous jobs continue in the background.
+  Disabling simulation restores the previous real sensor's own settings and
+  jobs. Mock and real session state never share a preference namespace, and
+  unattributed mock records are not reassigned when a sensor is later paired.
+  With no associated hardware, the home name is `—`; the selection dialog shows
+  **Add sensor** rather than a selectable empty sensor profile, and the connection
+  choices remain disabled until a real sensor can be configured.
 - Settings can be backed up from **Settings → Data and restore**: the app and
   each selected associated sensor produce separate password-encrypted
   `.uvirsettings` files. Multiple sensor backups can be imported together.
@@ -64,8 +117,20 @@ calibration when the UV board arrives.
 - Sensor parameters now group the RGB connection/activity LED, the separate
   blue pending-synchronization LED and an optional passive piezo buzzer. The
   buzzer uses GPIO 32,
-  defaults to 10% volume, and confirms app connection, disconnection, activity
+  defaults to 20% volume, and confirms app connection, disconnection, activity
   start or stop, and every saved acquisition or alert without blocking sampling.
+  Status LED brightness also defaults to 20%. These defaults apply only when no
+  stored setting exists; updates preserve all existing user values, including 10%.
+- Acquisition/alert notification volume sliders preview the configured sound
+  after each adjustment, using Android's alarm audio stream. The sensor buzzer
+  volume slider previews one short beep on the selected connected sensor when
+  its firmware advertises `buzzer_preview_supported`; previews never create records.
+- Android acquisitions keep their original confirmation sound; only alert
+  beeps use the new rising 1800-to-2400 Hz timbre. Alerts also offer a single
+  beep, distinct from acquisition feedback. Android retains the selected beep cadence, silence/vibration options
+  and alarm-stream volume. The passive sensor buzzer retains one acquisition
+  1400 Hz beep and three short rising alert beeps. Its 12-bit PWM volume range is capped at
+  the prototype's listening-tested usable peak, not calibrated sound-pressure level.
 
 ## Project structure
 
@@ -101,8 +166,9 @@ Open `firmware/esp32/UvirSensor/UvirSensor.ino` in Arduino IDE, select
 recognizes the current CP210x USB serial bridge and asks for USB access when the
 sensor is connected to the phone through a USB OTG data cable.
 
-Disable **Settings → Debug → Mock data** before testing the real sensor. AS7343
-VIS/NIR and optional AS7331 UV values remain datasheet-based estimates until
+Disable **Mock data** in the sensor **Diagnostics** settings before testing
+the real sensor. AS7343 VIS/NIR and optional AS7331 UV values remain
+datasheet-based estimates until
 the assembled instrument is calibrated against a traceable reference.
 
 ## License

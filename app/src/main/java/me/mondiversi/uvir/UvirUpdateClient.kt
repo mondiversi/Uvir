@@ -39,6 +39,8 @@ internal object UvirUpdatePolicy {
         }
         return digest.digest().toHex()
     }
+    fun matches(file: File, asset: UvirUpdateAsset): Boolean =
+        file.isFile && file.length() == asset.bytes && sha256(file) == asset.sha256
 }
 
 internal fun ByteArray.toHex(): String = joinToString("") { "%02x".format(it.toInt() and 255) }
@@ -88,7 +90,7 @@ internal class UvirUpdateClient(private val context: Context) {
     fun download(asset: UvirUpdateAsset, suffix: String, progress: (Float) -> Unit): File {
         val directory = File(context.noBackupFilesDir, "updates").apply { mkdirs() }
         val target = File(directory, "${asset.sha256}.$suffix")
-        if (target.isFile && target.length() == asset.bytes && UvirUpdatePolicy.sha256(target) == asset.sha256) return target
+        if (UvirUpdatePolicy.matches(target, asset)) return target
         val partial = File(directory, "${asset.sha256}.part")
         try {
             connection(asset.url).let { connection ->
@@ -115,6 +117,28 @@ internal class UvirUpdateClient(private val context: Context) {
             }
             return target
         } finally { partial.delete() }
+    }
+
+    /** The signed catalog, not an in-memory File, is the authority after process recreation. */
+    fun savePendingInstaller(encoded: String) {
+        verifyCatalog(encoded)
+        check(context.getSharedPreferences("uvir_updates", Context.MODE_PRIVATE).edit()
+            .putString("pending_app_catalog", encoded).commit()) { "Cannot persist pending installer" }
+    }
+
+    fun pendingInstaller(): File {
+        val encoded = context.getSharedPreferences("uvir_updates", Context.MODE_PRIVATE)
+            .getString("pending_app_catalog", null) ?: error("No pending app installer")
+        val release = verifyCatalog(encoded).app
+        require(release.code > BuildConfig.VERSION_CODE && android.os.Build.VERSION.SDK_INT >= release.minSdk) {
+            "Pending APK is outdated or incompatible"
+        }
+        val source = File(File(context.noBackupFilesDir, "updates"), "${release.asset.sha256}.apk")
+        UvirUpdates.verifyApk(context, source, release)
+        val directory = File(context.cacheDir, "updates").apply { check(isDirectory || mkdirs()) }
+        val shared = source.copyTo(File(directory, "${release.asset.sha256}.apk"), overwrite = true)
+        UvirUpdates.verifyApk(context, shared, release)
+        return shared
     }
 
     private fun request(url: String, limit: Int): ByteArray = connection(url).let { connection ->

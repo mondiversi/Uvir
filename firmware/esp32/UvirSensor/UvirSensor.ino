@@ -35,7 +35,7 @@
 namespace {
 
 constexpr char kProtocol[] = "uvir-sensor-v1";
-constexpr char kFirmwareVersion[] = "0.5.103";
+constexpr char kFirmwareVersion[] = "0.5.104";
 constexpr uint8_t kSensorSettingsSchemaVersion = 2;
 constexpr uint32_t kHostTimeoutMs = 12000;
 constexpr uint32_t kMinimumStreamIntervalMs = 150;
@@ -344,9 +344,9 @@ uint32_t nextRtcRefreshAtMs = 0;
 uint64_t lastRtcEpochMs = 0;
 uint64_t lastOfflineRecordId = 0;
 bool statusLedEnabled = true;
-uint8_t statusLedBrightness = 10;
+uint8_t statusLedBrightness = kUvirDefaultStatusLedBrightness;
 bool statusBuzzerEnabled = true;
-uint8_t statusBuzzerVolume = 10;
+uint8_t statusBuzzerVolume = kUvirDefaultStatusBuzzerVolume;
 bool autonomousRecordingAllowed = true;
 bool automaticShutdownEnabled = false;
 bool externalCommandEnabled = true;
@@ -750,10 +750,10 @@ void loadIdentity() {
   internetMqttPassword = preferences.getString("mqtt_pass", "");
   statusLedEnabled = preferences.getBool("led_enabled", true);
   statusLedBrightness = static_cast<uint8_t>(constrain(
-      preferences.getUChar("led_brightness", 10), 1, 100));
+      preferences.getUChar("led_brightness", kUvirDefaultStatusLedBrightness), 1, 100));
   statusBuzzerEnabled = preferences.getBool("buzzer_enabled", true);
   statusBuzzerVolume = static_cast<uint8_t>(constrain(
-      preferences.getUChar("buzzer_volume", 10), 1, 100));
+      preferences.getUChar("buzzer_volume", kUvirDefaultStatusBuzzerVolume), 1, 100));
   autonomousRecordingAllowed = preferences.getBool("offline_allowed", true);
   automaticShutdownEnabled =
       preferences.getBool(kPreferenceAutoShutdownEnabled, false);
@@ -1168,6 +1168,7 @@ void printHello(
   printConditionalJobFields(output);
   output.print(F(",\"conditional_acquisition_supported\":true"));
   output.print(F(",\"external_command_supported\":true"));
+  output.print(F(",\"buzzer_preview_supported\":true"));
   output.print(F(",\"status_led_enabled\":"));
   output.print(statusLedEnabled ? F("true") : F("false"));
   output.print(F(",\"status_led_brightness\":"));
@@ -4077,6 +4078,32 @@ void handleCommand(String command, Transport transport, Print &output) {
       return;
     }
     output.println(F("{\"type\":\"status\",\"protocol\":\"uvir-sensor-v1\",\"led_test\":\"started\",\"duration_ms\":15150}"));
+    return;
+  }
+
+  if (command.startsWith("BUZZER_PREVIEW ")) {
+    if (!appSessionActive || activeTransport != transport) {
+      printError(output, F("buzzer_preview_connection_required"),
+          F("Connect the sensor before previewing the buzzer volume"));
+      return;
+    }
+    const String volumeToken = originalCommand.substring(15);
+    char *end = nullptr;
+    const long volume = strtol(volumeToken.c_str(), &end, 10);
+    if (volumeToken.isEmpty() || *end != '\0' || volume < 1 || volume > 100) {
+      printError(output, F("buzzer_preview_invalid"),
+          F("Use BUZZER_PREVIEW volume_1_to_100"));
+      return;
+    }
+    if (!statusBuzzer.enabled()) {
+      printError(output, F("buzzer_preview_disabled"), F("Enable the buzzer before previewing its volume"));
+      return;
+    }
+    if (!statusBuzzer.requestVolumePreview(static_cast<uint8_t>(volume))) {
+      printError(output, F("buzzer_preview_busy"), F("Wait for the current buzzer test to finish"));
+      return;
+    }
+    output.println(F("{\"type\":\"status\",\"protocol\":\"uvir-sensor-v1\",\"buzzer_preview\":\"started\",\"duration_ms\":90}"));
     return;
   }
 

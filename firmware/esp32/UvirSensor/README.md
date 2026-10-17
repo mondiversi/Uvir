@@ -1,11 +1,18 @@
 # Uvir ESP32 sensor firmware
 
 This sketch is the first hardware bridge between Uvir for Android and an
-ESP32 Dev Module fitted with a GY-AS7343 spectral sensor and, optionally, an
-AS7331 UV sensor. It streams visible, far-red, NIR, UVA, UVB and UVC bands over
+ESP32 Dev Module fitted with a GY-AS734X breakout containing an AS7343 and,
+optionally, an AS7331 UV sensor. It streams visible, far-red, NIR, UVA, UVB and UVC bands over
 USB serial, the local Wi-Fi network, Bluetooth Classic SPP, or an encrypted
 Internet relay. Firmware keeps
 working with UV values unavailable when the optional AS7331 is not installed.
+
+The current prototype has both the GY-AS734X / AS7343 and MIKROE UV 5 Click /
+AS7331 boards installed and detected. The 2026-10-12 replacement visible-board
+check confirmed the same AS7343 chip through the driver's device-ID validation;
+no driver, GPIO assignment or calibration change is needed for the board label.
+Final-assembly tests and calibration will follow PCB assembly; see
+[`hardware/calibration`](../../../hardware/calibration/README.md).
 
 ## Settings authority and interrupted transfers
 
@@ -38,7 +45,7 @@ reset. Older firmware retains its previous sensor-authoritative readback behavio
 
 ## Current wiring
 
-| GY-AS7343 | ESP32 Dev Module |
+| GY-AS734X / AS7343 | ESP32 Dev Module |
 |---|---|
 | SDA | GPIO 21 |
 | SCL | GPIO 22 |
@@ -47,20 +54,23 @@ reset. Older firmware retains its previous sensor-authoritative readback behavio
 | I / INT | Not connected; optional active-low interrupt output |
 | G / GPIO | Not connected; optional trigger/synchronization GPIO |
 
-Optional SparkFun AS7331 / SEN-23517 on the same I2C bus:
+MIKROE UV 5 Click / AS7331 on the same I2C bus (current prototype):
 
 | AS7331 | ESP32 Dev Module |
 |---|---|
 | SDA | GPIO 21 (shared with AS7343) |
 | SCL | GPIO 22 (shared with AS7343) |
-| GND | GND |
+| GND (both mikroBUS ground pins) | GND |
 | 3V3 | 3.3 V |
-| INT | Not connected |
+| RDY | Not connected |
 | SYN | Not connected |
+| 5V / other unused mikroBUS pins | Not connected |
 
 The sensors do not conflict: AS7343 uses address `0x39` and AS7331 uses
 `0x74`. The AS7331 runs in command/one-shot mode and therefore does not need
-its `INT` or `SYN` pins for Uvir.
+its `RDY` or `SYN` pins for Uvir. SparkFun AS7331 boards remain supported by
+the driver, but their connectors and footprints are not interchangeable with
+the UV 5 Click board; use the current carrier R1 pin map for that module.
 
 HW-084 / DS3231 battery-backed real-time clock on the same I2C bus:
 
@@ -77,6 +87,13 @@ uses `0x57` and is not used by Uvir. The backup cell powers only the clock when
 main power is absent, so the module power LED going out is normal. If a CR2032
 is fitted, the module's charging path must remain disabled. Uvir stores UTC in
 the RTC and converts it for display in Android.
+
+`HELLO` exposes the RTC oscillator-stop flag. Android captures it before `TIME`
+clears it and checks each sensor anew on every app launch. A grouped warning
+lists affected sensors and suggests checking or replacing their backup cells,
+without assuming a battery model. OSF can also indicate first use or other
+clock faults; the DS3231 does not measure battery voltage or remaining charge.
+The startup warning needs no firmware upgrade, extra wiring, or database migration.
 
 32 KiB MB85RC256V I²C FRAM on the shared bus:
 
@@ -155,7 +172,17 @@ Optional low-current passive piezo buzzer:
 The direct connection above is intended for a small passive piezo buzzer. An
 active buzzer, magnetic transducer, or three-pin module may require a series
 resistor or a transistor driver according to its electrical specifications.
-The firmware generates the tones by PWM and starts at 10% volume.
+The firmware generates the tones by PWM and defaults to 20% volume. Status LED
+brightness also defaults to 20%. Both defaults apply only when no stored setting
+exists; updating the firmware never replaces an existing user-selected percentage.
+Acquisitions use one 1400 Hz beep; each of the three alert beeps rises from
+1800 to 2400 Hz, with unchanged timing. Volume uses 12-bit PWM capped at
+17.1875% duty: on the assembled prototype, the former 30-40% slider range was
+the useful peak and higher settings sounded weaker/distorted. The new 1-100%
+scale spans that conservative usable range; it is not a calibrated SPL scale.
+Revalidate this limit for a different buzzer. Stored volume percentages are
+preserved, but their electrical mapping changes. Previews, self-tests and
+diagnostic melodies use the same range without changing stored settings.
 
 External acquisition command (active low):
 
@@ -177,7 +204,7 @@ prolonged beep. Never apply 5 V directly to GPIO 33: use an optocoupler or a
 properly designed level-shifting/protection stage for an industrial 5 V command.
 
 The bare AS7343 operates at 1.8 V. Only connect the module to the ESP32 3.3 V
-pin if the exact GY-AS7343 board includes a regulator and I2C level shifting.
+pin if the exact GY-AS734X board includes a regulator and I2C level shifting.
 Check the markings/schematic of the purchased module first. Never feed a bare
 AS7343 directly from 3.3 V.
 
@@ -197,7 +224,7 @@ indicator because it stays nearly constant until the power bank shuts down.
    layout and gives the combined Wi-Fi/Bluetooth firmware enough space.
 4. Select the ESP32 serial port.
 5. Install **SparkFun AS7343 Arduino Library**, **SparkFun AS7331 Arduino
-   Library**, and **SparkFun Toolkit** from the Library Manager if Arduino
+   Library**, **SparkFun Toolkit**, and **ArduinoMqttClient** from the Library Manager if Arduino
    reports a missing library.
 6. Upload the sketch.
 
@@ -264,6 +291,10 @@ Commands accepted by the ESP32:
 - `BUZZER_TEST`: when connected and idle, reproduces the connection,
   disconnection, activity-start, activity-stop and saved-record sounds, then
   returns to silence;
+- `BUZZER_PREVIEW 30`: previews the buzzer at 30% with one short acquisition
+  beep, without changing persistent settings or creating records. Requires an
+  authenticated active connection and an enabled buzzer; can run during a
+  recording session, but not during a buzzer test or diagnostic performance;
 - `DEBUG_PERFORMANCE HAPPY_BIRTHDAY`, `DEBUG_PERFORMANCE INDIANA_JONES`,
   `DEBUG_PERFORMANCE JURASSIC_PARK`, or `DEBUG_PERFORMANCE STAR_WARS`: while
   connected and idle, starts the selected
@@ -478,6 +509,13 @@ the previously associated sensor by matching its unique ID and secret token.
 For Bluetooth, pair the displayed Uvir device from Android Bluetooth Settings.
 
 ## Irradiance values
+
+Firmware 0.5.104 extends the AS7343 automatic gain range down to 0.5x, after
+the assembled device saturated at the previous 16x minimum in direct sunlight.
+Startup gain, integration time, sampling settings and calibration factors are
+unchanged. Conversion always uses the gain of the completed read, including
+when the bounded automatic-gain retry budget is exhausted. This is a dynamic
+range correction, not an absolute calibration or an empirical UV correction.
 
 Values are emitted in `uW/cm2` and explicitly marked `datasheet_estimate`. The
 formula normalizes raw counts for actual gain and integration time, then uses

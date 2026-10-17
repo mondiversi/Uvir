@@ -5,17 +5,44 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 }
 
-val releaseKeystorePropertiesFile =
+val releaseSigningDirectory =
+    providers.environmentVariable("MONDIVERSI_SIGNING_DIR").orNull
+        ?.takeIf { it.isNotBlank() }
+        ?.let {
+            File(it).also { path ->
+                require(path.isAbsolute) { "MONDIVERSI_SIGNING_DIR must be an absolute path" }
+            }
+        }
+        ?: File(System.getProperty("user.home"), "Dropbox/Mondiversi/UvirSigning")
+
+val releaseSigningSources = listOf(
+    File(releaseSigningDirectory, "signing.properties"),
     rootProject.file("keystore.properties")
+).filter { it.isFile }
+val releaseSigningConfigured = releaseSigningSources.isNotEmpty()
 
 val releaseKeystoreProperties =
     Properties().apply {
-        if (releaseKeystorePropertiesFile.exists()) {
-            releaseKeystorePropertiesFile
-                .inputStream()
-                .use(::load)
+        releaseSigningSources.forEach { source -> source.inputStream().use(::load) }
+    }
+
+if (releaseSigningConfigured) {
+    listOf("storePassword", "keyAlias", "keyPassword").forEach { name ->
+        require(!releaseKeystoreProperties.getProperty(name).isNullOrEmpty()) {
+            "Private signing configuration is missing $name"
         }
     }
+}
+
+// The key stays outside the repository; do not bind another PC to a username.
+val releaseKeystoreFile =
+    releaseKeystoreProperties.getProperty("storeFile")
+        ?.trim()
+        ?.takeIf { it.isNotEmpty() }
+        ?.let {
+            File(it).also { path -> require(path.isAbsolute) { "storeFile must be an absolute path" } }
+        }
+        ?: File(releaseSigningDirectory, "uvir-release.jks")
 
 android {
     namespace = "me.mondiversi.uvir"
@@ -39,13 +66,9 @@ android {
     }
 
     signingConfigs {
-        if (releaseKeystorePropertiesFile.exists()) {
+        if (releaseSigningConfigured) {
             create("release") {
-                storeFile =
-                    file(
-                        releaseKeystoreProperties
-                            .getProperty("storeFile")
-                    )
+                storeFile = releaseKeystoreFile
                 storePassword =
                     releaseKeystoreProperties
                         .getProperty("storePassword")
@@ -62,16 +85,16 @@ android {
     buildTypes {
         debug {
             // Keep Android Studio Run/Debug compatible with the locally
-            // installed release APK. The private key stays outside Git and
-            // this falls back to Android's debug key on other computers.
-            if (releaseKeystorePropertiesFile.exists()) {
+            // installed release APK. A new PC can read the private Dropbox
+            // configuration without needing a project-local credentials file.
+            if (releaseSigningConfigured) {
                 signingConfig =
                     signingConfigs.getByName("release")
             }
         }
 
         release {
-            if (releaseKeystorePropertiesFile.exists()) {
+            if (releaseSigningConfigured) {
                 signingConfig =
                     signingConfigs.getByName("release")
             }

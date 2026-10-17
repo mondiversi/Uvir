@@ -34,14 +34,25 @@ does not represent the physical PCB layout. Intended placement is recorded in
 the logical pin map's `layout` section:
 
 - **Front, bottom to top:** ESP32 with USB facing the bottom edge; horizontal
-  AS7343 visible/NIR board above it; horizontal UV 5 Click board further up;
-  buzzer, RGB LED and blue LED at the top. Side button on the left, slightly
+  GY-AS734X visible/NIR board with AS7343 chip above it; horizontal UV 5 Click
+  board further up; buzzer, RGB LED and blue LED at the top. Side button on the left, slightly
   above the midpoint.
 - **Back, bottom to top:** transverse RTC; clear ESP32 antenna area; FRAM above;
   microSD adapter at the top with the card accessible from the edge.
-- **Approximate dimensions:** ESP32 25×52 mm; AS7343 22×13 mm;
+- **Approximate dimensions:** ESP32 25×52 mm; GY-AS734X 22×13 mm;
   UV 5 Click 28.6×25.4 mm; RTC 37×22 mm; FRAM 20×15 mm;
   microSD 24×43 mm. These are not sufficient for fabrication.
+
+The replacement visible-light module was checked on 2026-10-12: the board is
+marked GY-AS734X and initializes with the AS7343 driver, which verifies its
+device ID at `0x39`. The owner confirms the same board dimensions as before.
+Only its model labels have been corrected in the schematic/generator and pin
+map; connections, dimensions and symbol geometry are unchanged. The AS7343
+chip name remains correct in firmware and app component information.
+
+Final functional tests and optical calibration are planned after PCB assembly,
+with the final enclosure and LED/sensor isolation. This identification check
+does not certify the physical footprints or measurement accuracy.
 
 The four I²C peripherals share GPIO21/SDA, GPIO22/SCL, 3.3 V and GND.
 The microSD module uses GPIO13/18/19/23 for SPI, and only its VCC uses 5 V,

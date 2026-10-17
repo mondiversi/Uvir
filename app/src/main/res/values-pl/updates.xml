@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="update_available">Dostępne aktualizacje</string>
+    <string name="update_none">Brak dostępnych aktualizacji</string>
+    <string name="update_check_failed">Nie można sprawdzić aktualizacji. Zobacz dziennik błędów.</string>
+    <string name="update_app">Aktualizuj aplikację</string>
+    <string name="update_sensor">Aktualizuj czujnik</string>
+    <string name="update_app_first">Najpierw zaktualizuj aplikację.</string>
+    <string name="update_usb_required">Wybierz czujnik i połącz go przez USB, bez aktywnej sesji i po zsynchronizowaniu wszystkich rekordów.</string>
+    <string name="update_download">Pobieranie i weryfikacja…</string>
+    <string name="update_flash">Aktualizowanie czujnika…</string>
+    <string name="update_verify">Weryfikowanie czujnika…</string>
+    <string name="update_keep_connected">Nie odłączaj USB ani nie wyłączaj czujnika. W razie potrzeby przytrzymaj BOOT i spróbuj ponownie.</string>
+    <string name="update_done">Czujnik zaktualizowany</string>
+    <string name="update_failed">Aktualizacja nie powiodła się. Zobacz dziennik błędów. Jeśli czujnik nie uruchamia się, odzyskaj firmware przez USB z komputera.</string>
+    <string name="update_permission">Zezwól Uvir na instalowanie aktualizacji w ustawieniach Androida.</string>
+    <string name="update_whats_new">Podpisane aktualizacje aplikacji i czujnika, zweryfikowane pobieranie i wgrywanie firmware przez USB.</string>
+</resources>

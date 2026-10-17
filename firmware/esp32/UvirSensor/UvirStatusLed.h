@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Arduino.h>
+#include "UvirFeedbackDefaults.h"
 
 enum class UvirLedBaseState : uint8_t {
   Disconnected,
@@ -435,7 +436,7 @@ class UvirStatusLed {
   uint8_t greenPin_ = 26;
   uint8_t operationBluePin_ = 27;
   volatile bool enabled_ = true;
-  volatile uint8_t brightnessPercent_ = 35;
+  volatile uint8_t brightnessPercent_ = kUvirDefaultStatusLedBrightness;
   volatile UvirLedBaseState baseState_ = UvirLedBaseState::Disconnected;
   volatile bool operationActive_ = false;
   volatile uint16_t commandActivityDepth_ = 0;

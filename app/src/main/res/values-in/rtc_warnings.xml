@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rtc_clock_warning_title_single">Periksa baterai jam</string>
+    <string name="rtc_clock_warning_title_multiple">Periksa baterai jam</string>
+    <string name="rtc_clock_warning_message_single">Jam sensor \"%1$s\" melaporkan bahwa jam berhenti. Baterai mungkin habis atau tidak terpasang dengan benar. Periksa dan ganti jika diperlukan.</string>
+    <string name="rtc_clock_warning_message_multiple">Sensor berikut melaporkan jam berhenti:</string>
+    <string name="rtc_clock_warning_batteries_guidance">Baterai mungkin habis atau tidak terpasang dengan benar. Periksa dan ganti jika diperlukan.</string>
+</resources>

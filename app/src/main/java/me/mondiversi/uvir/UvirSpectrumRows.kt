@@ -193,11 +193,8 @@ fun SpectrumCard(
                         ),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(1.dp)
-                            .background(secondaryText.copy(alpha = 0.20f))
+                    UvirIslandHeaderDivider(
+                        color = secondaryText.copy(alpha = 0.20f)
                     )
 
                     if (showChart) {

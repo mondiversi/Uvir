@@ -27,10 +27,11 @@ import kotlin.math.abs
 class UvirCompactTitleActionsTest {
     @get:Rule val compose = createComposeRule()
 
-    @Test fun titleActionsUseBareThemedGlyphsWithUnchangedTargetsAndDisabledStates() {
+    @Test fun titleActionsKeepThemedActiveGlyphsWithoutChangingTargetsOrDisabledStates() {
         val night = mutableStateOf(false)
         val direction = mutableStateOf(LayoutDirection.Ltr)
         val enabled = mutableStateOf(true)
+        var neutral = Color.Unspecified
         var accent = Color.Unspecified
         var destructive = Color.Unspecified
         var background = Color.Unspecified
@@ -53,17 +54,18 @@ class UvirCompactTitleActionsTest {
             ) {
                 MaterialTheme(colorScheme = if (night.value) darkColorScheme() else lightColorScheme()) {
                     UvirActionTheme {
+                        neutral = uvirTitleActionColor()
                         accent = MaterialTheme.colorScheme.primary
                         destructive = UvirDestructiveActionColor
                         background = MaterialTheme.colorScheme.background
-                        disabled = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                        disabled = uvirTitleActionColor(enabled = false)
                         Column(Modifier.background(background)) {
                             Row {
                                 for (type in listOf(MenuIconType.EXPORT, MenuIconType.DELETE, MenuIconType.SHARE)) {
                                     UvirTitleActionButton(
                                         type.name, { taps++ }, Modifier.testTag(type.name),
                                         enabled = enabled.value,
-                                        iconColor = if (type == MenuIconType.DELETE) destructive else accent
+                                        iconColor = if (type == MenuIconType.DELETE) destructive else neutral
                                     ) { UvirTitleActionIcon(type) }
                                 }
                                 UvirTitleActionButton("Save", { taps++ }, Modifier.testTag("save"),
@@ -76,7 +78,7 @@ class UvirCompactTitleActionsTest {
                                     compact = true) { taps++ }
                                 UvirHomeHeaderActionButton("Settings", { taps++ }, Modifier.testTag("settings"),
                                     enabled = enabled.value) {
-                                    UvirHomeSettingsIcon(if (enabled.value) accent else disabled)
+                                    UvirHomeSettingsIcon(if (enabled.value) neutral else disabled)
                                 }
                                 UvirBackButton { taps++ }
                             }
@@ -106,7 +108,9 @@ class UvirCompactTitleActionsTest {
                         val expected = (when {
                             !active -> disabled
                             tag == "DELETE" -> destructive
-                            else -> accent
+                            tag in listOf("list-filter-toggle", "session-cycle-filter-toggle") ->
+                                accent
+                            else -> neutral
                         })
                             .compositeOver(background)
                         assertTrue("Bare themed glyph: $tag, night=$dark, enabled=$active",

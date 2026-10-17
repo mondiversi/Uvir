@@ -64,13 +64,12 @@ internal fun UvirVersionInfoScreen(
                 LocalUvirSettingsNeutralIcons provides true,
                 LocalUvirSettingsActionButtons provides true
             ) {
-                Column(
+                UvirIslandColumns(
                     modifier =
                         Modifier
                             .fillMaxSize()
                             .verticalScroll(scrollState),
-                    verticalArrangement =
-                        Arrangement.spacedBy(UvirIslandSpacing)
+                    spacing = UvirIslandSpacing
                 ) {
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
@@ -201,12 +200,6 @@ internal fun UvirVersionInfoScreen(
                             }
                         }
                     }
-
-                    UvirProjectNumbersSection(
-                        cardColor = cardColor,
-                        primaryText = primaryText,
-                        secondaryText = secondaryText
-                    )
 
                     Surface(
                         modifier = Modifier.fillMaxWidth(),

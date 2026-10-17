@@ -39,12 +39,35 @@ fun UvirApp(
     val view = LocalView.current
     val resources = androidx.compose.ui.platform.LocalResources.current
     val scope = rememberCoroutineScope()
+    // Simulation replaces sensor state, but must not move the user's settings page.
+    val settingsRouteState = rememberUvirSettingsRouteState()
     var epoch by rememberSaveable { mutableIntStateOf(0) }
     var switching by remember { mutableStateOf(false) }
     var contentSuspended by remember { mutableStateOf(false) }
     var frozenFrame by remember { mutableStateOf<ImageBitmap?>(null) }
     val transitionBackground =
         if (isSystemInDarkTheme()) Color(0xFF101418) else Color(0xFFF4F7F9)
+    val preferences = remember(context) { context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE) }
+    remember(context) {
+        runCatching { UvirSensorCredentialStore.ensureAssociatedSensorSelected(context) }
+            .onFailure { UvirErrorLog.record(context, "sensor_selection_restore", it) }
+        val realId = UvirSensorCredentialStore.load(context).deviceId
+        UvirSensorSimulationSettingsStore.migrateLegacy(preferences, realId)
+        runCatching { removeRetiredCameraSelection(preferences, realId) }
+            .onFailure { UvirErrorLog.record(context, "retired_source_cleanup", it) }
+        runCatching { switchSimulationContext(preferences, realId,
+            UvirSensorSimulationSettingsStore.load(preferences).enabled) }
+            .onFailure { UvirErrorLog.record(context, "simulation_context_restore", it) }
+    }
+    var simulationActive by remember(epoch) {
+        mutableStateOf(UvirSensorSimulationSettingsStore.load(preferences).enabled)
+    }
+    LaunchedEffect(openHomeRequestId) {
+        if (openHomeRequestId > 0L) {
+            settingsRouteState.close()
+            settingsRouteState.scrollState.scrollTo(0)
+        }
+    }
     // Observe USB identity changes so initial physical pairing acquires its own worker.
     val usbState by usbSensorManager.state.collectAsState()
     val selectedManager = remember(usbState.deviceId, epoch, multiSensorRuntime) {
@@ -63,17 +86,50 @@ fun UvirApp(
     }
     Box(Modifier.fillMaxSize()) {
     if (!contentSuspended) key(epoch) {
+        // Keep frozen switch frames outside the inset content: the captured
+        // Compose view already includes this safe area and must not be inset again.
+        UvirSystemBarsContent(backgroundColor = transitionBackground) {
         UvirAppContent(
             remoteNetworkEnabled, usbSensorManager, selectedManager,
             onRequestBluetoothPermission, currentWifiSsid, onRequestCurrentWifiSsid,
             openHomeRequestId,
             multiSensorRuntime = multiSensorRuntime,
+            simulationActive = simulationActive,
+            settingsRouteState = settingsRouteState,
+            onSimulationChanged = { enabled ->
+                if (!switching && simulationActive != enabled) scope.launch {
+                    frozenFrame = runCatching { view.drawToBitmap().asImageBitmap() }.getOrNull()
+                    switching = true
+                    withFrameNanos { }
+                    contentSuspended = true
+                    withFrameNanos { }
+                    withFrameNanos { }
+                    val result = runCatching {
+                        withContext(Dispatchers.IO) {
+                            switchSimulationContext(preferences,
+                                UvirSensorCredentialStore.load(context).deviceId, enabled)
+                        }
+                    }.onFailure { UvirErrorLog.record(context, "simulation_context_switch", it) }
+                    simulationActive = UvirSensorSimulationSettingsStore.load(preferences).enabled
+                    epoch++
+                    contentSuspended = false
+                    withFrameNanos { }
+                    withFrameNanos { }
+                    switching = false
+                    frozenFrame = null
+                    if (result.isFailure) showUvirBottomMessage(context, resources.getString(R.string.sensor_selection_failed))
+                }
+            },
             onSensorSelected = { request ->
                 val newAssociation = request == ASSOCIATE_NEW_SENSOR_REQUEST
-                val noSensorSelected = request == NO_SENSOR_SELECTED_REQUEST
-                val deviceId = if (newAssociation || noSensorSelected) "" else request
+                val refreshSelection = request.isBlank()
                 val oldId = UvirSensorCredentialStore.load(context).deviceId
-                if (!switching && (newAssociation || noSensorSelected ||
+                val deviceId = when {
+                    newAssociation -> ""
+                    refreshSelection -> requiredSelectedSensorId(oldId, UvirSensorCredentialStore.associatedDeviceIds(context))
+                    else -> request
+                }
+                if (!simulationActive && !switching && (newAssociation || refreshSelection ||
                     (!oldId.equals(deviceId, ignoreCase = true) &&
                     normalizeSensorDeviceId(deviceId) in UvirSensorCredentialStore.associatedDeviceIds(context)))
                 ) scope.launch {
@@ -90,8 +146,7 @@ fun UvirApp(
                             if (multiSensorRuntime == null) {
                                 usbSensorManager.disconnectForSensorSelection()
                                 wirelessSensorManager.disconnectForSensorSelection()
-                            } else if (noSensorSelected) multiSensorRuntime.disconnectAll()
-                            else if (newAssociation) usbSensorManager.disconnectForSensorSelection()
+                            } else if (newAssociation) usbSensorManager.disconnectForSensorSelection()
                         }
                         withFrameNanos { }
                         contentSuspended = true
@@ -103,7 +158,6 @@ fun UvirApp(
                             check(saveSelectedSensorContext(preferences, oldId, preserveSensorReadback = multiSensorRuntime != null))
                             activeContextChanged = true
                             if (newAssociation) check(UvirSensorCredentialStore.releaseActiveSensor(context))
-                            if (noSensorSelected) check(UvirSensorCredentialStore.deactivateSensorSelection(context))
                             if (deviceId.isNotBlank()) check(UvirSensorCredentialStore.activateAssociatedSensor(context, deviceId))
                             check(restoreSelectedSensorContext(preferences, deviceId))
                             check(UvirSensorRuntimeInfoStore.activate(context, deviceId))
@@ -125,6 +179,8 @@ fun UvirApp(
                         if ((deviceId.isNotBlank() || newAssociation || result.isFailure) &&
                             !usbSensorManager.state.value.attached) usbSensorManager.refreshSelectedSensor()
                     }
+                    settingsRouteState.close()
+                    settingsRouteState.scrollState.scrollTo(0)
                     epoch++
                     contentSuspended = false
                     withFrameNanos { }
@@ -136,6 +192,7 @@ fun UvirApp(
                 }
             }
         )
+        }
     }
     if (switching) {
         Box(

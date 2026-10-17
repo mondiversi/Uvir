@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_section_display">Görüntüleme</string>
+    <string name="settings_display_description">Arayüzü ekran boyutuna göre uyarla.</string>
+    <string name="notifications_misc_title">Diğer</string>
+    <string name="notifications_misc_description">Uygulamanın diğer bildirimlerini yönetin.</string>
+    <string name="rtc_battery_notification_toggle">Açılışta pil uyarısını göster</string>
+    <string name="rtc_battery_notification_description">Bir sensörün saati durmuşsa uyar.</string>
+    <string name="settings_mode_small_screen">Küçük ekran</string>
+    <string name="settings_mode_small_screen_active">Küçük ekran modu</string>
+    <string name="settings_mode_large_screen">Büyük ekran</string>
+    <string name="settings_mode_large_screen_unavailable">Büyük ekran modu henüz kullanılamıyor.</string>
+    <string name="rtc_clock_warning_show_each_launch">Her açılışta göster</string>
+    <string name="settings_theme_title">Tema</string>
+    <string name="settings_theme_description">İçeriğin görünümünü kişiselleştirmek için uygulamanın temasını seçin.</string>
+    <string name="settings_theme_default">Varsayılan</string>
+    <string name="settings_theme_light">Açık</string>
+    <string name="settings_theme_dark">Koyu</string>
+    <string name="settings_display_unavailable">Bu özellik henüz kullanılamıyor.</string>
+</resources>

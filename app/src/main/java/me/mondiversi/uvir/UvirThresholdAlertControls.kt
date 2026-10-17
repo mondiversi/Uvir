@@ -100,16 +100,6 @@ internal fun ThresholdDirectionSelector(
         ) {
             Text(
                 text = "\u2264",
-                color =
-                    if (enabled) {
-                        if (selectedDirection == ThresholdAlertDirection.BELOW) {
-                            primaryText
-                        } else {
-                            secondaryText
-                        }
-                    } else {
-                        secondaryText.copy(alpha = 0.45f)
-                    },
                 fontSize = 19.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -131,16 +121,6 @@ internal fun ThresholdDirectionSelector(
         ) {
             Text(
                 text = "\u2265",
-                color =
-                    if (enabled) {
-                        if (selectedDirection == ThresholdAlertDirection.ABOVE) {
-                            primaryText
-                        } else {
-                            secondaryText
-                        }
-                    } else {
-                        secondaryText.copy(alpha = 0.45f)
-                    },
                 fontSize = 19.sp,
                 fontWeight = FontWeight.Bold
             )

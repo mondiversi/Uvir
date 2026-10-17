@@ -29,7 +29,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.RadioButton
-import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -421,8 +420,16 @@ internal fun SessionChartScreen(
         }
     }
 
-    Scaffold(
+    UvirMeasurementScaffold(
+        state = listState,
         containerColor = backgroundColor,
+        scrollbarColor = secondaryText.copy(alpha = 0.46f),
+        contentPadding = PaddingValues(
+                        start = UvirScreenHorizontalPadding,
+                        end = UvirScreenHorizontalPadding,
+                        top = 4.dp,
+                        bottom = 40.dp
+                    ),
         topBar = {
             UvirCollapsingDetailTitleBar(listState) {
                 Surface(color = backgroundColor) {
@@ -451,7 +458,6 @@ internal fun SessionChartScreen(
                     )
 
                     UvirTitleActionButton(
-                        iconColor = MaterialTheme.colorScheme.primary,
                         contentDescription = chartShareDescription,
                         onClick = {
                             showShareDialog = true
@@ -488,32 +494,9 @@ internal fun SessionChartScreen(
                     }
                 }
             }
+
         }
-    ) { paddingValues ->
-        Column(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-        ) {
-            LazyColumn(
-                state = listState,
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .lazyScrollbarOverlay(
-                            state = listState,
-                            color = secondaryText.copy(alpha = 0.46f)
-                        ),
-                contentPadding =
-                    PaddingValues(
-                        start = UvirScreenHorizontalPadding,
-                        end = UvirScreenHorizontalPadding,
-                        top = 4.dp,
-                        bottom = 40.dp
-                    ),
-                verticalArrangement = Arrangement.spacedBy(UvirIslandSpacing)
-            ) {
+    ) {
             item {
                 UvirDetailIdentityCard(
                     primaryId = null,
@@ -719,8 +702,7 @@ internal fun SessionChartScreen(
                     )
                 }
             }
-            }
-        }
+
     }
 }
 
@@ -759,11 +741,7 @@ internal fun SessionChartShareOption(
                 selected = selected,
                 onClick = onClick,
                 colors =
-                    RadioButtonDefaults.colors(
-                        selectedColor =
-                            MaterialTheme.colorScheme.primary,
-                        unselectedColor = secondaryText
-                    )
+                    uvirRadioButtonColors(unselectedColor = secondaryText)
             )
 
             Spacer(Modifier.width(8.dp))

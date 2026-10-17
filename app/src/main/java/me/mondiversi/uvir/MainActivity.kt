@@ -32,6 +32,7 @@ import android.provider.Settings
 import android.provider.DocumentsContract
 import android.text.TextUtils
 import android.view.View
+import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -728,7 +729,9 @@ class MainActivity : ComponentActivity(), UvirExportSaveHost, UvirSettingsImport
             configuredAppLayoutDirection(this)
 
         setContent {
+            UvirThemeOverride(getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)) {
             UvirActionTheme {
+            UvirAdaptiveDisplay {
             CompositionLocalProvider(
                 LocalLayoutDirection provides appLayoutDirection
             ) {
@@ -819,6 +822,8 @@ class MainActivity : ComponentActivity(), UvirExportSaveHost, UvirSettingsImport
                 }
             }
             }
+            }
+            }
         }
 
         if (!directAccessAllowed) {
@@ -853,6 +858,9 @@ class MainActivity : ComponentActivity(), UvirExportSaveHost, UvirSettingsImport
     override fun onResume() {
         super.onResume()
 
+        // Keep every UVIR screen awake without changing the phone's display timeout.
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
         if (hasWifiNamePermission()) {
             refreshCurrentWifiSsid()
         }
@@ -866,6 +874,12 @@ class MainActivity : ComponentActivity(), UvirExportSaveHost, UvirSettingsImport
         if (::usbSensorManager.isInitialized) {
             usbSensorManager.scanForSensor()
         }
+    }
+
+    override fun onPause() {
+        // Release the foreground-only request when another app takes over or the user locks the phone.
+        window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        super.onPause()
     }
 
     override fun onNewIntent(intent: Intent) {

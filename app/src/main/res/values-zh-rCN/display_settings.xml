@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_section_display">显示</string>
+    <string name="settings_display_description">根据屏幕大小调整界面。</string>
+    <string name="notifications_misc_title">其他</string>
+    <string name="notifications_misc_description">管理应用显示的其他通知。</string>
+    <string name="rtc_battery_notification_toggle">启动时显示电池提醒</string>
+    <string name="rtc_battery_notification_description">若传感器时钟已停止则提醒。</string>
+    <string name="settings_mode_small_screen">小屏幕</string>
+    <string name="settings_mode_small_screen_active">小屏幕模式</string>
+    <string name="settings_mode_large_screen">大屏幕</string>
+    <string name="settings_mode_large_screen_unavailable">大屏幕模式尚不可用。</string>
+    <string name="rtc_clock_warning_show_each_launch">每次启动时显示</string>
+    <string name="settings_theme_title">主题</string>
+    <string name="settings_theme_description">选择应用主题，自定义内容的显示外观。</string>
+    <string name="settings_theme_default">默认</string>
+    <string name="settings_theme_light">浅色</string>
+    <string name="settings_theme_dark">深色</string>
+    <string name="settings_display_unavailable">此功能尚不可用。</string>
+</resources>

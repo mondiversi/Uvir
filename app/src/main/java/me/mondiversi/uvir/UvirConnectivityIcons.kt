@@ -7,12 +7,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 enum class ConnectivityIconType {
@@ -21,7 +23,12 @@ enum class ConnectivityIconType {
     SENSOR,
     GENERAL,
     ACTIONS,
+    APP,
     PHONE,
+    TABLET,
+    DISPLAY,
+    PALETTE,
+    THEME,
     TOOLS,
     MEASUREMENT,
     CALIBRATION,
@@ -29,6 +36,7 @@ enum class ConnectivityIconType {
     SIMULATION,
     MUSIC,
     ALERT,
+    NOTIFICATIONS,
     SOUND,
     LED,
     IRRADIANCE,
@@ -54,13 +62,14 @@ fun ConnectivitySectionIcon(
     type: ConnectivityIconType,
     modifier: Modifier = Modifier,
     tint: Color = LocalContentColor.current,
-    strokeScale: Float = 1f
+    strokeScale: Float = 1f,
+    iconSize: Dp = 20.dp
 ) {
     val effectiveStrokeScale = maxOf(strokeScale, LocalUvirActionGlyphStrokeScale.current)
     Canvas(
         modifier =
             modifier
-                .size(20.dp)
+                .size(iconSize)
                 .graphicsLayer(alpha = tint.alpha)
     ) {
         val tint = tint.copy(alpha = 1f)
@@ -71,6 +80,23 @@ fun ConnectivitySectionIcon(
             ) * effectiveStrokeScale
 
         when (type) {
+            ConnectivityIconType.APP -> {
+                drawRoundRect(
+                    color = tint,
+                    topLeft = Offset(size.width * 0.13f, size.height * 0.13f),
+                    size = Size(size.width * 0.74f, size.height * 0.74f),
+                    cornerRadius = CornerRadius(size.minDimension * 0.10f),
+                    style = Stroke(width = strokeWidth)
+                )
+                for (x in listOf(0.29f, 0.56f)) for (y in listOf(0.29f, 0.56f)) {
+                    drawRoundRect(
+                        color = tint,
+                        topLeft = Offset(size.width * x, size.height * y),
+                        size = Size(size.width * 0.15f, size.height * 0.15f),
+                        cornerRadius = CornerRadius(size.minDimension * 0.025f)
+                    )
+                }
+            }
             ConnectivityIconType.ACTIONS -> {
                 // Separate command tiles, with no overlapping strokes.
                 for (x in listOf(0.15f, 0.57f)) for (y in listOf(0.15f, 0.57f)) {
@@ -384,6 +410,78 @@ fun ConnectivitySectionIcon(
                 )
             }
 
+            ConnectivityIconType.TABLET -> {
+                drawRoundRect(
+                    color = tint,
+                    topLeft = Offset(size.width * 0.08f, size.height * 0.19f),
+                    size = Size(size.width * 0.84f, size.height * 0.62f),
+                    cornerRadius = CornerRadius(size.minDimension * 0.09f),
+                    style = Stroke(width = strokeWidth)
+                )
+                drawCircle(
+                    color = tint,
+                    radius = strokeWidth * 0.55f,
+                    center = Offset(size.width * 0.84f, size.height * 0.50f)
+                )
+            }
+
+            ConnectivityIconType.PALETTE -> {
+                val palette = Path().apply {
+                    moveTo(size.width * 0.53f, size.height * 0.12f)
+                    cubicTo(size.width * 0.28f, size.height * 0.07f,
+                        size.width * 0.10f, size.height * 0.26f,
+                        size.width * 0.10f, size.height * 0.50f)
+                    cubicTo(size.width * 0.10f, size.height * 0.75f,
+                        size.width * 0.31f, size.height * 0.89f,
+                        size.width * 0.56f, size.height * 0.88f)
+                    cubicTo(size.width * 0.69f, size.height * 0.88f,
+                        size.width * 0.72f, size.height * 0.77f,
+                        size.width * 0.64f, size.height * 0.69f)
+                    cubicTo(size.width * 0.58f, size.height * 0.63f,
+                        size.width * 0.61f, size.height * 0.54f,
+                        size.width * 0.71f, size.height * 0.54f)
+                    cubicTo(size.width * 0.94f, size.height * 0.57f,
+                        size.width * 0.94f, size.height * 0.28f,
+                        size.width * 0.75f, size.height * 0.17f)
+                    cubicTo(size.width * 0.69f, size.height * 0.13f,
+                        size.width * 0.61f, size.height * 0.11f,
+                        size.width * 0.53f, size.height * 0.12f)
+                    close()
+                }
+                drawPath(palette, tint, style = Stroke(width = strokeWidth, cap = StrokeCap.Round))
+                for ((x, y) in listOf(0.32f to 0.33f, 0.53f to 0.27f,
+                    0.74f to 0.37f, 0.27f to 0.55f)) {
+                    drawCircle(tint, radius = size.minDimension * 0.055f,
+                        center = Offset(size.width * x, size.height * y))
+                }
+            }
+
+            ConnectivityIconType.THEME -> {
+                val radius = size.minDimension * 0.34f
+                drawCircle(tint, radius, center, style = Stroke(width = strokeWidth))
+                val innerRadius = radius - strokeWidth * 1.5f
+                val half = Path().apply {
+                    arcTo(Rect(center.x - innerRadius, center.y - innerRadius,
+                        center.x + innerRadius, center.y + innerRadius), -90f, 180f, true)
+                    close()
+                }
+                drawPath(half, tint)
+            }
+
+            ConnectivityIconType.DISPLAY -> {
+                drawRoundRect(
+                    color = tint,
+                    topLeft = Offset(size.width * 0.09f, size.height * 0.12f),
+                    size = Size(size.width * 0.82f, size.height * 0.57f),
+                    cornerRadius = CornerRadius(size.minDimension * 0.06f),
+                    style = Stroke(width = strokeWidth)
+                )
+                drawLine(tint, Offset(size.width * 0.50f, size.height * 0.69f),
+                    Offset(size.width * 0.50f, size.height * 0.87f), strokeWidth, StrokeCap.Round)
+                drawLine(tint, Offset(size.width * 0.32f, size.height * 0.87f),
+                    Offset(size.width * 0.68f, size.height * 0.87f), strokeWidth, StrokeCap.Round)
+            }
+
             ConnectivityIconType.TOOLS -> {
                 drawRoundRect(
                     color = tint,
@@ -592,6 +690,36 @@ fun ConnectivitySectionIcon(
                         size.height * 0.16f
                     )
                 )
+            }
+
+            ConnectivityIconType.NOTIFICATIONS -> {
+                // One continuous outline keeps the tail free of overlapping strokes.
+                val bubble = Path().apply {
+                    moveTo(size.width * 0.25f, size.height * 0.14f)
+                    lineTo(size.width * 0.75f, size.height * 0.14f)
+                    quadraticTo(size.width * 0.87f, size.height * 0.14f,
+                        size.width * 0.87f, size.height * 0.26f)
+                    lineTo(size.width * 0.87f, size.height * 0.61f)
+                    quadraticTo(size.width * 0.87f, size.height * 0.73f,
+                        size.width * 0.75f, size.height * 0.73f)
+                    lineTo(size.width * 0.43f, size.height * 0.73f)
+                    lineTo(size.width * 0.28f, size.height * 0.87f)
+                    lineTo(size.width * 0.28f, size.height * 0.73f)
+                    lineTo(size.width * 0.25f, size.height * 0.73f)
+                    quadraticTo(size.width * 0.13f, size.height * 0.73f,
+                        size.width * 0.13f, size.height * 0.61f)
+                    lineTo(size.width * 0.13f, size.height * 0.26f)
+                    quadraticTo(size.width * 0.13f, size.height * 0.14f,
+                        size.width * 0.25f, size.height * 0.14f)
+                    close()
+                }
+                drawPath(bubble, tint, style = Stroke(width = strokeWidth,
+                    join = androidx.compose.ui.graphics.StrokeJoin.Round))
+                for (y in listOf(0.35f, 0.52f)) {
+                    drawLine(tint, Offset(size.width * 0.33f, size.height * y),
+                        Offset(size.width * 0.67f, size.height * y), strokeWidth,
+                        cap = StrokeCap.Round)
+                }
             }
 
             ConnectivityIconType.SOUND -> {

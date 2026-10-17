@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="diagnostics_test_group">Test diagnostyczny</string>
+    <string name="diagnostics_simulation_group">Symulacja</string>
+    <string name="diagnostics_simulation_description">Symuluje pomiary, alerty i wartości na żywo.</string>
+</resources>

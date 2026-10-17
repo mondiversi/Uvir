@@ -60,17 +60,9 @@
     <string name="exit_selection_mode">الخروج من وضع التحديد</string>
     <string name="select_all">تحديد الكل</string>
     <string name="deselect_all">إلغاء تحديد الكل</string>
-    <string name="share_measurements">مشاركة الالتقاطات</string>
-    <string name="share_all_measurements_question">هل تريد مشاركة كل الالتقاطات المحفوظة؟</string>
-    <string name="share_all_measurements_warning">لم يتم تحديد أي التقاط، لذلك ستتم مشاركة كل الالتقاطات المحفوظة.</string>
     <string name="choose_share_format">اختر تنسيق التصدير</string>
     <string name="data_export_title">تصدير البيانات</string>
     <string name="data_export_description">اختر التنسيقات والخيارات المستخدمة عند تصدير البيانات.</string>
-    <string name="share_as_csv">جدول بيانات (CSV)</string>
-    <string name="share_as_readable_table">جدول مقروء (TXT)</string>
-    <string name="share_readable_table_by_acquisition">حسب الالتقاط</string>
-    <string name="share_readable_table_by_spectral_area">حسب النطاق الطيفي</string>
-    <string name="share_readable_grouping_complete_sessions_only">يُطبّق فقط على الجلسات الكاملة.</string>
     <string name="acquisition_position_label">الموضع</string>
     <string name="session_variant_heading">التنويع %1$s</string>
     <string name="record_variant_compact">%1$s-%2$d</string>
@@ -85,37 +77,16 @@
         <item quantity="other">(%1$d عمليات اكتساب لكل %2$d تنويعات)</item>
     </plurals>
     <string name="session_variant_chart_files_info">سيتم إنشاء %1$d ملفات PNG، ملف واحد لكل تنويع.</string>
-    <string name="export_total_label">الإجمالي</string>
-    <string name="share_as_charts">رسم بياني (PNG)</string>
-    <string name="share_as_charts_description">يصدّر ثلاثة رسوم للإشعاع ورسمًا واحدًا للتأثيرات البيولوجية كأربع صور PNG منفصلة.</string>
-    <string name="share_acquisition_list_charts_description">يصدّر ثلاثة مخططات للإشعاع ومخططًا واحدًا للتأثيرات البيولوجية كأربع صور PNG منفصلة لكل عملية التقاط فردية أو جلسة محددة.</string>
-    <string name="share_alert_list_charts_description">يصدّر ثلاثة مخططات للإشعاع ومخططًا واحدًا للتأثيرات البيولوجية كأربع صور PNG منفصلة لكل تنبيه فردي أو جلسة محددة.</string>
-    <string name="share_partial_session_warning">تُصدّر تحديدات الجلسة غير المكتملة كالتقاطات فردية: ينشئ كل التقاط رسمه الخاص للإشعاع والتأثيرات البيولوجية بدلاً من رسم الجلسة الكامل.</string>
-    <string name="share_partial_alert_session_warning">تُصدّر تحديدات جلسة التنبيهات غير المكتملة كتنبيهات فردية، مع رسم منفصل لكل تنبيه.</string>
-    <string name="share_as_both">كلاهما</string>
     <string name="share">مشاركة</string>
-    <string name="share_all">مشاركة الكل</string>
     <string name="delete_selected_measurements_question">هل تريد حذف الالتقاطات المحددة؟</string>
     <plurals name="delete_selected_measurements_warning"><item quantity="zero">سيتم حذف %1$d من الالتقاطات المحددة نهائيًا.</item><item quantity="one">سيتم حذف الالتقاط المحدد نهائيًا.</item><item quantity="two">سيتم حذف %1$d من الالتقاطات المحددة نهائيًا.</item><item quantity="few">سيتم حذف %1$d من الالتقاطات المحددة نهائيًا.</item><item quantity="many">سيتم حذف %1$d من الالتقاطات المحددة نهائيًا.</item><item quantity="other">سيتم حذف %1$d من الالتقاطات المحددة نهائيًا.</item></plurals>
-    <string name="share_measurement_id_label">معرّف الالتقاط</string>
-    <string name="share_session_id_label">معرّف الجلسة</string>
     <string name="acquisition_session_id_label">معرّف الالتقاط / الجلسة</string>
-    <string name="share_date_label">التاريخ والوقت</string>
     <string name="session_date_duration_events_label">التاريخ والوقت</string>
     <string name="session_start_end_duration_label">البدء والانتهاء والمدة</string>
     <string name="acquisition_date_label">تاريخ الالتقاط</string>
     <string name="session_date_label">تاريخ الجلسة</string>
     <string name="alert_date_label">تاريخ التنبيه</string>
-    <string name="share_acquisition_label">الالتقاط</string>
     <string name="acquisition_mode_label">الوضع</string>
-    <string name="share_automatic">تلقائي</string>
-    <string name="share_manual">يدوي</string>
-    <string name="share_note_label">ملاحظة</string>
-    <string name="share_biological_effects_heading">التأثيرات البيولوجية · النموذج %1$s</string>
-    <string name="share_biological_effects_disclaimer">تقديرات تجريبية عريضة النطاق مشتقة من القنوات الملتقطة. ليست تقييمات طبية أو تشخيصية أو تقييمات سلامة. سيُحسّن النموذج بعد معايرة المستشعر الحقيقي.</string>
-    <string name="share_biological_effect_values">الإشعاع المرجّح: %1$s µW/cm² مكافئ · الصلة الطيفية: %2$s/100</string>
-    <string name="share_subject">التقاطات Uvir</string>
-    <string name="share_error">تعذرت مشاركة الالتقاطات.</string>
     <string name="automatic_acquisition">الالتقاط التلقائي</string>
     <string name="automatic_acquisition_title">الالتقاط التلقائي</string>
     <string name="automatic_notification_channel_name">الالتقاط التلقائي</string>
@@ -167,10 +138,12 @@
     <string name="sensor_settings_connection_required">صِل المستشعر لتغيير هذه الإعدادات.</string>
     <string name="sensor_parameters_description">اضبط الجوانب العامة للمستشعر.</string>
     <string name="home_sensor_disconnected_title">المستشعر غير متصل</string>
-    <string name="home_sensor_disconnected_description">صِل المستشعر لالتقاط البيانات أو تسجيل التنبيهات أو تغيير إعداداته.</string>
+    <string name="home_sensor_disconnected_description">صِل مستشعرًا لالتقاط البيانات أو تسجيل التنبيهات أو تغيير إعداداته.</string>
     <string name="home_sensor_disconnected_hint">افتح الإعدادات › المستشعر › الاتصال لاختيار USB أو Wi-Fi أو Bluetooth أو الإنترنت وعرض التعليمات.</string>
     <string name="sensor_connection_provisioning_reminder">لاستخدام Wi-Fi أو Bluetooth، صِل المستشعر عبر USB مرة واحدة على الأقل. سيحصل التطبيق بأمان على الهوية الفريدة وبيانات الوصول الخاصة بالمستشعر.</string>
-    <string name="sensor_connection_usb">USB</string><string name="sensor_connection_wifi">Wi-Fi</string><string name="sensor_connection_bluetooth">Bluetooth</string>
+    <string name="sensor_connection_usb">USB</string>
+    <string name="sensor_connection_wifi">Wi-Fi</string>
+    <string name="sensor_connection_bluetooth">Bluetooth</string>
     <string name="sensor_wifi_enabled">تمكين Wi-Fi في المستشعر</string>
     <string name="sensor_bluetooth_enabled">تمكين Bluetooth في المستشعر</string>
     <string name="sensor_radio_usb_control_description">يمكنك تغيير هذا الإعداد عبر USB أو الاتصال اللاسلكي الآخر النشط. إذا عُطّل الاتصالان اللاسلكيان، يلزم USB لإعادة تمكين أحدهما.</string>
@@ -180,16 +153,15 @@
     <string name="sensor_source_title">مصدر المستشعر</string>
     <string name="sensor_source_accessibility">مصدر المستشعر: %1$s</string>
     <string name="sensor_source_debug_accessibility">تجاوز البيانات الوهمية نشط</string>
-    <string name="sensor_source_debug_hint">بيانات المحاكاة نشطة لهذا المستشعر. يبقى الاتصال الحقيقي المختار محفوظًا ويُستخدم مجددًا عند تعطيل المحاكاة.</string>
+    <string name="sensor_source_debug_hint">بيانات المحاكاة نشطة: لتحديد مستشعر، عطّلها في الإعدادات → المستشعر → التشخيص.</string>
     <string name="sensor_source_disabled_hint">يمكن إعادة تمكين مصدر معطّل عبر الاتصال اللاسلكي الآخر النشط. إذا عُطّل الاثنان، صِل المستشعر عبر USB.</string>
-    <string name="sensor_info_action">معلومات المستشعر</string>
     <string name="sensor_power_off">إيقاف تشغيل المستشعر</string>
     <string name="sensor_power_off_title">إيقاف تشغيل المستشعر؟</string>
     <string name="sensor_power_off_message">سيدخل المستشعر في إيقاف منخفض الطاقة ولا يمكن تشغيله من التطبيق. لتشغيله مجددًا، اضغط EN/RESET أو افصل الطاقة وأعد توصيلها. للتأكيد، اضغط مطولاً على إيقاف التشغيل لمدة 5 ثوانٍ.</string>
     <string name="sensor_power_off_confirm">إيقاف التشغيل</string>
     <string name="sensor_disassociate_action">إلغاء الارتباط بالتطبيق</string>
     <string name="sensor_disassociate_title">إلغاء ارتباط المستشعر؟</string>
-    <string name="sensor_disassociate_message">يزيل إلغاء الإقران هذا المستشعر من قائمة الاختيار دون حذف اسمه أو السجلات المحفوظة. يمكنك إقرانه مجددًا عبر USB في أي وقت. لن يتغير المستشعر. للتأكيد، اضغط مطولًا على إلغاء الإقران لمدة 5 ثوانٍ.</string>
+    <string name="sensor_disassociate_message">يزيل إلغاء الإقران المستشعر من قائمة الاختيار دون حذف اسمه أو السجلات المحفوظة. يمكنك إقرانه مجددًا عبر USB في أي وقت. لن يتغير المستشعر. للتأكيد، اضغط مطولًا على إلغاء الإقران لمدة 5 ثوانٍ.</string>
     <string name="sensor_selection_failed">تعذر تغيير المستشعر. حاول مجددًا.</string>
     <string name="sensor_associate_action">إقران مستشعر</string>
     <string name="sensor_associate_usb_hint">وصّل المستشعر الجديد عبر USB. تبقى المستشعرات المقترنة سابقًا في القائمة.</string>
@@ -203,78 +175,151 @@
     <string name="restore_defaults_message">ستُستعاد جميع إعدادات التطبيق والمستشعر إلى قيمها الافتراضية. ستُحذف نهائيًا كل الالتقاطات والتنبيهات وسجلات الأخطاء المحفوظة، ثم سيتوقف المستشعر. للتأكيد، اضغط مطولاً على استعادة الكل لمدة 10 ثوانٍ متواصلة.</string>
     <string name="restore_defaults_confirm">استعادة الكل</string>
     <string name="restore_defaults_failed">تعذر إجراء الاستعادة الكاملة. تحقق من اتصال المستشعر وحاول مجددًا.</string>
-    <string name="sensor_info_title">معلومات المستشعر</string>
-    <string name="sensor_info_device">الجهاز</string><string name="sensor_info_general_information">معلومات عامة</string><string name="sensor_info_hardware">العتاد</string><string name="sensor_info_date_time">التاريخ والوقت</string><string name="sensor_info_rtc_status">حالة RTC</string><string name="sensor_info_clock_status">حالة الساعة</string><string name="sensor_info_time_source">مصدر الوقت</string><string name="sensor_info_rtc_time">وقت RTC</string><string name="sensor_info_time_source_phone">الهاتف</string><string name="sensor_info_valid">صالح</string><string name="sensor_info_invalid">غير صالح</string><string name="sensor_info_rtc_read_test">اختبار قراءة RTC</string><string name="sensor_info_connection">الاتصال</string><string name="sensor_info_measurement">القياس</string>
-    <string name="sensor_info_sensors_and_calibration">المستشعرات والمعايرة</string>
-    <string name="sensor_info_sampling">أخذ العينات</string><string name="sensor_info_synchronization">المزامنة</string>
-    <string name="sensor_info_sensor">المستشعر</string><string name="sensor_info_board">اللوحة</string><string name="sensor_info_chip">المتحكم الدقيق</string><string name="sensor_info_cpu">المعالج</string>
-    <string name="sensor_info_cpu_value">%1$d MHz · ‏%2$d نوى</string>
-    <string name="sensor_info_firmware">البرنامج الثابت</string><string name="sensor_info_identifier">معرّف المستشعر</string><string name="sensor_info_source">المصدر</string><string name="sensor_info_signal">الإشارة</string>
-    <string name="sensor_info_relative_signal">نسبي %1$s</string>
-    <string name="sensor_info_network">الشبكة</string><string name="sensor_info_ip_address">عنوان IP</string><string name="sensor_info_device_name">اسم الجهاز</string>
-    <string name="sensor_info_visible_sensor">مستشعر VIS/NIR</string><string name="sensor_info_uv_sensor">مستشعر UV</string><string name="sensor_info_unit">الوحدة</string><string name="sensor_info_calibration">المعايرة</string>
-    <string name="sensor_info_stream_interval">فاصل الإرسال</string><string name="sensor_info_integration">زمن التكامل</string><string name="sensor_info_gain">الكسب</string>
-    <string name="sensor_info_samples_sent">العينات المرسلة منذ التشغيل</string>
-    <string name="sensor_info_free_memory">الذاكرة الحرة</string><string name="sensor_info_memory">الذاكرة</string><string name="sensor_info_flash_memory">ذاكرة فلاش</string><string name="sensor_info_ram_memory">RAM</string><string name="sensor_info_offline_storage">التخزين دون اتصال</string>
-    <string name="sensor_info_flash_capacity">إجمالي الفلاش</string><string name="sensor_info_program_capacity">مساحة البرنامج</string><string name="sensor_info_firmware_storage">برنامج Uvir الثابت</string><string name="sensor_info_program_space_free">مساحة البرنامج الحرة</string>
-    <string name="sensor_info_ram_capacity">RAM ديناميكية</string><string name="sensor_info_ram_used">RAM مستخدمة</string><string name="sensor_info_ram_free">RAM حرة</string>
-    <string name="sensor_info_offline_storage_used">التخزين دون اتصال المستخدم</string><string name="sensor_info_offline_storage_free">التخزين دون اتصال الحر</string><string name="sensor_info_offline_storage_capacity">إجمالي التخزين دون اتصال</string>
-    <string name="sensor_info_detected">تم الاكتشاف</string><string name="sensor_info_not_detected">لم يُكتشف</string><string name="sensor_info_unavailable">غير متاح</string><string name="sensor_info_datasheet_estimate">تقدير ورقة البيانات</string>
-    <string name="sensor_info_milliseconds">%1$.1f ms</string><string name="sensor_info_kilobytes">%1$s KB</string>
-    <string name="sensor_info_power_consumption">استهلاك الطاقة</string><string name="sensor_info_power_current_estimate">تقدير التيار</string><string name="sensor_info_power_operating_range">نطاق التشغيل المقدر</string>
-    <string name="sensor_info_estimated_current">التيار المقدر</string><string name="sensor_info_estimated_power">الطاقة المقدرة</string><string name="sensor_info_energy_one_hour">الطاقة خلال ساعة</string>
-    <string name="sensor_info_minimum_current">الحد الأدنى للتيار</string><string name="sensor_info_minimum_power">الحد الأدنى للطاقة</string><string name="sensor_info_peak_current">ذروة التيار</string><string name="sensor_info_peak_power">ذروة الطاقة</string><string name="sensor_info_reference_voltage">الجهد المرجعي</string>
-    <string name="sensor_info_power_estimate_note">تقدير برمجي يعتمد على الاتصال وأخذ العينات والمؤشرات النشطة. يتطلب الاستهلاك الفعلي مقياس طاقة خارجيًا.</string>
     <string name="sensor_wifi_esp32_description">يتواصل التطبيق مع المستشعر عندما يستخدمان شبكة Wi-Fi نفسها.</string>
     <string name="sensor_connection_configuration_paths_description">يمكنك حفظ الشبكات اللاسلكية أو تغييرها عبر USB أو من خلال اتصال لاسلكي نشط ومصادق عليه. إذا لم يتوفر اتصال لاسلكي، استخدم USB.</string>
     <string name="sensor_bluetooth_esp32_description">أقرن المستشعر من إعدادات Bluetooth في Android؛ اتصاله بالتطبيق مباشر ومصادق عليه.</string>
     <string name="sensor_calibration_estimate_description">قيم VIS/NIR هي تقديرات بوحدة µW/cm² مشتقة من استجابة ورقة بيانات AS7343 النموذجية. لا تزال المعايرة المطلقة لهذه الوحدة تتطلب مرجعًا بصريًا معايرًا.</string>
-    <string name="sensor_provisioning_hint">صِل هذا المستشعر مرة واحدة عبر USB للحصول بأمان على اسمه الفريد وبيانات الوصول.</string>
+    <string name="sensor_provisioning_hint">صِل المستشعر مرة واحدة عبر USB للحصول بأمان على اسمه الفريد وبيانات الوصول.</string>
     <string name="sensor_associated_value">معرّف المستشعر المرتبط: %1$s</string>
-    <string name="sensor_wifi_network_label">اسم شبكة Wi-Fi</string><string name="sensor_wifi_password_label">كلمة مرور Wi-Fi</string>
+    <string name="sensor_wifi_network_label">اسم شبكة Wi-Fi</string>
+    <string name="sensor_wifi_password_label">كلمة مرور Wi-Fi</string>
     <string name="sensor_wifi_credentials_hint">لا يسمح Android للتطبيقات بقراءة كلمة مرور Wi-Fi محفوظة. أدخلها في المرة الأولى فقط: تُحفظ بخصوصية ولا يكشفها المستشعر عبر الاتصالات اللاسلكية.</string>
-    <string name="configure_sensor_wifi">حفظ الشبكة في المستشعر</string><string name="sensor_wifi_configured">تم حفظ شبكة Wi-Fi في المستشعر</string>
+    <string name="configure_sensor_wifi">حفظ الشبكة في المستشعر</string>
+    <string name="sensor_wifi_configured">تم حفظ شبكة Wi-Fi في المستشعر</string>
     <string name="sensor_wifi_usb_required">المستشعر غير متصل. استخدم USB أو Wi-Fi أو Bluetooth وحاول مجددًا</string>
-    <string name="sensor_wifi_network_value">الشبكة: %1$s</string><string name="sensor_wifi_password_value">كلمة المرور: %1$s</string><string name="sensor_wifi_address_value">آخر عنوان للمستشعر: %1$s:%2$d</string>
-    <string name="sensor_bluetooth_name_value">الجهاز: %1$s</string><string name="sensor_bluetooth_pin_value">رمز PIN للإقران: %1$s</string>
-    <string name="open_wifi_settings">إعدادات Wi-Fi</string><string name="open_bluetooth_settings">إعدادات Bluetooth</string>
-    <string name="settings_section_debug">التشخيص</string><string name="debug_description">أدوات مخصصة لاختبار التطبيق وتشخيصه.</string>
-    <string name="debug_fake_data">بيانات وهمية</string>
-    <string name="debug_fake_data_description">يحاكي قيماً عشوائية للمستشعر، حتى عندما لا يكون متصلاً.</string>
-    <string name="debug_error_log">تصدير سجل الأخطاء</string><string name="debug_error_log_description">يصدّر ملفًا تقنيًا يتضمن معلومات التطبيق والهاتف وآخر مستشعر معروف والأخطاء المسجلة. لا يتضمن الالتقاطات المحفوظة أو كلمات المرور أو رموز PIN أو بيانات المصادقة. عند تجاوز 256 KB، تُحذف الإدخالات الأقدم تلقائيًا مع الاحتفاظ بالأحدث.</string>
-    <string name="debug_error_log_empty">لم تُسجل أخطاء.</string><string name="debug_error_log_share_error">تعذرت مشاركة سجل الأخطاء.</string><string name="debug_error_log_subject">سجل أخطاء Uvir</string>
-    <string name="settings_section_acquisition">أخذ العينات</string><string name="sampling_sensor_processing_description">يتم أخذ العينات داخل المستشعر مباشرةً، ولا يتلقى التطبيق سوى النتيجة النهائية المعالجة.</string>
-    <string name="samples_per_measurement">عينات لكل التقاط</string><string name="samples_per_measurement_hint">القيم المسموح بها: 1–21 عينة.</string><string name="sample_spacing_ms">الوقت بين العينات (ms)</string><string name="sample_spacing_hint">القيم المسموح بها: 150–5000 ms.</string>
-    <string name="discard_extremes">استبعاد أعلى وأدنى عينة</string><string name="discard_extremes_description">يزيل استبعاد القيم المتطرفة أعلى وأدنى عينة ويتطلب 3 عينات على الأقل.</string>
+    <string name="sensor_wifi_network_value">الشبكة: %1$s</string>
+    <string name="sensor_wifi_password_value">كلمة المرور: %1$s</string>
+    <string name="sensor_wifi_address_value">آخر عنوان للمستشعر: %1$s:%2$d</string>
+    <string name="sensor_bluetooth_name_value">الجهاز: %1$s</string>
+    <string name="sensor_bluetooth_pin_value">رمز PIN للإقران: %1$s</string>
+    <string name="open_wifi_settings">إعدادات Wi-Fi</string>
+    <string name="open_bluetooth_settings">إعدادات Bluetooth</string>
+    <string name="settings_section_debug">التشخيص</string>
+    <string name="settings_section_acquisition">أخذ العينات</string>
+    <string name="sampling_sensor_processing_description">يتم أخذ العينات داخل المستشعر مباشرةً، ولا يتلقى التطبيق سوى النتيجة النهائية المعالجة.</string>
+    <string name="samples_per_measurement">عينات لكل التقاط</string>
+    <string name="samples_per_measurement_hint">القيم المسموح بها: 1–21 عينة.</string>
+    <string name="sample_spacing_ms">الوقت بين العينات (ms)</string>
+    <string name="sample_spacing_hint">القيم المسموح بها: 150–5000 ms.</string>
+    <string name="discard_extremes">استبعاد أعلى وأدنى عينة</string>
+    <string name="discard_extremes_description">يزيل استبعاد القيم المتطرفة أعلى وأدنى عينة ويتطلب 3 عينات على الأقل.</string>
     <string name="parameters_hint">عندما يقل الفاصل عن 500 ms، تُحدّث شاشة Live القيم كل 500 ms مع استمرار معالجة كل عينة مستلمة.</string>
-    <string name="invalid_acquisition_parameters">استخدم 1–21 عينة وفاصلاً بين 150 و5000 ms.</string><string name="parameters_saved">تم حفظ الإعدادات</string>
-    <string name="threshold_alerts_title">التنبيهات</string><string name="threshold_alerts_description">استخدم جرس كل مجموعة على الشاشة الرئيسية لضبط القيم والحدود. يمكنك هنا اختيار صوت التنبيه.</string>
-    <string name="threshold_alerts_select_values">القيم والحدود</string><string name="threshold_alerts_value">القيمة المراد مراقبتها</string>
-    <string name="threshold_channel_uv_total">الأشعة فوق البنفسجية</string><string name="threshold_channel_uvc">UVC</string><string name="threshold_channel_uvb">UVB</string><string name="threshold_channel_uva">UVA</string><string name="threshold_channel_hev">HEV</string><string name="threshold_channel_heb">HEB</string>
-    <string name="threshold_channel_visible_total">الضوء المرئي</string><string name="threshold_channel_nir_total">الأشعة تحت الحمراء</string><string name="threshold_channel_far_red">الأحمر البعيد</string><string name="threshold_channel_nir">NIR</string>
-    <string name="threshold_alerts_condition">شرط التشغيل</string><string name="threshold_direction_above">عند الحد أو أعلى منه</string><string name="threshold_direction_below">عند الحد أو أدنى منه</string><string name="threshold_direction_above_short">أعلى</string><string name="threshold_direction_below_short">أدنى</string>
-    <string name="threshold_use_current_value">القيمة الحالية</string><string name="threshold_rule_above_summary">يُشغّل عندما تساوي القيمة الحد أو تتجاوزه.</string><string name="threshold_rule_below_summary">يُشغّل عندما تساوي القيمة الحد أو تقل عنه.</string>
-    <string name="threshold_value_label">الحد (µW/cm²)</string><string name="threshold_value_biological_label">الحد (µW/cm² مكافئ)</string>
-    <string name="threshold_repeat_label">فاصل التحقق</string><string name="threshold_duration_label">مدة الصوت (ثوانٍ)</string><string name="threshold_sound_label">الصوت</string><string name="threshold_sound_silent">صامت</string><string name="threshold_sound_vibration">اهتزاز</string><string name="threshold_sound_single_beep">صفير واحد</string><string name="threshold_sound_double_beep">صفيران</string><string name="threshold_sound_triple_beep">ثلاث صفارات</string><string name="threshold_sound_long_beep">صفارات متعددة</string>
-    <string name="threshold_volume_label">شدة الصوت: %1$d%%</string><string name="threshold_sound_preview_hint">اضغط خيارًا لمعاينته. الوضع الصامت لا يصدر صوتًا أو اهتزازًا، لكن التنبيهات تُسجل. يعتمد مستوى الصوت النهائي أيضًا على مستوى صوت منبّه الهاتف.</string>
+    <string name="invalid_acquisition_parameters">استخدم 1–21 عينة وفاصلاً بين 150 و5000 ms.</string>
+    <string name="parameters_saved">تم حفظ الإعدادات</string>
+    <string name="threshold_alerts_title">التنبيهات</string>
+    <string name="threshold_alerts_description">استخدم جرس كل مجموعة على الشاشة الرئيسية لضبط القيم والحدود. يمكنك هنا اختيار صوت التنبيه.</string>
+    <string name="threshold_alerts_select_values">القيم والحدود</string>
+    <string name="threshold_alerts_value">القيمة المراد مراقبتها</string>
+    <string name="threshold_channel_uv_total">الأشعة فوق البنفسجية</string>
+    <string name="threshold_channel_uvc">UVC</string>
+    <string name="threshold_channel_uvb">UVB</string>
+    <string name="threshold_channel_uva">UVA</string>
+    <string name="threshold_channel_hev">HEV</string>
+    <string name="threshold_channel_heb">HEB</string>
+    <string name="threshold_channel_visible_total">الضوء المرئي</string>
+    <string name="threshold_channel_nir_total">الأشعة تحت الحمراء</string>
+    <string name="threshold_channel_far_red">الأحمر البعيد</string>
+    <string name="threshold_channel_nir">NIR</string>
+    <string name="threshold_alerts_condition">شرط التشغيل</string>
+    <string name="threshold_direction_above">عند الحد أو أعلى منه</string>
+    <string name="threshold_direction_below">عند الحد أو أدنى منه</string>
+    <string name="threshold_direction_above_short">أعلى</string>
+    <string name="threshold_direction_below_short">أدنى</string>
+    <string name="threshold_use_current_value">القيمة الحالية</string>
+    <string name="threshold_rule_above_summary">يُشغّل عندما تساوي القيمة الحد أو تتجاوزه.</string>
+    <string name="threshold_rule_below_summary">يُشغّل عندما تساوي القيمة الحد أو تقل عنه.</string>
+    <string name="threshold_value_label">الحد (µW/cm²)</string>
+    <string name="threshold_value_biological_label">الحد (µW/cm² مكافئ)</string>
+    <string name="threshold_repeat_label">فاصل التحقق</string>
+    <string name="threshold_duration_label">مدة الصوت (ثوانٍ)</string>
+    <string name="threshold_sound_label">الصوت</string>
+    <string name="threshold_sound_silent">صامت</string>
+    <string name="threshold_sound_vibration">اهتزاز</string>
+    <string name="threshold_sound_single_beep">صفير واحد</string>
+    <string name="threshold_sound_double_beep">صفيران</string>
+    <string name="threshold_sound_triple_beep">ثلاث صفارات</string>
+    <string name="threshold_sound_long_beep">صفارات متعددة</string>
+    <string name="threshold_volume_label">شدة الصوت: %1$d%%</string>
+    <string name="threshold_sound_preview_hint">يعتمد مستوى الصوت النهائي أيضًا على مستوى صوت منبّه الهاتف.</string>
     <string name="invalid_threshold_alert">استخدم حدودًا غير سالبة واضبط فاصل التكرار بين ثانية و24 ساعة.</string>
-    <string name="stop_all_value_alerts_accessibility">إيقاف جلسة التنبيهات</string><string name="stop_all_value_alerts_title">إيقاف جلسة التنبيهات؟</string><string name="stop_all_value_alerts_message">سيتم إنهاء جلسة التنبيهات الحالية. ستبقى التنبيهات المضبوطة والمسجلة محفوظة.</string><string name="stop_all_value_alerts_action">@string/stop</string><string name="continue_alert_monitoring">متابعة</string>
-    <string name="start_value_alert_session_accessibility">بدء جلسة التنبيهات</string><string name="start_value_alert_session_title">بدء جلسة التنبيهات</string><string name="start_value_alert_session_message">ستبدأ المراقبة باستخدام التنبيهات المضبوطة. يمكنك إضافة تنبيهات أو إزالتها لاحقًا دون بدء جلسة جديدة.</string><string name="start_value_alert_session_action">بدء</string>
-    <string name="threshold_rules_reset">إعادة ضبط التنبيهات النشطة</string><string name="threshold_rules_reset_confirm_action">إعادة ضبط الكل</string><string name="threshold_rules_reset_complete">تمت إعادة ضبط التنبيهات النشطة</string><string name="threshold_rules_reset_confirmation_title">إعادة ضبط كل التنبيهات النشطة؟</string><string name="threshold_rules_reset_confirmation_message">ستتم إعادة ضبط جميع التنبيهات النشطة. للتأكيد، اضغط مطولاً على إعادة ضبط الكل لمدة ثانيتين متواصلتين.</string>
-    <string name="threshold_bell_configure">ضبط تنبيهات هذه المجموعة</string><string name="threshold_bell_active">تنبيه نشط واحد أو أكثر في هذه المجموعة</string>
-    <string name="threshold_group_editor_title">التنبيهات لـ\n%1$s</string><string name="threshold_group_choose_value">اختر القيم المراد مراقبتها.</string><string name="threshold_group_rule_off">غير مضبوط</string><string name="threshold_group_rule_above">أعلى من %1$.3f µW/cm²</string><string name="threshold_group_rule_below">أدنى من %1$.3f µW/cm²</string>
-    <string name="threshold_editor_title">التنبيهات لـ %1$s</string><string name="threshold_editor_enable">تمكين التنبيه لهذه القيمة</string><string name="threshold_editor_invalid">أدخل حدًا غير سالب.</string>
-    <string name="threshold_voice_preview">معاينة تنبيه Uvir الصوتي.</string><string name="threshold_voice_above">%1$s أعلى من الحد. القيمة الحالية %2$.1f. الحد %3$.1f.</string><string name="threshold_voice_below">%1$s أدنى من الحد. القيمة الحالية %2$.1f. الحد %3$.1f.</string><string name="threshold_voice_additional">هناك %1$d من الشروط الإضافية النشطة.</string>
-    <string name="threshold_alert_log_open">عرض التنبيهات</string><string name="threshold_alert_log_title">التنبيهات</string><string name="threshold_alert_log_empty">لا توجد تنبيهات مسجلة.</string><string name="threshold_alert_id_label">معرّف التنبيه</string><string name="threshold_alert_log_share">مشاركة التنبيهات</string><string name="select_alerts">تحديد التنبيهات</string>
-    <string name="share_all_alerts_question">هل تريد مشاركة جميع التنبيهات المسجلة؟</string><string name="share_all_alerts_warning">لم يتم تحديد أي تنبيه، لذلك ستتم مشاركة جميع التنبيهات المسجلة.</string><string name="delete_selected_alerts_question">حذف التنبيهات المحددة؟</string>
+    <string name="stop_all_value_alerts_accessibility">إيقاف جلسة التنبيهات</string>
+    <string name="stop_all_value_alerts_title">إيقاف جلسة التنبيهات؟</string>
+    <string name="stop_all_value_alerts_message">سيتم إنهاء جلسة التنبيهات الحالية. ستبقى التنبيهات المضبوطة والمسجلة محفوظة.</string>
+    <string name="stop_all_value_alerts_action">@string/stop</string>
+    <string name="continue_alert_monitoring">متابعة</string>
+    <string name="start_value_alert_session_accessibility">بدء جلسة التنبيهات</string>
+    <string name="start_value_alert_session_title">بدء جلسة التنبيهات</string>
+    <string name="start_value_alert_session_message">ستبدأ المراقبة باستخدام التنبيهات المضبوطة. يمكنك إضافة تنبيهات أو إزالتها لاحقًا دون بدء جلسة جديدة.</string>
+    <string name="start_value_alert_session_action">بدء</string>
+    <string name="threshold_rules_reset">إعادة ضبط التنبيهات النشطة</string>
+    <string name="threshold_rules_reset_confirm_action">إعادة ضبط الكل</string>
+    <string name="threshold_rules_reset_complete">تمت إعادة ضبط التنبيهات النشطة</string>
+    <string name="threshold_rules_reset_confirmation_title">إعادة ضبط كل التنبيهات النشطة؟</string>
+    <string name="threshold_rules_reset_confirmation_message">ستتم إعادة ضبط جميع التنبيهات النشطة. للتأكيد، اضغط مطولاً على إعادة ضبط الكل لمدة ثانيتين متواصلتين.</string>
+    <string name="threshold_bell_configure">ضبط تنبيهات هذه المجموعة</string>
+    <string name="threshold_bell_active">تنبيه نشط واحد أو أكثر في هذه المجموعة</string>
+    <string name="threshold_group_editor_title">التنبيهات لـ\n%1$s</string>
+    <string name="threshold_group_choose_value">اختر القيم المراد مراقبتها.</string>
+    <string name="threshold_group_rule_off">غير مضبوط</string>
+    <string name="threshold_group_rule_above">أعلى من %1$.3f µW/cm²</string>
+    <string name="threshold_group_rule_below">أدنى من %1$.3f µW/cm²</string>
+    <string name="threshold_editor_title">التنبيهات لـ %1$s</string>
+    <string name="threshold_editor_enable">تمكين التنبيه لهذه القيمة</string>
+    <string name="threshold_editor_invalid">أدخل حدًا غير سالب.</string>
+    <string name="threshold_voice_preview">معاينة تنبيه Uvir الصوتي.</string>
+    <string name="threshold_voice_above">%1$s أعلى من الحد. القيمة الحالية %2$.1f. الحد %3$.1f.</string>
+    <string name="threshold_voice_below">%1$s أدنى من الحد. القيمة الحالية %2$.1f. الحد %3$.1f.</string>
+    <string name="threshold_voice_additional">هناك %1$d من الشروط الإضافية النشطة.</string>
+    <string name="threshold_alert_log_open">عرض التنبيهات</string>
+    <string name="threshold_alert_log_title">التنبيهات</string>
+    <string name="threshold_alert_log_empty">لا توجد تنبيهات مسجلة.</string>
+    <string name="threshold_alert_id_label">معرّف التنبيه</string>
+    <string name="threshold_alert_log_share">مشاركة التنبيهات</string>
+    <string name="select_alerts">تحديد التنبيهات</string>
+    <string name="delete_selected_alerts_question">حذف التنبيهات المحددة؟</string>
     <plurals name="delete_selected_alerts_warning"><item quantity="zero">سيتم حذف %1$d من التنبيهات المحددة نهائيًا.</item><item quantity="one">سيتم حذف التنبيه المحدد نهائيًا.</item><item quantity="two">سيتم حذف %1$d من التنبيهات المحددة نهائيًا.</item><item quantity="few">سيتم حذف %1$d من التنبيهات المحددة نهائيًا.</item><item quantity="many">سيتم حذف %1$d من التنبيهات المحددة نهائيًا.</item><item quantity="other">سيتم حذف %1$d من التنبيهات المحددة نهائيًا.</item></plurals>
     <string name="threshold_alerts_deleted">تم حذف التنبيهات</string>
     <plurals name="threshold_alert_count_since"><item quantity="zero">تم حفظ %1$d · منذ %2$s</item><item quantity="one">تم حفظ %1$d · منذ %2$s</item><item quantity="two">تم حفظ %1$d · منذ %2$s</item><item quantity="few">تم حفظ %1$d · منذ %2$s</item><item quantity="many">تم حفظ %1$d · منذ %2$s</item><item quantity="other">تم حفظ %1$d · منذ %2$s</item></plurals>
-    <string name="threshold_alert_export_subject">سجل تنبيهات Uvir</string><string name="threshold_alert_log_delete_title">حذف كل التنبيهات المسجلة؟</string><string name="threshold_alert_log_delete_warning">سيتم حذف كل التنبيهات المسجلة نهائيًا. للتأكيد، اضغط مطولاً على حذف الكل لمدة ثانيتين.</string><string name="threshold_alert_log_delete_all">حذف الكل</string><string name="threshold_alert_log_deleted">تم حذف التنبيهات</string>
-    <string name="threshold_log_violation_above">%1$s: %2$s µW/cm² ≥ %3$s µW/cm²</string><string name="threshold_log_violation_below">%1$s: %2$s µW/cm² ≤ %3$s µW/cm²</string><string name="threshold_log_biological_violation_above">%1$s: %2$s µW/cm² مكافئ ≥ %3$s µW/cm² مكافئ</string><string name="threshold_log_biological_violation_below">%1$s: %2$s µW/cm² مكافئ ≤ %3$s µW/cm² مكافئ</string>
-    <string name="settings_section_numeric_format">التنسيقات الإقليمية</string><string name="numeric_format_description">اختر تنسيق الأرقام.</string><string name="format_numbers_heading">الأرقام</string><string name="format_date_time_heading">التاريخ</string><string name="date_format_description">اختر تنسيق التاريخ.</string><string name="date_format_system">افتراضي</string><string name="date_format_international">دولي</string><string name="date_format_european">أوروبي</string><string name="date_format_american">أمريكي</string><string name="numeric_format_system">افتراضي</string><string name="numeric_format_international">دولي</string><string name="numeric_format_international_example">1 000.23</string><string name="numeric_format_european">أوروبي</string><string name="numeric_format_european_example">1.000,23</string><string name="format_time_heading">الوقت</string><string name="time_format_description">اختر تنسيق الوقت.</string><string name="time_format_system">افتراضي</string><string name="time_format_24_hours">24 ساعة</string><string name="time_format_12_hours">12 ساعة</string>
-    <string name="settings_section_language">اللغة</string><string name="language_description">اختر لغة الواجهة.</string><string name="language_system">افتراضي</string>
-    <string name="language_italian">Italiano</string><string name="language_english">English</string><string name="language_spanish">Español</string><string name="language_french">Français</string><string name="language_portuguese">Português</string><string name="language_hebrew">עברית</string><string name="language_arabic">العربية</string><string name="language_chinese">中文</string><string name="language_japanese">日本語</string>
+    <string name="threshold_alert_export_subject">سجل تنبيهات Uvir</string>
+    <string name="threshold_alert_log_delete_title">حذف كل التنبيهات المسجلة؟</string>
+    <string name="threshold_alert_log_delete_warning">سيتم حذف كل التنبيهات المسجلة نهائيًا. للتأكيد، اضغط مطولاً على حذف الكل لمدة ثانيتين.</string>
+    <string name="threshold_alert_log_delete_all">حذف الكل</string>
+    <string name="threshold_alert_log_deleted">تم حذف التنبيهات</string>
+    <string name="threshold_log_violation_above">%1$s: %2$s µW/cm² ≥ %3$s µW/cm²</string>
+    <string name="threshold_log_violation_below">%1$s: %2$s µW/cm² ≤ %3$s µW/cm²</string>
+    <string name="threshold_log_biological_violation_above">%1$s: %2$s µW/cm² مكافئ ≥ %3$s µW/cm² مكافئ</string>
+    <string name="threshold_log_biological_violation_below">%1$s: %2$s µW/cm² مكافئ ≤ %3$s µW/cm² مكافئ</string>
+    <string name="settings_section_numeric_format">التنسيقات الإقليمية</string>
+    <string name="numeric_format_description">اختر تنسيق الأرقام.</string>
+    <string name="format_numbers_heading">الأرقام</string>
+    <string name="format_date_time_heading">التاريخ</string>
+    <string name="date_format_description">اختر تنسيق التاريخ.</string>
+    <string name="date_format_system">افتراضي</string>
+    <string name="date_format_international">دولي</string>
+    <string name="date_format_european">أوروبي</string>
+    <string name="date_format_american">أمريكي</string>
+    <string name="numeric_format_system">افتراضي</string>
+    <string name="numeric_format_international">دولي</string>
+    <string name="numeric_format_international_example">1 000.23</string>
+    <string name="numeric_format_european">أوروبي</string>
+    <string name="numeric_format_european_example">1.000,23</string>
+    <string name="format_time_heading">الوقت</string>
+    <string name="time_format_description">اختر تنسيق الوقت.</string>
+    <string name="time_format_system">افتراضي</string>
+    <string name="time_format_24_hours">24 ساعة</string>
+    <string name="time_format_12_hours">12 ساعة</string>
+    <string name="settings_section_language">اللغة</string>
+    <string name="language_description">اختر لغة الواجهة.</string>
+    <string name="language_system">افتراضي</string>
+    <string name="language_italian">Italiano</string>
+    <string name="language_english">English</string>
+    <string name="language_spanish">Español</string>
+    <string name="language_french">Français</string>
+    <string name="language_portuguese">Português</string>
+    <string name="language_hebrew">עברית</string>
+    <string name="language_arabic">العربية</string>
+    <string name="language_chinese">中文</string>
+    <string name="language_japanese">日本語</string>
     <string name="reset_counters_title">إعادة ضبط العدادات</string>
     <string name="reset_counters_description">إدارة إعادة ضبط العدادات والبيانات المرتبطة بها.</string>
     <string name="data_and_restore_title">إدارة البيانات</string>
@@ -298,8 +343,6 @@
     <string name="reset_counters_stop_auto">أوقف القياس التلقائي قبل إعادة ضبط العدادات.</string>
     <string name="acquisition_counters_reset_complete">تمت إعادة ضبط عدادات القياسات</string>
     <string name="alert_counters_reset_complete">تمت إعادة ضبط عدادات التنبيهات</string>
-    <string name="export_database_title">تصدير قاعدة البيانات</string>
-    <string name="export_database">تصدير قاعدة البيانات</string>
     <string name="settings_transfer_description">تصدير/استيراد إعدادات التطبيق والمستشعرات عبر نسخ احتياطية مشفّرة.</string>
     <string name="import_database">استيراد قاعدة البيانات</string>
     <string name="database_transfer_description">تصدير/استعادة قاعدة البيانات كاملة عبر أرشيف ZIP مشفّر.</string>
@@ -308,10 +351,7 @@
     <string name="import_database_confirm">استيراد</string>
     <string name="import_database_failed">تعذّر استيراد قاعدة البيانات. تحقّق من كلمة المرور والأرشيف وإصدار قاعدة البيانات.</string>
     <string name="import_database_success">تم استيراد قاعدة البيانات.</string>
-    <string name="export_database_subject">قاعدة بيانات Uvir</string>
-    <string name="export_database_error">تعذر تصدير قاعدة البيانات.</string>
     <string name="close">إغلاق</string>
-
     <string name="irradiance_view">الإشعاعية</string>
     <string name="biological_effects_view">التأثيرات البيولوجية¹</string>
     <string name="biological_effects_group_name">التأثيرات البيولوجية</string>
@@ -329,7 +369,6 @@
     <string name="biological_compact_relevance">%1$.0f%%</string>
     <string name="relative_spectral_index">الأهمية الطيفية</string>
     <string name="relative_spectral_index_explanation">توضح القيمة من 0 إلى 100 مدى تركّز الطيف المقاس في الأطوال الموجية المرجحة بهذا التقدير. وهي تصف التركيب الطيفي لا الشدة الكلية، وليست نسبة للضرر ولا حدًا للسلامة.</string>
-
     <string name="delete_all_measurements_question">حذف جميع القياسات المحفوظة؟</string>
     <string name="delete_all_measurements_warning">ستُحذف جميع القياسات المحفوظة نهائيًا. للتأكيد، اضغط مطولًا على حذف الكل لمدة ثانيتين متواصلتين.</string>
     <string name="delete_all">حذف الكل</string>
@@ -351,7 +390,6 @@
     <string name="note">ملاحظة</string>
     <string name="edit_note">تعديل الملاحظة</string>
     <string name="no_note">لا توجد ملاحظة</string>
-
     <string name="automatic_badge">ت</string>
     <string name="manual_badge">ي</string>
     <string name="automatic_badge_description">قياس تلقائي</string>
@@ -368,7 +406,12 @@
     <string name="far_red_nir">الأشعة تحت الحمراء</string>
     <string name="infrared_sensor_footnote">¹ عرض النطاق عند نصف الحساسية القصوى: نحو 60 nm ‏(Far-red) و54 nm ‏(NIR).</string>
     <string name="infrared_peak_band">قمة¹ %1$d nm</string>
-    <string name="violet">بنفسجي</string><string name="blue">أزرق</string><string name="green">أخضر</string><string name="yellow">أصفر</string><string name="orange">برتقالي</string><string name="red">أحمر</string>
+    <string name="violet">بنفسجي</string>
+    <string name="blue">أزرق</string>
+    <string name="green">أخضر</string>
+    <string name="yellow">أصفر</string>
+    <string name="orange">برتقالي</string>
+    <string name="red">أحمر</string>
     <string name="percent_of_visible">%1$s%% من المرئي</string>
     <string name="version_info">الإصدار والمعلومات</string>
     <string name="version_info_title">Uvir %1$s</string>
@@ -391,20 +434,6 @@
     <string name="github_repository_pending">لم يُعَدّ مستودع GitHub بعد. ستصبح الروابط متاحة بعد نشر المشروع.</string>
     <string name="open_github_repository">فتح المستودع</string>
     <string name="check_for_updates">التحقق من التحديثات</string>
-    <string name="project_numbers_title">المشروع بالأرقام</string>
-    <string name="project_numbers_description">ملخص محدث لتطوير Uvir.</string>
-    <string name="project_numbers_development_time">تطوير بمساعدة الذكاء الاصطناعي</string>
-    <string name="project_numbers_development_time_value">نحو 4 أسابيع</string>
-    <string name="project_numbers_ai_use">ChatGPT / Codex</string>
-    <string name="project_numbers_ai_use_value">مساعدة مستمرة</string>
-    <string name="project_numbers_prototype_cost">تكلفة النموذج الأولي</string>
-    <string name="project_numbers_prototype_cost_value">أقل من €300</string>
-    <string name="project_numbers_languages">اللغات المدعومة</string>
-    <string name="project_numbers_languages_value">17</string>
-    <string name="project_numbers_automated_tests">الاختبارات الآلية</string>
-    <string name="project_numbers_automated_tests_value">352 ناجحًا</string>
-    <string name="project_numbers_snapshot_note">تشير الأرقام إلى الإصدار %1$s ويتم تحديثها مع تطور المشروع.</string>
-
     <string name="navigate_back">رجوع</string>
     <string name="session_chart_title">جلسة القياس</string>
     <string name="session_chart_open">فتح جلسة القياس</string>
@@ -488,7 +517,6 @@
     <string name="alert_chart_scale">المقارنة بالحد</string>
     <string name="alert_chart_threshold_reference" formatted="false">الحد · 100%</string>
     <string name="alert_chart_empty">لا توجد قيم متاحة لهذا التنبيه.</string>
-
     <string name="remote_usb_title">الاتصال عبر USB</string>
     <string name="remote_usb_description">صل الكابل، وافتح Uvir، واختر USB في برنامج سطح المكتب.</string>
     <string name="remote_wifi_title">الاتصال عبر Wi-Fi</string>
@@ -610,10 +638,6 @@
     <string name="sensor_firmware_update_required">البرنامج الثابت المثبت على المستشعر لا يدعم هذه الإعدادات. حدّثه ثم حاول مرة أخرى.</string>
     <string name="value_out_of_limits_corrected">القيمة خارج الحدود المسموحة. تم تصحيحها تلقائيًا.</string>
     <string name="invalid_sensor_calibration">أدخل عوامل معايرة بين 0.100 و10.000.</string>
-    <string name="sensor_info_visible_calibration_factor">عامل تصحيح VIS/NIR</string>
-    <string name="sensor_info_uv_calibration_factor">عامل تصحيح الأشعة فوق البنفسجية</string>
-    <string name="sensor_info_offline_alert_interval">فاصل التنبيه دون اتصال</string>
-    <string name="sensor_info_user_adjusted_calibration">معدّل بواسطة المستخدم</string>
     <string name="language_greek">Ελληνικά</string>
     <string name="language_persian">فارسی</string>
     <string name="language_russian">Русский</string>
@@ -634,16 +658,6 @@
     <string name="sensor_selection_title">اختيار المستشعر</string>
     <string name="sensor_name_label">اسم المستشعر</string>
     <string name="sensor_name_description">اسم يظهر في هذا التطبيق فقط. لا يتغير معرّف الجهاز الخاص بالمستشعر.</string>
-    <string name="debug_performance_title">حفل المستشعر</string>
-    <string name="debug_performance_description">يشغّل لحناً تشخيصياً مخزناً في المستشعر عبر الجرس ومصابيح LED.</string>
-    <string name="debug_performance_play">تشغيل</string>
-    <string name="debug_performance_stop">إيقاف</string>
-    <string name="debug_performance_firmware_required">حدّث البرنامج الثابت للمستشعر لاستخدام هذا الاختبار التشخيصي.</string>
-    <string name="debug_performance_connection_lost">توقّف التشغيل لأن المستشعر لم يعد متاحاً.</string>
-    <string name="debug_performance_happy_birthday">عيد ميلاد سعيد</string>
-    <string name="debug_performance_indiana_jones">Indiana Jones</string>
-    <string name="debug_performance_jurassic_park">Jurassic Park</string>
-    <string name="debug_performance_star_wars">Star Wars</string>
     <string name="data_and_restore_description_split">أدِر خيارات التصدير والاستيراد وإعادة الضبط.</string>
     <string name="data_management_settings_group">الإعدادات</string>
     <string name="data_management_database_group">قاعدة البيانات</string>
@@ -654,6 +668,9 @@
     <string name="language_hindi">हिन्दी</string>
     <string name="language_korean">한국어</string>
     <string name="language_swahili">Kiswahili</string>
+    <string name="language_polish">Polski</string>
+    <string name="language_dutch">Nederlands</string>
+    <string name="language_indonesian">Bahasa Indonesia</string>
     <string name="note_length_counter">%1$d/%2$d</string>
     <string name="restore_app_settings_action">إعادة ضبط التطبيق</string>
     <string name="restore_app_settings_confirm">إعادة ضبط</string>
@@ -661,12 +678,8 @@
     <string name="restore_app_settings_inline_warning">يحذف جميع الإعدادات وكل البيانات المخزنة في التطبيق. يبقى المستشعر والبيانات المخزنة عليه دون تغيير.</string>
     <string name="restore_app_settings_message">سيتم حذف جميع إعدادات تطبيق Uvir والبيانات المخزنة محلياً، بما في ذلك القياسات والتنبيهات المسجلة وسجلات الأخطاء والعدادات وملفات تعريف المستشعر وبيانات الاتصال المحفوظة. لن يتغير المستشعر نفسه ولن يتم إيقاف تشغيله. للتأكيد، اضغط مطولاً على «إعادة ضبط» لمدة 5 ثوانٍ.</string>
     <string name="restore_app_settings_title">إعادة ضبط التطبيق؟</string>
-    <string name="sensor_info_connected">متصل</string>
-    <string name="sensor_info_mqtt_broker">وسيط MQTT</string>
-    <string name="sensor_info_mqtt_status">حالة MQTT</string>
-    <string name="sensor_info_not_connected">غير متصل</string>
     <string name="sensor_status_no_sensor">غير متصل</string>
-    <string name="sensor_info_tls_port">منفذ TLS</string>
+    <string name="sensor_status_no_associated_sensor">لا يوجد مستشعر مقترن</string>
     <string name="sensor_restore_action">إعادة ضبط المستشعر</string>
     <string name="sensor_restore_confirm">إعادة ضبط</string>
     <string name="sensor_restore_failed">تعذرت إعادة ضبط المستشعر. تحقق من الاتصال وحاول مرة أخرى.</string>
@@ -675,34 +688,9 @@
     <string name="sensor_restore_title">إعادة ضبط المستشعر؟</string>
     <string name="sensor_usb_identity_mismatch">مستشعر USB غير مصرح به. يوجد مستشعر مختلف مرتبط بالتطبيق بالفعل.</string>
     <string name="show_password">إظهار كلمة المرور</string>
-    <string name="sensor_info_connecting">جارٍ الاتصال…</string>
-    <string name="sensor_info_searching">جارٍ البحث…</string>
-    <string name="sensor_info_activity">نشاط جارٍ…</string>
     <string name="note_and_sensor">الوضع والمستشعر وغير ذلك</string>
     <string name="sensor_status_connected">المستشعر متصل</string>
-    <string name="debug_diagnostic">اختبار تشخيصي</string>
-    <string name="diagnostic_description">يجري اختباراً تشخيصياً كاملاً للمستشعر.</string>
-    <string name="diagnostic_title">تشخيص المستشعر</string>
-    <string name="diagnostic_progress">اكتملت %1$d/%2$d طلبات</string>
-    <string name="diagnostic_summary">تم استلام %1$d/%2$d ردود</string>
-    <string name="diagnostic_success">لم تظهر مشكلات في طلبات الاختبار.</string>
-    <string name="diagnostic_warning">فشلت بعض الطلبات أو تغيّر الاتصال.</string>
-    <string name="diagnostic_latency">الاستجابة: الأدنى / المتوسط / الأقصى</string>
-    <string name="diagnostic_sample_age">عمر العينة</string>
-    <string name="diagnostic_request">طلب</string>
-    <string name="diagnostic_timeout">لم يصل رد ضمن المهلة</string>
-    <string name="diagnostic_write_failed">تعذّر الإرسال</string>
-    <string name="diagnostic_connection_changed">تغيّر المستشعر أو الاتصال</string>
-    <string name="diagnostic_notes">تشمل الأزمنة الاتصال وحمل المستشعر. هذا ليس اختبارًا كاملًا للأجهزة. لا تُدرج كلمات المرور وبيانات الدخول.</string>
-    <string name="diagnostic_generated">نُفّذ</string>
-    <string name="diagnostic_duration">مدة الاختبار</string>
-    <string name="diagnostic_auto_session">قياس تلقائي</string>
-    <string name="diagnostic_alert_session">جلسة تنبيهات</string>
-    <string name="diagnostic_active">قيد التشغيل</string>
-    <string name="diagnostic_inactive">غير قيد التشغيل</string>
-    <string name="diagnostic_share_error">تعذّرت مشاركة تقرير التشخيص.</string>
-    <string name="diagnostic_failed">تعذّر إكمال الاختبار التشخيصي.</string>
-    <string name="debug_secret_melody_found">لقد وجدت اللحن السري</string>
+    <string name="sensor_status_simulated">البيانات الوهمية نشطة</string>
     <string name="conditional_acquisition">التقط إذا</string>
     <string name="external_command">أمر خارجي</string>
     <string name="external_command_description">يُحفظ القياس فقط عندما يكتشف المستشعر أمرًا على الدخل الخارجي. تبقى ملاحظة الجلسة؛ ويتم تجاهل الفاصل والبداية المجدولة والنهاية والحد وشروط القياس.</string>
@@ -743,66 +731,29 @@
     <string name="list_filter_count">عرض %1$d من %2$d</string>
     <string name="list_filter_share_question">مشاركة جميع النتائج المعروضة؟</string>
     <string name="list_filter_share_warning">لم يتم تحديد أي سجلات. ستتم مشاركة جميع السجلات المطابقة لعوامل التصفية الحالية.</string>
-    <string name="settings_section_language_formats">الوحدات والتنسيقات</string>
+    <string name="settings_section_appearance">المظهر</string>
+    <string name="settings_section_language_formats">الوحدات</string>
     <string name="settings_section_sharing_export">التصدير</string>
-    <string name="export">تصدير</string><string name="import_settings">استيراد الإعدادات</string>
-    <string name="export_saved_successfully">تم حفظ الملفات.</string><string name="export_save_failed">تعذر حفظ الملفات.</string>
-    <string name="export_destination_description">احفظ الملفات على هذا الجهاز أو شاركها مع تطبيق آخر.</string>
-    <string name="export_settings_title">تصدير الإعدادات</string><string name="export_app_settings">إعدادات التطبيق</string>
-    <string name="export_app_settings_description">الواجهة والتنسيقات وتفضيلات الهاتف. لا تتضمن السجلات.</string>
-    <string name="export_sensor_settings">إعدادات المستشعر</string><string name="export_sensor_settings_description">المعايرة وأخذ العينات وخيارات التشغيل. لا تتضمن بيانات الاعتماد أو عناوين الشبكة.</string>
-    <string name="settings_export_failed">تعذر تصدير الإعدادات.</string><string name="settings_import_failed">ملف الإعدادات المحدد غير صالح أو لا يمكن استيراده.</string>
+    <string name="export">تصدير</string>
+    <string name="import_settings">استيراد الإعدادات</string>
+    <string name="settings_export_failed">تعذر تصدير الإعدادات.</string>
+    <string name="settings_import_failed">ملف الإعدادات المحدد غير صالح أو لا يمكن استيراده.</string>
     <string name="sensor_settings_restore_requires_connection">تم إقران المستشعر. لم تتم استعادة إعداداته لأنه غير متصل.</string>
     <string name="sensor_settings_restore_failed">تم إقران المستشعر، لكن تعذر استعادة إعداداته.</string>
     <plurals name="settings_imported_count"><item quantity="zero">لم يتم استيراد أي ملف إعدادات.</item><item quantity="one">تم استيراد ملف إعدادات واحد.</item><item quantity="two">تم استيراد ملفي إعدادات.</item><item quantity="few">تم استيراد %d ملفات إعدادات.</item><item quantity="many">تم استيراد %d ملف إعدادات.</item><item quantity="other">تم استيراد %d ملف إعدادات.</item></plurals>
     <string name="language_formats_description">اختر كيفية عرض البيانات وتنسيقها في التطبيق.</string>
-    <string name="export_format_heading">عمليات التصدير</string>
     <string name="irradiance_measurement_heading">قياس شدة الإشعاع</string>
     <string name="irradiance_measurement_description">اختر الوحدة المستخدمة لعرض شدة الإشعاع. تحتفظ القيم المحفوظة بالدقة الأصلية للمستشعر.</string>
-    <string name="export_format_description">اختر ما إذا كانت ملفات CSV والجداول المقروءة والرسوم تستخدم الإعدادات المحددة أو التنسيق العلمي الدولي.</string>
-    <string name="export_profile_heading">تنسيق البيانات</string>
-    <string name="export_format_selected">اللغة والتنسيقات المضبوطة</string>
-    <string name="export_format_international">علمي دولي</string>
-    <string name="export_format_preview_heading">معاينة</string>
-    <string name="export_format_profile_summary">اللغة: %1$s · الأرقام: %2$s · التاريخ: %3$s · الوقت: %4$s · شدة الإشعاع: %5$s</string>
     <string name="out_of_range_short">OL - خارج النطاق</string>
     <string name="out_of_range_csv_header">قيمة_خارج_النطاق</string>
-    <string name="debug_fake_out_of_range">قيم خارج النطاق</string>
-    <string name="debug_fake_out_of_range_description">يحاكي أحيانًا قيماً خارج النطاق.</string>
     <string name="language_english_localized">الإنجليزية</string>
-    <string name="sensor_info_scale_sensitivity">النطاق والحساسية</string>
-    <string name="sensor_info_display_scale">مقياس العرض</string>
-    <string name="sensor_info_selected_unit">الوحدة المحددة</string>
-    <string name="sensor_info_scale_equivalence">تكافؤ المقاييس</string>
-    <string name="sensor_info_scale_levels">مستويات النطاق</string>
-    <string name="sensor_info_as7343_scale_levels">الكسب التلقائي: 16× أو 32× أو 64× أو 128× أو 256× أو 512× أو 1024×؛ يبدأ القياس عند 256×. يبقى زمن التكامل 27.8 مللي ثانية لكل دورة SMUX، مع ثلاث دورات للطيف الكامل.</string>
-    <string name="sensor_info_range_control">التحكم في النطاق</string>
-    <string name="sensor_info_as7343_range_control">يزداد الكسب دون 250 عدّة خام وينخفض ابتداءً من 9,200 عدّة. تختار حتى ثلاث قراءات نطاقًا مناسبًا.</string>
-    <string name="sensor_info_precision">الدقة</string>
-    <string name="sensor_info_precision_note">كل مضاعفة للكسب تضاعف الاستجابة الخام للضوء الضعيف، لكنها تقلل هامش التشبع إلى النصف تقريبًا. هذا يحسّن الحساسية والتمييز لا دقة المعايرة؛ وحدة العرض لا تؤثر.</string>
-    <string name="sensor_info_status">الحالة</string>
-    <string name="sensor_info_as7331_scale_pending">يستخدم البرنامج الثابت الحالي ملف القياس الثابت لبرنامج التشغيل؛ ضبط النطاق التلقائي غير مفعّل بعد.</string>
-    <string name="sensor_info_as7331_precision_note">زيادة الكسب أو زمن التحويل تحسّن تمييز الأشعة فوق البنفسجية الضعيفة مع تقليل هامش التشبع. ستظهر المستويات التلقائية الدقيقة بعد التحقق باستخدام عتاد AS7331.</string>
-    <string name="settings_section_sounds_and_alerts">الأصوات والتنبيهات</string>
-    <string name="export_database_dialog_title">تصدير قاعدة البيانات</string>
-    <string name="export_database_dialog_description">سيتم تصدير قاعدة بيانات التطبيق بالكامل والمخزنة على هذا الهاتف، بما في ذلك عمليات القياس والتنبيهات المحفوظة.</string>
-    <string name="export_error_log_dialog_title">تصدير سجل الأخطاء</string>
-    <string name="export_error_log_dialog_description">سيتم تصدير سجل أخطاء التطبيق المخزن على هذا الهاتف كملف تقني. لا يتضمن القياسات المحفوظة أو بيانات الاعتماد.</string>
-    <string name="export_diagnostic_dialog_title">تصدير تقرير التشخيص</string>
-    <string name="export_diagnostic_dialog_description">سيتم تصدير تقرير تشخيص المستشعر. يتضمن نتائج الاختبار التقنية، لكنه لا يتضمن كلمات مرور أو بيانات اعتماد.</string>
-    <string name="export_sensor_info_dialog_title">تصدير معلومات المستشعر</string>
-    <string name="export_sensor_info_dialog_description">سيتم تصدير جميع المعلومات المعروضة لهذا المستشعر كملف نصي.</string>
+    <string name="settings_section_notifications">الإشعارات</string>
     <string name="acquisition_feedback_description">اختر الإشارة التي يصدرها التطبيق عند حفظ قياس يدوي أو تلقائي.</string>
-    <string name="acquisition_feedback_preview_hint">اضغط على خيار لتجربته. يعتمد مستوى الصوت النهائي أيضًا على مستوى صوت منبّه الهاتف.</string>
+    <string name="acquisition_feedback_preview_hint">يعتمد مستوى الصوت النهائي أيضًا على مستوى صوت منبّه الهاتف.</string>
     <string name="confirmation_question_suffix">؟</string>
     <string name="threshold_alerts_sound_description_v2">اختر الإشارة التي يصدرها التطبيق عند تسجيل تنبيه.</string>
-    <string name="export_all_measurements_question">تصدير جميع القياسات المحفوظة؟</string>
-    <string name="export_all_measurements_warning">لم يتم تحديد أي قياسات، لذا سيتم تصدير جميع القياسات المحفوظة.</string>
-    <string name="export_all_alerts_question">تصدير جميع التنبيهات المسجلة؟</string>
-    <string name="export_all_alerts_warning">لم يتم تحديد أي تنبيهات، لذا سيتم تصدير جميع التنبيهات المسجلة.</string>
     <string name="list_filter_export_question">تصدير جميع النتائج المعروضة؟</string>
     <string name="list_filter_export_warning">لم يتم تحديد أي سجلات. سيتم تصدير جميع السجلات المطابقة لعوامل التصفية الحالية.</string>
-    <string name="export_all">تصدير الكل</string>
     <string name="settings_include_sensitive_information">تضمين البيانات الحساسة</string>
     <string name="settings_include_sensitive_information_description">يتضمن بيانات اعتماد الاتصال وربط المستشعر، مما يتيح استعادته دون USB. ستُطلب كلمة مرور للتشفير.</string>
     <string name="settings_encryption_password_title">كلمة مرور التشفير</string>
@@ -816,7 +767,6 @@
     <string name="settings_decryption_password_description">هذه النسخة الاحتياطية مشفرة. أدخل كلمة المرور المستخدمة عند التصدير.</string>
     <string name="settings_decryption_password_incorrect">كلمة المرور غير صحيحة أو الملف تالف.</string>
     <string name="settings_decrypt">فتح</string>
-    <string name="export_sensor_settings_description_complete">المعايرة وأخذ العينات وخيارات التشغيل وإعدادات الاتصال.</string>
     <string name="sensor_external_command_description">يوضح كيفية استجابة المستشعر للأوامر الواردة من الإدخال الخارجي.</string>
     <string name="sensor_external_command_info_action">شرح أوامر الإدخال الخارجي</string>
     <string name="sensor_external_command_info_description">يستخدم الإدخال الخارجي لالتقاط البيانات والتحكم في الجلسات. يتطلب تاريخاً ووقتاً صالحين في المستشعر.</string>
@@ -835,46 +785,15 @@
     <string name="session_sequence_filter_settings_title">إعدادات التنويعات</string>
     <string name="session_sequence_filter_cycle_size">التنويعات لكل قياس:</string>
     <string name="session_sequence_filter_position">التنويع</string>
-    <string name="export_variant_count_label">عدد التنويعات</string>
     <string name="session_sequence_filter_preview">عمليات الاقتناء لكل تنويع: %1$d</string>
     <string name="session_sequence_filter_preview_total">المتغيرات غير مفعّلة</string>
     <string name="session_sequence_filter_export_note">يُعرض كل تنويع ويُصدَّر كمجموعة منفصلة، وقد يزيد ذلك عدد الملفات المنشأة.</string>
     <string name="session_sequence_filter_example">عمليات الاقتناء المعروضة: %1$d، %2$d، %3$d…</string>
-    <string name="share_charts_combined_groups">كل الرسوم البيانية في ملف واحد</string>
-    <string name="share_charts_separate_groups">ملف واحد لكل رسم بياني</string>
-    <string name="share_variant_charts_by_variant">حسب التنويع</string>
-    <string name="share_variant_charts_by_group">حسب النطاق الطيفي</string>
-    <string name="share_variant_grouping_complete_sessions_only">يُطبّق فقط على الجلسات الكاملة ذات التنويعات.</string>
-    <string name="share_chart_file_count">ملفات PNG: %1$d</string>
-    <string name="share_readable_table_file_count">ملفات TXT: %1$d</string>
-    <string name="export_file_count">ملفات %1$s: %2$d</string>
     <string name="confirm">تأكيد</string>
-    <string name="debug_simulate_events">محاكاة الأحداث</string>
-    <string name="debug_simulate_events_description">يضيف قياسات وتنبيهات محاكاة.</string>
-    <string name="debug_simulate_events_question">هل تريد محاكاة أحداث تجريبية؟</string>
-    <string name="debug_simulate_events_confirmation">ستُضاف قياسات وتنبيهات تجريبية إلى قاعدة البيانات. لن تتغير السجلات الحالية.</string>
-    <string name="debug_simulate_events_completed">تمت إضافة %1$d من القياسات و%2$d من التنبيهات</string>
-    <string name="debug_simulation_note">محاكاة تصحيح الأخطاء</string>
     <string name="hold_action_seconds_confirmation">اضغط مطولًا على %1$s لمدة %2$d ثوانٍ للتأكيد.</string>
     <string name="accessibility_expanded">موسّع</string>
     <string name="accessibility_collapsed">مطوي</string>
     <string name="accessibility_activate_again_to_confirm">فعّل مرة أخرى للتأكيد</string>
-    <string name="sensor_info_micro_sd">microSD</string>
-    <string name="sensor_info_micro_sd_status">حالة البطاقة</string>
-    <string name="sensor_info_storage_backend">وحدة التخزين النشطة</string>
-    <string name="sensor_info_micro_sd_type">نوع البطاقة</string>
-    <string name="sensor_info_file_system">نظام الملفات</string>
-    <string name="sensor_info_record_capacity_total">السعة الإجمالية للسجلات</string>
-    <string name="sensor_info_record_capacity_free">السجلات المتبقية</string>
-    <string name="sensor_info_record_size">حجم السجل</string>
-    <string name="sensor_info_pending_records">سجلات بانتظار المزامنة</string>
-    <string name="sensor_info_storage_backend_micro_sd">microSD</string>
-    <string name="sensor_info_storage_backend_internal">ذاكرة طوارئ داخلية</string>
-    <string name="sensor_info_storage_backend_none">لا توجد وحدة تخزين</string>
-    <string name="sensor_info_read_write_test">اختبار القراءة والكتابة</string>
-    <string name="sensor_info_test_passed">ناجح</string>
-    <string name="sensor_info_test_failed">فشل</string>
-    <string name="sensor_info_components">المكونات</string>
     <string name="sensor_no_selection">لا يوجد مستشعر</string>
     <string name="alert_registration_title">تسجيل التنبيهات</string>
     <string name="alert_configure_values">إعداد العتبات</string>
@@ -883,5 +802,5 @@
     <string name="alert_max_registrations">الحد الأقصى للتسجيلات</string>
     <string name="alert_registration_count">عدد التسجيلات</string>
     <string name="alert_configure_first">اضبط قيمة واحدة على الأقل قبل البدء.</string>
-    <string name="sensor_info_last_connection">آخر اتصال</string>
+    <string name="sensor_simulation_open_settings">فتح الإعدادات</string>
 </resources>

@@ -27,23 +27,24 @@ class UvirAlertSensorAssociationTest {
         database().use { db ->
             db.execSQL("INSERT INTO alert_sessions VALUES(10, NULL), (20, 2)")
             db.execSQL("INSERT INTO alerts VALUES(1, 100, 10, NULL, NULL, NULL), (2, 200, 20, NULL, NULL, NULL), (3, 300, NULL, NULL, 'uvir-other', NULL), (4, 400, NULL, 2, NULL, NULL)")
-            assertEquals(3, backfillUnassociatedAlertSensors(db, 1))
-            assertEquals(1L, sensorId(db, "alerts", "id", 1))
+            assertEquals(2, backfillUnassociatedAlertSensors(db))
+            assertEquals(null, sensorId(db, "alerts", "id", 1))
             assertEquals(2L, sensorId(db, "alerts", "id", 2))
             assertEquals(2L, sensorId(db, "alerts", "id", 3))
             assertEquals(2L, sensorId(db, "alerts", "id", 4))
-            assertEquals(1L, sensorId(db, "alert_sessions", "session_id", 10))
+            assertEquals(null, sensorId(db, "alert_sessions", "session_id", 10))
             assertEquals(2L, sensorId(db, "alert_sessions", "session_id", 20))
-            assertEquals(0, backfillUnassociatedAlertSensors(db, 2))
+            assertEquals(0, backfillUnassociatedAlertSensors(db))
         }
     }
 
     @Test
-    fun ignoresInvalidDefaultAndPreservesRecordsWhenSourceIdsWouldCollide() {
+    fun newlyAssociatedSensorsNeverClaimRecordsCreatedWithoutASensor() {
         database().use { db ->
             db.execSQL("INSERT INTO alerts VALUES(1, 100, NULL, 1, NULL, 7), (2, 200, NULL, NULL, NULL, 7)")
-            assertEquals(0, backfillUnassociatedAlertSensors(db, 0))
-            assertEquals(0, backfillUnassociatedAlertSensors(db, 1))
+            assertEquals(0, backfillUnassociatedAlertSensors(db))
+            db.execSQL("INSERT INTO sensors VALUES(3, 'UVIR-NEW')")
+            assertEquals(0, backfillUnassociatedAlertSensors(db))
             assertEquals(1L, sensorId(db, "alerts", "id", 1))
             assertEquals(null, sensorId(db, "alerts", "id", 2))
             db.rawQuery("SELECT COUNT(*) FROM alerts", null).use {

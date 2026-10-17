@@ -32,6 +32,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -92,7 +93,7 @@ class UvirHomeHeaderTrialTest {
                             wirelessAppConnectionConfirmed = confirmed.value,
                             sensorActivityInProgress = activity.value,
                             versionInfoDescription = infoDescription,
-                            primaryText = colors.onSurface,
+                            primaryText = if (dark.value) Color.White else Color(0xFF101418),
                             secondaryText = colors.onSurfaceVariant,
                             onOpenVersionInfo = { infoClicks.incrementAndGet() },
                             onSensorConnectionModeChanged = { sourceClicks.incrementAndGet(); connectionMode.value = it },
@@ -159,6 +160,9 @@ class UvirHomeHeaderTrialTest {
             assertTrue(version.top >= logo.center.y && version.bottom <= logo.bottom)
             val selector = compose.onNodeWithTag("home_sensor_selector").fetchSemanticsNode().boundsInRoot
             val settings = compose.onNodeWithContentDescription(context.getString(R.string.acquisition_parameters)).fetchSemanticsNode().boundsInRoot
+            val header = compose.onNodeWithTag("trial_header").fetchSemanticsNode().boundsInRoot
+            assertEquals("The home header must not add its own top spacer",
+                header.top, minOf(logo.top, selector.top, settings.top), 1f)
             val glyph = compose.onNodeWithTag("home_sensor_glyph", true).fetchSemanticsNode().boundsInRoot
             val status = compose.onNodeWithTag("home_sensor_status").fetchSemanticsNode().boundsInRoot
             assertEquals(36f * density, selector.height, 1f)
@@ -252,10 +256,14 @@ class UvirHomeHeaderTrialTest {
                 assertDotAndSourceColor(Color(0xFF43A047))
                 val settings = compose.onNodeWithContentDescription(context.getString(R.string.acquisition_parameters)).captureToImage().toPixelMap()
                 val accent = if (night) darkColorScheme().primary else lightColorScheme().primary
+                val titleColor = if (night) Color.White else Color(0xFF101418)
                 val inset = with(compose.density) { 6.dp.toPx().toInt() }
                 assertEquals("Settings must have no resting circle",
                     background, settings[inset, settings.height / 2])
-                assertTrue((0 until settings.height).any { y -> (0 until settings.width).any { x -> settings[x, y] == accent } })
+                assertTrue("Settings must use the same day/night tint as the title",
+                    (0 until settings.height).any { y -> (0 until settings.width).any { x -> settings[x, y] == titleColor } })
+                assertTrue("Settings must not retain the purple accent",
+                    (0 until settings.height).none { y -> (0 until settings.width).any { x -> settings[x, y] == accent } })
             }
     }
 
@@ -313,7 +321,36 @@ class UvirHomeHeaderTrialTest {
         }
     }
 
-    @Test fun fakeDataShowsConnectedLabelWithoutClaimingRealActivity() {
+    @Test fun fakeDataKeepsTheSameBugDrawingForEveryConnectionModeInBothThemesAndDirections() {
+        fakeData.value = true
+        confirmed.value = false
+        showHeader()
+        compose.mainClock.autoAdvance = false
+        val debugLabel = context.getString(R.string.sensor_source_debug_accessibility)
+        for (night in listOf(false, true)) for (layout in listOf(LayoutDirection.Ltr, LayoutDirection.Rtl)) {
+            compose.runOnIdle { dark.value = night; direction.value = layout }
+            var reference: androidx.compose.ui.graphics.PixelMap? = null
+            for (mode in SensorConnectionMode.entries) {
+                compose.runOnIdle { connectionMode.value = mode }
+                compose.mainClock.advanceTimeBy(100)
+                val statusDescription = compose.onNodeWithTag("home_sensor_status")
+                    .fetchSemanticsNode().config[SemanticsProperties.ContentDescription].joinToString()
+                assertTrue("Accessibility describes simulation, not a real transport", statusDescription.contains(debugLabel))
+                val drawing = compose.onNodeWithTag("home_sensor_glyph", true).captureToImage().toPixelMap()
+                val expected = reference
+                if (expected == null) reference = drawing else {
+                    assertEquals(expected.width, drawing.width)
+                    assertEquals(expected.height, drawing.height)
+                    for (y in 0 until drawing.height) for (x in 0 until drawing.width) {
+                        assertEquals("Simulation glyph does not change with $mode, night=$night, layout=$layout",
+                            expected[x, y], drawing[x, y])
+                    }
+                }
+            }
+        }
+    }
+
+    @Test fun fakeDataShowsItsOwnLabelWithoutClaimingRealConnectionOrActivity() {
         fakeData.value = true
         showHeader()
         for (darkTheme in listOf(false, true)) {
@@ -325,7 +362,8 @@ class UvirHomeHeaderTrialTest {
                         activity.value = busy
                         confirmed.value = false
                     }
-                    compose.onNodeWithText(context.getString(R.string.sensor_status_connected)).assertIsDisplayed()
+                    compose.onNodeWithText(context.getString(R.string.sensor_status_simulated)).assertIsDisplayed()
+                    compose.onNodeWithText(context.getString(R.string.sensor_status_connected)).assertDoesNotExist()
                     compose.onNodeWithText(context.getString(R.string.debug_fake_data)).assertDoesNotExist()
                     compose.onNodeWithText(context.getString(R.string.sensor_info_activity)).assertDoesNotExist()
                 }

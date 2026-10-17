@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_section_display">表示</string>
+    <string name="settings_display_description">画面サイズに合わせてインターフェースを調整します。</string>
+    <string name="notifications_misc_title">その他</string>
+    <string name="notifications_misc_description">アプリのその他の通知を管理します。</string>
+    <string name="rtc_battery_notification_toggle">起動時に電池の警告を表示</string>
+    <string name="rtc_battery_notification_description">センサーの時計が停止していたら警告します。</string>
+    <string name="settings_mode_small_screen">小さい画面</string>
+    <string name="settings_mode_small_screen_active">小画面モード</string>
+    <string name="settings_mode_large_screen">大きい画面</string>
+    <string name="settings_mode_large_screen_unavailable">大画面モードはまだ利用できません。</string>
+    <string name="rtc_clock_warning_show_each_launch">起動するたびに表示</string>
+    <string name="settings_theme_title">テーマ</string>
+    <string name="settings_theme_description">アプリのテーマを選択して、コンテンツの表示をカスタマイズします。</string>
+    <string name="settings_theme_default">デフォルト</string>
+    <string name="settings_theme_light">ライト</string>
+    <string name="settings_theme_dark">ダーク</string>
+    <string name="settings_display_unavailable">この機能はまだ利用できません。</string>
+</resources>

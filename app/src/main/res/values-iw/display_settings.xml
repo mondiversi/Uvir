@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_section_display">תצוגה</string>
+    <string name="settings_display_description">התאם את הממשק לגודל המסך.</string>
+    <string name="notifications_misc_title">שונות</string>
+    <string name="notifications_misc_description">ניהול התראות נוספות של האפליקציה.</string>
+    <string name="rtc_battery_notification_toggle">הצגת התראת סוללה בעת ההפעלה</string>
+    <string name="rtc_battery_notification_description">להתריע אם השעון של חיישן נעצר.</string>
+    <string name="settings_mode_small_screen">מסך קטן</string>
+    <string name="settings_mode_small_screen_active">מצב מסך קטן</string>
+    <string name="settings_mode_large_screen">מסך גדול</string>
+    <string name="settings_mode_large_screen_unavailable">מצב מסך גדול עדיין לא זמין.</string>
+    <string name="rtc_clock_warning_show_each_launch">הצגה בכל הפעלה</string>
+    <string name="settings_theme_title">ערכת נושא</string>
+    <string name="settings_theme_description">בחרו את ערכת הנושא של האפליקציה כדי להתאים את מראה התוכן.</string>
+    <string name="settings_theme_default">ברירת מחדל</string>
+    <string name="settings_theme_light">בהירה</string>
+    <string name="settings_theme_dark">כהה</string>
+    <string name="settings_display_unavailable">התכונה הזו עדיין אינה זמינה.</string>
+</resources>

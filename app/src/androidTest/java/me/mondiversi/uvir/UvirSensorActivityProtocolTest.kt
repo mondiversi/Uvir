@@ -9,7 +9,7 @@ import org.junit.Test
 
 /** Parser-only checks: no app database, saved preferences or sensor commands. */
 class UvirSensorActivityProtocolTest {
-    private val uid = "689FACC8E720"
+    private val uid = "112233445566" // Synthetic fixture, not a real sensor identity.
     private val previous = UvirSensorRuntimeInfo(deviceId = uid, visibleCalibrationFactor = 1.25)
 
     private fun frame(active: Boolean) = JSONObject()

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Resolved by Android, including unsupported-language fallback. -->
+    <string name="settings_resource_language_tag">en</string>
+</resources>

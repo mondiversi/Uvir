@@ -6,6 +6,14 @@ silent automatically and shows a short message manually. Network, signature,
 download, installer and USB failures go to the existing error log; they are not
 reported as “no updates”. No update is installed without user action.
 
+The APK installer uses Android's standard confirmation screen, as in Space
+Compass. If Android requests permission to install applications and recreates
+the Uvir process, returning from Settings reloads the locally persisted signed
+catalog and APK. Signature, package/version, file length and SHA-256 are checked
+again before handing the file to Android. Recovery does not rely on an in-memory
+file reference and does not require another download. Sensor updates remain a
+separate, USB-only operation after updating the app.
+
 The availability dialog lists the app first, followed by associated sensors in
 display-name order, with current and available versions. Sensor versions are the
 last authenticated versions received from each sensor, not guesses. Unassociated
@@ -64,7 +72,7 @@ publishing so the repository and the GitHub release stay consistent.
 2. Run all tests, build the signed release APK and compile the ESP32 huge_app image.
 3. Run `tools/ReleaseTool.java` with Java 17 or newer:
 
-   `java tools/ReleaseTool.java ROOT OUTPUT FIRMWARE_BUILD 1.3.0 4 0.5.103`
+   `java tools/ReleaseTool.java ROOT OUTPUT FIRMWARE_BUILD 1.3.0 4 0.5.104`
 
 4. Create a draft GitHub release tagged `v1.3.0`. Upload every generated asset:
    APK, application BIN, USB archive, signed index and SHA256SUMS.

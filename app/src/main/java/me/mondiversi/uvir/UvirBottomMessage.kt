@@ -20,7 +20,11 @@ internal fun showUvirBottomMessage(
     longDuration: Boolean = false
 ) {
     val appContext = context.applicationContext
-    val density = appContext.resources.displayMetrics.density
+    val configuration = appContext.resources.configuration
+    val shortestWidthDp = configuration.smallestScreenWidthDp.takeIf { it > 0 }
+        ?: minOf(configuration.screenWidthDp, configuration.screenHeightDp)
+    val scale = uvirAutomaticScreenScale(shortestWidthDp)
+    val density = appContext.resources.displayMetrics.density * scale
     val horizontalPadding = (20f * density).roundToInt()
     val verticalPadding = (13f * density).roundToInt()
     val sideMargin = (24f * density).roundToInt()
@@ -30,7 +34,7 @@ internal fun showUvirBottomMessage(
         TextView(appContext).apply {
             this.text = text
             setTextColor(Color.WHITE)
-            textSize = 14f
+            textSize = 14f * scale
             gravity = Gravity.CENTER_VERTICAL
             maxLines = 6
             setLineSpacing(0f, 1.08f)

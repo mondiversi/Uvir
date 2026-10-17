@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_section_display">प्रदर्शन</string>
+    <string name="settings_display_description">इंटरफ़ेस को स्क्रीन के आकार के अनुसार ढालें.</string>
+    <string name="notifications_misc_title">अन्य</string>
+    <string name="notifications_misc_description">ऐप की अन्य सूचनाएँ प्रबंधित करें।</string>
+    <string name="rtc_battery_notification_toggle">ऐप शुरू होने पर बैटरी की चेतावनी दिखाएँ</string>
+    <string name="rtc_battery_notification_description">किसी सेंसर की घड़ी रुक गई हो तो चेतावनी दें।</string>
+    <string name="settings_mode_small_screen">छोटी स्क्रीन</string>
+    <string name="settings_mode_small_screen_active">छोटी स्क्रीन का मोड</string>
+    <string name="settings_mode_large_screen">बड़ी स्क्रीन</string>
+    <string name="settings_mode_large_screen_unavailable">बड़ी स्क्रीन का मोड अभी उपलब्ध नहीं है।</string>
+    <string name="rtc_clock_warning_show_each_launch">हर बार शुरू होने पर दिखाएँ</string>
+    <string name="settings_theme_title">थीम</string>
+    <string name="settings_theme_description">सामग्री का रूप बदलने के लिए ऐप की थीम चुनें।</string>
+    <string name="settings_theme_default">डिफ़ॉल्ट</string>
+    <string name="settings_theme_light">हल्की</string>
+    <string name="settings_theme_dark">गहरी</string>
+    <string name="settings_display_unavailable">यह सुविधा अभी उपलब्ध नहीं है।</string>
+</resources>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="update_available">Updates beschikbaar</string>
+    <string name="update_none">Geen updates beschikbaar</string>
+    <string name="update_check_failed">Kan niet op updates controleren. Bekijk het foutenlogboek.</string>
+    <string name="update_app">App bijwerken</string>
+    <string name="update_sensor">Sensor bijwerken</string>
+    <string name="update_app_first">Werk eerst de app bij.</string>
+    <string name="update_usb_required">Selecteer de sensor en verbind deze via USB, zonder actieve sessie en met alle records gesynchroniseerd.</string>
+    <string name="update_download">Downloaden en controleren…</string>
+    <string name="update_flash">Sensor bijwerken…</string>
+    <string name="update_verify">Sensor controleren…</string>
+    <string name="update_keep_connected">Koppel USB niet los en schakel de sensor niet uit. Houd indien nodig BOOT ingedrukt en probeer opnieuw.</string>
+    <string name="update_done">Sensor bijgewerkt</string>
+    <string name="update_failed">Update mislukt. Bekijk het foutenlogboek. Als de sensor niet meer opstart, herstel dan de firmware via USB vanaf een computer.</string>
+    <string name="update_permission">Sta Uvir toe om updates te installeren in de Android-instellingen.</string>
+    <string name="update_whats_new">Ondertekende updates voor app en sensor, gecontroleerde downloads en firmware laden via USB.</string>
+</resources>

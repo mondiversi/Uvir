@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sensor_general_actions_title">Acties</string>
+    <string name="sensor_general_actions_description">Beheer de sensor en de koppeling met de app.</string>
+    <string name="sensor_general_profile_title">Profiel</string>
+    <string name="sensor_general_profile_description">Kies de sensornaam.</string>
+    <string name="sensor_general_operation_title">Werking</string>
+    <string name="sensor_general_operation_description">Stel het gedrag van de sensor in.</string>
+</resources>

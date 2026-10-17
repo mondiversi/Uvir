@@ -49,6 +49,10 @@ internal fun restoreUvirApplicationDefaults(
             )
             .edit()
             .clear()
+            // Also emits a key-specific change on Android versions where clear()
+            // does not notify preference observers.
+            .putBoolean(KEY_SHOW_RTC_BATTERY_WARNING, true)
+            .putString(KEY_APP_THEME, UvirAppTheme.DEFAULT.storedValue)
             .commit()
     val credentialsCleared =
         UvirSensorCredentialStore.clear(applicationContext)

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rtc_clock_warning_title_single">시계 배터리 확인</string>
+    <string name="rtc_clock_warning_title_multiple">시계 배터리 확인</string>
+    <string name="rtc_clock_warning_message_single">센서 \"%1$s\"의 시계가 정지를 보고했습니다. 배터리가 소진되었거나 제대로 연결되지 않았을 수 있습니다. 확인하고 필요하면 교체하세요.</string>
+    <string name="rtc_clock_warning_message_multiple">다음 센서가 시계 정지를 보고했습니다:</string>
+    <string name="rtc_clock_warning_batteries_guidance">배터리가 소진되었거나 제대로 연결되지 않았을 수 있습니다. 확인하고 필요하면 교체하세요.</string>
+</resources>

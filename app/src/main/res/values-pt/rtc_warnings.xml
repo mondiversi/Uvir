@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rtc_clock_warning_title_single">Verificar a bateria do relógio</string>
+    <string name="rtc_clock_warning_title_multiple">Verificar as baterias dos relógios</string>
+    <string name="rtc_clock_warning_message_single">O relógio do sensor \"%1$s\" indicou uma paragem. A bateria poderá estar descarregada ou mal ligada. Verifica-a e substitui-a se necessário.</string>
+    <string name="rtc_clock_warning_message_multiple">Os seguintes sensores indicaram uma paragem do relógio:</string>
+    <string name="rtc_clock_warning_batteries_guidance">As baterias poderão estar descarregadas ou mal ligadas. Verifica-as e substitui-as se necessário.</string>
+</resources>
