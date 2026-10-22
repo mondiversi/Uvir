@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dark_offsets_calculate">محاسبهٔ آفست‌ها</string>
+    <string name="dark_offsets_instructions">حدود 30 ثانیه در شرایط مرجع پایدار اندازه‌گیری کنید. در تاریکی زمینهٔ حسگر جبران می‌شود؛ در روشنایی، نور موجود نیز کم می‌شود و اندازه‌گیری‌ها نسبی خواهند بود. برای اندازه‌گیری در تاریکی، ورودی‌های نوری را با ماده‌ای کدر در فروسرخ نزدیک نیز بپوشانید و LEDها را در وضعیت عادی کار نگه دارید. میانگین، نویز تصادفی را حذف و بهره را کالیبره نمی‌کند.</string>
+    <string name="dark_offsets_progress">در حال اندازه‌گیری: %1$s / ۳۰ ثانیه</string>
+    <string name="dark_offsets_result">پیشنهاد بر اساس %1$s خوانش. هیچ تنظیمی تغییر نکرده است.</string>
+    <string name="dark_offsets_failed">اندازه‌گیری متوقف شد یا در دسترس نیست. اتصال و حسگر را بررسی و دوباره تلاش کنید.</string>
+    <string name="dark_offsets_start">شروع اندازه‌گیری</string>
+    <string name="dark_offsets_apply">اعمال آفست‌ها</string>
+    <string name="dark_offsets_firmware_required">به میان‌افزار حسگر 0.5.110 یا جدیدتر نیاز دارد.</string>
+    <string name="calibration_reset_values">بازنشانی مقادیر</string>
+    <string name="calibration_reset_confirmation_title">مقادیر بازنشانی شوند؟</string>
+    <string name="calibration_reset_confirm_action">بازنشانی</string>
+    <string name="calibration_reset_confirmation_message">ضرایب تصحیح %1$s را به ۱ و آفست‌ها را به ۰ بازمی‌گرداند. سایر تنظیمات کالیبراسیون و پنجرهٔ نوری تغییر نمی‌کنند.</string>
+    <string name="optical_window_reset_confirmation_message">ضریب عمومی و همه ضریب‌های کانال پنجره نوری را به 1 بازمی‌گرداند. کالیبراسیون تغییر نمی‌کند.</string>
+</resources>

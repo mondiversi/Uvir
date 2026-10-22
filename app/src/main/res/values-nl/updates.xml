@@ -14,5 +14,5 @@
     <string name="update_done">Sensor bijgewerkt</string>
     <string name="update_failed">Update mislukt. Bekijk het foutenlogboek. Als de sensor niet meer opstart, herstel dan de firmware via USB vanaf een computer.</string>
     <string name="update_permission">Sta Uvir toe om updates te installeren in de Android-instellingen.</string>
-    <string name="update_whats_new">Ondertekende updates voor app en sensor, gecontroleerde downloads en firmware laden via USB.</string>
+    <string name="update_whats_new">CSV-, TXT- en PNG-exports met sensormodellen, compacte spectrale verwijzingen en beter leesbare grafieklegenda’s.</string>
 </resources>

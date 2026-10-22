@@ -47,7 +47,7 @@ class UvirOutlinedButtonPaletteTest {
                         purple = MaterialTheme.colorScheme.primary
                         palettes = listOf(uvirOutlinedActionColors(primary),
                             uvirDestructiveOutlinedButtonColors(), uvirPrimaryOutlinedButtonColors())
-                        borders = listOf(uvirOutlinedActionBorder(enabled.value, secondary),
+                        borders = listOf(uvirOutlinedActionBorder(enabled.value, primary),
                             uvirDestructiveOutlinedButtonBorder(enabled.value, secondary),
                             uvirPrimaryOutlinedButtonBorder(enabled.value, secondary))
                         Column(Modifier.width(250.dp).background(card)) {
@@ -76,6 +76,8 @@ class UvirOutlinedButtonPaletteTest {
             assertNotEquals(normal.contentColor, palettes[2].contentColor)
             assertEquals((if (dark) Color.White else Color(0xFF101418)).copy(alpha = if (dark) 0.16f else 0.04f),
                 normal.containerColor)
+            if (active) assertEquals(BorderStroke(1.dp, normal.contentColor.copy(alpha = if (dark) .38f else .30f)), borders[0])
+            else assertNull(borders[0])
             for (index in 1..2) {
                 val accent = if (index == 1) red else purple
                 assertEquals(accent.copy(alpha = if (dark) 0.16f else 0.10f), palettes[index].containerColor)

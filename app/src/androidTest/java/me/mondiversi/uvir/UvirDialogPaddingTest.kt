@@ -2,10 +2,12 @@ package me.mondiversi.uvir
 
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -34,6 +36,29 @@ import org.junit.Test
 /** Isolated dialog geometry: no preferences, sensor commands or archive records. */
 class UvirDialogPaddingTest {
     @get:Rule val compose = createComposeRule()
+
+    @Test fun exportConfirmActionsStayTogetherWhenCancelWraps() {
+        compose.setContent {
+            KeepUvirVerificationScreenOn()
+            MaterialTheme {
+                BoxWithConstraints(Modifier.fillMaxSize()) {
+                    val actionWidth = (maxWidth - 48.dp) * 0.4f
+                    UvirAlertDialog(onDismissRequest = {}, title = { Text("Export") }, text = {},
+                        dismissButton = { Box(Modifier.width(actionWidth).height(48.dp).testTag("wrap_cancel")) },
+                        confirmButton = {
+                            Box(Modifier.width(actionWidth).height(48.dp).testTag("wrap_save"))
+                            Box(Modifier.width(actionWidth).height(48.dp).testTag("wrap_share"))
+                        })
+                }
+            }
+        }
+        val cancel = bounds("wrap_cancel")
+        val save = bounds("wrap_save")
+        val share = bounds("wrap_share")
+        assertEquals(save.top, share.top, 1f)
+        org.junit.Assert.assertTrue(save.right < share.left)
+        org.junit.Assert.assertTrue(cancel.top > save.bottom)
+    }
 
     @Test fun allScreenScalesKeepOriginalInsetsInsideFullWidthDialogs() {
         val width = mutableIntStateOf(400)

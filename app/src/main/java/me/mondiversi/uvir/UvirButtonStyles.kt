@@ -78,6 +78,11 @@ internal val UvirDestructiveActionColor: Color
     @Composable get() = if (isSystemInDarkTheme())
         uvirDestructiveButtonContainerColor() else UvirDestructiveActionBaseColor
 
+/** Cancel/stop captions share the same semantic red; disabled actions stay muted. */
+@Composable
+internal fun uvirCancelTextButtonColors(): ButtonColors =
+    ButtonDefaults.textButtonColors(contentColor = UvirDestructiveActionColor)
+
 /** A quieter red reserved for the filled surface of destructive buttons.
  * Day text/icons keep their existing red; night text/icons reuse this surface red. */
 @Composable
@@ -195,8 +200,9 @@ internal fun uvirNeutralOutlinedContainerColor(color: Color): Color =
 private fun uvirQuietActionBorderColor(color: Color): Color =
     color.copy(alpha = if (isSystemInDarkTheme()) 0.38f else 0.30f)
 
+/** Neutral and accent actions share outline opacity; the neutral hue still matches its label. */
 @Composable
 internal fun uvirOutlinedActionBorder(
     enabled: Boolean,
-    secondaryText: Color
-): BorderStroke? = uvirOutlinedButtonBorder(enabled, secondaryText, 1.dp)
+    contentColor: Color
+): BorderStroke? = uvirOutlinedButtonBorder(enabled, contentColor, 1.dp)

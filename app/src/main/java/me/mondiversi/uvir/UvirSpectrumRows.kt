@@ -13,6 +13,9 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.ProgressBarRangeInfo
+import androidx.compose.ui.semantics.progressBarRangeInfo
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -124,12 +127,7 @@ fun SpectrumCard(
                             text = if (outOfRange) {
                                 stringResource(R.string.out_of_range_short)
                             } else {
-                                "${formatUvirIrradianceNumber(
-                                    total,
-                                    3,
-                                    LocalUvirNumericFormat.current,
-                                    LocalUvirIrradianceUnit.current
-                                )} ${LocalUvirIrradianceUnit.current.symbol}"
+                                "${mainViewIrradianceNumber(total)} ${LocalUvirIrradianceUnit.current.symbol}"
                             },
                             color = if (alerted) Color(0xFFF57C00) else primaryText,
                             fontSize = 12.sp,
@@ -156,7 +154,7 @@ fun SpectrumCard(
                             color = secondaryText,
                             fontSize = 12.sp,
                             lineHeight = 19.sp,
-                            fontWeight = FontWeight.Bold,
+                            fontWeight = FontWeight.Normal,
                             maxLines = 1
                         )
                         Text(
@@ -202,7 +200,7 @@ fun SpectrumCard(
                             history = liveHistory,
                             series = liveChartSeries,
                             unit = LocalUvirIrradianceUnit.current.symbol,
-                            valueScale = LocalUvirIrradianceUnit.current::fromCanonicalUwCm2,
+                            valueScale = LocalUvirIrradianceUnit.current::fromCanonicalWm2,
                             outOfRange = { it.isOutOfRange(group) },
                             primaryText = primaryText,
                             secondaryText = secondaryText
@@ -241,7 +239,7 @@ fun SpectrumRow(
     name: String,
     band: String,
     value: Double,
-    percent: Float,
+    percent: Float?,
     primaryText: Color,
     secondaryText: Color,
     trackColor: Color,
@@ -311,12 +309,7 @@ fun SpectrumRow(
                     if (LocalUvirDisplayedOutOfRange.current) {
                         stringResource(R.string.out_of_range_short)
                     } else {
-                        "${formatUvirIrradianceNumber(
-                            value,
-                            3,
-                            LocalUvirNumericFormat.current,
-                            LocalUvirIrradianceUnit.current
-                        )} ${LocalUvirIrradianceUnit.current.symbol}"
+                        "${mainViewIrradianceNumber(value)} ${LocalUvirIrradianceUnit.current.symbol}"
                     },
                 color =
                     if (alerted) {
@@ -331,11 +324,11 @@ fun SpectrumRow(
 
             Text(
                 text =
-                    "${formatUvirNumber(
-                        percent.toDouble() * 100.0,
+                    percent?.let { "${formatUvirNumber(
+                        it.toDouble() * 100.0,
                         1,
                         LocalUvirNumericFormat.current
-                    )}%",
+                    )}%" } ?: "—",
                 color =
                     secondaryText,
                 fontSize =
@@ -345,7 +338,7 @@ fun SpectrumRow(
         }
 
         SpectrumBar(
-            percent = percent,
+            percent = percent ?: 0f,
             trackColor = trackColor,
             barColor = barColor
         )
@@ -440,12 +433,7 @@ fun DerivedSpectrumRow(
                     if (LocalUvirDisplayedOutOfRange.current) {
                         stringResource(R.string.out_of_range_short)
                     } else {
-                        "${formatUvirIrradianceNumber(
-                            value,
-                            3,
-                            LocalUvirNumericFormat.current,
-                            LocalUvirIrradianceUnit.current
-                        )} ${LocalUvirIrradianceUnit.current.symbol}"
+                        "${mainViewIrradianceNumber(value)} ${LocalUvirIrradianceUnit.current.symbol}"
                     },
                 color =
                     if (alerted) {
@@ -490,7 +478,7 @@ fun SpectrumBar(
 ) {
 
     val fraction =
-        percent.coerceIn(
+        (percent.takeIf { it.isFinite() } ?: 0f).coerceIn(
             0f,
             1f
         )
@@ -500,6 +488,7 @@ fun SpectrumBar(
             Modifier
                 .fillMaxWidth()
                 .height(7.dp)
+                .semantics { progressBarRangeInfo = ProgressBarRangeInfo(fraction, 0f..1f) }
     ) {
         val cornerRadius =
             CornerRadius(

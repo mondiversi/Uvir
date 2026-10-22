@@ -58,7 +58,7 @@ class UvirLiveIslandHeaderTest {
                             group = SensorGroup.UV,
                             title = headerText,
                             total = 1.0,
-                            bandLabel = "315–400 nm",
+                            bandLabel = "315–410 nm",
                             relativePercent = 0.5f,
                             trackColor = Color.LightGray,
                             barColor = Color.Blue,
@@ -120,7 +120,7 @@ class UvirLiveIslandHeaderTest {
                         group = SensorGroup.UV,
                         title = "Ultravioletti",
                         total = 1.0,
-                        bandLabel = "100–400 nm",
+                        bandLabel = "240–410 nm",
                         relativePercent = 0.5f,
                         trackColor = Color.LightGray,
                         barColor = Color.Blue,
@@ -135,7 +135,7 @@ class UvirLiveIslandHeaderTest {
                     ) {
                         SpectrumRow(
                             name = "UVC",
-                            band = "100–280 nm",
+                            band = "240–280 nm",
                             value = 0.5,
                             percent = 0.5f,
                             primaryText = Color.Black,
@@ -149,11 +149,11 @@ class UvirLiveIslandHeaderTest {
         }
         val heading = compose.onNodeWithText("Ultravioletti", useUnmergedTree = true)
             .fetchSemanticsNode().boundsInRoot
-        val headingBand = compose.onNodeWithText("100–400 nm", useUnmergedTree = true)
+        val headingBand = compose.onNodeWithText("240–410 nm", useUnmergedTree = true)
             .fetchSemanticsNode().boundsInRoot
         val rowHeading = compose.onNodeWithText("UVC", useUnmergedTree = true)
             .fetchSemanticsNode().boundsInRoot
-        val rowBand = compose.onNodeWithText("100–280 nm", useUnmergedTree = true)
+        val rowBand = compose.onNodeWithText("240–280 nm", useUnmergedTree = true)
             .fetchSemanticsNode().boundsInRoot
         val values = compose.onAllNodesWithText("mW/cm²", substring = true, useUnmergedTree = true)
             .fetchSemanticsNodes().map { it.boundsInRoot }

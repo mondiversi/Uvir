@@ -22,6 +22,7 @@ enum class ConnectivityIconType {
     DISCONNECTED,
     SENSOR,
     GENERAL,
+    GEAR,
     ACTIONS,
     APP,
     PHONE,
@@ -356,6 +357,24 @@ fun ConnectivitySectionIcon(
                         size.height * 0.50f
                     )
                 )
+            }
+
+            ConnectivityIconType.GEAR -> {
+                val gear = Path().apply {
+                    repeat(8) { tooth ->
+                        listOf(-22.5 to .32f, -11.25 to .42f, 11.25 to .42f, 22.5 to .32f)
+                            .forEachIndexed { corner, (offset, radius) ->
+                                val angle = Math.toRadians(tooth * 45.0 + offset)
+                                val x = center.x + kotlin.math.cos(angle).toFloat() * size.minDimension * radius
+                                val y = center.y + kotlin.math.sin(angle).toFloat() * size.minDimension * radius
+                                if (tooth == 0 && corner == 0) moveTo(x, y) else lineTo(x, y)
+                            }
+                    }
+                    close()
+                }
+                drawPath(gear, tint, style = Stroke(strokeWidth,
+                    join = androidx.compose.ui.graphics.StrokeJoin.Round))
+                drawCircle(tint, size.minDimension * .14f, center, style = Stroke(strokeWidth))
             }
 
             ConnectivityIconType.GENERAL -> {

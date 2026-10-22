@@ -133,7 +133,10 @@ private fun StringBuilder.appendSensorSnapshot(
     appendDiagnosticField("Sensors", sensorNames)
     appendDiagnosticField("Firmware", info.firmwareVersion)
     appendDiagnosticField("Unit", info.unit)
+    appendDiagnosticField("Canonical unit", info.canonicalUnit)
     appendDiagnosticField("Calibration", info.calibrationKind)
+    appendDiagnosticField("Offsets (W/m2)", info.calibrationOffsets?.toJson()?.toString().orEmpty())
+    appendDiagnosticField("Per-channel calibration factors", info.calibrationChannelFactors?.toJson()?.toString().orEmpty())
     appendDiagnosticField(
         "Visible calibration factor",
         info.visibleCalibrationFactor?.toString().orEmpty()

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_irradiance_decimals">Nafasi za desimali zinazoonyeshwa</string>
+    <string name="live_irradiance_decimals_description">Inatumika kwa thamani zinazoonyeshwa na uhamishaji maalum. Sifuri za mwisho zinaendelea kuonekana; data iliyohifadhiwa na uhamishaji wa kisayansi havibadiliki.</string>
+</resources>

@@ -155,9 +155,8 @@ class UvirHomeHeaderTrialTest {
         for (night in listOf(false, true)) for (layout in listOf(LayoutDirection.Ltr, LayoutDirection.Rtl)) {
             compose.runOnIdle { dark.value = night; direction.value = layout }
             val logo = compose.onNodeWithContentDescription(infoDescription).fetchSemanticsNode().boundsInRoot
-            val version = compose.onNodeWithText(BuildConfig.VERSION_NAME, useUnmergedTree = true).fetchSemanticsNode().boundsInRoot
-            assertEquals(logo.center.x, version.center.x, 1f)
-            assertTrue(version.top >= logo.center.y && version.bottom <= logo.bottom)
+            compose.onNodeWithTag("home_info_version", useUnmergedTree = true).assertDoesNotExist()
+            compose.onNodeWithText(BuildConfig.VERSION_NAME, useUnmergedTree = true).assertDoesNotExist()
             val selector = compose.onNodeWithTag("home_sensor_selector").fetchSemanticsNode().boundsInRoot
             val settings = compose.onNodeWithContentDescription(context.getString(R.string.acquisition_parameters)).fetchSemanticsNode().boundsInRoot
             val header = compose.onNodeWithTag("trial_header").fetchSemanticsNode().boundsInRoot

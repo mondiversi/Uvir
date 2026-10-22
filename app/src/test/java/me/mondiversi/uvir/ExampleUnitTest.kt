@@ -81,7 +81,7 @@ class ExampleUnitTest {
             DATA_EXPORT_LANGUAGE
         )
         assertEquals(
-            MEASUREMENT_EXPORT_COLUMNS_EN + "Out_of_range",
+            MEASUREMENT_EXPORT_COLUMNS_EN + listOf("Out_of_range", "Optical_window") + hardwareCsvColumns("en"),
             measurementExportColumns(
                 DATA_EXPORT_LANGUAGE
             )

@@ -146,6 +146,14 @@ comparison. Axis labels adapt decimal precision or use compact scientific
 notation. OL samples do not set the scale; percentage alert charts retain their
 threshold-centered logarithmic reference. Neither stored data nor schema changes.
 
+Irradiance storage is SI `W/m²` from database schema 25 and firmware 0.5.112.
+`UvirIrradianceStorage.kt` and `UvirSiDatabaseMigration.kt` isolate legacy-unit
+conversion from display preferences and typed imports. The v1 sensor protocol
+remains an explicitly labelled compatibility boundary in `uW/cm2`; all sensor
+arithmetic and new v3 offline records use SI. Unit markers on offset/snapshot JSON,
+an atomic preference marker and SQLite's upgrade transaction prevent double
+conversion. See [the migration contract](docs/SI_IRRADIANCE_MIGRATION.md).
+
 Automatic-acquisition draft cards reuse `SettingsSection` through the small
 `UvirAutomaticAcquisitionSection` adapter. Checkbox and header taps share the
 full-width clickable header, focus normalization and post-layout bring-into-view.

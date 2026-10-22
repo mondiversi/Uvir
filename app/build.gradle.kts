@@ -54,8 +54,8 @@ android {
         applicationId = "me.mondiversi.uvir"
         minSdk = 26
         targetSdk = 37
-        versionCode = 4
-        versionName = "1.3.0"
+        versionCode = 5
+        versionName = "1.4.0"
         buildConfigField(
             "String",
             "GITHUB_REPOSITORY_URL",
@@ -84,6 +84,10 @@ android {
 
     buildTypes {
         debug {
+            // Disposable package for device tests; never migrate the installed user's archive.
+            if (providers.gradleProperty("uvirIsolatedVerification").orNull == "true") {
+                applicationIdSuffix = ".verification"
+            }
             // Keep Android Studio Run/Debug compatible with the locally
             // installed release APK. A new PC can read the private Dropbox
             // configuration without needing a project-local credentials file.

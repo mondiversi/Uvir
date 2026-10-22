@@ -177,8 +177,9 @@ private fun UvirDialogActionFlow(modifier: Modifier, content: @Composable () -> 
         val rows = mutableListOf<List<Placeable>>()
         var row = mutableListOf<Placeable>()
         var rowWidth = 0
-        measurables.forEach { measurable ->
-            val child = measurable.measure(constraints.copy(minWidth = 0, minHeight = 0))
+        val children = measurables.map { it.measure(constraints.copy(minWidth = 0, minHeight = 0)) }
+        // Pack from the confirmation end: keep SAVE/SHARE together if CANCEL wraps.
+        children.asReversed().forEach { child ->
             val gap = if (row.isEmpty()) 0 else horizontalGap
             if (row.isNotEmpty() && rowWidth + gap + child.width > constraints.maxWidth) {
                 rows.add(row)
@@ -186,7 +187,7 @@ private fun UvirDialogActionFlow(modifier: Modifier, content: @Composable () -> 
                 rowWidth = 0
             }
             rowWidth += (if (row.isEmpty()) 0 else horizontalGap) + child.width
-            row.add(child)
+            row.add(0, child)
         }
         if (row.isNotEmpty()) rows.add(row)
         val widths = rows.map { it.sumOf { child -> child.width } + horizontalGap * (it.size - 1) }
@@ -195,7 +196,7 @@ private fun UvirDialogActionFlow(modifier: Modifier, content: @Composable () -> 
         val height = constraints.constrainHeight(heights.sum() + verticalGap * (rows.size - 1).coerceAtLeast(0))
         layout(width, height) {
             var y = 0
-            rows.indices.reversed().forEach { index ->
+            rows.indices.forEach { index ->
                 var x = width - widths[index]
                 rows[index].forEach { child ->
                     child.placeRelative(x, y + (heights[index] - child.height) / 2)

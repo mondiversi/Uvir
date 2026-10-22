@@ -574,6 +574,7 @@ internal fun sensorSampleToJson(
     sample: SensorSample
 ): JSONObject =
     JSONObject()
+        .put("unit", UVIR_CANONICAL_IRRADIANCE_UNIT)
         .put("uvc", sample.uvc)
         .put("uvb", sample.uvb)
         .put("uva", sample.uva)
@@ -586,6 +587,7 @@ internal fun sensorSampleToJson(
         .put("f8", sample.f8)
         .put("nir", sample.nir)
         .put("quality_flags", sample.qualityFlags)
+        .put("optical_window", sample.opticalWindow?.toJson())
 
 internal fun JSONObject.toSensorSample(): SensorSample =
     SensorSample(
@@ -600,8 +602,9 @@ internal fun JSONObject.toSensorSample(): SensorSample =
         rosso = optDouble("rosso", 0.0),
         f8 = optDouble("f8", 0.0),
         nir = optDouble("nir", 0.0),
-        qualityFlags = optInt("quality_flags", 0)
-    )
+        qualityFlags = optInt("quality_flags", 0),
+        opticalWindow = opticalWindowOrNull()
+    ).scaledIrradiance(irradianceUnitScaleToWm2(optString("unit", UVIR_LEGACY_IRRADIANCE_UNIT)))
 
 internal fun savedRecordToJson(
     record: SavedRecordDetail

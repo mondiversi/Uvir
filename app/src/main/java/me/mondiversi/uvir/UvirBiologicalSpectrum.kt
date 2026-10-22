@@ -41,6 +41,12 @@ fun BiologicalEffectsContent(
     secondaryText: Color
 ) {
     val estimate = biologicalEffects(sample)
+    val displayedDigits = currentUvirLiveIrradianceDecimals()
+    val displayedUnit = LocalUvirIrradianceUnit.current
+    val uvTotal = sample.uvc + sample.uvb + sample.uva
+    val visibleTotal = sample.violetto + sample.blu + sample.verde + sample.giallo + sample.arancione + sample.rosso
+    fun displayScore(value: Double, total: Double) =
+        uvirLiveIrradianceFraction(value, total, displayedDigits, displayedUnit, percentDigits = 0)
     val metrics = remember {
         listOf(
             ThresholdAlertMetric.BIO_DNA_UV,
@@ -141,7 +147,7 @@ fun BiologicalEffectsContent(
                         history = liveHistory,
                         series = biologicalLiveChartSeries(),
                         unit = LocalUvirIrradianceUnit.current.unitLabel(equivalent = true),
-                        valueScale = LocalUvirIrradianceUnit.current::fromCanonicalUwCm2,
+                        valueScale = LocalUvirIrradianceUnit.current::fromCanonicalWm2,
                         outOfRange = { it.isOutOfRange(SensorGroup.BIOLOGICAL) },
                         primaryText = primaryText,
                         secondaryText = secondaryText
@@ -152,7 +158,7 @@ fun BiologicalEffectsContent(
                         description = stringResource(R.string.dna_uv_proxy_description),
                         value = estimate.dnaUvProxy,
                         outOfRange = sample.isOutOfRange(ThresholdAlertMetric.BIO_DNA_UV),
-                        score = estimate.dnaUvScore,
+                        score = displayScore(estimate.dnaUvProxy, uvTotal),
                         color = thresholdAlertMetricDisplayColor(ThresholdAlertMetric.BIO_DNA_UV),
                         alerted = ThresholdAlertMetric.BIO_DNA_UV in alertedMetrics,
                         primaryText = primaryText,
@@ -164,7 +170,7 @@ fun BiologicalEffectsContent(
                         description = stringResource(R.string.uva_photoaging_proxy_description),
                         value = estimate.uvaPhotoagingProxy,
                         outOfRange = sample.isOutOfRange(ThresholdAlertMetric.BIO_UVA_PHOTOAGING),
-                        score = estimate.uvaPhotoagingScore,
+                        score = displayScore(estimate.uvaPhotoagingProxy, uvTotal),
                         color = thresholdAlertMetricDisplayColor(ThresholdAlertMetric.BIO_UVA_PHOTOAGING),
                         alerted = ThresholdAlertMetric.BIO_UVA_PHOTOAGING in alertedMetrics,
                         primaryText = primaryText,
@@ -176,7 +182,7 @@ fun BiologicalEffectsContent(
                         description = stringResource(R.string.hev_oxidative_proxy_description),
                         value = estimate.hevOxidativeProxy,
                         outOfRange = sample.isOutOfRange(ThresholdAlertMetric.BIO_HEV_OXIDATIVE),
-                        score = estimate.hevOxidativeScore,
+                        score = displayScore(estimate.hevOxidativeProxy, visibleTotal),
                         color = thresholdAlertMetricDisplayColor(ThresholdAlertMetric.BIO_HEV_OXIDATIVE),
                         alerted = ThresholdAlertMetric.BIO_HEV_OXIDATIVE in alertedMetrics,
                         primaryText = primaryText,
@@ -239,12 +245,7 @@ private fun BiologicalEffectRow(
                     if (outOfRange) {
                         stringResource(R.string.out_of_range_short)
                     } else {
-                        "${formatUvirIrradianceNumber(
-                            value,
-                            3,
-                            LocalUvirNumericFormat.current,
-                            LocalUvirIrradianceUnit.current
-                        )} ${LocalUvirIrradianceUnit.current.unitLabel(equivalent = true)}"
+                        "${mainViewIrradianceNumber(value)} ${LocalUvirIrradianceUnit.current.unitLabel(equivalent = true)}"
                     },
                 color =
                     if (alerted) UvirAttentionColor else primaryText,

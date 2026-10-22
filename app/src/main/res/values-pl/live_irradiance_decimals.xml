@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_irradiance_decimals">Wyświetlane miejsca dziesiętne</string>
+    <string name="live_irradiance_decimals_description">Dotyczy wyświetlanych wartości i eksportów niestandardowych. Końcowe zera pozostają widoczne; zapisane dane i eksporty naukowe nie zmieniają się.</string>
+</resources>

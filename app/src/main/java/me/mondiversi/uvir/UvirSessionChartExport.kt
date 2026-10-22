@@ -31,7 +31,7 @@ internal fun createSessionChartFile(
     val exportFormatting = uvirExportFormatting(context)
     val exportContext = exportFormatting.context
     val irradianceUnit = exportFormatting.irradianceUnit
-    val valueScale: (Double) -> Double = irradianceUnit::fromCanonicalUwCm2
+    val valueScale: (Double) -> Double = exportFormatting::chartValue
 
     val width = 1600
     val paint = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -67,7 +67,8 @@ internal fun createSessionChartFile(
                 sensorName = exportSensorNames(headerRecords.map { it.sensorDisplayName }),
                 noteLabel = exportContext.getString(R.string.share_note_label),
                 sensorLabel = exportContext.getString(R.string.sensor_selector_label),
-                emptyNote = exportContext.getString(R.string.no_note)
+                emptyNote = exportContext.getString(R.string.no_note),
+                hardwareCaption = exportHardwareCaption(exportContext, headerRecords.map { it.sensorId })
             ),
             paint = notePaint,
             maxWidth = 1420f
@@ -84,7 +85,11 @@ internal fun createSessionChartFile(
     val spansMultipleDays =
         sessionChartSpansMultipleDays(records.first().timestamp, records.last().timestamp)
     val timeAxisExtra = if (spansMultipleDays) 30 else 0
-    val height = 1145 + timeAxisExtra + headerOffset.toInt()
+    val series = sessionChartSeries(records, group)
+    val legend = UvirChartExportLegend(series.map { item ->
+        UvirChartLegendEntry(chartExportChannelLabel(exportContext, item.displayLabelResource, item.label), item.color.toArgb())
+    }, columns = 3, width = 1380f, paint = textPaint)
+    val height = 1035 + timeAxisExtra + headerOffset.toInt() + legend.height.toInt() + 40
     val bitmap =
         Bitmap.createBitmap(
             width,
@@ -189,7 +194,6 @@ internal fun createSessionChartFile(
     val top = 310f + headerOffset
     val right = 1510f
     val bottom = 920f + headerOffset
-    val series = sessionChartSeries(records, group)
     val startTimestamp = records.first().timestamp
     val endTimestamp = records.last().timestamp
     val timeSpan =
@@ -223,7 +227,7 @@ internal fun createSessionChartFile(
                     ) + 28f
             )
         }
-    val maximum = valueScale(uvirChartMaximum(
+    val maximum = uvirChartMaximum((
         maximumCanonicalOverride?.let { listOf(it) }
             ?: series
                 .flatMap { item ->
@@ -231,19 +235,14 @@ internal fun createSessionChartFile(
                         item.outOfRange.getOrNull(index) != true
                     }
                 }
-    ))
+    ).map(valueScale), exportFormatting.chartZeroMaximum())
 
     repeat(5) { index ->
         val y = top + (bottom - top) * index / 4f
         canvas.drawLine(left, y, right, y, gridPaint)
         val value = maximum * (4 - index) / 4.0
         canvas.drawText(
-            formatUvirChartAxisValue(
-                value,
-                maximum,
-                irradianceUnit.displayFractionDigits(2),
-                exportFormatting.numericFormat
-            ),
+            exportFormatting.chartAxisValue(value, maximum),
             24f,
             y + 9f,
             textPaint
@@ -367,34 +366,7 @@ internal fun createSessionChartFile(
         }
     }
 
-    var legendX = left
-    var legendY = 1035f + timeAxisExtra + headerOffset
-    series.forEach { item ->
-        paint.color = item.color.toArgb()
-        paint.style = Paint.Style.FILL
-        canvas.drawCircle(
-            legendX,
-            legendY - 9f,
-            10f,
-            paint
-        )
-        canvas.drawText(
-            item.displayLabelResource?.let { exportContext.getString(it) } ?: item.label,
-            legendX + 20f,
-            legendY,
-            textPaint
-        )
-        legendX +=
-            40f +
-                textPaint.measureText(
-                    item.displayLabelResource?.let { exportContext.getString(it) }
-                        ?: item.label
-                ) + 55f
-        if (legendX > 1380f) {
-            legendX = left
-            legendY += 34f
-        }
-    }
+    legend.draw(canvas, left, 1035f + timeAxisExtra + headerOffset)
 
     val sharedDirectory =
         File(context.cacheDir, "shared").apply {

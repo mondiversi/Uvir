@@ -1,4 +1,6 @@
 #pragma once
+#include "UvirIrradianceUnits.h"
+#include "UvirStoredRecord.h"
 
 #include <Arduino.h>
 #include <LittleFS.h>
@@ -9,60 +11,7 @@
 
 #include "UvirHardwareConfig.h"
 #include "UvirFram.h"
-
-constexpr uint8_t kUvirStoredBandCount = 11;
-constexpr uint8_t kUvirAcquisitionExternalTriggerFlag = 0x01;
-
-enum class UvirStoredRecordType : uint8_t {
-  Acquisition = 1,
-  Alert = 2,
-  Error = 3,
-};
-
-struct UvirStoredRecordV1 {
-  uint32_t magic = 0x55564952;
-  uint16_t version = 1;
-  uint8_t type = 0;
-  uint8_t reserved = 0;
-  uint64_t recordId = 0;
-  uint64_t timestampMs = 0;
-  int64_t sessionId = 0;
-  uint32_t sequence = 0;
-  float bands[kUvirStoredBandCount] = {};
-  char note[96] = {};
-  char details[224] = {};
-  uint32_t checksum = 0;
-};
-
-struct UvirStoredErrorPayload {
-  char code[48];
-  char message[176];
-};
-
-struct UvirStoredAcquisitionPayload {
-  float bands[kUvirStoredBandCount];
-  char legacyNote[96];
-};
-
-union UvirStoredPayload {
-  UvirStoredAcquisitionPayload acquisition;
-  char details[224];
-  UvirStoredErrorPayload error;
-  uint8_t raw[224];
-};
-
-struct UvirStoredRecord {
-  uint32_t magic = 0x55564952;
-  uint16_t version = 2;
-  uint8_t type = 0;
-  uint8_t reserved = 0;
-  uint64_t recordId = 0;
-  uint64_t timestampMs = 0;
-  int64_t sessionId = 0;
-  uint32_t sequence = 0;
-  UvirStoredPayload payload = {};
-  uint32_t checksum = 0;
-};
+#include "UvirOpticalHistory.h"
 
 enum class UvirStorageBackend : uint8_t {
   None,
@@ -80,6 +29,10 @@ class UvirOfflineStore {
   }
 
   bool framAvailable() const { return fram_ != nullptr; }
+  void setOpticalWindow(const UvirOpticalWindow &window) { opticalWindow_ = window; }
+  bool recordOpticalWindow(const UvirStoredRecord &record, UvirOpticalWindow &window) const {
+    return (record.reserved & kUvirOpticalContextKnownFlag) && opticalHistory_.lookup(record.recordId, window);
+  }
   uint32_t framRecordCount() const { return framQueue_.count; }
   uint32_t framRecordCapacity() const { return kFramRecordCapacity; }
 
@@ -110,6 +63,8 @@ class UvirOfflineStore {
       }
     }
 
+    opticalHistory_.begin(storage_ != nullptr ? storage_ : (internalAvailable_ ? &LittleFS : nullptr),
+        internalAvailable_ ? &LittleFS : nullptr);
     available_ = storage_ != nullptr;
     recount();
     return available_;
@@ -245,6 +200,13 @@ class UvirOfflineStore {
 
   bool append(UvirStoredRecord &record) {
     if (!available_ || full()) return false;
+    if (record.type != static_cast<uint8_t>(UvirStoredRecordType::Error)) {
+      if (!opticalHistory_.ensure(record.recordId, opticalWindow_)) {
+        ++writeErrorCount_;
+        return false;
+      }
+      record.reserved |= kUvirOpticalContextKnownFlag;
+    }
     if (fram_ != nullptr && framQueue_.count < kFramRecordCapacity &&
         appendToFram(record)) return true;
     if (storage_ == nullptr) return false;
@@ -257,6 +219,7 @@ class UvirOfflineStore {
     bool written = false;
     if (legacyMode_) {
       UvirStoredRecordV1 legacy = convertToVersion1(record);
+      if (legacy.magic != 0x55564952) { file.close(); ++writeErrorCount_; return false; }
       legacy.checksum = version1Checksum(legacy);
       written = file.write(
                     reinterpret_cast<const uint8_t *>(&legacy),
@@ -486,10 +449,13 @@ class UvirOfflineStore {
     const bool queueCleared = clearQueue();
     const bool framQueueCleared = clearFramQueue();
     const bool stateCleared = clearRuntimeState();
-    return queueCleared && framQueueCleared && stateCleared;
+    const bool opticsCleared = queueCleared && framQueueCleared && opticalHistory_.clear();
+    return queueCleared && framQueueCleared && stateCleared && opticsCleared;
   }
 
  private:
+  UvirOpticalWindow opticalWindow_;
+  UvirOpticalHistory opticalHistory_;
   struct RuntimeStateHeader {
     uint32_t magic = 0x55565354;
     uint16_t version = 1;
@@ -793,17 +759,11 @@ class UvirOfflineStore {
   }
 
   static uint32_t checksumBytes(const uint8_t *data, size_t length) {
-    uint32_t value = 2166136261u;
-    for (size_t index = 0; index < length; ++index) {
-      value = (value ^ data[index]) * 16777619u;
-    }
-    return value;
+    return uvirStoredChecksumBytes(data, length);
   }
 
   static uint32_t checksum(const UvirStoredRecord &record) {
-    return checksumBytes(
-        reinterpret_cast<const uint8_t *>(&record),
-        offsetof(UvirStoredRecord, checksum));
+    return uvirStoredChecksum(record);
   }
 
   static uint32_t version1Checksum(const UvirStoredRecordV1 &record) {
@@ -827,8 +787,7 @@ class UvirOfflineStore {
   }
 
   static bool valid(const UvirStoredRecord &record) {
-    return record.magic == 0x55564952 && record.version == 2 &&
-           record.checksum == checksum(record) && validType(record.type);
+    return uvirValidStoredRecord(record);
   }
 
   static bool validVersion1(const UvirStoredRecordV1 &record) {
@@ -853,6 +812,7 @@ class UvirOfflineStore {
 
   static UvirStoredRecord convertVersion1(const UvirStoredRecordV1 &legacy) {
     UvirStoredRecord record;
+    record.version = 2; // Conversion changes the layout, NOT the legacy physical unit.
     record.type = legacy.type;
     record.reserved = legacy.reserved;
     record.recordId = legacy.recordId;
@@ -902,6 +862,7 @@ class UvirOfflineStore {
     legacy.sequence = record.sequence;
     if (record.type == static_cast<uint8_t>(UvirStoredRecordType::Acquisition)) {
       memcpy(legacy.bands, record.payload.acquisition.bands, sizeof(legacy.bands));
+      if (record.version >= 3) for (float &value : legacy.bands) value = uvirWm2ToLegacy(value);
       copyLegacyText(
           legacy.note,
           sizeof(legacy.note),
@@ -913,6 +874,12 @@ class UvirOfflineStore {
           sizeof(legacy.details),
           record.payload.details,
           sizeof(record.payload.details));
+      if (record.version >= 3) {
+        char scaled[sizeof(legacy.details)] = {};
+        if (uvirScaleAlertDetails(legacy.details, scaled, sizeof(scaled), 100.0))
+          memcpy(legacy.details, scaled, sizeof(scaled));
+        else legacy.magic = 0; // Caller must refuse an unrepresentable legacy record.
+      }
     } else {
       copyLegacyText(
           legacy.note,
@@ -945,7 +912,7 @@ class UvirOfflineStore {
       source.close();
       return false;
     }
-    if (version == 2) {
+    if (version == 2 || version == 3) {
       legacyMode_ = false;
       source.close();
       return true;
@@ -1072,7 +1039,7 @@ class UvirOfflineStore {
           break;
         }
       }
-    } else if (version == 2) {
+    } else if (version == 2 || version == 3) {
       UvirStoredRecord record;
       while (source.position() + sizeof(record) <= source.size()) {
         if (source.read(reinterpret_cast<uint8_t *>(&record), sizeof(record)) !=

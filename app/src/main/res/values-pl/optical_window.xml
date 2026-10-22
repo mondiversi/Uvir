@@ -1,0 +1,24 @@
+<resources>
+    <string name="optical_window_factor_limits">Dozwolone wartości: %1$s–%2$s.</string>
+    <string name="optical_window_title">Kompensacja okna optycznego</string>
+    <string name="optical_window_description">Przybliżona korekcja tłumienia okna. Używaj współczynników ze specyfikacji optycznych lub pomiarów porównawczych.</string>
+    <string name="optical_window_enabled">Kompensuj okno optyczne</string>
+    <string name="optical_window_channel_factor">Mnożnik %1$s</string>
+    <string name="optical_window_hint">Współczynnik końcowy to ogólny × kanał. %1$s jest neutralne; transmisja 90%% wymaga współczynnika końcowego ×%2$s. Nie zastępuje to kalibracji.</string>
+    <string name="measured_uv_bands_note">Nominalne zakresy kanałów AS7331 o nierównomiernej czułości widmowej. Suma nie mierzy wszystkich długości fal UV.</string>
+    <string name="spectral_channel_peaks">Maksima: %1$s nm</string>
+    <string name="measured_visible_bands_note">Podane długości fal to nominalne maksima czułości AS7343, a nie granice jednorodnych pasm. Pary kanałów są uśredniane; HEV i wartości całkowite sumują wskazania wyświetlanych kanałów.</string>
+    <string name="measured_infrared_bands_note">Far-red łączy kanały 690 i 745 nm; NIR korzysta z kanału 855 nm. Są to odczyty kanałów, a nie pomiar całego widma podczerwieni.</string>
+    <string name="optical_window_common_factor">Wspólny mnożnik</string>
+    <string name="optical_window_individual_factors">Mnożniki dla kanałów</string>
+    <string name="measured_channel_sum">Suma kanałów</string>
+    <string name="calibration_offsets_title">Offsety</string>
+    <string name="calibration_offset_channel">Przesunięcie %1$s</string>
+    <string name="calibration_offsets_description">Offsety: dozwolone wartości %1$s–%2$s %3$s; %1$s niczego nie odejmuje. Odejmuje średnie tło zmierzone w ciemności lub w warunkach odniesienia. Stosowane przed współczynnikami; wyniki ujemne stają się zerem.</string>
+    <string name="calibration_offsets_firmware_required">Zaktualizuj oprogramowanie czujnika, aby ustawić przesunięcia.</string>
+    <string name="calibration_offsets_legacy_notice">Edycja zamieni wcześniejsze przesunięcia poszczególnych kanałów na jedno przesunięcie dla każdego koloru. Do tego czasu wartości pozostają bez zmian.</string>
+    <string name="calibration_factor_short">Współczynnik</string>
+    <string name="calibration_offset_short">Offset (%1$s)</string>
+    <string name="calibration_channel_factors_title">Współczynniki korekcji kanałów</string>
+    <string name="calibration_channels_firmware_required">Zaktualizuj oprogramowanie czujnika, aby ustawić współczynniki dla kanałów.</string>
+</resources>

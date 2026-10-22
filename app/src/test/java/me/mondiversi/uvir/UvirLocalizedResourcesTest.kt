@@ -161,7 +161,7 @@ class UvirLocalizedResourcesTest {
     }
 
     @Test fun allLanguagesKeepTheSameDomainResourceFiles() {
-        val domains = setOf("sensor_information.xml", "diagnostics.xml", "data_export.xml")
+        val domains = setOf("sensor_information.xml", "diagnostics.xml", "data_export.xml", "optical_window.xml")
         for ((key, base) in catalogs.getValue("values").filterValues { it.sourceFile in domains }) {
             for ((locale, catalog) in catalogs) {
                 assertEquals("Resource domain changed: $locale/$key", base.sourceFile,
@@ -285,11 +285,15 @@ class UvirLocalizedResourcesTest {
         }
     }
 
-    @Test fun mockSettingsShortcutUsesTheCompactOpenLabel() {
-        assertEquals("Apri impostazioni",
+    @Test fun mockSettingsShortcutUsesTheSettingsLabelInEveryLanguage() {
+        assertEquals("Impostazioni",
             catalogs.getValue("values-it").getValue("string:sensor_simulation_open_settings").text)
-        assertEquals("Open settings",
+        assertEquals("Settings",
             catalogs.getValue("values").getValue("string:sensor_simulation_open_settings").text)
+        for ((locale, catalog) in catalogs) {
+            assertEquals(locale, catalog.getValue("string:acquisition_parameters").text,
+                catalog.getValue("string:sensor_simulation_open_settings").text)
+        }
     }
 
     @Test fun simulatedEventsUseTheCompactDescriptionWithoutSensorIdentity() {

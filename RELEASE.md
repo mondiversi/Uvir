@@ -5,8 +5,8 @@
 - Display name: `Uvir`
 - Application ID: `me.mondiversi.uvir`
 - Namespace: `me.mondiversi.uvir`
-- Current version: `1.3.0` (`versionCode` 4)
-- Sensor firmware in the current development sources: `0.5.104`
+- Current version: `1.4.0` (`versionCode` 5)
+- Sensor firmware: `0.5.112`
 
 ## Building the APK
 
@@ -15,10 +15,10 @@ Double-click `CREA_APK_RELEASE.bat`.
 When the build finishes, the signed APK ready for distribution is available at:
 
 ```text
-dist\Uvir-1.3.0-release.apk
+dist\Uvir-1.4.0-release.apk
 ```
 
-The same directory also contains `Uvir-1.3.0-release.apk.sha256`, which can be
+The same directory also contains `Uvir-1.4.0-release.apk.sha256`, which can be
 used to verify that a download has not been modified or corrupted.
 
 The APK can be attached to a GitHub release or distributed from a website.

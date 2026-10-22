@@ -8,7 +8,7 @@ import org.json.JSONObject
 import java.io.File
 
 internal const val UVIR_SETTINGS_TRANSFER_SCHEMA = "uvir-settings"
-internal const val UVIR_SETTINGS_TRANSFER_VERSION = 3
+internal const val UVIR_SETTINGS_TRANSFER_VERSION = 4
 private const val UVIR_SETTINGS_TRANSFER_MINIMUM_VERSION = 1
 private const val SENSOR_PHONE_PREFERENCES = "phone_preferences"
 private const val SENSOR_DISPLAY_NAME = "sensor_display_name"
@@ -223,6 +223,7 @@ private fun writeUvirSettingsFile(
         JSONObject()
             .put("schema", UVIR_SETTINGS_TRANSFER_SCHEMA)
             .put("version", UVIR_SETTINGS_TRANSFER_VERSION)
+            .put("irradiance_unit", UVIR_CANONICAL_IRRADIANCE_UNIT)
             .put("scope", scope)
             .put("exported_at", System.currentTimeMillis())
             .put("payload", payload)
@@ -293,6 +294,11 @@ internal fun importUvirSettingsFiles(
     documents.forEach { document ->
         val root = document.root
         val payload = root.getJSONObject("payload")
+        if (root.optInt("version") < 4) {
+            // Work on the decrypted in-memory copy; never rewrite the source file.
+            if (root.getString("scope") == "app") migrateLegacyTransferPreferences(payload)
+            else payload.optJSONObject(SENSOR_PHONE_PREFERENCES)?.let(::migrateLegacyTransferPreferences)
+        } else require(root.getString("irradiance_unit") == UVIR_CANONICAL_IRRADIANCE_UNIT)
         when (root.getString("scope")) {
             "app" -> {
                 importAppSettings(context, payload)
@@ -594,8 +600,9 @@ private fun defaultImportedSensorSettings(
         lastSyncedAt = 0L
     )
 
-private fun UvirSensorSettingsSnapshot.toTransferJson(): JSONObject =
+internal fun UvirSensorSettingsSnapshot.toTransferJson(): JSONObject =
     JSONObject()
+        .put("irradiance_unit", UVIR_CANONICAL_IRRADIANCE_UNIT)
         .put("settings_schema_version", schemaVersion)
         .put("settings_updated_at_ms", updatedAtMs)
         .put("firmware_version", firmwareVersion)
@@ -612,6 +619,9 @@ private fun UvirSensorSettingsSnapshot.toTransferJson(): JSONObject =
         .put("discard_extremes", acquisitionParameters.discardExtremes)
         .put("visible_calibration_factor", calibrationSettings.visibleFactor.toDouble())
         .put("uv_calibration_factor", calibrationSettings.uvFactor.toDouble())
+        .put("optical_window", calibrationSettings.opticalWindow.toJson())
+        .apply { calibrationSettings.offsets?.let { put("calibration_offsets", it.toJson()) } }
+        .apply { calibrationSettings.channelFactors?.let { put("calibration_channel_factors", it.toJson()) } }
         .put("alert_repeat_seconds", alertRepeatSeconds)
         .put("alert_recording_enabled", alertRecordingEnabled)
         .put("alert_start_delay_seconds", alertStartDelaySeconds)
@@ -639,7 +649,7 @@ private fun UvirSensorSettingsSnapshot.toTransferJson(): JSONObject =
             }
         )
 
-private fun JSONObject.toSensorSettingsSnapshot(
+internal fun JSONObject.toSensorSettingsSnapshot(
     current: UvirSensorSettingsSnapshot
 ): UvirSensorSettingsSnapshot =
     UvirSensorSettingsSnapshot(
@@ -670,6 +680,14 @@ private fun JSONObject.toSensorSettingsSnapshot(
         calibrationSettings = SensorCalibrationSettings(
             visibleFactor = getDouble("visible_calibration_factor").toFloat()
                 .coerceIn(MIN_SENSOR_CALIBRATION_FACTOR, MAX_SENSOR_CALIBRATION_FACTOR),
+            opticalWindow = if (has("optical_window")) requireNotNull(opticalWindowOrNull()) else OpticalWindowSettings(),
+            offsets = if (has("calibration_offsets"))
+                requireNotNull(CalibrationOffsets.fromJsonOrNull(getJSONObject("calibration_offsets"))) else null,
+            channelFactors = if (has("calibration_channel_factors"))
+                requireNotNull(CalibrationChannelFactors.fromJsonOrNull(getJSONObject("calibration_channel_factors")))
+            else if (current.calibrationSettings.channelFactors != null) CalibrationChannelFactors.fromModuleFactors(
+                getDouble("visible_calibration_factor").toFloat().coerceIn(.1f, 10f),
+                getDouble("uv_calibration_factor").toFloat().coerceIn(.1f, 10f)) else null,
             uvFactor = getDouble("uv_calibration_factor").toFloat()
                 .coerceIn(MIN_SENSOR_CALIBRATION_FACTOR, MAX_SENSOR_CALIBRATION_FACTOR)
         ),
@@ -695,7 +713,8 @@ private fun JSONObject.toSensorSettingsSnapshot(
                         metric = metric,
                         enabled = rule.optBoolean("enabled", true),
                         direction = direction,
-                        threshold = rule.getDouble("threshold").toFloat().coerceAtLeast(0f)
+                        threshold = (rule.getDouble("threshold") * irradianceUnitScaleToWm2(
+                            optString("irradiance_unit", UVIR_LEGACY_IRRADIANCE_UNIT))).toFloat().coerceAtLeast(0f)
                     )
                 )
             }
@@ -713,7 +732,7 @@ private fun JSONObject.toSensorSettingsSnapshot(
     )
 
 internal fun isTransferableAppPreference(key: String): Boolean =
-    key != KEY_SIMULATION_CONTEXT_PREPARED && !isRetiredCameraPreference(key) &&
+    key != KEY_IRRADIANCE_STORAGE_UNIT && key != KEY_SIMULATION_CONTEXT_PREPARED && !isRetiredCameraPreference(key) &&
         key !in sensorSelectionPreferenceKeys &&
         key !in transientSettingsKeys &&
         !key.startsWith("selected_sensor_context.")
@@ -845,6 +864,15 @@ private fun importSensorPhonePreferences(
         }
     }
     check(editor.commit())
+}
+
+private fun migrateLegacyTransferPreferences(payload: JSONObject) {
+    payload.keys().asSequence().toList().forEach { key ->
+        val encoded = payload.optJSONObject(key)
+        val value = encoded?.opt("value") ?: payload.opt(key) ?: return@forEach
+        val migrated = migrateUvirIrradiancePreference(key, value)
+        if (encoded == null) payload.put(key, migrated) else encoded.put("value", migrated)
+    }
 }
 
 private fun JSONObject.putPreferenceValue(key: String, value: Any?) {

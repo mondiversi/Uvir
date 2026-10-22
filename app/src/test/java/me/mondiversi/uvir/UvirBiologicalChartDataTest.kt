@@ -51,7 +51,7 @@ class UvirBiologicalChartDataTest {
                 .map { it.shortLabel }
         )
         assertEquals(
-            listOf("VIS", "HEV", "V", "B", "G", "Y", "O", "R"),
+            listOf("VIS", "HEV", "V", "B", "G", "GY", "O", "R"),
             bars.filter { it.section == AcquisitionChartSection.VISIBLE }
                 .map { it.shortLabel }
         )

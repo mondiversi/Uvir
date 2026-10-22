@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dark_offsets_calculate">Calculate offsets</string>
+    <string name="dark_offsets_instructions">Measure for about 30 seconds under stable reference conditions. In darkness you compensate sensor background; under illumination you also subtract the light present, giving relative measurements. For a dark measurement, cover the optical inputs with material opaque to near-infrared too and keep the LEDs in their normal operating state. The mean does not eliminate random noise or calibrate gain.</string>
+    <string name="dark_offsets_progress">Measuring: %1$s / 30 s</string>
+    <string name="dark_offsets_result">Proposal from %1$s readings. No settings have been changed.</string>
+    <string name="dark_offsets_failed">Measurement interrupted or unavailable. Check the connection and sensor, then try again.</string>
+    <string name="dark_offsets_start">Start measurement</string>
+    <string name="dark_offsets_apply">Set offsets</string>
+    <string name="dark_offsets_firmware_required">Requires sensor firmware 0.5.110 or later.</string>
+    <string name="calibration_reset_values">Reset values</string>
+    <string name="calibration_reset_confirmation_title">Reset the values?</string>
+    <string name="calibration_reset_confirm_action">RESET</string>
+    <string name="calibration_reset_confirmation_message">Reset correction factors to 1 and offsets to 0 for %1$s. Other calibration and optical-window settings are unchanged.</string>
+    <string name="optical_window_reset_confirmation_message">Resets the general multiplier and all optical-window channel multipliers to 1. Calibration is unchanged.</string>
+</resources>

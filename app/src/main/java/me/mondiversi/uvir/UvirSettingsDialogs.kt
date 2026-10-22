@@ -7,6 +7,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 
@@ -15,9 +16,12 @@ internal fun UvirFirmwareUpdateRequiredDialog(
     cardColor: Color,
     primaryText: Color,
     secondaryText: Color,
+    onCheckUpdates: (() -> Unit)? = null,
     onDismissRequest: () -> Unit
 ) {
+    val context = LocalContext.current
     UvirAlertDialog(
+        modifier = Modifier.testTag("firmware_update_required_dialog"),
         onDismissRequest = onDismissRequest,
         title = {
             UvirClosableDialogTitle(
@@ -35,7 +39,16 @@ internal fun UvirFirmwareUpdateRequiredDialog(
                 )
             )
         },
-        confirmButton = {},
+        confirmButton = {
+            TextButton(modifier = Modifier.testTag("firmware_update_check"), onClick = {
+                onDismissRequest()
+                if (onCheckUpdates != null) onCheckUpdates()
+                else UvirUpdates.check(context, manual = true)
+            }) { Text(uvirActionLabel(R.string.check_for_updates)) }
+        },
+        dismissButton = {
+            UvirDialogCloseButton(onDismissRequest)
+        },
         containerColor = cardColor,
         titleContentColor = primaryText,
         textContentColor = secondaryText
@@ -98,7 +111,7 @@ internal fun UvirResetAlertRulesConfirmationDialog(
                                     enabled = false,
                                     direction =
                                         ThresholdAlertDirection.ABOVE,
-                                    threshold = 1f
+                                    threshold = DEFAULT_IRRADIANCE_THRESHOLD_W_M2
                                 )
                             }
 
@@ -108,7 +121,7 @@ internal fun UvirResetAlertRulesConfirmationDialog(
                                 rule.direction.name
                             alertRuleThresholdTexts[rule.metric] =
                                 thresholdEditableValue(
-                                    irradianceUnit.fromCanonicalUwCm2(
+                                    irradianceUnit.fromCanonicalWm2(
                                         rule.threshold.toDouble()
                                     )
                                 )

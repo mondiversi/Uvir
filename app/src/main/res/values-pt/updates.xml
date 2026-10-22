@@ -14,5 +14,5 @@
     <string name="update_done">Sensor atualizado</string>
     <string name="update_failed">Atualização falhou. Consulte o registo de erros. Se o sensor não arrancar, recupere o firmware por USB num computador.</string>
     <string name="update_permission">Permita que Uvir instale atualizações nas definições Android.</string>
-    <string name="update_whats_new">Atualizações assinadas da app e do sensor, transferências verificadas e carregamento do firmware por USB.</string>
+    <string name="update_whats_new">Exportações CSV, TXT e PNG com modelos dos sensores, referências espectrais compactas e legendas de gráficos mais legíveis.</string>
 </resources>

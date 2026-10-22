@@ -355,7 +355,7 @@ internal fun AcquisitionVerticalBarChart(
                     AcquisitionBarSection(
                         bars = sectionBars,
                         unit = stringResource(group.unitResource).withUvirIrradianceUnit(irradianceUnit),
-                        valueScale = irradianceUnit::fromCanonicalUwCm2,
+                        valueScale = irradianceUnit::fromCanonicalWm2,
                         primaryText = primaryText,
                         secondaryText = secondaryText
                     )
@@ -380,6 +380,7 @@ private fun AcquisitionBarSection(
     ))
     val numericFormat = LocalUvirNumericFormat.current
     val irradianceUnit = LocalUvirIrradianceUnit.current
+    val displayDigits = currentUvirLiveIrradianceDecimals()
     val outOfRangeText = stringResource(R.string.out_of_range_short)
     val inspectionPoints = bars.mapIndexedNotNull { index, bar ->
         if (bar.outOfRange) return@mapIndexedNotNull null
@@ -389,9 +390,9 @@ private fun AcquisitionBarSection(
                 (index + 0.5f) / bars.size.coerceAtLeast(1),
                 1f - (displayValue.coerceAtLeast(0.0) / maximum).toFloat().coerceIn(0f, 1f)),
             bar.displayLabelResource?.let { stringResource(it) } ?: bar.exportLabel,
-            formatUvirNumber(
+            formatUvirLiveDisplayNumber(
                 displayValue,
-                irradianceUnit.displayFractionDigits(3),
+                displayDigits,
                 numericFormat
             ) + " " + unit,
             bar.color)
@@ -410,7 +411,8 @@ private fun AcquisitionBarSection(
     ) {
         UvirChartYAxis(
             maximum = maximum,
-            fractionDigits = irradianceUnit.displayFractionDigits(2),
+            fractionDigits = displayDigits,
+            fixedFractionDigits = true,
             secondaryText = secondaryText,
             modifier = Modifier.fillMaxSize()
         ) { chartModifier ->
@@ -511,9 +513,9 @@ private fun AcquisitionBarSection(
                             text = if (bar.outOfRange) {
                                 outOfRangeText
                             } else {
-                                formatUvirNumber(
+                                formatUvirLiveDisplayNumber(
                                     valueScale(bar.value),
-                                    irradianceUnit.displayFractionDigits(3),
+                                    displayDigits,
                                     numericFormat
                                 )
                             },

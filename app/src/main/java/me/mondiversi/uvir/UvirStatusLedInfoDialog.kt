@@ -182,8 +182,8 @@ internal fun UvirStatusLedInfoDialog(
                 }
             }
         },
-        confirmButton = {},
-        dismissButton = {
+        dismissButton = { UvirDialogCloseButton(onDismissRequest) },
+        confirmButton = {
             TextButton(
                 enabled = testEnabled && !testInProgress,
                 onClick = {

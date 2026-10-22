@@ -27,30 +27,31 @@ class UvirMeasurementExportCompletenessTest {
                         rosso = 1.0,
                         f8 = 3.0,
                         nir = 1.0
-                    )
+                    ).scaledIrradiance(.01) // Historical fixture values were µW/cm².
             )
 
         val lines =
             measurementCsv(
                 records = listOf(record),
-                numericFormat = UvirNumericFormat.INTERNATIONAL
+                numericFormat = UvirNumericFormat.INTERNATIONAL,
+                irradianceDecimals = 1
             ).trim().lines()
         val headers = lines[0].split(';')
         val values = lines[1].split(';')
         val row = headers.zip(values).toMap()
 
         assertFalse("Automatic" in headers)
-        assertEquals("4", row["Ultraviolet_total_uW_cm2"])
+        assertEquals("4.0", row["Ultraviolet_total_uW_cm2"])
         assertEquals("22.2", row["Ultraviolet_total_percent"])
-        assertEquals("25.0", row["UVC_percent"])
-        assertEquals("50.0", row["UVA_percent"])
-        assertEquals("10", row["Visible_total_uW_cm2"])
+        assertEquals("5.6", row["UVC_percent"])
+        assertEquals("11.1", row["UVA_percent"])
+        assertEquals("10.0", row["Visible_total_uW_cm2"])
         assertEquals("55.6", row["Visible_total_percent"])
-        assertEquals("40.0", row["HEV_percent"])
-        assertEquals("4", row["Infrared_total_uW_cm2"])
+        assertEquals("22.2", row["HEV_percent"])
+        assertEquals("4.0", row["Infrared_total_uW_cm2"])
         assertEquals("22.2", row["Infrared_total_percent"])
-        assertEquals("75.0", row["FarRed_percent"])
-        assertEquals("25.0", row["NIR_percent"])
+        assertEquals("16.7", row["FarRed_percent"])
+        assertEquals("5.6", row["NIR_percent"])
         assertEquals(headers.size, values.size)
         assertTrue(headers.size > 40)
     }

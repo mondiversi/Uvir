@@ -1,0 +1,24 @@
+<resources>
+    <string name="optical_window_factor_limits">Valeurs autorisées : %1$s–%2$s.</string>
+    <string name="optical_window_title">Compensation de la fenêtre optique</string>
+    <string name="optical_window_description">Correction approximative de l’atténuation de la fenêtre. Utilise uniquement des facteurs issus de spécifications optiques ou de mesures comparatives.</string>
+    <string name="optical_window_enabled">Compenser la fenêtre optique</string>
+    <string name="optical_window_channel_factor">Multiplicateur %1$s</string>
+    <string name="optical_window_hint">Le facteur final est général × canal. %1$s est neutre ; une transmission de 90%% nécessite un facteur final de ×%2$s. Cela ne remplace pas l’étalonnage.</string>
+    <string name="measured_uv_bands_note">Plages nominales des canaux AS7331, à sensibilité spectrale non uniforme. Leur somme ne mesure pas toutes les longueurs d’onde UV.</string>
+    <string name="spectral_channel_peaks">Pics : %1$s nm</string>
+    <string name="measured_visible_bands_note">Les longueurs d’onde indiquées sont les pics nominaux de sensibilité de l’AS7343, pas les limites de bandes uniformes. Les paires de canaux sont moyennées ; HEV et les totaux additionnent les valeurs des canaux affichés.</string>
+    <string name="measured_infrared_bands_note">Far-red combine les canaux à 690 et 745 nm ; NIR utilise celui à 855 nm. Ces valeurs ne mesurent pas l’ensemble du spectre infrarouge.</string>
+    <string name="optical_window_common_factor">Multiplicateur commun</string>
+    <string name="optical_window_individual_factors">Multiplicateurs par canal</string>
+    <string name="measured_channel_sum">Somme des canaux</string>
+    <string name="calibration_offsets_title">Décalages</string>
+    <string name="calibration_offset_channel">Décalage %1$s</string>
+    <string name="calibration_offsets_description">Décalages : valeurs autorisées %1$s–%2$s %3$s ; %1$s ne soustrait rien. Soustrait un fond moyen mesuré dans le noir ou dans des conditions de référence. Application avant les facteurs ; les résultats négatifs deviennent nuls.</string>
+    <string name="calibration_offsets_firmware_required">Mets à jour le micrologiciel du capteur pour configurer les décalages.</string>
+    <string name="calibration_offsets_legacy_notice">La modification convertit les anciens offsets de chaque canal en un offset par couleur. Les anciennes valeurs restent inchangées jusque-là.</string>
+    <string name="calibration_factor_short">Facteur</string>
+    <string name="calibration_offset_short">Décalage (%1$s)</string>
+    <string name="calibration_channel_factors_title">Facteurs de correction par canal</string>
+    <string name="calibration_channels_firmware_required">Mettez à jour le micrologiciel du capteur pour configurer les facteurs par canal.</string>
+</resources>

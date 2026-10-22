@@ -14,6 +14,26 @@ no driver, GPIO assignment or calibration change is needed for the board label.
 Final-assembly tests and calibration will follow PCB assembly; see
 [`hardware/calibration`](../../../hardware/calibration/README.md).
 
+Firmware **0.5.112** uses SI `W/m²` internally and for new offline records.
+Legacy calibration/runtime states and queued v1/v2 records are read using their
+original units; new calibration uses an atomic `CAL5` block and record version 3
+retains the existing queue/FRAM layout. The explicitly labelled v1 interface
+continues to exchange `uW/cm2` so older serial clients do not get a silent ×100
+change. See the [SI migration notes](../../../docs/SI_IRRADIANCE_MIGRATION.md).
+
+Firmware **0.5.111** adds an independent optical-window master applied as
+general × channel without overwriting the eleven individual factors. It is saved
+atomically on the sensor and retained in offline optical context. Existing
+configuration uses a neutral master without changing readings or record layouts.
+See [the serial protocol](../../../docs/USB_SERIAL_PROTOCOL.md#independent-optical-window-master-firmware-05111).
+
+Firmware **0.5.110** adds read-only, approximately 30-second dark-offset
+measurement for the UV or visible/NIR group. `DARK_OFFSETS START UV|VIS <request_id>`
+collects normalized readings before user corrections; `DARK_OFFSETS CANCEL <request_id>`
+aborts the same request. A correlated `dark_offsets` preview never changes NVS
+or writes acquisition/alert records. See the [serial protocol](../../../docs/USB_SERIAL_PROTOCOL.md#dark-offset-measurement-firmware-05110)
+for the lease, reply states, sample order and explicit application step.
+
 ## Settings authority and interrupted transfers
 
 Firmware 0.5.102 reports `settings_updated_at_ms` in `HELLO`: UTC Unix
@@ -518,6 +538,51 @@ the previously associated sensor by matching its unique ID and secret token.
 For Bluetooth, pair the displayed Uvir device from Android Bluetooth Settings.
 
 ## Irradiance values
+
+Firmware **0.5.109** adds eleven absolute per-color calibration gains using the
+`CHANNEL_FACTORS` suffix of `CALIBRATION_CONFIG`. They replace module gains,
+after dark subtraction/clamping and before optical-window compensation.
+Settings are saved atomically in `cal_state4`; earlier calibration remains
+unchanged until an explicit edit. See the [protocol](../../../docs/USB_SERIAL_PROTOCOL.md#per-channel-calibration-firmware-05109).
+
+Firmware **0.5.108** refines dark calibration to one offset per displayed color:
+three UV and eight visible/NIR components, using `COLOR_OFFSETS` and version-2
+readback. The subtraction/clamp happens after the physical channels are combined,
+before calibration/window factors. Existing version-1 physical-channel offsets
+are preserved with their original calculation until explicitly replaced. The
+64-byte offset NVS layout is retained with distinct signatures for the two modes;
+there is no boot-time calibration rewrite or automatic dark measurement.
+
+Firmware **0.5.107** adds configurable physical-channel dark offsets: three UV
+and twelve visible/NIR values, initially zero, in the then-canonical uW/cm2 unit
+(internal storage is W/m2 from 0.5.112; v1 transport remains uW/cm2). They are
+subtracted before base factors, paired-color averaging, window compensation,
+conditions and saves. Complete calibration is stored atomically in versioned
+NVS state while preserving legacy settings. HELLO/status readback and standalone
+USB/Wi-Fi/Bluetooth/MQTT commands expose the same configuration. See the
+[offset protocol](../../../docs/USB_SERIAL_PROTOCOL.md#calibration_config-visible_factor-uv_factor)
+and [final-assembly calibration](../../../hardware/calibration/README.md).
+This source update does not measure or automatically set a dark calibration.
+
+Firmware 0.5.106 corrects the calibration busy guard: a configuration command
+must not reject itself because it started the activity LED. Actual acquisitions,
+alerts, synchronization and diagnostic tests still prevent calibration changes.
+The separate `calibration_locked` field lets clients avoid disabling every
+calibration field for the command indicator alone. This correction was flashed
+and checked on the connected device; common and individual window factors were
+verified without changing base calibration or creating records.
+
+Firmware 0.5.105 adds optional eleven-channel optical-window compensation, off
+by default. It persists the whole calibration/window configuration and applies
+correction once before conditions, averaging, alerts and storage. The existing
+SD/FRAM record layout is retained with a checksummed context-boundary journal.
+See [the protocol](../../../docs/USB_SERIAL_PROTOCOL.md) and
+[optical-window limits](../../../docs/OPTICAL_WINDOW.md). The connected ESP32 was
+updated to 0.5.105 on 2026-10-21 with its existing calibration/settings preserved
+and compensation disabled. AS7343, AS7331, RTC and FRAM checks passed; microSD
+was not detected before or after the update. This does not validate a protective
+window or replace final assembled-device calibration; see the linked validation
+record for scope and remaining checks.
 
 Firmware 0.5.104 extends the AS7343 automatic gain range down to 0.5x, after
 the assembled device saturated at the previous 16x minimum in direct sunlight.

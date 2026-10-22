@@ -419,7 +419,7 @@
     <string name="violet">Menekşe</string>
     <string name="blue">Mavi</string>
     <string name="green">Yeşil</string>
-    <string name="yellow">Sarı</string>
+    <string name="yellow">Yeşil-sarı</string>
     <string name="orange">Turuncu</string>
     <string name="red">Kırmızı</string>
     <string name="percent_of_visible">%1$s%% / görünür</string>
@@ -428,11 +428,11 @@
     <string name="app_version">Uygulama sürümü: %1$s</string>
     <string name="package_name_value">Paket: %1$s</string>
     <string name="about_whats_new_title">%1$s sürümündeki yenilikler</string>
-    <string name="about_whats_new_connectivity">Güvenli profiller ve USB, Wi-Fi, Bluetooth ile internet bağlantılarıyla sıralı çoklu sensör yönetimi.</string>
-    <string name="about_whats_new_connections">Koşullu ve harici komutla ölçüm, bağımsız oturumlar ve bağlantı kesilmesi ya da yeniden başlatma sonrasında güvenilir durum kurtarma.</string>
-    <string name="about_whats_new_measurements">Oturum varyantları, gelişmiş geçmiş filtreleri ve ölçümler ile uyarılar için daha net ayrıntılar.</string>
-    <string name="about_whats_new_interface">Birimler, bölgesel biçimler, gruplanmış grafikler ve sensör kimliği içeren genişletilmiş CSV, TXT ve PNG dışa aktarımları.</string>
-    <string name="about_whats_new_github">Şifreli ayar yedekleri, tümleşik tanılama ve kapsamlı arayüz ile erişilebilirlik iyileştirmeleri.</string>
+    <string name="about_whats_new_connectivity">Kanal başına düzeltme katsayıları ve ofsetler; ortalama ofsetlerin rehberli ölçümü ve sıfırlama onayları.</string>
+    <string name="about_whats_new_connections">Genel ana çarpan ve kanal çarpanlarıyla optik pencere telafisi; daha anlaşılır AS7331 aralıkları ve AS7343 duyarlılık tepe noktaları.</string>
+    <string name="about_whats_new_measurements">Mevcut ölçümleri ve ayarları koruyan otomatik geçişle ışınımın dahili olarak W/m² cinsinden saklanması.</string>
+    <string name="about_whats_new_interface">Canlı değerler, kayıtlı veriler ve özel dışa aktarımlar için ayarlanabilir ondalık basamaklar; bilimsel dışa aktarımlar kayıtlı hassasiyetin tamamını korur.</string>
+    <string name="about_whats_new_github">İyileştirilmiş ayar menüsü ve iletişim kutuları; yönlendirici tüpler ve difüzör gereksinimleri dahil güncellenmiş bağlantı, montaj ve kalibrasyon kılavuzları.</string>
     <string name="about_description">Ultraviyole, görünür ve kızılötesi ışınımın spektral ölçümü için uygulama.</string>
     <string name="about_spectral_ranges">Spektral bantlar: Ultraviyole • Görünür ışık • Kızılötesi</string>
     <string name="about_sensors">Desteklenen sensörler: AS7331 UV • AS7343 multispektral</string>
@@ -630,11 +630,10 @@
     <string name="threshold_rules_connection_required">Bu uyarıları değiştirmek için sensörü bağlayın.</string>
     <string name="threshold_repeat_sensor_description">Bu aralık sensörde saklanır ve uygulama bağlantısı kesildiğinde kaydedilen uyarıları da sınırlar.</string>
     <string name="sensor_calibration_title">Kalibrasyon</string>
-    <string name="sensor_calibration_description">Kalibre edilmiş bir referans cihazıyla karşılaştırarak elde edilen düzeltme faktörlerini uygulayın. 1.000 faktörü, varsayılan veri sayfası tahminini korur.</string>
+    <string name="sensor_calibration_description">Her kanalın düzeltme katsayılarını ve ofsetlerini ayarlayın.</string>
     <string name="sensor_calibration_visible_factor">VIS/NIR düzeltme faktörü · AS7343</string>
     <string name="sensor_calibration_uv_factor">UV düzeltme faktörü · AS7331</string>
-    <string name="sensor_calibration_factor_hint">İzin verilen değer: 0,100–10,000.</string>
-    <string name="sensor_calibration_uv_unavailable">Varsayılan UV kalibrasyonu korunur ve UV sensörü algılandığında düzenlenebilir hale gelir.</string>
+    <string name="sensor_calibration_factor_hint">Düzeltme katsayıları: izin verilen değerler %1$s–%2$s; %3$s kazancı değiştirmez. Kalibre edilmiş bir referans cihazıyla belirleyin.</string>
     <string name="sensor_calibration_firmware_required">Kalibrasyonu kullanmak için sensör donanım yazılımını güncelleyin.</string>
     <string name="sensor_firmware_update_required_title">Firmware güncellemesi gerekli</string>
     <string name="sensor_firmware_update_required">Sensöre yüklenen donanım yazılımı bu ayarları desteklemiyor. Sensör donanım yazılımını güncelleyin ve tekrar deneyin.</string>
@@ -804,5 +803,5 @@
     <string name="alert_max_registrations">En fazla kayıt</string>
     <string name="alert_registration_count">Kayıt sayısı</string>
     <string name="alert_configure_first">Başlamadan önce en az bir değer yapılandırın.</string>
-    <string name="sensor_simulation_open_settings">Ayarları aç</string>
+    <string name="sensor_simulation_open_settings">Ayarlar</string>
 </resources>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_irradiance_decimals">Decimali visualizzati</string>
+    <string name="live_irradiance_decimals_description">Vale per i valori visualizzati e le esportazioni personalizzate. Gli zeri finali restano visibili; dati salvati ed esportazioni scientifiche non cambiano.</string>
+</resources>

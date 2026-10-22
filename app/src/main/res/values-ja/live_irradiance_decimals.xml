@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_irradiance_decimals">表示する小数桁数</string>
+    <string name="live_irradiance_decimals_description">表示値とカスタムエクスポートに適用します。末尾のゼロは表示され、保存データと科学用エクスポートは変更されません。</string>
+</resources>

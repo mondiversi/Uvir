@@ -27,22 +27,22 @@ class UvirIrradianceFormattingTest {
     }
 
     @Test
-    fun convertsCanonicalMicrowattsWithoutLosingScale() {
-        val canonicalValue = 1_000.0
+    fun convertsCanonicalWattsWithoutLosingScale() {
+        val canonicalValue = 10.0
 
         assertEquals(
             10.0,
-            UvirIrradianceUnit.W_M2.fromCanonicalUwCm2(canonicalValue),
+            UvirIrradianceUnit.W_M2.fromCanonicalWm2(canonicalValue),
             0.0
         )
         assertEquals(
             1.0,
-            UvirIrradianceUnit.MW_CM2.fromCanonicalUwCm2(canonicalValue),
+            UvirIrradianceUnit.MW_CM2.fromCanonicalWm2(canonicalValue),
             0.0
         )
         assertEquals(
-            canonicalValue,
-            UvirIrradianceUnit.UW_CM2.fromCanonicalUwCm2(canonicalValue),
+            1000.0,
+            UvirIrradianceUnit.UW_CM2.fromCanonicalWm2(canonicalValue),
             0.0
         )
     }
@@ -50,10 +50,10 @@ class UvirIrradianceFormattingTest {
     @Test
     fun conversionRoundTripsThroughCanonicalUnit() {
         UvirIrradianceUnit.entries.forEach { unit ->
-            val displayed = unit.fromCanonicalUwCm2(12_345.678)
+            val displayed = unit.fromCanonicalWm2(12_345.678)
             assertEquals(
                 12_345.678,
-                unit.toCanonicalUwCm2(displayed),
+                unit.toCanonicalWm2(displayed),
                 0.000_001
             )
         }

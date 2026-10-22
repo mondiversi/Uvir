@@ -100,6 +100,7 @@ class UvirWirelessSensorManager(
     private val executor: ExecutorService = Executors.newSingleThreadExecutor()
     private val generation = AtomicInteger(0)
     private val diagnosticClient = UvirSensorDiagnosticClient()
+    private val darkOffsetClient = UvirDarkOffsetClient()
     private val mutableState = MutableStateFlow(UvirWirelessSensorState())
     private val outputWriteLock = Any()
     private val alertReceiptSequence = AtomicLong(0L)
@@ -537,7 +538,8 @@ class UvirWirelessSensorManager(
     internal fun replayPendingSettings(deviceId: String, pending: UvirPendingSensorSettings): Boolean {
         val state = mutableState.value
         val output = activeProtocolOutput ?: return false
-        return state.status == WirelessSensorConnectionStatus.CONNECTED && state.appConnectionConfirmed &&
+        return sensorCalibrationCommandsSupported(pending.commands, state.runtimeInfo.firmwareVersion) &&
+            state.status == WirelessSensorConnectionStatus.CONNECTED && state.appConnectionConfirmed &&
             state.deviceId.orEmpty().equals(deviceId, ignoreCase = true) &&
             runCatching { writeLine(output, pending.protocolCommand()); true }.getOrDefault(false)
     }
@@ -580,6 +582,17 @@ class UvirWirelessSensorManager(
             },
             send = { sendDiagnosticControlCommands(hardwareId, mode, listOf(it)) }
         )
+    }
+
+    internal suspend fun measureDarkOffsets(hardwareId: String, mode: SensorConnectionMode,
+        group: CalibrationGroup, onProgress: (Int) -> Unit): DarkOffsetReading {
+        val output = activeProtocolOutput
+        return darkOffsetClient.measure(hardwareId, group, connectionValid = {
+            val current = mutableState.value
+            output != null && activeProtocolOutput === output && current.mode == mode &&
+                current.status == WirelessSensorConnectionStatus.CONNECTED && current.appConnectionConfirmed &&
+                current.deviceId.equals(hardwareId, true)
+        }, send = { sendDiagnosticControlCommands(hardwareId, mode, listOf(it)) }, onProgress = onProgress)
     }
 
     fun stopAutomaticAcquisitionAndAwait(timeoutMs: Long): Boolean {
@@ -1286,6 +1299,10 @@ class UvirWirelessSensorManager(
         }
 
         val frameType = json.optString("type")
+        if (frameType == "dark_offsets") {
+            darkOffsetClient.receive(json)
+            return
+        }
         if (frameType == "activity") {
             val previous = mutableState.value
             previous.runtimeInfo.updatedFromActivityFrame(json, previous.appConnectionConfirmed)?.let { info ->
@@ -1554,7 +1571,12 @@ class UvirWirelessSensorManager(
                     message = json.optString("message", code)
                 )
                 mutableState.value = mutableState.value.copy(
-                    status = WirelessSensorConnectionStatus.ERROR,
+                    // Keep a healthy authenticated socket after a rejected
+                    // calibration edit. ERROR would trigger settings replays
+                    // on every following HELLO and flash the entire settings UI.
+                    status = if (isCalibrationCommandRejection(code)) {
+                        mutableState.value.status
+                    } else WirelessSensorConnectionStatus.ERROR,
                     mode = mode,
                     error = code
                 )
@@ -1563,7 +1585,7 @@ class UvirWirelessSensorManager(
     }
 
     private fun parseAlertEvent(json: JSONObject) {
-        val details = json.optString("details")
+        val details = json.sensorAlertDetailsWm2()
         if (details.isBlank()) return
         UvirSensorEventHub.emitLiveAlert(
             mutableState.value.deviceId.orEmpty(), SensorSyncSource.WIRELESS,
@@ -1582,7 +1604,8 @@ class UvirWirelessSensorManager(
                                 ?: System.currentTimeMillis(),
                         details = details,
                         sessionId = json.optLong("session_id", 0L),
-                        recorded = json.optBoolean("recorded", true)
+                        recorded = json.optBoolean("recorded", true),
+                        opticalWindow = json.opticalWindowOrNull()
                     )
             )
     }

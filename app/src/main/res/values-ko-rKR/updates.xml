@@ -14,5 +14,5 @@
     <string name="update_done">센서가 업데이트되었습니다</string>
     <string name="update_failed">업데이트에 실패했습니다. 오류 로그를 확인하세요. 센서가 시작되지 않으면 컴퓨터에서 USB로 펌웨어를 복구하세요.</string>
     <string name="update_permission">Android 설정에서 Uvir의 업데이트 설치를 허용하세요.</string>
-    <string name="update_whats_new">앱과 센서의 서명된 업데이트, 검증된 다운로드 및 USB 펌웨어 업데이트.</string>
+    <string name="update_whats_new">CSV, TXT, PNG 내보내기에 센서 모델과 간결한 스펙트럼 정보를 포함하고 그래프 범례의 가독성을 개선했습니다.</string>
 </resources>

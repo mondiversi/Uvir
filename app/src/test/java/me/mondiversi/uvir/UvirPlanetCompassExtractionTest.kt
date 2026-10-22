@@ -12,6 +12,11 @@ class UvirPlanetCompassExtractionTest {
         assertFalse(logo.contains("onLongClick"))
         assertFalse(logo.contains("SunFinderEntry"))
     }
+    @Test fun homeLogoDoesNotOverlayTheAppVersion() {
+        val logo = File(main, "java/me/mondiversi/uvir/UvirHomeInfoLogo.kt").readText()
+        assertFalse(logo.contains("home_info_version"))
+        assertFalse(logo.contains("BuildConfig.VERSION_NAME"))
+    }
     @Test fun noCelestialCodeMapsOrResourcesRemainInTheMeasurementApplication() {
         val files = File(main, "java/me/mondiversi/uvir").listFiles().orEmpty()
         assertFalse(files.any { Regex("^Uvir(Celestial|SunFinder|Moon|IssOrbit|Starlink|Horizons)").containsMatchIn(it.name) })

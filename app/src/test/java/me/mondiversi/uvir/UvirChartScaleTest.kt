@@ -13,9 +13,9 @@ class UvirChartScaleTest {
         val samples = listOf(0.001, 1.0, 5.0, 20.0)
         val canonicalMaximum = uvirChartMaximum(samples)
         for (unit in UvirIrradianceUnit.entries) {
-            val converted = samples.map(unit::fromCanonicalUwCm2)
-            val maximum = uvirChartMaximum(converted, unit.fromCanonicalUwCm2(1.0))
-            assertEquals(unit.fromCanonicalUwCm2(canonicalMaximum), maximum, 1e-12)
+            val converted = samples.map(unit::fromCanonicalWm2)
+            val maximum = uvirChartMaximum(converted, unit.fromCanonicalWm2(1.0))
+            assertEquals(unit.fromCanonicalWm2(canonicalMaximum), maximum, 1e-12)
             for (index in samples.indices) {
                 assertEquals(samples[index] / canonicalMaximum, converted[index] / maximum, 1e-12)
             }
@@ -30,7 +30,7 @@ class UvirChartScaleTest {
 
     @Test fun noDataAndZeroHaveAFinitePositiveFallbackInEachUnit() {
         for (unit in UvirIrradianceUnit.entries) {
-            val fallback = unit.fromCanonicalUwCm2(1.0)
+            val fallback = unit.fromCanonicalWm2(1.0)
             assertEquals(fallback, uvirChartMaximum(emptyList(), fallback), 0.0)
             assertEquals(fallback, uvirChartMaximum(listOf(0.0, -1.0), fallback), 0.0)
         }
@@ -58,7 +58,7 @@ class UvirChartScaleTest {
     @Test fun ticksAreDistinctAcrossAllUnitsAndOrdersOfMagnitude() {
         for (peak in listOf(0.000001, 0.005, 5.0, 20.0, 20_000.0, 2e9)) {
             for (unit in UvirIrradianceUnit.entries) {
-                val maximum = unit.fromCanonicalUwCm2(uvirChartMaximum(listOf(peak)))
+                val maximum = unit.fromCanonicalWm2(uvirChartMaximum(listOf(peak)))
                 val labels = (0..4).map { step ->
                     formatUvirChartAxisValue(maximum * step / 4, maximum,
                         unit.displayFractionDigits(2), UvirNumericFormat.INTERNATIONAL)

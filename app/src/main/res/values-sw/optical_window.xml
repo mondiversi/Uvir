@@ -1,0 +1,24 @@
+<resources>
+    <string name="optical_window_factor_limits">Thamani zinazoruhusiwa: %1$s–%2$s.</string>
+    <string name="optical_window_title">Fidia ya dirisha la optiki</string>
+    <string name="optical_window_description">Marekebisho ya makadirio ya upunguzaji wa mwanga na dirisha. Tumia vipengele kutoka vipimo vya optiki au vipimo vya kulinganisha.</string>
+    <string name="optical_window_enabled">Fidia dirisha la optiki</string>
+    <string name="optical_window_channel_factor">Kizidishi cha %1$s</string>
+    <string name="optical_window_hint">Kizidishi cha mwisho ni cha jumla × cha chaneli. %1$s hakibadili thamani; upitishaji wa 90%% unahitaji kizidishi cha mwisho ×%2$s. Hii haibadilishi usawazishaji.</string>
+    <string name="measured_uv_bands_note">Masafa ya kawaida ya chaneli za AS7331 yana unyeti wa spektra usio sawa. Jumla haipimi urefu wote wa mawimbi ya UV.</string>
+    <string name="spectral_channel_peaks">Vilele: %1$s nm</string>
+    <string name="measured_visible_bands_note">Urefu wa mawimbi unaoonyeshwa ni vilele vya kawaida vya unyeti wa AS7343, si mipaka ya masafa yenye unyeti sawa. Jozi za chaneli hukokotolewa kwa wastani; HEV na jumla hujumlisha thamani za chaneli zinazoonyeshwa.</string>
+    <string name="measured_infrared_bands_note">Far-red huunganisha chaneli za 690 na 745 nm; NIR hutumia chaneli ya 855 nm. Hizi ni thamani za chaneli, si kipimo cha wigo mzima wa infrared.</string>
+    <string name="optical_window_common_factor">Kizidishi cha pamoja</string>
+    <string name="optical_window_individual_factors">Vizidishi kwa kila chaneli</string>
+    <string name="measured_channel_sum">Jumla ya chaneli</string>
+    <string name="calibration_offsets_title">Ofseti</string>
+    <string name="calibration_offset_channel">Ofseti ya %1$s</string>
+    <string name="calibration_offsets_description">Ofseti: thamani zinazoruhusiwa %1$s–%2$s %3$s; %1$s haiondoi chochote. Huondoa wastani wa mandharinyuma uliopimwa gizani au katika hali za marejeo. Hutumika kabla ya vizidishi; matokeo hasi huwa sifuri.</string>
+    <string name="calibration_offsets_firmware_required">Sasisha programu dhibiti ya sensa ili kusanidi ofseti.</string>
+    <string name="calibration_offsets_legacy_notice">Kuhariri thamani hizi hubadilisha ofseti za awali za kila chaneli kuwa ofseti moja kwa kila rangi. Thamani za zamani huhifadhiwa hadi uhariri.</string>
+    <string name="calibration_factor_short">Kizidishi</string>
+    <string name="calibration_offset_short">Ofseti (%1$s)</string>
+    <string name="calibration_channel_factors_title">Vizidishi vya marekebisho kwa kila chaneli</string>
+    <string name="calibration_channels_firmware_required">Sasisha programu dhibiti ya kihisi ili kuweka vizidishi kwa kila chaneli.</string>
+</resources>

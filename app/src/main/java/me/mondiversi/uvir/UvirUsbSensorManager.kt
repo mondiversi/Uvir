@@ -94,6 +94,7 @@ class UvirUsbSensorManager(
     private val commandWriteLock = Any()
     @Volatile private var firmwareUpdateLease = false
     private val diagnosticClient = UvirSensorDiagnosticClient()
+    private val darkOffsetClient = UvirDarkOffsetClient()
     private val alertReceiptSequence = AtomicLong(0L)
     private val debugPerformanceCompletionCounter = AtomicLong(0L)
 
@@ -584,7 +585,8 @@ class UvirUsbSensorManager(
 
     internal fun replayPendingSettings(deviceId: String, pending: UvirPendingSensorSettings): Boolean {
         val state = mutableState.value
-        return usbTransportReady() && state.credentials.deviceId.equals(deviceId, ignoreCase = true) &&
+        return sensorCalibrationCommandsSupported(pending.commands, state.runtimeInfo.firmwareVersion) &&
+            usbTransportReady() && state.credentials.deviceId.equals(deviceId, ignoreCase = true) &&
             writeCommand(pending.protocolCommand())
     }
 
@@ -601,6 +603,16 @@ class UvirUsbSensorManager(
             },
             send = { sendDiagnosticControlCommands(hardwareId, listOf(it)) }
         )
+    }
+
+    internal suspend fun measureDarkOffsets(hardwareId: String, group: CalibrationGroup,
+        onProgress: (Int) -> Unit): DarkOffsetReading {
+        val generation = serialGeneration.get()
+        return darkOffsetClient.measure(hardwareId, group, connectionValid = {
+            val current = mutableState.value
+            serialGeneration.get() == generation && current.status == UsbSensorConnectionStatus.CONNECTED &&
+                current.appConnectionConfirmed && current.deviceId.equals(hardwareId, true)
+        }, send = { sendDiagnosticControlCommands(hardwareId, listOf(it)) }, onProgress = onProgress)
     }
 
     fun stopAutomaticAcquisitionAndAwait(timeoutMs: Long): Boolean {
@@ -1077,6 +1089,10 @@ class UvirUsbSensorManager(
         }
 
         val frameType = json.optString("type")
+        if (frameType == "dark_offsets") {
+            darkOffsetClient.receive(json)
+            return
+        }
         if (frameType == "activity") {
             val previous = mutableState.value
             previous.runtimeInfo.updatedFromActivityFrame(json, previous.appConnectionConfirmed)?.let { info ->
@@ -1193,7 +1209,7 @@ class UvirUsbSensorManager(
 
     private fun parseAlertEvent(json: JSONObject) {
         if (!protocolAccepted || !desiredStreaming) return
-        val details = json.optString("details")
+        val details = json.sensorAlertDetailsWm2()
         if (details.isBlank()) return
         UvirSensorEventHub.emitLiveAlert(
             mutableState.value.deviceId.orEmpty(), SensorSyncSource.USB,
@@ -1212,7 +1228,8 @@ class UvirUsbSensorManager(
                                 ?: System.currentTimeMillis(),
                         details = details,
                         sessionId = json.optLong("session_id", 0L),
-                        recorded = json.optBoolean("recorded", true)
+                        recorded = json.optBoolean("recorded", true),
+                        opticalWindow = json.opticalWindowOrNull()
                     )
             )
     }

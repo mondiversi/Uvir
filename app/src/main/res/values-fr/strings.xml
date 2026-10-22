@@ -427,7 +427,7 @@
     <string name="violet">Violet</string>
     <string name="blue">Bleu</string>
     <string name="green">Vert</string>
-    <string name="yellow">Jaune</string>
+    <string name="yellow">Vert-jaune</string>
     <string name="orange">Orange</string>
     <string name="red">Rouge</string>
     <string name="percent_of_visible">%1$s%% du visible</string>
@@ -436,11 +436,11 @@
     <string name="app_version">Version de l’application : %1$s</string>
     <string name="package_name_value">Package : %1$s</string>
     <string name="about_whats_new_title">Nouveautés de la version %1$s</string>
-    <string name="about_whats_new_connectivity">Gestion séquentielle de plusieurs capteurs avec profils sécurisés et connexions USB, Wi-Fi, Bluetooth et Internet.</string>
-    <string name="about_whats_new_connections">Acquisitions conditionnelles et par commande externe, sessions autonomes et restauration fiable de l’état après une déconnexion ou un redémarrage.</string>
-    <string name="about_whats_new_measurements">Variantes de session, filtres avancés de l’historique et détails plus clairs pour les acquisitions et les alertes.</string>
-    <string name="about_whats_new_interface">Exportations CSV, TXT et PNG enrichies avec unités, formats régionaux, graphiques regroupés et identification du capteur.</string>
-    <string name="about_whats_new_github">Sauvegardes chiffrées des paramètres, diagnostic intégré et nombreuses améliorations de l’interface et de l’accessibilité.</string>
+    <string name="about_whats_new_connectivity">Facteurs de correction et décalages par canal, avec mesure guidée des décalages moyens et confirmation des réinitialisations.</string>
+    <string name="about_whats_new_connections">Compensation de la fenêtre optique avec multiplicateur général et multiplicateurs par canal ; plages AS7331 et pics de sensibilité AS7343 mieux précisés.</string>
+    <string name="about_whats_new_measurements">Stockage interne de l’irradiance en W/m², avec migration automatique préservant les mesures et réglages existants.</string>
+    <string name="about_whats_new_interface">Nombre de décimales réglable pour les valeurs en direct, les données enregistrées et les exports personnalisés ; les exports scientifiques conservent toute la précision enregistrée.</string>
+    <string name="about_whats_new_github">Menu des réglages et boîtes de dialogue améliorés ; guides de câblage, de montage et de calibration actualisés, avec tubes directionnels et exigences du diffuseur.</string>
     <string name="about_description">Application d’acquisition spectrale du rayonnement ultraviolet, visible et infrarouge.</string>
     <string name="about_spectral_ranges">Bandes spectrales : Ultraviolet • Lumière visible • Infrarouge</string>
     <string name="about_sensors">Capteurs pris en charge : AS7331 UV • AS7343 multispectral</string>
@@ -640,11 +640,10 @@
     <string name="threshold_rules_connection_required">Connectez le capteur pour modifier ces alertes.</string>
     <string name="threshold_repeat_sensor_description">Cet intervalle est stocké dans le capteur et limite également les alertes enregistrées lorsque l’application est déconnectée.</string>
     <string name="sensor_calibration_title">Étalonnage</string>
-    <string name="sensor_calibration_description">Appliquez les facteurs de correction obtenus par comparaison avec un instrument de référence étalonné. Un facteur de 1.000 conserve l’estimation par défaut de la fiche technique.</string>
+    <string name="sensor_calibration_description">Règle les facteurs de correction et les décalages de chaque canal.</string>
     <string name="sensor_calibration_visible_factor">Facteur de correction VIS/NIR · AS7343</string>
     <string name="sensor_calibration_uv_factor">Facteur de correction UV · AS7331</string>
-    <string name="sensor_calibration_factor_hint">Valeur autorisée : 0.100–10.000.</string>
-    <string name="sensor_calibration_uv_unavailable">L’étalonnage UV par défaut est conservé et deviendra modifiable lorsque le capteur UV sera détecté.</string>
+    <string name="sensor_calibration_factor_hint">Facteurs de correction : valeurs autorisées %1$s–%2$s ; %3$s ne modifie pas le gain. Détermine-les avec un instrument de référence étalonné.</string>
     <string name="sensor_calibration_firmware_required">Mettez à jour le micrologiciel du capteur pour utiliser l’étalonnage.</string>
     <string name="sensor_firmware_update_required_title">Mise à jour du micrologiciel requise</string>
     <string name="sensor_firmware_update_required">Le micrologiciel installé sur le capteur ne prend pas en charge ces paramètres. Mettez-le à jour puis réessayez.</string>
@@ -814,5 +813,5 @@
     <string name="alert_max_registrations">Enregistrements maximum</string>
     <string name="alert_registration_count">Nombre d’enregistrements</string>
     <string name="alert_configure_first">Configurez au moins une valeur avant de démarrer.</string>
-    <string name="sensor_simulation_open_settings">Ouvrir les paramètres</string>
+    <string name="sensor_simulation_open_settings">Paramètres</string>
 </resources>

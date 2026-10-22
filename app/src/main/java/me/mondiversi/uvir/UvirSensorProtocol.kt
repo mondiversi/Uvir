@@ -10,9 +10,10 @@ internal const val UVIR_SENSOR_UNIT = "uW/cm2"
  * here prevents one transport from silently exposing a different spectrum.
  */
 internal fun JSONObject.toUvirSensorSampleOrNull(): SensorSample? {
-    if (optString("unit") != UVIR_SENSOR_UNIT) return null
+    val unit = optString("unit")
+    if (unit !in setOf(UVIR_LEGACY_IRRADIANCE_UNIT, UVIR_CANONICAL_IRRADIANCE_UNIT)) return null
     val bands = optJSONObject("bands") ?: return null
-    return bands.toUvirBandSample().copy(qualityFlags = uvirQualityFlags())
+    return bands.toUvirBandSample(unit).copy(qualityFlags = uvirQualityFlags(), opticalWindow = opticalWindowOrNull())
 }
 
 internal fun JSONObject.uvirQualityFlags(): Int {
@@ -26,7 +27,7 @@ internal fun JSONObject.uvirQualityFlags(): Int {
     return flags
 }
 
-internal fun JSONObject.toUvirBandSample(): SensorSample =
+internal fun JSONObject.toUvirBandSample(unit: String = UVIR_LEGACY_IRRADIANCE_UNIT): SensorSample =
     SensorSample(
         uvc = nonNegativeFiniteDouble("uvc"),
         uvb = nonNegativeFiniteDouble("uvb"),
@@ -39,7 +40,14 @@ internal fun JSONObject.toUvirBandSample(): SensorSample =
         rosso = nonNegativeFiniteDouble("red"),
         f8 = nonNegativeFiniteDouble("far_red"),
         nir = nonNegativeFiniteDouble("nir")
-    )
+    ).scaledIrradiance(irradianceUnitScaleToWm2(unit))
+
+internal fun JSONObject.sensorIrradianceScaleToWm2(): Double =
+    irradianceUnitScaleToWm2(optString(KEY_IRRADIANCE_STORAGE_UNIT,
+        optString("unit", UVIR_LEGACY_IRRADIANCE_UNIT)))
+
+internal fun JSONObject.sensorAlertDetailsWm2(): String =
+    scaleUvirAlertDetails(optString("details"), sensorIrradianceScaleToWm2())
 
 private fun JSONObject.nonNegativeFiniteDouble(key: String): Double =
     optDouble(key, 0.0)

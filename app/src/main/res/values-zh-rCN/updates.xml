@@ -14,5 +14,5 @@
     <string name="update_done">传感器已更新</string>
     <string name="update_failed">更新失败。请查看错误日志。如果传感器无法启动，请通过计算机 USB 恢复固件。</string>
     <string name="update_permission">请在 Android 设置中允许 Uvir 安装更新。</string>
-    <string name="update_whats_new">应用和传感器的签名更新、经过验证的下载及 USB 固件更新。</string>
+    <string name="update_whats_new">CSV、TXT 和 PNG 导出包含传感器型号、精简光谱参考信息及更清晰的图例。</string>
 </resources>

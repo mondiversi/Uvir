@@ -1175,12 +1175,12 @@ internal fun AlertViolationSummary(
     showBiologicalEquivalentUnit: Boolean = true,
     showThresholdDeltaOnly: Boolean = false
 ) {
-    val metricLabel =
+    val metricLabel = sensorChannelLabel(
         stringResource(
             thresholdAlertMetricLabelResource(
                 violation.rule.metric
             )
-        )
+        ), thresholdAlertMetricLabelResource(violation.rule.metric))
     val irradianceUnit = LocalUvirIrradianceUnit.current
     val unit =
         if (
@@ -1218,19 +1218,9 @@ internal fun AlertViolationSummary(
                 "$sign${formatUvirNumber(abs(delta), 1, numericFormat)}%"
             } ?: "—"
         } else {
-            formatUvirIrradianceNumber(
-                violation.value,
-                3,
-                numericFormat,
-                irradianceUnit
-            ) +
+            displayedUvirIrradianceNumber(violation.value) +
                 " $symbol " +
-                formatUvirIrradianceNumber(
-                    violation.rule.threshold.toDouble(),
-                    3,
-                    numericFormat,
-                    irradianceUnit
-                ) +
+                displayedUvirIrradianceNumber(violation.rule.threshold.toDouble()) +
                 " $unit"
         }
 

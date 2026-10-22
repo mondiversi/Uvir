@@ -12,6 +12,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,6 +28,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
@@ -162,6 +164,11 @@ internal fun UvirHomeSettingsIcon(
     tint: Color,
     modifier: Modifier = Modifier
 ) {
+    if (UVIR_HOME_SETTINGS_DROPDOWN_ENABLED) {
+        Icon(painterResource(R.drawable.ic_menu), contentDescription = null,
+            modifier = modifier.size(UvirHomeHeaderIconSize), tint = tint)
+        return
+    }
     UvirMenuIcon(
         type = MenuIconType.ACQUISITION_PARAMETERS,
         modifier = modifier.size(UvirHomeHeaderIconSize),
@@ -205,7 +212,8 @@ internal fun UvirHomeHeader(
     sensorAlertMonitoringDeviceIds: Set<String> = emptySet(),
     sensorDialogColor: Color = MaterialTheme.colorScheme.surface,
     onOpenSimulationSettings: () -> Unit = {},
-    onAddSensor: () -> Unit = {}
+    onAddSensor: () -> Unit = {},
+    onOpenSettingsPage: ((UvirSettingsPage) -> Unit)? = null
 ) {
     val selectedConnectionIsConnected =
         if (sensorConnectionMode == SensorConnectionMode.USB) {
@@ -370,7 +378,16 @@ internal fun UvirHomeHeader(
         }
 
         Spacer(Modifier.width(UvirHomeHeaderActionGap))
-        UvirHomeHeaderActionButton(
+        if (UVIR_HOME_SETTINGS_DROPDOWN_ENABLED && onOpenSettingsPage != null) {
+            UvirHomeSettingsDropdown(
+                primaryText = primaryText,
+                secondaryText = secondaryText,
+                containerColor = sensorDialogColor,
+                onOpenPage = onOpenSettingsPage,
+                onOpenInfo = onOpenVersionInfo,
+                onOpened = { onSensorSelectionExpandedChange(false) }
+            )
+        } else UvirHomeHeaderActionButton(
             contentDescription = stringResource(R.string.acquisition_parameters),
             onClick = onOpenSettings
         ) {

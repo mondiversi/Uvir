@@ -78,7 +78,8 @@ toward the top; an accessible side button. RTC, FRAM and SD occupy the reverse,
 with card access from an edge. This intent is not an assembly drawing for every
 published layout: check the selected native CAD's layers and orientation.
 
-Keep the ESP32 antenna area clear of copper, modules, battery holders and metal
+Keep the ESP32 antenna area clear of copper, modules, battery holders and metal,
+including the enclosure's aluminium panel,
 as required by the exact ESP32 module design. Do not place the RTC under the
 antenna merely to follow the rough arrangement. Ensure sockets on opposite
 sides cannot touch through leads or spacers.
@@ -89,6 +90,16 @@ bands being measured; ordinary plastic or glass is not a neutral UV window.
 Changing enclosure, window, distance or LED shielding after calibration can
 change the result. Maintain the normal operating LED configuration during the
 final dark/reference tests, with suitable physical isolation.
+
+If protection is wanted, use **UV-grade synthetic fused silica, polished and
+uncoated**, with documented transmission across at least 240–1000 nm. Prefer
+two small windows with opaque LED barriers; nominal 1 mm is a starting point for
+a supported aperture, not a guaranteed enclosure fit or impact rating. A shared
+sheet needs its own mechanical and light-isolation review. See
+[window selection, thickness and mounting](../docs/OPTICAL_WINDOW.md#choosing-an-optional-protective-window)
+for a specification-checked purchase option. Include the final window in optical
+tests, and set justified window compensation only if its loss has not already
+been included in the final-assembly calibration.
 
 ## 5. Firmware and first communication
 

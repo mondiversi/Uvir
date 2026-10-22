@@ -6,7 +6,7 @@ This document describes the USB interface currently implemented by the Uvir
 ESP32 firmware. It is intended for computers, mobile devices and embedded
 controllers that need to power and control the sensor without running the Uvir
 Android application. The command documentation was checked against firmware
-source `0.5.104` on 2026-10-17. See the
+source `0.5.112` on 2026-10-22. See the
 [standalone transport/setup guide](STANDALONE_SENSOR.md) for concrete USB,
 Wi-Fi, Bluetooth and MQTT connection procedures and a runnable live reader.
 
@@ -46,7 +46,7 @@ bridge.
 | Flow control | none |
 | Command terminator | `LF`, `CR`, or `CRLF` |
 | Response framing | one UTF-8 JSON object per line |
-| Maximum command line handled by firmware | 512 characters |
+| Maximum command line handled by firmware | 16384 bytes (firmware 0.5.107+; earlier USB/Wi-Fi/SPP: 512) |
 
 The controlling device must act as a USB host. A USB power-only connection is
 not sufficient. Some serial libraries toggle DTR/RTS when opening a port and
@@ -93,7 +93,7 @@ PING\n
 ```
 
 ```json
-{"type":"hello","protocol":"uvir-sensor-v1","device_id":"…","firmware":"0.5.104"}
+{"type":"hello","protocol":"uvir-sensor-v1","device_id":"…","firmware":"0.5.106"}
 ```
 
 An integration should:
@@ -202,6 +202,14 @@ database fields are required.
 Use capability fields such as `conditional_acquisition_supported` and
 `external_command_supported` before presenting related controls.
 
+Firmware 0.5.106 adds `calibration_locked` to HELLO and activity frames. It is
+true for actual work that prevents calibration changes, but excludes the
+configuration command indicator and its short LED hold. `operation_active`
+continues to include that visual activity. Clients must not interpret a
+`calibration_busy`, `calibration_invalid` or `calibration_save_failed` response as
+a lost authenticated transport; retain the connection and report the rejected
+edit. Calibration/window factors continue to travel together in one command.
+
 ### `APP_CONNECT`
 
 Marks this transport as the active live app session and returns a `status`
@@ -284,8 +292,12 @@ sampling sequence.
 }
 ```
 
-The canonical transport unit is always `uW/cm2`; display-unit conversion is a
-client responsibility. When `uv_available` is false, a client must not present
+The **v1 compatibility transport** unit is always `uW/cm2`; display-unit conversion is a
+client responsibility. Firmware 0.5.112 and Android database v25 use `W/m2`
+internally, converting exactly once at the v1 boundary. `HELLO` additionally
+reports `canonical_unit: "W/m2"` and `storage_record_version: 3`; these describe
+internal storage, not the unit of v1 sample/threshold/offset numbers. See the
+[SI migration notes](SI_IRRADIANCE_MIGRATION.md). When `uv_available` is false, a client must not present
 UV values as valid measurements. `saturated == true` means at least one value
 was outside the usable range and should be represented as overload rather than
 as a precise number.
@@ -315,7 +327,181 @@ SAMPLING_CONFIG 5 150 1
 
 ### `CALIBRATION_CONFIG <visible_factor> <uv_factor>`
 
+Channel identifiers remain stable: the protocol field/metric `yellow`/`YELLOW`
+is displayed as green-yellow and represents the mean of AS7343 F5/FY (nominal
+peaks 550 / 555 nm), not a dedicated yellow passband. Similarly, HEV sums the
+violet/blue estimates and is displayed without its own wavelength list.
+See [channel definitions](OPTICAL_WINDOW.md).
+
 Both factors must be finite values from 0.1 to 10.0. Calibration is persistent.
+The legacy form also disables optical-window compensation and resets its factors
+to one. To retain/configure independent window factors, use firmware 0.5.106+:
+
+```text
+CALIBRATION_CONFIG <visible_factor> <uv_factor> <ON|OFF> <uvc> <uvb> <uva> <violet> <blue> <green> <yellow> <orange> <red> <far_red> <nir>
+```
+
+All eleven window factors are required, finite, and between 1 and 10. An unchanged
+configuration is a no-op; an actual calibration/window change is rejected while
+a sensor activity is running. A failed persistent write retains the prior
+configuration. HELLO and calibration replies expose
+`"optical_window":{"version":1,"enabled":false,"factors":[1,1,1,1,1,1,1,1,1,1,1]}`.
+Samples, acquisitions, alerts and synchronized records carry their capture context
+when known. The values are already corrected; clients must not apply the factors
+again. An absent context on an older record remains unknown.
+See [optical-window limits and band definitions](OPTICAL_WINDOW.md).
+
+Firmware **0.5.108+** accepts one dark offset per displayed color/channel:
+
+```text
+CALIBRATION_CONFIG <visible_factor> <uv_factor> <ON|OFF> <11 window factors> COLOR_OFFSETS <11 dark offsets>
+```
+
+Color offset order is **UVC, UVB, UVA, violet, blue, green, green-yellow, orange,
+red, far-red, NIR**, the same order as optical-window factors. Values are finite,
+nonnegative v1 wire **uW/cm2**, between 0 and 1000000. Supply all eleven values;
+zero means no subtraction. Physical channels are normalized and paired using
+the usual color means, then the color offset is subtracted and clamped once at
+zero, before the base and optical-window factors, conditions and saves. This is
+not equivalent to clamping each constituent physical channel separately.
+
+HELLO/calibration status returns
+`"calibration_offsets":{"version":2,"unit":"uW/cm2","values":[0,0,0,0,0,0,0,0,0,0,0]}`.
+Configuration is validated and persisted atomically with base/window factors;
+changes remain blocked during real work. Previously saved readings are never
+recalculated, and the current configuration is not historical record provenance.
+
+For backward compatibility, firmware **0.5.107+** also accepts the earlier fifteen
+physical-channel offsets:
+
+```text
+CALIBRATION_CONFIG <visible_factor> <uv_factor> <ON|OFF> <11 window factors> OFFSETS <15 dark offsets>
+```
+
+Offset wire order is **UVC, UVB, UVA, F1, F2, FZ, F3, F4, F5, FY, FXL, F6,
+F7, F8, NIR**. Values are finite, nonnegative v1 wire **uW/cm2**, from 0 to
+1000000. All fifteen must be supplied; zero means no subtraction. Display units
+and locale never change this protocol. Old two-factor/window-only commands
+preserve existing offsets; an explicit fifteen-zero suffix clears them.
+The configuration is validated and persisted atomically with the base and
+window factors, and cannot change during acquisitions, alerts or other work.
+HELLO and calibration acknowledgements expose
+`"calibration_offsets":{"version":1,"unit":"uW/cm2","values":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}`.
+An absent object on older firmware means unknown/not supported, not measured zero.
+
+In this legacy mode only, subtraction occurs after count-to-irradiance normalization, before each base
+factor, paired-channel averaging, optical-window factors, conditions and saves.
+Negative corrected channel values are floored at zero. No separate offsets
+exist for HEV or group totals. Previously saved measurements are not recalculated;
+current HELLO settings must not be treated as historical per-record calibration
+provenance. The offline record layout is unchanged.
+
+Firmware 0.5.108 retains this legacy calculation and its version-1 readback until
+an explicit `COLOR_OFFSETS` edit replaces it. Window-only/two-factor commands
+never switch modes or clear offsets. The Android color editor shows averages of
+legacy paired offsets, warns when a nonzero legacy configuration would be
+converted, and converts only when a color value is explicitly changed. Near zero,
+the two clamp orders differ, so this is an intentional configuration change, not
+a silent background migration. An all-zero `COLOR_OFFSETS` suffix clears offsets
+and selects color mode. No database migration is needed for the versioned JSON.
+
+### Per-channel calibration (firmware 0.5.109+)
+
+Append `CHANNEL_FACTORS` and eleven finite, dimensionless values in **0.1–10.0**:
+
+```text
+CALIBRATION_CONFIG <visible_factor> <uv_factor> <ON|OFF> <11 window factors> [COLOR_OFFSETS <11 dark offsets>] CHANNEL_FACTORS <11 absolute correction factors>
+```
+
+The order is UVC, UVB, UVA, violet, blue, green, green-yellow, orange, red,
+far-red, NIR. These absolute factors **replace**, rather than multiply, the two
+module factors for the respective channels. The acquisition order is normalized
+irradiance, the existing paired-color mean, dark-offset subtraction floored at
+zero, channel correction, then optical-window compensation. Totals, conditions,
+alerts and saved values use the corrected results. No independent total factor
+is applied and no historical record is recalculated.
+
+`HELLO` and calibration replies include `calibration_channel_factors`, either
+`null` for legacy module-factor operation or
+`{"version":1,"values":[1,1,1,1,1,1,1,1,1,1,1]}`. A missing suffix preserves the
+existing channel factors. Once channel factors are configured, changing module
+factors without the explicit suffix is rejected to protect calibration from
+older clients. Set all eleven absolute values explicitly to restore a common
+factor. Complete configuration is persisted atomically in `cal_state4`; startup
+reads earlier calibration formats without writing or changing their behavior.
+
+Android shows equal-width factor/offset fields for each channel. An unset
+channel configuration displays the current module factors; opening the editor
+does not save. A first explicit factor edit initializes the other channels from
+those module factors. Settings exports/imports and the per-sensor cache retain
+the full factor array. Database schema 24 adds a nullable sensor-settings column
+only; older database imports are upgraded in a private extracted copy.
+
+### Independent optical-window master (firmware 0.5.111+)
+
+Append `WINDOW_MASTER <factor>` after any offset and channel-factor suffixes:
+
+```text
+CALIBRATION_CONFIG 1 1 ON 1.5 1 1 1 1 1 1 1 1 1 1 WINDOW_MASTER 1.2
+```
+
+The window correction is `master × channel`, applied once after dark subtraction
+and calibration. Both components accept 1–10; their effective product may reach
+100. A master of 1 is neutral and changing it never overwrites channel factors.
+The master has six-decimal resolution. This is not a calibrated transmission
+curve and cannot recover wavelengths blocked by a window.
+
+Readback and per-record optical provenance use version 2 with a `master` number
+and eleven individual `factors`. Version 1 remains readable and implies a master
+of 1. Existing settings and readings are not rescaled. Once explicitly configured,
+the master, including 1, must be included in subsequent calibration commands so
+older clients cannot silently remove it.
+
+Binary context version 2 identifies itself with signature `OPT2` and uses three
+previously reserved bytes for a little-endian master in millionths. The 52-byte
+optical structure, 180-byte calibration state, 64-byte optical journal entries
+and acquisition record layout remain unchanged. Old `OPT1` contexts retain their
+original calculation. There is no database migration or historical-record rewrite.
+
+### Dark-offset measurement (firmware 0.5.110+)
+
+```text
+DARK_OFFSETS START <UV|VIS> <32-character hexadecimal request ID>
+DARK_OFFSETS CANCEL <same request ID>
+```
+
+The sensor must be idle and the requested chip present. Android labels this
+action **Calculate offsets**. Keep the reference condition stable: cover the
+optical inputs completely, including near-infrared, with the final optical
+assembly and normal LED operation for sensor dark-bias calibration. An illuminated
+reference is allowed for deliberate background subtraction, but also subtracts
+real ambient light, giving relative rather than absolute readings. The historical
+`DARK_OFFSETS` command and reply names are unchanged. The transient job runs for about
+30 seconds, taking roughly one sample per second (at least 20 required). It reads
+normalized irradiance **before all user offsets, channel/module gains and window
+compensation**, without changing or temporarily resetting any saved settings.
+UV returns UVC/UVB/UVA; VIS returns violet/blue/green/green-yellow/orange/red/far-red/NIR.
+The result is a mean-background proposal, not random-noise removal or absolute calibration.
+
+Replies use `type: "dark_offsets"`, `protocol: "uvir-sensor-v1"`, `device_id`,
+`request_id`, `group`, `state`, `elapsed_ms` and `samples`. State is `progress`,
+`ready`, `cancelled` or `error`. A ready frame additionally contains `unit:
+"uW/cm2"` and `values` (3 or 8 finite nonnegative offsets). An error contains a
+machine-readable `error`; failed/saturated readings invalidate the proposal.
+
+Keep the original authenticated transport alive with PING at intervals shorter
+than 12 seconds. Link loss/lease expiry cancels measurement. Only its original
+transport and request ID may cancel it; other state-changing commands are
+rejected while busy. HELLO/PING and streaming controls remain serviced, but normal
+live samples pause during measurement. Neither acquisitions, alerts nor settings
+are saved. Applying a proposal requires a separate explicit CALIBRATION_CONFIG.
+
+Android shows a closable, scrollable preview and writes offsets only on **Set
+offsets**, retaining the other group, gains and window factors. Each calibration
+group has a **Reset values** button opening the standard confirmation dialog:
+hold its confirmation action for two seconds (own factors to 1, offsets to 0).
+The per-channel window editor has an independent confirmation dialog resetting to all-ones,
+retaining per-channel mode and leaving calibration untouched.
 
 ### `SENSOR_CONFIG`
 
@@ -367,11 +553,13 @@ encoding. Jobs, samples, resets, session controls and nested updates are not
 allowed. Native accepted settings commands also advance the sensor revision;
 `TIME` and keepalives do not.
 
-Although the inner decoder permits up to 6000 decoded characters, the outer
-USB/Wi-Fi/SPP command must still fit **512 characters including its hex payload**.
-Do not confuse an inner limit with the usable transport envelope. Keep updates
-small, read back settings, and do not use the same committed revision for later
-chunks (equal revisions are ignored).
+The inner decoder permits up to 6000 decoded bytes. Firmware 0.5.107+ accepts an
+outer command up to **16384 bytes including its hex payload** on all transports,
+so a complete offset configuration fits. Oversized stream commands are discarded
+through the next line terminator, rather than executing a truncated suffix;
+oversized MQTT messages are rejected. Earlier USB/Wi-Fi/SPP firmware accepts only
+512 bytes: keep those updates small. Read back settings and do not use the same
+committed revision for later chunks (equal revisions are ignored).
 
 ### `ALERT_SETTINGS`
 

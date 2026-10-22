@@ -5,14 +5,14 @@
 // AS7343 typical response from the ams OSRAM datasheet at 155 mW/m2
 // (15.5 uW/cm2), 1024x gain and 27.8 ms integration time.
 //
-// These coefficients produce a datasheet-based estimate in uW/cm2. They are
+// These coefficients produce a datasheet-based estimate in W/m2. They are
 // NOT a traceable per-device calibration: package tolerance, board optics,
 // covers/diffusers and dark offset remain uncharacterized. Replace scale and
 // dark values after comparing the assembled instrument with a calibrated
 // reference source or spectroradiometer.
 namespace UvirCalibration {
 
-constexpr float kReferenceIrradianceUwCm2 = 15.5f;
+constexpr float kReferenceIrradianceWm2 = 0.155f;
 // Typical optical gain ratio from AS7343 datasheet, relative to 64x.
 constexpr float kReferenceGainRatio = 16.9f;
 constexpr float kReferenceIntegrationMs = 27.8f;
@@ -54,7 +54,7 @@ constexpr ChannelCalibration kChannels[CHANNEL_COUNT] = {
     {10581.0f, 0.0f, 1.0f},  // NIR 855 nm
 };
 
-inline float convertToUwCm2(
+inline float convertToWm2(
     uint16_t raw,
     SpectralChannel channel,
     float gainRatio,
@@ -69,7 +69,7 @@ inline float convertToUwCm2(
   }
 
   return corrected / calibration.referenceCounts *
-         kReferenceIrradianceUwCm2 *
+         kReferenceIrradianceWm2 *
          (kReferenceGainRatio / gainRatio) *
          (kReferenceIntegrationMs / integrationMs) *
          calibration.scale;

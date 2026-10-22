@@ -409,7 +409,7 @@
     <string name="violet">بنفسجي</string>
     <string name="blue">أزرق</string>
     <string name="green">أخضر</string>
-    <string name="yellow">أصفر</string>
+    <string name="yellow">أخضر مصفر</string>
     <string name="orange">برتقالي</string>
     <string name="red">أحمر</string>
     <string name="percent_of_visible">%1$s%% من المرئي</string>
@@ -418,11 +418,11 @@
     <string name="app_version">إصدار التطبيق: %1$s</string>
     <string name="package_name_value">الحزمة: %1$s</string>
     <string name="about_whats_new_title">ما الجديد في الإصدار %1$s</string>
-    <string name="about_whats_new_connectivity">إدارة متسلسلة لعدة مستشعرات مع ملفات تعريف آمنة واتصالات USB وWi-Fi وBluetooth والإنترنت.</string>
-    <string name="about_whats_new_connections">عمليات اقتناء مشروطة وعبر أمر خارجي، وجلسات مستقلة، واستعادة موثوقة للحالة بعد انقطاع الاتصال أو إعادة التشغيل.</string>
-    <string name="about_whats_new_measurements">متغيرات للجلسات، ومرشحات متقدمة للسجل، وتفاصيل أوضح لعمليات الاقتناء والتنبيهات.</string>
-    <string name="about_whats_new_interface">عمليات تصدير موسعة بصيغ CSV وTXT وPNG مع الوحدات والتنسيقات الإقليمية والرسوم المجمعة وتعريف المستشعر.</string>
-    <string name="about_whats_new_github">نسخ احتياطية مشفرة للإعدادات، وتشخيصات مدمجة، وتحسينات واسعة للواجهة وإمكانية الوصول.</string>
+    <string name="about_whats_new_connectivity">معاملات تصحيح وإزاحات لكل قناة، مع قياس موجّه لمتوسط الإزاحات وتأكيد إعادة الضبط.</string>
+    <string name="about_whats_new_connections">تعويض النافذة البصرية بمضاعف رئيسي ومضاعفات للقنوات؛ توضيح نطاقات AS7331 وقمم الحساسية في AS7343.</string>
+    <string name="about_whats_new_measurements">تخزين الإشعاع داخليًا بوحدة W/m²، مع ترحيل تلقائي يحافظ على القياسات والإعدادات الحالية.</string>
+    <string name="about_whats_new_interface">منازل عشرية قابلة للضبط للقيم المباشرة والبيانات المحفوظة والتصدير المخصص؛ يحتفظ التصدير العلمي بكامل الدقة المخزنة.</string>
+    <string name="about_whats_new_github">تحسين قائمة الإعدادات ومربعات الحوار؛ تحديث أدلة التوصيل والتجميع والمعايرة، بما في ذلك الأنابيب الاتجاهية ومتطلبات ناشر الضوء.</string>
     <string name="about_description">تطبيق لقياس الطيف للأشعة فوق البنفسجية والضوء المرئي والأشعة تحت الحمراء.</string>
     <string name="about_spectral_ranges">النطاقات الطيفية: الأشعة فوق البنفسجية • الضوء المرئي • الأشعة تحت الحمراء</string>
     <string name="about_sensors">المستشعرات المدعومة: AS7331 للأشعة فوق البنفسجية • AS7343 متعدد الأطياف</string>
@@ -628,11 +628,10 @@
     <string name="threshold_rules_connection_required">صل المستشعر لتغيير هذه التنبيهات.</string>
     <string name="threshold_repeat_sensor_description">يُخزن هذا الفاصل في المستشعر ويحد أيضًا من التنبيهات المسجلة أثناء انقطاع التطبيق.</string>
     <string name="sensor_calibration_title">المعايرة</string>
-    <string name="sensor_calibration_description">طبّق عوامل تصحيح ناتجة من المقارنة بجهاز مرجعي معاير. يحافظ العامل 1.000 على تقدير ورقة البيانات الافتراضي.</string>
+    <string name="sensor_calibration_description">اضبط معاملات التصحيح والإزاحات لكل قناة.</string>
     <string name="sensor_calibration_visible_factor">عامل تصحيح VIS/NIR · AS7343</string>
     <string name="sensor_calibration_uv_factor">عامل تصحيح الأشعة فوق البنفسجية · AS7331</string>
-    <string name="sensor_calibration_factor_hint">القيمة المسموحة: 0.100–10.000.</string>
-    <string name="sensor_calibration_uv_unavailable">تُحفظ معايرة الأشعة فوق البنفسجية الافتراضية وستصبح قابلة للتعديل عند اكتشاف مستشعر الأشعة فوق البنفسجية.</string>
+    <string name="sensor_calibration_factor_hint">معاملات التصحيح: القيم المسموحة %1$s–%2$s؛ %3$s يُبقي الكسب دون تغيير. حددها باستخدام جهاز مرجعي معاير.</string>
     <string name="sensor_calibration_firmware_required">حدّث البرنامج الثابت للمستشعر لاستخدام المعايرة.</string>
     <string name="sensor_firmware_update_required_title">يلزم تحديث البرنامج الثابت</string>
     <string name="sensor_firmware_update_required">البرنامج الثابت المثبت على المستشعر لا يدعم هذه الإعدادات. حدّثه ثم حاول مرة أخرى.</string>
@@ -802,5 +801,5 @@
     <string name="alert_max_registrations">الحد الأقصى للتسجيلات</string>
     <string name="alert_registration_count">عدد التسجيلات</string>
     <string name="alert_configure_first">اضبط قيمة واحدة على الأقل قبل البدء.</string>
-    <string name="sensor_simulation_open_settings">فتح الإعدادات</string>
+    <string name="sensor_simulation_open_settings">الإعدادات</string>
 </resources>

@@ -84,9 +84,9 @@ internal fun UvirAlertRegistrationForm(
                     onClick = onConfigureValues,
                     modifier = Modifier.fillMaxWidth(),
                     colors = uvirOutlinedActionColors(primaryText),
-                    border = uvirOutlinedActionBorder(true, secondaryText)
+                    border = uvirOutlinedActionBorder(true, primaryText)
                 ) {
-                    UvirLabeledButtonContent(text = stringResource(
+                    UvirLabeledButtonContent(text = uvirActionLabel(
                         R.string.alert_configure_values_count, configuredCount)) {
                         UvirMenuIcon(type = MenuIconType.ALERT_LOG, modifier = Modifier.size(20.dp))
                     }

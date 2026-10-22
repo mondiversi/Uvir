@@ -1,0 +1,24 @@
+<resources>
+    <string name="optical_window_factor_limits">Toegestane waarden: %1$s–%2$s.</string>
+    <string name="optical_window_title">Compensatie optisch venster</string>
+    <string name="optical_window_description">Benaderende correctie voor vensterverzwakking. Gebruik alleen factoren uit optische specificaties of vergelijkende metingen.</string>
+    <string name="optical_window_enabled">Optisch venster compenseren</string>
+    <string name="optical_window_channel_factor">Vermenigvuldigingsfactor %1$s</string>
+    <string name="optical_window_hint">De uiteindelijke factor is algemeen × kanaal. %1$s is neutraal; 90%% transmissie vereist een eindfactor van ×%2$s. Dit vervangt de kalibratie niet.</string>
+    <string name="measured_uv_bands_note">Nominale AS7331-kanaalbereiken met niet-uniforme spectrale gevoeligheid. De som meet niet alle UV-golflengten.</string>
+    <string name="spectral_channel_peaks">Pieken: %1$s nm</string>
+    <string name="measured_visible_bands_note">De aangegeven golflengten zijn nominale gevoeligheidspieken van de AS7343, geen grenzen van uniforme banden. Kanaalparen worden gemiddeld; HEV en totalen tellen de weergegeven kanaalwaarden op.</string>
+    <string name="measured_infrared_bands_note">Far-red combineert de kanalen van 690 en 745 nm; NIR gebruikt het kanaal van 855 nm. Dit zijn kanaalmetingen, geen meting van het volledige infraroodspectrum.</string>
+    <string name="optical_window_common_factor">Gemeenschappelijke factor</string>
+    <string name="optical_window_individual_factors">Vermenigvuldigers per kanaal</string>
+    <string name="measured_channel_sum">Som van kanalen</string>
+    <string name="calibration_offsets_title">Offsets</string>
+    <string name="calibration_offset_channel">Offset %1$s</string>
+    <string name="calibration_offsets_description">Offsets: toegestane waarden %1$s–%2$s %3$s; %1$s trekt niets af. Trekt een gemiddelde achtergrond af, gemeten in het donker of onder referentieomstandigheden. Toegepast vóór de factoren; negatieve resultaten worden nul.</string>
+    <string name="calibration_offsets_firmware_required">Werk de sensorfirmware bij om offsets in te stellen.</string>
+    <string name="calibration_offsets_legacy_notice">Bij bewerking worden eerdere offsets per kanaal omgezet naar één offset per kleur. Tot die tijd blijven de oude waarden ongewijzigd.</string>
+    <string name="calibration_factor_short">Factor</string>
+    <string name="calibration_offset_short">Offset (%1$s)</string>
+    <string name="calibration_channel_factors_title">Correctiefactoren per kanaal</string>
+    <string name="calibration_channels_firmware_required">Werk de sensorfirmware bij om factoren per kanaal in te stellen.</string>
+</resources>

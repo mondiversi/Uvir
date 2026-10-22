@@ -1,0 +1,24 @@
+<resources>
+    <string name="optical_window_factor_limits">القيم المسموحة: %1$s–%2$s.</string>
+    <string name="optical_window_title">تعويض النافذة البصرية</string>
+    <string name="optical_window_description">تصحيح تقريبي لتوهين النافذة. استخدم معاملات من المواصفات البصرية أو القياسات المقارنة فقط.</string>
+    <string name="optical_window_enabled">تعويض النافذة البصرية</string>
+    <string name="optical_window_channel_factor">معامل ضرب %1$s</string>
+    <string name="optical_window_hint">المعامل النهائي هو العام × القناة. %1$s محايد؛ نفاذية 90%% تتطلب معاملاً نهائياً ×%2$s. هذا لا يحل محل المعايرة.</string>
+    <string name="measured_uv_bands_note">نطاقات اسمية لقنوات AS7331 بحساسية طيفية غير منتظمة. مجموعها لا يقيس جميع الأطوال الموجية للأشعة فوق البنفسجية.</string>
+    <string name="spectral_channel_peaks">القمم: %1$s نانومتر</string>
+    <string name="measured_visible_bands_note">الأطوال الموجية المعروضة هي قمم الحساسية الاسمية لـ AS7343 وليست حدود نطاقات منتظمة. يُحسب متوسط أزواج القنوات؛ وتجمع HEV والإجماليات قيم القنوات المعروضة.</string>
+    <string name="measured_infrared_bands_note">يجمع Far-red قناتي 690 و745 نانومتر؛ ويستخدم NIR قناة 855 نانومتر. هذه قراءات للقنوات وليست قياسًا لكامل طيف الأشعة تحت الحمراء.</string>
+    <string name="optical_window_common_factor">معامل ضرب عام</string>
+    <string name="optical_window_individual_factors">مضاعفات القنوات</string>
+    <string name="measured_channel_sum">مجموع القنوات</string>
+    <string name="calibration_offsets_title">الإزاحات</string>
+    <string name="calibration_offset_channel">إزاحة %1$s</string>
+    <string name="calibration_offsets_description">الإزاحات: القيم المسموحة %1$s–%2$s %3$s؛ %1$s لا يطرح شيئًا. يُطرح متوسط الخلفية المقاس في الظلام أو في ظروف مرجعية. تُطبّق قبل المعاملات؛ تصبح النتائج السالبة صفرًا.</string>
+    <string name="calibration_offsets_firmware_required">حدّث البرنامج الثابت للمستشعر لضبط الإزاحات.</string>
+    <string name="calibration_offsets_legacy_notice">يؤدي تعديل هذه القيم إلى تحويل إزاحات القنوات السابقة إلى إزاحة واحدة لكل لون. تبقى القيم القديمة دون تغيير حتى التعديل.</string>
+    <string name="calibration_factor_short">المعامل</string>
+    <string name="calibration_offset_short">الإزاحة (%1$s)</string>
+    <string name="calibration_channel_factors_title">معاملات التصحيح لكل قناة</string>
+    <string name="calibration_channels_firmware_required">حدّث البرنامج الثابت للمستشعر لضبط معاملات كل قناة.</string>
+</resources>

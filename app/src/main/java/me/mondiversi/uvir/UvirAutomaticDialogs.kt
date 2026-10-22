@@ -83,6 +83,7 @@ internal fun UvirAutomaticBackgroundWarningDialog(
             }
         },
         dismissButton = {
+            UvirDialogCloseButton(onDismissRequest)
             TextButton(onClick = onContinue) {
                 Text(
                     stringResource(

@@ -9,8 +9,10 @@ internal fun thresholdAlertLogCsv(
     numericFormat: UvirNumericFormat,
     dateFormat: UvirDateFormat = UvirDateFormat.INTERNATIONAL,
     timeFormat: UvirTimeFormat = UvirTimeFormat.H24,
-    irradianceUnit: UvirIrradianceUnit = UvirIrradianceUnit.UW_CM2
+    irradianceUnit: UvirIrradianceUnit = UvirIrradianceUnit.UW_CM2,
+    irradianceDecimals: Int? = uvirExportIrradianceDecimals(context, irradianceUnit)
 ): String {
+    val hardware = loadExportHardwareModels(context, entries.map { it.sensorId })
     val rows =
         mutableListOf(
             listOf(
@@ -26,8 +28,9 @@ internal fun thresholdAlertLogCsv(
                     .withUvirIrradianceUnit(irradianceUnit),
                 context.getString(R.string.sensor_info_unit),
                 context.getString(R.string.sensor_name_label),
-                context.getString(R.string.out_of_range_csv_header)
-            ).joinToString(";")
+                context.getString(R.string.out_of_range_csv_header),
+                "Optical_window"
+            ).plus(hardwareCsvColumns(context.resources.configuration.locales[0].language)).joinToString(";")
         )
 
     entries
@@ -48,11 +51,7 @@ internal fun thresholdAlertLogCsv(
                             timeFormat
                         ),
                         entry.timestamp.toString(),
-                        context.getString(
-                            thresholdAlertMetricLabelResource(
-                                violation.rule.metric
-                            )
-                        ),
+                        context.resources.sensorChannelLabel(thresholdAlertMetricLabelResource(violation.rule.metric)),
                         if (
                             violation.rule.direction ==
                             ThresholdAlertDirection.ABOVE
@@ -67,19 +66,24 @@ internal fun thresholdAlertLogCsv(
                             formatUvirIrradianceExportNumber(
                                 violation.value,
                                 numericFormat,
-                                irradianceUnit
+                                irradianceUnit,
+                                irradianceDecimals
                             )
                         },
                         formatUvirIrradianceExportNumber(
                             violation.rule.threshold.toDouble(),
                             numericFormat,
-                            irradianceUnit
+                            irradianceUnit,
+                            irradianceDecimals
                         ),
                         irradianceUnit.unitLabel(
                             equivalent = violation.rule.metric.isBiologicalEffect()
                         ),
                         exportSensorName(entry.sensorDisplayName),
-                        if (entry.qualityFlags.isOutOfRange(violation.rule.metric)) "1" else "0"
+                        if (entry.qualityFlags.isOutOfRange(violation.rule.metric)) "1" else "0",
+                        entry.opticalWindow?.toJson()?.toString().orEmpty(),
+                        hardware.models(entry.sensorId).ultraviolet,
+                        hardware.models(entry.sensorId).visibleInfrared
                     ).joinToString(";") {
                         csvCell(it)
                     }
@@ -95,8 +99,10 @@ internal fun readableThresholdAlertLog(
     numericFormat: UvirNumericFormat,
     dateFormat: UvirDateFormat = UvirDateFormat.INTERNATIONAL,
     timeFormat: UvirTimeFormat = UvirTimeFormat.H24,
-    irradianceUnit: UvirIrradianceUnit = UvirIrradianceUnit.UW_CM2
+    irradianceUnit: UvirIrradianceUnit = UvirIrradianceUnit.UW_CM2,
+    irradianceDecimals: Int? = uvirExportIrradianceDecimals(context, irradianceUnit)
 ): String = buildString {
+    val hardware = loadExportHardwareModels(context, entries.map { it.sensorId })
     appendLine("Uvir ${context.getString(R.string.threshold_alert_log_title)}")
     appendLine()
 
@@ -107,6 +113,8 @@ internal fun readableThresholdAlertLog(
                 "${context.getString(R.string.sensor_selector_label)}: " +
                     exportSensorName(entry.sensorDisplayName)
             )
+            appendLine(hardware.models(entry.sensorId).caption())
+            appendLine("${context.getString(R.string.optical_window_title)}: ${opticalWindowSummary(entry.opticalWindow, numericFormat)}")
             appendLine("${context.getString(R.string.alert_chart_id_label)}: ${entry.id}")
             appendLine(
                 "${context.getString(R.string.share_session_id_label)}: " +
@@ -130,11 +138,7 @@ internal fun readableThresholdAlertLog(
                 entry.details
             ).forEach { violation ->
                 val metric =
-                    context.getString(
-                        thresholdAlertMetricLabelResource(
-                            violation.rule.metric
-                        )
-                    )
+                    context.resources.sensorChannelLabel(thresholdAlertMetricLabelResource(violation.rule.metric))
                 val symbol =
                     if (
                         violation.rule.direction ==
@@ -153,8 +157,8 @@ internal fun readableThresholdAlertLog(
                     appendLine(context.getString(R.string.out_of_range_short))
                 } else {
                     appendLine(
-                        "${formatUvirIrradianceNumber(violation.value, 3, numericFormat, irradianceUnit)} $symbol " +
-                            "${formatUvirIrradianceNumber(violation.rule.threshold.toDouble(), 3, numericFormat, irradianceUnit)} $unit"
+                        "${formatUvirIrradianceExportNumber(violation.value, numericFormat, irradianceUnit, irradianceDecimals)} $symbol " +
+                            "${formatUvirIrradianceExportNumber(violation.rule.threshold.toDouble(), numericFormat, irradianceUnit, irradianceDecimals)} $unit"
                     )
                 }
             }

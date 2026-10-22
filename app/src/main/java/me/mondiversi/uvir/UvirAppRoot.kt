@@ -373,6 +373,7 @@ internal fun UvirAppContent(
     var irradianceUnit by rememberSaveable {
         mutableStateOf(loadUvirIrradianceUnit(context))
     }
+    val irradianceDisplayDecimals = rememberUvirIrradianceDisplayDecimals(context)
 
     val simulationDeviceId = normalizeSensorDeviceId(intendedDeviceId)
     // Preferences own this state: an old Activity snapshot must not restore
@@ -1652,7 +1653,8 @@ internal fun UvirAppContent(
                     timestamp = timestampMs,
                     sessionId = sessionId.takeIf { it > 0L },
                     sensorDeviceId = selectedSensorDeviceId,
-                    qualityFlags = latestMeasurement.get().qualityFlags
+                    qualityFlags = latestMeasurement.get().qualityFlags,
+                    opticalWindow = latestMeasurement.get().opticalWindow
                 )
             }
         if (insertedAlertId != -1L) {
@@ -4109,7 +4111,8 @@ internal fun UvirAppContent(
         LocalUvirDateFormat provides dateFormat,
         LocalUvirTimeFormat provides
             resolveUvirTimeFormat(context, timeFormat),
-        LocalUvirIrradianceUnit provides irradianceUnit
+        LocalUvirIrradianceUnit provides irradianceUnit,
+        LocalUvirLiveIrradianceDecimals provides irradianceDisplayDecimals.getValue(irradianceUnit)
     ) {
     when (screen) {
 
@@ -4463,6 +4466,15 @@ internal fun UvirAppContent(
                         wirelessSensorManager.diagnosticProbe(hardwareId, mode)
                     }
                 },
+                onMeasureDarkOffsets = { hardwareId, mode, group, progress ->
+                    check(!useFakeSensorData && hardwareId.equals(intendedDeviceId, true)) { "dark_offsets_connection_changed" }
+                    if (mode == SensorConnectionMode.USB) {
+                        usbSensorManager.measureDarkOffsets(hardwareId, group, progress)
+                    } else {
+                        val manager = multiSensorRuntime?.wirelessFor(hardwareId) ?: wirelessSensorManager
+                        manager.measureDarkOffsets(hardwareId, mode, group, progress)
+                    }
+                },
                 onPowerOffSensor = {
                     withContext(Dispatchers.IO) {
                         sendSensorControlCommands(
@@ -4554,6 +4566,14 @@ internal fun UvirAppContent(
                 },
                 sensorCalibrationSettings = sensorCalibrationSettings,
                 onApplySensorCalibration = { calibration ->
+                    if ((calibration.opticalWindow.masterFactor != null && !firmwareSupportsOpticalWindowMaster(selectedRuntimeInfo.firmwareVersion)) ||
+                        (calibration.channelFactors != null && !firmwareSupportsCalibrationChannels(selectedRuntimeInfo.firmwareVersion)) ||
+                        (calibration.opticalWindow != OpticalWindowSettings() &&
+                        !firmwareSupportsOpticalWindow(selectedRuntimeInfo.firmwareVersion)) ||
+                        (calibration.offsets != null && !firmwareSupportsCalibrationOffsets(selectedRuntimeInfo.firmwareVersion, calibration.offsets))) {
+                        showUvirBottomMessage(context, context.getString(R.string.sensor_calibration_firmware_required))
+                        false
+                    } else
                     if (
                         !firmwareSupportsSensorCalibration(
                             selectedRuntimeInfo.firmwareVersion

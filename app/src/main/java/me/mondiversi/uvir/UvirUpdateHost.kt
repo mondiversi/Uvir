@@ -69,6 +69,9 @@ internal fun UvirUpdateDialog(
         UvirAlertDialog(
             onDismissRequest = { if (!state.busy) onDismiss() },
             confirmButton = null,
+            dismissButton = if (state.busy) null else {
+                { UvirDialogCloseButton(onDismiss) }
+            },
             containerColor = if (darkTheme) Color(0xFF1C242B) else Color.White,
             titleContentColor = text,
             textContentColor = text,
@@ -82,7 +85,7 @@ internal fun UvirUpdateDialog(
                         OutlinedButton(enabled = !state.busy, modifier = Modifier.fillMaxWidth(),
                             colors = uvirPrimaryOutlinedButtonColors(),
                             border = uvirPrimaryOutlinedButtonBorder(!state.busy, secondary), onClick = onAppUpdate
-                        ) { Text(stringResource(R.string.update_app)) }
+                        ) { Text(uvirActionLabel(R.string.update_app)) }
                     }
                     state.sensors.forEach { sensor ->
                         HorizontalDivider()
@@ -95,7 +98,7 @@ internal fun UvirUpdateDialog(
                             colors = uvirPrimaryOutlinedButtonColors(),
                             border = uvirPrimaryOutlinedButtonBorder(!state.busy && !appFirst && available, secondary), onClick = {
                             onSensorUpdate(sensor)
-                        }) { Text(stringResource(R.string.update_sensor)) }
+                        }) { Text(uvirActionLabel(R.string.update_sensor)) }
                     }
                     if (state.busy) {
                         HorizontalDivider()

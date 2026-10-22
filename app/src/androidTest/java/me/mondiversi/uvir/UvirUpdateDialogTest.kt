@@ -3,6 +3,9 @@ package me.mondiversi.uvir
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
+import androidx.compose.runtime.*
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.platform.app.InstrumentationRegistry
@@ -14,6 +17,7 @@ import org.junit.Test
 class UvirUpdateDialogTest {
     @get:Rule val compose = createComposeRule()
     private val context = InstrumentationRegistry.getInstrumentation().targetContext
+    private fun action(resource: Int) = formatUvirActionLabel(context.getString(resource), context.resources.configuration.locales[0])
     private val asset = UvirUpdateAsset("", 1, "")
     private fun state(busy: Boolean = false, appFirst: Boolean = true) = UvirUpdateState(
         dialog = true, busy = busy, progress = if (busy) 0.4f else null,
@@ -23,27 +27,55 @@ class UvirUpdateDialogTest {
     )
     private val usb = UvirUsbSensorState(appConnectionConfirmed = true,
         runtimeInfo = UvirSensorRuntimeInfo(deviceId = "TEST-SENSOR", operationActive = false))
+
+    @Test fun idleClosureUsesTheThemePurpleInBothThemes() {
+        val dark = mutableStateOf(false)
+        var expected = Color.Unspecified
+        compose.setContent {
+            KeepUvirVerificationScreenOn()
+            val configuration = uvirThemeConfiguration(LocalConfiguration.current,
+                if (dark.value) UvirAppTheme.DARK else UvirAppTheme.LIGHT)
+            CompositionLocalProvider(LocalConfiguration provides configuration) {
+                MaterialTheme(colorScheme = if (dark.value) darkColorScheme() else lightColorScheme()) {
+                    val color = MaterialTheme.colorScheme.primary
+                    SideEffect { expected = color }
+                    UvirUpdateDialog(state(), usb, {}, {}, {}, darkTheme = dark.value)
+                }
+            }
+        }
+        for (night in listOf(false, true)) {
+            compose.runOnIdle { dark.value = night }
+            compose.waitForIdle()
+            compose.onNodeWithText(action(R.string.close), useUnmergedTree = true)
+                .assertUvirActionTextColor(expected)
+            compose.onNodeWithText(context.getString(R.string.cancel)).assertDoesNotExist()
+        }
+    }
     @Test fun appIsFirstAndSensorCannotBeFlashedBeforeApp() {
         compose.setContent { MaterialTheme { UvirUpdateDialog(state(), usb, {}, {}, {}) } }
         val app = compose.onNodeWithText("Uvir").fetchSemanticsNode().boundsInRoot
         val sensor = compose.onNodeWithText(state().sensors.single().name).fetchSemanticsNode().boundsInRoot
         assertTrue(app.bottom < sensor.top)
-        compose.onNodeWithText(context.getString(R.string.update_app)).assertIsEnabled()
-        compose.onNodeWithText(context.getString(R.string.update_sensor)).assertIsNotEnabled()
+        compose.onNodeWithText(action(R.string.update_app)).assertIsEnabled()
+        compose.onNodeWithText(action(R.string.update_sensor)).assertIsNotEnabled()
+        compose.onNodeWithText(action(R.string.close)).assertIsEnabled()
     }
     @Test fun busyButtonsAreDisabledInDarkTheme() {
         compose.setContent { MaterialTheme(colorScheme = darkColorScheme()) { UvirUpdateDialog(state(busy = true), usb, {}, {}, {}, darkTheme = true) } }
-        compose.onNodeWithText(context.getString(R.string.update_app)).assertIsNotEnabled()
-        compose.onNodeWithText(context.getString(R.string.update_sensor)).assertIsNotEnabled()
+        compose.onNodeWithText(action(R.string.update_app)).assertIsNotEnabled()
+        compose.onNodeWithText(action(R.string.update_sensor)).assertIsNotEnabled()
+        compose.onNodeWithText(context.getString(R.string.cancel)).assertDoesNotExist()
+        compose.onNodeWithText(action(R.string.close)).assertDoesNotExist()
+        compose.onNodeWithText(context.getString(R.string.stop)).assertDoesNotExist()
         compose.onNodeWithText(context.getString(R.string.update_download)).assertExists()
     }
     @Test fun idleSelectedUsbSensorCanBeUpdatedAfterApp() {
         compose.setContent { MaterialTheme(colorScheme = lightColorScheme()) { UvirUpdateDialog(state(appFirst = false), usb, {}, {}, {}, darkTheme = false) } }
-        compose.onNodeWithText(context.getString(R.string.update_sensor)).assertIsEnabled()
+        compose.onNodeWithText(action(R.string.update_sensor)).assertIsEnabled()
         compose.onNodeWithText("1.3.0 → 1.3.1").assertDoesNotExist()
     }
     @Test fun anotherUsbIdentityIsNeverEnabled() {
         compose.setContent { MaterialTheme { UvirUpdateDialog(state(appFirst = false), usb.copy(runtimeInfo = usb.runtimeInfo.copy(deviceId = "OTHER")), {}, {}, {}) } }
-        compose.onNodeWithText(context.getString(R.string.update_sensor)).assertIsNotEnabled()
+        compose.onNodeWithText(action(R.string.update_sensor)).assertIsNotEnabled()
     }
 }

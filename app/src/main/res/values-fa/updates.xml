@@ -14,5 +14,5 @@
     <string name="update_done">حسگر به‌روز شد</string>
     <string name="update_failed">به‌روزرسانی ناموفق بود. گزارش خطا را ببینید. اگر حسگر راه‌اندازی نشد، میان‌افزار را با USB از رایانه بازیابی کنید.</string>
     <string name="update_permission">در تنظیمات Android به Uvir اجازه نصب به‌روزرسانی بدهید.</string>
-    <string name="update_whats_new">به‌روزرسانی امضاشده برنامه و حسگر، دانلود تأییدشده و بارگذاری میان‌افزار با USB.</string>
+    <string name="update_whats_new">خروجی CSV، TXT و PNG با مدل حسگرها، ارجاعات طیفی فشرده و راهنماهای خواناتر نمودار.</string>
 </resources>

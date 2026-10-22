@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dark_offsets_calculate">Offsets berekenen</string>
+    <string name="dark_offsets_instructions">Meet ongeveer 30 seconden onder stabiele referentieomstandigheden. In het donker compenseer je de sensorachtergrond; bij verlichting trek je ook het aanwezige licht af en krijg je relatieve metingen. Dek voor een donkermeting de optische ingangen af met materiaal dat ook ondoorzichtig is voor nabij-infrarood en laat de leds normaal werken. Het gemiddelde verwijdert geen willekeurige ruis en kalibreert de versterking niet.</string>
+    <string name="dark_offsets_progress">Meten: %1$s / 30 s</string>
+    <string name="dark_offsets_result">Voorstel uit %1$s metingen. Er zijn geen instellingen gewijzigd.</string>
+    <string name="dark_offsets_failed">Meting onderbroken of niet beschikbaar. Controleer de verbinding en sensor en probeer opnieuw.</string>
+    <string name="dark_offsets_start">Meting starten</string>
+    <string name="dark_offsets_apply">Offsets instellen</string>
+    <string name="dark_offsets_firmware_required">Vereist sensorfirmware 0.5.110 of nieuwer.</string>
+    <string name="calibration_reset_values">Waarden herstellen</string>
+    <string name="calibration_reset_confirmation_title">Waarden herstellen?</string>
+    <string name="calibration_reset_confirm_action">HERSTELLEN</string>
+    <string name="calibration_reset_confirmation_message">Herstel correctiefactoren naar 1 en offsets naar 0 voor %1$s. Andere kalibratie- en optische-vensterinstellingen blijven ongewijzigd.</string>
+    <string name="optical_window_reset_confirmation_message">Zet de algemene vermenigvuldiger en alle kanaalvermenigvuldigers van het optische venster terug op 1. De kalibratie blijft ongewijzigd.</string>
+</resources>

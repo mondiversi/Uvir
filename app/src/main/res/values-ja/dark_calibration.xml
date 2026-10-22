@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dark_offsets_calculate">オフセットを計算</string>
+    <string name="dark_offsets_instructions">安定した基準条件で約30秒間測定します。暗所ではセンサーの背景値を補正し、照明下では存在する光も差し引くため、測定値は相対値になります。暗所で測定する場合は、近赤外線も透過しない素材で光学入力を覆い、LEDは通常の動作状態に保ってください。平均値はランダムノイズを除去したり、ゲインを校正したりするものではありません。</string>
+    <string name="dark_offsets_progress">測定中：%1$s / 30 秒</string>
+    <string name="dark_offsets_result">%1$s 回の読み取りによる提案です。設定は変更されていません。</string>
+    <string name="dark_offsets_failed">測定が中断されたか利用できません。接続とセンサーを確認して再試行してください。</string>
+    <string name="dark_offsets_start">測定を開始</string>
+    <string name="dark_offsets_apply">オフセットを適用</string>
+    <string name="dark_offsets_firmware_required">センサーファームウェア0.5.110以降が必要です。</string>
+    <string name="calibration_reset_values">値をリセット</string>
+    <string name="calibration_reset_confirmation_title">値をリセットしますか？</string>
+    <string name="calibration_reset_confirm_action">リセット</string>
+    <string name="calibration_reset_confirmation_message">%1$sの補正係数を1、オフセットを0に戻します。他の校正設定や光学窓の設定は変更されません。</string>
+    <string name="optical_window_reset_confirmation_message">全体の倍率と光学窓のすべてのチャンネル倍率を1に戻します。校正は変更しません。</string>
+</resources>

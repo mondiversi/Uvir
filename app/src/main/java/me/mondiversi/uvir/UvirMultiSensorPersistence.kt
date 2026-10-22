@@ -87,7 +87,7 @@ internal class UvirMultiSensorPersistence(
                 val violations = parseThresholdAlertLogDetails(event.details)
                 val existed = database.hasMatchingSensorAlert(id, event.timestampMs, event.details)
                 val stored = !event.recorded || existed || database.insertThresholdAlertLog(
-                    violations, event.timestampMs, event.sessionId.takeIf { it > 0L }, id, frame.qualityFlags) != -1L
+                    violations, event.timestampMs, event.sessionId.takeIf { it > 0L }, id, frame.qualityFlags, event.opticalWindow) != -1L
                 if (event.recorded && stored && !existed) incrementUnread(KEY_UNREAD_ALERT_COUNT)
                 UvirSensorEventHub.publishAlert(UvirStoredDeviceEvent(id, event, stored, stored && !existed && event.recorded))
             }
@@ -112,7 +112,7 @@ internal class UvirMultiSensorPersistence(
                     is SensorSyncEvent.Alert -> {
                         val existed = database.hasMatchingSensorAlert(id, event.timestamp, event.details)
                         stored = database.insertRecoveredThresholdAlert(event.timestamp, event.details, id,
-                            event.recordId, event.sessionId.takeIf { it > 0L }, event.qualityFlags)
+                            event.recordId, event.sessionId.takeIf { it > 0L }, event.qualityFlags, event.opticalWindow)
                         newRecord = stored && !existed
                         if (newRecord) incrementUnread(KEY_UNREAD_ALERT_COUNT)
                         if (stored) {

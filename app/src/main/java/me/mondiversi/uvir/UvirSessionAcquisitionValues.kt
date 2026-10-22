@@ -49,6 +49,7 @@ internal fun SessionAcquisitionValuesCard(
     val darkMode = isSystemInDarkTheme()
     val numericFormat = LocalUvirNumericFormat.current
     val irradianceUnit = LocalUvirIrradianceUnit.current
+    val displayDigits = currentUvirLiveIrradianceDecimals()
 
     UvirCollapsibleChartCard(
         title = stringResource(group.titleResource),
@@ -226,11 +227,11 @@ internal fun SessionAcquisitionValuesCard(
                             ) {
                                 Text(
                                     text =
-                                        item.displayLabelResource
+                                        sensorChannelLabel(item.displayLabelResource
                                             ?.let { resource ->
                                                 stringResource(resource)
                                             }
-                                            ?: item.label,
+                                            ?: item.label, item.displayLabelResource, item.label),
                                     modifier = Modifier.weight(1f),
                                     color =
                                         uvirSessionValueLabelColor(
@@ -259,12 +260,7 @@ internal fun SessionAcquisitionValuesCard(
                                         if (valueOutOfRange) {
                                             stringResource(R.string.out_of_range_short)
                                         } else {
-                                            formatUvirIrradianceNumber(
-                                                item.values[recordIndex],
-                                                3,
-                                                numericFormat,
-                                                irradianceUnit
-                                            )
+                                            displayedUvirIrradianceNumber(item.values[recordIndex])
                                         },
                                     color = primaryText,
                                     fontSize = 12.sp,
@@ -277,25 +273,13 @@ internal fun SessionAcquisitionValuesCard(
                                 )
 
                                 if (!group.biological) {
-                                    val total = series.first().values[recordIndex]
                                     val contribution =
-                                        if (itemIndex == 0) {
-                                            record.sample.spectralTotals()
-                                                .share(group.spectrumIconGroup())
+                                        if (itemIndex == 0 || showRelativeBreakdown) {
+                                            record.sample.spectralTotals().displayShare(
+                                                item.values[recordIndex], displayDigits, irradianceUnit)
                                                 ?.let { share ->
-                                                    stringResource(
-                                                        R.string.biological_compact_relevance,
-                                                        share * 100f
-                                                    )
+                                                    formatUvirNumber(share.toDouble() * 100.0, 1, numericFormat) + "%"
                                                 } ?: "—"
-                                        } else if (showRelativeBreakdown && !valueOutOfRange) {
-                                            stringResource(
-                                                R.string.biological_compact_relevance,
-                                                percentage(
-                                                    item.values[recordIndex],
-                                                    total
-                                                ) * 100f
-                                            )
                                         } else {
                                             ""
                                         }

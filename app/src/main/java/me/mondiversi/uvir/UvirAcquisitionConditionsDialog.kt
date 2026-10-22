@@ -49,8 +49,8 @@ internal fun UvirAcquisitionConditionsDialog(
         mutableStateMapOf<ThresholdAlertMetric, String>().apply {
             metrics.forEach { metric -> put(metric,
                 thresholdEditableValue(
-                    irradianceUnit.fromCanonicalUwCm2(
-                        (initialRules.firstOrNull { it.metric == metric }?.threshold ?: 1f).toDouble()
+                    irradianceUnit.fromCanonicalWm2(
+                        (initialRules.firstOrNull { it.metric == metric }?.threshold ?: DEFAULT_IRRADIANCE_THRESHOLD_W_M2).toDouble()
                     )
                 )) }
         }
@@ -67,7 +67,7 @@ internal fun UvirAcquisitionConditionsDialog(
         if (normalized.corrected) {
             showUvirBottomMessage(context, resources.getString(R.string.value_out_of_limits_corrected))
         }
-        return irradianceUnit.toCanonicalUwCm2(normalized.value.toDouble()).toFloat()
+        return irradianceUnit.toCanonicalWm2(normalized.value.toDouble()).toFloat()
     }
     UvirAlertDialog(
         onDismissRequest = onDismissRequest,
@@ -114,7 +114,7 @@ internal fun UvirAcquisitionConditionsDialog(
                                             focus.clearFocus()
                                             currentSample?.let {
                                                 thresholds[metric] = thresholdEditableValue(
-                                                    irradianceUnit.fromCanonicalUwCm2(
+                                                    irradianceUnit.fromCanonicalWm2(
                                                         it.thresholdMetricValue(metric)
                                                     )
                                                 )

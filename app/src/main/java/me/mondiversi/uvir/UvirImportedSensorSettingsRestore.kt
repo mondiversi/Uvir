@@ -33,7 +33,12 @@ internal suspend fun restoreImportedSensorSettingsToConnectedSensor(
     if (
         !firmwareIsCurrentForApp(transport.firmwareVersion) ||
         !firmwareSupportsSensorSettingsSnapshot(transport.firmwareVersion) ||
-        !firmwareSupportsSensorCalibration(transport.firmwareVersion)
+        !firmwareSupportsSensorCalibration(transport.firmwareVersion) ||
+        (imported.settings.calibrationSettings.opticalWindow != OpticalWindowSettings() &&
+            !firmwareSupportsOpticalWindow(transport.firmwareVersion)) ||
+        (imported.settings.calibrationSettings.channelFactors != null && !firmwareSupportsCalibrationChannels(transport.firmwareVersion)) ||
+        (imported.settings.calibrationSettings.offsets != null &&
+            !firmwareSupportsCalibrationOffsets(transport.firmwareVersion, imported.settings.calibrationSettings.offsets))
     ) {
         return UvirImportedSensorRestoreStatus.FAILED
     }
@@ -42,6 +47,11 @@ internal suspend fun restoreImportedSensorSettingsToConnectedSensor(
         ?: return UvirImportedSensorRestoreStatus.FAILED
     val target = imported.settings.copy(
         firmwareVersion = activeSettings.firmwareVersion,
+        calibrationSettings = imported.settings.calibrationSettings.let {
+            if (it.channelFactors == null && activeSettings.calibrationSettings.channelFactors != null)
+                it.copy(channelFactors = CalibrationChannelFactors.fromModuleFactors(it.visibleFactor, it.uvFactor))
+            else it
+        },
         alertMonitoringEnabled = activeSettings.alertMonitoringEnabled,
         alertSessionId = activeSettings.alertSessionId
     )
@@ -231,6 +241,11 @@ internal fun sensorBackedSettingsMatch(
             current.calibrationSettings.uvFactor -
                 target.calibrationSettings.uvFactor
         ) < 0.0001f &&
+        current.calibrationSettings.opticalWindow.enabled == target.calibrationSettings.opticalWindow.enabled &&
+        current.calibrationSettings.opticalWindow.factors.zip(target.calibrationSettings.opticalWindow.factors)
+            .all { (actual, desired) -> abs(actual - desired) < 0.0001f } &&
+        (target.calibrationSettings.offsets == null || current.calibrationSettings.offsets == target.calibrationSettings.offsets) &&
+        (target.calibrationSettings.channelFactors == null || current.calibrationSettings.channelFactors == target.calibrationSettings.channelFactors) &&
         current.alertRepeatSeconds == target.alertRepeatSeconds &&
         current.alertRecordingEnabled == target.alertRecordingEnabled &&
         current.alertStartDelaySeconds == target.alertStartDelaySeconds &&

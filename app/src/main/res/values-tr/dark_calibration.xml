@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dark_offsets_calculate">Ofsetleri hesapla</string>
+    <string name="dark_offsets_instructions">Kararlı referans koşullarında yaklaşık 30 saniye ölçüm yap. Karanlıkta sensör arka planı dengelenir; aydınlıkta mevcut ışık da çıkarılır ve göreli ölçümler elde edilir. Karanlık ölçüm için optik girişleri yakın kızılötesini de geçirmeyen bir malzemeyle kapat ve LED’leri normal çalışma durumunda tut. Ortalama, rastgele gürültüyü gidermez ve kazancı kalibre etmez.</string>
+    <string name="dark_offsets_progress">Ölçülüyor: %1$s / 30 sn</string>
+    <string name="dark_offsets_result">%1$s okumadan öneri. Hiçbir ayar değiştirilmedi.</string>
+    <string name="dark_offsets_failed">Ölçüm kesildi veya kullanılamıyor. Bağlantıyı ve sensörü kontrol edip tekrar deneyin.</string>
+    <string name="dark_offsets_start">Ölçümü başlat</string>
+    <string name="dark_offsets_apply">Ofsetleri uygula</string>
+    <string name="dark_offsets_firmware_required">Sensör yazılımı 0.5.110 veya üzeri gerekir.</string>
+    <string name="calibration_reset_values">Değerleri sıfırla</string>
+    <string name="calibration_reset_confirmation_title">Değerler sıfırlansın mı?</string>
+    <string name="calibration_reset_confirm_action">SIFIRLA</string>
+    <string name="calibration_reset_confirmation_message">%1$s için düzeltme katsayılarını 1, ofsetleri 0 yapar. Diğer kalibrasyon ve optik pencere ayarları değişmez.</string>
+    <string name="optical_window_reset_confirmation_message">Genel çarpanı ve optik pencerenin tüm kanal çarpanlarını 1 değerine sıfırlar. Kalibrasyon değişmez.</string>
+</resources>

@@ -180,7 +180,7 @@ internal fun updateThresholdAlertNotification(
         context.getString(
             R.string.threshold_notification_value,
             formatUvirIrradianceNumber(
-                canonicalUwCm2 = alert.value,
+                canonicalWm2 = alert.value,
                 fractionDigits = 3,
                 numericFormat = loadUvirNumericFormat(context),
                 unit = irradianceUnit

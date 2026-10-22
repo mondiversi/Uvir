@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_irradiance_decimals">Desimal yang ditampilkan</string>
+    <string name="live_irradiance_decimals_description">Berlaku untuk nilai yang ditampilkan dan ekspor khusus. Nol di akhir tetap terlihat; data tersimpan dan ekspor ilmiah tidak berubah.</string>
+</resources>

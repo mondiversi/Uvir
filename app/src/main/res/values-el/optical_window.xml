@@ -1,0 +1,24 @@
+<resources>
+    <string name="optical_window_factor_limits">Επιτρεπόμενες τιμές: %1$s–%2$s.</string>
+    <string name="optical_window_title">Αντιστάθμιση οπτικού παραθύρου</string>
+    <string name="optical_window_description">Προσεγγιστική διόρθωση της εξασθένησης του παραθύρου. Χρησιμοποίησε συντελεστές από οπτικές προδιαγραφές ή συγκριτικές μετρήσεις.</string>
+    <string name="optical_window_enabled">Αντιστάθμιση οπτικού παραθύρου</string>
+    <string name="optical_window_channel_factor">Πολλαπλασιαστής %1$s</string>
+    <string name="optical_window_hint">Ο τελικός συντελεστής είναι γενικός × κανάλι. Το %1$s είναι ουδέτερο· μετάδοση 90%% απαιτεί τελικό συντελεστή ×%2$s. Δεν αντικαθιστά τη βαθμονόμηση.</string>
+    <string name="measured_uv_bands_note">Ονομαστικά εύρη καναλιών AS7331 με μη ομοιόμορφη φασματική ευαισθησία. Το άθροισμα δεν μετρά όλα τα μήκη κύματος UV.</string>
+    <string name="spectral_channel_peaks">Κορυφές: %1$s nm</string>
+    <string name="measured_visible_bands_note">Τα εμφανιζόμενα μήκη κύματος είναι ονομαστικές κορυφές ευαισθησίας του AS7343, όχι όρια ομοιόμορφων ζωνών. Τα ζεύγη καναλιών υπολογίζονται ως μέσος όρος· το HEV και τα σύνολα αθροίζουν τις εμφανιζόμενες τιμές καναλιών.</string>
+    <string name="measured_infrared_bands_note">Το Far-red συνδυάζει τα κανάλια 690 και 745 nm· το NIR χρησιμοποιεί το κανάλι 855 nm. Οι τιμές δεν μετρούν ολόκληρο το υπέρυθρο φάσμα.</string>
+    <string name="optical_window_common_factor">Κοινός πολλαπλασιαστής</string>
+    <string name="optical_window_individual_factors">Πολλαπλασιαστές ανά κανάλι</string>
+    <string name="measured_channel_sum">Άθροισμα καναλιών</string>
+    <string name="calibration_offsets_title">Μετατοπίσεις</string>
+    <string name="calibration_offset_channel">Μετατόπιση %1$s</string>
+    <string name="calibration_offsets_description">Μετατοπίσεις: επιτρεπόμενες τιμές %1$s–%2$s %3$s· το %1$s δεν αφαιρεί τίποτα. Αφαιρείται το μέσο υπόβαθρο που μετρήθηκε στο σκοτάδι ή σε συνθήκες αναφοράς. Εφαρμόζονται πριν από τους συντελεστές· τα αρνητικά αποτελέσματα γίνονται μηδέν.</string>
+    <string name="calibration_offsets_firmware_required">Ενημέρωσε το υλικολογισμικό του αισθητήρα για τη ρύθμιση μετατοπίσεων.</string>
+    <string name="calibration_offsets_legacy_notice">Η επεξεργασία μετατρέπει τις προηγούμενες μετατοπίσεις καναλιών σε μία ανά χρώμα. Μέχρι τότε, οι παλιές τιμές παραμένουν αμετάβλητες.</string>
+    <string name="calibration_factor_short">Συντελεστής</string>
+    <string name="calibration_offset_short">Μετατόπιση (%1$s)</string>
+    <string name="calibration_channel_factors_title">Συντελεστές διόρθωσης ανά κανάλι</string>
+    <string name="calibration_channels_firmware_required">Ενημέρωσε το υλικολογισμικό του αισθητήρα για να ρυθμίσεις συντελεστές ανά κανάλι.</string>
+</resources>

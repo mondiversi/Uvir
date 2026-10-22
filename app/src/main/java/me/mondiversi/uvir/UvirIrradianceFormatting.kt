@@ -7,8 +7,8 @@ import androidx.core.content.edit
 internal const val UVIR_IRRADIANCE_UNIT_KEY = "irradiance_unit"
 
 /**
- * Irradiance is always stored and exchanged with the sensor in µW/cm².
- * This preference only controls presentation and exports.
+ * Canonical storage and calculations use SI W/m². Legacy protocol adapters
+ * convert explicitly at their boundaries. This preference is presentation only.
  */
 enum class UvirIrradianceUnit(
     val storedValue: String,
@@ -19,18 +19,18 @@ enum class UvirIrradianceUnit(
     MW_CM2("mw_cm2", "mW/cm²", "mW_cm2"),
     UW_CM2("uw_cm2", "µW/cm²", "uW_cm2");
 
-    fun fromCanonicalUwCm2(value: Double): Double =
+    fun fromCanonicalWm2(value: Double): Double =
         when (this) {
-            W_M2 -> value / 100.0
-            MW_CM2 -> value / 1_000.0
-            UW_CM2 -> value
+            W_M2 -> value
+            MW_CM2 -> value / 10.0
+            UW_CM2 -> value * 100.0
         }
 
-    fun toCanonicalUwCm2(value: Double): Double =
+    fun toCanonicalWm2(value: Double): Double =
         when (this) {
-            W_M2 -> value * 100.0
-            MW_CM2 -> value * 1_000.0
-            UW_CM2 -> value
+            W_M2 -> value
+            MW_CM2 -> value * 10.0
+            UW_CM2 -> value / 100.0
         }
 
     fun unitLabel(equivalent: Boolean = false): String =
@@ -39,6 +39,7 @@ enum class UvirIrradianceUnit(
     fun csvUnitLabel(equivalent: Boolean = false): String =
         if (equivalent) "${csvSymbol}_eq" else csvSymbol
 
+    // Retain the pre-SI presentation precision contract; this is NOT storage rounding.
     fun displayFractionDigits(canonicalFractionDigits: Int): Int =
         (canonicalFractionDigits +
             when (this) {
@@ -80,28 +81,30 @@ internal fun saveUvirIrradianceUnit(
 }
 
 internal fun formatUvirIrradianceNumber(
-    canonicalUwCm2: Double,
+    canonicalWm2: Double,
     fractionDigits: Int,
     numericFormat: UvirNumericFormat,
     unit: UvirIrradianceUnit,
     grouping: Boolean = true
 ): String =
     formatUvirNumber(
-        value = unit.fromCanonicalUwCm2(canonicalUwCm2),
+        value = unit.fromCanonicalWm2(canonicalWm2),
         fractionDigits = unit.displayFractionDigits(fractionDigits),
         format = numericFormat,
         grouping = grouping
     )
 
 internal fun formatUvirIrradianceExportNumber(
-    canonicalUwCm2: Double,
+    canonicalWm2: Double,
     numericFormat: UvirNumericFormat,
-    unit: UvirIrradianceUnit
-): String =
-    formatUvirExportNumber(
-        unit.fromCanonicalUwCm2(canonicalUwCm2),
-        numericFormat
-    )
+    unit: UvirIrradianceUnit,
+    fractionDigits: Int? = null
+): String = if (fractionDigits == null) {
+    formatUvirExportNumber(unit.fromCanonicalWm2(canonicalWm2), numericFormat)
+} else {
+    formatUvirLiveDisplayNumber(unit.fromCanonicalWm2(canonicalWm2), fractionDigits,
+        numericFormat, grouping = false)
+}
 
 internal fun String.withUvirIrradianceUnit(
     unit: UvirIrradianceUnit

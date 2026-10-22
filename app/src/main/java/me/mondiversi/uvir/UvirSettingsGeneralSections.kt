@@ -242,7 +242,9 @@ internal fun UvirSettingsGeneralSections(
     secondaryText: Color,
     scrollToSimulation: Boolean = false,
     onSimulationShown: () -> Unit = {},
-    notificationsSection: @Composable () -> Unit = {}
+    notificationsSection: @Composable () -> Unit = {},
+    liveIrradianceDecimals: Int = defaultUvirLiveIrradianceDecimals(UvirIrradianceUnit.fromStoredValue(irradianceUnitValue)),
+    onLiveIrradianceDecimalsChange: (Int) -> Unit = {}
 ) {
     val context = LocalContext.current
     val resources = LocalResources.current
@@ -557,6 +559,13 @@ internal fun UvirSettingsGeneralSections(
                             }
                         )
                     }
+                    HorizontalDivider(color = secondaryText.copy(alpha = 0.20f))
+                    UvirLiveIrradianceDecimalsSetting(
+                        digits = liveIrradianceDecimals,
+                        onDigitsChange = onLiveIrradianceDecimalsChange,
+                        primaryText = primaryText,
+                        secondaryText = secondaryText
+                    )
                 }
             }
 
@@ -719,7 +728,7 @@ internal fun UvirSettingsGeneralSections(
                         contentDescription = exportDescription
                     },
                     colors = uvirOutlinedActionColors(primaryText),
-                    border = uvirOutlinedActionBorder(true, secondaryText)
+                    border = uvirOutlinedActionBorder(true, primaryText)
                 ) {
                     UvirLabeledButtonContent(
                         text = stringResource(R.string.export)
@@ -739,7 +748,7 @@ internal fun UvirSettingsGeneralSections(
                         contentDescription = importDescription
                     },
                     colors = uvirOutlinedActionColors(primaryText),
-                    border = uvirOutlinedActionBorder(true, secondaryText)
+                    border = uvirOutlinedActionBorder(true, primaryText)
                 ) {
                     UvirLabeledButtonContent(
                         text = stringResource(R.string.data_management_import_button)
@@ -776,7 +785,7 @@ internal fun UvirSettingsGeneralSections(
                         contentDescription = exportDescription
                     },
                     colors = uvirOutlinedActionColors(primaryText),
-                    border = uvirOutlinedActionBorder(true, secondaryText)
+                    border = uvirOutlinedActionBorder(true, primaryText)
                 ) {
                     UvirLabeledButtonContent(
                         text = stringResource(R.string.export)
@@ -796,7 +805,7 @@ internal fun UvirSettingsGeneralSections(
                         contentDescription = importDescription
                     },
                     colors = uvirOutlinedActionColors(primaryText),
-                    border = uvirOutlinedActionBorder(true, secondaryText)
+                    border = uvirOutlinedActionBorder(true, primaryText)
                 ) {
                     UvirLabeledButtonContent(
                         text = stringResource(R.string.data_management_import_button)
@@ -976,7 +985,7 @@ internal fun UvirSimulateEventsButton(
         enabled = enabled,
         modifier = Modifier.fillMaxWidth().testTag("simulate_events_button"),
         colors = uvirOutlinedActionColors(primaryText),
-        border = uvirOutlinedActionBorder(enabled, secondaryText)
+        border = uvirOutlinedActionBorder(enabled, primaryText)
     ) {
         UvirLabeledButtonContent(text = stringResource(R.string.debug_simulate_events)) {
             UvirMenuIcon(
@@ -1059,7 +1068,7 @@ internal fun UvirErrorLogSettingsIsland(
                 contentDescription = exportDescription
             },
             colors = uvirOutlinedActionColors(primaryText),
-            border = uvirOutlinedActionBorder(true, secondaryText)
+            border = uvirOutlinedActionBorder(true, primaryText)
         ) {
             UvirLabeledButtonContent(
                 text = stringResource(R.string.export)

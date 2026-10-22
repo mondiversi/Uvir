@@ -659,7 +659,7 @@ internal fun SessionChartScreen(
                                         R.string.session_chart_unit
                                     }
                                 ).withUvirIrradianceUnit(irradianceUnit),
-                                valueScale = irradianceUnit::fromCanonicalUwCm2,
+                                valueScale = irradianceUnit::fromCanonicalWm2,
                                 primaryText = primaryText,
                                 secondaryText = secondaryText
                             )
@@ -787,6 +787,7 @@ private fun SessionLineChart(
     val timeFormat = LocalUvirTimeFormat.current
     val numericFormat = LocalUvirNumericFormat.current
     val irradianceUnit = LocalUvirIrradianceUnit.current
+    val displayDigits = currentUvirLiveIrradianceDecimals()
     val dateFormat = LocalUvirDateFormat.current
     val inspectionPoints = series.flatMap { item ->
         val label = item.displayLabelResource?.let { stringResource(it) } ?: item.label
@@ -799,9 +800,9 @@ private fun SessionLineChart(
                         if (item.values.size <= 1) 0.5f
                         else (record.timestamp - startTime).toFloat() / timeSpan.toFloat(),
                         1f - (displayValue.coerceAtLeast(0.0) / maximum).toFloat()),
-                    label, formatUvirNumber(
+                    label, formatUvirLiveDisplayNumber(
                         displayValue,
-                        irradianceUnit.displayFractionDigits(3),
+                        displayDigits,
                         numericFormat
                     ) + " " + unit,
                     item.color,
@@ -852,7 +853,8 @@ private fun SessionLineChart(
                 ) {
                     UvirChartYAxis(
                         maximum = maximum,
-                        fractionDigits = irradianceUnit.displayFractionDigits(2),
+                        fractionDigits = displayDigits,
+                        fixedFractionDigits = true,
                         secondaryText = secondaryText,
                         modifier = Modifier.fillMaxSize()
                     ) { chartModifier ->

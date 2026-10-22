@@ -487,7 +487,7 @@ private fun AlertSessionCombinedLineChart(
     val valueScale: (Double) -> Double = if (percentageScale) {
         { value: Double -> value }
     } else {
-        irradianceUnit::fromCanonicalUwCm2
+        irradianceUnit::fromCanonicalWm2
     }
     val chartValues =
         series.flatMap { item ->
@@ -541,7 +541,8 @@ private fun AlertSessionCombinedLineChart(
                     else (point.timestamp - startTime).toFloat() / timeSpan.toFloat(),
                     1f - if (percentageScale) alertThresholdCenteredLogFraction(value, logExtent)
                           else (value.coerceAtLeast(0.0) / maximum).toFloat()),
-                label, formatUvirNumber(value, if (percentageScale) 1 else 3, numericFormat) +
+                label, (if (percentageScale) formatUvirNumber(value, 1, numericFormat)
+                    else formatUvirLiveDisplayNumber(value, currentUvirLiveIrradianceDecimals(), numericFormat)) +
                     if (percentageScale) "%" else " ${irradianceUnit.symbol}",
                 item.color,
                 formatUvirDateTime(
@@ -580,7 +581,8 @@ private fun AlertSessionCombinedLineChart(
                 ) {
                     UvirChartYAxis(
                         maximum = maximum,
-                        fractionDigits = 2,
+                        fractionDigits = currentUvirLiveIrradianceDecimals(),
+                        fixedFractionDigits = !percentageScale,
                         secondaryText = secondaryText,
                         modifier = Modifier.fillMaxSize(),
                         labels = axisLabels

@@ -36,16 +36,20 @@ fun SensorGroupContent(
     cardColor: Color,
     primaryText: Color,
     secondaryText: Color,
-    trackColor: Color
+    trackColor: Color,
+    sensorModel: String = liveSpectralSensorModel(group)
 ) {
-
+    val displayedDigits = currentUvirLiveIrradianceDecimals()
+    val displayedUnit = LocalUvirIrradianceUnit.current
+    val displayedTotals = UvirSpectralTotals(uvTotal, visibleTotal, nirTotal, sample.hasAnyOutOfRangeValue())
+    fun displayShare(value: Double) = displayedTotals.displayShare(value, displayedDigits, displayedUnit)
     val allGroupsInRange =
         !sample.isOutOfRange(SensorGroup.UV) &&
             !sample.isOutOfRange(SensorGroup.VISIBLE) &&
             !sample.isOutOfRange(SensorGroup.NIR)
     fun totalShare(groupTotal: Double): Float? =
         if (allGroupsInRange) {
-            uvirIrradianceGroupShare(groupTotal, uvTotal, visibleTotal, nirTotal)
+            uvirLiveIrradianceGroupShare(groupTotal, uvTotal, visibleTotal, nirTotal, displayedDigits, displayedUnit)
         } else null
 
     val liveChartSeries =
@@ -124,7 +128,7 @@ fun SensorGroupContent(
                 group = group,
                 title = stringResource(R.string.uv_radiation),
                 total = uvTotal,
-                bandLabel = "100–400 nm",
+                bandLabel = sensorModel,
                 relativePercent = totalShare(uvTotal),
                 trackColor = trackColor,
                 barColor = Color(0xFF6A1B9A),
@@ -161,12 +165,11 @@ fun SensorGroupContent(
 
                 SpectrumRow(
                     name = "UVC",
-                    band = "100–280 nm",
+                    band = UvirSensorBands.UVC,
                     value = sample.uvc,
                     percent =
-                        percentage(
-                            sample.uvc,
-                            uvTotal
+                        displayShare(
+                            sample.uvc
                         ),
                     primaryText = primaryText,
                     secondaryText = secondaryText,
@@ -190,12 +193,11 @@ fun SensorGroupContent(
 
                 SpectrumRow(
                     name = "UVB",
-                    band = "280–315 nm",
+                    band = UvirSensorBands.UVB,
                     value = sample.uvb,
                     percent =
-                        percentage(
-                            sample.uvb,
-                            uvTotal
+                        displayShare(
+                            sample.uvb
                         ),
                     primaryText = primaryText,
                     secondaryText = secondaryText,
@@ -219,12 +221,11 @@ fun SensorGroupContent(
 
                 SpectrumRow(
                     name = "UVA",
-                    band = "315–400 nm",
+                    band = UvirSensorBands.UVA,
                     value = sample.uva,
                     percent =
-                        percentage(
-                            sample.uva,
-                            uvTotal
+                        displayShare(
+                            sample.uva
                         ),
                     primaryText = primaryText,
                     secondaryText = secondaryText,
@@ -255,7 +256,7 @@ fun SensorGroupContent(
                 group = group,
                 title = stringResource(R.string.visible_light),
                 total = visibleTotal,
-                bandLabel = "400–700 nm",
+                bandLabel = sensorModel,
                 relativePercent = totalShare(visibleTotal),
                 trackColor = trackColor,
                 barColor = Color(0xFF00897B),
@@ -292,9 +293,9 @@ fun SensorGroupContent(
 
                 SpectrumRow(
                     name = "HEV¹",
-                    band = "400–500 nm",
+                    band = "",
                     value = hev,
-                    percent = percentage(hev, visibleTotal),
+                    percent = displayShare(hev),
                     primaryText = primaryText,
                     secondaryText = secondaryText,
                     trackColor = trackColor,
@@ -310,11 +311,10 @@ fun SensorGroupContent(
 
                 SpectrumRow(
                     stringResource(R.string.violet),
-                    "400–450 nm",
+                    UvirSensorBands.VIOLET_CHANNELS,
                     sample.violetto,
-                    percentage(
-                        sample.violetto,
-                        visibleTotal
+                    displayShare(
+                        sample.violetto
                     ),
                     primaryText,
                     secondaryText,
@@ -338,11 +338,10 @@ fun SensorGroupContent(
 
                 SpectrumRow(
                     stringResource(R.string.blue),
-                    "450–495 nm",
+                    UvirSensorBands.BLUE_CHANNELS,
                     sample.blu,
-                    percentage(
-                        sample.blu,
-                        visibleTotal
+                    displayShare(
+                        sample.blu
                     ),
                     primaryText,
                     secondaryText,
@@ -366,11 +365,10 @@ fun SensorGroupContent(
 
                 SpectrumRow(
                     stringResource(R.string.green),
-                    "495–570 nm",
+                    UvirSensorBands.GREEN_CHANNEL,
                     sample.verde,
-                    percentage(
-                        sample.verde,
-                        visibleTotal
+                    displayShare(
+                        sample.verde
                     ),
                     primaryText,
                     secondaryText,
@@ -394,11 +392,10 @@ fun SensorGroupContent(
 
                 SpectrumRow(
                     stringResource(R.string.yellow),
-                    "570–590 nm",
+                    UvirSensorBands.GREEN_YELLOW_CHANNELS,
                     sample.giallo,
-                    percentage(
-                        sample.giallo,
-                        visibleTotal
+                    displayShare(
+                        sample.giallo
                     ),
                     primaryText,
                     secondaryText,
@@ -422,11 +419,10 @@ fun SensorGroupContent(
 
                 SpectrumRow(
                     stringResource(R.string.orange),
-                    "590–620 nm",
+                    UvirSensorBands.ORANGE_CHANNEL,
                     sample.arancione,
-                    percentage(
-                        sample.arancione,
-                        visibleTotal
+                    displayShare(
+                        sample.arancione
                     ),
                     primaryText,
                     secondaryText,
@@ -450,11 +446,10 @@ fun SensorGroupContent(
 
                 SpectrumRow(
                     stringResource(R.string.red),
-                    "620–700 nm",
+                    UvirSensorBands.RED_CHANNEL,
                     sample.rosso,
-                    percentage(
-                        sample.rosso,
-                        visibleTotal
+                    displayShare(
+                        sample.rosso
                     ),
                     primaryText,
                     secondaryText,
@@ -491,9 +486,8 @@ fun SensorGroupContent(
             SpectrumCard(
                 group = group,
                 title = stringResource(R.string.far_red_nir),
-                footnote = stringResource(R.string.infrared_sensor_footnote),
                 total = nirTotal,
-                bandLabel = "745 / 855 nm",
+                bandLabel = sensorModel,
                 relativePercent = totalShare(nirTotal),
                 trackColor = trackColor,
                 barColor = Color(0xFF6D4C41),
@@ -530,12 +524,11 @@ fun SensorGroupContent(
 
                 SpectrumRow(
                     name = "Far-red",
-                    band = stringResource(R.string.infrared_peak_band, 745),
+                    band = UvirSensorBands.FAR_RED_CHANNELS,
                     value = sample.f8,
                     percent =
-                        percentage(
-                            sample.f8,
-                            nirTotal
+                        displayShare(
+                            sample.f8
                         ),
                     primaryText = primaryText,
                     secondaryText = secondaryText,
@@ -559,12 +552,11 @@ fun SensorGroupContent(
 
                 SpectrumRow(
                     name = "NIR",
-                    band = stringResource(R.string.infrared_peak_band, 855),
+                    band = UvirSensorBands.NIR_CHANNEL,
                     value = sample.nir,
                     percent =
-                        percentage(
-                            sample.nir,
-                            nirTotal
+                        displayShare(
+                            sample.nir
                         ),
                     primaryText = primaryText,
                     secondaryText = secondaryText,

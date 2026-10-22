@@ -122,6 +122,18 @@ internal object UvirSensorRuntimeInfoStore {
         }.getOrNull()
     }
 
+    /** Never substitute the currently selected sensor for the record's source. */
+    fun loadForDevice(context: Context, deviceId: String): UvirSensorRuntimeInfo? {
+        if (deviceId.isBlank()) return null
+        val preferences = context.applicationContext.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
+        val encoded = preferences.getString(profileSnapshotKey(deviceId), null)
+            ?: preferences.getString(SNAPSHOT_KEY, null) ?: return null
+        return runCatching {
+            UvirSensorRuntimeInfo().updatedFrom(JSONObject(encoded).getJSONObject("info"))
+                .takeIf { it.deviceId.equals(deviceId, ignoreCase = true) }
+        }.getOrNull()
+    }
+
     private fun profileSnapshotKey(deviceId: String): String =
         "sensor_snapshot." + normalizeSensorDeviceId(deviceId)
 
@@ -194,9 +206,15 @@ private fun UvirSensorRuntimeInfo.stableDiagnosticFingerprint(): String =
         sensorName,
         firmwareVersion,
         unit,
+        canonicalUnit,
+        visibleSensorModel,
+        uvSensorModel,
         calibrationKind,
         visibleCalibrationFactor,
         uvCalibrationFactor,
+        opticalWindow,
+        calibrationOffsets,
+        calibrationChannelFactors,
         offlineAlertRepeatSeconds,
         sensorAvailable,
         uvAvailable,
@@ -242,6 +260,7 @@ private fun UvirSensorRuntimeInfo.stableDiagnosticFingerprint(): String =
 
 private fun UvirSensorRuntimeInfo.toStoredJson(): JSONObject =
     JSONObject()
+        .put(KEY_IRRADIANCE_STORAGE_UNIT, UVIR_CANONICAL_IRRADIANCE_UNIT)
         .put("protocol", protocol)
         .put("device_id", deviceId)
         .put("board", boardName)
@@ -251,9 +270,15 @@ private fun UvirSensorRuntimeInfo.toStoredJson(): JSONObject =
         .put("sensor", sensorName)
         .put("firmware", firmwareVersion)
         .put("unit", unit)
+        .put("canonical_unit", canonicalUnit)
+        .put("visible_sensor_model", visibleSensorModel)
+        .put("uv_sensor_model", uvSensorModel)
         .put("calibration", calibrationKind)
         .putIfNotNull("visible_calibration_factor", visibleCalibrationFactor)
         .putIfNotNull("uv_calibration_factor", uvCalibrationFactor)
+        .putIfNotNull("calibration_offsets", calibrationOffsets?.toJson())
+        .putIfNotNull("calibration_channel_factors", calibrationChannelFactors?.toJson())
+        .put("optical_window", opticalWindow?.toJson())
         .putIfNotNull("sensor_available", sensorAvailable)
         .putIfNotNull("uv_available", uvAvailable)
         .putIfNotNull("uptime_ms", uptimeMs)

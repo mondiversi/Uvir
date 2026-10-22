@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_irradiance_decimals">رقم‌های اعشار نمایشی</string>
+    <string name="live_irradiance_decimals_description">برای مقادیر نمایشی و خروجی‌های سفارشی اعمال می‌شود. صفرهای انتهایی نمایان می‌مانند؛ داده‌های ذخیره‌شده و خروجی‌های علمی تغییر نمی‌کنند.</string>
+</resources>

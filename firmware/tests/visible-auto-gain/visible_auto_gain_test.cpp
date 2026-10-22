@@ -57,6 +57,42 @@ int main() {
   assert(saturated);
   assert(std::fabs(sensor.gainRatio() - 0.0079f) < 0.000001f);
 
+  // Each physical AS7343 channel is corrected before paired colors are averaged.
+  VisibleGainTest::countsPerGain = 1000;
+  for (int i = 0; i < 8; ++i) captureAndCheck(sensor, saturated);
+  UvirCalibrationOffsets offsets;
+  offsets.signature = kUvirPhysicalOffsetSignature;
+  offsets.values[3] = 10000; // SI W/m²: remove F1 only, not the other violet channel F2.
+  float correctedBands[11] = {};
+  assert(sensor.capture(2, correctedBands, saturated, offsets));
+  const auto raw = static_cast<uint16_t>(std::min(10000.0f, VisibleGainTest::countsPerGain * sensor.gain()));
+  const float f2 = UvirCalibration::convertToWm2(raw, UvirCalibration::F2_425, sensor.gainRatio(), sensor.integrationMs());
+  assert(std::fabs(correctedBands[3] - f2) < .0001f); // (0 + F2) / 2 * factor 2.
+  const float f4 = UvirCalibration::convertToWm2(raw, UvirCalibration::F4_515, sensor.gainRatio(), sensor.integrationMs());
+  assert(std::fabs(correctedBands[5] - f4 * 2) < .0001f); // Unrelated green unchanged.
+  // The new color offset is subtracted AFTER pairing, with one clamp per color.
+  // This must not leave a residual from clamping the two physical channels separately.
+  float baseline[11] = {};
+  assert(sensor.capture(1, baseline, saturated));
+  UvirCalibrationOffsets colorOffsets;
+  colorOffsets.values[3] = baseline[3];
+  assert(sensor.capture(2, correctedBands, saturated, colorOffsets));
+  assert(correctedBands[3] == 0); // The displayed violet dark value is completely removed.
+  assert(std::fabs(correctedBands[5] - baseline[5] * 2) < .0001f);
+  colorOffsets.values[3] = baseline[3] * .5f;
+  assert(sensor.capture(2, correctedBands, saturated, colorOffsets));
+  assert(std::fabs(correctedBands[3] - baseline[3]) < .0001f);
+  // Absolute color factors replace the module gain, after dark subtraction.
+  UvirCalibrationChannelFactors channels;
+  channels.enabled = 1;
+  channels.values[3] = 3;
+  channels.values[5] = .5f;
+  assert(sensor.capture(7, correctedBands, saturated, colorOffsets, channels));
+  assert(std::fabs(correctedBands[3] - baseline[3] * .5f * 3) < .0001f);
+  assert(std::fabs(correctedBands[5] - baseline[5] * .5f) < .0001f);
+  colorOffsets.values[3] = baseline[3] * 2;
+  assert(sensor.capture(7, correctedBands, saturated, colorOffsets, channels));
+  assert(correctedBands[3] == 0); // A larger factor cannot resurrect a negative reading.
   VisibleGainTest::failRead = true;
   float bands[11] = {};
   assert(!sensor.capture(1.0f, bands, saturated));

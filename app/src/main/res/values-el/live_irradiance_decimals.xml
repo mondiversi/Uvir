@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_irradiance_decimals">Δεκαδικά ψηφία</string>
+    <string name="live_irradiance_decimals_description">Ισχύει για τις εμφανιζόμενες τιμές και τις προσαρμοσμένες εξαγωγές. Τα τελικά μηδενικά παραμένουν ορατά· τα αποθηκευμένα δεδομένα και οι επιστημονικές εξαγωγές δεν αλλάζουν.</string>
+</resources>

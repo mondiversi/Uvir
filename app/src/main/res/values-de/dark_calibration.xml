@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dark_offsets_calculate">Offsets berechnen</string>
+    <string name="dark_offsets_instructions">Miss etwa 30 Sekunden unter stabilen Referenzbedingungen. Im Dunkeln wird der Sensoruntergrund kompensiert; bei Beleuchtung wird auch das vorhandene Licht abgezogen, sodass relative Messwerte entstehen. Decke für eine Dunkelmessung die optischen Eingänge auch gegen nahes Infrarot ab und betreibe die LEDs wie üblich. Der Mittelwert beseitigt kein zufälliges Rauschen und kalibriert nicht die Verstärkung.</string>
+    <string name="dark_offsets_progress">Messung: %1$s / 30 s</string>
+    <string name="dark_offsets_result">Vorschlag aus %1$s Messwerten. Keine Einstellungen wurden geändert.</string>
+    <string name="dark_offsets_failed">Messung unterbrochen oder nicht verfügbar. Prüfe Verbindung und Sensor und versuche es erneut.</string>
+    <string name="dark_offsets_start">Messung starten</string>
+    <string name="dark_offsets_apply">Offsets übernehmen</string>
+    <string name="dark_offsets_firmware_required">Erfordert Sensor-Firmware 0.5.110 oder neuer.</string>
+    <string name="calibration_reset_values">Werte zurücksetzen</string>
+    <string name="calibration_reset_confirmation_title">Werte zurücksetzen?</string>
+    <string name="calibration_reset_confirm_action">ZURÜCKSETZEN</string>
+    <string name="calibration_reset_confirmation_message">Korrekturfaktoren für %1$s auf 1 und Offsets auf 0 zurücksetzen. Andere Kalibrierungs- und Fenstereinstellungen bleiben unverändert.</string>
+    <string name="optical_window_reset_confirmation_message">Setzt den allgemeinen Multiplikator und alle Kanalmultiplikatoren des optischen Fensters auf 1 zurück. Die Kalibrierung bleibt unverändert.</string>
+</resources>

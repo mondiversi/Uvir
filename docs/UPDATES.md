@@ -68,13 +68,14 @@ future project-owned GitHub posts in English. This does not change the app's
 localized interface strings. Reuse the English release-notes document when
 publishing so the repository and the GitHub release stay consistent.
 
-1. Increment the app version/code and sensor firmware version.
+1. Increment the app version/code. Increment the sensor firmware version when
+   its implementation changes; an app-only release may reuse verified firmware.
 2. Run all tests, build the signed release APK and compile the ESP32 huge_app image.
 3. Run `tools/ReleaseTool.java` with Java 17 or newer:
 
-   `java tools/ReleaseTool.java ROOT OUTPUT FIRMWARE_BUILD 1.3.0 4 0.5.104`
+   `java tools/ReleaseTool.java ROOT OUTPUT FIRMWARE_BUILD 1.4.0 5 0.5.112`
 
-4. Create a draft GitHub release tagged `v1.3.0`. Upload every generated asset:
+4. Create a draft GitHub release tagged `v1.4.0`. Upload every generated asset:
    APK, application BIN, USB archive, signed index and SHA256SUMS.
 5. Publish only after all uploads and validation succeed. The updater ignores
    drafts and prereleases through GitHub's latest-stable endpoint.
@@ -84,4 +85,7 @@ Keep `keystore.properties`, the keystore and all credentials outside source
 control. Future key rotation needs an explicitly trusted migration, not simply
 replacing the index certificate.
 
-Physical testing of the AS7331 UV component remains pending until installation.
+The AS7331 and AS7343 modules have been detected and exercised on the prototype.
+Final tests and traceable calibration with the PCB, enclosure, optical tubes,
+diffuser and any protective windows remain pending. A signed firmware build is
+not evidence of absolute irradiance accuracy or PCB fabrication approval.

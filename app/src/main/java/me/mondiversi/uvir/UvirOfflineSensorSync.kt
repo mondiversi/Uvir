@@ -74,7 +74,8 @@ internal sealed interface SensorSyncEvent {
         val timestamp: Long,
         val details: String,
         val sessionId: Long,
-        val qualityFlags: Int = 0
+        val qualityFlags: Int = 0,
+        val opticalWindow: OpticalWindowSettings? = null
     ) : SensorSyncEvent
 
     data class Error(
@@ -205,8 +206,9 @@ internal fun parseSensorRuntimeFrame(
                     jobActive = json.optBoolean("job_active", false),
                     nextAtMs = json.optLong("next_at_ms", 0L),
                     externalCommand = json.opt("external_command") as? Boolean,
-                    sample = bands.toUvirBandSample().copy(
-                        qualityFlags = json.uvirQualityFlags()
+                    sample = bands.toUvirBandSample(json.optString("unit", UVIR_LEGACY_IRRADIANCE_UNIT)).copy(
+                        qualityFlags = json.uvirQualityFlags(),
+                        opticalWindow = json.opticalWindowOrNull()
                     )
                 )
                 , deviceId
@@ -224,7 +226,8 @@ internal fun parseSensorRuntimeFrame(
                     nextAtMs = json.optLong("next_at_ms", 0L),
                     externalCommand =
                         (json.opt("offline_external_command") as? Boolean),
-                    conditionPlan = json.optString("offline_condition_plan").takeIf { json.has("offline_condition_plan") },
+                    conditionPlan = json.optString("offline_condition_plan").takeIf { json.has("offline_condition_plan") }
+                        ?.let { scaleUvirConditionPlan(it, json.sensorIrradianceScaleToWm2()) },
                     conditionWaiting = (json.opt("offline_condition_waiting") as? Boolean),
                     endAtMs = json.optLong("offline_end_ms").takeIf { json.has("offline_end_ms") },
                     startedAtMs = json.optLong("offline_started_ms").takeIf { json.has("offline_started_ms") }
@@ -278,8 +281,9 @@ internal fun parseSensorSyncFrame(
                         sequence = json.optInt("sequence", 0),
                         note = json.optString("note"),
                         externalCommand = json.opt("external_command") as? Boolean,
-                        sample = bands.toUvirBandSample().copy(
-                            qualityFlags = json.uvirQualityFlags()
+                        sample = bands.toUvirBandSample(json.optString("unit", UVIR_LEGACY_IRRADIANCE_UNIT)).copy(
+                            qualityFlags = json.uvirQualityFlags(),
+                        opticalWindow = json.opticalWindowOrNull()
                         )
                     )
                 }
@@ -288,9 +292,10 @@ internal fun parseSensorSyncFrame(
                     source = source,
                     recordId = recordId,
                     timestamp = timestamp,
-                    details = json.optString("details"),
+                    details = json.sensorAlertDetailsWm2(),
                     sessionId = json.optLong("session_id", 0L),
-                    qualityFlags = json.uvirQualityFlags()
+                    qualityFlags = json.uvirQualityFlags(),
+                        opticalWindow = json.opticalWindowOrNull()
                 )
 
                 "error" -> SensorSyncEvent.Error(
@@ -427,7 +432,7 @@ internal fun sensorOfflineJobCommand(
             (if (request.useDuration) request.durationSeconds.coerceAtLeast(1L) else 0L) +
             " ${plan.rules.size} " +
             plan.rules.joinToString(" ") {
-                "${it.metric.name} ${it.direction.name} ${it.threshold}"
+                "${it.metric.name} ${it.direction.name} ${irradianceLegacyCommandNumber(it.threshold)}"
             }
     } ?: "")
     }
@@ -444,7 +449,7 @@ internal fun sensorAlertCommands(
             .forEach { rule ->
                 add(
                     "ALERT_RULE ${rule.metric.name} " +
-                        "${rule.direction.name} ${rule.threshold}"
+                        "${rule.direction.name} ${irradianceLegacyCommandNumber(rule.threshold)}"
                 )
             }
         add(

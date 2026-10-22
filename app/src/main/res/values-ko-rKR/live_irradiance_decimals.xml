@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_irradiance_decimals">표시할 소수 자릿수</string>
+    <string name="live_irradiance_decimals_description">표시 값과 사용자 지정 내보내기에 적용됩니다. 끝자리 0은 유지되며 저장된 데이터와 과학용 내보내기는 변경되지 않습니다.</string>
+</resources>

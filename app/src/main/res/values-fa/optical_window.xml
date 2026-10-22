@@ -1,0 +1,24 @@
+<resources>
+    <string name="optical_window_factor_limits">مقادیر مجاز: %1$s–%2$s.</string>
+    <string name="optical_window_title">جبران پنجره نوری</string>
+    <string name="optical_window_description">اصلاح تقریبی تضعیف پنجره. فقط از ضرایب مشخصات نوری یا اندازه‌گیری‌های مقایسه‌ای استفاده کنید.</string>
+    <string name="optical_window_enabled">جبران پنجره نوری</string>
+    <string name="optical_window_channel_factor">ضریب %1$s</string>
+    <string name="optical_window_hint">ضریب نهایی برابر است با عمومی × کانال. %1$s خنثی است؛ عبور 90%% به ضریب نهایی ×%2$s نیاز دارد. این جایگزین کالیبراسیون نیست.</string>
+    <string name="measured_uv_bands_note">بازه‌های اسمی کانال‌های AS7331 حساسیت طیفی یکنواختی ندارند. مجموع آن‌ها اندازه‌گیری همه طول‌موج‌های UV نیست.</string>
+    <string name="spectral_channel_peaks">قله‌ها: %1$s نانومتر</string>
+    <string name="measured_visible_bands_note">طول‌موج‌های نمایش‌داده‌شده قله‌های اسمی حساسیت AS7343 هستند، نه مرز نوارهای یکنواخت. از جفت کانال‌ها میانگین گرفته می‌شود؛ HEV و مقادیر کل، مقادیر کانال‌های نمایش‌داده‌شده را جمع می‌کنند.</string>
+    <string name="measured_infrared_bands_note">Far-red کانال‌های 690 و745 نانومتر را ترکیب می‌کند؛ NIR از کانال 855 نانومتر استفاده می‌کند. این‌ها خوانش کانال‌ها هستند، نه اندازه‌گیری کل طیف فروسرخ.</string>
+    <string name="optical_window_common_factor">ضریب مشترک</string>
+    <string name="optical_window_individual_factors">ضریب‌های هر کانال</string>
+    <string name="measured_channel_sum">مجموع کانال‌ها</string>
+    <string name="calibration_offsets_title">آفست‌ها</string>
+    <string name="calibration_offset_channel">آفست %1$s</string>
+    <string name="calibration_offsets_description">آفست‌ها: مقادیر مجاز %1$s–%2$s %3$s؛ %1$s چیزی کم نمی‌کند. میانگین زمینهٔ اندازه‌گیری‌شده در تاریکی یا شرایط مرجع کم می‌شود. پیش از ضرایب اعمال می‌شوند؛ نتایج منفی صفر می‌شوند.</string>
+    <string name="calibration_offsets_firmware_required">برای تنظیم آفست‌ها، میان‌افزار حسگر را به‌روزرسانی کنید.</string>
+    <string name="calibration_offsets_legacy_notice">ویرایش این مقادیر، آفست‌های قبلی کانال‌ها را به یک آفست برای هر رنگ تبدیل می‌کند. تا پیش از ویرایش، مقادیر قبلی حفظ می‌شوند.</string>
+    <string name="calibration_factor_short">ضریب</string>
+    <string name="calibration_offset_short">آفست (%1$s)</string>
+    <string name="calibration_channel_factors_title">ضرایب تصحیح هر کانال</string>
+    <string name="calibration_channels_firmware_required">برای تنظیم ضرایب هر کانال، میان‌افزار حسگر را به‌روزرسانی کنید.</string>
+</resources>

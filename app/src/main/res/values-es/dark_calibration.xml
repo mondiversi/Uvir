@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dark_offsets_calculate">Calcular offsets</string>
+    <string name="dark_offsets_instructions">Mide durante unos 30 segundos en condiciones de referencia estables. En oscuridad compensas el fondo del sensor; con iluminación también restas la luz presente y obtienes mediciones relativas. Para medir en oscuridad, cubre las entradas ópticas con material opaco también al infrarrojo cercano y mantén los LED en su estado normal de uso. La media no elimina el ruido aleatorio ni calibra la ganancia.</string>
+    <string name="dark_offsets_progress">Midiendo: %1$s / 30 s</string>
+    <string name="dark_offsets_result">Propuesta de %1$s lecturas. No se ha modificado ningún ajuste.</string>
+    <string name="dark_offsets_failed">Medición interrumpida o no disponible. Comprueba la conexión y el sensor y vuelve a intentarlo.</string>
+    <string name="dark_offsets_start">Iniciar medición</string>
+    <string name="dark_offsets_apply">Aplicar offsets</string>
+    <string name="dark_offsets_firmware_required">Requiere firmware del sensor 0.5.110 o posterior.</string>
+    <string name="calibration_reset_values">Restablecer valores</string>
+    <string name="calibration_reset_confirmation_title">¿Restablecer los valores?</string>
+    <string name="calibration_reset_confirm_action">RESTABLECER</string>
+    <string name="calibration_reset_confirmation_message">Restablece los factores de corrección a 1 y los offsets a 0 para %1$s. Los demás ajustes de calibración y de la ventana óptica no cambian.</string>
+    <string name="optical_window_reset_confirmation_message">Restablece a 1 el multiplicador general y todos los multiplicadores por canal de la ventana óptica. La calibración no cambia.</string>
+</resources>

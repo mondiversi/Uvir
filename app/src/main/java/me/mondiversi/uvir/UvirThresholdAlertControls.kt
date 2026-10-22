@@ -56,6 +56,9 @@ internal fun ThresholdAlertMetricLabel(
             fontSize = 14.sp,
             fontWeight = FontWeight.Medium
         )
+        sensorChannelReference(thresholdAlertMetricLabelResource(metric))?.let { reference ->
+            Text(reference, color = secondaryText, fontSize = 10.sp, maxLines = 1)
+        }
     }
 }
 
@@ -179,7 +182,7 @@ internal fun CurrentThresholdValueButton(
         modifier = modifier.height(38.dp),
         contentPadding = PaddingValues(horizontal = 14.dp),
         colors = uvirOutlinedActionColors(primaryText),
-        border = uvirOutlinedActionBorder(enabled, secondaryText)
+        border = uvirOutlinedActionBorder(enabled, primaryText)
     ) {
         CaptureMeasurementIcon(
             modifier = Modifier.size(17.dp),
@@ -187,7 +190,7 @@ internal fun CurrentThresholdValueButton(
         )
         Spacer(Modifier.width(6.dp))
         Text(
-            text = stringResource(R.string.threshold_use_current_value),
+            text = uvirActionLabel(R.string.threshold_use_current_value),
             fontSize = 11.sp,
             fontWeight = FontWeight.SemiBold,
             maxLines = 1

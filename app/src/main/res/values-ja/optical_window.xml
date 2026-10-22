@@ -1,0 +1,24 @@
+<resources>
+    <string name="optical_window_factor_limits">許容値：%1$s～%2$s。</string>
+    <string name="optical_window_title">光学窓の補正</string>
+    <string name="optical_window_description">窓による減衰の近似補正です。光学仕様または比較測定に基づく係数のみを設定してください。</string>
+    <string name="optical_window_enabled">光学窓を補正する</string>
+    <string name="optical_window_channel_factor">%1$s の倍率</string>
+    <string name="optical_window_hint">最終係数は全体 × チャンネルです。%1$s は補正なしを意味し、透過率90%%では最終係数 ×%2$s が必要です。校正の代わりにはなりません。</string>
+    <string name="measured_uv_bands_note">AS7331チャネルの公称範囲です。分光感度は均一ではなく、合計はUVの全波長を測定した値ではありません。</string>
+    <string name="spectral_channel_peaks">ピーク: %1$s nm</string>
+    <string name="measured_visible_bands_note">表示波長はAS7343の公称感度ピークであり、一様な帯域の境界ではありません。チャネルの組は平均され、HEVと合計値は表示チャネル値を加算します。</string>
+    <string name="measured_infrared_bands_note">Far-redは690 nmと745 nmのチャンネルを組み合わせ、NIRは855 nmを使用します。各チャンネルの測定値であり、赤外線スペクトル全体の測定ではありません。</string>
+    <string name="optical_window_common_factor">共通の倍率</string>
+    <string name="optical_window_individual_factors">チャンネル別の倍率</string>
+    <string name="measured_channel_sum">チャネル合計</string>
+    <string name="calibration_offsets_title">オフセット</string>
+    <string name="calibration_offset_channel">%1$s オフセット</string>
+    <string name="calibration_offsets_description">オフセット：許容値は %1$s～%2$s %3$s。%1$s は差し引きなしです。暗所または基準条件で測定した平均背景値を差し引きます。係数より前に適用され、負の結果はゼロになります。</string>
+    <string name="calibration_offsets_firmware_required">オフセットを設定するにはセンサーのファームウェアを更新してください。</string>
+    <string name="calibration_offsets_legacy_notice">編集すると、従来のチャンネル別オフセットが色ごとのオフセットに変換されます。編集するまでは以前の値が保持されます。</string>
+    <string name="calibration_factor_short">補正係数</string>
+    <string name="calibration_offset_short">オフセット (%1$s)</string>
+    <string name="calibration_channel_factors_title">チャンネル別補正係数</string>
+    <string name="calibration_channels_firmware_required">チャンネル別の係数を設定するには、センサーのファームウェアを更新してください。</string>
+</resources>

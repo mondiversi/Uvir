@@ -419,7 +419,7 @@
     <string name="violet">Βιολετί</string>
     <string name="blue">Μπλε</string>
     <string name="green">Πράσινο</string>
-    <string name="yellow">Κίτρινο</string>
+    <string name="yellow">Πρασινοκίτρινο</string>
     <string name="orange">Πορτοκαλί</string>
     <string name="red">Κόκκινο</string>
     <string name="percent_of_visible">%1$s%% του ορατού</string>
@@ -428,11 +428,11 @@
     <string name="app_version">Έκδοση εφαρμογής: %1$s</string>
     <string name="package_name_value">Συσκευασία: %1$s</string>
     <string name="about_whats_new_title">Τι νέο υπάρχει στην έκδοση %1$s</string>
-    <string name="about_whats_new_connectivity">Διαδοχική διαχείριση πολλών αισθητήρων με ασφαλή προφίλ και συνδέσεις USB, Wi-Fi, Bluetooth και Internet.</string>
-    <string name="about_whats_new_connections">Λήψεις υπό συνθήκες και μέσω εξωτερικής εντολής, αυτόνομες συνεδρίες και αξιόπιστη επαναφορά κατάστασης μετά από αποσύνδεση ή επανεκκίνηση.</string>
-    <string name="about_whats_new_measurements">Παραλλαγές συνεδριών, προηγμένα φίλτρα ιστορικού και σαφέστερες λεπτομέρειες για λήψεις και ειδοποιήσεις.</string>
-    <string name="about_whats_new_interface">Εμπλουτισμένες εξαγωγές CSV, TXT και PNG με μονάδες, τοπικές μορφές, ομαδοποιημένα γραφήματα και αναγνώριση αισθητήρα.</string>
-    <string name="about_whats_new_github">Κρυπτογραφημένα αντίγραφα ασφαλείας ρυθμίσεων, ενσωματωμένα διαγνωστικά και εκτεταμένες βελτιώσεις διεπαφής και προσβασιμότητας.</string>
+    <string name="about_whats_new_connectivity">Συντελεστές διόρθωσης και μετατοπίσεις ανά κανάλι, με καθοδηγούμενη μέτρηση των μέσων μετατοπίσεων και επιβεβαιώσεις επαναφοράς.</string>
+    <string name="about_whats_new_connections">Αντιστάθμιση οπτικού παραθύρου με γενικό πολλαπλασιαστή και πολλαπλασιαστές καναλιών· σαφέστερα εύρη AS7331 και κορυφές ευαισθησίας AS7343.</string>
+    <string name="about_whats_new_measurements">Εσωτερική αποθήκευση της ακτινοβολίας σε W/m², με αυτόματη μεταφορά που διατηρεί τις υπάρχουσες μετρήσεις και ρυθμίσεις.</string>
+    <string name="about_whats_new_interface">Ρυθμιζόμενα δεκαδικά ψηφία για ζωντανές τιμές, αποθηκευμένα δεδομένα και προσαρμοσμένες εξαγωγές· οι επιστημονικές εξαγωγές διατηρούν όλη την αποθηκευμένη ακρίβεια.</string>
+    <string name="about_whats_new_github">Βελτιωμένο μενού ρυθμίσεων και διάλογοι· ενημερωμένοι οδηγοί καλωδίωσης, συναρμολόγησης και βαθμονόμησης, με κατευθυντικούς σωλήνες και απαιτήσεις διαχύτη.</string>
     <string name="about_description">Εφαρμογή φασματικής καταγραφής υπεριώδους, ορατής και υπέρυθρης ακτινοβολίας.</string>
     <string name="about_spectral_ranges">Φασματικές ζώνες: Υπεριώδης ακτινοβολία • Ορατό φως • Υπέρυθρη ακτινοβολία</string>
     <string name="about_sensors">Υποστηριζόμενοι αισθητήρες: AS7331 UV • AS7343 πολυφασματικοί</string>
@@ -630,11 +630,10 @@
     <string name="threshold_rules_connection_required">Συνδέστε τον αισθητήρα για να αλλάξετε αυτές τις ειδοποιήσεις.</string>
     <string name="threshold_repeat_sensor_description">Αυτό το διάστημα αποθηκεύεται στον αισθητήρα και περιορίζει επίσης τις ειδοποιήσεις που καταγράφονται ενώ η εφαρμογή είναι αποσυνδεδεμένη.</string>
     <string name="sensor_calibration_title">Βαθμονόμηση</string>
-    <string name="sensor_calibration_description">Εφαρμόστε τους συντελεστές διόρθωσης που λαμβάνονται με σύγκριση με ένα βαθμονομημένο όργανο αναφοράς. Ένας συντελεστής 1.000 διατηρεί την προεπιλεγμένη εκτίμηση του φύλλου δεδομένων.</string>
+    <string name="sensor_calibration_description">Ρύθμισε τους συντελεστές διόρθωσης και τις μετατοπίσεις για κάθε κανάλι.</string>
     <string name="sensor_calibration_visible_factor">Συντελεστής διόρθωσης VIS/NIR · AS7343</string>
     <string name="sensor_calibration_uv_factor">Συντελεστής διόρθωσης UV · AS7331</string>
-    <string name="sensor_calibration_factor_hint">Επιτρεπόμενη τιμή: 0,100–10,000.</string>
-    <string name="sensor_calibration_uv_unavailable">Η προεπιλεγμένη βαθμονόμηση UV διατηρείται και θα είναι επεξεργάσιμη όταν εντοπιστεί ο αισθητήρας UV.</string>
+    <string name="sensor_calibration_factor_hint">Συντελεστές διόρθωσης: επιτρεπόμενες τιμές %1$s–%2$s· το %3$s δεν αλλάζει την ενίσχυση. Προσδιόρισέ τους με ένα βαθμονομημένο όργανο αναφοράς.</string>
     <string name="sensor_calibration_firmware_required">Ενημερώστε το υλικολογισμικό του αισθητήρα για να χρησιμοποιήσετε τη βαθμονόμηση.</string>
     <string name="sensor_firmware_update_required_title">Απαιτείται ενημέρωση υλικολογισμικού</string>
     <string name="sensor_firmware_update_required">Το υλικολογισμικό που είναι εγκατεστημένο στον αισθητήρα δεν υποστηρίζει αυτές τις ρυθμίσεις. Ενημερώστε το υλικολογισμικό του αισθητήρα και δοκιμάστε ξανά.</string>
@@ -804,5 +803,5 @@
     <string name="alert_max_registrations">Μέγιστες καταγραφές</string>
     <string name="alert_registration_count">Αριθμός καταγραφών</string>
     <string name="alert_configure_first">Ρυθμίστε τουλάχιστον μία τιμή πριν την έναρξη.</string>
-    <string name="sensor_simulation_open_settings">Άνοιγμα ρυθμίσεων</string>
+    <string name="sensor_simulation_open_settings">Ρυθμίσεις</string>
 </resources>

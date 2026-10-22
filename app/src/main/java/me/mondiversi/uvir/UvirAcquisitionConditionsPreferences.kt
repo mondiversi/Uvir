@@ -26,7 +26,7 @@ internal fun loadAcquisitionConditions(preferences: SharedPreferences): List<Thr
         }.associateBy { it.metric }
     }.getOrDefault(emptyMap())
     return acquisitionConditionMetrics().map { metric ->
-        stored[metric] ?: ThresholdAlertRule(metric, false, ThresholdAlertDirection.ABOVE, 1f)
+        stored[metric] ?: ThresholdAlertRule(metric, false, ThresholdAlertDirection.ABOVE, DEFAULT_IRRADIANCE_THRESHOLD_W_M2)
     }
 }
 internal fun saveAcquisitionConditions(

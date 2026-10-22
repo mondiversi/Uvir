@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_irradiance_decimals">Displayed decimals</string>
+    <string name="live_irradiance_decimals_description">Applies to displayed values and custom exports. Trailing zeros stay visible; stored data and scientific exports are unchanged.</string>
+</resources>

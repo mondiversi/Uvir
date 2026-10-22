@@ -270,12 +270,12 @@ private fun AlertViolationDataRow(
     primaryText: Color,
     secondaryText: Color
 ) {
-    val metricLabel =
+    val metricLabel = sensorChannelLabel(
         stringResource(
             thresholdAlertMetricLabelResource(
                 violation.rule.metric
             )
-        )
+        ), thresholdAlertMetricLabelResource(violation.rule.metric))
     val symbol =
         if (violation.rule.direction == ThresholdAlertDirection.ABOVE) {
             "≥"
@@ -289,21 +289,11 @@ private fun AlertViolationDataRow(
         if (outOfRange) {
             stringResource(R.string.out_of_range_short)
         } else {
-            formatUvirIrradianceNumber(
-                violation.value,
-                3,
-                numericFormat,
-                irradianceUnit
-            )
+            displayedUvirIrradianceNumber(violation.value)
         }
     val thresholdValue =
         "$symbol " +
-            formatUvirIrradianceNumber(
-                violation.rule.threshold.toDouble(),
-                3,
-                numericFormat,
-                irradianceUnit
-            )
+            displayedUvirIrradianceNumber(violation.rule.threshold.toDouble())
     val delta =
         alertThresholdDeltaPercent(
             value = violation.value,

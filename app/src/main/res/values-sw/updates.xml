@@ -14,5 +14,5 @@
     <string name="update_done">Kihisi kimesasishwa</string>
     <string name="update_failed">Sasisho limeshindwa. Angalia kumbukumbu ya hitilafu. Kihisi kisipoanza, rejesha programu dhibiti kwa USB kutoka kompyuta.</string>
     <string name="update_permission">Ruhusu Uvir kusakinisha masasisho katika mipangilio ya Android.</string>
-    <string name="update_whats_new">Masasisho yaliyosainiwa ya programu na kihisi, upakuaji uliothibitishwa na usakinishaji wa programu dhibiti kwa USB.</string>
+    <string name="update_whats_new">Uhamishaji wa CSV, TXT na PNG wenye modeli za sensa, marejeo mafupi ya spektra na maelezo ya grafu yanayosomeka zaidi.</string>
 </resources>

@@ -1,6 +1,7 @@
 package me.mondiversi.uvir
 
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.res.Configuration
 import androidx.core.content.edit
 import java.util.Locale
@@ -38,8 +39,12 @@ internal data class UvirExportFormatting(
     val numericFormat: UvirNumericFormat,
     val dateFormat: UvirDateFormat,
     val timeFormat: UvirTimeFormat,
-    val irradianceUnit: UvirIrradianceUnit
+    val irradianceUnit: UvirIrradianceUnit,
+    val irradianceDecimals: Int? = null
 )
+
+/** Preserve the chosen export policy through localized/nested export helpers. */
+private class UvirExportPrecisionContext(base: Context, val mode: UvirExportMode, val digits: Int?) : ContextWrapper(base)
 
 internal data class UvirDataExportPreferences(
     val chartExportMode: UvirChartExportMode = UvirChartExportMode.COMBINED,
@@ -171,7 +176,7 @@ internal fun uvirExportFormatting(
 ): UvirExportFormatting =
     uvirExportFormatting(
         context = context,
-        mode = loadUvirExportMode(context)
+        mode = (context as? UvirExportPrecisionContext)?.mode ?: loadUvirExportMode(context)
     )
 
 internal fun uvirExportFormatting(
@@ -181,7 +186,8 @@ internal fun uvirExportFormatting(
     when (mode) {
         UvirExportMode.SELECTED ->
             UvirExportFormatting(
-                context = context,
+                context = UvirExportPrecisionContext(context, mode,
+                    loadUvirLiveIrradianceDecimals(context, loadUvirIrradianceUnit(context))),
                 language =
                     context.resources.configuration.locales[0].language,
                 numericFormat = loadUvirNumericFormat(context),
@@ -191,7 +197,8 @@ internal fun uvirExportFormatting(
                         context,
                         loadUvirTimeFormat(context)
                     ),
-                irradianceUnit = loadUvirIrradianceUnit(context)
+                irradianceUnit = loadUvirIrradianceUnit(context),
+                irradianceDecimals = loadUvirLiveIrradianceDecimals(context, loadUvirIrradianceUnit(context))
             )
 
         UvirExportMode.INTERNATIONAL -> {
@@ -201,7 +208,7 @@ internal fun uvirExportFormatting(
                     setLayoutDirection(Locale.ENGLISH)
                 }
             UvirExportFormatting(
-                context = context.createConfigurationContext(configuration),
+                context = UvirExportPrecisionContext(context.createConfigurationContext(configuration), mode, null),
                 language = DATA_EXPORT_LANGUAGE,
                 numericFormat = UvirNumericFormat.INTERNATIONAL,
                 dateFormat = UvirDateFormat.INTERNATIONAL,
@@ -210,3 +217,31 @@ internal fun uvirExportFormatting(
             )
         }
     }
+
+/** Null means full stored precision, not a second display-decimal limit. */
+internal fun uvirExportIrradianceDecimals(context: Context, unit: UvirIrradianceUnit): Int? =
+    if (context is UvirExportPrecisionContext) context.digits
+    else if (loadUvirExportMode(context) == UvirExportMode.SELECTED) loadUvirLiveIrradianceDecimals(context, unit)
+    else null
+
+internal fun UvirExportFormatting.irradiance(value: Double): String =
+    formatUvirIrradianceExportNumber(value, numericFormat, irradianceUnit, irradianceDecimals)
+
+internal fun UvirExportFormatting.chartAxisValue(value: Double, maximum: Double): String =
+    if (irradianceDecimals != null) formatUvirLiveDisplayNumber(value, irradianceDecimals, numericFormat, grouping = false)
+    else formatUvirChartAxisValue(value, maximum, irradianceUnit.displayFractionDigits(2), numericFormat)
+
+internal fun UvirExportFormatting.displayValue(value: Double): String =
+    formatUvirExportPercentage(value, numericFormat, irradianceDecimals)
+
+internal fun UvirExportFormatting.chartValue(canonicalWm2: Double): Double {
+    val display = irradianceUnit.fromCanonicalWm2(canonicalWm2)
+    return irradianceDecimals?.let { roundUvirLiveDisplayValue(display, it) } ?: display
+}
+
+internal fun UvirExportFormatting.chartZeroMaximum(): Double =
+    irradianceDecimals?.let { Math.pow(10.0, -it.toDouble()) } ?: irradianceUnit.fromCanonicalWm2(1.0)
+
+internal fun formatUvirExportPercentage(value: Double, format: UvirNumericFormat, digits: Int?): String =
+    if (digits == null) formatUvirExportNumber(value, format)
+    else formatUvirLiveDisplayNumber(value, digits, format, grouping = false)

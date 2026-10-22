@@ -1,0 +1,24 @@
+<resources>
+    <string name="optical_window_factor_limits">İzin verilen değerler: %1$s–%2$s.</string>
+    <string name="optical_window_title">Optik pencere telafisi</string>
+    <string name="optical_window_description">Pencere zayıflatması için yaklaşık düzeltme. Yalnızca optik özelliklerden veya karşılaştırmalı ölçümlerden elde edilen katsayıları kullanın.</string>
+    <string name="optical_window_enabled">Optik pencereyi telafi et</string>
+    <string name="optical_window_channel_factor">%1$s çarpanı</string>
+    <string name="optical_window_hint">Son katsayı genel × kanaldır. %1$s etkisizdir; 90%% geçirgenlik için son katsayı ×%2$s olmalıdır. Kalibrasyonun yerini almaz.</string>
+    <string name="measured_uv_bands_note">AS7331 kanallarının nominal aralıklarında spektral duyarlılık eşit değildir. Toplam, tüm UV dalga boylarının ölçümü değildir.</string>
+    <string name="spectral_channel_peaks">Tepeler: %1$s nm</string>
+    <string name="measured_visible_bands_note">Gösterilen dalga boyları AS7343 nominal duyarlılık tepeleridir, tekdüze bant sınırları değildir. Kanal çiftlerinin ortalaması alınır; HEV ve toplamlar gösterilen kanal değerlerini toplar.</string>
+    <string name="measured_infrared_bands_note">Far-red, 690 ve 745 nm kanallarını birleştirir; NIR, 855 nm kanalını kullanır. Bunlar kanal okumalarıdır, tüm kızılötesi spektrumun ölçümü değildir.</string>
+    <string name="optical_window_common_factor">Ortak çarpan</string>
+    <string name="optical_window_individual_factors">Kanal çarpanları</string>
+    <string name="measured_channel_sum">Kanal toplamı</string>
+    <string name="calibration_offsets_title">Ofsetler</string>
+    <string name="calibration_offset_channel">%1$s ofseti</string>
+    <string name="calibration_offsets_description">Ofsetler: izin verilen değerler %1$s–%2$s %3$s; %1$s hiçbir şey çıkarmaz. Karanlıkta veya referans koşullarında ölçülen ortalama arka planı çıkarır. Faktörlerden önce uygulanır; negatif sonuçlar sıfır olur.</string>
+    <string name="calibration_offsets_firmware_required">Ofsetleri ayarlamak için sensör yazılımını güncelleyin.</string>
+    <string name="calibration_offsets_legacy_notice">Bu değerleri düzenlemek, önceki kanal ofsetlerini renk başına tek bir ofsete dönüştürür. Düzenleme yapılana kadar eski değerler korunur.</string>
+    <string name="calibration_factor_short">Çarpan</string>
+    <string name="calibration_offset_short">Ofset (%1$s)</string>
+    <string name="calibration_channel_factors_title">Kanal düzeltme çarpanları</string>
+    <string name="calibration_channels_firmware_required">Kanal çarpanlarını ayarlamak için sensör yazılımını güncelleyin.</string>
+</resources>

@@ -37,6 +37,51 @@ class UvirSensorSettingsSyncStoreTest {
         wifiEnabled = true, bluetoothEnabled = true, internetEnabled = false, internetUsePrimaryWifi = true,
         wifiSsid = "", internetRelayHost = "", internetRelayPort = 8883, lastSyncedAt = 50, updatedAtMs = date)
 
+    @Test fun offsetsStayPerDeviceAndSurviveSettingsBackupAndLegacyPendingEdits() {
+        val offsets = CalibrationOffsets(List(15) { it * .125f })
+        val a = snapshot().copy(firmwareVersion = "0.5.108",
+            calibrationSettings = SensorCalibrationSettings(offsets = offsets))
+        val b = snapshot().copy(firmwareVersion = "0.5.108",
+            calibrationSettings = SensorCalibrationSettings(offsets = CalibrationOffsets()))
+        UvirDatabaseHelper(context).use { database ->
+            assertTrue(database.upsertSensorSettings("A", a))
+            assertTrue(database.upsertSensorSettings("B", b))
+            assertEquals(offsets, database.readSensorSettings("A")!!.calibrationSettings.offsets)
+            assertEquals(CalibrationOffsets(), database.readSensorSettings("B")!!.calibrationSettings.offsets)
+            val restored = a.toTransferJson().toSensorSettingsSnapshot(b)
+            assertEquals(offsets, restored.calibrationSettings.offsets)
+            val legacy = UvirPendingSensorSettings(101, listOf("CALIBRATION_CONFIG 1.2 0.8")).applyTo(a)
+            assertEquals(offsets, legacy.calibrationSettings.offsets)
+            val clear = UvirPendingSensorSettings(102, listOf(sensorCalibrationCommand(b.calibrationSettings))).applyTo(a)
+            assertEquals(CalibrationOffsets(), clear.calibrationSettings.offsets)
+            assertFalse(sensorBackedSettingsMatch(b, a))
+            assertTrue(sensorBackedSettingsMatch(a, a))
+        }
+    }
+
+    @Test fun channelGainsStayPerSensorAndRoundTripThroughExportsAndTheOutbox() {
+        val gains = CalibrationChannelFactors(List(11) { .5f + it * .1f })
+        val a = snapshot().copy(firmwareVersion = "0.5.109",
+            calibrationSettings = SensorCalibrationSettings(1.2f, .8f,
+                offsets = CalibrationOffsets(), channelFactors = gains))
+        val b = snapshot().copy(firmwareVersion = "0.5.109")
+        UvirDatabaseHelper(context).use { database ->
+            assertTrue(database.upsertSensorSettings("A", a))
+            assertTrue(database.upsertSensorSettings("B", b))
+            assertEquals(gains, database.readSensorSettings("A")!!.calibrationSettings.channelFactors)
+            assertNull(database.readSensorSettings("B")!!.calibrationSettings.channelFactors)
+            assertEquals(a.calibrationSettings, a.toTransferJson().toSensorSettingsSnapshot(b).calibrationSettings)
+            val legacyBackup = a.toTransferJson().apply { remove("calibration_channel_factors") }
+            assertEquals(CalibrationChannelFactors.fromModuleFactors(1.2f, .8f),
+                legacyBackup.toSensorSettingsSnapshot(a).calibrationSettings.channelFactors)
+            val pending = UvirPendingSensorSettings(101, listOf(sensorCalibrationCommand(a.calibrationSettings)))
+            assertEquals(gains, pending.applyTo(b).calibrationSettings.channelFactors)
+            val olderWindowEdit = UvirPendingSensorSettings(102, listOf("CALIBRATION_CONFIG 1.2 0.8"))
+            assertEquals(gains, olderWindowEdit.applyTo(a).calibrationSettings.channelFactors)
+            assertFalse(sensorBackedSettingsMatch(a.copy(calibrationSettings = a.calibrationSettings.copy(channelFactors = null)), a))
+        }
+    }
+
     @Test fun pendingSurvivesStoreReloadAndOlderReadbackButHardwareWinsTies() {
         UvirDatabaseHelper(context).use { database ->
             database.upsertSensorSettings("A", snapshot(), syncedAt = 50)
@@ -102,7 +147,7 @@ class UvirSensorSettingsSyncStoreTest {
             assertEquals(0L, migrated.updatedAtMs)
             assertEquals(snapshot().sensorParameters, migrated.sensorParameters)
             assertNull(migrated.alertRecordingEnabled)
-            assertEquals(20, database.readableDatabase.version)
+            assertEquals(25, database.readableDatabase.version)
         }
     }
 }

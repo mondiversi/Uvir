@@ -14,5 +14,5 @@
     <string name="update_done">Ο αισθητήρας ενημερώθηκε</string>
     <string name="update_failed">Η ενημέρωση απέτυχε. Δείτε το αρχείο σφαλμάτων. Αν ο αισθητήρας δεν ξεκινά, ανακτήστε το firmware με USB από υπολογιστή.</string>
     <string name="update_permission">Επιτρέψτε στο Uvir να εγκαθιστά ενημερώσεις στις ρυθμίσεις Android.</string>
-    <string name="update_whats_new">Υπογεγραμμένες ενημερώσεις εφαρμογής και αισθητήρα, επαληθευμένες λήψεις και φόρτωση firmware με USB.</string>
+    <string name="update_whats_new">Εξαγωγές CSV, TXT και PNG με μοντέλα αισθητήρων, συνοπτικές φασματικές αναφορές και πιο ευανάγνωστα υπομνήματα γραφημάτων.</string>
 </resources>

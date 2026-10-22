@@ -1,0 +1,24 @@
+<resources>
+    <string name="optical_window_factor_limits">Nilai yang diizinkan: %1$s–%2$s.</string>
+    <string name="optical_window_title">Kompensasi jendela optik</string>
+    <string name="optical_window_description">Koreksi perkiraan untuk pelemahan oleh jendela. Gunakan faktor dari spesifikasi optik atau pengukuran perbandingan.</string>
+    <string name="optical_window_enabled">Kompensasikan jendela optik</string>
+    <string name="optical_window_channel_factor">Pengali %1$s</string>
+    <string name="optical_window_hint">Faktor akhir adalah umum × kanal. %1$s bersifat netral; transmisi 90%% memerlukan faktor akhir ×%2$s. Ini tidak menggantikan kalibrasi.</string>
+    <string name="measured_uv_bands_note">Rentang nominal kanal AS7331 memiliki kepekaan spektral tidak seragam. Jumlahnya bukan pengukuran seluruh panjang gelombang UV.</string>
+    <string name="spectral_channel_peaks">Puncak: %1$s nm</string>
+    <string name="measured_visible_bands_note">Panjang gelombang yang ditampilkan adalah puncak sensitivitas nominal AS7343, bukan batas pita yang seragam. Pasangan kanal dirata-ratakan; HEV dan total menjumlahkan nilai kanal yang ditampilkan.</string>
+    <string name="measured_infrared_bands_note">Far-red menggabungkan kanal 690 dan 745 nm; NIR menggunakan kanal 855 nm. Ini adalah pembacaan kanal, bukan pengukuran seluruh spektrum inframerah.</string>
+    <string name="optical_window_common_factor">Pengali umum</string>
+    <string name="optical_window_individual_factors">Pengali per kanal</string>
+    <string name="measured_channel_sum">Jumlah kanal</string>
+    <string name="calibration_offsets_title">Offset</string>
+    <string name="calibration_offset_channel">Offset %1$s</string>
+    <string name="calibration_offsets_description">Offset: nilai yang diizinkan %1$s–%2$s %3$s; %1$s tidak mengurangi apa pun. Mengurangi rata-rata latar belakang yang diukur dalam gelap atau kondisi acuan. Diterapkan sebelum faktor; hasil negatif menjadi nol.</string>
+    <string name="calibration_offsets_firmware_required">Perbarui firmware sensor untuk mengatur offset.</string>
+    <string name="calibration_offsets_legacy_notice">Mengedit nilai ini mengubah offset kanal sebelumnya menjadi satu offset per warna. Nilai lama tetap dipertahankan hingga Anda mengeditnya.</string>
+    <string name="calibration_factor_short">Faktor</string>
+    <string name="calibration_offset_short">Offset (%1$s)</string>
+    <string name="calibration_channel_factors_title">Faktor koreksi per kanal</string>
+    <string name="calibration_channels_firmware_required">Perbarui firmware sensor untuk mengatur faktor per kanal.</string>
+</resources>

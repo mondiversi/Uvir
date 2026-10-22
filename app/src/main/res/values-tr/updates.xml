@@ -14,5 +14,5 @@
     <string name="update_done">Sensör güncellendi</string>
     <string name="update_failed">Güncelleme başarısız. Hata günlüğüne bakın. Sensör açılmıyorsa bilgisayardan USB ile ürün yazılımını kurtarın.</string>
     <string name="update_permission">Android ayarlarında Uvir uygulamasına güncelleme yükleme izni verin.</string>
-    <string name="update_whats_new">Uygulama ve sensör için imzalı güncellemeler, doğrulanmış indirmeler ve USB ile ürün yazılımı yükleme.</string>
+    <string name="update_whats_new">Sensör modelleri, kısa spektral bilgiler ve daha okunaklı grafik açıklamaları içeren CSV, TXT ve PNG dışa aktarımları.</string>
 </resources>

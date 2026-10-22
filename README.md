@@ -42,13 +42,18 @@ before making the enclosure openings or treating readings as calibrated irradian
 - [Command / record protocol](docs/USB_SERIAL_PROTOCOL.md) and
   [signed app/sensor updates](docs/UPDATES.md).
 
-This push updates development sources and documentation. It does not replace
-the APKs or signed update indexes already attached to GitHub Releases.
+Download the signed app and sensor firmware from the
+[latest release](https://github.com/mondiversi/Uvir/releases/latest). The release
+includes a signed update index for verified in-app downloads.
 
 ## Android app
 
 - Package: `me.mondiversi.uvir`
-- Current version: `1.3.0` (sensor firmware `0.5.104`)
+- Current app version: **1.4.0**; sensor firmware: **0.5.112**.
+- [Version 1.4.0 release notes](docs/RELEASE_NOTES_1.4.0.md): per-channel
+  calibration and window compensation, canonical SI storage, configurable
+  display/export precision, spectral references and updated construction guides.
+- [Optical bands and optional window compensation](docs/OPTICAL_WINDOW.md): nominal channel coverage, correction limits and deferred hardware validation.
 - Signed GitHub update checks at startup and from Info, verified APK downloads,
   and identity-checked USB sensor updates. The app is updated before the sensor.
   See [update and recovery documentation](docs/UPDATES.md).

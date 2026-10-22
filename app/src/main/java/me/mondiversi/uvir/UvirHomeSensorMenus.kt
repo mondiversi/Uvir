@@ -84,8 +84,14 @@ internal fun UvirHomeSensorSelectionDialog(
                         onClick = onOpenSimulationSettings,
                         modifier = Modifier.testTag("home_sensor_simulation_settings")
                     ) {
-                        Text(stringResource(R.string.sensor_simulation_open_settings))
+                        Text(uvirActionLabel(R.string.sensor_simulation_open_settings))
                     }
+                }
+            } else null,
+            dismissButton = if (simulationActive) {
+                {
+                    UvirDialogCloseButton(onDismissRequest,
+                        modifier = Modifier.testTag("home_sensor_simulation_close"))
                 }
             } else null,
             fixedBottomContent = if (simulationActive) null else {

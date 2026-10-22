@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_irradiance_decimals">Getoonde decimalen</string>
+    <string name="live_irradiance_decimals_description">Geldt voor weergegeven waarden en aangepaste exports. Nullen aan het einde blijven zichtbaar; opgeslagen gegevens en wetenschappelijke exports veranderen niet.</string>
+</resources>

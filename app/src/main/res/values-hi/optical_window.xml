@@ -1,0 +1,24 @@
+<resources>
+    <string name="optical_window_factor_limits">अनुमत मान: %1$s–%2$s.</string>
+    <string name="optical_window_title">ऑप्टिकल विंडो क्षतिपूर्ति</string>
+    <string name="optical_window_description">विंडो से होने वाले क्षीणन का अनुमानित सुधार। केवल ऑप्टिकल विनिर्देशों या तुलनात्मक मापों से प्राप्त गुणक उपयोग करें।</string>
+    <string name="optical_window_enabled">ऑप्टिकल विंडो की क्षतिपूर्ति करें</string>
+    <string name="optical_window_channel_factor">%1$s गुणक</string>
+    <string name="optical_window_hint">अंतिम गुणक सामान्य × चैनल है। %1$s तटस्थ है; 90%% संचरण के लिए अंतिम गुणक ×%2$s चाहिए। यह कैलिब्रेशन का विकल्प नहीं है।</string>
+    <string name="measured_uv_bands_note">AS7331 चैनलों की नाममात्र सीमाओं में वर्णक्रमीय संवेदनशीलता समान नहीं है। उनका योग सभी UV तरंगदैर्घ्यों का माप नहीं है।</string>
+    <string name="spectral_channel_peaks">शिखर: %1$s nm</string>
+    <string name="measured_visible_bands_note">दिखाई गई तरंगदैर्घ्य AS7343 की नाममात्र संवेदनशीलता के शिखर हैं, समान बैंड की सीमाएँ नहीं। चैनल युग्मों का औसत लिया जाता है; HEV और कुल मान प्रदर्शित चैनल मानों का योग हैं।</string>
+    <string name="measured_infrared_bands_note">Far-red में 690 और 745 nm चैनल संयुक्त हैं; NIR में 855 nm चैनल है। ये चैनलों की रीडिंग हैं, पूरे अवरक्त स्पेक्ट्रम का माप नहीं।</string>
+    <string name="optical_window_common_factor">सभी चैनलों का गुणक</string>
+    <string name="optical_window_individual_factors">हर चैनल के गुणक</string>
+    <string name="measured_channel_sum">चैनलों का योग</string>
+    <string name="calibration_offsets_title">ऑफ़सेट</string>
+    <string name="calibration_offset_channel">%1$s ऑफसेट</string>
+    <string name="calibration_offsets_description">ऑफ़सेट: अनुमत मान %1$s–%2$s %3$s; %1$s कुछ नहीं घटाता। अंधेरे या संदर्भ स्थितियों में मापी गई औसत पृष्ठभूमि घटाता है। गुणकों से पहले लागू होता है; ऋणात्मक परिणाम शून्य हो जाते हैं।</string>
+    <string name="calibration_offsets_firmware_required">ऑफसेट सेट करने के लिए सेंसर का फर्मवेयर अपडेट करें।</string>
+    <string name="calibration_offsets_legacy_notice">इन मानों को संपादित करने पर पुराने चैनल ऑफ़सेट हर रंग के एक ऑफ़सेट में बदल जाते हैं। संपादन तक पुराने मान नहीं बदलते।</string>
+    <string name="calibration_factor_short">गुणक</string>
+    <string name="calibration_offset_short">ऑफ़सेट (%1$s)</string>
+    <string name="calibration_channel_factors_title">प्रति-चैनल सुधार गुणक</string>
+    <string name="calibration_channels_firmware_required">प्रति-चैनल गुणक सेट करने के लिए सेंसर का फ़र्मवेयर अपडेट करें।</string>
+</resources>

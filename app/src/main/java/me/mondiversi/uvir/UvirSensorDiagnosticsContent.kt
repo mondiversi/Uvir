@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -35,13 +36,14 @@ internal fun UvirSensorDiagnosticsContent(
     var progress by remember { mutableIntStateOf(0) }
     var report by remember { mutableStateOf<UvirSensorDiagnosticReport?>(null) }
     var job by remember { mutableStateOf<Job?>(null) }
+    DisposableEffect(Unit) { onDispose { job?.cancel() } }
 
     Column(verticalArrangement = Arrangement.spacedBy(UvirSettingsRelatedGap)) {
         OutlinedButton(
             enabled = sensorConnected && !inProgress,
             modifier = Modifier.fillMaxWidth(),
             colors = uvirOutlinedActionColors(primaryText),
-            border = uvirOutlinedActionBorder(sensorConnected && !inProgress, secondaryText),
+            border = uvirOutlinedActionBorder(sensorConnected && !inProgress, primaryText),
             onClick = {
                 if (compareFirmwareVersions(sensorInfo.firmwareVersion, UVIR_DIAGNOSTIC_MINIMUM_FIRMWARE) < 0) {
                     showFirmwareDialog = true
@@ -134,6 +136,7 @@ internal fun UvirSensorDiagnosticsContent(
         }
         UvirAlertDialog(
             onDismissRequest = ::dismiss,
+            modifier = Modifier.testTag("diagnostic_dialog"),
             title = {
                 UvirClosableDialogTitle(
                     title = stringResource(R.string.diagnostic_title),
@@ -180,6 +183,13 @@ internal fun UvirSensorDiagnosticsContent(
                 }
             },
             dismissButton = {
+                TextButton(
+                    enabled = !exportRequest.inProgress,
+                    modifier = Modifier.testTag("diagnostic_cancel"),
+                    colors = ButtonDefaults.textButtonColors(contentColor =
+                        if (inProgress) UvirDestructiveActionColor else MaterialTheme.colorScheme.primary),
+                    onClick = ::dismiss
+                ) { Text(uvirActionLabel(if (inProgress) R.string.stop else R.string.close)) }
                 if (!inProgress && report != null) {
                     TextButton(
                         enabled = !exportRequest.inProgress,

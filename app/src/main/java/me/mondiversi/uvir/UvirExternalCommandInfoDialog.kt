@@ -114,7 +114,7 @@ internal fun UvirExternalCommandInfoDialog(
                 }
             }
         },
-        confirmButton = {},
+        confirmButton = { UvirDialogCloseButton(onDismissRequest) },
         containerColor = cardColor,
         titleContentColor = primaryText,
         textContentColor = primaryText

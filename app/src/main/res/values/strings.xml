@@ -471,7 +471,7 @@
     <string name="violet">Violet</string>
     <string name="blue">Blue</string>
     <string name="green">Green</string>
-    <string name="yellow">Yellow</string>
+    <string name="yellow">Green-yellow</string>
     <string name="orange">Orange</string>
     <string name="red">Red</string>
     <string name="percent_of_visible">%1$s%% of visible</string>
@@ -480,11 +480,11 @@
     <string name="app_version">App version: %1$s</string>
     <string name="package_name_value">Package: %1$s</string>
     <string name="about_whats_new_title">What’s new in version %1$s</string>
-    <string name="about_whats_new_connectivity">Sequential multi-sensor management with secure profiles and USB, Wi-Fi, Bluetooth, and Internet connections.</string>
-    <string name="about_whats_new_connections">Conditional and external-command acquisitions, autonomous sessions, and reliable state recovery after disconnection or restart.</string>
-    <string name="about_whats_new_measurements">Session variants, advanced history filters, and clearer acquisition and alert details.</string>
-    <string name="about_whats_new_interface">Expanded CSV, TXT, and PNG exports with units, regional formats, grouped charts, and sensor identification.</string>
-    <string name="about_whats_new_github">Encrypted settings backups, integrated diagnostics, and extensive interface and accessibility refinements.</string>
+    <string name="about_whats_new_connectivity">Per-channel correction factors and offsets, with guided mean-offset measurement and reset confirmations.</string>
+    <string name="about_whats_new_connections">Optical-window compensation with a common master and channel multipliers; clearer AS7331 ranges and AS7343 sensitivity peaks.</string>
+    <string name="about_whats_new_measurements">Internal irradiance storage in W/m², with automatic migration preserving existing measurements and settings.</string>
+    <string name="about_whats_new_interface">Configurable decimal places for live and saved values and custom exports; scientific exports retain full stored precision.</string>
+    <string name="about_whats_new_github">Refined settings menu and dialogs; updated wiring, assembly and calibration guides, including directional tubes and diffuser requirements.</string>
     <string name="about_description">Spectral acquisition app for ultraviolet, visible and infrared radiation.</string>
     <string name="about_spectral_ranges">Spectral bands: Ultraviolet • Visible light • Infrared</string>
     <string name="about_sensors">Supported sensors: AS7331 UV • AS7343 multispectral</string>
@@ -682,11 +682,10 @@
     <string name="threshold_rules_connection_required">Connect the sensor to change these alerts.</string>
     <string name="threshold_repeat_sensor_description">This interval is stored in the sensor and also limits alerts recorded while the app is disconnected.</string>
     <string name="sensor_calibration_title">Calibration</string>
-    <string name="sensor_calibration_description">Apply correction factors obtained by comparison with a calibrated reference instrument. A factor of 1.000 preserves the default datasheet estimate.</string>
+    <string name="sensor_calibration_description">Adjust correction factors and offsets for each channel.</string>
     <string name="sensor_calibration_visible_factor">VIS/NIR correction factor · AS7343</string>
     <string name="sensor_calibration_uv_factor">UV correction factor · AS7331</string>
-    <string name="sensor_calibration_factor_hint">Allowed value: 0.100–10.000.</string>
-    <string name="sensor_calibration_uv_unavailable">The default UV calibration is preserved and will become editable when the UV sensor is detected.</string>
+    <string name="sensor_calibration_factor_hint">Correction factors: allowed values %1$s–%2$s; %3$s leaves the gain unchanged. Determine them using a calibrated reference instrument.</string>
     <string name="sensor_calibration_firmware_required">Update the sensor firmware to use calibration.</string>
     <string name="sensor_firmware_update_required_title">Firmware update required</string>
     <string name="sensor_firmware_update_required">The firmware installed on the sensor does not support these settings. Update the sensor firmware and try again.</string>
@@ -807,5 +806,5 @@
     <string name="alert_max_registrations">Maximum recordings</string>
     <string name="alert_registration_count">Number of recordings</string>
     <string name="alert_configure_first">Configure at least one value before starting.</string>
-    <string name="sensor_simulation_open_settings">Open settings</string>
+    <string name="sensor_simulation_open_settings">Settings</string>
 </resources>

@@ -443,7 +443,7 @@
     <string name="violet">Zambarau</string>
     <string name="blue">Bluu</string>
     <string name="green">Kijani</string>
-    <string name="yellow">Njano</string>
+    <string name="yellow">Kijani-manjano</string>
     <string name="orange">Chungwa</string>
     <string name="red">Nyekundu</string>
     <string name="percent_of_visible">%1$s%% inayoonekana</string>
@@ -452,11 +452,11 @@
     <string name="app_version">Toleo la programu: %1$s</string>
     <string name="package_name_value">Kifurushi: %1$s</string>
     <string name="about_whats_new_title">Nini kipya katika toleo %1$s</string>
-    <string name="about_whats_new_connectivity">Udhibiti wa mfululizo wa vitambuzi vingi wenye wasifu salama na miunganisho ya USB, Wi-Fi, Bluetooth na Intaneti.</string>
-    <string name="about_whats_new_connections">Upataji wa masharti na kwa amri ya nje, vipindi vinavyojiendesha na urejeshaji wa hali kwa uhakika baada ya kukatika au kuwashwa upya.</string>
-    <string name="about_whats_new_measurements">Aina za vipindi, vichujio vya kina vya historia na maelezo yaliyo wazi zaidi ya upataji na tahadhari.</string>
-    <string name="about_whats_new_interface">Uhamishaji mpana wa CSV, TXT na PNG wenye vipimo, miundo ya kikanda, chati zilizopangwa kwa makundi na utambuzi wa kitambuzi.</string>
-    <string name="about_whats_new_github">Nakala rudufu zilizosimbwa za mipangilio, uchunguzi uliojumuishwa na maboresho mengi ya kiolesura na ufikivu.</string>
+    <string name="about_whats_new_connectivity">Vigezo vya kusahihisha na offseti kwa kila chaneli, pamoja na kipimo kinachoongozwa cha offseti wastani na uthibitisho wa kuweka upya.</string>
+    <string name="about_whats_new_connections">Fidia ya dirisha la macho kwa kizidishi cha jumla na vizidishi vya chaneli; masafa ya AS7331 na vilele vya unyeti wa AS7343 vilivyo wazi zaidi.</string>
+    <string name="about_whats_new_measurements">Hifadhi ya ndani ya iradiansi katika W/m², pamoja na uhamishaji wa kiotomatiki unaohifadhi vipimo na mipangilio iliyopo.</string>
+    <string name="about_whats_new_interface">Nafasi za desimali zinazoweza kuchaguliwa kwa thamani za moja kwa moja, data iliyohifadhiwa na uhamishaji maalumu; uhamishaji wa kisayansi huhifadhi usahihi wote uliohifadhiwa.</string>
+    <string name="about_whats_new_github">Menyu ya mipangilio na visanduku vya mazungumzo vimeboreshwa; miongozo ya nyaya, uunganishaji na kalibresheni imesasishwa, ikijumuisha mirija elekezi na mahitaji ya kisambazaji cha mwanga.</string>
     <string name="about_description">Programu ya vipimo vya wigo wa mionzi ya urujuanimno, mwanga unaoonekana na mionzi ya infraredi.</string>
     <string name="about_spectral_ranges">Bendi za wigo: Urujuanimno • Mwanga unaoonekana • Mionzi ya infraredi</string>
     <string name="about_sensors">Vihisi vinavyotumika: AS7331 UV • AS7343 yenye spectra nyingi</string>
@@ -654,11 +654,10 @@
     <string name="threshold_rules_connection_required">Unganisha kihisi ili kubadilisha arifa hizi.</string>
     <string name="threshold_repeat_sensor_description">Muda huu huhifadhiwa kwenye kitambuzi na pia hupunguza arifa zilizorekodiwa wakati programu imekatwa.</string>
     <string name="sensor_calibration_title">Urekebishaji</string>
-    <string name="sensor_calibration_description">Tumia vipengele vya kusahihisha vilivyopatikana kwa kulinganisha na chombo kilichosawazishwa. Kipengele cha 1.000 huhifadhi makadirio ya hifadhidata chaguomsingi.</string>
+    <string name="sensor_calibration_description">Rekebisha vizidishi vya marekebisho na ofseti kwa kila chaneli.</string>
     <string name="sensor_calibration_visible_factor">Sababu ya kusahihisha VIS/NIR · AS7343</string>
     <string name="sensor_calibration_uv_factor">Sababu ya kusahihisha UV · AS7331</string>
-    <string name="sensor_calibration_factor_hint">Thamani inayoruhusiwa: 0.100–10,000.</string>
-    <string name="sensor_calibration_uv_unavailable">Urekebishaji chaguomsingi wa UV huhifadhiwa na utaweza kuhaririwa kihisi cha UV kitatambuliwa.</string>
+    <string name="sensor_calibration_factor_hint">Vizidishi vya marekebisho: thamani zinazoruhusiwa %1$s–%2$s; %3$s haibadili ukuzaji. Vibaini kwa kutumia kifaa rejea kilichosawazishwa.</string>
     <string name="sensor_calibration_firmware_required">Sasisha programu dhibiti ya kihisi ili kutumia urekebishaji.</string>
     <string name="sensor_firmware_update_required_title">Usasishaji wa programu dhibiti unahitajika</string>
     <string name="sensor_firmware_update_required">Firmware iliyosanikishwa kwenye sensor haiunga mkono mipangilio hii. Sasisha programu dhibiti ya kihisi na ujaribu tena.</string>
@@ -804,5 +803,5 @@
     <string name="alert_max_registrations">Idadi ya juu ya rekodi</string>
     <string name="alert_registration_count">Idadi ya rekodi</string>
     <string name="alert_configure_first">Sanidi angalau thamani moja kabla ya kuanza.</string>
-    <string name="sensor_simulation_open_settings">Fungua mipangilio</string>
+    <string name="sensor_simulation_open_settings">Mipangilio</string>
 </resources>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_irradiance_decimals">Casas decimais exibidas</string>
+    <string name="live_irradiance_decimals_description">Aplica-se aos valores exibidos e às exportações personalizadas. Os zeros finais permanecem visíveis; os dados salvos e as exportações científicas não mudam.</string>
+</resources>

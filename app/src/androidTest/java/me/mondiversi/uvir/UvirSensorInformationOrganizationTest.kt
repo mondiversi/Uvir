@@ -13,6 +13,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performScrollTo
 import androidx.test.platform.app.InstrumentationRegistry
 import java.util.Locale
@@ -75,7 +76,10 @@ class UvirSensorInformationOrganizationTest {
         assertTrue(general.contains(info.deviceId))
         assertTrue(general.contains(info.firmwareVersion))
         assertFalse(general.contains("AS7343"))
-        assertEquals(1, Regex("AS7343").findAll(report).count())
+        assertEquals(1, Regex("AS7343").findAll(device).count())
+        assertTrue(report.contains(res.getString(R.string.measured_visible_bands_note)))
+        assertTrue(report.contains(res.getString(R.string.spectral_channel_peaks, "405 / 425")))
+        assertTrue(report.contains(res.getString(R.string.measured_infrared_bands_note)))
         assertTrue(report.contains("2023-11-14 22:13:20 UTC"))
         assertTrue(report.contains(res.getString(R.string.sensor_info_last_connection)))
         assertTrue(report.contains("2023-11-14 22:14:20 UTC"))
@@ -116,7 +120,8 @@ class UvirSensorInformationOrganizationTest {
                 .performScrollTo().assertIsDisplayed()
             // The old generic row contained just AS7343 in general information.
             compose.onNodeWithText("AS7343").assertDoesNotExist()
-            compose.onNodeWithText(res.getString(R.string.sensor_info_components))
+            // The page also has a later measurement-components heading.
+            compose.onAllNodesWithText(res.getString(R.string.sensor_info_components))[0]
                 .performScrollTo().assertIsDisplayed()
             compose.onNodeWithText("AS7343 · I²C 0x39 · ${res.getString(R.string.sensor_info_detected)}")
                 .performScrollTo().assertIsDisplayed()

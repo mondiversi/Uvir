@@ -80,7 +80,10 @@ internal class UvirSettingsSaveInput(
     val sensorWifiPassword: String,
     val appliedSensorWifiSsid: String,
     val appliedSensorWifiPassword: String,
-    val onConfigureSensorWifi: suspend (String, String) -> Boolean
+    val onConfigureSensorWifi: suspend (String, String) -> Boolean,
+    val opticalWindowDraft: OpticalWindowSettings = sensorCalibrationSettings.opticalWindow,
+    val calibrationOffsetsDraft: CalibrationOffsets? = sensorCalibrationSettings.offsets,
+    val calibrationChannelFactorsDraft: CalibrationChannelFactors? = sensorCalibrationSettings.channelFactors
 )
 
 internal suspend fun applyUvirSettingsGroup(input: UvirSettingsSaveInput) {
@@ -148,7 +151,9 @@ internal suspend fun applyUvirSettingsGroup(input: UvirSettingsSaveInput) {
                 onVisibleCalibrationFactorTextChange(visible.text)
                 onUvCalibrationFactorTextChange(uv.text)
                 if (visible.corrected || uv.corrected) corrected()
-                val target = SensorCalibrationSettings(visible.value, uv.value)
+                val target = sensorCalibrationSettings.copy(visibleFactor = visible.value, uvFactor = uv.value,
+                    opticalWindow = opticalWindowDraft, offsets = calibrationOffsetsDraft,
+                    channelFactors = calibrationChannelFactorsDraft)
                 if (target != sensorCalibrationSettings && firmwareAllowed() &&
                     send { onApplySensorCalibration(target) }) saved()
             }

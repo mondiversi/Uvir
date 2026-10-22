@@ -115,6 +115,7 @@ data class ThresholdAlertLogEntry(
     val note: String = "",
     val sensorId: Long? = null,
     val qualityFlags: Int = 0,
+    val opticalWindow: OpticalWindowSettings? = null,
     // Resolved from the sensor profile when read; not duplicated in record storage.
     val sensorDisplayName: String = ""
 )
@@ -124,7 +125,8 @@ data class SensorLiveAlertEvent(
     val timestampMs: Long,
     val details: String,
     val sessionId: Long = 0L,
-    val recorded: Boolean = true
+    val recorded: Boolean = true,
+    val opticalWindow: OpticalWindowSettings? = null
 )
 
 internal data class ThresholdNotificationAlert(
@@ -164,7 +166,16 @@ data class SensorSample(
 
     val f8: Double = 0.0,
     val nir: Double = 0.0,
-    val qualityFlags: Int = 0
+    val qualityFlags: Int = 0,
+    val opticalWindow: OpticalWindowSettings? = null
+)
+
+/** Scale physical quantities only; flags and optical metadata are not irradiance. */
+internal fun SensorSample.scaledIrradiance(scale: Double): SensorSample = copy(
+    uvc = uvc * scale, uvb = uvb * scale, uva = uva * scale,
+    violetto = violetto * scale, blu = blu * scale, verde = verde * scale,
+    giallo = giallo * scale, arancione = arancione * scale, rosso = rosso * scale,
+    f8 = f8 * scale, nir = nir * scale
 )
 
 internal const val UVIR_QUALITY_UV_OUT_OF_RANGE = 1
@@ -212,7 +223,8 @@ private fun SensorSample.toSaveableValues(): List<Double> =
         f8,
         nir,
         qualityFlags.toDouble()
-    )
+    ) + listOf(opticalWindow?.let { if (it.enabled) 1.0 else 0.0 } ?: -1.0) +
+        (opticalWindow?.factors ?: List(11) { 1f }).map(Float::toDouble)
 
 private fun sensorSampleFromValues(
     values: List<Double>
@@ -229,7 +241,9 @@ private fun sensorSampleFromValues(
         rosso = values[8],
         f8 = values[9],
         nir = values[10],
-        qualityFlags = values[11].toInt()
+        qualityFlags = values[11].toInt(),
+        opticalWindow = if (values.size >= 24 && values[12] >= 0.0)
+            OpticalWindowSettings(values[12] == 1.0, values.subList(13, 24).map(Double::toFloat)) else null
     )
 
 internal val SensorSampleSaver =
@@ -245,19 +259,14 @@ internal val SensorSampleSaver =
 internal val SensorSampleListSaver =
     listSaver<List<SensorSample>, Double>(
         save = { samples ->
-            samples.flatMap {
+            listOf(-241.0) + samples.flatMap {
                 it.toSaveableValues()
             }
         },
         restore = { values ->
-            values
-                .chunked(
-                    SENSOR_SAMPLE_VALUE_COUNT
-                )
-                .filter {
-                    it.size ==
-                            SENSOR_SAMPLE_VALUE_COUNT
-                }
+            (if (values.firstOrNull() == -241.0) values.drop(1).chunked(24)
+                else values.chunked(SENSOR_SAMPLE_VALUE_COUNT))
+                .filter { it.size == 24 || it.size == SENSOR_SAMPLE_VALUE_COUNT }
                 .map {
                     sensorSampleFromValues(it)
                 }

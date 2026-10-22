@@ -366,20 +366,29 @@ internal fun UvirSensorInfoScreen(
                                         buildList {
                                             add(
                                                 stringResource(R.string.sensor_info_unit) to
-                                                    sensorInfo.unit.displayUnit(unavailable)
+                                                    sensorInfo.canonicalUnit.ifBlank { sensorInfo.unit }.displayUnit(unavailable)
                                             )
                                             add(
                                                 stringResource(R.string.sensor_info_calibration) to
                                                     sensorInfo.calibrationKind.calibrationText(unavailable)
                                             )
-                                            sensorInfo.visibleCalibrationFactor?.let { factor ->
+                                            add(stringResource(R.string.optical_window_title) to
+                                                opticalWindowSummary(sensorInfo.opticalWindow, numericFormat))
+                                            add(stringResource(R.string.calibration_offsets_title) to
+                                                calibrationOffsetsSummary(sensorInfo.calibrationOffsets,
+                                                    LocalUvirIrradianceUnit.current, numericFormat))
+                                            sensorInfo.calibrationChannelFactors?.let { factors ->
+                                                add(stringResource(R.string.calibration_channel_factors_title) to
+                                                    calibrationChannelFactorsSummary(factors, numericFormat))
+                                            }
+                                            sensorInfo.visibleCalibrationFactor?.takeIf { sensorInfo.calibrationChannelFactors == null }?.let { factor ->
                                                 add(
                                                     stringResource(
                                                         R.string.sensor_info_visible_calibration_factor
                                                     ) to formatUvirNumber(factor, 3, numericFormat)
                                                 )
                                             }
-                                            sensorInfo.uvCalibrationFactor?.let { factor ->
+                                            sensorInfo.uvCalibrationFactor?.takeIf { sensorInfo.calibrationChannelFactors == null }?.let { factor ->
                                                 add(
                                                     stringResource(
                                                         R.string.sensor_info_uv_calibration_factor
@@ -478,6 +487,11 @@ internal fun UvirSensorInfoScreen(
                                             stringResource(R.string.sensor_info_scale_equivalence) to
                                                 "1 W/m² = 0.1 mW/cm² = 100 µW/cm²"
                                         )
+                                ),
+                                SensorInfoGroup(
+                                    title = stringResource(R.string.sensor_info_components),
+                                    rows = uvirSensorSpectralInfoRows(resources),
+                                    paragraphLayout = true
                                 )
                             )
                     )
@@ -710,6 +724,32 @@ internal data class SensorInfoGroup(
     val rows: List<Pair<String, String>>,
     val paragraphLayout: Boolean = false
 )
+
+/** Technical channel descriptions live in Info, not in the compact live cards. */
+internal fun uvirSensorSpectralInfoRows(resources: Resources): List<Pair<String, String>> {
+    fun peaks(values: String) = resources.getString(R.string.spectral_channel_peaks, values.removeSuffix(" nm"))
+    fun visibleChannel(label: Int, values: String) =
+        "${resources.getString(label)}: ${peaks(values)}"
+    return listOf(
+        resources.getString(R.string.uv_radiation) to listOf(
+            "UVC ${UvirSensorBands.UVC} · UVB ${UvirSensorBands.UVB} · UVA ${UvirSensorBands.UVA}",
+            resources.getString(R.string.measured_uv_bands_note)
+        ).joinToString("\n"),
+        resources.getString(R.string.visible_light) to listOf(
+            resources.getString(R.string.measured_visible_bands_note),
+            visibleChannel(R.string.violet, UvirSensorBands.VIOLET_CHANNELS),
+            visibleChannel(R.string.blue, UvirSensorBands.BLUE_CHANNELS),
+            visibleChannel(R.string.green, UvirSensorBands.GREEN_CHANNEL),
+            visibleChannel(R.string.yellow, UvirSensorBands.GREEN_YELLOW_CHANNELS),
+            visibleChannel(R.string.orange, UvirSensorBands.ORANGE_CHANNEL),
+            visibleChannel(R.string.red, UvirSensorBands.RED_CHANNEL)
+        ).joinToString("\n"),
+        resources.getString(R.string.far_red_nir) to listOf(
+            peaks(UvirSensorBands.INFRARED_CHANNELS),
+            resources.getString(R.string.measured_infrared_bands_note)
+        ).joinToString("\n")
+    )
+}
 
 /** Same device categories for the screen and its report, without duplicate sensor models. */
 internal fun uvirSensorDeviceInfoGroups(
@@ -989,6 +1029,7 @@ private fun String.storageBackendText(unavailable: String): String =
 @Composable
 private fun String.displayUnit(unavailable: String): String =
     when (lowercase()) {
+        "w/m2", "w/m²" -> "W/m²"
         "uw/cm2", "µw/cm²" -> "µW/cm²"
         else -> orUnavailable(unavailable)
     }
@@ -1041,6 +1082,7 @@ internal fun formatUvirSensorInformation(
     }
     fun displayUnit(value: String): String =
         when (value.lowercase()) {
+            "w/m2", "w/m²" -> "W/m²"
             "uw/cm2", "µw/cm²" -> "µW/cm²"
             else -> value.orUnavailable(unavailable)
         }
@@ -1179,20 +1221,29 @@ internal fun formatUvirSensorInformation(
                 buildList {
                     add(
                         resources.getString(R.string.sensor_info_unit) to
-                            displayUnit(sensorInfo.unit)
+                            displayUnit(sensorInfo.canonicalUnit.ifBlank { sensorInfo.unit })
                     )
                     add(
                         resources.getString(R.string.sensor_info_calibration) to
                             calibration(sensorInfo.calibrationKind)
                     )
-                    sensorInfo.visibleCalibrationFactor?.let {
+                    add(resources.getString(R.string.optical_window_title) to
+                        opticalWindowSummary(sensorInfo.opticalWindow, numericFormat))
+                    add(resources.getString(R.string.calibration_offsets_title) to
+                        calibrationOffsetsSummary(sensorInfo.calibrationOffsets,
+                            irradianceUnit, numericFormat))
+                    sensorInfo.calibrationChannelFactors?.let { factors ->
+                        add(resources.getString(R.string.calibration_channel_factors_title) to
+                            calibrationChannelFactorsSummary(factors, numericFormat))
+                    }
+                    sensorInfo.visibleCalibrationFactor?.takeIf { sensorInfo.calibrationChannelFactors == null }?.let {
                         add(
                             resources.getString(
                                 R.string.sensor_info_visible_calibration_factor
                             ) to formatUvirNumber(it, 3, numericFormat)
                         )
                     }
-                    sensorInfo.uvCalibrationFactor?.let {
+                    sensorInfo.uvCalibrationFactor?.takeIf { sensorInfo.calibrationChannelFactors == null }?.let {
                         add(
                             resources.getString(
                                 R.string.sensor_info_uv_calibration_factor
@@ -1268,7 +1319,9 @@ internal fun formatUvirSensorInformation(
                         irradianceUnit.symbol,
                     resources.getString(R.string.sensor_info_scale_equivalence) to
                         "1 W/m² = 0.1 mW/cm² = 100 µW/cm²"
-                )
+                ),
+            resources.getString(R.string.sensor_info_components) to
+                uvirSensorSpectralInfoRows(resources)
         )
     val memoryGroups =
         listOf(

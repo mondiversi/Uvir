@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_irradiance_decimals">المنازل العشرية المعروضة</string>
+    <string name="live_irradiance_decimals_description">ينطبق على القيم المعروضة وعمليات التصدير المخصصة. تبقى الأصفار النهائية ظاهرة؛ ولا تتغير البيانات المحفوظة أو عمليات التصدير العلمية.</string>
+</resources>

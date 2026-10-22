@@ -1,0 +1,24 @@
+<resources>
+    <string name="optical_window_factor_limits">ערכים מותרים: %1$s–%2$s.</string>
+    <string name="optical_window_title">פיצוי לחלון האופטי</string>
+    <string name="optical_window_description">תיקון מקורב להנחתת החלון. יש להשתמש במקדמים ממפרט אופטי או ממדידות השוואתיות בלבד.</string>
+    <string name="optical_window_enabled">פיצוי על החלון האופטי</string>
+    <string name="optical_window_channel_factor">מכפיל %1$s</string>
+    <string name="optical_window_hint">המקדם הסופי הוא כללי × ערוץ. %1$s הוא ניטרלי; העברה של 90%% דורשת מקדם סופי ×%2$s. אין בכך תחליף לכיול.</string>
+    <string name="measured_uv_bands_note">תחומים נומינליים של ערוצי AS7331, עם רגישות ספקטרלית לא אחידה. הסכום אינו מדידה של כל אורכי גל ה-UV.</string>
+    <string name="spectral_channel_peaks">שיאים: %1$s ננומטר</string>
+    <string name="measured_visible_bands_note">אורכי הגל המוצגים הם שיאי הרגישות הנומינליים של AS7343, ולא גבולות של תחומים אחידים. זוגות ערוצים מחושבים כממוצע; HEV והסכומים מחברים את ערכי הערוצים המוצגים.</string>
+    <string name="measured_infrared_bands_note">Far-red משלב את הערוצים ב־690 וב־745 ננומטר; NIR משתמש בערוץ ב־855 ננומטר. אלה קריאות של ערוצים, לא מדידה של כל הספקטרום התת־אדום.</string>
+    <string name="optical_window_common_factor">מכפיל משותף</string>
+    <string name="optical_window_individual_factors">מכפילים לכל ערוץ</string>
+    <string name="measured_channel_sum">סכום ערוצים</string>
+    <string name="calibration_offsets_title">היסטים</string>
+    <string name="calibration_offset_channel">היסט %1$s</string>
+    <string name="calibration_offsets_description">היסטים: ערכים מותרים %1$s–%2$s %3$s; %1$s אינו מפחית דבר. מפחיתים רקע ממוצע שנמדד בחושך או בתנאי ייחוס. מיושמים לפני המקדמים; תוצאות שליליות הופכות לאפס.</string>
+    <string name="calibration_offsets_firmware_required">יש לעדכן את קושחת החיישן כדי להגדיר היסטים.</string>
+    <string name="calibration_offsets_legacy_notice">עריכת הערכים ממירה את ההיסטים הקודמים של הערוצים להיסט אחד לכל צבע. עד לעריכה, הערכים הישנים נשארים ללא שינוי.</string>
+    <string name="calibration_factor_short">מקדם</string>
+    <string name="calibration_offset_short">היסט (%1$s)</string>
+    <string name="calibration_channel_factors_title">מקדמי תיקון לכל ערוץ</string>
+    <string name="calibration_channels_firmware_required">יש לעדכן את קושחת החיישן כדי להגדיר מקדמים לכל ערוץ.</string>
+</resources>

@@ -75,7 +75,7 @@ fun generateRandomSample(
         f8 = Random.nextDouble(50.0, 700.0),
         nir = Random.nextDouble(50.0, 900.0),
         qualityFlags = qualityFlags
-    )
+    ).scaledIrradiance(.01)
 }
 
 fun averageValues(
@@ -118,7 +118,8 @@ fun combineSamples(
 
         f8 = averageValues(samples.map { it.f8 }, discardExtremes),
         nir = averageValues(samples.map { it.nir }, discardExtremes),
-        qualityFlags = samples.fold(0) { flags, sample -> flags or sample.qualityFlags }
+        qualityFlags = samples.fold(0) { flags, sample -> flags or sample.qualityFlags },
+        opticalWindow = samples.commonOpticalWindow()
     )
 }
 

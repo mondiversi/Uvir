@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dark_offsets_calculate">计算偏移</string>
+    <string name="dark_offsets_instructions">在稳定的参考条件下测量约30秒。在黑暗中可补偿传感器本底；在有光环境中也会减去现有光照，因此得到的是相对测量值。暗处测量时，请用也能阻挡近红外的材料遮住光学输入，并让LED保持正常工作状态。平均值不能消除随机噪声或校准增益。</string>
+    <string name="dark_offsets_progress">测量中：%1$s / 30秒</string>
+    <string name="dark_offsets_result">根据%1$s次读数提出的建议。尚未更改任何设置。</string>
+    <string name="dark_offsets_failed">测量中断或不可用。请检查连接和传感器后重试。</string>
+    <string name="dark_offsets_start">开始测量</string>
+    <string name="dark_offsets_apply">应用偏移</string>
+    <string name="dark_offsets_firmware_required">需要传感器固件0.5.110或更高版本。</string>
+    <string name="calibration_reset_values">重置数值</string>
+    <string name="calibration_reset_confirmation_title">重置数值？</string>
+    <string name="calibration_reset_confirm_action">重置</string>
+    <string name="calibration_reset_confirmation_message">将%1$s的校正系数重置为1，偏移重置为0。其他校准和光学窗口设置保持不变。</string>
+    <string name="optical_window_reset_confirmation_message">将总体倍率和光学窗口所有通道倍率重置为1。校准保持不变。</string>
+</resources>

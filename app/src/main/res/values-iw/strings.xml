@@ -427,7 +427,7 @@
     <string name="violet">סגול</string>
     <string name="blue">כחול</string>
     <string name="green">ירוק</string>
-    <string name="yellow">צהוב</string>
+    <string name="yellow">ירוק-צהוב</string>
     <string name="orange">כתום</string>
     <string name="red">אדום</string>
     <string name="percent_of_visible">%1$s%% של גלוי</string>
@@ -436,11 +436,11 @@
     <string name="app_version">גרסת האפליקציה: %1$s</string>
     <string name="package_name_value">חבילה: %1$s</string>
     <string name="about_whats_new_title">מה חדש בגרסה %1$s</string>
-    <string name="about_whats_new_connectivity">ניהול רציף של חיישנים מרובים עם פרופילים מאובטחים וחיבורי USB, Wi-Fi, Bluetooth ואינטרנט.</string>
-    <string name="about_whats_new_connections">רכישות מותנות ובאמצעות פקודה חיצונית, הפעלות עצמאיות ושחזור מצב אמין לאחר ניתוק או הפעלה מחדש.</string>
-    <string name="about_whats_new_measurements">וריאציות להפעלות, מסנני היסטוריה מתקדמים ופרטים ברורים יותר לרכישות ולהתראות.</string>
-    <string name="about_whats_new_interface">יצוא מורחב בפורמטים CSV, TXT ו-PNG עם יחידות, תבניות אזוריות, תרשימים מקובצים וזיהוי החיישן.</string>
-    <string name="about_whats_new_github">גיבויים מוצפנים של ההגדרות, אבחון משולב ושיפורים נרחבים בממשק ובנגישות.</string>
+    <string name="about_whats_new_connectivity">מקדמי תיקון והיסטים לכל ערוץ, עם מדידה מודרכת של ההיסטים הממוצעים ואישור לפני איפוס.</string>
+    <string name="about_whats_new_connections">פיצוי חלון אופטי באמצעות מכפיל כללי ומכפילי ערוצים; הבהרת טווחי AS7331 ושיאי הרגישות של AS7343.</string>
+    <string name="about_whats_new_measurements">אחסון פנימי של עוצמת הקרינה ב-W/m², עם העברה אוטומטית השומרת על המדידות וההגדרות הקיימות.</string>
+    <string name="about_whats_new_interface">מספר ספרות עשרוניות ניתן להגדרה לערכים חיים, נתונים שמורים וייצוא מותאם; ייצוא מדעי שומר על מלוא הדיוק המאוחסן.</string>
+    <string name="about_whats_new_github">תפריט הגדרות וחלונות דו-שיח משופרים; מדריכי חיווט, הרכבה וכיול מעודכנים, כולל צינורות כיווניים ודרישות למפזר אור.</string>
     <string name="about_description">אפליקציה לאיסוף נתונים ספקטרליים של קרינה על־סגולה, נראית ותת־אדומה.</string>
     <string name="about_spectral_ranges">תחומים ספקטרליים: על־סגול • אור נראה • תת־אדום</string>
     <string name="about_sensors">חיישנים נתמכים: AS7331 UV • AS7343 multispectral</string>
@@ -640,11 +640,10 @@
     <string name="threshold_rules_connection_required">חבר את החיישן כדי לשנות התראות אלו.</string>
     <string name="threshold_repeat_sensor_description">מרווח זה נשמר בחיישן ומגביל גם התראות המוקלטות בזמן שהאפליקציה מנותקת.</string>
     <string name="sensor_calibration_title">כיול</string>
-    <string name="sensor_calibration_description">החל גורמי תיקון שהושגו בהשוואה למכשיר ייחוס מכויל. פקטור של 1,000 שומר על אומדן ברירת המחדל של גליון הנתונים.</string>
+    <string name="sensor_calibration_description">התאם את מקדמי התיקון וההיסטים לכל ערוץ.</string>
     <string name="sensor_calibration_visible_factor">מקדם תיקון VIS/NIR · AS7343</string>
     <string name="sensor_calibration_uv_factor">מקדם תיקון UV · AS7331</string>
-    <string name="sensor_calibration_factor_hint">ערך מותר: 0.100–10.000.</string>
-    <string name="sensor_calibration_uv_unavailable">כיול ברירת המחדל של UV נשמר ויהיה ניתן לעריכה כאשר חיישן UV מזוהה.</string>
+    <string name="sensor_calibration_factor_hint">מקדמי תיקון: ערכים מותרים %1$s–%2$s; %3$s אינו משנה את ההגבר. קבע אותם באמצעות מכשיר ייחוס מכויל.</string>
     <string name="sensor_calibration_firmware_required">עדכן את קושחת החיישן כדי להשתמש בכיול.</string>
     <string name="sensor_firmware_update_required_title">נדרש עדכון קושחה</string>
     <string name="sensor_firmware_update_required">הקושחה המותקנת על החיישן אינה תומכת בהגדרות אלו. עדכן את קושחת החיישן ונסה שוב.</string>
@@ -814,5 +813,5 @@
     <string name="alert_max_registrations">מספר רישומים מרבי</string>
     <string name="alert_registration_count">מספר רישומים</string>
     <string name="alert_configure_first">יש להגדיר לפחות ערך אחד לפני ההפעלה.</string>
-    <string name="sensor_simulation_open_settings">פתיחת הגדרות</string>
+    <string name="sensor_simulation_open_settings">הגדרות</string>
 </resources>

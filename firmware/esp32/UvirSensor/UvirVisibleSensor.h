@@ -4,6 +4,8 @@
 #include <Wire.h>
 
 #include "Calibration.h"
+#include "UvirCalibrationOffsets.h"
+#include "UvirCalibrationChannelFactors.h"
 
 // Encapsulates the AS7343 acquisition, automatic gain selection and
 // datasheet-based irradiance conversion. The sensor is powered only while a
@@ -41,33 +43,36 @@ class UvirVisibleSensor {
     sensor_.powerOff();
   }
 
-  bool capture(float calibrationFactor, float *bands, bool &saturated) {
+  bool capture(float calibrationFactor, float *bands, bool &saturated,
+      const UvirCalibrationOffsets &offsets = UvirCalibrationOffsets{},
+      const UvirCalibrationChannelFactors &channels = UvirCalibrationChannelFactors{}) {
+    offsets_ = offsets;
     if (!acquireWithAutomaticGain(saturated)) return false;
 
     const float f1 = irradiance(
-        CH_PURPLE_F1_405NM, UvirCalibration::F1_405, calibrationFactor);
+        CH_PURPLE_F1_405NM, UvirCalibration::F1_405);
     const float f2 = irradiance(
-        CH_DARK_BLUE_F2_425NM, UvirCalibration::F2_425, calibrationFactor);
+        CH_DARK_BLUE_F2_425NM, UvirCalibration::F2_425);
     const float fz = irradiance(
-        CH_BLUE_FZ_450NM, UvirCalibration::FZ_450, calibrationFactor);
+        CH_BLUE_FZ_450NM, UvirCalibration::FZ_450);
     const float f3 = irradiance(
-        CH_LIGHT_BLUE_F3_475NM, UvirCalibration::F3_475, calibrationFactor);
+        CH_LIGHT_BLUE_F3_475NM, UvirCalibration::F3_475);
     const float f4 = irradiance(
-        CH_BLUE_F4_515NM, UvirCalibration::F4_515, calibrationFactor);
+        CH_BLUE_F4_515NM, UvirCalibration::F4_515);
     const float f5 = irradiance(
-        CH_GREEN_F5_550NM, UvirCalibration::F5_550, calibrationFactor);
+        CH_GREEN_F5_550NM, UvirCalibration::F5_550);
     const float fy = irradiance(
-        CH_GREEN_FY_555NM, UvirCalibration::FY_555, calibrationFactor);
+        CH_GREEN_FY_555NM, UvirCalibration::FY_555);
     const float fxl = irradiance(
-        CH_ORANGE_FXL_600NM, UvirCalibration::FXL_600, calibrationFactor);
+        CH_ORANGE_FXL_600NM, UvirCalibration::FXL_600);
     const float f6 = irradiance(
-        CH_BROWN_F6_640NM, UvirCalibration::F6_640, calibrationFactor);
+        CH_BROWN_F6_640NM, UvirCalibration::F6_640);
     const float f7 = irradiance(
-        CH_RED_F7_690NM, UvirCalibration::F7_690, calibrationFactor);
+        CH_RED_F7_690NM, UvirCalibration::F7_690);
     const float f8 = irradiance(
-        CH_DARK_RED_F8_745NM, UvirCalibration::F8_745, calibrationFactor);
+        CH_DARK_RED_F8_745NM, UvirCalibration::F8_745);
     const float nir = irradiance(
-        CH_NIR_855NM, UvirCalibration::NIR_855, calibrationFactor);
+        CH_NIR_855NM, UvirCalibration::NIR_855);
 
     bands[3] = (f1 + f2) * 0.5f;
     bands[4] = (fz + f3) * 0.5f;
@@ -77,6 +82,11 @@ class UvirVisibleSensor {
     bands[8] = f6;
     bands[9] = (f7 + f8) * 0.5f;
     bands[10] = nir;
+    for (int i = 3; i < 11; ++i) {
+      if (offsets.signature == kUvirColorOffsetSignature)
+        bands[i] = uvirSubtractDarkOffset(bands[i], offsets.values[i]);
+      bands[i] *= uvirChannelFactor(channels, i, calibrationFactor);
+    }
     return true;
   }
 
@@ -97,6 +107,7 @@ class UvirVisibleSensor {
   uint16_t rawChannels_[ksfAS7343NumChannels] = {};
   int gainIndex_ = kDefaultGainIndex;
   bool available_ = false;
+  UvirCalibrationOffsets offsets_;
 
   const sfe_as7343_again_t kGainSettings[12] = {
       AGAIN_0_5, AGAIN_1, AGAIN_2, AGAIN_4, AGAIN_8,
@@ -196,13 +207,13 @@ class UvirVisibleSensor {
 
   float irradiance(
       uint8_t rawIndex,
-      UvirCalibration::SpectralChannel channel,
-      float calibrationFactor) const {
-    return UvirCalibration::convertToUwCm2(
+      UvirCalibration::SpectralChannel channel) const {
+    const float unscaled = UvirCalibration::convertToWm2(
                rawChannels_[rawIndex],
                channel,
                gainRatio(),
-               integrationMs()) *
-           calibrationFactor;
+               integrationMs());
+    return offsets_.signature == kUvirPhysicalOffsetSignature
+        ? uvirSubtractDarkOffset(unscaled, offsets_.values[3 + static_cast<int>(channel)]) : unscaled;
   }
 };

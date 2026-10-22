@@ -78,7 +78,7 @@ class UvirIndependentAcquisitionConditionsUiTest {
         compose.setContent {
             val resources = LocalResources.current
             title = resources.getString(R.string.conditional_acquisition)
-            configure = resources.getString(R.string.conditional_configure)
+            configure = formatUvirActionLabel(resources.getString(R.string.conditional_configure), resources.configuration.locales[0])
             save = resources.getString(R.string.save); cancel = resources.getString(R.string.cancel)
             warning = resources.getString(R.string.conditional_no_rules)
             MaterialTheme(colorScheme = if (dark.value) darkColorScheme() else lightColorScheme()) {
@@ -145,7 +145,7 @@ class UvirIndependentAcquisitionConditionsUiTest {
         var enabledChanges = 0
         compose.setContent {
             val resources = LocalResources.current
-            configure = resources.getString(R.string.conditional_configure)
+            configure = formatUvirActionLabel(resources.getString(R.string.conditional_configure), resources.configuration.locales[0])
             title = resources.getString(R.string.conditional_acquisition)
             waiting = resources.getString(R.string.conditional_waiting)
             MaterialTheme {
@@ -198,7 +198,7 @@ class UvirIndependentAcquisitionConditionsUiTest {
         }
         val all = context.getString(R.string.conditional_all)
         val start = context.getString(R.string.conditional_start)
-        val configure = context.getString(R.string.conditional_configure)
+        val configure = formatUvirActionLabel(context.getString(R.string.conditional_configure), context.resources.configuration.locales[0])
         for (night in listOf(false, true)) {
             compose.runOnIdle {
                 dark.value = night

@@ -11,6 +11,11 @@ assembly are ready. Covered-sensor and sunlight checks on the breadboard are
 preliminary checks, not a traceable absolute calibration. The 2026-10-12 board
 identification update does not change existing coefficients or user settings.
 
+The planned final housing is **TEKO COFFER-A/6.5**; see the
+[enclosure notes](../README.md#planned-enclosure). Perform final dark/reference
+checks with the circuitry mounted in that housing, including the final sensor
+openings/windows, optical barriers and normal LED configuration.
+
 Include the [proposed directional tubes and diffuser](../README.md#directional-optical-heads-prototype)
 in the final optical configuration. Record the bore, the height reference, wall
 material, diffuser identity and placement. Check angular response for all channels,
@@ -36,6 +41,66 @@ Before values are considered absolute measurements:
 Do not derive absolute visible/NIR or UV scale factors from sunlight alone.
 The AS7331 UVC channel also needs a suitable UVC reference; an outdoor residual
 by itself neither establishes real UVC exposure nor validates that channel.
+
+## Editable offsets
+
+Firmware 0.5.108+ supports eleven color/channel irradiance offsets, initially
+zero. Firmware 0.5.109+ also supports eleven absolute multiplicative factors.
+The Android calibration editor places UV first, then visible/NIR, with equal
+factor/offset columns and one row per displayed channel. Legacy module factors
+initialize the rows without changing measurements or saving on open. Offsets
+follow the selected display unit. Since firmware 0.5.112 and database v25 they
+are stored internally in W/m2; only the explicitly labelled v1 compatibility
+interface exchanges uW/cm2. See the [SI migration notes](../../docs/SI_IRRADIANCE_MIGRATION.md).
+Firmware 0.5.110 adds **Calculate offsets**, independently for UV and
+visible/NIR. It samples for about 30 seconds before user corrections, previews
+the mean offsets and changes nothing until **Set offsets** is confirmed. It is
+not necessary to reset the existing gains, offsets or window factors first.
+For sensor dark-bias calibration, use the final opaque barriers, normal LED operation and completely covered optical inputs. Collect
+a distribution rather than one sample, and verify at the operating temperature,
+gain and integration settings. An offset corrects mean dark bias, not random
+noise; choose appropriate measurement sensitivity before characterizing it.
+
+A stable illuminated reference can instead be used for deliberate background
+subtraction. That also subtracts real light present during the reference interval,
+so subsequent readings are relative to that condition, not absolute irradiance.
+It is not an automatic rejection of bad measurements or random-noise filtering.
+Recalculate with genuinely dark, covered inputs to return to dark-bias correction.
+The UI uses the generic name **Offsets**, including Sensor Info and its report;
+the mean-based calculation and existing settings/protocol formats are unchanged.
+
+Offsets are subtracted once per displayed color, after physical-channel
+normalization and the usual paired-channel means, before the channel factor
+(or the original module factor if no channel factors have been configured).
+Any negative result after subtraction is floored at zero.
+Violet, blue, green-yellow and far-red each have one offset, not one per peak.
+HEV and group totals receive no additional offset. Older physical-channel
+configurations retain their original semantics until explicitly edited.
+Do not also encode the same dark correction in `Calibration.h` and runtime
+offsets. See [implementation and limitations](../../docs/OPTICAL_WINDOW.md#color-dark-offsets).
+
+## Protective windows
+
+Window compensation is separate from calibration. The current editor always
+presents a common master multiplier and all per-channel multipliers, with
+**1.0 meaning no correction**. Each channel's final multiplier is
+**master × channel**; there is no activation/customization checkbox. This master
+behavior requires firmware 0.5.111+ and an idle, connected sensor; 0.5.112 is
+included with app 1.4.0.
+Justified factors apply before sampling, conditions, alerts and offline saves.
+They do not correct historical records or recover blocked wavelengths. See
+[window selection, compensation and validation status](../../docs/OPTICAL_WINDOW.md).
+
+Use UV-grade synthetic fused silica with documented transmission over the
+required UV/VIS/NIR response; nominal 1 mm is the starting recommendation for
+small supported windows, subject to the final mount. Keep that exact window,
+optical geometry and normal LED configuration in the final reference tests.
+If the complete instrument is calibrated with the window installed, its loss
+is normally already included: leave separate window factors at 1.0 unless the
+procedure explicitly separates them. Do not apply the same correction twice.
+If calibration was performed without the window, derive its additional factors
+from applicable transmission data or controlled comparisons, not an assumed
+uniform 10% loss.
 
 ## Reproducible dark and response checks
 

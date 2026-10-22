@@ -28,6 +28,7 @@ Dimensions are approximate build measurements, **not footprint specifications**.
 | As needed | Opaque optical barriers | Separate sensor apertures from all indicator LEDs inside the selected enclosure | Final optical assembly |
 | 2, for the directional prototype | Hollow optical tubes and holders | One per AS7331/AS7343 chip; opaque in the measured bands with low-reflectance internal surfaces; [design and mounting](README.md#directional-optical-heads-prototype) | Clear bore 6 mm; clear height 25 mm above the chip; optional 2 mm wall gives 10 mm outside diameter |
 | To be selected | AS7343 optical diffuser | Achromatic diffuser suited to the final optical head; characterize placement and transmission before calibration | Not supplied by a hollow tube; material, thickness and mount remain to be validated |
+| Optional, normally 2 | Protective optical windows | UV-grade synthetic fused silica, polished both faces, uncoated; documented 240–1000 nm transmission; see [selection and compensation](../docs/OPTICAL_WINDOW.md#choosing-an-optional-protective-window) | Nominal 1 mm for small supported apertures; size clear openings and mounts for the final assembly |
 
 The RGB LED's unused blue anode needs no resistor because it is not connected.
 The separate blue LED **does** need its own resistor. If a different buzzer needs

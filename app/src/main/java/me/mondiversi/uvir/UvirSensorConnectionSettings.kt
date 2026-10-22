@@ -187,7 +187,7 @@ internal fun UvirSensorConnectionSettings(
                 modifier = Modifier.fillMaxWidth(),
                 enabled = sensorSettingsEnabled,
                 colors = uvirOutlinedActionColors(primaryText),
-                border = uvirOutlinedActionBorder(sensorSettingsEnabled, secondaryText)
+                border = uvirOutlinedActionBorder(sensorSettingsEnabled, primaryText)
             ) {
                 UvirLabeledButtonContent(text = stringResource(R.string.open_wifi_settings)) {
                     ConnectivitySectionIcon(
@@ -247,7 +247,7 @@ internal fun UvirSensorConnectionSettings(
                 modifier = Modifier.fillMaxWidth(),
                 enabled = sensorSettingsEnabled,
                 colors = uvirOutlinedActionColors(primaryText),
-                border = uvirOutlinedActionBorder(sensorSettingsEnabled, secondaryText)
+                border = uvirOutlinedActionBorder(sensorSettingsEnabled, primaryText)
             ) {
                 UvirLabeledButtonContent(
                     text = stringResource(R.string.open_bluetooth_settings)

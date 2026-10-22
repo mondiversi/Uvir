@@ -419,7 +419,7 @@
     <string name="violet">بنفش</string>
     <string name="blue">آبی</string>
     <string name="green">سبز</string>
-    <string name="yellow">زرد</string>
+    <string name="yellow">سبز-زرد</string>
     <string name="orange">نارنجی</string>
     <string name="red">قرمز</string>
     <string name="percent_of_visible">%1$s%% قابل مشاهده است</string>
@@ -428,11 +428,11 @@
     <string name="app_version">نسخه برنامه: %1$s</string>
     <string name="package_name_value">بسته بندی: %1$s</string>
     <string name="about_whats_new_title">موارد جدید در نسخه %1$s</string>
-    <string name="about_whats_new_connectivity">مدیریت ترتیبی چند حسگر با پروفایل‌های امن و اتصال‌های USB، Wi-Fi، Bluetooth و اینترنت.</string>
-    <string name="about_whats_new_connections">برداشت‌های شرطی و مبتنی بر فرمان خارجی، جلسه‌های مستقل و بازیابی مطمئن وضعیت پس از قطع اتصال یا راه‌اندازی مجدد.</string>
-    <string name="about_whats_new_measurements">گونه‌های جلسه، فیلترهای پیشرفته تاریخچه و جزئیات روشن‌تر برای برداشت‌ها و هشدارها.</string>
-    <string name="about_whats_new_interface">خروجی‌های گسترده CSV، TXT و PNG با واحدها، قالب‌های منطقه‌ای، نمودارهای گروه‌بندی‌شده و شناسه حسگر.</string>
-    <string name="about_whats_new_github">پشتیبان‌گیری رمزگذاری‌شده از تنظیمات، عیب‌یابی یکپارچه و بهبودهای گسترده رابط و دسترس‌پذیری.</string>
+    <string name="about_whats_new_connectivity">ضرایب تصحیح و آفست برای هر کانال، همراه با اندازه‌گیری هدایت‌شده میانگین آفست‌ها و تأیید بازنشانی.</string>
+    <string name="about_whats_new_connections">جبران پنجره نوری با ضریب اصلی و ضرایب کانال؛ توضیح روشن‌تر بازه‌های AS7331 و قله‌های حساسیت AS7343.</string>
+    <string name="about_whats_new_measurements">ذخیره‌سازی داخلی تابش در W/m²، با مهاجرت خودکار که اندازه‌گیری‌ها و تنظیمات موجود را حفظ می‌کند.</string>
+    <string name="about_whats_new_interface">تعداد اعشار قابل تنظیم برای مقادیر زنده، داده‌های ذخیره‌شده و خروجی سفارشی؛ خروجی علمی تمام دقت ذخیره‌شده را حفظ می‌کند.</string>
+    <string name="about_whats_new_github">بهبود منوی تنظیمات و پنجره‌های گفتگو؛ به‌روزرسانی راهنمای سیم‌کشی، مونتاژ و کالیبراسیون، شامل لوله‌های جهت‌دار و الزامات پخش‌کننده نور.</string>
     <string name="about_description">برنامهٔ ثبت طیفی تابش فرابنفش، مرئی و فروسرخ.</string>
     <string name="about_spectral_ranges">باندهای طیفی: فرابنفش • نور مرئی • فروسرخ</string>
     <string name="about_sensors">سنسورهای پشتیبانی شده: AS7331 UV • AS7343 چند طیفی</string>
@@ -630,11 +630,10 @@
     <string name="threshold_rules_connection_required">برای تغییر این هشدارها، سنسور را وصل کنید.</string>
     <string name="threshold_repeat_sensor_description">این فاصله زمانی در سنسور ذخیره می شود و همچنین هشدارهای ضبط شده در حین قطع شدن برنامه را محدود می کند.</string>
     <string name="sensor_calibration_title">کالیبراسیون</string>
-    <string name="sensor_calibration_description">ضرایب تصحیح به دست آمده از مقایسه با یک ابزار مرجع کالیبره شده را اعمال کنید. ضریب 1000 تخمین صفحه داده پیش فرض را حفظ می کند.</string>
+    <string name="sensor_calibration_description">ضرایب اصلاح و آفست‌ها را برای هر کانال تنظیم کنید.</string>
     <string name="sensor_calibration_visible_factor">ضریب تصحیح VIS/NIR · AS7343</string>
     <string name="sensor_calibration_uv_factor">ضریب تصحیح UV · AS7331</string>
-    <string name="sensor_calibration_factor_hint">مقدار مجاز: 0.100–10.000.</string>
-    <string name="sensor_calibration_uv_unavailable">کالیبراسیون پیش‌فرض UV حفظ می‌شود و با شناسایی حسگر UV قابل ویرایش خواهد بود.</string>
+    <string name="sensor_calibration_factor_hint">ضرایب اصلاح: مقادیر مجاز %1$s–%2$s؛ %3$s بهره را تغییر نمی‌دهد. آن‌ها را با ابزار مرجع کالیبره‌شده تعیین کنید.</string>
     <string name="sensor_calibration_firmware_required">برای استفاده از کالیبراسیون، سفت‌افزار سنسور را به‌روزرسانی کنید.</string>
     <string name="sensor_firmware_update_required_title">به روز رسانی سیستم عامل مورد نیاز است</string>
     <string name="sensor_firmware_update_required">سیستم عامل نصب شده روی سنسور از این تنظیمات پشتیبانی نمی کند. سیستم عامل سنسور را به روز کنید و دوباره امتحان کنید.</string>
@@ -804,5 +803,5 @@
     <string name="alert_max_registrations">حداکثر ثبت‌ها</string>
     <string name="alert_registration_count">تعداد ثبت‌ها</string>
     <string name="alert_configure_first">پیش از شروع دست‌کم یک مقدار را تنظیم کنید.</string>
-    <string name="sensor_simulation_open_settings">باز کردن تنظیمات</string>
+    <string name="sensor_simulation_open_settings">تنظیمات</string>
 </resources>

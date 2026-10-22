@@ -97,7 +97,8 @@ internal fun HoldToConfirmActionButton(
     enabled: Boolean = true,
     holdDurationMillis: Long = 2_000L,
     compactLabel: Boolean = false,
-    actionColor: Color = UvirDestructiveActionColor
+    actionColor: Color = UvirDestructiveActionColor,
+    modifier: Modifier = Modifier
 ) {
     var isHolding by remember { mutableStateOf(false) }
     val holdProgress = remember { Animatable(0f) }
@@ -140,7 +141,7 @@ internal fun HoldToConfirmActionButton(
     Box(
         contentAlignment = Alignment.Center,
         modifier =
-            Modifier
+            modifier
                 .heightIn(min = 48.dp)
                 .clip(RoundedCornerShape(50))
                 .drawBehind {

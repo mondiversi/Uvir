@@ -397,7 +397,7 @@
     <string name="violet">紫色</string>
     <string name="blue">蓝色</string>
     <string name="green">绿色</string>
-    <string name="yellow">黄色</string>
+    <string name="yellow">黄绿</string>
     <string name="orange">橙色</string>
     <string name="red">红色</string>
     <string name="percent_of_visible">可见光的 %1$s%%</string>
@@ -406,11 +406,11 @@
     <string name="app_version">应用版本：%1$s</string>
     <string name="package_name_value">软件包：%1$s</string>
     <string name="about_whats_new_title">版本 %1$s 的新内容</string>
-    <string name="about_whats_new_connectivity">通过安全配置文件以及 USB、Wi-Fi、Bluetooth 和互联网连接，按顺序管理多个传感器。</string>
-    <string name="about_whats_new_connections">条件采集和外部命令采集、自治会话，以及断开连接或重启后的可靠状态恢复。</string>
-    <string name="about_whats_new_measurements">会话变体、高级历史筛选，以及更清晰的采集和警报详情。</string>
-    <string name="about_whats_new_interface">扩展 CSV、TXT 和 PNG 导出，支持单位、区域格式、分组图表和传感器标识。</string>
-    <string name="about_whats_new_github">加密设置备份、集成诊断，以及大量界面和无障碍改进。</string>
+    <string name="about_whats_new_connectivity">支持各通道校正系数和偏移量，提供平均偏移量测量引导及重置确认。</string>
+    <string name="about_whats_new_connections">光学窗口补偿采用总倍率与各通道倍率相乘，并明确 AS7331 波段范围和 AS7343 灵敏度峰值。</string>
+    <string name="about_whats_new_measurements">内部辐照度统一以 W/m² 存储，自动迁移并保留已有测量数据和设置。</string>
+    <string name="about_whats_new_interface">可设置实时值、已存数据及自定义导出的小数位数；科学格式导出保留完整的存储精度。</string>
+    <string name="about_whats_new_github">改进设置菜单和对话框；更新接线、装配及校准指南，涵盖定向光管和漫射器要求。</string>
     <string name="about_description">用于紫外线、可见光和红外线辐射的光谱采集应用。</string>
     <string name="about_spectral_ranges">光谱波段：紫外线 • 可见光 • 红外线</string>
     <string name="about_sensors">支持的传感器：AS7331 UV • AS7343 多光谱</string>
@@ -602,11 +602,10 @@
     <string name="threshold_rules_connection_required">连接传感器后才能更改这些警报。</string>
     <string name="threshold_repeat_sensor_description">此间隔存储在传感器中，也会限制应用断开时记录的警报。</string>
     <string name="sensor_calibration_title">校准</string>
-    <string name="sensor_calibration_description">应用通过与校准参考仪器比较所得的修正系数。系数 1.000 保留默认数据表估算。</string>
+    <string name="sensor_calibration_description">调整各通道的校正系数和偏移。</string>
     <string name="sensor_calibration_visible_factor">VIS/NIR 修正系数 · AS7343</string>
     <string name="sensor_calibration_uv_factor">UV 修正系数 · AS7331</string>
-    <string name="sensor_calibration_factor_hint">允许值：0.100–10.000。</string>
-    <string name="sensor_calibration_uv_unavailable">默认 UV 校准将保留，并在检测到 UV 传感器后可编辑。</string>
+    <string name="sensor_calibration_factor_hint">校正系数：允许值为 %1$s–%2$s；%3$s 不改变增益。请使用已校准的参考仪器确定。</string>
     <string name="sensor_calibration_firmware_required">请更新传感器固件以使用校准。</string>
     <string name="sensor_firmware_update_required_title">需要更新固件</string>
     <string name="sensor_firmware_update_required">传感器上安装的固件不支持这些设置。请更新传感器固件后重试。</string>
@@ -776,5 +775,5 @@
     <string name="alert_max_registrations">最多记录数</string>
     <string name="alert_registration_count">记录数量</string>
     <string name="alert_configure_first">开始前请至少配置一个数值。</string>
-    <string name="sensor_simulation_open_settings">打开设置</string>
+    <string name="sensor_simulation_open_settings">设置</string>
 </resources>

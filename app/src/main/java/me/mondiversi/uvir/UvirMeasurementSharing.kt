@@ -46,31 +46,31 @@ internal val MEASUREMENT_EXPORT_COLUMNS_IT =
         "Progressivo_sessione",
         "Variante",
         "Numero_varianti",
-        "UVC_100_280_nm_uW_cm2",
+        "UVC_240_280_nm_uW_cm2",
         "UVC_percentuale",
         "UVB_280_315_nm_uW_cm2",
         "UVB_percentuale",
-        "UVA_315_400_nm_uW_cm2",
+        "UVA_315_410_nm_uW_cm2",
         "UVA_percentuale",
         "Totale_ultravioletti_uW_cm2",
         "Totale_ultravioletti_percentuale",
-        "HEV_400_500_nm_uW_cm2",
+        "HEV_uW_cm2",
         "HEV_percentuale",
-        "Violetto_400_450_nm_uW_cm2",
+        "Violetto_peaks_405_425_nm_uW_cm2",
         "Violetto_percentuale",
-        "Blu_450_495_nm_uW_cm2",
+        "Blu_peaks_450_475_nm_uW_cm2",
         "Blu_percentuale",
-        "Verde_495_570_nm_uW_cm2",
+        "Verde_peak_515_nm_uW_cm2",
         "Verde_percentuale",
-        "Giallo_570_590_nm_uW_cm2",
-        "Giallo_percentuale",
-        "Arancione_590_620_nm_uW_cm2",
+        "Verde_giallo_peaks_550_555_nm_uW_cm2",
+        "Verde_giallo_percentuale",
+        "Arancione_peak_600_nm_uW_cm2",
         "Arancione_percentuale",
-        "Rosso_620_700_nm_uW_cm2",
+        "Rosso_peak_640_nm_uW_cm2",
         "Rosso_percentuale",
         "Totale_luce_visibile_uW_cm2",
         "Totale_luce_visibile_percentuale",
-        "FarRed_picco_745_nm_uW_cm2",
+        "FarRed_picchi_690_745_nm_uW_cm2",
         "FarRed_percentuale",
         "NIR_picco_855_nm_uW_cm2",
         "NIR_percentuale",
@@ -97,31 +97,31 @@ internal val MEASUREMENT_EXPORT_COLUMNS_EN =
         "Session_sequence",
         "Variant",
         "Variant_count",
-        "UVC_100_280_nm_uW_cm2",
+        "UVC_240_280_nm_uW_cm2",
         "UVC_percent",
         "UVB_280_315_nm_uW_cm2",
         "UVB_percent",
-        "UVA_315_400_nm_uW_cm2",
+        "UVA_315_410_nm_uW_cm2",
         "UVA_percent",
         "Ultraviolet_total_uW_cm2",
         "Ultraviolet_total_percent",
-        "HEV_400_500_nm_uW_cm2",
+        "HEV_uW_cm2",
         "HEV_percent",
-        "Violet_400_450_nm_uW_cm2",
+        "Violet_peaks_405_425_nm_uW_cm2",
         "Violet_percent",
-        "Blue_450_495_nm_uW_cm2",
+        "Blue_peaks_450_475_nm_uW_cm2",
         "Blue_percent",
-        "Green_495_570_nm_uW_cm2",
+        "Green_peak_515_nm_uW_cm2",
         "Green_percent",
-        "Yellow_570_590_nm_uW_cm2",
-        "Yellow_percent",
-        "Orange_590_620_nm_uW_cm2",
+        "Green_yellow_peaks_550_555_nm_uW_cm2",
+        "Green_yellow_percent",
+        "Orange_peak_600_nm_uW_cm2",
         "Orange_percent",
-        "Red_620_700_nm_uW_cm2",
+        "Red_peak_640_nm_uW_cm2",
         "Red_percent",
         "Visible_total_uW_cm2",
         "Visible_total_percent",
-        "FarRed_peak_745_nm_uW_cm2",
+        "FarRed_peaks_690_745_nm_uW_cm2",
         "FarRed_percent",
         "NIR_peak_855_nm_uW_cm2",
         "NIR_percent",
@@ -147,11 +147,11 @@ internal fun measurementExportColumns(
         MEASUREMENT_EXPORT_COLUMNS_EN
     }).map { column ->
         column.replace("uW_cm2", irradianceUnit.csvSymbol)
-    } + if (language == "it") {
+    } + (if (language == "it") {
         "Valore_fuori_scala"
     } else {
         "Out_of_range"
-    }
+    }) + "Optical_window" + hardwareCsvColumns(language)
 
 private fun csvHeaderPart(value: String): String =
     value.trim()
@@ -181,31 +181,31 @@ internal fun measurementExportColumns(
         "${label(R.string.share_session_id_label)}_sequence",
         label(R.string.session_sequence_filter_position),
         label(R.string.export_variant_count_label),
-        "UVC_100_280_nm_${irradianceUnit.csvSymbol}",
+        "UVC_240_280_nm_${irradianceUnit.csvSymbol}",
         "UVC_%",
         "UVB_280_315_nm_${irradianceUnit.csvSymbol}",
         "UVB_%",
-        "UVA_315_400_nm_${irradianceUnit.csvSymbol}",
+        "UVA_315_410_nm_${irradianceUnit.csvSymbol}",
         "UVA_%",
         "${label(R.string.export_total_label)}_${label(R.string.uv_radiation)}_${irradianceUnit.csvSymbol}",
         "${label(R.string.export_total_label)}_${label(R.string.uv_radiation)}_%",
-        "HEV_400_500_nm_${irradianceUnit.csvSymbol}",
+        "HEV_${irradianceUnit.csvSymbol}",
         "HEV_%",
-        "${label(R.string.violet)}_400_450_nm_${irradianceUnit.csvSymbol}",
+        "${label(R.string.violet)}_peaks_405_425_nm_${irradianceUnit.csvSymbol}",
         "${label(R.string.violet)}_%",
-        "${label(R.string.blue)}_450_495_nm_${irradianceUnit.csvSymbol}",
+        "${label(R.string.blue)}_peaks_450_475_nm_${irradianceUnit.csvSymbol}",
         "${label(R.string.blue)}_%",
-        "${label(R.string.green)}_495_570_nm_${irradianceUnit.csvSymbol}",
+        "${label(R.string.green)}_peak_515_nm_${irradianceUnit.csvSymbol}",
         "${label(R.string.green)}_%",
-        "${label(R.string.yellow)}_570_590_nm_${irradianceUnit.csvSymbol}",
+        "${label(R.string.yellow)}_peaks_550_555_nm_${irradianceUnit.csvSymbol}",
         "${label(R.string.yellow)}_%",
-        "${label(R.string.orange)}_590_620_nm_${irradianceUnit.csvSymbol}",
+        "${label(R.string.orange)}_peak_600_nm_${irradianceUnit.csvSymbol}",
         "${label(R.string.orange)}_%",
-        "${label(R.string.red)}_620_700_nm_${irradianceUnit.csvSymbol}",
+        "${label(R.string.red)}_peak_640_nm_${irradianceUnit.csvSymbol}",
         "${label(R.string.red)}_%",
         "${label(R.string.export_total_label)}_${label(R.string.visible_light)}_${irradianceUnit.csvSymbol}",
         "${label(R.string.export_total_label)}_${label(R.string.visible_light)}_%",
-        "${label(R.string.session_chart_series_far_red)}_peak_745_nm_${irradianceUnit.csvSymbol}",
+        "${label(R.string.session_chart_series_far_red)}_peaks_690_745_nm_${irradianceUnit.csvSymbol}",
         "${label(R.string.session_chart_series_far_red)}_%",
         "NIR_peak_855_nm_${irradianceUnit.csvSymbol}",
         "NIR_%",
@@ -219,8 +219,9 @@ internal fun measurementExportColumns(
         "${estimatedWeighted}_${label(R.string.hev_oxidative_proxy)}_${irradianceUnit.csvSymbol}_eq",
         "${spectralIndex}_${label(R.string.hev_oxidative_proxy)}_0_100",
         label(R.string.sensor_name_label),
-        label(R.string.out_of_range_csv_header)
-    )
+        label(R.string.out_of_range_csv_header),
+        "Optical_window"
+    ) + hardwareCsvColumns(language)
 }
 
 internal fun csvDateTime(
@@ -246,8 +247,10 @@ internal fun measurementCsv(
     labelContext: Context? = null,
     timeFormat: UvirTimeFormat = UvirTimeFormat.H24,
     irradianceUnit: UvirIrradianceUnit = UvirIrradianceUnit.UW_CM2,
-    variantCountsBySession: Map<Long, Int> = emptyMap()
+    variantCountsBySession: Map<Long, Int> = emptyMap(),
+    irradianceDecimals: Int? = labelContext?.let { uvirExportIrradianceDecimals(it, irradianceUnit) }
 ): String = buildString {
+    val hardware = loadExportHardwareModels(labelContext, records.map { it.sensorId })
     val columns =
         labelContext?.let {
             measurementExportColumns(it, language, irradianceUnit)
@@ -305,25 +308,15 @@ internal fun measurementCsv(
             if (sample.isOutOfRange(group)) {
                 ""
             } else {
-                formatUvirIrradianceExportNumber(value, numericFormat, irradianceUnit)
+                formatUvirIrradianceExportNumber(value, numericFormat, irradianceUnit, irradianceDecimals)
             }
-        fun relativePercent(
-            value: Double,
-            total: Double,
-            group: SensorGroup
-        ): String =
-            if (sample.isOutOfRange(group)) {
-                ""
-            } else {
-                formatUvirNumber(
-                    percentage(value, total).toDouble() * 100.0,
-                    1,
-                    numericFormat
-                )
-            }
+        fun relativePercent(value: Double): String =
+            spectralTotals.shareOfTotal(value)?.let { share ->
+                formatUvirExportPercentage(share.toDouble() * 100.0, numericFormat, irradianceDecimals)
+            }.orEmpty()
         fun groupShare(group: SensorGroup): String =
             spectralTotals.share(group)?.let { share ->
-                formatUvirNumber(share.toDouble() * 100.0, 1, numericFormat)
+                formatUvirExportPercentage(share.toDouble() * 100.0, numericFormat, irradianceDecimals)
             }.orEmpty()
 
         appendLine(
@@ -364,44 +357,47 @@ internal fun measurementCsv(
                     ?.toString()
                     .orEmpty(),
                 irradiance(sample.uvc, SensorGroup.UV),
-                relativePercent(sample.uvc, uvTotal, SensorGroup.UV),
+                relativePercent(sample.uvc),
                 irradiance(sample.uvb, SensorGroup.UV),
-                relativePercent(sample.uvb, uvTotal, SensorGroup.UV),
+                relativePercent(sample.uvb),
                 irradiance(sample.uva, SensorGroup.UV),
-                relativePercent(sample.uva, uvTotal, SensorGroup.UV),
+                relativePercent(sample.uva),
                 irradiance(uvTotal, SensorGroup.UV),
                 groupShare(SensorGroup.UV),
                 irradiance(hev, SensorGroup.VISIBLE),
-                relativePercent(hev, visibleTotal, SensorGroup.VISIBLE),
+                relativePercent(hev),
                 irradiance(sample.violetto, SensorGroup.VISIBLE),
-                relativePercent(sample.violetto, visibleTotal, SensorGroup.VISIBLE),
+                relativePercent(sample.violetto),
                 irradiance(sample.blu, SensorGroup.VISIBLE),
-                relativePercent(sample.blu, visibleTotal, SensorGroup.VISIBLE),
+                relativePercent(sample.blu),
                 irradiance(sample.verde, SensorGroup.VISIBLE),
-                relativePercent(sample.verde, visibleTotal, SensorGroup.VISIBLE),
+                relativePercent(sample.verde),
                 irradiance(sample.giallo, SensorGroup.VISIBLE),
-                relativePercent(sample.giallo, visibleTotal, SensorGroup.VISIBLE),
+                relativePercent(sample.giallo),
                 irradiance(sample.arancione, SensorGroup.VISIBLE),
-                relativePercent(sample.arancione, visibleTotal, SensorGroup.VISIBLE),
+                relativePercent(sample.arancione),
                 irradiance(sample.rosso, SensorGroup.VISIBLE),
-                relativePercent(sample.rosso, visibleTotal, SensorGroup.VISIBLE),
+                relativePercent(sample.rosso),
                 irradiance(visibleTotal, SensorGroup.VISIBLE),
                 groupShare(SensorGroup.VISIBLE),
                 irradiance(sample.f8, SensorGroup.NIR),
-                relativePercent(sample.f8, farRedNirTotal, SensorGroup.NIR),
+                relativePercent(sample.f8),
                 irradiance(sample.nir, SensorGroup.NIR),
-                relativePercent(sample.nir, farRedNirTotal, SensorGroup.NIR),
+                relativePercent(sample.nir),
                 irradiance(farRedNirTotal, SensorGroup.NIR),
                 groupShare(SensorGroup.NIR),
                 BIOLOGICAL_MODEL_VERSION,
                 irradiance(effects.dnaUvProxy, SensorGroup.UV),
-                csvNumber(effects.dnaUvScore.toDouble() * 100.0, numericFormat),
+                formatUvirExportPercentage(effects.dnaUvScore.toDouble() * 100.0, numericFormat, irradianceDecimals),
                 irradiance(effects.uvaPhotoagingProxy, SensorGroup.UV),
-                csvNumber(effects.uvaPhotoagingScore.toDouble() * 100.0, numericFormat),
+                formatUvirExportPercentage(effects.uvaPhotoagingScore.toDouble() * 100.0, numericFormat, irradianceDecimals),
                 irradiance(effects.hevOxidativeProxy, SensorGroup.VISIBLE),
-                csvNumber(effects.hevOxidativeScore.toDouble() * 100.0, numericFormat),
+                formatUvirExportPercentage(effects.hevOxidativeScore.toDouble() * 100.0, numericFormat, irradianceDecimals),
                 exportSensorName(record.sensorDisplayName),
-                if (sample.hasAnyOutOfRangeValue()) "1" else "0"
+                if (sample.hasAnyOutOfRangeValue()) "1" else "0",
+                sample.opticalWindow?.toJson()?.toString().orEmpty(),
+                hardware.models(record.sensorId).ultraviolet,
+                hardware.models(record.sensorId).visibleInfrared
             ).joinToString(";") {
                 csvCell(it)
             }
@@ -419,7 +415,8 @@ internal fun readableMeasurementTable(
     groupByVariant: Boolean = false,
     variantCountOverride: Int? = null,
     includeRecordVariant: Boolean = true,
-    grouping: UvirReadableTableGrouping = UvirReadableTableGrouping.BY_ACQUISITION
+    grouping: UvirReadableTableGrouping = UvirReadableTableGrouping.BY_ACQUISITION,
+    irradianceDecimals: Int? = uvirExportIrradianceDecimals(context, irradianceUnit)
 ): String {
     if (
         grouping == UvirReadableTableGrouping.BY_SPECTRAL_AREA &&
@@ -435,13 +432,15 @@ internal fun readableMeasurementTable(
                     numericFormat = numericFormat,
                     dateFormat = dateFormat,
                     timeFormat = timeFormat,
-                    irradianceUnit = irradianceUnit
+                    irradianceUnit = irradianceUnit,
+                    irradianceDecimals = irradianceDecimals
                 )
             )
         }
     }
 
     return buildString {
+    val hardware = loadExportHardwareModels(context, records.map { it.sensorId })
     appendLine("Uvir ${context.getString(R.string.saved_measurements)}")
     appendLine()
 
@@ -479,6 +478,7 @@ internal fun readableMeasurementTable(
             "${context.getString(R.string.sensor_selector_label)}: " +
                 exportSensorName(record.sensorDisplayName)
         )
+        appendLine(hardware.models(record.sensorId).caption())
         appendLine(
             "${context.getString(R.string.share_measurement_id_label)}: " +
                 record.id
@@ -532,6 +532,7 @@ internal fun readableMeasurementTable(
         )
         appendLine()
 
+        appendLine("${context.getString(R.string.optical_window_title)}: ${opticalWindowSummary(record.sample.opticalWindow, numericFormat)}")
         val uvTotal = record.sample.uvc + record.sample.uvb + record.sample.uva
         val hev = record.sample.violetto + record.sample.blu
         val visibleTotal =
@@ -543,24 +544,14 @@ internal fun readableMeasurementTable(
             if (record.sample.isOutOfRange(group)) {
                 context.getString(R.string.out_of_range_short)
             } else {
-                "${formatUvirIrradianceNumber(value, 3, numericFormat, irradianceUnit)} " +
+                "${formatUvirIrradianceExportNumber(value, numericFormat, irradianceUnit, irradianceDecimals)} " +
                     irradianceUnit.symbol
             }
 
-        fun readablePercentage(
-            value: Double,
-            total: Double,
-            group: SensorGroup
-        ): String =
-            if (record.sample.isOutOfRange(group)) {
-                "—"
-            } else {
-                formatUvirNumber(
-                    percentage(value, total).toDouble() * 100.0,
-                    1,
-                    numericFormat
-                ) + "%"
-            }
+        fun readablePercentage(value: Double): String =
+            record.sample.spectralTotals().shareOfTotal(value)?.let { share ->
+                formatUvirExportPercentage(share.toDouble() * 100.0, numericFormat, irradianceDecimals) + "%"
+            } ?: "—"
 
         fun appendIrradianceGroup(
             title: String,
@@ -574,7 +565,7 @@ internal fun readableMeasurementTable(
                     Triple(
                         name,
                         readableValue(value, group),
-                        readablePercentage(value, total, group)
+                        readablePercentage(value)
                     )
                 }
             val nameWidth =
@@ -585,7 +576,7 @@ internal fun readableMeasurementTable(
             appendLine(
                 title.padEnd(nameWidth) + "  " + totalText.padEnd(valueWidth) +
                     "  " + (record.sample.spectralTotals().share(group)?.let { share ->
-                        formatUvirNumber(share.toDouble() * 100.0, 1, numericFormat) + "%"
+                        formatUvirExportPercentage(share.toDouble() * 100.0, numericFormat, irradianceDecimals) + "%"
                     } ?: "—")
             )
             rows.forEach { (name, value, relativePercentage) ->
@@ -603,9 +594,9 @@ internal fun readableMeasurementTable(
             group = SensorGroup.UV,
             components =
                 listOf(
-                    "UVC" to record.sample.uvc,
-                    "UVB" to record.sample.uvb,
-                    "UVA" to record.sample.uva
+                    sensorChannelLabel("UVC", null, "UVC") to record.sample.uvc,
+                    sensorChannelLabel("UVB", null, "UVB") to record.sample.uvb,
+                    sensorChannelLabel("UVA", null, "UVA") to record.sample.uva
                 )
         )
         appendIrradianceGroup(
@@ -614,13 +605,13 @@ internal fun readableMeasurementTable(
             group = SensorGroup.VISIBLE,
             components =
                 listOf(
-                    "HEV" to hev,
-                    context.getString(R.string.violet) to record.sample.violetto,
-                    context.getString(R.string.blue) to record.sample.blu,
-                    context.getString(R.string.green) to record.sample.verde,
-                    context.getString(R.string.yellow) to record.sample.giallo,
-                    context.getString(R.string.orange) to record.sample.arancione,
-                    context.getString(R.string.red) to record.sample.rosso
+                    sensorChannelLabel("HEV", null, "HEV") to hev,
+                    context.resources.sensorChannelLabel(R.string.violet) to record.sample.violetto,
+                    context.resources.sensorChannelLabel(R.string.blue) to record.sample.blu,
+                    context.resources.sensorChannelLabel(R.string.green) to record.sample.verde,
+                    context.resources.sensorChannelLabel(R.string.yellow) to record.sample.giallo,
+                    context.resources.sensorChannelLabel(R.string.orange) to record.sample.arancione,
+                    context.resources.sensorChannelLabel(R.string.red) to record.sample.rosso
                 )
         )
         appendIrradianceGroup(
@@ -629,8 +620,8 @@ internal fun readableMeasurementTable(
             group = SensorGroup.NIR,
             components =
                 listOf(
-                    context.getString(R.string.session_chart_series_far_red) to record.sample.f8,
-                    "NIR" to record.sample.nir
+                    context.resources.sensorChannelLabel(R.string.session_chart_series_far_red) to record.sample.f8,
+                    sensorChannelLabel("NIR", null, "NIR") to record.sample.nir
                 )
         )
 
@@ -672,11 +663,7 @@ internal fun readableMeasurementTable(
         ).forEachIndexed { effectIndex, (name, weightedValue, score) ->
             appendLine(name)
             val scoreText =
-                formatUvirNumber(
-                    score.toDouble() * 100.0,
-                    1,
-                    numericFormat
-                )
+                formatUvirExportPercentage(score.toDouble() * 100.0, numericFormat, irradianceDecimals)
             if (
                 record.sample.isOutOfRange(
                     if (effectIndex == 2) SensorGroup.VISIBLE else SensorGroup.UV
@@ -689,11 +676,11 @@ internal fun readableMeasurementTable(
                 appendLine(
                     context.getString(
                         R.string.share_biological_effect_values,
-                        formatUvirIrradianceNumber(
+                        formatUvirIrradianceExportNumber(
                             weightedValue,
-                            3,
                             numericFormat,
-                            irradianceUnit
+                            irradianceUnit,
+                            irradianceDecimals
                         ),
                         scoreText
                     ).withUvirIrradianceUnit(irradianceUnit)

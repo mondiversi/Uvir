@@ -694,7 +694,8 @@ class MainActivity : ComponentActivity(), UvirExportSaveHost, UvirSettingsImport
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+        // Durable preferences and SQLite are migrated; discard unversioned pre-SI UI caches.
+        super.onCreate(if ((application as? UvirApplication)?.consumeLegacyUiState() == true) null else savedInstanceState)
 
         consumeOpenHomeRequest(intent)
 

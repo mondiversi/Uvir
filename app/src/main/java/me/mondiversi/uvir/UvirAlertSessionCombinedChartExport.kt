@@ -97,7 +97,7 @@ private fun createAlertSessionCategoryPanel(
     val percentageScale = series.all { it.usesPercentageScale() }
     val valueScale: (Double) -> Double =
         if (percentageScale) ({ value -> value })
-        else irradianceUnit::fromCanonicalUwCm2
+        else exportFormatting::chartValue
     val chartValues =
         series.flatMap { item ->
             item.points.filterNot { it.outOfRange }.map { point ->
@@ -114,7 +114,7 @@ private fun createAlertSessionCategoryPanel(
         (chartValues + chartThresholds)
             .maxOrNull()
             ?.coerceAtLeast(100.0) ?: 100.0
-    } else uvirChartMaximum(chartValues + chartThresholds, valueScale(1.0))
+    } else uvirChartMaximum(chartValues + chartThresholds, exportFormatting.chartZeroMaximum())
     val logExtent =
         if (percentageScale) alertThresholdCenteredLogExtent(chartValues) else 1.0
     val logTicks =
@@ -160,17 +160,21 @@ private fun createAlertSessionCategoryPanel(
                 sensorName = exportSensorNames(sortedEntries.map { it.sensorDisplayName }),
                 noteLabel = exportContext.getString(R.string.share_note_label),
                 sensorLabel = exportContext.getString(R.string.sensor_selector_label),
-                emptyNote = exportContext.getString(R.string.no_note)
+                emptyNote = exportContext.getString(R.string.no_note),
+                hardwareCaption = exportHardwareCaption(exportContext, sortedEntries.map { it.sensorId })
             ),
             paint = textPaint,
             maxWidth = 1420f
         )
     val headerOffset = (contextLines.size - 1) * 30f
-    val legendRows = (series.size + 1) / 2
+    val legend = UvirChartExportLegend(series.map { item ->
+        UvirChartLegendEntry(chartExportChannelLabel(exportContext, thresholdAlertMetricLabelResource(item.metric), ""),
+            item.color.toArgb())
+    }, columns = 2, width = 1380f, paint = smallPaint)
     val spansMultipleDays =
         sessionChartSpansMultipleDays(sortedEntries.first().timestamp, sortedEntries.last().timestamp)
     val timeAxisExtra = if (spansMultipleDays) 30 else 0
-    val height = 1155 + timeAxisExtra + legendRows * 48 + headerOffset.toInt()
+    val height = 1060 + timeAxisExtra + legend.height.toInt() + headerOffset.toInt()
     val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
     val canvas = Canvas(bitmap)
     canvas.drawColor(Color.WHITE)
@@ -291,8 +295,7 @@ private fun createAlertSessionCategoryPanel(
                 formatUvirNumber(value, alertThresholdAxisFractionDigits(value),
                     exportFormatting.numericFormat) + "%"
             } else {
-                formatUvirChartAxisValue(value, maximum, irradianceUnit.displayFractionDigits(2),
-                    exportFormatting.numericFormat)
+                exportFormatting.chartAxisValue(value, maximum)
             },
             24f,
             y + 9f,
@@ -387,20 +390,7 @@ private fun createAlertSessionCategoryPanel(
         }
     }
 
-    val legendTop = 1020f + timeAxisExtra
-    val legendColumnWidth = (right - left) / 2f
-    series.forEachIndexed { index, item ->
-        val x = left + (index % 2) * legendColumnWidth
-        val y = legendTop + (index / 2) * 48f
-        val seriesPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = item.color.toArgb() }
-        canvas.drawCircle(x, y - 8f, 10f, seriesPaint)
-        canvas.drawText(
-            exportContext.getString(thresholdAlertMetricLabelResource(item.metric)),
-            x + 22f,
-            y,
-            smallPaint
-        )
-    }
+    legend.draw(canvas, left, 1020f + timeAxisExtra)
     if (percentageScale) {
         canvas.drawText(
             exportContext.getString(R.string.alert_chart_threshold_reference),

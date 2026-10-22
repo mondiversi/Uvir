@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dark_offsets_calculate">Hitung offset</string>
+    <string name="dark_offsets_instructions">Ukur selama sekitar 30 detik dalam kondisi acuan yang stabil. Dalam gelap, latar belakang sensor dikompensasi; dengan pencahayaan, cahaya yang ada juga dikurangi sehingga menghasilkan pengukuran relatif. Untuk pengukuran gelap, tutupi masukan optik dengan bahan yang juga tidak tembus inframerah dekat dan biarkan LED beroperasi normal. Nilai rata-rata tidak menghilangkan derau acak atau mengalibrasi penguatan.</string>
+    <string name="dark_offsets_progress">Mengukur: %1$s / 30 d</string>
+    <string name="dark_offsets_result">Usulan dari %1$s pembacaan. Tidak ada pengaturan yang diubah.</string>
+    <string name="dark_offsets_failed">Pengukuran terputus atau tidak tersedia. Periksa koneksi dan sensor, lalu coba lagi.</string>
+    <string name="dark_offsets_start">Mulai pengukuran</string>
+    <string name="dark_offsets_apply">Terapkan offset</string>
+    <string name="dark_offsets_firmware_required">Memerlukan firmware sensor 0.5.110 atau lebih baru.</string>
+    <string name="calibration_reset_values">Atur ulang nilai</string>
+    <string name="calibration_reset_confirmation_title">Atur ulang nilai?</string>
+    <string name="calibration_reset_confirm_action">ATUR ULANG</string>
+    <string name="calibration_reset_confirmation_message">Atur faktor koreksi menjadi 1 dan offset menjadi 0 untuk %1$s. Pengaturan kalibrasi lain dan jendela optik tidak berubah.</string>
+    <string name="optical_window_reset_confirmation_message">Mengatur pengali umum dan semua pengali kanal jendela optik kembali ke 1. Kalibrasi tidak berubah.</string>
+</resources>

@@ -76,7 +76,6 @@ private fun createAlertChartPanelFile(
             it.metric.isBiologicalEffect() == biological
         }
     require(bars.isNotEmpty())
-    val legendRows = (bars.size + 1) / 2
     val width = 1600
     val titlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.rgb(32, 32, 38)
@@ -116,13 +115,22 @@ private fun createAlertChartPanelFile(
             sensorName = entry.sensorDisplayName,
             noteLabel = exportContext.getString(R.string.share_note_label),
             sensorLabel = exportContext.getString(R.string.sensor_selector_label),
-            emptyNote = exportContext.getString(R.string.no_note)
+            emptyNote = exportContext.getString(R.string.no_note),
+            hardwareCaption = exportHardwareCaption(exportContext, listOf(entry.sensorId))
         ),
         paint = textPaint,
         maxWidth = 1420f
     )
     val headerOffset = (contextLines.size - 1) * 30f
-    val height = 1125 + legendRows * 58 + headerOffset.toInt()
+    val legend = UvirChartExportLegend(bars.map { bar ->
+        val label = chartExportChannelLabel(exportContext, thresholdAlertMetricLabelResource(bar.metric), "")
+        val value = if (bar.outOfRange) exportContext.getString(R.string.out_of_range_short) else
+            "${exportFormatting.irradiance(bar.value)} / ${exportFormatting.irradiance(bar.threshold)} " +
+                exportFormatting.irradianceUnit.unitLabel(bar.metric.isBiologicalEffect()) +
+                " · Δ ${if (bar.thresholdDeltaPercent < 0) "−" else "+"}${exportFormatting.displayValue(abs(bar.thresholdDeltaPercent))}%"
+        UvirChartLegendEntry(label, bar.color.toArgb(), value)
+    }, columns = 2, width = 1380f, paint = smallPaint)
+    val height = 915 + legend.height.toInt() + headerOffset.toInt()
     val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
     val canvas = Canvas(bitmap)
     canvas.drawColor(Color.WHITE)
@@ -244,44 +252,7 @@ private fun createAlertChartPanelFile(
         }
     }
 
-    val legendTop = 875f
-    val legendColumnWidth = (right - left) / 2f
-    bars.forEachIndexed { index, bar ->
-        val metricLabel =
-            exportContext.getString(
-                thresholdAlertMetricLabelResource(bar.metric)
-            )
-        val delta = bar.thresholdDeltaPercent
-        val deltaText =
-            if (bar.outOfRange) {
-                exportContext.getString(R.string.out_of_range_short)
-            } else {
-                (if (delta < 0.0) "−" else "+") +
-                    formatUvirNumber(
-                        abs(delta),
-                        1,
-                        exportFormatting.numericFormat
-                    ) + "%"
-            }
-        val column = index % 2
-        val row = index / 2
-        val legendX = left + legendColumnWidth * column
-        val legendY = legendTop + row * 58f
-        barPaint.color = bar.color.toArgb()
-        canvas.drawCircle(legendX, legendY - 8f, 10f, barPaint)
-        canvas.drawText(
-            metricLabel,
-            legendX + 22f,
-            legendY,
-            smallPaint
-        )
-        canvas.drawText(
-            deltaText,
-            legendX + 22f,
-            legendY + 26f,
-            smallPaint
-        )
-    }
+    legend.draw(canvas, left, 875f)
 
     val sharedDirectory = File(context.cacheDir, "shared").apply { mkdirs() }
     val file =

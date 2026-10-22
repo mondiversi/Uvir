@@ -146,20 +146,8 @@ internal fun UvirExportProfileSection(
         val previewDateTime =
             "${formatUvirDateOnly(previewTimestamp, preview.dateFormat)} · " +
                 formatUvirTimeOnly(previewTimestamp, preview.timeFormat)
-        val previewTotal =
-            formatUvirIrradianceNumber(
-                canonicalUwCm2 = 123456.78,
-                fractionDigits = 3,
-                numericFormat = preview.numericFormat,
-                unit = preview.irradianceUnit
-            )
-        val previewUva =
-            formatUvirIrradianceNumber(
-                canonicalUwCm2 = 89214.32,
-                fractionDigits = 3,
-                numericFormat = preview.numericFormat,
-                unit = preview.irradianceUnit
-            )
+        val previewTotal = preview.irradiance(1234.5678)
+        val previewUva = preview.irradiance(892.1432)
 
         Surface(
             modifier = Modifier.fillMaxWidth(),

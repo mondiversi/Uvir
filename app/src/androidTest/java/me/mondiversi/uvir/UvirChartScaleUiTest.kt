@@ -46,7 +46,7 @@ class UvirChartScaleUiTest {
             MaterialTheme(colorScheme = if (dark.value) darkColorScheme() else lightColorScheme()) {
                 Box(Modifier.fillMaxWidth().testTag("live")) {
                     LiveRollingChart(history, listOf(LiveChartSeries("UVA", Color.Blue) { it.uva }),
-                        unit.value.symbol, unit.value::fromCanonicalUwCm2,
+                        unit.value.symbol, unit.value::fromCanonicalWm2,
                         { it.isOutOfRange(SensorGroup.UV) }, Color.Black, Color.Gray)
                 }
             }

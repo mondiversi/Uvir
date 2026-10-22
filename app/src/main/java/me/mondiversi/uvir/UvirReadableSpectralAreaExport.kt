@@ -9,8 +9,10 @@ internal fun readableMeasurementSpectralAreaBody(
     numericFormat: UvirNumericFormat,
     dateFormat: UvirDateFormat,
     timeFormat: UvirTimeFormat,
-    irradianceUnit: UvirIrradianceUnit
+    irradianceUnit: UvirIrradianceUnit,
+    irradianceDecimals: Int? = uvirExportIrradianceDecimals(context, irradianceUnit)
 ): String = buildString {
+    val hardware = loadExportHardwareModels(context, records.map { it.sensorId })
     val locale = context.resources.configuration.locales[0]
     val orderedRecords = records.sortedBy { it.timestamp }
 
@@ -22,25 +24,14 @@ internal fun readableMeasurementSpectralAreaBody(
         if (record.sample.isOutOfRange(group)) {
             context.getString(R.string.out_of_range_short)
         } else {
-            "${formatUvirIrradianceNumber(value, 3, numericFormat, irradianceUnit)} " +
+            "${formatUvirIrradianceExportNumber(value, numericFormat, irradianceUnit, irradianceDecimals)} " +
                 irradianceUnit.symbol
         }
 
-    fun readablePercentage(
-        record: SavedRecordDetail,
-        value: Double,
-        total: Double,
-        group: SensorGroup
-    ): String =
-        if (record.sample.isOutOfRange(group)) {
-            "—"
-        } else {
-            formatUvirNumber(
-                percentage(value, total).toDouble() * 100.0,
-                1,
-                numericFormat
-            ) + "%"
-        }
+    fun readablePercentage(record: SavedRecordDetail, value: Double): String =
+        record.sample.spectralTotals().shareOfTotal(value)?.let { share ->
+            formatUvirExportPercentage(share.toDouble() * 100.0, numericFormat, irradianceDecimals) + "%"
+        } ?: "—"
 
     fun appendAcquisitionHeading(record: SavedRecordDetail) {
         appendLine(
@@ -62,13 +53,13 @@ internal fun readableMeasurementSpectralAreaBody(
             appendAcquisitionHeading(record)
             val totalValue = total(record)
             val share = record.sample.spectralTotals().share(group)?.let { value ->
-                formatUvirNumber(value.toDouble() * 100.0, 1, numericFormat) + "%"
+                formatUvirExportPercentage(value.toDouble() * 100.0, numericFormat, irradianceDecimals) + "%"
             } ?: "—"
             appendLine("$totalLabel: ${readableValue(record, totalValue, group)} · $share")
             components(record).forEach { (name, value) ->
                 appendLine(
                     "$name: ${readableValue(record, value, group)} · " +
-                        readablePercentage(record, value, totalValue, group)
+                        readablePercentage(record, value)
                 )
             }
             if (index < orderedRecords.lastIndex) {
@@ -89,6 +80,8 @@ internal fun readableMeasurementSpectralAreaBody(
             "${context.getString(R.string.sensor_selector_label)}: " +
                 exportSensorName(record.sensorDisplayName)
         )
+        appendLine(hardware.models(record.sensorId).caption())
+        appendLine("${context.getString(R.string.optical_window_title)}: ${opticalWindowSummary(record.sample.opticalWindow, numericFormat)}")
         appendLine(
             "${context.getString(R.string.share_session_id_label)}: " +
                 (record.sessionId?.toString() ?: "—")
@@ -133,9 +126,9 @@ internal fun readableMeasurementSpectralAreaBody(
         total = { it.sample.uvc + it.sample.uvb + it.sample.uva },
         components = {
             listOf(
-                "UVC" to it.sample.uvc,
-                "UVB" to it.sample.uvb,
-                "UVA" to it.sample.uva
+                sensorChannelLabel("UVC", null, "UVC") to it.sample.uvc,
+                sensorChannelLabel("UVB", null, "UVB") to it.sample.uvb,
+                sensorChannelLabel("UVA", null, "UVA") to it.sample.uva
             )
         }
     )
@@ -153,13 +146,13 @@ internal fun readableMeasurementSpectralAreaBody(
         },
         components = {
             listOf(
-                "HEV" to (it.sample.violetto + it.sample.blu),
-                context.getString(R.string.violet) to it.sample.violetto,
-                context.getString(R.string.blue) to it.sample.blu,
-                context.getString(R.string.green) to it.sample.verde,
-                context.getString(R.string.yellow) to it.sample.giallo,
-                context.getString(R.string.orange) to it.sample.arancione,
-                context.getString(R.string.red) to it.sample.rosso
+                sensorChannelLabel("HEV", null, "HEV") to (it.sample.violetto + it.sample.blu),
+                context.resources.sensorChannelLabel(R.string.violet) to it.sample.violetto,
+                context.resources.sensorChannelLabel(R.string.blue) to it.sample.blu,
+                context.resources.sensorChannelLabel(R.string.green) to it.sample.verde,
+                context.resources.sensorChannelLabel(R.string.yellow) to it.sample.giallo,
+                context.resources.sensorChannelLabel(R.string.orange) to it.sample.arancione,
+                context.resources.sensorChannelLabel(R.string.red) to it.sample.rosso
             )
         }
     )
@@ -174,8 +167,8 @@ internal fun readableMeasurementSpectralAreaBody(
         total = { it.sample.f8 + it.sample.nir },
         components = {
             listOf(
-                context.getString(R.string.session_chart_series_far_red) to it.sample.f8,
-                "NIR" to it.sample.nir
+                context.resources.sensorChannelLabel(R.string.session_chart_series_far_red) to it.sample.f8,
+                sensorChannelLabel("NIR", null, "NIR") to it.sample.nir
             )
         }
     )
@@ -213,7 +206,7 @@ internal fun readableMeasurementSpectralAreaBody(
             )
         ).forEachIndexed { effectIndex, (name, weightedValue, score) ->
             val scoreText =
-                formatUvirNumber(score.toDouble() * 100.0, 1, numericFormat)
+                formatUvirExportPercentage(score.toDouble() * 100.0, numericFormat, irradianceDecimals)
             appendLine(name)
             if (
                 record.sample.isOutOfRange(
@@ -227,11 +220,11 @@ internal fun readableMeasurementSpectralAreaBody(
                 appendLine(
                     context.getString(
                         R.string.share_biological_effect_values,
-                        formatUvirIrradianceNumber(
+                        formatUvirIrradianceExportNumber(
                             weightedValue,
-                            3,
                             numericFormat,
-                            irradianceUnit
+                            irradianceUnit,
+                            irradianceDecimals
                         ),
                         scoreText
                     ).withUvirIrradianceUnit(irradianceUnit)

@@ -108,7 +108,7 @@ internal fun SensorSyncCompleteDialog(
                 }
             }
         },
-        confirmButton = {},
+        confirmButton = { UvirDialogCloseButton(onDismiss) },
         containerColor = cardColor,
         titleContentColor = primaryText,
         textContentColor = primaryText
@@ -173,7 +173,7 @@ internal fun SensorSyncIncompleteDialog(
                 }
             }
         },
-        confirmButton = {},
+        confirmButton = { UvirDialogCloseButton(onDismiss) },
         containerColor = cardColor,
         titleContentColor = primaryText,
         textContentColor = primaryText

@@ -74,7 +74,7 @@ class UvirConditionalAcquisitionTest {
         val normal=sensorOfflineJobCommand(request,1,1000,31000,0,params)
         assertEquals("OFFLINE_JOB 1 1000 5 31000 3 0 5 150 1 -",normal)
         val conditional=sensorOfflineJobCommand(request.copy(conditionalPlan=plan(action=AcquisitionConditionAction.START)),1,1000,0,0,params)
-        assertEquals("OFFLINE_CONDITIONAL_JOB 1 1000 5 0 3 0 5 150 1 - START ANY 30 2 UV_TOTAL ABOVE 6.0 NIR_TOTAL BELOW 4.0",conditional)
+        assertEquals("OFFLINE_CONDITIONAL_JOB 1 1000 5 0 3 0 5 150 1 - START ANY 30 2 UV_TOTAL ABOVE 600 NIR_TOTAL BELOW 400",conditional)
     }
     @Test fun oldFirmwareCannotSilentlyIgnoreConditions() {
         assertFalse(firmwareSupportsConditionalAcquisition("0.5.72"))

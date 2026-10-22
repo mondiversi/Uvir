@@ -91,6 +91,9 @@ internal fun UvirSensorRuntimeInfo.toSensorSettingsSnapshotOrNull():
                             MIN_SENSOR_CALIBRATION_FACTOR,
                             MAX_SENSOR_CALIBRATION_FACTOR
                         ),
+                opticalWindow = opticalWindow ?: OpticalWindowSettings(),
+                offsets = calibrationOffsets,
+                channelFactors = calibrationChannelFactors,
                 uvFactor =
                     (uvCalibrationFactor ?: return null)
                         .toFloat()
@@ -133,7 +136,7 @@ internal fun UvirSensorSettingsSnapshot.sensorBackedAlertSettings(
                     metric = metric,
                     enabled = false,
                     direction = ThresholdAlertDirection.ABOVE,
-                    threshold = 1f
+                    threshold = DEFAULT_IRRADIANCE_THRESHOLD_W_M2
                 )
         }
     return appSettings.copy(

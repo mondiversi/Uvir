@@ -435,7 +435,7 @@
     <string name="violet">Фиолетовый</string>
     <string name="blue">Синий</string>
     <string name="green">Зеленый</string>
-    <string name="yellow">Желтый</string>
+    <string name="yellow">Зелёно-жёлтый</string>
     <string name="orange">Оранжевый</string>
     <string name="red">Красный</string>
     <string name="percent_of_visible">%1$s%% видимых</string>
@@ -444,11 +444,11 @@
     <string name="app_version">Версия приложения: %1$s.</string>
     <string name="package_name_value">Пакет: %1$s</string>
     <string name="about_whats_new_title">Что нового в версии %1$s</string>
-    <string name="about_whats_new_connectivity">Последовательное управление несколькими датчиками с защищенными профилями и подключениями USB, Wi-Fi, Bluetooth и через Интернет.</string>
-    <string name="about_whats_new_connections">Условные измерения и измерения по внешней команде, автономные сеансы и надежное восстановление состояния после отключения или перезапуска.</string>
-    <string name="about_whats_new_measurements">Варианты сеансов, расширенные фильтры истории и более понятные сведения об измерениях и оповещениях.</string>
-    <string name="about_whats_new_interface">Расширенный экспорт CSV, TXT и PNG с единицами измерения, региональными форматами, сгруппированными графиками и идентификацией датчика.</string>
-    <string name="about_whats_new_github">Зашифрованные резервные копии настроек, встроенная диагностика и многочисленные улучшения интерфейса и доступности.</string>
+    <string name="about_whats_new_connectivity">Поправочные коэффициенты и смещения для каждого канала, с пошаговым измерением средних смещений и подтверждением сброса.</string>
+    <string name="about_whats_new_connections">Компенсация оптического окна с общим множителем и множителями каналов; уточнены диапазоны AS7331 и пики чувствительности AS7343.</string>
+    <string name="about_whats_new_measurements">Внутреннее хранение облучённости в W/m² с автоматическим переносом, сохраняющим существующие измерения и настройки.</string>
+    <string name="about_whats_new_interface">Настраиваемое число знаков после запятой для текущих значений, сохранённых данных и пользовательского экспорта; научный экспорт сохраняет всю записанную точность.</string>
+    <string name="about_whats_new_github">Улучшены меню настроек и диалоги; обновлены руководства по подключению, сборке и калибровке, включая направляющие трубки и требования к рассеивателю.</string>
     <string name="about_description">Приложение для спектрального измерения ультрафиолетового, видимого и инфракрасного излучения.</string>
     <string name="about_spectral_ranges">Спектральные диапазоны: Ультрафиолет • Видимый свет • Инфракрасное излучение</string>
     <string name="about_sensors">Поддерживаемые датчики: AS7331 UV • AS7343 мультиспектральный</string>
@@ -650,11 +650,10 @@
     <string name="threshold_rules_connection_required">Подключите датчик, чтобы изменить эти оповещения.</string>
     <string name="threshold_repeat_sensor_description">Этот интервал сохраняется в датчике, а также ограничивает количество оповещений, записываемых, когда приложение отключено.</string>
     <string name="sensor_calibration_title">Калибровка</string>
-    <string name="sensor_calibration_description">Примените поправочные коэффициенты, полученные путем сравнения с калиброванным эталонным прибором. Коэффициент 1,000 сохраняет оценку таблицы данных по умолчанию.</string>
+    <string name="sensor_calibration_description">Настройте поправочные коэффициенты и смещения для каждого канала.</string>
     <string name="sensor_calibration_visible_factor">Поправочный коэффициент VIS/NIR · AS7343</string>
     <string name="sensor_calibration_uv_factor">Поправочный коэффициент УФ · AS7331</string>
-    <string name="sensor_calibration_factor_hint">Допустимое значение: 0,100–10,000.</string>
-    <string name="sensor_calibration_uv_unavailable">Калибровка УФ-излучения по умолчанию сохраняется и станет доступной для редактирования при обнаружении УФ-датчика.</string>
+    <string name="sensor_calibration_factor_hint">Поправочные коэффициенты: допустимые значения %1$s–%2$s; %3$s не изменяет усиление. Определяйте их с помощью калиброванного эталонного прибора.</string>
     <string name="sensor_calibration_firmware_required">Обновите прошивку датчика, чтобы использовать калибровку.</string>
     <string name="sensor_firmware_update_required_title">Требуется обновление прошивки</string>
     <string name="sensor_firmware_update_required">Прошивка, установленная на датчике, не поддерживает эти настройки. Обновите прошивку датчика и повторите попытку.</string>
@@ -824,5 +823,5 @@
     <string name="alert_max_registrations">Максимум записей</string>
     <string name="alert_registration_count">Количество записей</string>
     <string name="alert_configure_first">Перед запуском настройте хотя бы одно значение.</string>
-    <string name="sensor_simulation_open_settings">Открыть настройки</string>
+    <string name="sensor_simulation_open_settings">Настройки</string>
 </resources>

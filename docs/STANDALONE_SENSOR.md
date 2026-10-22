@@ -1,7 +1,7 @@
 # Use the complete UVIR sensor without the Android app
 
 This guide is for a PC, another controller or a custom application. It describes
-the implemented firmware `0.5.104`, protocol `uvir-sensor-v1`. It does not require
+the implemented firmware `0.5.112`, protocol `uvir-sensor-v1`. It does not require
 the official Android interface. Build the hardware using the
 [assembly guide](../hardware/ASSEMBLY.md) and [all wiring guides](../hardware/wiring/README.md).
 

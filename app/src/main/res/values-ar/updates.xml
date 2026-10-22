@@ -14,5 +14,5 @@
     <string name="update_done">تم تحديث المستشعر</string>
     <string name="update_failed">فشل التحديث. راجع سجل الأخطاء. إذا لم يبدأ المستشعر، استعد البرنامج عبر USB من حاسوب.</string>
     <string name="update_permission">اسمح لتطبيق Uvir بتثبيت التحديثات في إعدادات Android.</string>
-    <string name="update_whats_new">تحديثات موقعة للتطبيق والمستشعر وتنزيلات موثقة وتحميل البرنامج عبر USB.</string>
+    <string name="update_whats_new">تصدير CSV وTXT وPNG مع طرازات المستشعرات ومراجع طيفية موجزة ومفاتيح رسوم بيانية أوضح.</string>
 </resources>

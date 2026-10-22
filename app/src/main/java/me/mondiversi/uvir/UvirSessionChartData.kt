@@ -155,7 +155,7 @@ internal fun sessionChartSeries(
                     R.string.green
                 ),
                 SessionChartSeries(
-                    "Yellow",
+                    "Green-yellow",
                     Color(0xFFF9A825),
                     values { it.giallo },
                     R.string.yellow

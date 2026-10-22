@@ -188,8 +188,8 @@ internal fun UvirStatusBuzzerInfoDialog(
                 }
             }
         },
-        confirmButton = {},
-        dismissButton = {
+        dismissButton = { UvirDialogCloseButton(onDismissRequest) },
+        confirmButton = {
             TextButton(
                 enabled = testEnabled && !testInProgress,
                 onClick = {

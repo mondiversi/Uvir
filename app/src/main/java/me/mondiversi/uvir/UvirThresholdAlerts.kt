@@ -50,7 +50,7 @@ internal fun loadThresholdAlertSettings(
     val legacyThreshold =
         preferences.getFloat(
             KEY_THRESHOLD_ALERT_VALUE,
-            1f
+            DEFAULT_IRRADIANCE_THRESHOLD_W_M2
         ).coerceAtLeast(0f)
     val legacyEnabled =
         preferences.getBoolean(
@@ -100,7 +100,7 @@ internal fun loadThresholdAlertSettings(
             if (legacyChannel == ThresholdAlertMetric.HEB) {
                 legacyThreshold
             } else {
-                1f
+                DEFAULT_IRRADIANCE_THRESHOLD_W_M2
             }
         )
 
@@ -154,7 +154,7 @@ internal fun loadThresholdAlertSettings(
                                 !preferences.contains(violetValueKey) &&
                                 legacyHebConfigured -> legacyHebThreshold
                             metric == legacyChannel -> legacyThreshold
-                            else -> 1f
+                            else -> DEFAULT_IRRADIANCE_THRESHOLD_W_M2
                         }
                     ).coerceAtLeast(0f)
             )

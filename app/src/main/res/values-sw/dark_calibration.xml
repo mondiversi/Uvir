@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dark_offsets_calculate">Kokotoa ofseti</string>
+    <string name="dark_offsets_instructions">Pima kwa takriban sekunde 30 katika hali thabiti za marejeo. Gizani unafidia mandharinyuma ya kihisi; katika mwanga unaondoa pia mwanga uliopo na kupata vipimo vya kulinganisha. Kwa kipimo cha gizani, funika ingizo la macho kwa nyenzo isiyopitisha pia infraredi ya karibu na acha LED katika hali ya kawaida ya kazi. Wastani hauondoi kelele nasibu wala kurekebisha ukuzaji.</string>
+    <string name="dark_offsets_progress">Kupima: %1$s / sek 30</string>
+    <string name="dark_offsets_result">Pendekezo kutoka usomaji %1$s. Hakuna mipangilio iliyobadilishwa.</string>
+    <string name="dark_offsets_failed">Kipimo kimekatizwa au hakipatikani. Angalia muunganisho na kihisi, kisha ujaribu tena.</string>
+    <string name="dark_offsets_start">Anza kipimo</string>
+    <string name="dark_offsets_apply">Tumia offset</string>
+    <string name="dark_offsets_firmware_required">Inahitaji firmware ya kihisi 0.5.110 au mpya zaidi.</string>
+    <string name="calibration_reset_values">Weka upya thamani</string>
+    <string name="calibration_reset_confirmation_title">Weka upya thamani?</string>
+    <string name="calibration_reset_confirm_action">WEKA UPYA</string>
+    <string name="calibration_reset_confirmation_message">Weka vizidishi vya marekebisho kuwa 1 na offset kuwa 0 kwa %1$s. Mipangilio mingine ya urekebishaji na dirisha la macho haibadiliki.</string>
+    <string name="optical_window_reset_confirmation_message">Hurejesha kizidishi cha jumla na vizidishi vyote vya chaneli za dirisha la macho kuwa 1. Usawazishaji haubadiliki.</string>
+</resources>

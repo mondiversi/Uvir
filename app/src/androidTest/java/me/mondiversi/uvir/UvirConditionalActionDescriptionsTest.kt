@@ -110,7 +110,8 @@ class UvirConditionalActionDescriptionsTest {
             .performScrollTo().assertIsDisplayed()
         compose.onNodeWithText(context.getString(R.string.conditional_limits_description))
             .performScrollTo().assertIsDisplayed()
-        compose.onNodeWithText(context.getString(R.string.conditional_configure)).assertIsNotEnabled()
+        compose.onNodeWithText(formatUvirActionLabel(context.getString(R.string.conditional_configure),
+            context.resources.configuration.locales[0])).assertIsNotEnabled()
     }
 
     @Test fun everySupportedLanguageContainsTheFourExplanations() {

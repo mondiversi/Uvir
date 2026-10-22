@@ -16,7 +16,10 @@
 #include <nvs.h>
 
 #include "UvirBluetoothBondReset.h"
+#include "UvirCommandLineGuard.h"
+#include "UvirDarkOffsets.h"
 #include "UvirHardwareConfig.h"
+#include "UvirIrradianceUnits.h"
 #include "UvirDebugPerformance.h"
 #include "UvirPublicCaBundle.h"
 #include "UvirOfflineStore.h"
@@ -35,7 +38,7 @@
 namespace {
 
 constexpr char kProtocol[] = "uvir-sensor-v1";
-constexpr char kFirmwareVersion[] = "0.5.104";
+constexpr char kFirmwareVersion[] = "0.5.112";
 constexpr uint8_t kSensorSettingsSchemaVersion = 2;
 constexpr uint32_t kHostTimeoutMs = 12000;
 constexpr uint32_t kMinimumStreamIntervalMs = 150;
@@ -91,6 +94,11 @@ enum class Transport : uint8_t { None, Usb, Wifi, Bluetooth, Internet };
 enum class WirelessMode : uint8_t { Off, Wifi, Bluetooth, Internet };
 enum class ClockSource : uint8_t { Unavailable, Rtc, Phone };
 
+UvirDarkOffsets darkOffsets;
+Transport darkOffsetsTransport = Transport::None;
+String darkOffsetsRequestId;
+uint32_t darkOffsetsHostAtMs = 0;
+
 struct UvirBandSample {
   float values[kUvirStoredBandCount] = {};
   bool saturated = false;
@@ -132,6 +140,12 @@ struct PersistentAlertRule {
   float threshold = 0.0f;
 };
 
+struct PersistentSiAlertRules {
+  uint32_t magic = 0x53495231; // SIR1: atomic SI rule snapshot, legacy keys remain untouched.
+  uint32_t count = 0;
+  PersistentAlertRule rules[kMaximumOfflineAlertRules];
+};
+
 struct PersistentRuntimeActivityStateV1 {
   uint32_t magic = 0x55565254;
   uint16_t version = 1;
@@ -161,7 +175,7 @@ struct PersistentRuntimeActivityStateV1 {
   PersistentAlertRule alertRules[kMaximumOfflineAlertRules];
 };
 struct PersistentRuntimeActivityState : PersistentRuntimeActivityStateV1 {
-  PersistentRuntimeActivityState() { version = 2; }
+  PersistentRuntimeActivityState() { version = 3; } // SI thresholds, unchanged binary size.
   uint32_t alertStartDelaySeconds = 0;
   uint32_t alertDurationSeconds = 0;
   uint32_t alertMaximumRegistrations = 0;
@@ -198,6 +212,7 @@ UvirVisibleSensor visibleSensor;
 UvirUvSensor uvSensor;
 Preferences preferences;
 uint64_t settingsUpdatedAtMs = 0;
+bool siConfigurationHealthy = true;
 bool applyingDatedSettings = false;
 uint32_t settingsCommandErrors = 0;
 bool settingsWirelessReconfigurePending = false;
@@ -247,6 +262,7 @@ String usbCommandBuffer;
 String wifiCommandBuffer;
 String bluetoothCommandBuffer;
 String internetCommandBuffer;
+UvirCommandLineGuard usbCommandGuard, wifiCommandGuard, bluetoothCommandGuard;
 String sensorDeviceId;
 String authToken;
 String wifiSsid;
@@ -366,6 +382,9 @@ uint32_t samplingSpacingMs = kDefaultStreamIntervalMs;
 bool samplingDiscardExtremes = true;
 float visibleCalibrationFactor = 1.0f;
 float uvCalibrationFactor = 1.0f;
+UvirOpticalWindow opticalWindow;
+UvirCalibrationOffsets calibrationOffsets;
+UvirCalibrationChannelFactors calibrationChannelFactors;
 UvirBandSample liveSampleWindow[kMaximumAcquisitionSamples];
 uint8_t liveSampleWindowCount = 0;
 uint8_t liveSampleWindowNext = 0;
@@ -399,9 +418,11 @@ bool restoreRuntimeActivityState();
 void reconcileRestoredActivityState();
 
 bool sensorOperationActive();
+bool sensorOperationActive(bool includeCommandIndicator);
 bool sensorActivityActive();
 bool activityReported = false;
 bool lastReportedActivity = false;
+bool lastReportedCalibrationLocked = false;
 Transport lastActivityTransport = Transport::None;
 
 String randomCredential(size_t length, const char *alphabet) {
@@ -793,6 +814,66 @@ void loadIdentity() {
   visibleCalibrationFactor =
       preferences.getFloat("cal_visible", 1.0f);
   uvCalibrationFactor = preferences.getFloat("cal_uv", 1.0f);
+  UvirCalibrationState calibration;
+  if (preferences.getBytesLength("cal_state2") == sizeof(calibration) &&
+      preferences.getBytes("cal_state2", &calibration, sizeof(calibration)) == sizeof(calibration) &&
+      calibration.signature == 0x43414c32 && uvirValidOpticalWindow(calibration.window) &&
+      isfinite(calibration.visible) && calibration.visible >= .1f && calibration.visible <= 10 &&
+      isfinite(calibration.uv) && calibration.uv >= .1f && calibration.uv <= 10) {
+    visibleCalibrationFactor = calibration.visible;
+    uvCalibrationFactor = calibration.uv;
+    opticalWindow = calibration.window;
+  }
+  UvirCalibrationStateV3 calibrationV3;
+  if (preferences.getBytesLength("cal_state3") == sizeof(calibrationV3) &&
+      preferences.getBytes("cal_state3", &calibrationV3, sizeof(calibrationV3)) == sizeof(calibrationV3) &&
+      calibrationV3.signature == 0x43414c33 && uvirValidOpticalWindow(calibrationV3.window) &&
+      uvirValidCalibrationOffsets(calibrationV3.offsets, true) &&
+      isfinite(calibrationV3.visible) && calibrationV3.visible >= .1f && calibrationV3.visible <= 10 &&
+      isfinite(calibrationV3.uv) && calibrationV3.uv >= .1f && calibrationV3.uv <= 10) {
+    visibleCalibrationFactor = calibrationV3.visible;
+    uvCalibrationFactor = calibrationV3.uv;
+    opticalWindow = calibrationV3.window;
+    calibrationOffsets = calibrationV3.offsets;
+  }
+  UvirCalibrationStateV4 calibrationV4;
+  if (preferences.getBytesLength("cal_state4") == sizeof(calibrationV4) &&
+      preferences.getBytes("cal_state4", &calibrationV4, sizeof(calibrationV4)) == sizeof(calibrationV4) &&
+      calibrationV4.signature == 0x43414c34 && uvirValidOpticalWindow(calibrationV4.window) &&
+      uvirValidCalibrationOffsets(calibrationV4.offsets, true) && uvirValidChannelFactors(calibrationV4.channels) &&
+      isfinite(calibrationV4.visible) && calibrationV4.visible >= .1f && calibrationV4.visible <= 10 &&
+      isfinite(calibrationV4.uv) && calibrationV4.uv >= .1f && calibrationV4.uv <= 10) {
+    visibleCalibrationFactor = calibrationV4.visible;
+    uvCalibrationFactor = calibrationV4.uv;
+    opticalWindow = calibrationV4.window;
+    calibrationOffsets = calibrationV4.offsets;
+    calibrationChannelFactors = calibrationV4.channels;
+  }
+  // Legacy CAL3/CAL4 offsets were µW/cm². Read them without overwriting their backup.
+  for (float &offset : calibrationOffsets.values) offset = uvirLegacyToWm2(offset);
+  UvirCalibrationStateV4 calibrationSi;
+  const bool validCalibrationSi = preferences.getBytesLength("cal_state5") == sizeof(calibrationSi) &&
+      preferences.getBytes("cal_state5", &calibrationSi, sizeof(calibrationSi)) == sizeof(calibrationSi) &&
+      calibrationSi.signature == 0x43414c35 && uvirValidOpticalWindow(calibrationSi.window) &&
+      uvirValidCalibrationOffsets(calibrationSi.offsets) && uvirValidChannelFactors(calibrationSi.channels) &&
+      isfinite(calibrationSi.visible) && calibrationSi.visible >= .1f && calibrationSi.visible <= 10 &&
+      isfinite(calibrationSi.uv) && calibrationSi.uv >= .1f && calibrationSi.uv <= 10;
+  if (validCalibrationSi) {
+    visibleCalibrationFactor = calibrationSi.visible;
+    uvCalibrationFactor = calibrationSi.uv;
+    opticalWindow = calibrationSi.window;
+    calibrationOffsets = calibrationSi.offsets;
+    calibrationChannelFactors = calibrationSi.channels;
+  } else if (preferences.isKey("cal_state5")) {
+    siConfigurationHealthy = false; // Never silently fall back to obsolete calibration.
+  } else {
+    calibrationSi.signature = 0x43414c35;
+    calibrationSi.visible = visibleCalibrationFactor; calibrationSi.uv = uvCalibrationFactor;
+    calibrationSi.window = opticalWindow; calibrationSi.offsets = calibrationOffsets;
+    calibrationSi.channels = calibrationChannelFactors;
+    siConfigurationHealthy = preferences.putBytes("cal_state5", &calibrationSi, sizeof(calibrationSi)) == sizeof(calibrationSi);
+  }
+  offlineStore.setOpticalWindow(opticalWindow);
   if (!isfinite(visibleCalibrationFactor) ||
       visibleCalibrationFactor < 0.1f || visibleCalibrationFactor > 10.0f) {
     visibleCalibrationFactor = 1.0f;
@@ -816,7 +897,36 @@ void loadIdentity() {
     offlineAlertRules[index].above =
         preferences.getBool(aboveKey.c_str(), true);
     offlineAlertRules[index].threshold =
-        preferences.getFloat(thresholdKey.c_str(), 0.0f);
+        uvirLegacyToWm2(preferences.getFloat(thresholdKey.c_str(), 0.0f));
+  }
+
+  PersistentSiAlertRules siRules;
+  if (preferences.getBytesLength("si_alert_rules") == sizeof(siRules) &&
+      preferences.getBytes("si_alert_rules", &siRules, sizeof(siRules)) == sizeof(siRules) &&
+      siRules.magic == 0x53495231 && siRules.count <= kMaximumOfflineAlertRules) {
+    bool valid = true;
+    for (uint32_t i = 0; i < siRules.count; ++i)
+      valid = valid && memchr(siRules.rules[i].metric, 0, sizeof(siRules.rules[i].metric)) &&
+          isfinite(siRules.rules[i].threshold) && siRules.rules[i].threshold >= 0;
+    if (valid) {
+      offlineAlertRuleCount = siRules.count;
+      for (uint32_t i = 0; i < siRules.count; ++i) {
+        offlineAlertRules[i].metric = siRules.rules[i].metric;
+        offlineAlertRules[i].above = siRules.rules[i].above != 0;
+        offlineAlertRules[i].threshold = siRules.rules[i].threshold;
+      }
+    } else siConfigurationHealthy = false;
+  } else if (preferences.isKey("si_alert_rules")) {
+    siConfigurationHealthy = false;
+  } else {
+    siRules.count = offlineAlertRuleCount;
+    for (uint32_t i = 0; i < siRules.count; ++i) {
+      snprintf(siRules.rules[i].metric, sizeof(siRules.rules[i].metric), "%s", offlineAlertRules[i].metric.c_str());
+      siRules.rules[i].above = offlineAlertRules[i].above;
+      siRules.rules[i].threshold = offlineAlertRules[i].threshold;
+    }
+    if (preferences.putBytes("si_alert_rules", &siRules, sizeof(siRules)) != sizeof(siRules))
+      siConfigurationHealthy = false;
   }
 
   if (authToken.length() != 32) {
@@ -934,6 +1044,50 @@ String hmacSha256Hex(const String &secret, const String &message) {
 }
 
 void printFloat(Print &output, float value);
+void printIrradiance(Print &output, float value);
+void printStoredIrradiance(Print &output, float value, uint16_t version);
+void printCalibrationOffsets(Print &output) {
+  const bool grouped = calibrationOffsets.signature == kUvirColorOffsetSignature;
+  output.print(F(",\"calibration_offsets\":{\"version\":"));
+  output.print(grouped ? 2 : 1);
+  output.print(F(",\"unit\":\"uW/cm2\",\"values\":["));
+  for (uint8_t i = 0; i < (grouped ? 11 : 15); ++i) {
+    if (i) output.print(',');
+    char value[32];
+    snprintf(value, sizeof(value), "%.9g", static_cast<double>(uvirWm2ToLegacy(calibrationOffsets.values[i])));
+    output.print(value); // Nine significant digits preserve tiny stored float offsets too.
+  }
+  output.print(F("]}"));
+}
+void printCalibrationChannelFactors(Print &output) {
+  output.print(F(",\"calibration_channel_factors\":"));
+  if (!calibrationChannelFactors.enabled) { output.print(F("null")); return; }
+  output.print(F("{\"version\":1,\"values\":["));
+  for (uint8_t i = 0; i < 11; ++i) {
+    if (i) output.print(',');
+    char value[32];
+    snprintf(value, sizeof(value), "%.9g", static_cast<double>(calibrationChannelFactors.values[i]));
+    output.print(value);
+  }
+  output.print(F("]}"));
+}
+void printOpticalWindow(Print &output, const UvirOpticalWindow &window) {
+  output.print(F(",\"optical_window\":{\"version\":"));
+  output.print(window.signature == kUvirOpticalV2 ? 2 : 1);
+  output.print(F(",\"enabled\":"));
+  output.print(window.enabled ? F("true") : F("false"));
+  output.print(F(",\"factors\":["));
+  for (uint8_t i = 0; i < 11; ++i) {
+    if (i) output.print(',');
+    output.print(window.factors[i], 9); // Preserve the stored float through JSON readback.
+  }
+  output.print(']');
+  if (window.signature == kUvirOpticalV2) {
+    output.print(F(",\"master\":"));
+    output.print(uvirOpticalMaster(window), 9);
+  }
+  output.print('}');
+}
 Print *outputForTransport(Transport transport);
 bool isAuthenticated(Transport transport);
 void printConditionalJobFields(Print &output);
@@ -982,18 +1136,23 @@ void printHello(
   output.print(F("\","));
   output.print(F("\"firmware\":\""));
   output.print(kFirmwareVersion);
-  output.print(F("\",\"unit\":\"uW/cm2\","));
+  output.print(F("\",\"unit\":\"uW/cm2\",\"canonical_unit\":\"W/m2\",\"storage_record_version\":3,"));
+  output.print(F("\"si_configuration_valid\":"));
+  output.print(siConfigurationHealthy ? F("true,") : F("false,"));
   output.print(F("\"measurement_kind\":\"band_equivalent_irradiance\","));
   output.print(F("\"calibration\":\""));
   output.print(
       fabsf(visibleCalibrationFactor - 1.0f) < 0.0001f &&
-              fabsf(uvCalibrationFactor - 1.0f) < 0.0001f
+              fabsf(uvCalibrationFactor - 1.0f) < 0.0001f && uvirZeroCalibrationOffsets(calibrationOffsets) && uvirUnitChannelFactors(calibrationChannelFactors)
           ? F("datasheet_estimate")
           : F("user_adjusted"));
   output.print(F("\",\"visible_calibration_factor\":"));
   printFloat(output, visibleCalibrationFactor);
   output.print(F(",\"uv_calibration_factor\":"));
   printFloat(output, uvCalibrationFactor);
+  printOpticalWindow(output, opticalWindow);
+  printCalibrationOffsets(output);
+  printCalibrationChannelFactors(output);
   output.print(F(",\"uv_available\":"));
   output.print(uvSensor.available() ? F("true") : F("false"));
   output.print(F(","));
@@ -1149,7 +1308,7 @@ void printHello(
     output.print(F("\",\"direction\":\""));
     output.print(rule.above ? F("ABOVE") : F("BELOW"));
     output.print(F("\",\"threshold\":"));
-    printFloat(output, rule.threshold);
+    printIrradiance(output, rule.threshold);
     output.print('}');
   }
   output.print(']');
@@ -1159,6 +1318,8 @@ void printHello(
   output.print(offlineJob.enabled ? F("true") : F("false"));
   output.print(F(",\"operation_active\":"));
   output.print(sensorActivityActive() ? F("true") : F("false"));
+  output.print(F(",\"calibration_locked\":"));
+  output.print(sensorOperationActive(false) ? F("true") : F("false"));
   output.print(F(",\"offline_session_id\":"));
   printUInt64(output, offlineJob.sessionId);
   output.print(F(",\"offline_completed\":"));
@@ -1266,6 +1427,33 @@ void printFloat(Print &output, float value) {
   output.print(value, 6);
 }
 
+void printIrradiance(Print &output, float siValue) {
+  char text[32];
+  snprintf(text, sizeof(text), "%.9g", static_cast<double>(uvirWm2ToLegacy(siValue)));
+  output.print(text); // v1 wire stays explicitly µW/cm², including old Android clients.
+}
+
+String storedAlertDetailsForV1(const UvirStoredRecord &record) {
+  if (record.version < 3) return String(record.payload.details);
+  // The wire is not constrained to the fixed-size offline record payload.
+  char text[768] = {};
+  if (!uvirScaleAlertDetails(record.payload.details, text, sizeof(text), 100.0)) return String();
+  return String(text);
+}
+
+void printStoredIrradiance(Print &output, float value, uint16_t version) {
+  if (version >= 3) printIrradiance(output, value);
+  else {
+    char text[32]; snprintf(text, sizeof(text), "%.9g", static_cast<double>(value));
+    output.print(text);
+  }
+}
+
+String irradianceNumber(float value) {
+  char text[32]; snprintf(text, sizeof(text), "%.9g", static_cast<double>(value));
+  return String(text);
+}
+
 // Reuse every physical reading (live, acquisition or alert) for conditions.
 // This avoids a second slow sampling loop and never changes the alert rules.
 void observeAutomaticConditionSample(const UvirBandSample &sample) {
@@ -1276,6 +1464,7 @@ void observeAutomaticConditionSample(const UvirBandSample &sample) {
 }
 
 bool captureBandSample(UvirBandSample &sample) {
+  if (!siConfigurationHealthy) return false;
   // Start the UV one-shot first, then let its conversion overlap the AS7343
   // integration. This avoids stretching Uvir's configured sample cadence.
   if (!uvSensor.beginCapture()) {
@@ -1284,7 +1473,7 @@ bool captureBandSample(UvirBandSample &sample) {
   if (!visibleSensor.capture(
           visibleCalibrationFactor,
           sample.values,
-          sample.saturated)) {
+          sample.saturated, calibrationOffsets, calibrationChannelFactors)) {
     uvSensor.cancelCapture();
     return false;
   }
@@ -1292,11 +1481,68 @@ bool captureBandSample(UvirBandSample &sample) {
           uvCalibrationFactor,
           sample.values[0],
           sample.values[1],
-          sample.values[2])) {
+          sample.values[2], calibrationOffsets, calibrationChannelFactors)) {
     return false;
   }
+  if (!uvirApplyOpticalWindow(sample.values, opticalWindow)) return false;
   observeAutomaticConditionSample(sample);
   return true;
+}
+
+void printDarkOffsets(Print &output, const char *state, const char *error = nullptr) {
+  output.print(F("{\"type\":\"dark_offsets\",\"protocol\":\"uvir-sensor-v1\",\"device_id\":\""));
+  output.print(sensorDeviceId);
+  output.print(F("\",\"request_id\":\""));
+  output.print(darkOffsetsRequestId);
+  output.print(F("\",\"group\":\""));
+  output.print(darkOffsets.uv ? "UV" : "VIS");
+  output.print(F("\",\"state\":\""));
+  output.print(state);
+  output.print(F("\",\"elapsed_ms\":"));
+  output.print(min(darkOffsets.elapsed(millis()), UvirDarkOffsets::kDurationMs));
+  output.print(F(",\"samples\":"));
+  output.print(darkOffsets.count);
+  if (error != nullptr) {
+    output.print(F(",\"error\":\"")); output.print(error); output.print('"');
+  }
+  if (strcmp(state, "ready") == 0) {
+    output.print(F(",\"unit\":\"uW/cm2\",\"values\":["));
+    const int first = darkOffsets.uv ? 0 : 3, end = darkOffsets.uv ? 3 : 11;
+    for (int i = first; i < end; ++i) {
+      if (i != first) output.print(',');
+      printIrradiance(output, darkOffsets.means[i]);
+    }
+    output.print(']');
+  }
+  output.println('}');
+}
+
+void serviceDarkOffsets() {
+  if (!darkOffsets.active) return;
+  Print *output = outputForTransport(darkOffsetsTransport);
+  if (output == nullptr || !isAuthenticated(darkOffsetsTransport) ||
+      millis() - darkOffsetsHostAtMs >= kHostTimeoutMs) {
+    darkOffsets.cancel();
+    return;
+  }
+  if (darkOffsets.finished(millis())) {
+    darkOffsets.cancel();
+    printDarkOffsets(*output, darkOffsets.usable() ? "ready" : "error", darkOffsets.usable() ? nullptr : "too_few_samples");
+    return;
+  }
+  if (!darkOffsets.due(millis())) return;
+  UvirBandSample raw;
+  // Do NOT use captureBandSample: it applies user corrections and feeds acquisition conditions.
+  const bool captured = darkOffsets.uv
+      ? (uvSensor.beginCapture() && uvSensor.finishCapture(1.f, raw.values[0], raw.values[1], raw.values[2]))
+      : visibleSensor.capture(1.f, raw.values, raw.saturated);
+  if (!captured || !darkOffsets.add(raw.values, raw.saturated, millis())) {
+    uvSensor.cancelCapture();
+    darkOffsets.cancel();
+    printDarkOffsets(*output, "error", raw.saturated ? "saturated" : "read_failed");
+    return;
+  }
+  printDarkOffsets(*output, "progress");
 }
 
 bool alertEvaluationReady() {
@@ -1330,11 +1576,11 @@ String alertDetailsForSample(const UvirBandSample &sample) {
     if (!details.isEmpty()) details += ';';
     details += rule.metric;
     details += '|';
-    details += String(value, 6);
+    details += irradianceNumber(value);
     details += '|';
     details += rule.above ? "ABOVE" : "BELOW";
     details += '|';
-    details += String(rule.threshold, 6);
+    details += irradianceNumber(rule.threshold);
   }
   return details;
 }
@@ -1357,14 +1603,17 @@ void emitConnectedAlertIfNeeded(
   const uint64_t timestampMs = currentEpochMs();
   output.print(F("{\"type\":\"alert_event\",\"protocol\":\""));
   output.print(kProtocol);
-  output.print(F("\",\"timestamp_ms\":"));
+  output.print(F("\",\"unit\":\"uW/cm2\",\"timestamp_ms\":"));
   printUInt64(output, timestampMs);
   output.print(F(",\"details\":\""));
-  printJsonString(output, details);
+  char wireDetails[2304] = {};
+  if (uvirScaleAlertDetails(details.c_str(), wireDetails, sizeof(wireDetails), 100.0))
+    printJsonString(output, String(wireDetails));
   output.print(F("\",\"session_id\":"));
   printUInt64(output, offlineAlertSessionId);
   output.print(F(",\"recorded\":"));
   output.print(offlineAlertRecordingEnabled ? F("true") : F("false"));
+  printOpticalWindow(output, opticalWindow);
   output.println(F("}"));
 
   // The ESP32 owns this single deadline for connected and disconnected use.
@@ -1448,6 +1697,7 @@ bool continuousSampleIsFresh() {
 // instant of a physical command instead of starting another full sampling
 // window after the button has already been pressed.
 void serviceContinuousSampling() {
+  if (darkOffsets.active) return;
   if (!visibleSensor.available()) return;
 
   const uint32_t now = millis();
@@ -1469,6 +1719,7 @@ void serviceContinuousSampling() {
 }
 
 void printSample(Print &output) {
+  if (darkOffsets.active) return;
   if (!latestContinuousSampleAvailable) return;
   const UvirBandSample sample = latestContinuousSample;
 
@@ -1483,7 +1734,7 @@ void printSample(Print &output) {
   output.print(F("\"calibration\":\""));
   output.print(
       fabsf(visibleCalibrationFactor - 1.0f) < 0.0001f &&
-              fabsf(uvCalibrationFactor - 1.0f) < 0.0001f
+              fabsf(uvCalibrationFactor - 1.0f) < 0.0001f && uvirZeroCalibrationOffsets(calibrationOffsets) && uvirUnitChannelFactors(calibrationChannelFactors)
           ? F("datasheet_estimate")
           : F("user_adjusted"));
   output.print(F("\","));
@@ -1503,28 +1754,29 @@ void printSample(Print &output) {
   output.print(samplingSpacingMs);
   output.print(F(",\"extremes_discarded\":"));
   output.print(samplingDiscardExtremes ? F("true") : F("false"));
+  printOpticalWindow(output, opticalWindow);
   output.print(F(",\"bands\":{\"uvc\":"));
-  printFloat(output, sample.values[0]);
+  printIrradiance(output, sample.values[0]);
   output.print(F(",\"uvb\":"));
-  printFloat(output, sample.values[1]);
+  printIrradiance(output, sample.values[1]);
   output.print(F(",\"uva\":"));
-  printFloat(output, sample.values[2]);
+  printIrradiance(output, sample.values[2]);
   output.print(F(",\"violet\":"));
-  printFloat(output, sample.values[3]);
+  printIrradiance(output, sample.values[3]);
   output.print(F(",\"blue\":"));
-  printFloat(output, sample.values[4]);
+  printIrradiance(output, sample.values[4]);
   output.print(F(",\"green\":"));
-  printFloat(output, sample.values[5]);
+  printIrradiance(output, sample.values[5]);
   output.print(F(",\"yellow\":"));
-  printFloat(output, sample.values[6]);
+  printIrradiance(output, sample.values[6]);
   output.print(F(",\"orange\":"));
-  printFloat(output, sample.values[7]);
+  printIrradiance(output, sample.values[7]);
   output.print(F(",\"red\":"));
-  printFloat(output, sample.values[8]);
+  printIrradiance(output, sample.values[8]);
   output.print(F(",\"far_red\":"));
-  printFloat(output, sample.values[9]);
+  printIrradiance(output, sample.values[9]);
   output.print(F(",\"nir\":"));
-  printFloat(output, sample.values[10]);
+  printIrradiance(output, sample.values[10]);
   output.println(F("}}"));
   emitConnectedAlertIfNeeded(output, sample);
 }
@@ -1661,6 +1913,17 @@ AveragedAcquisitionStep serviceAveragedAcquisition(UvirBandSample &result) {
 }
 
 void persistOfflineAlerts() {
+  PersistentSiAlertRules siRules;
+  siRules.count = offlineAlertRuleCount;
+  for (uint8_t i = 0; i < offlineAlertRuleCount; ++i) {
+    snprintf(siRules.rules[i].metric, sizeof(siRules.rules[i].metric), "%s", offlineAlertRules[i].metric.c_str());
+    siRules.rules[i].above = offlineAlertRules[i].above ? 1 : 0;
+    siRules.rules[i].threshold = offlineAlertRules[i].threshold;
+  }
+  if (preferences.putBytes("si_alert_rules", &siRules, sizeof(siRules)) != sizeof(siRules)) {
+    offlineStorageError = true;
+    return;
+  }
   preferences.putBool("alert_enabled", offlineAlertsEnabled);
   preferences.putBool("alert_record", offlineAlertRecordingEnabled);
   preferences.putUInt("alert_repeat", offlineAlertRepeatSeconds);
@@ -1683,7 +1946,7 @@ void persistOfflineAlerts() {
     preferences.putBool(
         aboveKey.c_str(), offlineAlertRules[index].above);
     preferences.putFloat(
-        thresholdKey.c_str(), offlineAlertRules[index].threshold);
+        thresholdKey.c_str(), uvirWm2ToLegacy(offlineAlertRules[index].threshold)); // downgrade mirror only
   }
   if (runtimeStatePersistenceEnabled) persistRuntimeActivityState();
 }
@@ -1774,7 +2037,7 @@ bool restoreRuntimeActivityState() {
       restoredV2 ? static_cast<const PersistentRuntimeActivityStateV1 &>(state)
                  : previousState;
   if (saved.magic != 0x55565254 ||
-      saved.version != (restoredV2 ? 2 : 1) ||
+      (restoredV2 ? (saved.version != 2 && saved.version != 3) : saved.version != 1) ||
       saved.size != (restoredV2 ? sizeof(state) : sizeof(previousState)) ||
       saved.samplesPerAcquisition == 0 ||
       saved.samplesPerAcquisition > kMaximumAcquisitionSamples ||
@@ -1799,6 +2062,9 @@ bool restoreRuntimeActivityState() {
   restoredJob.sampleSpacingMs = stateV1.sampleSpacingMs;
   restoredJob.discardExtremes = stateV1.discardExtremes != 0;
   restoredJob.condition = stateV1.condition;
+  if (saved.version < 3)
+    for (uint8_t i = 0; i < restoredJob.condition.count; ++i)
+      restoredJob.condition.rules[i].threshold = uvirLegacyToWm2(restoredJob.condition.rules[i].threshold);
   restoredJob.conditionStarted = stateV1.conditionStarted != 0;
   restoredJob.conditionDurationSeconds = stateV1.conditionDurationSeconds;
   restoredJob.startedAtMs = stateV1.startedAtMs;
@@ -1832,7 +2098,7 @@ bool restoreRuntimeActivityState() {
     }
     offlineAlertRules[index].metric = metric;
     offlineAlertRules[index].above = source.above != 0;
-    offlineAlertRules[index].threshold = source.threshold;
+    offlineAlertRules[index].threshold = saved.version < 3 ? uvirLegacyToWm2(source.threshold) : source.threshold;
   }
   return true;
 }
@@ -2080,9 +2346,10 @@ void storeOfflineError(const String &code, const String &message) {
 }
 
 void printStoredRecord(Print &output, const UvirStoredRecord &record) {
+  // Wire v1 stays µW/cm², independent of each queued record's storage version.
   output.print(F("{\"type\":\"offline_record\",\"protocol\":\""));
   output.print(kProtocol);
-  output.print(F("\",\"record_kind\":\""));
+  output.print(F("\",\"unit\":\"uW/cm2\",\"record_kind\":\""));
   output.print(
       record.type == static_cast<uint8_t>(UvirStoredRecordType::Acquisition)
           ? F("acquisition")
@@ -2093,6 +2360,8 @@ void printStoredRecord(Print &output, const UvirStoredRecord &record) {
   printUInt64(output, record.recordId);
   output.print(F(",\"timestamp_ms\":"));
   printUInt64(output, record.timestampMs);
+  UvirOpticalWindow storedWindow;
+  if (offlineStore.recordOpticalWindow(record, storedWindow)) printOpticalWindow(output, storedWindow);
   if (record.type == static_cast<uint8_t>(UvirStoredRecordType::Acquisition)) {
     output.print(F(",\"session_id\":"));
     printUInt64(output, static_cast<uint64_t>(record.sessionId));
@@ -2106,23 +2375,23 @@ void printStoredRecord(Print &output, const UvirStoredRecord &record) {
         output,
         String(record.payload.acquisition.legacyNote));
     output.print(F("\",\"bands\":{\"uvc\":"));
-    printFloat(output, record.payload.acquisition.bands[0]);
-    output.print(F(",\"uvb\":")); printFloat(output, record.payload.acquisition.bands[1]);
-    output.print(F(",\"uva\":")); printFloat(output, record.payload.acquisition.bands[2]);
-    output.print(F(",\"violet\":")); printFloat(output, record.payload.acquisition.bands[3]);
-    output.print(F(",\"blue\":")); printFloat(output, record.payload.acquisition.bands[4]);
-    output.print(F(",\"green\":")); printFloat(output, record.payload.acquisition.bands[5]);
-    output.print(F(",\"yellow\":")); printFloat(output, record.payload.acquisition.bands[6]);
-    output.print(F(",\"orange\":")); printFloat(output, record.payload.acquisition.bands[7]);
-    output.print(F(",\"red\":")); printFloat(output, record.payload.acquisition.bands[8]);
-    output.print(F(",\"far_red\":")); printFloat(output, record.payload.acquisition.bands[9]);
-    output.print(F(",\"nir\":")); printFloat(output, record.payload.acquisition.bands[10]);
+    printStoredIrradiance(output, record.payload.acquisition.bands[0], record.version);
+    output.print(F(",\"uvb\":")); printStoredIrradiance(output, record.payload.acquisition.bands[1], record.version);
+    output.print(F(",\"uva\":")); printStoredIrradiance(output, record.payload.acquisition.bands[2], record.version);
+    output.print(F(",\"violet\":")); printStoredIrradiance(output, record.payload.acquisition.bands[3], record.version);
+    output.print(F(",\"blue\":")); printStoredIrradiance(output, record.payload.acquisition.bands[4], record.version);
+    output.print(F(",\"green\":")); printStoredIrradiance(output, record.payload.acquisition.bands[5], record.version);
+    output.print(F(",\"yellow\":")); printStoredIrradiance(output, record.payload.acquisition.bands[6], record.version);
+    output.print(F(",\"orange\":")); printStoredIrradiance(output, record.payload.acquisition.bands[7], record.version);
+    output.print(F(",\"red\":")); printStoredIrradiance(output, record.payload.acquisition.bands[8], record.version);
+    output.print(F(",\"far_red\":")); printStoredIrradiance(output, record.payload.acquisition.bands[9], record.version);
+    output.print(F(",\"nir\":")); printStoredIrradiance(output, record.payload.acquisition.bands[10], record.version);
     output.print(F("}"));
   } else if (record.type == static_cast<uint8_t>(UvirStoredRecordType::Alert)) {
     output.print(F(",\"session_id\":"));
     printUInt64(output, static_cast<uint64_t>(record.sessionId));
     output.print(F(",\"details\":\""));
-    printJsonString(output, String(record.payload.details));
+    printJsonString(output, storedAlertDetailsForV1(record));
     output.print(F("\""));
   } else {
     output.print(F(",\"code\":\""));
@@ -2151,7 +2420,7 @@ void printConditionalJobFields(Print &output) {
       output.print(rule.above ? "ABOVE" : "BELOW");
       output.print(',');
       // Nine significant digits preserve a Float threshold across a readback.
-      char value[32]; snprintf(value,sizeof(value),"%.9g",static_cast<double>(rule.threshold));
+      char value[32]; snprintf(value,sizeof(value),"%.9g",static_cast<double>(uvirWm2ToLegacy(rule.threshold)));
       output.print(value);
     }
   }
@@ -2164,7 +2433,7 @@ void printConditionalJobFields(Print &output) {
 void printAutomaticStatus(Print &output) {
   output.print(F("{\"type\":\"automatic_status\",\"protocol\":\""));
   output.print(kProtocol);
-  output.print(F("\",\"session_id\":"));
+  output.print(F("\",\"unit\":\"uW/cm2\",\"session_id\":"));
   printUInt64(output, offlineJob.sessionId);
   output.print(F(",\"completed_count\":"));
   output.print(offlineJob.completedCount);
@@ -2181,7 +2450,7 @@ void printLiveAcquisitionEvent(
     const UvirStoredRecord &record) {
   output.print(F("{\"type\":\"acquisition_event\",\"protocol\":\""));
   output.print(kProtocol);
-  output.print(F("\",\"record_id\":"));
+  output.print(F("\",\"unit\":\"uW/cm2\",\"record_id\":"));
   printUInt64(output, record.recordId);
   output.print(F(",\"timestamp_ms\":"));
   printUInt64(output, record.timestampMs);
@@ -2200,18 +2469,19 @@ void printLiveAcquisitionEvent(
   output.print(offlineJob.enabled ? F("true") : F("false"));
   output.print(F(",\"next_at_ms\":"));
   printUInt64(output, offlineJob.nextAtMs);
+  printOpticalWindow(output, opticalWindow);
   output.print(F(",\"bands\":{\"uvc\":"));
-  printFloat(output, record.payload.acquisition.bands[0]);
-  output.print(F(",\"uvb\":")); printFloat(output, record.payload.acquisition.bands[1]);
-  output.print(F(",\"uva\":")); printFloat(output, record.payload.acquisition.bands[2]);
-  output.print(F(",\"violet\":")); printFloat(output, record.payload.acquisition.bands[3]);
-  output.print(F(",\"blue\":")); printFloat(output, record.payload.acquisition.bands[4]);
-  output.print(F(",\"green\":")); printFloat(output, record.payload.acquisition.bands[5]);
-  output.print(F(",\"yellow\":")); printFloat(output, record.payload.acquisition.bands[6]);
-  output.print(F(",\"orange\":")); printFloat(output, record.payload.acquisition.bands[7]);
-  output.print(F(",\"red\":")); printFloat(output, record.payload.acquisition.bands[8]);
-  output.print(F(",\"far_red\":")); printFloat(output, record.payload.acquisition.bands[9]);
-  output.print(F(",\"nir\":")); printFloat(output, record.payload.acquisition.bands[10]);
+  printStoredIrradiance(output, record.payload.acquisition.bands[0], record.version);
+  output.print(F(",\"uvb\":")); printStoredIrradiance(output, record.payload.acquisition.bands[1], record.version);
+  output.print(F(",\"uva\":")); printStoredIrradiance(output, record.payload.acquisition.bands[2], record.version);
+  output.print(F(",\"violet\":")); printStoredIrradiance(output, record.payload.acquisition.bands[3], record.version);
+  output.print(F(",\"blue\":")); printStoredIrradiance(output, record.payload.acquisition.bands[4], record.version);
+  output.print(F(",\"green\":")); printStoredIrradiance(output, record.payload.acquisition.bands[5], record.version);
+  output.print(F(",\"yellow\":")); printStoredIrradiance(output, record.payload.acquisition.bands[6], record.version);
+  output.print(F(",\"orange\":")); printStoredIrradiance(output, record.payload.acquisition.bands[7], record.version);
+  output.print(F(",\"red\":")); printStoredIrradiance(output, record.payload.acquisition.bands[8], record.version);
+  output.print(F(",\"far_red\":")); printStoredIrradiance(output, record.payload.acquisition.bands[9], record.version);
+  output.print(F(",\"nir\":")); printStoredIrradiance(output, record.payload.acquisition.bands[10], record.version);
   output.println(F("}}"));
 }
 
@@ -2250,6 +2520,7 @@ bool beginExternalCommandProvisionalAcquisition() {
 }
 
 void handleExternalCommandTriplePress() {
+  if (darkOffsets.active) { statusLed.signalTimeUnavailable(); return; }
   // A triple press is a session-start gesture, never three acquisitions.
   // Existing sessions own the input already and deliberately ignore it.
   externalAcquisitionRequestsPending = 0;
@@ -2359,6 +2630,18 @@ void IRAM_ATTR onExternalCommandEdge() {
 }
 
 void serviceExternalCommandInput() {
+  if (darkOffsets.active) {
+    // A physical press must never add records or change LED conditions during dark measurement.
+    externalCommandShortPressCount = 0;
+    externalCommandGesturePrimed = false;
+    portENTER_CRITICAL(&externalCommandMux);
+    externalCommandPressActive = false;
+    externalCommandShortPressPendingCount = 0;
+    externalCommandLongPressPending = false;
+    externalCommandLongPressReported = false;
+    portEXIT_CRITICAL(&externalCommandMux);
+    return;
+  }
   if (!externalCommandEnabled) {
     portENTER_CRITICAL(&externalCommandMux);
     externalCommandPressActive = false;
@@ -3276,24 +3559,32 @@ void printCalibrationStatus(Print &output) {
   output.print(F("\"calibration_saved\":true,\"calibration\":\""));
   output.print(
       fabsf(visibleCalibrationFactor - 1.0f) < 0.0001f &&
-              fabsf(uvCalibrationFactor - 1.0f) < 0.0001f
+              fabsf(uvCalibrationFactor - 1.0f) < 0.0001f && uvirZeroCalibrationOffsets(calibrationOffsets) && uvirUnitChannelFactors(calibrationChannelFactors)
           ? F("datasheet_estimate")
           : F("user_adjusted"));
   output.print(F("\",\"visible_calibration_factor\":"));
   printFloat(output, visibleCalibrationFactor);
   output.print(F(",\"uv_calibration_factor\":"));
   printFloat(output, uvCalibrationFactor);
+  printOpticalWindow(output, opticalWindow);
+  printCalibrationOffsets(output);
+  printCalibrationChannelFactors(output);
   output.println(F("}"));
 }
 
-bool sensorOperationActive() {
-  return offlineJob.enabled || alertMonitoringActive() ||
+bool sensorOperationActive(bool includeCommandIndicator) {
+  return darkOffsets.active || offlineJob.enabled || alertMonitoringActive() ||
       pendingLiveAcquisition || externalAcquisitionRequestsPending > 0 ||
       externalCommandShortPressCount > 0 ||
       averagedAcquisition.kind != AveragedAcquisitionKind::None ||
       alertConfigurationInProgress || offlineStore.syncActive() ||
       debugPerformance.active() || statusLed.selfTestActive() ||
-      statusBuzzer.selfTestActive() || statusLed.commandActivityActive();
+      statusBuzzer.selfTestActive() ||
+      (includeCommandIndicator && statusLed.commandActivityActive());
+}
+
+bool sensorOperationActive() {
+  return sensorOperationActive(true);
 }
 
 bool sensorActivityActive() {
@@ -3308,15 +3599,19 @@ void refreshSensorActivity() {
     return;
   }
   const bool active = sensorActivityActive();
+  const bool calibrationLocked = sensorOperationActive(false);
   if (activityReported && lastActivityTransport == activeTransport &&
-      lastReportedActivity == active) return;
+      lastReportedActivity == active && lastReportedCalibrationLocked == calibrationLocked) return;
   activityReported = true;
   lastActivityTransport = activeTransport;
   lastReportedActivity = active;
+  lastReportedCalibrationLocked = calibrationLocked;
   output->print(F("{\"type\":\"activity\",\"protocol\":\"uvir-sensor-v1\",\"device_id\":\""));
   output->print(sensorDeviceId);
   output->print(F("\",\"operation_active\":"));
   output->print(active ? F("true") : F("false"));
+  output->print(F(",\"calibration_locked\":"));
+  output->print(calibrationLocked ? F("true") : F("false"));
   output->println(F("}"));
 }
 
@@ -3416,6 +3711,55 @@ void handleCommand(String command, Transport transport, Print &output) {
   if (!isAuthenticated(transport)) {
     printError(output, F("auth_required"), F("Authenticate before using the sensor"));
     return;
+  }
+
+  if (darkOffsets.active && darkOffsetsTransport == transport) darkOffsetsHostAtMs = millis();
+  if (command.startsWith("DARK_OFFSETS ")) {
+    int position = 0;
+    String payload = command.substring(13);
+    const String action = takeCommandToken(payload, position);
+    const bool start = action == "START";
+    const String group = start ? takeCommandToken(payload, position) : "";
+    const String id = takeCommandToken(payload, position);
+    bool valid = id.length() == 32 && takeCommandToken(payload, position).isEmpty();
+    for (size_t i = 0; valid && i < id.length(); ++i) {
+      valid = (id[i] >= '0' && id[i] <= '9') || (id[i] >= 'A' && id[i] <= 'F');
+    }
+    if (!valid || (start && group != "UV" && group != "VIS") || (!start && action != "CANCEL")) {
+      printError(output, F("dark_offsets_invalid"), F("Invalid dark-offset request"));
+      return;
+    }
+    if (!start) {
+      if (darkOffsets.active && darkOffsetsTransport == transport && id == darkOffsetsRequestId) {
+        darkOffsets.cancel();
+        printDarkOffsets(output, "cancelled");
+      }
+      return;
+    }
+    if (sensorOperationActive(false) ||
+        (group == "UV" ? !uvSensor.available() : !visibleSensor.available())) {
+      // Correlate refusal too; never steal or cancel another request.
+      output.print(F("{\"type\":\"dark_offsets\",\"protocol\":\"uvir-sensor-v1\",\"device_id\":\""));
+      output.print(sensorDeviceId); output.print(F("\",\"request_id\":\"")); output.print(id);
+      output.print(F("\",\"group\":\"")); output.print(group);
+      output.println(F("\",\"state\":\"error\",\"error\":\"unavailable_or_busy\"}"));
+      return;
+    }
+    darkOffsets.start(group == "UV", millis());
+    darkOffsetsRequestId = id;
+    darkOffsetsTransport = transport;
+    darkOffsetsHostAtMs = millis();
+    printDarkOffsets(output, "progress");
+    return;
+  }
+  if (darkOffsets.active && command != "HELLO" && command != "PING" && command != "SAMPLE" &&
+      command != "STOP" && !command.startsWith("STREAM")) {
+    printError(output, F("dark_offsets_busy"), F("Cancel dark measurement before changing sensor state"));
+    return;
+  }
+  if (command == "STOP" && transport == darkOffsetsTransport && darkOffsets.active) {
+    darkOffsets.cancel();
+    printDarkOffsets(output, "cancelled");
   }
 
   if (command.startsWith("SETTINGS_APPLY ")) {
@@ -3887,21 +4231,57 @@ void handleCommand(String command, Transport transport, Print &output) {
   }
 
   if (command.startsWith("CALIBRATION_CONFIG ")) {
-    String payload = originalCommand.substring(19);
-    int position = 0;
-    const float visibleFactor = takeCommandToken(payload, position).toFloat();
-    const float uvFactor = takeCommandToken(payload, position).toFloat();
-    if (!isfinite(visibleFactor) || !isfinite(uvFactor) ||
-        visibleFactor < 0.1f || visibleFactor > 10.0f ||
-        uvFactor < 0.1f || uvFactor > 10.0f) {
+    float visibleFactor = 1, uvFactor = 1;
+    UvirOpticalWindow nextWindow;
+    UvirCalibrationOffsets nextOffsets = calibrationOffsets;
+    UvirCalibrationChannelFactors nextChannels = calibrationChannelFactors;
+    if (!uvirParseCalibration(originalCommand.substring(19).c_str(), visibleFactor, uvFactor, nextWindow, &nextOffsets, &nextChannels)) {
       printError(
           output,
           F("calibration_invalid"),
-          F("Use CALIBRATION_CONFIG visible_factor uv_factor (0.1-10.0)"));
+          F("Use CALIBRATION_CONFIG visible uv [ON|OFF 11 window factors [COLOR_OFFSETS 11 offsets] [CHANNEL_FACTORS 11 absolute gains] [WINDOW_MASTER factor]]"));
+      return;
+    }
+    if (visibleCalibrationFactor == visibleFactor && uvCalibrationFactor == uvFactor &&
+        uvirSameOpticalWindow(opticalWindow, nextWindow) && uvirSameCalibrationOffsets(calibrationOffsets, nextOffsets) &&
+        uvirSameChannelFactors(calibrationChannelFactors, nextChannels)) {
+      printCalibrationStatus(output);
+      return;
+    }
+    // The command scope already lights the activity LED. Neither this command
+    // nor the indicator's short hold is a running acquisition/session/test.
+    if (sensorOperationActive(false)) {
+      printError(output, F("calibration_busy"), F("Stop activities before changing calibration or optical compensation"));
+      return;
+    }
+    // A legacy client cannot silently discard a master that it cannot represent.
+    if (opticalWindow.signature == kUvirOpticalV2 && originalCommand.indexOf("WINDOW_MASTER") < 0) {
+      printError(output, F("calibration_invalid"), F("Include WINDOW_MASTER to preserve the configured optical master"));
+      return;
+    }
+    // Older clients must not unknowingly override per-channel calibration by editing module gains.
+    if (calibrationChannelFactors.enabled && originalCommand.indexOf("CHANNEL_FACTORS") < 0 &&
+        (visibleFactor != visibleCalibrationFactor || uvFactor != uvCalibrationFactor)) {
+      printError(output, F("calibration_invalid"), F("Include CHANNEL_FACTORS when changing an existing per-channel calibration"));
+      return;
+    }
+    UvirCalibrationStateV4 nextCalibration;
+    nextCalibration.signature = 0x43414c35;
+    nextCalibration.visible = visibleFactor;
+    nextCalibration.uv = uvFactor;
+    nextCalibration.window = nextWindow;
+    nextCalibration.offsets = nextOffsets;
+    nextCalibration.channels = nextChannels;
+    if (preferences.putBytes("cal_state5", &nextCalibration, sizeof(nextCalibration)) != sizeof(nextCalibration)) {
+      printError(output, F("calibration_save_failed"), F("Calibration could not be saved; previous settings retained"));
       return;
     }
     visibleCalibrationFactor = visibleFactor;
     uvCalibrationFactor = uvFactor;
+    opticalWindow = nextWindow;
+    calibrationOffsets = nextOffsets;
+    calibrationChannelFactors = nextChannels;
+    offlineStore.setOpticalWindow(opticalWindow);
     preferences.putFloat("cal_visible", visibleCalibrationFactor);
     preferences.putFloat("cal_uv", uvCalibrationFactor);
     resetLiveSampleWindow();
@@ -4492,7 +4872,7 @@ void handleCommand(String command, Transport transport, Print &output) {
     rule.metric = takeCommandToken(payload, position);
     const String direction = takeCommandToken(payload, position);
     rule.above = direction == "ABOVE";
-    rule.threshold = takeCommandToken(payload, position).toFloat();
+    rule.threshold = uvirLegacyToWm2(takeCommandToken(payload, position).toFloat());
     if (rule.metric.isEmpty() || (direction != "ABOVE" && direction != "BELOW")) {
       printError(output, F("alert_rule_invalid"), F("Use ALERT_RULE metric ABOVE/BELOW threshold"));
       return;
@@ -4958,18 +5338,24 @@ void handleCommand(String command, Transport transport, Print &output) {
   printError(output, F("unknown_command"), F("Unsupported sensor command"));
 }
 
-void readCommands(Stream &input, Print &output, String &buffer, Transport transport) {
+void readCommands(Stream &input, Print &output, String &buffer, Transport transport,
+    UvirCommandLineGuard &guard) {
   while (input.available() > 0) {
     const char value = static_cast<char>(input.read());
-    if (value == '\n' || value == '\r') {
-      if (!buffer.isEmpty()) {
+    switch (guard.accept(value, buffer.length())) {
+      case UvirCommandByteAction::Dispatch:
         handleCommand(buffer, transport, output);
         buffer = "";
-      }
-    } else if (buffer.length() < 512) {
-      buffer += value;
-    } else {
-      buffer = "";
+        break;
+      case UvirCommandByteAction::Append:
+        buffer += value;
+        break;
+      case UvirCommandByteAction::Overflow:
+        buffer = "";
+        printError(output, F("command_too_long"), F("Command exceeds 16384 bytes"));
+        break;
+      case UvirCommandByteAction::Ignore:
+        break;
     }
   }
 }
@@ -5066,6 +5452,7 @@ void serviceWifi() {
       wifiAuthenticated = false;
       wifiClientConnectedAtMs = millis();
       wifiCommandBuffer = "";
+      wifiCommandGuard.reset();
     }
     if (lostAuthenticatedClient) {
       resumeWirelessFallbackAfterDisconnect();
@@ -5077,7 +5464,7 @@ void serviceWifi() {
       wifiClient.stop();
       return;
     }
-    readCommands(wifiClient, wifiOutput, wifiCommandBuffer, Transport::Wifi);
+    readCommands(wifiClient, wifiOutput, wifiCommandBuffer, Transport::Wifi, wifiCommandGuard);
   }
 }
 
@@ -5163,11 +5550,11 @@ void serviceInternet() {
     internetCommandBuffer = "";
     while (internetMqttClient.available() > 0) {
       const char value = static_cast<char>(internetMqttClient.read());
-      if (internetCommandBuffer.length() < 16384) {
+      if (internetCommandBuffer.length() < kUvirMaximumCommandBytes) {
         internetCommandBuffer += value;
       }
     }
-    if (expectedTopic && !retained && !internetCommandBuffer.isEmpty()) {
+    if (expectedTopic && !retained && messageSize <= kUvirMaximumCommandBytes && !internetCommandBuffer.isEmpty()) {
       handleCommand(
           internetCommandBuffer,
           Transport::Internet,
@@ -5181,6 +5568,8 @@ void serviceBluetooth() {
   if (wirelessMode != WirelessMode::Bluetooth || !bluetoothSerial.hasClient()) {
     const bool lostAuthenticatedClient = bluetoothAuthenticated;
     bluetoothAuthenticated = false;
+    bluetoothCommandBuffer = "";
+    bluetoothCommandGuard.reset();
     if (lostAuthenticatedClient) {
       resumeWirelessFallbackAfterDisconnect();
     }
@@ -5190,7 +5579,8 @@ void serviceBluetooth() {
       bluetoothSerial,
       bluetoothSerial,
       bluetoothCommandBuffer,
-      Transport::Bluetooth);
+      Transport::Bluetooth,
+      bluetoothCommandGuard);
 }
 
 }  // namespace
@@ -5287,7 +5677,7 @@ void loop() {
   serviceExternalCommandInput();
   serviceRtcClock();
   serviceOfflineRecording();
-  readCommands(Serial, Serial, usbCommandBuffer, Transport::Usb);
+  readCommands(Serial, Serial, usbCommandBuffer, Transport::Usb, usbCommandGuard);
   serviceWifi();
   serviceInternet();
   serviceBluetooth();
@@ -5320,6 +5710,7 @@ void loop() {
     }
   }
 
+  serviceDarkOffsets();
   serviceContinuousSampling();
 
   if (streamEnabled && static_cast<int32_t>(now - nextSampleAtMs) >= 0) {

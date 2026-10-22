@@ -149,7 +149,7 @@ inline bool uvirParseCondition(const char *tail,UvirConditionPlan &destination,
     if (!uvirConditionToken(cursor,token,sizeof(token))) return false;
     errno=0; const float threshold=strtof(token,&end);
     if(errno || *end || end==token || !isfinite(threshold) || threshold<0) return false;
-    plan.rules[i].threshold=threshold;
+    plan.rules[i].threshold=threshold / 100.f; // v1 command µW/cm² -> internal SI
   }
   while(*cursor==' ') ++cursor;
   if (*cursor || !uvirConditionPlanValid(plan)) return false;

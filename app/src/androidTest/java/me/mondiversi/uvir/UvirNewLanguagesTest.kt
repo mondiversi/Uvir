@@ -13,6 +13,8 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.performScrollTo
 import androidx.test.platform.app.InstrumentationRegistry
 import java.util.Locale
@@ -36,7 +38,7 @@ class UvirNewLanguagesTest {
             val res = resources(tag)
             assertEquals("Pengaturan", res.getString(R.string.acquisition_parameters))
             assertEquals("Bahasa Indonesia", res.getString(R.string.language_indonesian))
-            assertEquals("Buka pengaturan", res.getString(R.string.sensor_simulation_open_settings))
+            assertEquals("Pengaturan", res.getString(R.string.sensor_simulation_open_settings))
             for (count in listOf(0, 1, 2, 5, 21)) {
                 assertEquals("$count pengukuran",
                     res.getQuantityString(R.plurals.session_chart_acquisition_count, count, count))
@@ -101,7 +103,8 @@ class UvirNewLanguagesTest {
                 val res = resources(language)
                 for (key in listOf(R.string.sensor_info_general_information,
                     R.string.sensor_info_components, R.string.sensor_info_date_time)) {
-                    compose.onNodeWithText(res.getString(key)).performScrollTo().assertIsDisplayed()
+                    // The components caption also appears in the summary above its section.
+                    compose.onAllNodesWithText(res.getString(key)).onLast().performScrollTo().assertIsDisplayed()
                 }
             }
         }

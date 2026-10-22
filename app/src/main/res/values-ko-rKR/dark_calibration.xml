@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dark_offsets_calculate">오프셋 계산</string>
+    <string name="dark_offsets_instructions">안정적인 기준 조건에서 약 30초 동안 측정합니다. 어두운 곳에서는 센서 배경값을 보정하고, 조명이 있는 곳에서는 현재 빛도 빼므로 상대 측정값이 됩니다. 어두운 곳에서 측정할 때는 근적외선도 차단하는 재료로 광학 입력을 덮고 LED를 정상 작동 상태로 유지하세요. 평균값은 무작위 잡음을 제거하거나 게인을 교정하지 않습니다.</string>
+    <string name="dark_offsets_progress">측정 중: %1$s / 30초</string>
+    <string name="dark_offsets_result">%1$s회 판독에 따른 제안입니다. 설정은 변경되지 않았습니다.</string>
+    <string name="dark_offsets_failed">측정이 중단되었거나 사용할 수 없습니다. 연결과 센서를 확인하고 다시 시도하세요.</string>
+    <string name="dark_offsets_start">측정 시작</string>
+    <string name="dark_offsets_apply">오프셋 적용</string>
+    <string name="dark_offsets_firmware_required">센서 펌웨어 0.5.110 이상이 필요합니다.</string>
+    <string name="calibration_reset_values">값 초기화</string>
+    <string name="calibration_reset_confirmation_title">값을 초기화할까요?</string>
+    <string name="calibration_reset_confirm_action">초기화</string>
+    <string name="calibration_reset_confirmation_message">%1$s의 보정 계수를 1로, 오프셋을 0으로 초기화합니다. 다른 보정 및 광학 창 설정은 변경되지 않습니다.</string>
+    <string name="optical_window_reset_confirmation_message">전체 배수와 광학 창의 모든 채널 배수를 1로 초기화합니다. 교정은 변경하지 않습니다.</string>
+</resources>

@@ -14,5 +14,5 @@
     <string name="update_done">Capteur mis à jour</string>
     <string name="update_failed">Échec de la mise à jour. Consultez le journal des erreurs. Si le capteur ne démarre plus, restaurez le firmware par USB depuis un ordinateur.</string>
     <string name="update_permission">Autorisez Uvir à installer des mises à jour dans les paramètres Android.</string>
-    <string name="update_whats_new">Mises à jour signées de l’application et du capteur, téléchargements vérifiés et chargement du firmware par USB.</string>
+    <string name="update_whats_new">Exports CSV, TXT et PNG avec modèles des capteurs, références spectrales compactes et légendes des graphiques plus lisibles.</string>
 </resources>

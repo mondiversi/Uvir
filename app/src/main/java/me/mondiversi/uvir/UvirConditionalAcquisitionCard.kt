@@ -58,10 +58,10 @@ internal fun UvirConditionalAcquisitionCard(
             onClick = onConfigure, enabled = !locked,
             modifier = Modifier.fillMaxWidth(),
             colors = uvirOutlinedActionColors(primaryText),
-            border = uvirOutlinedActionBorder(!locked, secondaryText)
+            border = uvirOutlinedActionBorder(!locked, primaryText)
         ) {
             UvirLabeledButtonContent(
-                text = stringResource(R.string.conditional_configure)
+                text = uvirActionLabel(R.string.conditional_configure)
             ) {
                 AutomaticSettingIcon(
                     type = AutomaticSettingIconType.CONFIGURE,

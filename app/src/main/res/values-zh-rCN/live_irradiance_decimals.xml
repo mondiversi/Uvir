@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_irradiance_decimals">显示的小数位数</string>
+    <string name="live_irradiance_decimals_description">适用于显示值和自定义导出。保留末尾的零；已保存的数据和科学导出不变。</string>
+</resources>

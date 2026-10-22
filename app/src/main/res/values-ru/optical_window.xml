@@ -1,0 +1,24 @@
+<resources>
+    <string name="optical_window_factor_limits">Допустимые значения: %1$s–%2$s.</string>
+    <string name="optical_window_title">Компенсация оптического окна</string>
+    <string name="optical_window_description">Приближённая коррекция ослабления окном. Используйте коэффициенты из оптических характеристик или сравнительных измерений.</string>
+    <string name="optical_window_enabled">Компенсировать оптическое окно</string>
+    <string name="optical_window_channel_factor">Множитель %1$s</string>
+    <string name="optical_window_hint">Итоговый коэффициент — общий × канал. %1$s не меняет показания; для пропускания 90%% нужен итоговый коэффициент ×%2$s. Это не заменяет калибровку.</string>
+    <string name="measured_uv_bands_note">Номинальные диапазоны каналов AS7331 с неравномерной спектральной чувствительностью. Их сумма не измеряет все длины волн УФ.</string>
+    <string name="spectral_channel_peaks">Пики: %1$s нм</string>
+    <string name="measured_visible_bands_note">Указанные длины волн — номинальные пики чувствительности AS7343, а не границы равномерных спектральных полос. Для пар каналов берётся среднее; HEV и итоги суммируют показания отображаемых каналов.</string>
+    <string name="measured_infrared_bands_note">Far-red объединяет каналы 690 и 745 нм; NIR использует канал 855 нм. Это показания каналов, а не измерение всего инфракрасного спектра.</string>
+    <string name="optical_window_common_factor">Общий множитель</string>
+    <string name="optical_window_individual_factors">Множители по каналам</string>
+    <string name="measured_channel_sum">Сумма каналов</string>
+    <string name="calibration_offsets_title">Смещения</string>
+    <string name="calibration_offset_channel">Смещение %1$s</string>
+    <string name="calibration_offsets_description">Смещения: допустимые значения %1$s–%2$s %3$s; %1$s ничего не вычитает. Вычитается средний фон, измеренный в темноте или в опорных условиях. Применяются до коэффициентов; отрицательные результаты становятся нулевыми.</string>
+    <string name="calibration_offsets_firmware_required">Обновите прошивку датчика для настройки смещений.</string>
+    <string name="calibration_offsets_legacy_notice">При редактировании прежние смещения отдельных каналов преобразуются в одно смещение для каждого цвета. До этого старые значения не меняются.</string>
+    <string name="calibration_factor_short">Коэффициент</string>
+    <string name="calibration_offset_short">Смещение (%1$s)</string>
+    <string name="calibration_channel_factors_title">Коэффициенты коррекции каналов</string>
+    <string name="calibration_channels_firmware_required">Обновите прошивку датчика, чтобы настроить коэффициенты отдельных каналов.</string>
+</resources>

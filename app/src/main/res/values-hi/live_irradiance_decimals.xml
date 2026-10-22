@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_irradiance_decimals">दिखाए जाने वाले दशमलव स्थान</string>
+    <string name="live_irradiance_decimals_description">दिखाए गए मानों और कस्टम निर्यात पर लागू होता है। अंत के शून्य दिखाई देते रहेंगे; सहेजा गया डेटा और वैज्ञानिक निर्यात नहीं बदलते।</string>
+</resources>

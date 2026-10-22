@@ -113,7 +113,7 @@ private fun createAcquisitionChartFile(
     val exportFormatting = uvirExportFormatting(context)
     val exportContext = exportFormatting.context
     val irradianceUnit = exportFormatting.irradianceUnit
-    val valueScale: (Double) -> Double = irradianceUnit::fromCanonicalUwCm2
+    val valueScale: (Double) -> Double = exportFormatting::chartValue
     val width = 1600
     val titlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.rgb(32, 32, 38)
@@ -150,7 +150,8 @@ private fun createAcquisitionChartFile(
                 sensorName = record.sensorDisplayName,
                 noteLabel = exportContext.getString(R.string.share_note_label),
                 sensorLabel = exportContext.getString(R.string.sensor_selector_label),
-                emptyNote = exportContext.getString(R.string.no_note)
+                emptyNote = exportContext.getString(R.string.no_note),
+                hardwareCaption = exportHardwareCaption(exportContext, listOf(record.sensorId))
             ),
             paint = smallPaint,
             maxWidth = 1420f
@@ -164,11 +165,13 @@ private fun createAcquisitionChartFile(
         (noteLines.size * 30f + 20f - 10f)
             .coerceAtLeast(40f) + variantHeaderOffset
     val sections = listOf(section to bars)
+    val legend = UvirChartExportLegend(bars.map { bar ->
+        UvirChartLegendEntry(chartExportChannelLabel(exportContext, bar.displayLabelResource, bar.exportLabel),
+            bar.color.toArgb(), if (bar.outOfRange) exportContext.getString(R.string.out_of_range_short)
+            else exportFormatting.irradiance(bar.value))
+    }, columns = 3, width = 1380f, paint = smallPaint)
     val sectionHeights =
-        sections.sumOf { (_, sectionBars) ->
-            val legendRows = (sectionBars.size + 3) / 4
-            500 + legendRows * 58
-        }
+        sections.size * (500 + legend.height.toInt())
     val height =
         225 + headerOffset.toInt() + sectionHeights + 50
     val bitmap =
@@ -227,8 +230,6 @@ private fun createAcquisitionChartFile(
 
     val left = 130f
     val right = 1510f
-    val legendColumns = 4
-    val legendColumnWidth = 350f
     var sectionTop = 225f + headerOffset
 
     sections.forEachIndexed { sectionIndex, (section, sectionBars) ->
@@ -247,23 +248,18 @@ private fun createAcquisitionChartFile(
 
         val top = sectionTop + 90f
         val bottom = top + 300f
-        val maximum = valueScale(uvirChartMaximum(
+        val maximum = uvirChartMaximum(
             sectionBars
                 .filterNot { it.outOfRange }
-                .map { it.value }
-        ))
+                .map { valueScale(it.value) }, exportFormatting.chartZeroMaximum()
+        )
 
         repeat(5) { index ->
             val y = top + (bottom - top) * index / 4f
             canvas.drawLine(left, y, right, y, gridPaint)
             val value = maximum * (4 - index) / 4.0
             canvas.drawText(
-                formatUvirChartAxisValue(
-                    value,
-                    maximum,
-                    irradianceUnit.displayFractionDigits(2),
-                    exportFormatting.numericFormat
-                ),
+                exportFormatting.chartAxisValue(value, maximum),
                 24f,
                 y + 8f,
                 smallPaint
@@ -304,32 +300,8 @@ private fun createAcquisitionChartFile(
         }
 
         val legendStartY = bottom + 82f
-        sectionBars.forEachIndexed { index, bar ->
-            val column = index % legendColumns
-            val row = index / legendColumns
-            val x = left + column * legendColumnWidth
-            val y = legendStartY + row * 58f
-            barPaint.color = bar.color.toArgb()
-            canvas.drawCircle(x, y - 8f, 10f, barPaint)
-            canvas.drawText(
-                "${bar.displayLabelResource?.let(exportContext::getString) ?: bar.exportLabel}: " +
-                    if (bar.outOfRange) {
-                        exportContext.getString(R.string.out_of_range_short)
-                    } else {
-                        formatUvirNumber(
-                            valueScale(bar.value),
-                            irradianceUnit.displayFractionDigits(3),
-                            exportFormatting.numericFormat
-                        )
-                    },
-                x + 20f,
-                y,
-                smallPaint
-            )
-        }
-
-        val legendRows = (sectionBars.size + legendColumns - 1) / legendColumns
-        sectionTop = legendStartY + legendRows * 58f + 28f
+        legend.draw(canvas, left, legendStartY)
+        sectionTop = legendStartY + legend.height + 28f
 
         if (sectionIndex < sections.lastIndex) {
             canvas.drawLine(

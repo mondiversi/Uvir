@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_irradiance_decimals">ספרות עשרוניות מוצגות</string>
+    <string name="live_irradiance_decimals_description">חל על הערכים המוצגים ועל ייצוא מותאם אישית. האפסים בסוף נשארים גלויים; הנתונים השמורים והייצוא המדעי אינם משתנים.</string>
+</resources>

@@ -28,17 +28,21 @@ internal fun UvirChartYAxis(
     modifier: Modifier = Modifier,
     suffix: String = "",
     labels: List<String>? = null,
+    fixedFractionDigits: Boolean = false,
     chart: @Composable (Modifier) -> Unit
 ) {
     val numericFormat = LocalUvirNumericFormat.current
     val resolvedLabels =
         labels ?: (UVIR_CHART_AXIS_DIVISIONS downTo 0).map { step ->
-                formatUvirChartAxisValue(
+                (if (fixedFractionDigits) {
+                    formatUvirLiveDisplayNumber(maximum * step / UVIR_CHART_AXIS_DIVISIONS,
+                        fractionDigits, numericFormat, grouping = false)
+                } else formatUvirChartAxisValue(
                     value = maximum * step / UVIR_CHART_AXIS_DIVISIONS,
                     maximum = maximum,
                     preferredFractionDigits = fractionDigits,
                     numericFormat = numericFormat
-                ) + suffix
+                )) + suffix
             }
 
     Box(modifier = modifier) {

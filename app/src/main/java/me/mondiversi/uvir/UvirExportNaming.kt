@@ -116,7 +116,7 @@ internal fun thresholdAlertMetricExportFileLabel(
         ThresholdAlertMetric.VIOLET -> "Violet"
         ThresholdAlertMetric.BLUE -> "Blue"
         ThresholdAlertMetric.GREEN -> "Green"
-        ThresholdAlertMetric.YELLOW -> "Yellow"
+        ThresholdAlertMetric.YELLOW -> "Green_Yellow"
         ThresholdAlertMetric.ORANGE -> "Orange"
         ThresholdAlertMetric.RED -> "Red"
         ThresholdAlertMetric.NIR_TOTAL -> "Infrared"

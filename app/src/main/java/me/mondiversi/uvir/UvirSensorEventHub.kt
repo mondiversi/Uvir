@@ -52,7 +52,8 @@ internal object UvirSensorEventHub {
 internal fun JSONObject.toUvirLiveAlert(sequence: Long) = SensorLiveAlertEvent(
     receiptSequence = sequence,
     timestampMs = optLong("timestamp_ms").takeIf { it > 0L } ?: System.currentTimeMillis(),
-    details = optString("details"),
+    details = sensorAlertDetailsWm2(),
     sessionId = optLong("session_id", 0L),
-    recorded = optBoolean("recorded", true)
+    recorded = optBoolean("recorded", true),
+    opticalWindow = opticalWindowOrNull()
 )

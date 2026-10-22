@@ -435,7 +435,7 @@
     <string name="violet">보라색</string>
     <string name="blue">파란색</string>
     <string name="green">녹색</string>
-    <string name="yellow">노란색</string>
+    <string name="yellow">연두</string>
     <string name="orange">주황색</string>
     <string name="red">빨간색</string>
     <string name="percent_of_visible">보이는 %1$s%%</string>
@@ -444,11 +444,11 @@
     <string name="app_version">앱 버전: %1$s</string>
     <string name="package_name_value">패키지: %1$s</string>
     <string name="about_whats_new_title">%1$s 버전의 새로운 기능</string>
-    <string name="about_whats_new_connectivity">보안 프로필과 USB, Wi-Fi, Bluetooth 및 인터넷 연결을 통한 순차적 다중 센서 관리.</string>
-    <string name="about_whats_new_connections">조건부 및 외부 명령 수집, 자율 세션, 연결 해제 또는 재시작 후 안정적인 상태 복구.</string>
-    <string name="about_whats_new_measurements">세션 변형, 고급 기록 필터, 수집 및 알림에 대한 더 명확한 세부 정보.</string>
-    <string name="about_whats_new_interface">단위, 지역 형식, 그룹화된 차트 및 센서 식별을 포함하도록 확장된 CSV, TXT 및 PNG 내보내기.</string>
-    <string name="about_whats_new_github">암호화된 설정 백업, 통합 진단, 인터페이스 및 접근성 전반의 개선.</string>
+    <string name="about_whats_new_connectivity">채널별 보정 계수와 오프셋, 평균 오프셋 측정 안내 및 초기화 확인을 지원합니다.</string>
+    <string name="about_whats_new_connections">공통 배율과 채널별 배율을 이용한 광학 창 보정, 더 명확해진 AS7331 범위 및 AS7343 감도 피크 설명.</string>
+    <string name="about_whats_new_measurements">기존 측정값과 설정을 보존하는 자동 마이그레이션으로 복사조도를 내부적으로 W/m² 단위로 저장합니다.</string>
+    <string name="about_whats_new_interface">실시간 값, 저장 데이터 및 사용자 지정 내보내기의 소수 자릿수를 설정할 수 있으며, 과학 형식 내보내기는 저장된 전체 정밀도를 유지합니다.</string>
+    <string name="about_whats_new_github">설정 메뉴와 대화상자를 개선하고, 지향성 튜브와 확산판 요건을 포함한 배선·조립·교정 안내를 업데이트했습니다.</string>
     <string name="about_description">자외선, 가시광선, 적외선의 스펙트럼 측정 앱.</string>
     <string name="about_spectral_ranges">스펙트럼 대역: 자외선 • 가시광선 • 적외선</string>
     <string name="about_sensors">지원되는 센서: AS7331 UV • AS7343 다중 스펙트럼</string>
@@ -644,11 +644,10 @@
     <string name="threshold_rules_connection_required">이러한 경고를 변경하려면 센서를 연결하세요.</string>
     <string name="threshold_repeat_sensor_description">이 간격은 센서에 저장되며 앱 연결이 끊어진 동안 기록되는 경고도 제한됩니다.</string>
     <string name="sensor_calibration_title">교정</string>
-    <string name="sensor_calibration_description">교정된 기준 장비와 비교하여 얻은 보정 계수를 적용합니다. 1.000배수는 기본 데이터시트 추정치를 유지합니다.</string>
+    <string name="sensor_calibration_description">각 채널의 보정 계수와 오프셋을 조정합니다.</string>
     <string name="sensor_calibration_visible_factor">VIS/NIR 보정 계수 · AS7343</string>
     <string name="sensor_calibration_uv_factor">UV 보정계수 · AS7331</string>
-    <string name="sensor_calibration_factor_hint">허용되는 값: 0.100~10.000.</string>
-    <string name="sensor_calibration_uv_unavailable">기본 UV 보정은 유지되며 UV 센서가 감지되면 편집 가능해집니다.</string>
+    <string name="sensor_calibration_factor_hint">보정 계수: 허용 범위는 %1$s~%2$s이며, %3$s은 이득을 변경하지 않습니다. 교정된 기준 장비로 결정하세요.</string>
     <string name="sensor_calibration_firmware_required">보정을 사용하려면 센서 펌웨어를 업데이트하세요.</string>
     <string name="sensor_firmware_update_required_title">펌웨어 업데이트 필요</string>
     <string name="sensor_firmware_update_required">센서에 설치된 펌웨어는 이러한 설정을 지원하지 않습니다. 센서 펌웨어를 업데이트하고 다시 시도하세요.</string>
@@ -794,5 +793,5 @@
     <string name="alert_max_registrations">최대 기록 수</string>
     <string name="alert_registration_count">기록 수</string>
     <string name="alert_configure_first">시작하기 전에 값을 하나 이상 설정하세요.</string>
-    <string name="sensor_simulation_open_settings">설정 열기</string>
+    <string name="sensor_simulation_open_settings">설정</string>
 </resources>

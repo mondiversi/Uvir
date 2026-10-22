@@ -14,5 +14,5 @@
     <string name="update_done">Czujnik zaktualizowany</string>
     <string name="update_failed">Aktualizacja nie powiodła się. Zobacz dziennik błędów. Jeśli czujnik nie uruchamia się, odzyskaj firmware przez USB z komputera.</string>
     <string name="update_permission">Zezwól Uvir na instalowanie aktualizacji w ustawieniach Androida.</string>
-    <string name="update_whats_new">Podpisane aktualizacje aplikacji i czujnika, zweryfikowane pobieranie i wgrywanie firmware przez USB.</string>
+    <string name="update_whats_new">Eksporty CSV, TXT i PNG z modelami czujników, zwięzłymi danymi widmowymi i czytelniejszymi legendami wykresów.</string>
 </resources>

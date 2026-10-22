@@ -2,6 +2,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.security.*;
+import java.security.cert.CertificateFactory;
 import java.time.Instant;
 import java.util.*;
 import java.util.zip.*;
@@ -82,6 +83,11 @@ public class ReleaseTool {
         Path keyPath = signingKeyPath(properties, System.getProperty("user.home"), System.getenv());
         try (InputStream input = Files.newInputStream(keyPath)) { keys.load(input, properties.getProperty("storePassword").toCharArray()); }
         String alias = properties.getProperty("keyAlias");
+        try (InputStream input = Files.newInputStream(root.resolve("app/src/main/res/raw/uvir_update_certificate.pem"))) {
+            var pinned = CertificateFactory.getInstance("X.509").generateCertificate(input);
+            if (!MessageDigest.isEqual(pinned.getEncoded(), keys.getCertificate(alias).getEncoded()))
+                throw new SecurityException("Signing certificate does not match the app's pinned update certificate");
+        }
         Signature signer = Signature.getInstance("SHA256withRSA");
         signer.initSign((PrivateKey)keys.getKey(alias, properties.getProperty("keyPassword").toCharArray()));
         byte[] bytes = payload.getBytes(StandardCharsets.UTF_8); signer.update(bytes); byte[] signature = signer.sign();
@@ -94,7 +100,7 @@ public class ReleaseTool {
                 output.putNextEntry(new ZipEntry(name)); Files.copy(build.resolve(name), output); output.closeEntry();
             }
             output.putNextEntry(new ZipEntry("README.txt"));
-            output.write(("Uvir Sensor " + sensor + " — classic ESP32, huge_app 3 MiB.\n\nEXISTING UVIR SENSOR: synchronize all records and stop every session first.\nPreserving update (application ONLY):\npython -m esptool --chip esp32 --port COM6 write-flash 0x10000 UvirSensor.ino.bin\nReplace COM6 with your serial port. Never erase-flash.\n\nFIRST INSTALL ONLY, after confirming the hardware and flash layout:\npython -m esptool --chip esp32 --port COM6 write-flash 0x1000 UvirSensor.ino.bootloader.bin 0x8000 UvirSensor.ino.partitions.bin 0x10000 UvirSensor.ino.bin\nDo not use the first-install command to update an existing sensor.\n\nKeep USB power connected. Hold BOOT if automatic entry fails.\nIf a single-partition update is interrupted, repeat the application-only command.\nSettings (NVS), microSD and FRAM are not erased by application-only updates.\nPhysical AS7331 UV validation is pending.\n").getBytes(StandardCharsets.UTF_8));
+            output.write(("Uvir Sensor " + sensor + " — classic ESP32, huge_app 3 MiB.\n\nEXISTING UVIR SENSOR: synchronize all records and stop every session first.\nPreserving update (application ONLY):\npython -m esptool --chip esp32 --port COM6 write-flash 0x10000 UvirSensor.ino.bin\nReplace COM6 with your serial port. Never erase-flash.\n\nFIRST INSTALL ONLY, after confirming the hardware and flash layout:\npython -m esptool --chip esp32 --port COM6 write-flash 0x1000 UvirSensor.ino.bootloader.bin 0x8000 UvirSensor.ino.partitions.bin 0x10000 UvirSensor.ino.bin\nDo not use the first-install command to update an existing sensor.\n\nKeep USB power connected. Hold BOOT if automatic entry fails.\nIf a single-partition update is interrupted, repeat the application-only command.\nSettings (NVS), microSD and FRAM are not erased by application-only updates.\nFirmware 0.5.112 uses W/m2 internally and migrates legacy configuration without changing physical values; the labelled v1 wire interface remains uW/cm2.\nFinal-assembly optical testing and traceable calibration remain pending.\n").getBytes(StandardCharsets.UTF_8));
             output.closeEntry();
         }
         StringBuilder sums = new StringBuilder();

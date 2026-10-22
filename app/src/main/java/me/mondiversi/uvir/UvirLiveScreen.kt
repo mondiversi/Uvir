@@ -188,6 +188,8 @@ internal fun LiveScreen(
         suspend () -> Boolean,
     onDiagnosticProbe:
         suspend (String, SensorConnectionMode) -> UvirDiagnosticProbe,
+    onMeasureDarkOffsets:
+        suspend (String, SensorConnectionMode, CalibrationGroup, (Int) -> Unit) -> DarkOffsetReading,
     onPowerOffSensor:
         suspend () -> Boolean,
     onDisassociateSensor:
@@ -518,12 +520,18 @@ internal fun LiveScreen(
         automaticShutdownSecondsText = refreshUneditedSetting(automaticShutdownSecondsText, (lastLoadedParameters.automaticShutdownSeconds % 60).toString(), (sensorParameters.automaticShutdownSeconds % 60).toString())
         lastLoadedParameters = sensorParameters
     }
+    var opticalWindowDraft by remember(sensorProfileHardwareUid) { mutableStateOf(sensorCalibrationSettings.opticalWindow) }
+    var calibrationOffsetsDraft by remember(sensorProfileHardwareUid) { mutableStateOf(sensorCalibrationSettings.offsets) }
+    var calibrationChannelFactorsDraft by remember(sensorProfileHardwareUid) { mutableStateOf(sensorCalibrationSettings.channelFactors) }
     var lastLoadedCalibration by remember(sensorProfileHardwareUid) { mutableStateOf(sensorCalibrationSettings) }
     LaunchedEffect(sensorCalibrationSettings, sensorProfileHardwareUid) {
         visibleCalibrationFactorText = refreshUneditedSetting(visibleCalibrationFactorText,
             lastLoadedCalibration.visibleFactor.toString(), sensorCalibrationSettings.visibleFactor.toString())
         uvCalibrationFactorText = refreshUneditedSetting(uvCalibrationFactorText,
             lastLoadedCalibration.uvFactor.toString(), sensorCalibrationSettings.uvFactor.toString())
+        opticalWindowDraft = refreshUneditedSetting(opticalWindowDraft, lastLoadedCalibration.opticalWindow, sensorCalibrationSettings.opticalWindow)
+        calibrationOffsetsDraft = refreshUneditedSetting(calibrationOffsetsDraft, lastLoadedCalibration.offsets, sensorCalibrationSettings.offsets)
+        calibrationChannelFactorsDraft = refreshUneditedSetting(calibrationChannelFactorsDraft, lastLoadedCalibration.channelFactors, sensorCalibrationSettings.channelFactors)
         lastLoadedCalibration = sensorCalibrationSettings
     }
 
@@ -1065,7 +1073,7 @@ internal fun LiveScreen(
                 enabled = false,
                 direction =
                     ThresholdAlertDirection.ABOVE,
-                threshold = 1f
+                threshold = DEFAULT_IRRADIANCE_THRESHOLD_W_M2
             )
 
         editingAlertMetric = metric
@@ -1074,7 +1082,7 @@ internal fun LiveScreen(
             rule.direction.name
         editingAlertThresholdText =
             thresholdEditableValue(
-                irradianceUnit.fromCanonicalUwCm2(rule.threshold.toDouble())
+                irradianceUnit.fromCanonicalWm2(rule.threshold.toDouble())
             )
         editingAlertError = null
     }
@@ -1093,7 +1101,7 @@ internal fun LiveScreen(
                         enabled = false,
                         direction =
                             ThresholdAlertDirection.ABOVE,
-                        threshold = 1f
+                        threshold = DEFAULT_IRRADIANCE_THRESHOLD_W_M2
                     )
 
                 groupAlertEnabledStates[metric] =
@@ -1102,7 +1110,7 @@ internal fun LiveScreen(
                     rule.direction.name
                 groupAlertThresholdTexts[metric] =
                     thresholdEditableValue(
-                        irradianceUnit.fromCanonicalUwCm2(rule.threshold.toDouble())
+                        irradianceUnit.fromCanonicalWm2(rule.threshold.toDouble())
                     )
             }
 
@@ -1286,12 +1294,13 @@ internal fun LiveScreen(
         rememberSaveable(irradianceUnit) {
             mutableStateOf(irradianceUnit.storedValue)
         }
+    val liveIrradianceDecimals = rememberUvirIrradianceDisplayDecimals(context)
 
     LaunchedEffect(irradianceUnit, thresholdAlertSettings.rules) {
         thresholdAlertSettings.rules.forEach { rule ->
             alertRuleThresholdTexts[rule.metric] =
                 thresholdEditableValue(
-                    irradianceUnit.fromCanonicalUwCm2(rule.threshold.toDouble())
+                    irradianceUnit.fromCanonicalWm2(rule.threshold.toDouble())
                 )
         }
     }
@@ -2821,7 +2830,7 @@ editingAlertGroup?.let { group ->
                                             onUseCurrentValue = {
                                                 groupAlertThresholdTexts[metric] =
                                                     thresholdEditableValue(
-                                                        irradianceUnit.fromCanonicalUwCm2(
+                                                        irradianceUnit.fromCanonicalWm2(
                                                             measurement.thresholdMetricValue(metric)
                                                         )
                                                     )
@@ -2952,14 +2961,14 @@ editingAlertGroup?.let { group ->
                                             groupAlertThresholdTexts[metric] = normalized.text
                                         }
                                     }.value.let { displayed ->
-                                        irradianceUnit.toCanonicalUwCm2(
+                                        irradianceUnit.toCanonicalWm2(
                                             displayed.toDouble()
                                         ).toFloat()
                                     }
                                 } else {
                                     thresholdAlertSettings.rules
                                         .firstOrNull { it.metric == metric }
-                                        ?.threshold ?: 1f
+                                        ?.threshold ?: DEFAULT_IRRADIANCE_THRESHOLD_W_M2
                                 }
                             }
 
@@ -3012,7 +3021,7 @@ editingAlertGroup?.let { group ->
                                         rule.direction.name
                                     alertRuleThresholdTexts[rule.metric] =
                                         thresholdEditableValue(
-                                            irradianceUnit.fromCanonicalUwCm2(
+                                            irradianceUnit.fromCanonicalWm2(
                                                 rule.threshold.toDouble()
                                             )
                                         )
@@ -3150,7 +3159,7 @@ if (editingAlertGroup == null) editingAlertMetric?.let { metric ->
                                 onUseCurrentValue = {
                                     editingAlertThresholdText =
                                         thresholdEditableValue(
-                                            irradianceUnit.fromCanonicalUwCm2(
+                                            irradianceUnit.fromCanonicalWm2(
                                                 measurement.thresholdMetricValue(metric)
                                             )
                                         )
@@ -3265,7 +3274,7 @@ if (editingAlertGroup == null) editingAlertMetric?.let { metric ->
                         }
                         val threshold =
                             normalizedThreshold?.value?.let { displayed ->
-                                irradianceUnit.toCanonicalUwCm2(
+                                irradianceUnit.toCanonicalWm2(
                                     displayed.toDouble()
                                 ).toFloat()
                             }
@@ -3273,7 +3282,7 @@ if (editingAlertGroup == null) editingAlertMetric?.let { metric ->
                                     .replace(',', '.')
                                     .toFloatOrNull()
                                     ?.let { displayed ->
-                                        irradianceUnit.toCanonicalUwCm2(
+                                        irradianceUnit.toCanonicalWm2(
                                             displayed.toDouble()
                                         ).toFloat()
                                     }
@@ -3316,7 +3325,7 @@ if (editingAlertGroup == null) editingAlertMetric?.let { metric ->
                                 updatedRule.direction.name
                             alertRuleThresholdTexts[metric] =
                                 thresholdEditableValue(
-                                    irradianceUnit.fromCanonicalUwCm2(
+                                    irradianceUnit.fromCanonicalWm2(
                                         updatedRule.threshold.toDouble()
                                     )
                                 )
@@ -3505,6 +3514,9 @@ if (showParametersDialog) {
                 onUvCalibrationFactorTextChange = settingsTextCorrection(uvCalibrationFactorText, { uvCalibrationFactorText }) {
                     uvCalibrationFactorText = it
                 },
+                opticalWindowDraft = opticalWindowDraft,
+                calibrationOffsetsDraft = calibrationOffsetsDraft,
+                calibrationChannelFactorsDraft = calibrationChannelFactorsDraft,
                 sensorCalibrationSettings =
                     sensorCalibrationSettings,
                 alertSoundValue = alertSoundValue,
@@ -3527,7 +3539,7 @@ if (showParametersDialog) {
                 sensorSettingsEnabled = sensorControlConnectionAvailable,
                 sensorCalibrationEnabled =
                     sensorControlConnectionAvailable &&
-                        sensorCalibrationSupported,
+                        sensorCalibrationSupported && !selectedSensorInfo.calibrationChangeBlocked,
                 sensorFirmwareCurrent = sensorFirmwareCurrent,
                 sensorWifiRadioEnabled = sensorWifiRadioEnabled,
                 sensorBluetoothRadioEnabled =
@@ -3624,13 +3636,13 @@ if (showParametersDialog) {
             parametersError =
                 null
 
-            if (selectedSettingsPage != null) {
+            if (!uvirSettingsBackReturnsHome(selectedSettingsPage, UVIR_HOME_SETTINGS_DROPDOWN_ENABLED)) {
                 selectedSettingsPage = null
                 settingsApplyScope.launch {
                     parametersScrollState.scrollTo(0)
                 }
             } else {
-                showParametersDialog = false
+                settingsRouteState.close()
             }
         },
 
@@ -3947,8 +3959,22 @@ if (showParametersDialog) {
                     context = context,
                     enabled =
                         sensorControlConnectionAvailable &&
-                            sensorCalibrationSupported,
+                            !selectedSensorInfo.calibrationChangeBlocked,
                     uvSensorAvailable = selectedSensorInfo.uvAvailable == true,
+                    offsets = calibrationOffsetsDraft,
+                    offsetsSupported = firmwareSupportsCalibrationOffsets(selectedSensorInfo.firmwareVersion),
+                    onOffsetsChange = { calibrationOffsetsDraft = it },
+                    channelFactors = calibrationChannelFactorsDraft,
+                    channelFactorsSupported = firmwareSupportsCalibrationChannels(selectedSensorInfo.firmwareVersion),
+                    onChannelFactorsChange = { calibrationChannelFactorsDraft = it },
+                    sensorDeviceId = sensorProfileHardwareUid,
+                    darkMeasurementSupported = compareFirmwareVersions(selectedSensorInfo.firmwareVersion, DARK_OFFSETS_MINIMUM_FIRMWARE) >= 0,
+                    onMeasureDarkOffsets = { group, progress ->
+                        onMeasureDarkOffsets(sensorProfileHardwareUid, sensorConnectionMode, group, progress)
+                    },
+                    onFirmwareUpdateRequired = {
+                        if (selectedSensorInfo.firmwareVersion.isNotBlank()) showFirmwareUpdateRequiredDialog = true
+                    },
                     visibleFactorText = visibleCalibrationFactorText,
                     onVisibleFactorTextChange = {
                         visibleCalibrationFactorText = it
@@ -3961,6 +3987,16 @@ if (showParametersDialog) {
                     primaryText = primaryText,
                     secondaryText = secondaryText
                 )
+                UvirOpticalWindowSettings(value = opticalWindowDraft,
+                    onChange = { opticalWindowDraft = it },
+                    enabled = sensorControlConnectionAvailable && !selectedSensorInfo.calibrationChangeBlocked,
+                    supported = firmwareSupportsOpticalWindow(selectedSensorInfo.firmwareVersion),
+                    masterSupported = firmwareSupportsOpticalWindowMaster(selectedSensorInfo.firmwareVersion),
+                    cardColor = cardColor, primaryText = primaryText, secondaryText = secondaryText,
+                    sensorDeviceId = sensorProfileHardwareUid,
+                    onFirmwareUpdateRequired = {
+                        if (selectedSensorInfo.firmwareVersion.isNotBlank()) showFirmwareUpdateRequiredDialog = true
+                    })
                 }
                 }
 
@@ -4027,6 +4063,16 @@ if (showParametersDialog) {
                         }
                     },
                     irradianceUnitValue = irradianceUnitValue,
+                    liveIrradianceDecimals = liveIrradianceDecimals.getValue(UvirIrradianceUnit.fromStoredValue(irradianceUnitValue)),
+                    onLiveIrradianceDecimalsChange = { digits ->
+                        val unit = UvirIrradianceUnit.fromStoredValue(irradianceUnitValue)
+                        if (liveIrradianceDecimals[unit] != digits) {
+                            settingsSaveQueue.finishEditing()
+                            settingsFocusManager.clearFocus(force = true)
+                            saveUvirLiveIrradianceDecimals(context, unit, digits)
+                            showUvirBottomMessage(context, parametersSavedText)
+                        }
+                    },
                     onIrradianceUnitValueChange = {
                         val target = UvirIrradianceUnit.fromStoredValue(it)
                         val changed = target != irradianceUnit
@@ -4174,7 +4220,7 @@ val openSettingsFromHome: () -> Unit = {
         alertRuleDirectionValues[rule.metric] = rule.direction.name
         alertRuleThresholdTexts[rule.metric] =
             thresholdEditableValue(
-                irradianceUnit.fromCanonicalUwCm2(rule.threshold.toDouble())
+                irradianceUnit.fromCanonicalWm2(rule.threshold.toDouble())
             )
     }
 
@@ -4250,6 +4296,11 @@ val homeHeaderContent: @Composable () -> Unit = {
             showVersionInfoDialog = true
         },
         onOpenSettings = openSettingsFromHome,
+        onOpenSettingsPage = { page ->
+            openSettingsFromHome()
+            selectedSettingsPage = page
+            settingsApplyScope.launch { parametersScrollState.scrollTo(0) }
+        },
         onOpenSimulationSettings = {
             openSettingsFromHome()
             settingsRouteState.openSimulationSettings()
@@ -4508,6 +4559,7 @@ floatingActionButton = {
             }
         }
     } else {
+    CompositionLocalProvider(LocalUvirLiveIrradianceDecimals provides liveIrradianceDecimals.getValue(irradianceUnit)) {
     LazyColumn(
         state =
             liveListState,
@@ -4675,7 +4727,8 @@ floatingActionButton = {
                         secondaryText,
 
                     trackColor =
-                        trackColor
+                        trackColor,
+                    sensorModel = liveSpectralSensorModel(group, selectedSensorInfo)
                 )
             }
             if (liveUsesLandscapeIslands) {
@@ -4730,6 +4783,7 @@ floatingActionButton = {
                 )
             }
         }
+    }
     }
     }
 }

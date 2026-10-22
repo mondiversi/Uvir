@@ -411,7 +411,7 @@
     <string name="violet">紫</string>
     <string name="blue">青</string>
     <string name="green">緑</string>
-    <string name="yellow">黄</string>
+    <string name="yellow">黄緑</string>
     <string name="orange">オレンジ</string>
     <string name="red">赤</string>
     <string name="percent_of_visible">可視光の %1$s%%</string>
@@ -420,11 +420,11 @@
     <string name="app_version">アプリバージョン: %1$s</string>
     <string name="package_name_value">パッケージ: %1$s</string>
     <string name="about_whats_new_title">バージョン %1$s の新機能</string>
-    <string name="about_whats_new_connectivity">保護されたプロファイルと USB、Wi-Fi、Bluetooth、インターネット接続による複数センサーの順次管理。</string>
-    <string name="about_whats_new_connections">条件付きおよび外部コマンドによる取得、自律セッション、切断または再起動後の確実な状態復元。</string>
-    <string name="about_whats_new_measurements">セッションのバリエーション、高度な履歴フィルター、取得とアラートのより明確な詳細表示。</string>
-    <string name="about_whats_new_interface">単位、地域形式、グループ化グラフ、センサー識別を含む CSV、TXT、PNG 書き出しの拡充。</string>
-    <string name="about_whats_new_github">設定の暗号化バックアップ、統合診断、インターフェースとアクセシビリティの幅広い改善。</string>
+    <string name="about_whats_new_connectivity">チャンネル別の補正係数とオフセットに対応。平均オフセットの測定ガイドとリセット確認を追加。</string>
+    <string name="about_whats_new_connections">全体倍率とチャンネル別倍率による光学窓の補正。AS7331の範囲とAS7343の感度ピークの説明を明確化。</string>
+    <string name="about_whats_new_measurements">放射照度を内部でW/m²単位で保存。既存の測定値と設定を維持する自動移行に対応。</string>
+    <string name="about_whats_new_interface">ライブ値、保存データ、カスタムエクスポートの小数桁数を設定可能に。科学形式のエクスポートは保存時の精度を維持。</string>
+    <string name="about_whats_new_github">設定メニューとダイアログを改善。指向性チューブと拡散板の要件を含め、配線・組み立て・校正ガイドを更新。</string>
     <string name="about_description">紫外線、可視光、赤外線のスペクトル測定アプリ。</string>
     <string name="about_spectral_ranges">スペクトル帯域：紫外線 • 可視光 • 赤外線</string>
     <string name="about_sensors">対応センサー: AS7331 UV • AS7343 マルチスペクトル</string>
@@ -620,11 +620,10 @@
     <string name="threshold_rules_connection_required">これらのアラートを変更するにはセンサーを接続してください。</string>
     <string name="threshold_repeat_sensor_description">この間隔はセンサーに保存され、アプリ切断中に記録されるアラートも制限します。</string>
     <string name="sensor_calibration_title">校正</string>
-    <string name="sensor_calibration_description">校正済み基準器との比較で得た補正係数を適用します。係数 1.000 はデータシート既定推定値を維持します。</string>
+    <string name="sensor_calibration_description">各チャンネルの補正係数とオフセットを調整します。</string>
     <string name="sensor_calibration_visible_factor">VIS/NIR 補正係数 · AS7343</string>
     <string name="sensor_calibration_uv_factor">UV 補正係数 · AS7331</string>
-    <string name="sensor_calibration_factor_hint">許容値: 0.100～10.000。</string>
-    <string name="sensor_calibration_uv_unavailable">既定の UV 校正は維持され、UV センサーを検出すると編集可能になります。</string>
+    <string name="sensor_calibration_factor_hint">補正係数：許容値は %1$s～%2$s。%3$s はゲインを変更しません。校正済みの基準器を使って決定してください。</string>
     <string name="sensor_calibration_firmware_required">校正を使用するにはセンサーのファームウェアを更新してください。</string>
     <string name="sensor_firmware_update_required_title">ファームウェア更新が必要です</string>
     <string name="sensor_firmware_update_required">センサーにインストールされたファームウェアはこれらの設定に対応していません。ファームウェアを更新して再試行してください。</string>
@@ -794,5 +793,5 @@
     <string name="alert_max_registrations">最大記録数</string>
     <string name="alert_registration_count">記録数</string>
     <string name="alert_configure_first">開始する前に少なくとも1つの値を設定してください。</string>
-    <string name="sensor_simulation_open_settings">設定を開く</string>
+    <string name="sensor_simulation_open_settings">設定</string>
 </resources>

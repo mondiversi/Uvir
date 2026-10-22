@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dark_offsets_calculate">ऑफ़सेट की गणना करें</string>
+    <string name="dark_offsets_instructions">स्थिर संदर्भ स्थितियों में लगभग 30 सेकंड मापें। अंधेरे में सेंसर की पृष्ठभूमि की भरपाई होती है; रोशनी में मौजूद प्रकाश भी घटाया जाता है, इसलिए माप सापेक्ष होते हैं। अंधेरे में मापने के लिए ऑप्टिकल इनपुट को ऐसी सामग्री से ढकें जो निकट अवरक्त के लिए भी अपारदर्शी हो और LED को सामान्य कार्य स्थिति में रखें। औसत यादृच्छिक शोर को नहीं हटाता और न ही गेन को कैलिब्रेट करता है।</string>
+    <string name="dark_offsets_progress">मापन: %1$s / 30 सेकंड</string>
+    <string name="dark_offsets_result">%1$s रीडिंग से प्रस्ताव। कोई सेटिंग नहीं बदली गई।</string>
+    <string name="dark_offsets_failed">मापन बाधित है या उपलब्ध नहीं है। कनेक्शन और सेंसर जाँचें, फिर दोबारा कोशिश करें।</string>
+    <string name="dark_offsets_start">मापन शुरू करें</string>
+    <string name="dark_offsets_apply">ऑफ़सेट लागू करें</string>
+    <string name="dark_offsets_firmware_required">सेंसर फ़र्मवेयर 0.5.110 या नया आवश्यक है।</string>
+    <string name="calibration_reset_values">मान रीसेट करें</string>
+    <string name="calibration_reset_confirmation_title">मान रीसेट करें?</string>
+    <string name="calibration_reset_confirm_action">रीसेट करें</string>
+    <string name="calibration_reset_confirmation_message">%1$s के सुधार गुणक 1 और ऑफ़सेट 0 पर रीसेट करता है। अन्य कैलिब्रेशन और ऑप्टिकल विंडो सेटिंग नहीं बदलतीं।</string>
+    <string name="optical_window_reset_confirmation_message">सामान्य गुणक और ऑप्टिकल विंडो के सभी चैनल गुणकों को 1 पर रीसेट करता है। कैलिब्रेशन नहीं बदलता।</string>
+</resources>

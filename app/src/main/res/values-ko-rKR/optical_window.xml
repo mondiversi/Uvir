@@ -1,0 +1,24 @@
+<resources>
+    <string name="optical_window_factor_limits">허용 값: %1$s–%2$s.</string>
+    <string name="optical_window_title">광학 창 보정</string>
+    <string name="optical_window_description">창에 의한 감쇠를 근사적으로 보정합니다. 광학 사양 또는 비교 측정에 근거한 계수만 설정하세요.</string>
+    <string name="optical_window_enabled">광학 창 보정 사용</string>
+    <string name="optical_window_channel_factor">%1$s 배율</string>
+    <string name="optical_window_hint">최종 계수는 전체 × 채널입니다. %1$s은 보정하지 않음을 뜻하며, 투과율 90%%에는 최종 계수 ×%2$s이 필요합니다. 교정을 대신하지 않습니다.</string>
+    <string name="measured_uv_bands_note">AS7331 채널의 공칭 범위이며 파장별 감도는 균일하지 않습니다. 합계는 모든 UV 파장을 측정한 값이 아닙니다.</string>
+    <string name="spectral_channel_peaks">최대 감도: %1$s nm</string>
+    <string name="measured_visible_bands_note">표시된 파장은 AS7343의 공칭 감도 피크이며 균일한 대역의 경계가 아닙니다. 채널 쌍은 평균을 내며 HEV와 합계는 표시된 채널 값을 더합니다.</string>
+    <string name="measured_infrared_bands_note">Far-red는 690 및 745 nm 채널을 결합하고 NIR은 855 nm 채널을 사용합니다. 채널 측정값이며 전체 적외선 스펙트럼을 측정한 값이 아닙니다.</string>
+    <string name="optical_window_common_factor">공통 배율</string>
+    <string name="optical_window_individual_factors">채널별 배수</string>
+    <string name="measured_channel_sum">채널 합계</string>
+    <string name="calibration_offsets_title">오프셋</string>
+    <string name="calibration_offset_channel">%1$s 오프셋</string>
+    <string name="calibration_offsets_description">오프셋: 허용 값은 %1$s–%2$s %3$s이며 %1$s은 빼지 않습니다. 어두운 곳이나 기준 조건에서 측정한 평균 배경값을 뺍니다. 계수보다 먼저 적용되며 음수 결과는 0이 됩니다.</string>
+    <string name="calibration_offsets_firmware_required">오프셋을 설정하려면 센서 펌웨어를 업데이트하세요.</string>
+    <string name="calibration_offsets_legacy_notice">이 값을 편집하면 기존 채널별 오프셋이 색상별 오프셋 하나로 변환됩니다. 편집 전까지 기존 값은 그대로 유지됩니다.</string>
+    <string name="calibration_factor_short">보정 계수</string>
+    <string name="calibration_offset_short">오프셋 (%1$s)</string>
+    <string name="calibration_channel_factors_title">채널별 보정 계수</string>
+    <string name="calibration_channels_firmware_required">채널별 계수를 설정하려면 센서 펌웨어를 업데이트하세요.</string>
+</resources>

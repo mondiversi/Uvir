@@ -4,6 +4,30 @@ internal const val MAX_AUTOMATIC_DURATION_HOURS = 99_999L
 internal const val MAX_AUTOMATIC_ACQUISITIONS = 999_999
 internal const val MAX_ALERT_REPEAT_SECONDS = 86_400L
 
+/** Keep stored/parser input canonical; only the editor's presentation is localized. */
+internal fun filterUvirNumericInput(
+    text: String,
+    format: UvirNumericFormat,
+    decimal: Boolean
+): String {
+    val symbols = numericFormatSymbols(format)
+    return buildString {
+        var separatorFound = false
+        text.forEachIndexed { index, character ->
+            val digit = Character.digit(character, 10)
+            when {
+                (character == '-' || character == symbols.minusSign) && index == 0 -> append('-')
+                digit in 0..9 -> append('0' + digit)
+                decimal && !separatorFound &&
+                    (character == '.' || character == ',' || character == symbols.decimalSeparator) -> {
+                    append('.')
+                    separatorFound = true
+                }
+            }
+        }
+    }
+}
+
 internal data class NormalizedIntegerInput(
     val value: Int,
     val text: String,

@@ -14,5 +14,5 @@
     <string name="update_done">Sensor aktualisiert</string>
     <string name="update_failed">Update fehlgeschlagen. Siehe Fehlerprotokoll. Startet der Sensor nicht mehr, Firmware per USB am Computer wiederherstellen.</string>
     <string name="update_permission">Uvir in den Android-Einstellungen die Installation von Updates erlauben.</string>
-    <string name="update_whats_new">Signierte Updates für App und Sensor, geprüfte Downloads und Firmware-Übertragung per USB.</string>
+    <string name="update_whats_new">CSV-, TXT- und PNG-Exporte mit Sensormodellen, kompakten Spektralangaben und besser lesbaren Diagrammlegenden.</string>
 </resources>

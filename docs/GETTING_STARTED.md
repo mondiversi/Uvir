@@ -19,6 +19,41 @@ The repository's `main` branch is a development snapshot. Installable published
 versions, when available, are under [GitHub Releases](https://github.com/mondiversi/Uvir/releases).
 A source push does not replace an existing APK or publish a signed update.
 
+### Units, decimal places and spectral percentages
+
+Measurements are stored in the SI base unit `W/m²`, at the precision
+received from the sensor. The unit and decimal-place preferences affect live
+and saved-value displays, including chart labels, without rewriting records.
+Trailing zeros are retained. **Scientific/international exports** use W/m²,
+English/international formatting and the full round-trippable stored numeric
+precision. **Selected/custom exports** use the selected unit, number format and
+per-unit decimal count, including trailing zeros, in CSV, readable text and
+chart values. Chart axes remain compact in scientific mode. Neither mode
+rewrites or rounds stored readings.
+
+CSV exports append UV and visible/infrared component-model columns; readable
+tables and charts include compact model captions. Models are resolved from
+each record's source profile, not the selected sensor. Missing identities use
+an em dash. Earlier v1 profiles use the documented AS7331/AS7343 channel-schema
+defaults when explicit component names were not cached. UV channel labels use
+nominal ranges; visible/infrared labels give discrete sensitivity peaks, not
+continuous colour passbands. Totals and HEV do not claim an individual passband.
+
+Database version 25 converts older irradiances, alert thresholds and calibration
+offsets once, without applying calibration or optical compensation again.
+The explicitly labelled v1 sensor interface remains `uW/cm2` for compatibility;
+both Android and firmware convert at that boundary. See the
+[SI migration notes](SI_IRRADIANCE_MIGRATION.md) for backup and compatibility details.
+
+Spectral channel percentages use the total **UV + visible + infrared** of the
+same measurement, not the channel's own spectral group. Group totals and the
+overlapping HEV subset are not counted again in that denominator. UI shares
+use displayed, rounded irradiances so a displayed zero has an empty progress
+bar; exported shares use the original values. If part of the required spectrum
+is out of range, the global percentage is unavailable instead of inferred.
+Alert percentages remain relative to their configured thresholds, and the
+biological indices retain their separate spectral-weighting meaning.
+
 ## 2. Hardware and wiring
 
 The authoritative logical pin map is
@@ -53,6 +88,10 @@ For complete construction instructions, use the
 [assembly guide](../hardware/ASSEMBLY.md) and
 [wiring index for every component](../hardware/wiring/README.md).
 The [firmware guide](../firmware/esp32/UvirSensor/README.md) explains the implementation.
+
+The complete circuitry is intended to be housed in a **TEKO COFFER-A/6.5**.
+See the [enclosure specification and assembly notes](../hardware/README.md#planned-enclosure)
+before final mounting and optical calibration.
 
 ## 3. Schematics and carrier PCB
 

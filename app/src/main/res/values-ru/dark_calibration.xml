@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dark_offsets_calculate">Рассчитать смещения</string>
+    <string name="dark_offsets_instructions">Измеряйте около 30 секунд в стабильных опорных условиях. В темноте компенсируется фон датчика; при освещении также вычитается присутствующий свет, поэтому измерения становятся относительными. Для измерения в темноте закройте оптические входы материалом, непрозрачным также для ближнего ИК, и оставьте светодиоды в обычном рабочем состоянии. Среднее не устраняет случайный шум и не калибрует усиление.</string>
+    <string name="dark_offsets_progress">Измерение: %1$s / 30 с</string>
+    <string name="dark_offsets_result">Предложение по %1$s отсчётам. Настройки не изменены.</string>
+    <string name="dark_offsets_failed">Измерение прервано или недоступно. Проверьте подключение и датчик и повторите попытку.</string>
+    <string name="dark_offsets_start">Начать измерение</string>
+    <string name="dark_offsets_apply">Применить смещения</string>
+    <string name="dark_offsets_firmware_required">Требуется прошивка датчика 0.5.110 или новее.</string>
+    <string name="calibration_reset_values">Сбросить значения</string>
+    <string name="calibration_reset_confirmation_title">Сбросить значения?</string>
+    <string name="calibration_reset_confirm_action">СБРОСИТЬ</string>
+    <string name="calibration_reset_confirmation_message">Сбросить коэффициенты коррекции до 1 и смещения до 0 для %1$s. Другие настройки калибровки и оптического окна не изменяются.</string>
+    <string name="optical_window_reset_confirmation_message">Возвращает общий множитель и все множители каналов оптического окна к 1. Калибровка не меняется.</string>
+</resources>

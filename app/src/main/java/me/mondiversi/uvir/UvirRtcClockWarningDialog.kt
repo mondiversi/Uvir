@@ -38,7 +38,7 @@ internal fun UvirRtcClockWarningDialog(
     val single = names.size == 1
     UvirAlertDialog(
         onDismissRequest = onDismiss,
-        confirmButton = null,
+        confirmButton = { UvirDialogCloseButton(onDismiss) },
         modifier = Modifier.testTag("rtc_clock_warning_dialog"),
         title = {
             UvirClosableDialogTitle(

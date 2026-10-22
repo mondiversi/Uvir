@@ -10,6 +10,7 @@ import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.platform.app.InstrumentationRegistry
 import java.util.concurrent.atomic.AtomicBoolean
@@ -24,7 +25,7 @@ class UvirSensorDiagnosticsUiTest {
     @get:Rule val compose = createComposeRule()
     private val resources = InstrumentationRegistry.getInstrumentation().targetContext.resources
     private val info = UvirSensorRuntimeInfo(
-        deviceId = "TEST_SENSOR", firmwareVersion = "0.5.69", boardName = "ESP32",
+        deviceId = "TEST_SENSOR", firmwareVersion = "0.5.110", boardName = "ESP32",
         heapSizeBytes = 240_000, freeHeapBytes = 110_000, flashSizeBytes = 4_194_304,
         offlineUsed = 0, offlineCapacity = 1800, sensorAvailable = true, uvAvailable = false,
         offlineRecording = false, alertMonitoringEnabled = true,
@@ -51,7 +52,7 @@ class UvirSensorDiagnosticsUiTest {
         compose.setContent {
             MaterialTheme {
                 val colors = MaterialTheme.colorScheme
-                UvirSensorDiagnosticsContent(true, info.copy(firmwareVersion = "0.5.68"),
+                UvirSensorDiagnosticsContent(true, info.copy(firmwareVersion = "0.5.91"),
                     SensorConnectionMode.USB, "Test", colors.surface, colors.onSurface, colors.onSurfaceVariant,
                     onProbe = { _, _ -> calls.incrementAndGet(); UvirDiagnosticProbe(UvirDiagnosticOutcome.TIMEOUT) })
             }
@@ -85,12 +86,16 @@ class UvirSensorDiagnosticsUiTest {
         assertEquals(6, calls.get())
         for (darkTheme in listOf(false, true)) {
             compose.runOnIdle { dark.value = darkTheme }
-            compose.onNodeWithText(resources.getString(R.string.export)).assertIsEnabled().assertIsDisplayed()
+            compose.onNodeWithText(resources.getString(R.string.share)).assertIsEnabled().assertIsDisplayed()
+            compose.onNodeWithText(resources.getString(R.string.save)).assertIsEnabled().assertIsDisplayed()
             compose.onNodeWithText(resources.getString(R.string.close)).assertIsDisplayed()
-            val share = compose.onNodeWithText(resources.getString(R.string.export)).fetchSemanticsNode().boundsInRoot
+            val share = compose.onNodeWithText(resources.getString(R.string.share)).fetchSemanticsNode().boundsInRoot
             val close = compose.onNodeWithText(resources.getString(R.string.close)).fetchSemanticsNode().boundsInRoot
-            assertTrue(share.center.x < close.center.x)
+            // Confirm actions stay together; a wrapped close command occupies the bottom row.
+            assertTrue(close.center.x < share.center.x || close.top > share.bottom)
         }
+        compose.onNodeWithTag("diagnostic_cancel").performClick()
+        compose.onNodeWithTag("diagnostic_dialog").assertDoesNotExist()
     }
 
     @Test fun closingInProgressCancelsPendingProbe() {
@@ -109,9 +114,11 @@ class UvirSensorDiagnosticsUiTest {
         }
         compose.onNodeWithText(resources.getString(R.string.debug_diagnostic)).performClick()
         compose.waitUntil(2_000L) { waiting.get() }
-        compose.onNodeWithText(resources.getString(R.string.export)).assertIsNotEnabled()
-        compose.onNodeWithText(resources.getString(R.string.close)).performClick()
+        compose.onNodeWithText(resources.getString(R.string.share)).assertDoesNotExist()
+        compose.onNodeWithText(resources.getString(R.string.save)).assertDoesNotExist()
+        compose.onNodeWithText(resources.getString(R.string.stop)).assertIsEnabled().performClick()
         compose.waitUntil(2_000L) { cancelled.get() }
+        compose.onNodeWithTag("diagnostic_dialog").assertDoesNotExist()
     }
 
     @Test fun popupAndTxtUseTheSameReportWithoutNetworkCredentials() {

@@ -18,13 +18,11 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.platform.app.InstrumentationRegistry
 import java.util.Locale
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
@@ -32,27 +30,24 @@ import org.junit.Test
 class UvirInfraredFootnoteTest {
     @get:Rule val compose = createComposeRule()
 
-    @Test fun infraredUsesLocalFootnoteOneInEveryLanguage() {
+    @Test fun technicalNotesAndChannelPeaksAreAvailableInInfoInEveryLanguage() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         for (language in listOf("en", "it", "ar", "de", "el", "es", "fa", "fr", "hi", "he", "ja", "ko-KR", "pt", "ru", "sw", "pl", "nl", "id", "tr", "zh-CN")) {
             val configuration = Configuration(context.resources.configuration)
             configuration.setLocale(Locale.forLanguageTag(language))
             val translated = context.createConfigurationContext(configuration)
-            val footnote = translated.getString(R.string.infrared_sensor_footnote)
-            assertTrue("Local note 1: $language", footnote.startsWith("¹ "))
-            assertTrue("Old note 2 removed: $language", !footnote.contains("²"))
-            for (peak in listOf(745, 855)) {
-                val band = translated.getString(R.string.infrared_peak_band, peak)
-                assertTrue("Peak refers to local note 1: $language", band.contains("¹ "))
-                assertTrue("Old peak reference removed: $language", !band.contains("²"))
-                val wavelengthDigits = band.filter { it.isDigit() }
-                    .map { Character.digit(it, 10) }.joinToString("")
-                assertEquals("Peak wavelength preserved with localized digits: $language", peak.toString(), wavelengthDigits)
-            }
+            val rows = uvirSensorSpectralInfoRows(translated.resources)
+            assertEquals(3, rows.size)
+            org.junit.Assert.assertFalse("No conventional passbands remain: $language",
+                rows[1].second.contains("≈"))
+            org.junit.Assert.assertTrue(rows[1].second.contains(
+                translated.getString(R.string.spectral_channel_peaks, "405 / 425")))
+            org.junit.Assert.assertTrue(rows[2].second.contains(
+                translated.getString(R.string.measured_infrared_bands_note)))
         }
     }
 
-    @Test fun footnoteFollowsChannelsWithMarkersOnPeakLabelsAndCollapsesWithIsland() {
+    @Test fun compactInfraredChannelsHaveNoNewTechnicalNotesInEitherThemeOrDirection() {
         val dark = mutableStateOf(false)
         val direction = mutableStateOf(LayoutDirection.Ltr)
         val chart = mutableStateOf(false)
@@ -60,9 +55,9 @@ class UvirInfraredFootnoteTest {
         val sample = SensorSample(f8 = 4.0, nir = 6.0)
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val title = context.getString(R.string.far_red_nir)
-        val footnote = context.getString(R.string.infrared_sensor_footnote)
-        val farRedPeak = context.getString(R.string.infrared_peak_band, 745)
-        val nirPeak = context.getString(R.string.infrared_peak_band, 855)
+        val footnote = context.getString(R.string.measured_infrared_bands_note)
+        val farRedPeak = UvirSensorBands.FAR_RED_CHANNELS
+        val nirPeak = UvirSensorBands.NIR_CHANNEL
         compose.setContent {
             val view = LocalView.current
             DisposableEffect(view) {
@@ -107,13 +102,12 @@ class UvirInfraredFootnoteTest {
                     } else {
                         "Far-red"
                     }
-                    val farRed = compose.onNodeWithText(farRedLabel).assertIsDisplayed()
-                        .fetchSemanticsNode().boundsInRoot
-                    val nir = compose.onNodeWithText("NIR").assertIsDisplayed()
-                        .fetchSemanticsNode().boundsInRoot
-                    val note = compose.onNodeWithText(footnote).assertIsDisplayed()
-                        .fetchSemanticsNode().boundsInRoot
-                    assertEquals(1, compose.onAllNodesWithText(footnote).fetchSemanticsNodes().size)
+                    compose.onNodeWithText(farRedLabel).assertIsDisplayed()
+                    compose.onNodeWithText("NIR").assertIsDisplayed()
+                    compose.onNodeWithText(footnote).assertDoesNotExist()
+                    compose.onNodeWithText(context.getString(R.string.spectral_channel_peaks,
+                        "690 / 745 / 855")).assertDoesNotExist()
+                    compose.onNodeWithText(context.getString(R.string.measured_channel_sum)).assertDoesNotExist()
                     compose.onNodeWithText("Far-red²").assertDoesNotExist()
                     compose.onNodeWithText("NIR²").assertDoesNotExist()
                     compose.onNodeWithText("Far-red¹").assertDoesNotExist()
@@ -125,7 +119,6 @@ class UvirInfraredFootnoteTest {
                         compose.onNodeWithText(farRedPeak).assertIsDisplayed()
                         compose.onNodeWithText(nirPeak).assertIsDisplayed()
                     }
-                    assertTrue("Footnote must sit below both channel labels", note.top >= maxOf(farRed.bottom, nir.bottom))
                     compose.onNode(hasText(title) and hasClickAction()).performClick()
                     compose.onNodeWithText(footnote).assertDoesNotExist()
                     compose.onNodeWithText(farRedLabel).assertDoesNotExist()
@@ -133,7 +126,7 @@ class UvirInfraredFootnoteTest {
                     compose.onNodeWithText(farRedPeak).assertDoesNotExist()
                     compose.onNodeWithText(nirPeak).assertDoesNotExist()
                     compose.onNode(hasText(title) and hasClickAction()).performClick()
-                    compose.onNodeWithText(footnote).assertIsDisplayed()
+                    compose.onNodeWithText(footnote).assertDoesNotExist()
                 }
             }
         }

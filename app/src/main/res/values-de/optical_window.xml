@@ -1,0 +1,24 @@
+<resources>
+    <string name="optical_window_factor_limits">Zulässige Werte: %1$s–%2$s.</string>
+    <string name="optical_window_title">Kompensation des optischen Fensters</string>
+    <string name="optical_window_description">Näherungsweise Korrektur der Fensterdämpfung. Faktoren nur aus optischen Spezifikationen oder Vergleichsmessungen übernehmen.</string>
+    <string name="optical_window_enabled">Optisches Fenster kompensieren</string>
+    <string name="optical_window_channel_factor">Multiplikator %1$s</string>
+    <string name="optical_window_hint">Der endgültige Faktor ist allgemein × Kanal. %1$s ist neutral; 90%% Transmission erfordert einen Endfaktor von ×%2$s. Dies ersetzt keine Kalibrierung.</string>
+    <string name="measured_uv_bands_note">Nominelle AS7331-Kanalbereiche mit ungleichmäßiger spektraler Empfindlichkeit. Die Summe erfasst nicht alle UV-Wellenlängen.</string>
+    <string name="spectral_channel_peaks">Maxima: %1$s nm</string>
+    <string name="measured_visible_bands_note">Die angegebenen Wellenlängen sind nominale Empfindlichkeitsmaxima des AS7343, keine Grenzen gleichmäßig gemessener Spektralbänder. Kanalpaare werden gemittelt; HEV und Gesamtwerte summieren die angezeigten Kanalwerte.</string>
+    <string name="measured_infrared_bands_note">Far-red kombiniert die Kanäle bei 690 und 745 nm; NIR nutzt den Kanal bei 855 nm. Dies sind Kanalwerte, keine Messung des gesamten Infrarotspektrums.</string>
+    <string name="optical_window_common_factor">Gemeinsamer Multiplikator</string>
+    <string name="optical_window_individual_factors">Multiplikatoren je Kanal</string>
+    <string name="measured_channel_sum">Kanalsumme</string>
+    <string name="calibration_offsets_title">Offsets</string>
+    <string name="calibration_offset_channel">Offset %1$s</string>
+    <string name="calibration_offsets_description">Offsets: zulässige Werte %1$s–%2$s %3$s; %1$s bedeutet keinen Abzug. Ein im Dunkeln oder unter Referenzbedingungen gemessener mittlerer Untergrund wird abgezogen. Anwendung vor den Faktoren; negative Ergebnisse werden null.</string>
+    <string name="calibration_offsets_firmware_required">Aktualisiere die Sensor-Firmware, um Offsets einzustellen.</string>
+    <string name="calibration_offsets_legacy_notice">Beim Bearbeiten werden bisherige Offsets einzelner Kanäle in einen Offset pro Farbe umgewandelt. Bis dahin bleiben die alten Werte unverändert.</string>
+    <string name="calibration_factor_short">Faktor</string>
+    <string name="calibration_offset_short">Offset (%1$s)</string>
+    <string name="calibration_channel_factors_title">Korrekturfaktoren pro Kanal</string>
+    <string name="calibration_channels_firmware_required">Aktualisiere die Sensor-Firmware, um Faktoren pro Kanal einzustellen.</string>
+</resources>

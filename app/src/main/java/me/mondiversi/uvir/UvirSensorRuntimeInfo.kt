@@ -15,7 +15,8 @@ internal fun UvirSensorRuntimeInfo.updatedFromActivityFrame(
         normalizeSensorDeviceId(json.optString("device_id")) != normalizeSensorDeviceId(deviceId)
     ) return null
     val active = json.opt("operation_active") as? Boolean ?: return null
-    return copy(operationActive = active)
+    return copy(operationActive = active,
+        calibrationLocked = json.opt("calibration_locked") as? Boolean ?: calibrationLocked)
 }
 
 data class UvirSensorRuntimeInfo(
@@ -30,9 +31,13 @@ data class UvirSensorRuntimeInfo(
     val sensorName: String = "",
     val firmwareVersion: String = "",
     val unit: String = "",
+    val canonicalUnit: String = "",
     val calibrationKind: String = "",
     val visibleCalibrationFactor: Double? = null,
     val uvCalibrationFactor: Double? = null,
+    val opticalWindow: OpticalWindowSettings? = null,
+    val calibrationOffsets: CalibrationOffsets? = null,
+    val calibrationChannelFactors: CalibrationChannelFactors? = null,
     val sensorAvailable: Boolean? = null,
     val uvAvailable: Boolean? = null,
     val i2cSdaPin: Int? = null,
@@ -73,6 +78,8 @@ data class UvirSensorRuntimeInfo(
     val appConnected: Boolean? = null,
     // Ephemeral activity from the connected device, never part of its saved settings.
     val operationActive: Boolean? = null,
+    // Actual work/test lock, excluding the settings command's visual LED pulse.
+    val calibrationLocked: Boolean? = null,
     val streamIntervalMs: Long? = null,
     val samplingSamplesPerMeasurement: Int? = null,
     val samplingSpacingMs: Long? = null,
@@ -196,6 +203,11 @@ internal fun UvirSensorRuntimeInfo.updatedFrom(
         firmwareVersion =
             json.stringOrPrevious("firmware", firmwareVersion),
         unit = json.stringOrPrevious("unit", unit),
+        canonicalUnit = when {
+            json.has("canonical_unit") -> json.optString("canonical_unit")
+            json.optString("type") == "hello" -> ""
+            else -> canonicalUnit
+        },
         calibrationKind =
             json.stringOrPrevious("calibration", calibrationKind),
         visibleCalibrationFactor =
@@ -203,6 +215,21 @@ internal fun UvirSensorRuntimeInfo.updatedFrom(
                 "visible_calibration_factor",
                 visibleCalibrationFactor
             ),
+        opticalWindow = when {
+            json.has("optical_window") -> json.opticalWindowOrNull()
+            json.has("firmware") && !firmwareSupportsOpticalWindow(json.optString("firmware")) -> null
+            else -> opticalWindow
+        },
+        calibrationOffsets = when {
+            json.has("calibration_offsets") -> CalibrationOffsets.fromJsonOrNull(json.optJSONObject("calibration_offsets"))
+            json.has("firmware") && !firmwareSupportsCalibrationOffsets(json.optString("firmware"), calibrationOffsets) -> null
+            else -> calibrationOffsets
+        },
+        calibrationChannelFactors = when {
+            json.has("calibration_channel_factors") -> CalibrationChannelFactors.fromJsonOrNull(json.optJSONObject("calibration_channel_factors"))
+            json.has("firmware") && !firmwareSupportsCalibrationChannels(json.optString("firmware")) -> null
+            else -> calibrationChannelFactors
+        },
         uvCalibrationFactor =
             json.doubleOrPrevious(
                 "uv_calibration_factor",
@@ -277,6 +304,11 @@ internal fun UvirSensorRuntimeInfo.updatedFrom(
         streaming = json.booleanOrPrevious("streaming", streaming),
         appConnected = json.booleanOrPrevious("app_connected", appConnected),
         operationActive = json.booleanOrPrevious("operation_active", operationActive),
+        calibrationLocked = when {
+            json.has("calibration_locked") -> json.booleanOrPrevious("calibration_locked", calibrationLocked)
+            json.optString("type") == "hello" -> null
+            else -> calibrationLocked
+        },
         streamIntervalMs =
             json.longOrPrevious("stream_interval_ms", streamIntervalMs),
         samplingSamplesPerMeasurement =
@@ -508,7 +540,7 @@ internal fun UvirSensorRuntimeInfo.updatedFrom(
                 offlineExternalCommand
             ),
         offlineConditionPlan = if (json.has("offline_condition_plan"))
-            decodeConditionalAcquisitionPlan(json.optString("offline_condition_plan")) else offlineConditionPlan,
+            decodeConditionalAcquisitionPlan(scaleUvirConditionPlan(json.optString("offline_condition_plan"), json.sensorIrradianceScaleToWm2())) else offlineConditionPlan,
         offlineConditionWaiting = json.booleanOrPrevious("offline_condition_waiting", offlineConditionWaiting),
         offlineEndAtMs = json.longOrPrevious("offline_end_ms", offlineEndAtMs),
         offlineStartedAtMs = json.longOrPrevious("offline_started_ms", offlineStartedAtMs),
@@ -623,10 +655,10 @@ private fun JSONObject.alertRulesOrPrevious(
     if (!has(key)) return previous
     if (isNull(key)) return null
     val values = optJSONArray(key) ?: return previous
-    return values.toThresholdAlertRules()
+    return values.toThresholdAlertRules(sensorIrradianceScaleToWm2())
 }
 
-private fun JSONArray.toThresholdAlertRules(): List<ThresholdAlertRule> =
+private fun JSONArray.toThresholdAlertRules(scale: Double): List<ThresholdAlertRule> =
     buildList {
         for (index in 0 until length()) {
             val value = optJSONObject(index) ?: continue
@@ -645,7 +677,7 @@ private fun JSONArray.toThresholdAlertRules(): List<ThresholdAlertRule> =
             val threshold =
                 value.optDouble("threshold", Double.NaN)
                     .takeIf { it.isFinite() && it >= 0.0 }
-                    ?.toFloat()
+                    ?.let { (it * scale).toFloat() }
                     ?: continue
             add(
                 ThresholdAlertRule(

@@ -75,7 +75,7 @@ class UvirRtcClockWarningTest {
         }
     }
 
-    @Test fun singleAndMultipleSensorsShareOnePopupWithOnlyTheCloseIconInBothThemes() {
+    @Test fun singleAndMultipleSensorsShareOnePopupWithCloseIconAndFooterInBothThemes() {
         val ids = mutableStateOf(listOf("UVIR-A"))
         val dark = mutableStateOf(false)
         val direction = mutableStateOf(LayoutDirection.Ltr)
@@ -109,8 +109,8 @@ class UvirRtcClockWarningTest {
             compose.onNodeWithText(resources.getString(R.string.rtc_clock_warning_title_multiple)).assertIsDisplayed()
             compose.onNodeWithText("• Portatile").assertIsDisplayed()
             compose.onNodeWithText("• Laboratorio").assertIsDisplayed()
-            compose.onNodeWithText(resources.getString(R.string.close)).assertDoesNotExist()
-            compose.onAllNodes(hasClickAction()).assertCountEquals(2)
+            compose.onNodeWithText(resources.getString(R.string.close)).assertIsDisplayed()
+            compose.onAllNodes(hasClickAction()).assertCountEquals(3)
             compose.onNodeWithText(resources.getString(R.string.rtc_clock_warning_show_each_launch))
                 .assertIsOn().assertIsDisplayed()
             if (layout == LayoutDirection.Ltr) {
@@ -121,7 +121,7 @@ class UvirRtcClockWarningTest {
                     }
             }
         }
-        compose.onNodeWithContentDescription(resources.getString(R.string.close)).performClick()
+        compose.onNodeWithText(resources.getString(R.string.close)).performClick()
         compose.runOnIdle { assertTrue(dismissed) }
     }
 

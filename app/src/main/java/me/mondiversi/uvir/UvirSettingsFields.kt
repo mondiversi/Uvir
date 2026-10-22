@@ -6,14 +6,25 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.OffsetMapping
+import androidx.compose.ui.text.input.TransformedText
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+
+/** Shared trailing reference for calibration and optical-window fields. */
+@Composable
+internal fun SettingsChannelReference(text: String, color: Color, modifier: Modifier = Modifier) {
+    Text(text, color = color, fontSize = 11.sp, maxLines = 1,
+        modifier = Modifier.padding(horizontal = 12.dp).then(modifier))
+}
 
 @Composable
 internal fun DecimalField(
@@ -22,45 +33,34 @@ internal fun DecimalField(
     label: String,
     enabled: Boolean = true,
     onEditingComplete: () -> Unit = {},
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    trailingContent: (@Composable () -> Unit)? = null,
+    maxChars: Int = 13,
+    labelLeadingContent: (@Composable () -> Unit)? = null
 ) {
+    val numericFormat = LocalUvirNumericFormat.current
+    val localizedInput = uvirNumericInputTransformation(numericFormat)
     OutlinedTextField(
         value = value,
         onValueChange = { newValue ->
-            val normalized =
-                newValue.replace(',', '.')
-            val filtered =
-                buildString {
-                    var decimalSeparatorFound = false
-
-                    normalized.forEachIndexed { index, character ->
-                        when {
-                            character == '-' && index == 0 ->
-                                append(character)
-
-                            character.isDigit() ->
-                                append(character)
-
-                            character == '.' &&
-                                    !decimalSeparatorFound -> {
-                                append(character)
-                                decimalSeparatorFound = true
-                            }
-                        }
-                    }
-                }.take(13)
-
-            onValueChange(filtered)
+            onValueChange(filterUvirNumericInput(newValue, numericFormat, decimal = true).take(maxChars))
         },
         modifier =
             modifier.settingsCommitOnBlur(onEditingComplete = onEditingComplete),
         enabled = enabled,
         label = {
-            AdaptiveFieldLabel(label)
+            if (labelLeadingContent == null) AdaptiveFieldLabel(label)
+            else Row(verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                labelLeadingContent()
+                Box(Modifier.weight(1f, fill = false)) { AdaptiveFieldLabel(label) }
+            }
         },
+        trailingIcon = trailingContent,
         colors =
             UvirOutlinedTextFieldColors(),
         singleLine = true,
+        visualTransformation = localizedInput,
         keyboardOptions =
             KeyboardOptions(
                 keyboardType =
@@ -79,19 +79,12 @@ fun NumberField(
     enabled: Boolean = true,
     onEditingComplete: () -> Unit = {}
 ) {
-
+    val numericFormat = LocalUvirNumericFormat.current
     OutlinedTextField(
         value = value,
 
         onValueChange = { newValue ->
-            val normalized =
-                buildString {
-                    newValue.forEachIndexed { index, character ->
-                        if (character.isDigit() || (character == '-' && index == 0)) {
-                            append(character)
-                        }
-                    }
-                }
+            val normalized = filterUvirNumericInput(newValue, numericFormat, decimal = false)
             val allowedLength = maxChars + if (normalized.startsWith('-')) 1 else 0
             onValueChange(normalized.take(allowedLength))
         },
@@ -109,6 +102,7 @@ fun NumberField(
             UvirOutlinedTextFieldColors(),
 
         singleLine = true,
+        visualTransformation = uvirNumericInputTransformation(numericFormat),
 
         keyboardOptions =
             KeyboardOptions(
@@ -117,6 +111,17 @@ fun NumberField(
             )
     )
 }
+
+@Composable
+private fun uvirNumericInputTransformation(format: UvirNumericFormat): VisualTransformation =
+    remember(format, java.util.Locale.getDefault()) {
+        VisualTransformation { original ->
+            TransformedText(
+                AnnotatedString(formatUvirDecimalInputText(original.text, format)),
+                OffsetMapping.Identity
+            )
+        }
+    }
 
 @Composable
 fun AdaptiveFieldLabel(

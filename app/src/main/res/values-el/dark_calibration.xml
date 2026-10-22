@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dark_offsets_calculate">Υπολογισμός μετατοπίσεων</string>
+    <string name="dark_offsets_instructions">Μέτρησε για περίπου 30 δευτερόλεπτα σε σταθερές συνθήκες αναφοράς. Στο σκοτάδι αντισταθμίζεται το υπόβαθρο του αισθητήρα· με φωτισμό αφαιρείται και το υπάρχον φως, οπότε οι μετρήσεις είναι σχετικές. Για μέτρηση στο σκοτάδι, κάλυψε τις οπτικές εισόδους με υλικό αδιαφανές και στο εγγύς υπέρυθρο και διατήρησε τα LED στην κανονική λειτουργία τους. Ο μέσος όρος δεν εξαλείφει τον τυχαίο θόρυβο ούτε βαθμονομεί την ενίσχυση.</string>
+    <string name="dark_offsets_progress">Μέτρηση: %1$s / 30 δ</string>
+    <string name="dark_offsets_result">Πρόταση από %1$s μετρήσεις. Δεν άλλαξε καμία ρύθμιση.</string>
+    <string name="dark_offsets_failed">Η μέτρηση διακόπηκε ή δεν είναι διαθέσιμη. Ελέγξτε σύνδεση και αισθητήρα και δοκιμάστε ξανά.</string>
+    <string name="dark_offsets_start">Έναρξη μέτρησης</string>
+    <string name="dark_offsets_apply">Εφαρμογή offset</string>
+    <string name="dark_offsets_firmware_required">Απαιτεί υλικολογισμικό αισθητήρα 0.5.110 ή νεότερο.</string>
+    <string name="calibration_reset_values">Επαναφορά τιμών</string>
+    <string name="calibration_reset_confirmation_title">Επαναφορά τιμών;</string>
+    <string name="calibration_reset_confirm_action">ΕΠΑΝΑΦΟΡΑ</string>
+    <string name="calibration_reset_confirmation_message">Επαναφέρει τους συντελεστές διόρθωσης στο 1 και τα offset στο 0 για %1$s. Οι άλλες ρυθμίσεις βαθμονόμησης και οπτικού παραθύρου δεν αλλάζουν.</string>
+    <string name="optical_window_reset_confirmation_message">Επαναφέρει τον γενικό πολλαπλασιαστή και όλους τους πολλαπλασιαστές καναλιών του οπτικού παραθύρου στο 1. Η βαθμονόμηση δεν αλλάζει.</string>
+</resources>

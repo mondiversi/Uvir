@@ -14,5 +14,5 @@
     <string name="update_done">सेंसर अपडेट हुआ</string>
     <string name="update_failed">अपडेट विफल रहा। त्रुटि लॉग देखें। सेंसर चालू न हो तो कंप्यूटर से USB द्वारा फ़र्मवेयर पुनर्स्थापित करें।</string>
     <string name="update_permission">Android सेटिंग में Uvir को अपडेट स्थापित करने दें।</string>
-    <string name="update_whats_new">ऐप और सेंसर के हस्ताक्षरित अपडेट, सत्यापित डाउनलोड और USB से फ़र्मवेयर लोड करना।</string>
+    <string name="update_whats_new">सेंसर मॉडल, संक्षिप्त वर्णक्रमीय संदर्भ और अधिक स्पष्ट ग्राफ़ संकेतों सहित CSV, TXT और PNG निर्यात।</string>
 </resources>

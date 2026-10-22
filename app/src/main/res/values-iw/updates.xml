@@ -14,5 +14,5 @@
     <string name="update_done">החיישן עודכן</string>
     <string name="update_failed">העדכון נכשל. יש לעיין ביומן השגיאות. אם החיישן אינו מתחיל, יש לשחזר קושחה דרך USB ממחשב.</string>
     <string name="update_permission">יש לאפשר ל־Uvir להתקין עדכונים בהגדרות Android.</string>
-    <string name="update_whats_new">עדכונים חתומים לאפליקציה ולחיישן, הורדות מאומתות וטעינת קושחה דרך USB.</string>
+    <string name="update_whats_new">ייצוא CSV, TXT ו-PNG עם דגמי חיישנים, הפניות ספקטרליות תמציתיות ומקרא גרפים קריא יותר.</string>
 </resources>

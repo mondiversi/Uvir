@@ -1,0 +1,24 @@
+<resources>
+    <string name="optical_window_factor_limits">Allowed values: %1$s–%2$s.</string>
+    <string name="optical_window_title">Optical window compensation</string>
+    <string name="optical_window_description">Approximate correction for window attenuation. Set factors only from optical specifications or comparative measurements.</string>
+    <string name="optical_window_enabled">Compensate for the optical window</string>
+    <string name="optical_window_channel_factor">%1$s multiplier</string>
+    <string name="optical_window_hint">The final factor is general × channel. %1$s is neutral; 90%% transmission requires a final factor of ×%2$s. This does not replace calibration.</string>
+    <string name="measured_uv_bands_note">Nominal AS7331 channel ranges, with non-uniform spectral sensitivity. The total is the sum of the channels, not a measurement of all UV wavelengths.</string>
+    <string name="spectral_channel_peaks">Peaks: %1$s nm</string>
+    <string name="measured_visible_bands_note">The wavelengths shown are nominal AS7343 sensitivity peaks, not uniform band limits. Paired channels are averaged; HEV and totals sum the displayed channel values.</string>
+    <string name="measured_infrared_bands_note">Far-red combines the 690 and 745 nm channels; NIR uses the 855 nm channel. These are channel readings, not a measurement of the entire infrared spectrum.</string>
+    <string name="optical_window_common_factor">Common multiplier</string>
+    <string name="optical_window_individual_factors">Per-channel multipliers</string>
+    <string name="measured_channel_sum">Channel sum</string>
+    <string name="calibration_offsets_title">Offsets</string>
+    <string name="calibration_offset_channel">%1$s offset</string>
+    <string name="calibration_offsets_description">Offsets: allowed values %1$s–%2$s %3$s; %1$s means no subtraction. Subtract a mean background measured in darkness or under reference conditions. Applied before the factors; negative results become zero.</string>
+    <string name="calibration_offsets_firmware_required">Update the sensor firmware to configure offsets.</string>
+    <string name="calibration_offsets_legacy_notice">Editing these offsets converts any earlier physical-channel offsets to one offset per color. Old values are retained until you make an edit.</string>
+    <string name="calibration_factor_short">Factor</string>
+    <string name="calibration_offset_short">Offset (%1$s)</string>
+    <string name="calibration_channel_factors_title">Channel correction factors</string>
+    <string name="calibration_channels_firmware_required">Update the sensor firmware to configure per-channel factors.</string>
+</resources>

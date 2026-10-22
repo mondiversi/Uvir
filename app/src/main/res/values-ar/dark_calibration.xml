@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dark_offsets_calculate">حساب الإزاحات</string>
+    <string name="dark_offsets_instructions">قِس لنحو 30 ثانية في ظروف مرجعية مستقرة. في الظلام تُعوَّض خلفية المستشعر؛ ومع الإضاءة يُطرح الضوء الموجود أيضًا فتكون القياسات نسبية. للقياس في الظلام غطِّ المداخل البصرية بمادة معتمة للأشعة تحت الحمراء القريبة أيضًا، وأبقِ مصابيح LED في وضع التشغيل المعتاد. المتوسط لا يزيل الضوضاء العشوائية ولا يعاير الكسب.</string>
+    <string name="dark_offsets_progress">جارٍ القياس: %1$s / 30 ث</string>
+    <string name="dark_offsets_result">اقتراح من %1$s قراءة. لم تتغير أي إعدادات.</string>
+    <string name="dark_offsets_failed">توقف القياس أو تعذر إجراؤه. تحقّق من الاتصال والمستشعر ثم أعد المحاولة.</string>
+    <string name="dark_offsets_start">بدء القياس</string>
+    <string name="dark_offsets_apply">تطبيق الإزاحات</string>
+    <string name="dark_offsets_firmware_required">يتطلب برنامج المستشعر الثابت 0.5.110 أو أحدث.</string>
+    <string name="calibration_reset_values">إعادة ضبط القيم</string>
+    <string name="calibration_reset_confirmation_title">إعادة ضبط القيم؟</string>
+    <string name="calibration_reset_confirm_action">إعادة الضبط</string>
+    <string name="calibration_reset_confirmation_message">يعيد معاملات التصحيح إلى 1 والإزاحات إلى 0 لـ %1$s. تبقى إعدادات المعايرة الأخرى والنافذة البصرية دون تغيير.</string>
+    <string name="optical_window_reset_confirmation_message">يعيد المضاعف العام وجميع مضاعفات قنوات النافذة البصرية إلى 1. لا تتغير المعايرة.</string>
+</resources>

@@ -88,7 +88,7 @@ internal fun acquisitionChartBars(
                 AcquisitionChartBar("V", "Violet", R.string.violet, Color(0xFF8E24AA), sample.violetto, AcquisitionChartSection.VISIBLE, visibleOutOfRange),
                 AcquisitionChartBar("B", "Blue", R.string.blue, Color(0xFF1E88E5), sample.blu, AcquisitionChartSection.VISIBLE, visibleOutOfRange),
                 AcquisitionChartBar("G", "Green", R.string.green, Color(0xFF43A047), sample.verde, AcquisitionChartSection.VISIBLE, visibleOutOfRange),
-                AcquisitionChartBar("Y", "Yellow", R.string.yellow, Color(0xFFF9A825), sample.giallo, AcquisitionChartSection.VISIBLE, visibleOutOfRange),
+                AcquisitionChartBar("GY", "Green-yellow", R.string.yellow, Color(0xFFF9A825), sample.giallo, AcquisitionChartSection.VISIBLE, visibleOutOfRange),
                 AcquisitionChartBar("O", "Orange", R.string.orange, Color(0xFFEF6C00), sample.arancione, AcquisitionChartSection.VISIBLE, visibleOutOfRange),
                 AcquisitionChartBar("R", "Red", R.string.red, Color(0xFFE53935), sample.rosso, AcquisitionChartSection.VISIBLE, visibleOutOfRange),
                 AcquisitionChartBar(

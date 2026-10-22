@@ -110,16 +110,17 @@ internal fun formatUvirExportNumber(
         return value.toString()
     }
 
-    return DecimalFormat(
-        "0.#########",
-        numericFormatSymbols(format)
-    ).apply {
-        isGroupingUsed = false
-        roundingMode = RoundingMode.HALF_UP
-    }.format(value)
+    // Preserve the complete round-trippable stored Double, including tiny values.
+    val plain = java.math.BigDecimal.valueOf(value).stripTrailingZeros().toPlainString()
+    val symbols = numericFormatSymbols(format)
+    return plain.map { character -> when (character) {
+        '.' -> symbols.decimalSeparator
+        in '0'..'9' -> symbols.zeroDigit + (character - '0')
+        else -> character
+    } }.joinToString("")
 }
 
-private fun numericFormatSymbols(
+internal fun numericFormatSymbols(
     format: UvirNumericFormat
 ): DecimalFormatSymbols =
     when (format) {
@@ -137,6 +138,19 @@ private fun numericFormatSymbols(
         UvirNumericFormat.AMERICAN ->
             DecimalFormatSymbols.getInstance(Locale.US)
     }
+
+/** Editable numbers omit grouping and preserve every character/cursor offset. */
+internal fun formatUvirDecimalInputText(text: String, format: UvirNumericFormat): String {
+    val symbols = numericFormatSymbols(format)
+    return text.map { character ->
+        when (character) {
+            '.', ',' -> symbols.decimalSeparator
+            '-' -> symbols.minusSign
+            in '0'..'9' -> symbols.zeroDigit + (character - '0')
+            else -> character
+        }
+    }.joinToString("")
+}
 
 @Composable
 internal fun NumericFormatOptionRow(

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_irradiance_decimals">Gösterilen ondalık basamaklar</string>
+    <string name="live_irradiance_decimals_description">Görüntülenen değerlere ve özel dışa aktarımlara uygulanır. Sondaki sıfırlar görünür kalır; kayıtlı veriler ve bilimsel dışa aktarımlar değişmez.</string>
+</resources>

@@ -17,6 +17,9 @@ internal data class UvirSpectralTotals(
     fun share(group: SensorGroup): Float? =
         if (outOfRange || group == SensorGroup.BIOLOGICAL) null
         else uvirIrradianceGroupShare(total(group), ultraviolet, visible, infrared)
+
+    fun shareOfTotal(value: Double): Float? =
+        if (outOfRange) null else percentage(value, ultraviolet + visible + infrared)
 }
 
 internal fun SensorSample.spectralTotals(): UvirSpectralTotals =

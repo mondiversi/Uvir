@@ -423,7 +423,7 @@
     <string name="violet">Violett</string>
     <string name="blue">Blau</string>
     <string name="green">Grün</string>
-    <string name="yellow">Gelb</string>
+    <string name="yellow">Grün-gelb</string>
     <string name="orange">Orange</string>
     <string name="red">Rot</string>
     <string name="percent_of_visible">%1$s%% der sichtbaren</string>
@@ -432,11 +432,11 @@
     <string name="app_version">App-Version: %1$s</string>
     <string name="package_name_value">Paket: %1$s</string>
     <string name="about_whats_new_title">Neu in Version %1$s</string>
-    <string name="about_whats_new_connectivity">Sequenzielle Verwaltung mehrerer Sensoren mit geschützten Profilen und Verbindungen über USB, Wi-Fi, Bluetooth und Internet.</string>
-    <string name="about_whats_new_connections">Bedingte und extern ausgelöste Erfassungen, autonome Sitzungen und zuverlässige Wiederherstellung des Status nach Trennung oder Neustart.</string>
-    <string name="about_whats_new_measurements">Sitzungsvarianten, erweiterte Verlaufsfilter und klarere Details zu Erfassungen und Alarmen.</string>
-    <string name="about_whats_new_interface">Erweiterte CSV-, TXT- und PNG-Exporte mit Einheiten, regionalen Formaten, gruppierten Diagrammen und Sensoridentifikation.</string>
-    <string name="about_whats_new_github">Verschlüsselte Einstellungs-Backups, integrierte Diagnose und umfassende Verbesserungen an Oberfläche und Barrierefreiheit.</string>
+    <string name="about_whats_new_connectivity">Korrekturfaktoren und Offsets je Kanal, mit geführter Messung mittlerer Offsets und Bestätigung beim Zurücksetzen.</string>
+    <string name="about_whats_new_connections">Kompensation optischer Fenster mit gemeinsamem Hauptfaktor und Kanalfaktoren; klarere AS7331-Bereiche und AS7343-Empfindlichkeitsmaxima.</string>
+    <string name="about_whats_new_measurements">Interne Speicherung der Bestrahlungsstärke in W/m² mit automatischer Migration unter Beibehaltung vorhandener Messungen und Einstellungen.</string>
+    <string name="about_whats_new_interface">Einstellbare Dezimalstellen für Live-Werte, gespeicherte Daten und benutzerdefinierte Exporte; wissenschaftliche Exporte behalten die volle gespeicherte Genauigkeit.</string>
+    <string name="about_whats_new_github">Überarbeitete Einstellungsmenüs und Dialoge; aktualisierte Verdrahtungs-, Montage- und Kalibrierungsanleitungen mit Richtungsrohren und Diffusoranforderungen.</string>
     <string name="about_description">App zur spektralen Erfassung ultravioletter, sichtbarer und infraroter Strahlung.</string>
     <string name="about_spectral_ranges">Spektralbereiche: Ultraviolett • Sichtbares Licht • Infrarot</string>
     <string name="about_sensors">Unterstützte Sensoren: AS7331 UV • AS7343 multispektral</string>
@@ -634,11 +634,10 @@
     <string name="threshold_rules_connection_required">Sensor anschließen, um diese Alarme zu ändern.</string>
     <string name="threshold_repeat_sensor_description">Dieses Intervall wird im Sensor gespeichert und begrenzt auch die aufgezeichneten Warnungen, während die App getrennt ist.</string>
     <string name="sensor_calibration_title">Kalibrierung</string>
-    <string name="sensor_calibration_description">Wenden Sie Korrekturfaktoren an, die durch den Vergleich mit einem kalibrierten Referenzinstrument erhalten wurden. Ein Faktor von 1,000 erhält die standardmäßige Datenblatt-Schätzung.</string>
+    <string name="sensor_calibration_description">Passe Korrekturfaktoren und Offsets für jeden Kanal an.</string>
     <string name="sensor_calibration_visible_factor">VIS/NIR Korrekturfaktor · AS7343</string>
     <string name="sensor_calibration_uv_factor">UV Korrekturfaktor · AS7331</string>
-    <string name="sensor_calibration_factor_hint">Erlaubter Wert: 0,100–10,000.</string>
-    <string name="sensor_calibration_uv_unavailable">Die standardmäßige UV-Kalibrierung wird beibehalten und wird bearbeitbar, sobald der UV-Sensor erkannt wird.</string>
+    <string name="sensor_calibration_factor_hint">Korrekturfaktoren: zulässige Werte %1$s–%2$s; %3$s lässt die Verstärkung unverändert. Bestimme sie mit einem kalibrierten Referenzinstrument.</string>
     <string name="sensor_calibration_firmware_required">Aktualisieren Sie die Sensor-Firmware, um die Kalibrierung zu verwenden.</string>
     <string name="sensor_firmware_update_required_title">Firmware-Update erforderlich</string>
     <string name="sensor_firmware_update_required">Die auf dem Sensor installierte Firmware unterstützt diese Einstellungen nicht. Aktualisieren Sie die Sensor-Firmware und versuchen Sie es erneut.</string>
@@ -805,5 +804,5 @@
     <string name="alert_max_registrations">Maximale Aufzeichnungen</string>
     <string name="alert_registration_count">Anzahl der Aufzeichnungen</string>
     <string name="alert_configure_first">Konfiguriere vor dem Start mindestens einen Wert.</string>
-    <string name="sensor_simulation_open_settings">Einstellungen öffnen</string>
+    <string name="sensor_simulation_open_settings">Einstellungen</string>
 </resources>

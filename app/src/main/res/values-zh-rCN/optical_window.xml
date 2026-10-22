@@ -1,0 +1,24 @@
+<resources>
+    <string name="optical_window_factor_limits">允许值：%1$s–%2$s。</string>
+    <string name="optical_window_title">光学窗口补偿</string>
+    <string name="optical_window_description">近似修正窗口造成的衰减。仅使用来自光学规格或对比测量的系数。</string>
+    <string name="optical_window_enabled">启用光学窗口补偿</string>
+    <string name="optical_window_channel_factor">%1$s 倍率</string>
+    <string name="optical_window_hint">最终系数为总体 × 通道。%1$s 不作修正；透过率为90%%时，最终系数应为 ×%2$s。不能替代校准。</string>
+    <string name="measured_uv_bands_note">AS7331 通道的标称范围，其光谱灵敏度并不均匀。总值为各通道之和，不是所有紫外波长的测量值。</string>
+    <string name="spectral_channel_peaks">峰值：%1$s nm</string>
+    <string name="measured_visible_bands_note">所示波长是AS7343的标称灵敏度峰值，并非均匀波段的边界。成对通道取平均值；HEV和总值为所示通道值之和。</string>
+    <string name="measured_infrared_bands_note">Far-red组合690和745 nm通道；NIR使用855 nm通道。这些是通道读数，并非整个红外光谱的测量值。</string>
+    <string name="optical_window_common_factor">通用倍数</string>
+    <string name="optical_window_individual_factors">各通道倍率</string>
+    <string name="measured_channel_sum">通道总和</string>
+    <string name="calibration_offsets_title">偏移</string>
+    <string name="calibration_offset_channel">%1$s 偏移</string>
+    <string name="calibration_offsets_description">偏移：允许值为 %1$s–%2$s %3$s；%1$s 表示不减去任何值。减去在黑暗或参考条件下测得的平均本底。在系数之前应用，负结果归零。</string>
+    <string name="calibration_offsets_firmware_required">请更新传感器固件以设置偏移。</string>
+    <string name="calibration_offsets_legacy_notice">编辑这些值会将原有的各通道偏移转换为每种颜色一个偏移。编辑前，旧值保持不变。</string>
+    <string name="calibration_factor_short">校正系数</string>
+    <string name="calibration_offset_short">偏移量 (%1$s)</string>
+    <string name="calibration_channel_factors_title">各通道校正系数</string>
+    <string name="calibration_channels_firmware_required">请更新传感器固件以设置各通道系数。</string>
+</resources>

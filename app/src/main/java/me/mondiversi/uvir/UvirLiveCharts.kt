@@ -192,6 +192,11 @@ internal fun LiveRollingChart(
     // A new peak must remain visible even while the axis is expanding.
     val animatedCanonicalMaximum = if (floatMaximum != null) animatedMaximum.toDouble() else canonicalMaximum
     val maxValue = valueScale(maxOf(animatedCanonicalMaximum, canonicalMaximum / UVIR_CHART_HEADROOM))
+    val liveDigits = currentUvirLiveIrradianceDecimals()
+    val numericFormat = LocalUvirNumericFormat.current
+    val fixedLabels = (4 downTo 0).map { step ->
+        formatUvirLiveDisplayNumber(maxValue * step / 4.0, liveDigits, numericFormat, grouping = false)
+    }
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -227,7 +232,8 @@ internal fun LiveRollingChart(
         ) {
             UvirChartYAxis(
                 maximum = maxValue,
-                fractionDigits = 1,
+                fractionDigits = liveDigits,
+                labels = fixedLabels,
                 secondaryText = secondaryText,
                 modifier = Modifier.fillMaxWidth().height(146.dp)
             ) { chartModifier ->

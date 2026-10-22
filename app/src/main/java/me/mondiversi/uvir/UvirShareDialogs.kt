@@ -7,6 +7,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 
@@ -80,11 +81,11 @@ internal fun MeasurementShareFormatDialog(
         }
 
     UvirAlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = { if (!exportRequest.inProgress) onDismiss() },
         title = {
             UvirClosableDialogTitle(
                 title = stringResource(R.string.choose_share_format),
-                onDismiss = onDismiss
+                onDismiss = { if (!exportRequest.inProgress) onDismiss() }
             )
         },
         text = {
@@ -141,35 +142,18 @@ internal fun MeasurementShareFormatDialog(
             }
         },
         confirmButton = {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(2.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.End),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    TextButton(
-                        enabled = selectedFormat != null && !exportRequest.inProgress,
-                        onClick = {
-                            exportRequest.request(UvirExportDestination.SAVE)
-                        }
-                    ) {
-                        Text(stringResource(R.string.save))
-                    }
-
-                    TextButton(
-                        enabled = selectedFormat != null && !exportRequest.inProgress,
-                        onClick = {
-                            exportRequest.request(UvirExportDestination.SHARE)
-                        }
-                    ) {
-                        Text(stringResource(R.string.share))
-                    }
-                }
-
-            }
+            TextButton(
+                enabled = selectedFormat != null && !exportRequest.inProgress,
+                onClick = { exportRequest.request(UvirExportDestination.SAVE) }
+            ) { Text(stringResource(R.string.save)) }
+            TextButton(
+                enabled = selectedFormat != null && !exportRequest.inProgress,
+                onClick = { exportRequest.request(UvirExportDestination.SHARE) }
+            ) { Text(stringResource(R.string.share)) }
+        },
+        dismissButton = {
+            UvirDialogCloseButton(onDismiss, enabled = !exportRequest.inProgress,
+                modifier = Modifier.testTag("export_format_close"))
         },
         containerColor = cardColor,
         titleContentColor = primaryText,
@@ -216,33 +200,18 @@ internal fun UvirSaveOrShareDialog(
             }
         },
         confirmButton = {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(2.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.End),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    TextButton(
-                        enabled = !exportRequest.inProgress,
-                        onClick = {
-                            exportRequest.request(UvirExportDestination.SAVE)
-                        }
-                    ) {
-                        Text(stringResource(R.string.save))
-                    }
-                    TextButton(
-                        enabled = !exportRequest.inProgress,
-                        onClick = {
-                            exportRequest.request(UvirExportDestination.SHARE)
-                        }
-                    ) {
-                        Text(stringResource(R.string.share))
-                    }
-                }
-            }
+            TextButton(
+                enabled = !exportRequest.inProgress,
+                onClick = { exportRequest.request(UvirExportDestination.SAVE) }
+            ) { Text(stringResource(R.string.save)) }
+            TextButton(
+                enabled = !exportRequest.inProgress,
+                onClick = { exportRequest.request(UvirExportDestination.SHARE) }
+            ) { Text(stringResource(R.string.share)) }
+        },
+        dismissButton = {
+            UvirDialogCloseButton(onDismiss, enabled = !exportRequest.inProgress,
+                modifier = Modifier.testTag("export_dialog_close"))
         },
         containerColor = cardColor,
         titleContentColor = primaryText,

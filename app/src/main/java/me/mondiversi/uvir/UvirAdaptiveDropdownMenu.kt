@@ -17,6 +17,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -40,6 +41,9 @@ internal fun UvirAdaptiveDropdownMenu(
     containerColor: Color = MenuDefaults.containerColor,
     tonalElevation: Dp = MenuDefaults.TonalElevation,
     scrollbarColor: Color = uvirNeutralContentColor().copy(alpha = 0.45f),
+    shape: Shape = MenuDefaults.shape,
+    dimAmount: Float = 0f,
+    alignToEnd: Boolean = false,
     content: @Composable ColumnScope.() -> Unit
 ) {
     if (!expanded) return
@@ -47,16 +51,17 @@ internal fun UvirAdaptiveDropdownMenu(
     val configuration = LocalConfiguration.current
     val direction = LocalLayoutDirection.current
     val margin = with(density) { 8.dp.roundToPx() }
-    val position = remember(margin) { UvirDropdownPositionProvider(margin) }
+    val position = remember(margin, alignToEnd) { UvirDropdownPositionProvider(margin, alignToEnd) }
     Popup(onDismissRequest = onDismissRequest, popupPositionProvider = position,
         properties = PopupProperties(focusable = true)) {
+        UvirDropdownWindowDimming(dimAmount)
         CompositionLocalProvider(LocalDensity provides density, LocalConfiguration provides configuration,
             LocalLayoutDirection provides direction) {
             Surface(
                 modifier = Modifier
                     .widthIn(max = (configuration.screenWidthDp.dp - 16.dp).coerceAtLeast(1.dp))
                     .heightIn(max = (configuration.screenHeightDp.dp - 48.dp).coerceAtLeast(1.dp)),
-                shape = MenuDefaults.shape, color = containerColor,
+                shape = shape, color = containerColor,
                 tonalElevation = tonalElevation, shadowElevation = MenuDefaults.ShadowElevation
             ) {
                 Column(modifier.scrollbarOverlay(scrollState, scrollbarColor)
@@ -67,8 +72,11 @@ internal fun UvirAdaptiveDropdownMenu(
     }
 }
 
-/** Prefer below/above the anchor, clamp to the visible window, and mirror the start edge in RTL. */
-internal class UvirDropdownPositionProvider(private val margin: Int) : PopupPositionProvider {
+/** Prefer below/above the anchor, clamp to the window, and mirror the chosen edge in RTL. */
+internal class UvirDropdownPositionProvider(
+    private val margin: Int,
+    private val alignToEnd: Boolean = false
+) : PopupPositionProvider {
     override fun calculatePosition(anchorBounds: IntRect, windowSize: IntSize,
         layoutDirection: LayoutDirection, popupContentSize: IntSize): IntOffset {
         val maxX = (windowSize.width - margin - popupContentSize.width).coerceAtLeast(margin)
@@ -77,7 +85,10 @@ internal class UvirDropdownPositionProvider(private val margin: Int) : PopupPosi
             else anchorBounds.right - popupContentSize.width
         val end = if (layoutDirection == LayoutDirection.Ltr) anchorBounds.right - popupContentSize.width
             else anchorBounds.left
-        val x = listOf(start, end).firstOrNull { it in margin..maxX } ?: start.coerceIn(margin, maxX)
+        val preferred = if (alignToEnd) end else start
+        val fallback = if (alignToEnd) start else end
+        val x = listOf(preferred, fallback).firstOrNull { it in margin..maxX }
+            ?: preferred.coerceIn(margin, maxX)
         val y = listOf(anchorBounds.bottom, anchorBounds.top - popupContentSize.height)
             .firstOrNull { it in margin..maxY } ?: anchorBounds.bottom.coerceIn(margin, maxY)
         return IntOffset(x, y)

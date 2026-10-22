@@ -39,9 +39,9 @@ class UvirExportSensorMetadataTest {
             UvirNumericFormat.INTERNATIONAL
         )
         val lines = csv.trim().lines()
-        assertTrue(lines[0].endsWith("Sensor_name;Out_of_range"))
-        assertTrue(lines[1].endsWith(";Garden;0"))
-        assertTrue(lines[2].endsWith(";Balcony;0"))
+        assertTrue(lines[0].endsWith("Sensor_name;Out_of_range;Optical_window;UV_sensor_model;VIS_IR_sensor_model"))
+        assertTrue(lines[1].endsWith(";Garden;0;;—;—"))
+        assertTrue(lines[2].endsWith(";Balcony;0;;—;—"))
         lines.forEach {
             assertEquals(
                 measurementExportColumns(DATA_EXPORT_LANGUAGE).size,
@@ -57,7 +57,7 @@ class UvirExportSensorMetadataTest {
             listOf(SavedRecordDetail(1L, 1L, "", false, SensorSample(), sensorDisplayName = sensorName)),
             UvirNumericFormat.INTERNATIONAL
         )
-        assertTrue(csv.trim().endsWith(";" + csvCell(sensorName) + ";0"))
+        assertTrue(csv.trim().endsWith(";" + csvCell(sensorName) + ";0;;—;—"))
         assertTrue(csv.contains("חיישן"))
     }
 }

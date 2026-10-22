@@ -36,7 +36,7 @@ internal fun createAlertSessionChartFile(
     val valueScale: (Double) -> Double = if (percentageScale) {
         { value: Double -> value }
     } else {
-        irradianceUnit::fromCanonicalUwCm2
+        exportFormatting::chartValue
     }
 
     val width = 1600
@@ -69,13 +69,26 @@ internal fun createAlertSessionChartFile(
             sensorName = exportSensorNames(sortedEntries.map { it.sensorDisplayName }),
             noteLabel = exportContext.getString(R.string.share_note_label),
             sensorLabel = exportContext.getString(R.string.sensor_selector_label),
-            emptyNote = exportContext.getString(R.string.no_note)
+            emptyNote = exportContext.getString(R.string.no_note),
+            hardwareCaption = exportHardwareCaption(exportContext, sortedEntries.map { it.sensorId })
         ),
         paint = textPaint,
         maxWidth = 1420f
     )
     val headerOffset = (contextLines.size - 1) * 30f
-    val height = 1000 + headerOffset.toInt()
+    val thresholdLabel = if (percentageScale) {
+        exportContext.getString(R.string.alert_chart_threshold_reference)
+    } else {
+        val direction = if (series.direction == ThresholdAlertDirection.ABOVE) "≥" else "≤"
+        exportContext.getString(R.string.alert_session_chart_threshold, direction,
+            exportFormatting.irradiance(series.points.first().chartThreshold(false)), chartUnit)
+    }
+    val legend = UvirChartExportLegend(listOf(
+        UvirChartLegendEntry(chartExportChannelLabel(exportContext, thresholdAlertMetricLabelResource(metric), ""),
+            series.color.toArgb()),
+        UvirChartLegendEntry(thresholdLabel, Color.rgb(245, 124, 0))
+    ), columns = 2, width = 1380f, paint = textPaint)
+    val height = 987 + legend.height.toInt() + headerOffset.toInt()
     val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
     val canvas = Canvas(bitmap)
     canvas.drawColor(Color.WHITE)
@@ -131,7 +144,7 @@ internal fun createAlertSessionChartFile(
             }
     val maximum = if (percentageScale) {
         scaleValues.maxOrNull()?.coerceAtLeast(100.0) ?: 100.0
-    } else uvirChartMaximum(scaleValues, valueScale(1.0))
+    } else uvirChartMaximum(scaleValues, exportFormatting.chartZeroMaximum())
     val logExtent =
         if (percentageScale) {
             alertThresholdCenteredLogExtent(
@@ -174,12 +187,7 @@ internal fun createAlertSessionChartFile(
                     exportFormatting.numericFormat
                 ) + "%"
             } else {
-                formatUvirChartAxisValue(
-                    value,
-                    maximum,
-                    2,
-                    exportFormatting.numericFormat
-                )
+                exportFormatting.chartAxisValue(value, maximum)
             },
             24f,
             y + 9f,
@@ -317,31 +325,7 @@ internal fun createAlertSessionChartFile(
         canvas.drawText(label, textX, 885f, textPaint)
     }
 
-    canvas.drawCircle(left, 938f, 10f, seriesPaint)
-    canvas.drawText(metricLabel, left + 20f, 947f, textPaint)
-    val thresholdLabel =
-        if (percentageScale) {
-            exportContext.getString(R.string.alert_chart_threshold_reference)
-        } else {
-            val direction =
-                if (series.direction == ThresholdAlertDirection.ABOVE) "≥" else "≤"
-            exportContext.getString(
-                R.string.alert_session_chart_threshold,
-                direction,
-                formatUvirNumber(
-                    threshold,
-                    3,
-                    exportFormatting.numericFormat
-                ),
-                chartUnit
-            )
-        }
-    canvas.drawText(
-        thresholdLabel,
-        840f,
-        947f,
-        thresholdLabelPaint
-    )
+    legend.draw(canvas, left, 947f)
 
     val sharedDirectory =
         File(context.cacheDir, "shared").apply { mkdirs() }

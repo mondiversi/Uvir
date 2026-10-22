@@ -11,6 +11,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -96,19 +97,18 @@ internal fun UvirEncryptedDatabaseExportDialog(
             }
         },
         confirmButton = {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.End)
-            ) {
-                TextButton(
-                    enabled = password.length >= UVIR_SETTINGS_MINIMUM_PASSWORD_LENGTH && !inProgress,
-                    onClick = { requestExport(UvirExportDestination.SAVE) }
-                ) { Text(stringResource(R.string.save)) }
-                TextButton(
-                    enabled = password.length >= UVIR_SETTINGS_MINIMUM_PASSWORD_LENGTH && !inProgress,
-                    onClick = { requestExport(UvirExportDestination.SHARE) }
-                ) { Text(stringResource(R.string.share)) }
-            }
+            TextButton(
+                enabled = password.length >= UVIR_SETTINGS_MINIMUM_PASSWORD_LENGTH && !inProgress,
+                onClick = { requestExport(UvirExportDestination.SAVE) }
+            ) { Text(stringResource(R.string.save)) }
+            TextButton(
+                enabled = password.length >= UVIR_SETTINGS_MINIMUM_PASSWORD_LENGTH && !inProgress,
+                onClick = { requestExport(UvirExportDestination.SHARE) }
+            ) { Text(stringResource(R.string.share)) }
+        },
+        dismissButton = {
+            UvirDialogCloseButton(onDismiss, enabled = !inProgress,
+                modifier = Modifier.testTag("database_export_close"))
         },
         containerColor = cardColor,
         titleContentColor = primaryText,
@@ -358,24 +358,22 @@ internal fun UvirSettingsExportDialog(
             }
         },
         confirmButton = {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.End),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                TextButton(
-                    enabled = hasExportSelection &&
-                        password.length >= UVIR_SETTINGS_MINIMUM_PASSWORD_LENGTH &&
-                        !exportRequest.inProgress,
-                    onClick = { requestExport(UvirExportDestination.SAVE) }
-                ) { Text(stringResource(R.string.save)) }
-                TextButton(
-                    enabled = hasExportSelection &&
-                        password.length >= UVIR_SETTINGS_MINIMUM_PASSWORD_LENGTH &&
-                        !exportRequest.inProgress,
-                    onClick = { requestExport(UvirExportDestination.SHARE) }
-                ) { Text(stringResource(R.string.share)) }
-            }
+            TextButton(
+                enabled = hasExportSelection &&
+                    password.length >= UVIR_SETTINGS_MINIMUM_PASSWORD_LENGTH &&
+                    !exportRequest.inProgress,
+                onClick = { requestExport(UvirExportDestination.SAVE) }
+            ) { Text(stringResource(R.string.save)) }
+            TextButton(
+                enabled = hasExportSelection &&
+                    password.length >= UVIR_SETTINGS_MINIMUM_PASSWORD_LENGTH &&
+                    !exportRequest.inProgress,
+                onClick = { requestExport(UvirExportDestination.SHARE) }
+            ) { Text(stringResource(R.string.share)) }
+        },
+        dismissButton = {
+            UvirDialogCloseButton(onDismiss, enabled = !exportRequest.inProgress,
+                modifier = Modifier.testTag("settings_export_close"))
         },
         containerColor = cardColor,
         titleContentColor = primaryText,
@@ -532,7 +530,7 @@ internal fun UvirSettingsPasswordDialog(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 TextButton(onClick = ::submit, enabled = !busy) {
-                    Text(confirmLabel)
+                    Text(uvirActionLabel(confirmLabel))
                 }
                 TextButton(
                     onClick = onDismiss,

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_irradiance_decimals">Знаков после запятой</string>
+    <string name="live_irradiance_decimals_description">Применяется к отображаемым значениям и пользовательскому экспорту. Конечные нули остаются видимыми; сохранённые данные и научный экспорт не меняются.</string>
+</resources>

@@ -97,7 +97,7 @@ private fun validateImportedDatabase(source: SQLiteDatabase, target: SQLiteDatab
     }
     UVIR_DATABASE_TABLES.forEach { table ->
         val expected = databaseTableColumns(target, table)
-        check(expected.isNotEmpty() && databaseTableColumns(source, table) == expected) {
+        check(expected.isNotEmpty() && databaseTableColumns(source, table).sorted() == expected.sorted()) {
             "The imported database has an incompatible $table table"
         }
     }
@@ -131,9 +131,35 @@ internal suspend fun importEncryptedUvirDatabaseArchive(
         ).use { source ->
             // Upgrade only the private extracted copy of the previous schema.
             // Never mutate the user's original ZIP/database or app preferences.
-            if (source.version == 20 && target.version == 21) {
+            if (source.version == 20 && target.version >= 21) {
                 UvirLegacyCameraArchive.createTable(source)
                 source.version = 21
+            }
+            if (source.version == 21 && target.version >= 22) {
+                listOf("acquisitions", "alerts", "sensor_settings").forEach { table ->
+                    if (databaseTableColumns(source, table).none { it.startsWith("optical_window:") }) {
+                        source.execSQL("ALTER TABLE $table ADD COLUMN optical_window TEXT")
+                    }
+                }
+                source.version = 22
+            }
+            if (source.version == 22 && target.version >= 23) {
+                if (databaseTableColumns(source, "sensor_settings").none { it.startsWith("calibration_offsets:") })
+                    source.execSQL("ALTER TABLE sensor_settings ADD COLUMN calibration_offsets TEXT")
+                source.version = 23
+            }
+            if (source.version == 23 && target.version >= 24) {
+                if (databaseTableColumns(source, "sensor_settings").none { it.startsWith("calibration_channel_factors:") })
+                    source.execSQL("ALTER TABLE sensor_settings ADD COLUMN calibration_channel_factors TEXT")
+                source.version = 24
+            }
+            if (source.version == 24 && target.version >= 25) {
+                source.beginTransaction()
+                try {
+                    migrateUvirDatabaseToSi(source)
+                    source.version = 25
+                    source.setTransactionSuccessful()
+                } finally { source.endTransaction() }
             }
             validateImportedDatabase(source, target)
         }
@@ -148,7 +174,10 @@ internal suspend fun importEncryptedUvirDatabaseArchive(
                     target.execSQL("DELETE FROM main.$table")
                 }
                 UVIR_DATABASE_TABLES.forEach { table ->
-                    target.execSQL("INSERT INTO main.$table SELECT * FROM uvir_import.$table")
+                    // Upgraded and fresh databases can have a different physical column order.
+                    val columns = databaseTableColumns(target, table)
+                        .joinToString(",") { "\"" + it.substringBefore(':') + "\"" }
+                    target.execSQL("INSERT INTO main.$table ($columns) SELECT $columns FROM uvir_import.$table")
                 }
                 target.execSQL(
                     "DELETE FROM main.sqlite_sequence " +

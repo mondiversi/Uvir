@@ -2,10 +2,12 @@
 
 #include <SparkFun_AS7331.h>
 #include <Wire.h>
+#include "UvirCalibrationOffsets.h"
+#include "UvirCalibrationChannelFactors.h"
 
 // Owns the optional AS7331 and guarantees that every successful reading ends
 // with the device back in power-down. The returned values are already in
-// uW/cm2 according to the SparkFun driver conversion.
+// Driver output is µW/cm²; public capture results below are canonical W/m².
 class UvirUvSensor {
  public:
   bool begin(uint8_t address, TwoWire &wire = Wire) {
@@ -41,7 +43,9 @@ class UvirUvSensor {
       float calibrationFactor,
       float &uvc,
       float &uvb,
-      float &uva) {
+      float &uva,
+      const UvirCalibrationOffsets &offsets = UvirCalibrationOffsets{},
+      const UvirCalibrationChannelFactors &channels = UvirCalibrationChannelFactors{}) {
     uvc = 0.0f;
     uvb = 0.0f;
     uva = 0.0f;
@@ -57,9 +61,10 @@ class UvirUvSensor {
     }
     const bool readOk = ksfTkErrOk == sensor_.readAllUV();
     if (readOk) {
-      uvc = sensor_.getUVC() * calibrationFactor;
-      uvb = sensor_.getUVB() * calibrationFactor;
-      uva = sensor_.getUVA() * calibrationFactor;
+      // SparkFun exposes µW/cm²; convert ONCE before offsets/gains/window processing.
+      uvc = uvirSubtractDarkOffset(sensor_.getUVC() / 100.f, offsets.values[0]) * uvirChannelFactor(channels, 0, calibrationFactor);
+      uvb = uvirSubtractDarkOffset(sensor_.getUVB() / 100.f, offsets.values[1]) * uvirChannelFactor(channels, 1, calibrationFactor);
+      uva = uvirSubtractDarkOffset(sensor_.getUVA() / 100.f, offsets.values[2]) * uvirChannelFactor(channels, 2, calibrationFactor);
     }
 
     const bool powerDownOk =

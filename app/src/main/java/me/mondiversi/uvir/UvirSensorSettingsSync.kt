@@ -57,7 +57,10 @@ internal fun UvirPendingSensorSettings.applyTo(snapshot: UvirSensorSettingsSnaps
                 automaticShutdownSeconds = t.getOrNull(7)?.toInt() ?: result.sensorParameters.automaticShutdownSeconds,
                 externalCommandEnabled = t.getOrNull(8)?.let { it == "ON" } ?: result.sensorParameters.externalCommandEnabled))
             "SAMPLING_CONFIG" -> result.copy(acquisitionParameters = AcquisitionParameters(t[1].toInt(), t[2].toLong(), t[3] == "1"))
-            "CALIBRATION_CONFIG" -> result.copy(calibrationSettings = SensorCalibrationSettings(t[1].toFloat(), t[2].toFloat()))
+            "CALIBRATION_CONFIG" -> parseSensorCalibrationCommand(command)?.let {
+                result.copy(calibrationSettings = it.copy(offsets = it.offsets ?: result.calibrationSettings.offsets,
+                    channelFactors = it.channelFactors ?: result.calibrationSettings.channelFactors))
+            } ?: result
             "WIFI_CONFIG" -> result.copy(wifiSsid = t[1].decodeSensorSettingsHex())
             "INTERNET_CONFIG" -> result.copy(internetEnabled = t[1] == "ON", internetUsePrimaryWifi = t[2] == "PRIMARY",
                 internetRelayHost = t[5].decodeSensorSettingsHex(), internetRelayPort = t[6].toInt())
@@ -66,7 +69,7 @@ internal fun UvirPendingSensorSettings.applyTo(snapshot: UvirSensorSettingsSnaps
                 alertStartDelaySeconds = t[3].toLong(), alertDurationSeconds = t[4].toLong(), alertMaxRegistrations = t[5].toInt(),
                 alertRules = t[6].decodeSensorSettingsHex().lineSequence().filter(String::isNotBlank).map { line ->
                     val r = line.split(' ')
-                    ThresholdAlertRule(ThresholdAlertMetric.valueOf(r[1]), true, ThresholdAlertDirection.valueOf(r[2]), r[3].toFloat())
+                    ThresholdAlertRule(ThresholdAlertMetric.valueOf(r[1]), true, ThresholdAlertDirection.valueOf(r[2]), legacyIrradianceToWm2(r[3].toDouble()).toFloat())
                 }.toList())
             else -> result
         }
@@ -205,6 +208,7 @@ internal fun sendDatedSensorSettings(
     context: Context, deviceId: String, runtime: UvirSensorRuntimeInfo,
     commands: List<String>, sendRaw: (List<String>) -> Boolean
 ): Boolean {
+    if (!sensorCalibrationCommandsSupported(commands, runtime.firmwareVersion)) return false
     if (deviceId.isBlank() || compareFirmwareVersions(runtime.firmwareVersion, SENSOR_SETTINGS_SYNC_MIN_FIRMWARE) < 0) {
         return sendRaw(commands)
     }

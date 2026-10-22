@@ -427,7 +427,7 @@
     <string name="violet">Violeta</string>
     <string name="blue">Azul</string>
     <string name="green">Verde</string>
-    <string name="yellow">Amarillo</string>
+    <string name="yellow">Verde-amarillo</string>
     <string name="orange">Naranja</string>
     <string name="red">Rojo</string>
     <string name="percent_of_visible">%1$s%% del visible</string>
@@ -436,11 +436,11 @@
     <string name="app_version">Versión de la aplicación: %1$s</string>
     <string name="package_name_value">Paquete: %1$s</string>
     <string name="about_whats_new_title">Novedades de la versión %1$s</string>
-    <string name="about_whats_new_connectivity">Gestión secuencial de varios sensores con perfiles protegidos y conexiones USB, Wi-Fi, Bluetooth e Internet.</string>
-    <string name="about_whats_new_connections">Adquisiciones condicionales y mediante comando externo, sesiones autónomas y recuperación fiable del estado tras desconexiones o reinicios.</string>
-    <string name="about_whats_new_measurements">Variantes de sesión, filtros avanzados del historial y detalles más claros para adquisiciones y alertas.</string>
-    <string name="about_whats_new_interface">Exportaciones CSV, TXT y PNG ampliadas con unidades, formatos regionales, gráficos agrupados e identificación del sensor.</string>
-    <string name="about_whats_new_github">Copias de seguridad cifradas de los ajustes, diagnóstico integrado y numerosas mejoras de interfaz y accesibilidad.</string>
+    <string name="about_whats_new_connectivity">Factores de corrección y offsets por canal, con medición guiada de los offsets medios y confirmaciones de restablecimiento.</string>
+    <string name="about_whats_new_connections">Compensación de la ventana óptica con multiplicador general y por canal; rangos AS7331 y picos de sensibilidad AS7343 más claros.</string>
+    <string name="about_whats_new_measurements">Almacenamiento interno de la irradiancia en W/m², con migración automática que conserva las mediciones y los ajustes existentes.</string>
+    <string name="about_whats_new_interface">Decimales configurables para valores en directo, datos guardados y exportaciones personalizadas; las exportaciones científicas conservan toda la precisión guardada.</string>
+    <string name="about_whats_new_github">Menú de ajustes y diálogos mejorados; guías de cableado, montaje y calibración actualizadas, incluidos tubos direccionales y requisitos del difusor.</string>
     <string name="about_description">Aplicación de adquisición espectral de radiación ultravioleta, visible e infrarroja.</string>
     <string name="about_spectral_ranges">Bandas espectrales: Ultravioleta • Luz visible • Infrarrojo</string>
     <string name="about_sensors">Sensores compatibles: AS7331 UV • AS7343 multiespectral</string>
@@ -640,11 +640,10 @@
     <string name="threshold_rules_connection_required">Conecta el sensor para cambiar estas alertas.</string>
     <string name="threshold_repeat_sensor_description">Este intervalo se almacena en el sensor y también limita las alertas registradas mientras la aplicación está desconectada.</string>
     <string name="sensor_calibration_title">Calibración</string>
-    <string name="sensor_calibration_description">Aplica factores de corrección obtenidos mediante comparación con un instrumento de referencia calibrado. Un factor de 1.000 conserva la estimación predeterminada de la ficha técnica.</string>
+    <string name="sensor_calibration_description">Ajusta los factores de corrección y los offsets de cada canal.</string>
     <string name="sensor_calibration_visible_factor">Factor de corrección VIS/NIR · AS7343</string>
     <string name="sensor_calibration_uv_factor">Factor de corrección UV · AS7331</string>
-    <string name="sensor_calibration_factor_hint">Valor permitido: 0.100–10.000.</string>
-    <string name="sensor_calibration_uv_unavailable">La calibración UV predeterminada se conserva y podrá editarse cuando se detecte el sensor UV.</string>
+    <string name="sensor_calibration_factor_hint">Factores de corrección: valores permitidos %1$s–%2$s; %3$s no modifica la ganancia. Determínalos con un instrumento de referencia calibrado.</string>
     <string name="sensor_calibration_firmware_required">Actualiza el firmware del sensor para usar la calibración.</string>
     <string name="sensor_firmware_update_required_title">Actualización de firmware necesaria</string>
     <string name="sensor_firmware_update_required">El firmware instalado en el sensor no admite estos ajustes. Actualiza el firmware del sensor e inténtalo de nuevo.</string>
@@ -814,5 +813,5 @@
     <string name="alert_max_registrations">Registros máximos</string>
     <string name="alert_registration_count">Número de registros</string>
     <string name="alert_configure_first">Configura al menos un valor antes de iniciar.</string>
-    <string name="sensor_simulation_open_settings">Abrir ajustes</string>
+    <string name="sensor_simulation_open_settings">Ajustes</string>
 </resources>

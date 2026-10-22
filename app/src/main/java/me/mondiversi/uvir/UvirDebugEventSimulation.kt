@@ -38,7 +38,7 @@ internal fun UvirDatabaseHelper.insertDebugSimulationEvents(
             f8 = 8.9 * factor,
             nir = 17.5 * factor,
             qualityFlags = qualityFlags
-        )
+        ).scaledIrradiance(.01)
     }
 
     fun save(
@@ -136,9 +136,9 @@ internal fun UvirDatabaseHelper.insertDebugSimulationEvents(
                     metric = metric,
                     enabled = true,
                     direction = direction,
-                    threshold = threshold
+                    threshold = legacyIrradianceToWm2(threshold)
                 ),
-            value = value
+            value = legacyIrradianceToWm2(value)
         )
 
     fun addAlert(

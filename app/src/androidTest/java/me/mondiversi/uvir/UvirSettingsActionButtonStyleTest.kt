@@ -88,6 +88,10 @@ class UvirSettingsActionButtonStyleTest {
                 assertEquals(if (dark) Color(0xFFA1A5AE) else Color(0xFF808790), palettes[index].disabledContentColor)
                 assertEquals(1.dp, borders[index]!!.width)
                 if (!active) assertEquals(borders[0], borders[index])
+                else assertEquals(
+                    palettes[index].contentColor.copy(alpha = if (dark) .48f else .38f),
+                    (borders[index]!!.brush as androidx.compose.ui.graphics.SolidColor).value
+                )
                 val button = compose.onNodeWithTag("action-$index")
                 if (active) button.assertIsEnabled() else button.assertIsNotEnabled()
                 assertWeight("Action $index", FontWeight.SemiBold, fits = true)

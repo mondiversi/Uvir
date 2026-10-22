@@ -15,11 +15,26 @@ class UvirDatabaseHelper(
     context.applicationContext,
     "uvir.db",
     null,
-    21
+    25
 ) {
 
     private val appContext =
         context.applicationContext
+
+    override fun onConfigure(db: SQLiteDatabase) {
+        super.onConfigure(db)
+        if (db.version in 1..24) {
+            // Before SQLiteOpenHelper starts its upgrade transaction. The checkpoint
+            // must succeed; never upgrade a live archive without a consistent backup.
+            db.rawQuery("PRAGMA wal_checkpoint(FULL)", null).use { c ->
+                check(c.moveToFirst() && c.getInt(0) == 0) { "Unable to checkpoint database before SI migration" }
+            }
+            val source = java.io.File(db.path)
+            val target = java.io.File(appContext.noBackupFilesDir, "before-si/uvir-v${db.version}.db")
+            check(target.parentFile!!.isDirectory || target.parentFile!!.mkdirs())
+            atomicUvirPrivateBackup(source, target)
+        }
+    }
 
     private val mutableAcquisitionRevision = MutableStateFlow(0L)
     private val mutableAlertRevision = MutableStateFlow(0L)
@@ -117,7 +132,8 @@ class UvirDatabaseHelper(
 
                 f8 REAL NOT NULL,
                 nir REAL NOT NULL,
-                quality_flags INTEGER NOT NULL DEFAULT 0
+                quality_flags INTEGER NOT NULL DEFAULT 0,
+                optical_window TEXT
             )
             """.trimIndent()
         )
@@ -139,6 +155,7 @@ class UvirDatabaseHelper(
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 timestamp INTEGER NOT NULL,
                 details TEXT NOT NULL,
+                optical_window TEXT,
                 quality_flags INTEGER NOT NULL DEFAULT 0,
                 session_id INTEGER,
                 session_sequence INTEGER,
@@ -217,6 +234,9 @@ class UvirDatabaseHelper(
                 discard_extremes INTEGER NOT NULL,
                 visible_calibration_factor REAL NOT NULL,
                 uv_calibration_factor REAL NOT NULL,
+                optical_window TEXT,
+                calibration_offsets TEXT,
+                calibration_channel_factors TEXT,
                 alert_monitoring_enabled INTEGER NOT NULL,
                 alert_repeat_seconds INTEGER NOT NULL,
                 alert_session_id INTEGER NOT NULL,
@@ -411,11 +431,19 @@ class UvirDatabaseHelper(
             addColumnIfMissing(db, "sensor_settings", "alert_duration_seconds", "INTEGER NOT NULL DEFAULT 0")
             addColumnIfMissing(db, "sensor_settings", "alert_max_registrations", "INTEGER NOT NULL DEFAULT 0")
         }
+        if (oldVersion < 22) {
+            addColumnIfMissing(db, "acquisitions", "optical_window", "TEXT")
+            addColumnIfMissing(db, "alerts", "optical_window", "TEXT")
+            addColumnIfMissing(db, "sensor_settings", "optical_window", "TEXT")
+        }
+        if (oldVersion < 23) addColumnIfMissing(db, "sensor_settings", "calibration_offsets", "TEXT")
+        if (oldVersion < 24) addColumnIfMissing(db, "sensor_settings", "calibration_channel_factors", "TEXT")
         if (oldVersion < 21) UvirLegacyCameraArchive.createTable(db)
         if (oldVersion < 20) {
             addColumnIfMissing(db, "sensor_settings", "settings_updated_at_ms", "INTEGER NOT NULL DEFAULT 0")
             addColumnIfMissing(db, "sensor_settings", "alert_recording_enabled", "INTEGER")
         }
+        if (oldVersion < 25 && newVersion >= 25) migrateUvirDatabaseToSi(db)
     }
 
     private fun migrateAcquisitionVariantsToVersion18(
@@ -857,6 +885,9 @@ class UvirDatabaseHelper(
                     putBoolean("discard_extremes", settings.acquisitionParameters.discardExtremes)
                     put("visible_calibration_factor", settings.calibrationSettings.visibleFactor)
                     put("uv_calibration_factor", settings.calibrationSettings.uvFactor)
+                    put("optical_window", settings.calibrationSettings.opticalWindow.toJson().toString())
+                    put("calibration_offsets", settings.calibrationSettings.offsets?.toJson()?.toString())
+                    put("calibration_channel_factors", settings.calibrationSettings.channelFactors?.toJson()?.toString())
                     putBoolean("alert_monitoring_enabled", settings.alertMonitoringEnabled)
                     put("alert_repeat_seconds", settings.alertRepeatSeconds)
                     put("alert_session_id", settings.alertSessionId)
@@ -964,7 +995,10 @@ class UvirDatabaseHelper(
                 calibrationSettings =
                     SensorCalibrationSettings(
                         visibleFactor = cursor.getFloat(12),
-                        uvFactor = cursor.getFloat(13)
+                        uvFactor = cursor.getFloat(13),
+                        opticalWindow = OpticalWindowSettings.fromStoredOrNull(cursor.getString(31)) ?: OpticalWindowSettings(),
+                        offsets = CalibrationOffsets.fromStoredOrNull(cursor.getString(32)),
+                        channelFactors = CalibrationChannelFactors.fromStoredOrNull(cursor.getString(33))
                     ),
                 alertMonitoringEnabled = cursor.getInt(14) != 0,
                 alertRepeatSeconds = cursor.getInt(15),
@@ -1095,7 +1129,10 @@ class UvirDatabaseHelper(
                 "alert_duration_seconds",
                 "alert_max_registrations",
                 "settings_updated_at_ms",
-                "alert_recording_enabled"
+                "alert_recording_enabled",
+                "optical_window",
+                "calibration_offsets",
+                "calibration_channel_factors"
             )
     }
 
@@ -2127,6 +2164,7 @@ class UvirDatabaseHelper(
             put("f8", sample.f8)
             put("nir", sample.nir)
             put("quality_flags", sample.qualityFlags)
+                    put("optical_window", sample.opticalWindow?.toJson()?.toString())
         }
 
         val result = database.insert(
@@ -2230,6 +2268,7 @@ class UvirDatabaseHelper(
                     put("f8", sample.f8)
                     put("nir", sample.nir)
                     put("quality_flags", sample.qualityFlags)
+                    put("optical_window", sample.opticalWindow?.toJson()?.toString())
                 },
                 SQLiteDatabase.CONFLICT_IGNORE
             )
@@ -2464,7 +2503,8 @@ class UvirDatabaseHelper(
 
                     f8 = d("f8"),
                     nir = d("nir"),
-                    qualityFlags = d("quality_flags").toInt()
+                    qualityFlags = d("quality_flags").toInt(),
+                    opticalWindow = OpticalWindowSettings.fromStoredOrNull(it.getString(it.getColumnIndexOrThrow("optical_window")))
                 ),
                 sessionId =
                     it.getColumnIndexOrThrow(
@@ -2773,7 +2813,8 @@ class UvirDatabaseHelper(
         timestamp: Long = System.currentTimeMillis(),
         sessionId: Long? = null,
         sensorDeviceId: String = "",
-        qualityFlags: Int = 0
+        qualityFlags: Int = 0,
+        opticalWindow: OpticalWindowSettings? = null
     ): Long {
         if (violations.isEmpty()) {
             return -1L
@@ -2813,6 +2854,7 @@ class UvirDatabaseHelper(
                     put("timestamp", timestamp)
                     put("details", details)
                     put("quality_flags", qualityFlags)
+                    put("optical_window", opticalWindow?.toJson()?.toString())
                     sensorId?.let { put("sensor_id", it) }
                     normalizedSessionId?.let {
                         put("session_id", it)
@@ -2846,7 +2888,8 @@ class UvirDatabaseHelper(
         sensorDeviceId: String,
         sensorRecordId: Long,
         sessionId: Long? = null,
-        qualityFlags: Int = 0
+        qualityFlags: Int = 0,
+        opticalWindow: OpticalWindowSettings? = null
     ): Boolean {
         if (details.isBlank()) return false
         val database = writableDatabase
@@ -2873,7 +2916,10 @@ class UvirDatabaseHelper(
                 arrayOf(sensorId.toString(), timestamp.toString(), details)
             ).use { cursor -> if (cursor.moveToFirst()) cursor.getLong(0) else null }
             if (existingLive != null) {
-                database.update("alerts", ContentValues().apply { put("sensor_record_id", sensorRecordId) },
+                database.update("alerts", ContentValues().apply {
+                    put("sensor_record_id", sensorRecordId)
+                    opticalWindow?.let { put("optical_window", it.toJson().toString()) }
+                },
                     "id = ?", arrayOf(existingLive.toString()))
                 database.setTransactionSuccessful()
                 return true
@@ -2885,6 +2931,7 @@ class UvirDatabaseHelper(
                     put("timestamp", timestamp)
                     put("details", details)
                     put("quality_flags", qualityFlags)
+                    put("optical_window", opticalWindow?.toJson()?.toString())
                     sensorId?.let { put("sensor_id", it) }
                     put("sensor_record_id", sensorRecordId)
                     normalizedSessionId?.let {
@@ -2987,7 +3034,7 @@ class UvirDatabaseHelper(
                 COALESCE(session.note, '') AS session_note,
                 alert.sensor_id,
                 COALESCE(NULLIF(sensor.display_name, ''), sensor.hardware_uid, '—') AS sensor_display_name
-                , alert.quality_flags
+                , alert.quality_flags, alert.optical_window
             FROM alerts AS alert
             LEFT JOIN alert_sessions AS session
               ON session.session_id = alert.session_id
@@ -3024,7 +3071,8 @@ class UvirDatabaseHelper(
                         sensorId =
                             if (cursor.isNull(6)) null else cursor.getLong(6),
                         sensorDisplayName = cursor.getString(7),
-                        qualityFlags = cursor.getInt(8)
+                        qualityFlags = cursor.getInt(8),
+                        opticalWindow = OpticalWindowSettings.fromStoredOrNull(cursor.getString(9))
                     )
             }
         }
@@ -3098,6 +3146,7 @@ class UvirDatabaseHelper(
                 put("f8", record.sample.f8)
                 put("nir", record.sample.nir)
                 put("quality_flags", record.sample.qualityFlags)
+                put("optical_window", record.sample.opticalWindow?.toJson()?.toString())
             }
 
         return writableDatabase.update(
@@ -3160,6 +3209,7 @@ class UvirDatabaseHelper(
                         put("f8", record.sample.f8)
                         put("nir", record.sample.nir)
                         put("quality_flags", record.sample.qualityFlags)
+                put("optical_window", record.sample.opticalWindow?.toJson()?.toString())
                     }
 
                 database.insertOrThrow(
