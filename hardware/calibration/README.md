@@ -11,6 +11,13 @@ assembly are ready. Covered-sensor and sunlight checks on the breadboard are
 preliminary checks, not a traceable absolute calibration. The 2026-10-12 board
 identification update does not change existing coefficients or user settings.
 
+Include the [proposed directional tubes and diffuser](../README.md#directional-optical-heads-prototype)
+in the final optical configuration. Record the bore, the height reference, wall
+material, diffuser identity and placement. Check angular response for all channels,
+relative alignment of the two heads, lateral leakage and saturation. Recheck
+calibration after changing these components; equal tube dimensions alone do not
+establish a common field of view or absolute irradiance accuracy.
+
 Before values are considered absolute measurements:
 
 1. test the assembled hardware and check for optical leakage from indicator

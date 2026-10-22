@@ -16,6 +16,16 @@ Final-assembly testing and traceable calibration of both optical sensors will
 follow PCB assembly. See [hardware identification](hardware/README.md) and the
 [calibration plan](hardware/calibration/README.md).
 
+The circuitry is intended to be housed in a **TEKO COFFER-A/6.5** enclosure.
+See the [enclosure and assembly notes](hardware/README.md#planned-enclosure).
+
+For the intended directional prototype, plan two hollow optical tubes: one
+above the AS7331 UV chip and one above the AS7343 visible/NIR chip, each with a
+**6 mm clear bore and 25 mm clear height above the chip's top optical window**.
+Wall thickness is a mechanical choice; **2 mm is an optional rigidity example**.
+See [tube mounting, diffuser requirements and validation limits](hardware/README.md#directional-optical-heads-prototype)
+before making the enclosure openings or treating readings as calibrated irradiance.
+
 ## Start here
 
 - [Setup and assembly tutorial](docs/GETTING_STARTED.md): components, GPIO map,

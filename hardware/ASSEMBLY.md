@@ -57,6 +57,21 @@ RTC battery, SD signal direction, LED polarity and the external contact.
 
 ## 4. Mechanical and optical arrangement
 
+The selected housing for the complete circuitry is **TEKO COFFER-A/6.5**:
+an ABS enclosure with a 1 mm aluminium top panel, according to the
+[manufacturer](https://www.teko.it/en/products/family/TC/series/coffer-a).
+Dry-fit the PCB, removable modules and sockets inside it before final fastening.
+Check the required USB, microSD, button, LED, buzzer and optical openings; this
+housing selection does not establish that a published PCB revision already fits.
+
+For the directional prototype, allow one hollow tube per optical chip with a
+6 mm clear bore and 25 mm clear height above its top optical window. Wall
+thickness is selected for rigidity and opacity; 2 mm is an optional example,
+giving a 10 mm outside diameter. Check mounts, lid clearance and LED isolation
+using the [optical-head dimensions and diffuser notes](README.md#directional-optical-heads-prototype).
+These are proposed prototype dimensions; verify angular response and calibrate
+the final assembly before interpreting the results as absolute irradiance.
+
 The original placement intent has ESP32 at the front bottom with USB facing
 down; horizontal visible/NIR then UV boards above it; buzzer and indicators
 toward the top; an accessible side button. RTC, FRAM and SD occupy the reverse,

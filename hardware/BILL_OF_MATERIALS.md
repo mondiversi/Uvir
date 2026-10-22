@@ -24,7 +24,10 @@ Dimensions are approximate build measurements, **not footprint specifications**.
 | 1 | USB data cable / suitable power source | Must support ESP32, radios and card-write current peaks | Match USB connector |
 | Optional | USB OTG data adapter | Initial Android association, if required by the phone | Match phone |
 | Optional | Two-pin external button connector | For example JST-XH; carries contact and ground only | Match PCB |
-| As needed | Enclosure and opaque optical barriers | Separate sensor apertures from all indicator LEDs | Final optical assembly |
+| 1 | Enclosure | **TEKO COFFER-A/6.5**, intended housing for the complete circuitry; [manufacturer](https://www.teko.it/en/products/family/TC/series/coffer-a) | Nominal 125 x 70 x 35 mm (L x W x H), not usable internal dimensions |
+| As needed | Opaque optical barriers | Separate sensor apertures from all indicator LEDs inside the selected enclosure | Final optical assembly |
+| 2, for the directional prototype | Hollow optical tubes and holders | One per AS7331/AS7343 chip; opaque in the measured bands with low-reflectance internal surfaces; [design and mounting](README.md#directional-optical-heads-prototype) | Clear bore 6 mm; clear height 25 mm above the chip; optional 2 mm wall gives 10 mm outside diameter |
+| To be selected | AS7343 optical diffuser | Achromatic diffuser suited to the final optical head; characterize placement and transmission before calibration | Not supplied by a hollow tube; material, thickness and mount remain to be validated |
 
 The RGB LED's unused blue anode needs no resistor because it is not connected.
 The separate blue LED **does** need its own resistor. If a different buzzer needs
