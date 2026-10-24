@@ -46,7 +46,7 @@
     <string name="debug_simulate_events">SIMULAR EVENTOS</string>
     <string name="debug_simulate_events_description">Añade adquisiciones y alertas simuladas.</string>
     <string name="debug_simulate_events_question">¿Simular eventos de prueba?</string>
-    <string name="debug_simulate_events_confirmation">Se añadirán a la base de datos adquisiciones y alertas de prueba. Los registros existentes no se modificarán.</string>
+    <string name="debug_simulate_events_confirmation">Se añaden a la base de datos adquisiciones y alertas de prueba. Los registros existentes no se modifican.</string>
     <string name="debug_simulate_events_completed">Se añadieron %1$d adquisiciones y %2$d alertas</string>
     <string name="debug_simulation_note">Simulación de depuración</string>
 </resources>

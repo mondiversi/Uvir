@@ -10,8 +10,8 @@
     <string name="optional_note">Примечание об измерениях</string>
     <string name="note_example">Примечание об измерениях</string>
     <string name="single_acquisition">Одно измерение</string>
-    <string name="single_acquisition_ends_manual_session">Последний ручной сеанс завершится.</string>
-    <string name="automatic_start_ends_manual_session">Текущий сеанс ручного управления завершится.</string>
+    <string name="single_acquisition_ends_manual_session">Последний ручной сеанс завершается.</string>
+    <string name="automatic_start_ends_manual_session">Текущий сеанс ручного управления завершается.</string>
     <string name="interrupt_manual_session_title">Остановить текущий сеанс вручную?</string>
     <string name="interrupt_manual_session_message">Чтобы начать сеанс автоматического измерения, необходимо остановить текущий сеанс ручного измерения.</string>
     <string name="interrupt_manual_session_action">СТОП</string>
@@ -84,14 +84,14 @@
         <item quantity="many">(%1$d измерений на %2$d вариантов)</item>
         <item quantity="other">(%1$d измерения на %2$d вариантов)</item>
     </plurals>
-    <string name="session_variant_chart_files_info">Будет создано файлов PNG: %1$d, по одному для каждого варианта.</string>
+    <string name="session_variant_chart_files_info">Создаются файлы PNG: %1$d, по одному для каждого варианта.</string>
     <string name="share">ПОДЕЛИТЬСЯ</string>
     <string name="delete_selected_measurements_question">Удалить выбранные измерения?</string>
     <plurals name="delete_selected_measurements_warning">
-        <item quantity="one">%1$d Выбранное измерение будет удалено без возможности восстановления.</item>
-        <item quantity="few">%1$d выбранных измерения будут удалены без возможности восстановления.</item>
-        <item quantity="many">%1$d выбранных измерений будут удалены без возможности восстановления.</item>
-        <item quantity="other">%1$d Выбранные измерения будут удалены без возможности восстановления.</item>
+        <item quantity="one">%1$d Выбранное измерение удаляется без возможности восстановления.</item>
+        <item quantity="few">%1$d выбранных измерения удаляются без возможности восстановления.</item>
+        <item quantity="many">%1$d выбранных измерений удаляются без возможности восстановления.</item>
+        <item quantity="other">%1$d Выбранные измерения удаляются без возможности восстановления.</item>
     </plurals>
     <string name="acquisition_session_id_label">идентификатор измерения/сеанса</string>
     <string name="session_date_duration_events_label">Дата и время</string>
@@ -144,7 +144,7 @@
     <string name="automatic_stopping">Остановка автоматического измерения…</string>
     <string name="automatic_stop_failed">Невозможно остановить автоматическое измерение. Проверьте подключение датчика и повторите попытку.</string>
     <string name="stop_automatic_confirmation_title">Остановить автоматическое измерение?</string>
-    <string name="stop_automatic_confirmation_message">Текущее автоматическое измерение будет остановлено. Продолжать?</string>
+    <string name="stop_automatic_confirmation_message">Текущее автоматическое измерение останавливается. Продолжать?</string>
     <string name="continue_acquisition">ПРОДОЛЖАЙТЕ БЕГАТЬ</string>
     <string name="acquisition_parameters">Настройки</string>
     <string name="connectivity">Возможности подключения</string>
@@ -175,11 +175,11 @@
     <string name="sensor_source_disabled_hint">Отключенный источник можно повторно включить через другое активное беспроводное соединение. Если оба отключены, подключите датчик с помощью USB.</string>
     <string name="sensor_power_off">ДАТЧИК ВЫКЛЮЧЕНИЯ ПИТАНИЯ</string>
     <string name="sensor_power_off_title">Выключить датчик?</string>
-    <string name="sensor_power_off_message">Датчик отключится с низким энергопотреблением, и его нельзя будет перезапустить из приложения. Чтобы включить его снова, нажмите EN/RESET или отключите и снова подключите питание. Для подтверждения нажмите и удерживайте кнопку ВЫКЛЮЧИТЬ ПИТАНИЕ в течение 5 секунд.</string>
+    <string name="sensor_power_off_message">Датчик отключается с низким энергопотреблением, и его нельзя перезапустить из приложения. Чтобы включить его снова, нажмите EN/RESET или отключите и снова подключите питание. Для подтверждения нажмите и удерживайте кнопку ВЫКЛЮЧИТЬ ПИТАНИЕ в течение 5 секунд.</string>
     <string name="sensor_power_off_confirm">ВЫКЛЮЧИТЬ ПИТАНИЕ</string>
     <string name="sensor_disassociate_action">ОТВЯЗАТЬ ОТ ПРИЛОЖЕНИЯ</string>
     <string name="sensor_disassociate_title">Отвязать датчик?</string>
-    <string name="sensor_disassociate_message">Отвязка удаляет датчик из списка выбора, но не удаляет его имя и сохранённые записи. Его можно снова привязать по USB в любое время. Сам датчик не изменится. Для подтверждения удерживайте ОТВЯЗАТЬ 5 секунд.</string>
+    <string name="sensor_disassociate_message">Отвязка удаляет датчик из списка выбора, но не удаляет его имя и сохранённые записи. Его можно снова привязать по USB в любое время. Сам датчик не изменяется. Для подтверждения удерживайте ОТВЯЗАТЬ 5 секунд.</string>
     <string name="sensor_selection_failed">Не удалось сменить датчик. Повторите попытку.</string>
     <string name="sensor_associate_action">Привязать датчик</string>
     <string name="sensor_associate_usb_hint">Подключите новый датчик по USB. Ранее привязанные датчики останутся в списке.</string>
@@ -190,7 +190,7 @@
     <string name="expand_all_settings_content_description">Развернуть все настройки</string>
     <string name="collapse_all_settings_content_description">Свернуть все настройки</string>
     <string name="restore_defaults_title">Восстановить настройки по умолчанию?</string>
-    <string name="restore_defaults_message">Все настройки приложения и датчиков будут восстановлены до значений по умолчанию. Все сохраненные измерения, записанные оповещения и журналы ошибок будут безвозвратно удалены. После этого датчик отключится. Для подтверждения нажмите и удерживайте ВОССТАНОВИТЬ ВСЕ непрерывно в течение 10 секунд.</string>
+    <string name="restore_defaults_message">Все настройки приложения и датчиков восстанавливаются до значений по умолчанию. Все сохраненные измерения, записанные оповещения и журналы ошибок безвозвратно удаляются. После этого датчик отключается. Для подтверждения нажмите и удерживайте ВОССТАНОВИТЬ ВСЕ непрерывно в течение 10 секунд.</string>
     <string name="restore_defaults_confirm">ВОССТАНОВИТЬ ВСЕ</string>
     <string name="restore_defaults_failed">Полное восстановление невозможно выполнить. Проверьте подключение датчика и повторите попытку.</string>
     <string name="sensor_wifi_esp32_description">Приложение связывается с датчиком, когда оба используют одну сеть Wi-Fi.</string>
@@ -262,18 +262,18 @@
     <string name="invalid_threshold_alert">Используйте неотрицательные пределы и установите интервал повторения от 1 секунды до 24 часов.</string>
     <string name="stop_all_value_alerts_accessibility">Остановить сеанс оповещений</string>
     <string name="stop_all_value_alerts_title">Остановить сеанс оповещений?</string>
-    <string name="stop_all_value_alerts_message">Текущий сеанс оповещений будет завершён. Настроенные и записанные оповещения будут сохранены.</string>
+    <string name="stop_all_value_alerts_message">Текущий сеанс оповещений завершается. Настроенные и записанные оповещения сохраняются.</string>
     <string name="stop_all_value_alerts_action">@string/stop</string>
     <string name="continue_alert_monitoring">ПРОДОЛЖИТЬ</string>
     <string name="start_value_alert_session_accessibility">Начать сеанс оповещения</string>
     <string name="start_value_alert_session_title">Запуск сеанса оповещений</string>
-    <string name="start_value_alert_session_message">Мониторинг начнется с использованием настроенных оповещений. Вы можете добавить или удалить оповещения позже, не начиная новый сеанс.</string>
+    <string name="start_value_alert_session_message">Мониторинг начинается с использованием настроенных оповещений. Вы можете добавить или удалить оповещения позже, не начиная новый сеанс.</string>
     <string name="start_value_alert_session_action">СТАРТ</string>
     <string name="threshold_rules_reset">СБРОС АКТИВНЫХ ПРЕДУПРЕЖДЕНИЙ</string>
     <string name="threshold_rules_reset_confirm_action">СБРОСИТЬ ВСЕ</string>
     <string name="threshold_rules_reset_complete">Активные оповещения сброшены</string>
     <string name="threshold_rules_reset_confirmation_title">Сбросить все активные оповещения?</string>
-    <string name="threshold_rules_reset_confirmation_message">Все активные оповещения будут сброшены. Для подтверждения нажмите и удерживайте СБРОСИТЬ ВСЕ непрерывно в течение 2 секунд.</string>
+    <string name="threshold_rules_reset_confirmation_message">Все активные оповещения сбрасываются. Для подтверждения нажмите и удерживайте СБРОСИТЬ ВСЕ непрерывно в течение 2 секунд.</string>
     <string name="threshold_bell_configure">Настроить оповещения для этой группы</string>
     <string name="threshold_bell_active">Одно или несколько активных оповещений в этой группе.</string>
     <string name="threshold_group_editor_title">оповещения для \n%1$s</string>
@@ -296,10 +296,10 @@
     <string name="select_alerts">Выберите оповещения</string>
     <string name="delete_selected_alerts_question">Удалить выбранные оповещения?</string>
     <plurals name="delete_selected_alerts_warning">
-        <item quantity="one">%1$d выбранное оповещение будет удалено навсегда.</item>
-        <item quantity="few">%1$d выбранных оповещения будут безвозвратно удалены.</item>
-        <item quantity="many">%1$d выбранных оповещений будут безвозвратно удалены.</item>
-        <item quantity="other">Выбранные оповещения %1$d будут безвозвратно удалены.</item>
+        <item quantity="one">%1$d выбранное оповещение удаляется навсегда.</item>
+        <item quantity="few">%1$d выбранных оповещения безвозвратно удаляются.</item>
+        <item quantity="many">%1$d выбранных оповещений безвозвратно удаляются.</item>
+        <item quantity="other">Выбранные оповещения %1$d безвозвратно удаляются.</item>
     </plurals>
     <string name="threshold_alerts_deleted">Оповещения удалены.</string>
     <plurals name="threshold_alert_count_since">
@@ -310,7 +310,7 @@
     </plurals>
     <string name="threshold_alert_export_subject">Uvir Журнал оповещений</string>
     <string name="threshold_alert_log_delete_title">Удалить все записанные оповещения?</string>
-    <string name="threshold_alert_log_delete_warning">Все записанные оповещения будут удалены без возможности восстановления. Для подтверждения нажмите и удерживайте УДАЛИТЬ ВСЕ непрерывно в течение 2 секунд.</string>
+    <string name="threshold_alert_log_delete_warning">Все записанные оповещения удаляются без возможности восстановления. Для подтверждения нажмите и удерживайте УДАЛИТЬ ВСЕ непрерывно в течение 2 секунд.</string>
     <string name="threshold_alert_log_delete_all">УДАЛИТЬ ВСЕ</string>
     <string name="threshold_alert_log_deleted">Оповещения удалены.</string>
     <string name="threshold_log_violation_above">%1$s: %2$s µW/cm² ≥ %3$s µW/cm²</string>
@@ -357,16 +357,16 @@
     <string name="reset_all_records_action">СБРОС СЧЕТЧИКОВ</string>
     <string name="reset_all_records_warning">Удаляет все сохраненные измерения и записанные оповещения, а затем сбрасывает их идентификаторы и идентификаторы сеансов.</string>
     <string name="reset_all_records_confirmation_title">Сбросить все счетчики?</string>
-    <string name="reset_all_records_confirmation_message">Все сохраненные измерения и записанные оповещения будут безвозвратно удалены. Их идентификаторы и идентификаторы сеансов будут перезапущены с самого начала. Для подтверждения нажмите и удерживайте СБРОСИТЬ ВСЕ непрерывно в течение 5 секунд.</string>
+    <string name="reset_all_records_confirmation_message">Все сохраненные измерения и записанные оповещения безвозвратно удаляются. Их идентификаторы и идентификаторы сеансов перезапускаются с самого начала. Для подтверждения нажмите и удерживайте СБРОСИТЬ ВСЕ непрерывно в течение 5 секунд.</string>
     <string name="all_counters_reset_complete">Сброс записей и счетчиков</string>
     <string name="reset_acquisition_counters_action">СБРОС ИЗМЕРЕНИЙ</string>
     <string name="reset_acquisition_counters_warning">Безвозвратно удаляет все сохраненные измерения и сбрасывает идентификаторы измерений и сеансов.</string>
     <string name="reset_acquisition_counters_confirmation_title">Сбросить измерения?</string>
-    <string name="reset_acquisition_counters_confirmation_message">Безвозвратно удаляет все сохраненные измерения и сбрасывает идентификаторы измерений и сеансов. Журнал оповещений и настройки оповещений не будут изменены. Для подтверждения нажмите и удерживайте СБРОСИТЬ ВСЕ непрерывно в течение 2 секунд.</string>
+    <string name="reset_acquisition_counters_confirmation_message">Безвозвратно удаляет все сохраненные измерения и сбрасывает идентификаторы измерений и сеансов. Журнал оповещений и настройки оповещений не изменяются. Для подтверждения нажмите и удерживайте СБРОСИТЬ ВСЕ непрерывно в течение 2 секунд.</string>
     <string name="reset_alert_counters_action">СБРОС ПРЕДУПРЕЖДЕНИЙ</string>
     <string name="reset_alert_counters_warning">Безвозвратно удаляет все записанные оповещения и сбрасывает идентификаторы оповещений.</string>
     <string name="reset_alert_counters_confirmation_title">Сбросить оповещения?</string>
-    <string name="reset_alert_counters_confirmation_message">Безвозвратно удаляет все записанные оповещения и сбрасывает идентификаторы оповещений. Сохраненные измерения и настройки оповещений не будут изменены. Для подтверждения нажмите и удерживайте СБРОСИТЬ ВСЕ непрерывно в течение 2 секунд.</string>
+    <string name="reset_alert_counters_confirmation_message">Безвозвратно удаляет все записанные оповещения и сбрасывает идентификаторы оповещений. Сохраненные измерения и настройки оповещений не изменяются. Для подтверждения нажмите и удерживайте СБРОСИТЬ ВСЕ непрерывно в течение 2 секунд.</string>
     <string name="reset_confirmation_action">СБРОСИТЬ ВСЕ</string>
     <string name="reset_counters_stop_auto">Остановите автоматическое измерение перед сбросом счетчиков.</string>
     <string name="acquisition_counters_reset_complete">сброс счетчиков измерений</string>
@@ -375,7 +375,7 @@
     <string name="import_database">ИМПОРТИРОВАТЬ БАЗУ ДАННЫХ</string>
     <string name="database_transfer_description">Экспорт/восстановление всей базы данных через зашифрованный ZIP-архив.</string>
     <string name="import_database_dialog_title">Импортировать базу данных?</string>
-    <string name="import_database_dialog_description">Записи и профили датчиков на этом телефоне будут заменены данными из резервной копии. Физический датчик не изменится. Для продолжения введите пароль ZIP-файла.</string>
+    <string name="import_database_dialog_description">Записи и профили датчиков на этом телефоне заменяются данными из резервной копии. Физический датчик не изменяется. Для продолжения введите пароль ZIP-файла.</string>
     <string name="import_database_confirm">Импортировать</string>
     <string name="import_database_failed">Не удалось импортировать базу данных. Проверьте пароль, архив и версию базы данных.</string>
     <string name="import_database_success">База данных импортирована.</string>
@@ -398,7 +398,7 @@
     <string name="relative_spectral_index">Спектральная значимость</string>
     <string name="relative_spectral_index_explanation">0–100 показывает, насколько сильно полученный спектр сконцентрирован на длинах волн, взвешенных по этой оценке. Он описывает спектральный состав, а не общую интенсивность. Это не процент ущерба и не порог безопасности.</string>
     <string name="delete_all_measurements_question">Удалить все сохраненные измерения?</string>
-    <string name="delete_all_measurements_warning">Все сохраненные измерения будут безвозвратно удалены. Для подтверждения нажмите и удерживайте УДАЛИТЬ ВСЕ непрерывно в течение 2 секунд.</string>
+    <string name="delete_all_measurements_warning">Все сохраненные измерения безвозвратно удаляются. Для подтверждения нажмите и удерживайте УДАЛИТЬ ВСЕ непрерывно в течение 2 секунд.</string>
     <string name="delete_all">УДАЛИТЬ ВСЕ</string>
     <plurals name="measurement_count_since">
         <item quantity="one">%1$d сохранен · с момента %2$s</item>
@@ -408,7 +408,7 @@
     </plurals>
     <string name="no_saved_measurements">Измерения не сохранены.</string>
     <string name="delete_measurement_question">Удалить это измерение?</string>
-    <string name="delete_measurement_warning">Это измерение будет удалено навсегда.</string>
+    <string name="delete_measurement_warning">Это измерение удаляется навсегда.</string>
     <string name="measurement_deleted">измерение удалено</string>
     <string name="measurements_deleted">измерения удалены</string>
     <string name="delete">УДАЛИТЬ</string>
@@ -508,7 +508,7 @@
     <string name="session_chart_note">Примечание к сессии</string>
     <string name="session_chart_total_acquisitions">Общие измерения</string>
     <string name="delete_acquisition_session_question">Удалить этот сеанс?</string>
-    <string name="delete_acquisition_session_warning">Все измерения в этом сеансе будут безвозвратно удалены.</string>
+    <string name="delete_acquisition_session_warning">Все измерения в этом сеансе безвозвратно удаляются.</string>
     <string name="acquisition_session_deleted">Сеанс удален.</string>
     <string name="alert_session_chart_empty">Для этого сеанса оповещений данные отсутствуют.</string>
     <string name="alert_session_chart_unit">Значение · %1$s</string>
@@ -530,10 +530,10 @@
     <string name="alert_session_detail_values">Типы значений</string>
     <string name="alert_session_detail_total">Всего оповещений</string>
     <string name="delete_alert_question">Удалить это оповещение?</string>
-    <string name="delete_alert_warning">Это записанное оповещение будет удалено навсегда.</string>
+    <string name="delete_alert_warning">Это записанное оповещение удаляется навсегда.</string>
     <string name="alert_deleted">оповещение удалено</string>
     <string name="delete_alert_session_question">Удалить этот сеанс оповещения?</string>
-    <string name="delete_alert_session_warning">Все записанные оповещения в этом сеансе будут безвозвратно удалены.</string>
+    <string name="delete_alert_session_warning">Все записанные оповещения в этом сеансе безвозвратно удаляются.</string>
     <string name="alert_session_deleted">Сеанс оповещения удален</string>
     <string name="alert_chart_date">Записано: %1$s</string>
     <string name="alert_chart_scale">Сравнение порогов</string>
@@ -587,7 +587,7 @@
     <string name="offline_capacity_estimated_duration_unlimited">Предполагаемая автономность: неограниченная</string>
     <string name="offline_capacity_conservative_hint">Консервативная оценка: при одновременном нарушении пороговых значений используется одна запись оповещения на каждый интервал повторения.</string>
     <string name="offline_disconnection_description">Соединение с датчиком потеряно. Эта оценка объединяет активные автоматические измерения и оповещения.</string>
-    <string name="offline_disconnection_recording_disabled">Автономная запись в автономном режиме отключена. Датчик не будет сохранять новые измерения или оповещения до тех пор, пока не будет повторно подключен.</string>
+    <string name="offline_disconnection_recording_disabled">Автономная запись в автономном режиме отключена. Датчик не сохраняет новые измерения или оповещения до повторного подключения.</string>
     <string name="offline_disconnection_estimate_unavailable">Последний статус датчика не содержит достаточно информации для оценки оставшейся автономности.</string>
     <string name="offline_duration_days_hours">%1$d d %2$d ч</string>
     <string name="offline_duration_hours_minutes">%1$d ч %2$d мин.</string>
@@ -697,7 +697,7 @@
     <string name="restore_app_settings_confirm">СБРОСИТЬ</string>
     <string name="restore_app_settings_failed">Не удалось сбросить настройки приложения.</string>
     <string name="restore_app_settings_inline_warning">Удаляет все настройки и данные, сохранённые в приложении. Датчик и сохранённые на нём данные не изменяются.</string>
-    <string name="restore_app_settings_message">Будут удалены все настройки приложения Uvir и локальные данные, включая измерения, записанные оповещения, журналы ошибок, счётчики, профили датчиков и сохранённые данные подключения. Сам датчик не изменится и не выключится. Для подтверждения удерживайте «СБРОСИТЬ» 5 секунд.</string>
+    <string name="restore_app_settings_message">Удаляются все настройки приложения Uvir и локальные данные, включая измерения, записанные оповещения, журналы ошибок, счётчики, профили датчиков и сохранённые данные подключения. Сам датчик не изменяется и не выключается. Для подтверждения удерживайте «СБРОСИТЬ» 5 секунд.</string>
     <string name="restore_app_settings_title">Сбросить приложение?</string>
     <string name="sensor_status_no_sensor">Не подключён</string>
     <string name="sensor_status_no_associated_sensor">Нет сопряжённого датчика</string>
@@ -705,7 +705,7 @@
     <string name="sensor_restore_confirm">СБРОСИТЬ</string>
     <string name="sensor_restore_failed">Не удалось сбросить датчик. Проверьте подключение и повторите попытку.</string>
     <string name="sensor_restore_inline_warning">Удаляет несинхронизированные данные датчика, сбрасывает его конфигурацию и данные подключения, а затем выключает его.</string>
-    <string name="sensor_restore_message">Будет сброшен только датчик. Его настройки и данные подключения вернутся к значениям по умолчанию; сохранённые на нём несинхронизированные измерения, оповещения и ошибки будут удалены, после чего датчик выключится. Настройки приложения и уже сохранённые в Uvir записи не изменятся. Для подтверждения удерживайте «СБРОСИТЬ» 5 секунд.</string>
+    <string name="sensor_restore_message">Сбрасывается только датчик. Его настройки и данные подключения возвращаются к значениям по умолчанию; сохранённые на нём несинхронизированные измерения, оповещения и ошибки удаляются, после чего датчик выключается. Настройки приложения и уже сохранённые в Uvir записи не изменяются. Для подтверждения удерживайте «СБРОСИТЬ» 5 секунд.</string>
     <string name="sensor_restore_title">Сбросить датчик?</string>
     <string name="sensor_usb_identity_mismatch">USB-датчик не авторизован. С приложением уже связан другой датчик.</string>
     <string name="show_password">Показать пароль</string>
@@ -751,7 +751,7 @@
     <string name="list_filter_no_results">Нет результатов для этих фильтров.</string>
     <string name="list_filter_count">Показано %1$d из %2$d</string>
     <string name="list_filter_share_question">Поделиться всеми показанными результатами?</string>
-    <string name="list_filter_share_warning">Записи не выбраны. Будут отправлены все записи, соответствующие текущим фильтрам.</string>
+    <string name="list_filter_share_warning">Записи не выбраны. Отправляются все записи, соответствующие текущим фильтрам.</string>
     <string name="settings_section_appearance">Оформление</string>
     <string name="settings_section_language_formats">Единицы</string>
     <string name="settings_section_sharing_export">Экспорт</string>
@@ -774,11 +774,11 @@
     <string name="confirmation_question_suffix">?</string>
     <string name="threshold_alerts_sound_description_v2">Выберите сигнал приложения при регистрации оповещения.</string>
     <string name="list_filter_export_question">Экспортировать все показанные результаты?</string>
-    <string name="list_filter_export_warning">Записи не выбраны. Будут экспортированы все записи, соответствующие текущим фильтрам.</string>
+    <string name="list_filter_export_warning">Записи не выбраны. Экспортируются все записи, соответствующие текущим фильтрам.</string>
     <string name="settings_include_sensitive_information">Включить конфиденциальные данные</string>
-    <string name="settings_include_sensitive_information_description">Включает учетные данные подключения и привязку датчика, позволяя восстановить его без USB. Потребуется пароль шифрования.</string>
+    <string name="settings_include_sensitive_information_description">Включает учетные данные подключения и привязку датчика, позволяя восстановить его без USB. Требуется пароль шифрования.</string>
     <string name="settings_encryption_password_title">Пароль шифрования</string>
-    <string name="settings_encryption_password_description">Используйте не менее 8 символов. Этот же пароль понадобится для последующего импорта резервной копии.</string>
+    <string name="settings_encryption_password_description">Используйте не менее 8 символов. Этот же пароль нужен для последующего импорта резервной копии.</string>
     <string name="settings_encryption_password">Пароль шифрования</string>
     <string name="settings_encryption_password_confirm">Подтвердите пароль</string>
     <string name="settings_encryption_password_too_short">Используйте не менее %1$d символов.</string>
@@ -824,5 +824,5 @@
     <string name="alert_registration_count">Количество записей</string>
     <string name="alert_configure_first">Перед запуском настройте хотя бы одно значение.</string>
     <string name="sensor_simulation_disable">Отключить</string>
-    <string name="settings_import_confirmation_description">Настройки из выбранных файлов заменят текущие настройки.</string>
+    <string name="settings_import_confirmation_description">Настройки из выбранных файлов заменяют текущие настройки.</string>
 </resources>

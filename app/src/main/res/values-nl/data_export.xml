@@ -54,13 +54,13 @@
     <string name="export_format_preview_heading">Voorbeeld</string>
     <string name="export_format_profile_summary">Taal: %1$s · Getallen: %2$s · Datum: %3$s · Tijd: %4$s · Bestralingssterkte: %5$s</string>
     <string name="export_database_dialog_title">De database exporteren</string>
-    <string name="export_database_dialog_description">De volledige app-database op deze telefoon wordt geëxporteerd, inclusief opgeslagen metingen en waarschuwingen.</string>
+    <string name="export_database_dialog_description">Exporteer de volledige app-database op deze telefoon, inclusief opgeslagen metingen en waarschuwingen.</string>
     <string name="export_error_log_dialog_title">Het foutenlogboek exporteren</string>
-    <string name="export_error_log_dialog_description">Het foutenlogboek van de app op deze telefoon wordt als technisch bestand geëxporteerd. Opgeslagen metingen en inloggegevens zijn niet inbegrepen.</string>
+    <string name="export_error_log_dialog_description">Exporteer het foutenlogboek van de app als technisch bestand. Opgeslagen metingen en inloggegevens zijn niet inbegrepen.</string>
     <string name="export_diagnostic_dialog_title">Het diagnoserapport exporteren</string>
-    <string name="export_diagnostic_dialog_description">Het diagnoserapport van de sensor wordt geëxporteerd. Het bevat technische testresultaten, maar geen wachtwoorden of inloggegevens.</string>
+    <string name="export_diagnostic_dialog_description">Exporteer het diagnoserapport van de sensor. Het bevat technische testresultaten, maar geen wachtwoorden of inloggegevens.</string>
     <string name="export_sensor_info_dialog_title">Sensorinformatie exporteren</string>
-    <string name="export_sensor_info_dialog_description">Alle sensorinformatie wordt als tekstbestand geëxporteerd.</string>
+    <string name="export_sensor_info_dialog_description">Exporteer alle sensorinformatie als tekstbestand.</string>
     <string name="export_all_measurements_question">Alle opgeslagen metingen exporteren?</string>
     <string name="export_all_measurements_warning">Er zijn geen metingen geselecteerd, dus alle opgeslagen metingen worden geëxporteerd.</string>
     <string name="export_all_alerts_question">Alle geregistreerde waarschuwingen exporteren?</string>
@@ -76,4 +76,5 @@
     <string name="share_chart_file_count">PNG-bestanden: %1$d</string>
     <string name="share_readable_table_file_count">TXT-bestanden: %1$d</string>
     <string name="export_file_count">%1$s-bestanden: %2$d</string>
+    <string name="export_settings_description">Exporteer de geselecteerde app- en sensorinstellingen.</string>
 </resources>

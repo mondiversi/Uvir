@@ -13,7 +13,7 @@
     <string name="export_sensor_settings_description">المعايرة وأخذ العينات وخيارات التشغيل. لا تتضمن بيانات الاعتماد أو عناوين الشبكة.</string>
     <string name="share_measurements">مشاركة الالتقاطات</string>
     <string name="share_all_measurements_question">هل تريد مشاركة كل الالتقاطات المحفوظة؟</string>
-    <string name="share_all_measurements_warning">لم يتم تحديد أي التقاط، لذلك ستتم مشاركة كل الالتقاطات المحفوظة.</string>
+    <string name="share_all_measurements_warning">لم يتم تحديد أي التقاط، لذلك تتم مشاركة كل الالتقاطات المحفوظة.</string>
     <string name="share_as_csv">جدول بيانات (CSV)</string>
     <string name="share_as_readable_table">جدول مقروء (TXT)</string>
     <string name="share_readable_table_by_acquisition">حسب الالتقاط</string>
@@ -41,7 +41,7 @@
     <string name="share_subject">التقاطات Uvir</string>
     <string name="share_error">تعذرت مشاركة الالتقاطات.</string>
     <string name="share_all_alerts_question">هل تريد مشاركة جميع التنبيهات المسجلة؟</string>
-    <string name="share_all_alerts_warning">لم يتم تحديد أي تنبيه، لذلك ستتم مشاركة جميع التنبيهات المسجلة.</string>
+    <string name="share_all_alerts_warning">لم يتم تحديد أي تنبيه، لذلك تتم مشاركة جميع التنبيهات المسجلة.</string>
     <string name="export_database_title">تصدير قاعدة البيانات</string>
     <string name="export_database">تصدير قاعدة البيانات</string>
     <string name="export_database_subject">قاعدة بيانات Uvir</string>
@@ -54,17 +54,17 @@
     <string name="export_format_preview_heading">معاينة</string>
     <string name="export_format_profile_summary">اللغة: %1$s · الأرقام: %2$s · التاريخ: %3$s · الوقت: %4$s · شدة الإشعاع: %5$s</string>
     <string name="export_database_dialog_title">تصدير قاعدة البيانات</string>
-    <string name="export_database_dialog_description">سيتم تصدير قاعدة بيانات التطبيق بالكامل والمخزنة على هذا الهاتف، بما في ذلك عمليات القياس والتنبيهات المحفوظة.</string>
+    <string name="export_database_dialog_description">صدّر قاعدة بيانات التطبيق بالكامل والمخزنة على هذا الهاتف، بما في ذلك القياسات والتنبيهات المحفوظة.</string>
     <string name="export_error_log_dialog_title">تصدير سجل الأخطاء</string>
-    <string name="export_error_log_dialog_description">سيتم تصدير سجل أخطاء التطبيق المخزن على هذا الهاتف كملف تقني. لا يتضمن القياسات المحفوظة أو بيانات الاعتماد.</string>
+    <string name="export_error_log_dialog_description">صدّر سجل أخطاء التطبيق كملف تقني. لا يتضمن القياسات المحفوظة أو بيانات الاعتماد.</string>
     <string name="export_diagnostic_dialog_title">تصدير تقرير التشخيص</string>
-    <string name="export_diagnostic_dialog_description">سيتم تصدير تقرير تشخيص المستشعر. يتضمن نتائج الاختبار التقنية، لكنه لا يتضمن كلمات مرور أو بيانات اعتماد.</string>
+    <string name="export_diagnostic_dialog_description">صدّر تقرير تشخيص المستشعر. يتضمن نتائج الاختبار التقنية، لكنه لا يتضمن كلمات مرور أو بيانات اعتماد.</string>
     <string name="export_sensor_info_dialog_title">تصدير معلومات المستشعر</string>
-    <string name="export_sensor_info_dialog_description">سيتم تصدير جميع معلومات المستشعر كملف نصي.</string>
+    <string name="export_sensor_info_dialog_description">صدّر جميع معلومات المستشعر كملف نصي.</string>
     <string name="export_all_measurements_question">تصدير جميع القياسات المحفوظة؟</string>
-    <string name="export_all_measurements_warning">لم يتم تحديد أي قياسات، لذا سيتم تصدير جميع القياسات المحفوظة.</string>
+    <string name="export_all_measurements_warning">لم يتم تحديد أي قياسات، لذا يتم تصدير جميع القياسات المحفوظة.</string>
     <string name="export_all_alerts_question">تصدير جميع التنبيهات المسجلة؟</string>
-    <string name="export_all_alerts_warning">لم يتم تحديد أي تنبيهات، لذا سيتم تصدير جميع التنبيهات المسجلة.</string>
+    <string name="export_all_alerts_warning">لم يتم تحديد أي تنبيهات، لذا يتم تصدير جميع التنبيهات المسجلة.</string>
     <string name="export_all">تصدير الكل</string>
     <string name="export_sensor_settings_description_complete">المعايرة وأخذ العينات وخيارات التشغيل وإعدادات الاتصال.</string>
     <string name="export_variant_count_label">عدد التنويعات</string>
@@ -76,4 +76,5 @@
     <string name="share_chart_file_count">ملفات PNG: %1$d</string>
     <string name="share_readable_table_file_count">ملفات TXT: %1$d</string>
     <string name="export_file_count">ملفات %1$s: %2$d</string>
+    <string name="export_settings_description">صدّر إعدادات التطبيق والمستشعرات المحددة.</string>
 </resources>

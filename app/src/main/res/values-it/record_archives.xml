@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="record_archive_title">Acquisizioni e allerte</string>
-    <string name="record_archive_description">Esporta/importa acquisizioni e allerte, comprese le rispettive sessioni.</string>
-    <string name="record_archive_export_description">Esporta tutti i record di questo tipo, comprese le sessioni, in un file UVIR senza password.</string>
-    <string name="record_archive_import_description">I dati saranno aggiunti all’archivio. I record già presenti vengono ignorati. I sensori sconosciuti sono mostrati con l’ID hardware fino all’associazione.</string>
+    <string name="record_archive_description">Esporta/importa acquisizioni o allerte in un unico file, comprese le rispettive sessioni.</string>
+    <string name="record_archive_export_description">Esporta tutti i record di questo tipo, comprese le sessioni, in un unico file.</string>
+    <string name="record_archive_import_description">Aggiungi i dati all’archivio. I record già presenti vengono ignorati. I sensori sconosciuti sono mostrati con l’ID hardware fino all’associazione.</string>
     <string name="record_archive_import_summary">Record: %1$d · Sessioni: %2$d</string>
     <string name="record_archive_import_success">Importati: %1$d · Già presenti: %2$d</string>
     <string name="record_archive_failed">Impossibile trasferire i record. Controlla il file e il tipo di dati.</string>
+    <string name="record_archive_export_acquisitions_title">Esporta le acquisizioni</string>
+    <string name="record_archive_export_alerts_title">Esporta le allerte</string>
 </resources>

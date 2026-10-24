@@ -170,6 +170,7 @@ internal fun UvirSaveOrShareDialog(
     description: String,
     fileFormat: UvirExportFileFormat,
     fileCount: Int = 1,
+    dismissLabelRes: Int = R.string.close,
     onDismiss: () -> Unit,
     onExport: (UvirExportDestination) -> Unit
 ) {
@@ -210,8 +211,13 @@ internal fun UvirSaveOrShareDialog(
             ) { Text(stringResource(R.string.share)) }
         },
         dismissButton = {
-            UvirDialogCloseButton(onDismiss, enabled = !exportRequest.inProgress,
-                modifier = Modifier.testTag("export_dialog_close"))
+            if (dismissLabelRes == R.string.cancel) {
+                UvirDialogCancelButton(onDismiss, enabled = !exportRequest.inProgress,
+                    modifier = Modifier.testTag("export_dialog_close"))
+            } else {
+                UvirDialogDismissButton(dismissLabelRes, onDismiss, enabled = !exportRequest.inProgress,
+                    modifier = Modifier.testTag("export_dialog_close"))
+            }
         },
         containerColor = cardColor,
         titleContentColor = primaryText,

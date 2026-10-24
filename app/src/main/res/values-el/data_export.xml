@@ -13,7 +13,7 @@
     <string name="export_sensor_settings_description">Βαθμονόμηση, δειγματοληψία και επιλογές λειτουργίας. Δεν περιλαμβάνονται διαπιστευτήρια ή διευθύνσεις δικτύου.</string>
     <string name="share_measurements">Μοιραστείτε μετρήσεις</string>
     <string name="share_all_measurements_question">Κοινή χρήση όλων των αποθηκευμένων μετρήσεων;</string>
-    <string name="share_all_measurements_warning">Δεν έχουν επιλεγεί μετρήσεις, επομένως όλες οι αποθηκευμένες μετρήσεις θα κοινοποιηθούν.</string>
+    <string name="share_all_measurements_warning">Δεν έχουν επιλεγεί μετρήσεις, επομένως όλες οι αποθηκευμένες μετρήσεις κοινοποιούνται.</string>
     <string name="share_as_csv">Υπολογιστικό φύλλο (CSV)</string>
     <string name="share_as_readable_table">Ευανάγνωστος πίνακας (TXT)</string>
     <string name="share_readable_table_by_acquisition">Ανά λήψη</string>
@@ -41,7 +41,7 @@
     <string name="share_subject">Μετρήσεις Uvir</string>
     <string name="share_error">Δεν είναι δυνατή η κοινή χρήση των μετρήσεων.</string>
     <string name="share_all_alerts_question">Κοινή χρήση όλων των καταγεγραμμένων ειδοποιήσεων;</string>
-    <string name="share_all_alerts_warning">Δεν έχει επιλεγεί καμία ειδοποίηση, επομένως θα κοινοποιηθούν όλες οι καταγεγραμμένες ειδοποιήσεις.</string>
+    <string name="share_all_alerts_warning">Δεν έχει επιλεγεί καμία ειδοποίηση, επομένως κοινοποιούνται όλες οι καταγεγραμμένες ειδοποιήσεις.</string>
     <string name="export_database_title">Εξαγωγή βάσης δεδομένων</string>
     <string name="export_database">ΒΑΣΗ ΔΕΔΟΜΕΝΩΝ ΕΞΑΓΩΓΗΣ</string>
     <string name="export_database_subject">Βάση δεδομένων Uvir</string>
@@ -54,17 +54,17 @@
     <string name="export_format_preview_heading">Προεπισκόπηση</string>
     <string name="export_format_profile_summary">Γλώσσα: %1$s · Αριθμοί: %2$s · Ημερομηνία: %3$s · Ώρα: %4$s · Ακτινοβολία: %5$s</string>
     <string name="export_database_dialog_title">Εξαγωγή της βάσης δεδομένων</string>
-    <string name="export_database_dialog_description">Θα εξαχθεί ολόκληρη η βάση δεδομένων της εφαρμογής που είναι αποθηκευμένη σε αυτό το τηλέφωνο, μαζί με τις αποθηκευμένες μετρήσεις και ειδοποιήσεις.</string>
+    <string name="export_database_dialog_description">Εξαγάγετε ολόκληρη τη βάση δεδομένων της εφαρμογής που είναι αποθηκευμένη σε αυτό το τηλέφωνο, μαζί με τις αποθηκευμένες μετρήσεις και ειδοποιήσεις.</string>
     <string name="export_error_log_dialog_title">Εξαγωγή αρχείου καταγραφής σφαλμάτων</string>
-    <string name="export_error_log_dialog_description">Το αρχείο καταγραφής σφαλμάτων της εφαρμογής που είναι αποθηκευμένο σε αυτό το τηλέφωνο θα εξαχθεί ως τεχνικό αρχείο. Δεν περιλαμβάνονται αποθηκευμένες μετρήσεις ή διαπιστευτήρια.</string>
+    <string name="export_error_log_dialog_description">Εξαγάγετε το αρχείο καταγραφής σφαλμάτων της εφαρμογής ως τεχνικό αρχείο. Δεν περιλαμβάνονται αποθηκευμένες μετρήσεις ή διαπιστευτήρια.</string>
     <string name="export_diagnostic_dialog_title">Εξαγωγή αναφοράς διάγνωσης</string>
-    <string name="export_diagnostic_dialog_description">Θα εξαχθεί η αναφορά διάγνωσης του αισθητήρα. Περιέχει τεχνικά αποτελέσματα δοκιμών, αλλά όχι κωδικούς πρόσβασης ή διαπιστευτήρια.</string>
+    <string name="export_diagnostic_dialog_description">Εξαγάγετε την αναφορά διάγνωσης του αισθητήρα. Περιέχει τεχνικά αποτελέσματα δοκιμών, αλλά όχι κωδικούς πρόσβασης ή διαπιστευτήρια.</string>
     <string name="export_sensor_info_dialog_title">Εξαγωγή πληροφοριών αισθητήρα</string>
-    <string name="export_sensor_info_dialog_description">Όλες οι πληροφορίες του αισθητήρα θα εξαχθούν σε αρχείο κειμένου.</string>
+    <string name="export_sensor_info_dialog_description">Εξαγάγετε όλες τις πληροφορίες του αισθητήρα σε αρχείο κειμένου.</string>
     <string name="export_all_measurements_question">Εξαγωγή όλων των αποθηκευμένων μετρήσεων;</string>
-    <string name="export_all_measurements_warning">Δεν έχουν επιλεγεί μετρήσεις, επομένως θα εξαχθούν όλες οι αποθηκευμένες μετρήσεις.</string>
+    <string name="export_all_measurements_warning">Δεν έχουν επιλεγεί μετρήσεις, επομένως εξάγονται όλες οι αποθηκευμένες μετρήσεις.</string>
     <string name="export_all_alerts_question">Εξαγωγή όλων των καταγεγραμμένων ειδοποιήσεων;</string>
-    <string name="export_all_alerts_warning">Δεν έχουν επιλεγεί ειδοποιήσεις, επομένως θα εξαχθούν όλες οι καταγεγραμμένες ειδοποιήσεις.</string>
+    <string name="export_all_alerts_warning">Δεν έχουν επιλεγεί ειδοποιήσεις, επομένως εξάγονται όλες οι καταγεγραμμένες ειδοποιήσεις.</string>
     <string name="export_all">ΕΞΑΓΩΓΗ ΟΛΩΝ</string>
     <string name="export_sensor_settings_description_complete">Βαθμονόμηση, δειγματοληψία, επιλογές λειτουργίας και ρυθμίσεις σύνδεσης.</string>
     <string name="export_variant_count_label">Πλήθος παραλλαγών</string>
@@ -76,4 +76,5 @@
     <string name="share_chart_file_count">Αρχεία PNG: %1$d</string>
     <string name="share_readable_table_file_count">Αρχεία TXT: %1$d</string>
     <string name="export_file_count">Αρχεία %1$s: %2$d</string>
+    <string name="export_settings_description">Εξαγάγετε τις επιλεγμένες ρυθμίσεις της εφαρμογής και των αισθητήρων.</string>
 </resources>

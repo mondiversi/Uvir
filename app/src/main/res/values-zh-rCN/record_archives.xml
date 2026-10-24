@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="record_archive_title">采集和警报</string>
-    <string name="record_archive_description">导出或导入采集、警报及其会话。</string>
-    <string name="record_archive_export_description">将此类型的所有已保存记录（包括会话）导出为无密码的 UVIR 文件。</string>
-    <string name="record_archive_import_description">数据将添加到存档中。已有记录将被跳过。未知传感器在关联前以硬件 ID 显示。</string>
+    <string name="record_archive_description">通过单个文件导出或导入采集或警报及其会话。</string>
+    <string name="record_archive_export_description">将此类型的所有记录（包括会话）导出为单个文件。</string>
+    <string name="record_archive_import_description">数据添加到存档中。已有记录被跳过。未知传感器在关联前以硬件 ID 显示。</string>
     <string name="record_archive_import_summary">记录：%1$d · 会话：%2$d</string>
     <string name="record_archive_import_success">已导入：%1$d · 已存在：%2$d</string>
     <string name="record_archive_failed">无法传输记录。请检查文件和数据类型。</string>
+    <string name="record_archive_export_acquisitions_title">导出采集</string>
+    <string name="record_archive_export_alerts_title">导出警报</string>
 </resources>

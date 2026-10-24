@@ -46,7 +46,7 @@
     <string name="debug_simulate_events">محاكاة الأحداث</string>
     <string name="debug_simulate_events_description">أضف قياسات وتنبيهات محاكاة.</string>
     <string name="debug_simulate_events_question">هل تريد محاكاة أحداث تجريبية؟</string>
-    <string name="debug_simulate_events_confirmation">ستُضاف قياسات وتنبيهات تجريبية إلى قاعدة البيانات. لن تتغير السجلات الحالية.</string>
+    <string name="debug_simulate_events_confirmation">تُضاف قياسات وتنبيهات تجريبية إلى قاعدة البيانات. لا تتغير السجلات الحالية.</string>
     <string name="debug_simulate_events_completed">تمت إضافة %1$d من القياسات و%2$d من التنبيهات</string>
     <string name="debug_simulation_note">محاكاة تصحيح الأخطاء</string>
 </resources>

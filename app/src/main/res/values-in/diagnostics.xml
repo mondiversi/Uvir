@@ -46,7 +46,7 @@
     <string name="debug_simulate_events">SIMULASIKAN KEJADIAN</string>
     <string name="debug_simulate_events_description">Tambahkan pengukuran dan peringatan simulasi.</string>
     <string name="debug_simulate_events_question">Simulasikan kejadian pengujian?</string>
-    <string name="debug_simulate_events_confirmation">Pengukuran dan peringatan pengujian akan ditambahkan ke basis data. Rekaman yang ada tidak diubah.</string>
+    <string name="debug_simulate_events_confirmation">Pengukuran dan peringatan pengujian ditambahkan ke basis data. Rekaman yang ada tidak diubah.</string>
     <string name="debug_simulate_events_completed">%1$d pengukuran dan %2$d peringatan ditambahkan</string>
     <string name="debug_simulation_note">Simulasi diagnostik</string>
 </resources>

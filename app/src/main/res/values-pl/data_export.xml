@@ -13,7 +13,7 @@
     <string name="export_sensor_settings_description">Kalibracja, próbkowanie i opcje działania. Bez danych uwierzytelniania i adresów sieciowych.</string>
     <string name="share_measurements">Udostępnij pomiary</string>
     <string name="share_all_measurements_question">Udostępnić wszystkie zapisane pomiary?</string>
-    <string name="share_all_measurements_warning">Nie wybrano pomiarów, więc zostaną udostępnione wszystkie zapisane pomiary.</string>
+    <string name="share_all_measurements_warning">Nie wybrano pomiarów, więc są udostępniane wszystkie zapisane pomiary.</string>
     <string name="share_as_csv">Arkusz kalkulacyjny (CSV)</string>
     <string name="share_as_readable_table">Czytelna tabela (TXT)</string>
     <string name="share_readable_table_by_acquisition">Według pomiaru</string>
@@ -41,7 +41,7 @@
     <string name="share_subject">Pomiary Uvir</string>
     <string name="share_error">Nie można udostępnić pomiarów.</string>
     <string name="share_all_alerts_question">Udostępnić wszystkie zarejestrowane alerty?</string>
-    <string name="share_all_alerts_warning">Nie wybrano alertów, więc zostaną udostępnione wszystkie zarejestrowane alerty.</string>
+    <string name="share_all_alerts_warning">Nie wybrano alertów, więc są udostępniane wszystkie zarejestrowane alerty.</string>
     <string name="export_database_title">Eksportuj bazę danych</string>
     <string name="export_database">EKSPORTUJ BAZĘ DANYCH</string>
     <string name="export_database_subject">Baza danych Uvir</string>
@@ -54,17 +54,17 @@
     <string name="export_format_preview_heading">Podgląd</string>
     <string name="export_format_profile_summary">Język: %1$s · Liczby: %2$s · Data: %3$s · Godzina: %4$s · Natężenie napromienienia: %5$s</string>
     <string name="export_database_dialog_title">Eksportuj bazę danych</string>
-    <string name="export_database_dialog_description">Zostanie wyeksportowana cała baza danych aplikacji na tym telefonie, w tym zapisane pomiary i alerty.</string>
+    <string name="export_database_dialog_description">Eksportuj całą bazę danych aplikacji na tym telefonie, w tym zapisane pomiary i alerty.</string>
     <string name="export_error_log_dialog_title">Eksportuj dziennik błędów</string>
-    <string name="export_error_log_dialog_description">Dziennik błędów aplikacji na tym telefonie zostanie wyeksportowany jako plik techniczny. Bez zapisanych pomiarów i danych uwierzytelniania.</string>
+    <string name="export_error_log_dialog_description">Eksportuj dziennik błędów aplikacji jako plik techniczny. Bez zapisanych pomiarów i danych uwierzytelniania.</string>
     <string name="export_diagnostic_dialog_title">Eksportuj raport diagnostyczny</string>
-    <string name="export_diagnostic_dialog_description">Zostanie wyeksportowany raport diagnostyczny czujnika. Zawiera wyniki testów technicznych, bez haseł i danych uwierzytelniania.</string>
+    <string name="export_diagnostic_dialog_description">Eksportuj raport diagnostyczny czujnika. Zawiera wyniki testów technicznych, bez haseł i danych uwierzytelniania.</string>
     <string name="export_sensor_info_dialog_title">Eksportuj informacje o czujniku</string>
-    <string name="export_sensor_info_dialog_description">Wszystkie informacje o czujniku zostaną wyeksportowane jako plik tekstowy.</string>
+    <string name="export_sensor_info_dialog_description">Eksportuj wszystkie informacje o czujniku jako plik tekstowy.</string>
     <string name="export_all_measurements_question">Wyeksportować wszystkie zapisane pomiary?</string>
-    <string name="export_all_measurements_warning">Nie wybrano pomiarów, więc zostaną wyeksportowane wszystkie zapisane pomiary.</string>
+    <string name="export_all_measurements_warning">Nie wybrano pomiarów, więc są eksportowane wszystkie zapisane pomiary.</string>
     <string name="export_all_alerts_question">Wyeksportować wszystkie zarejestrowane alerty?</string>
-    <string name="export_all_alerts_warning">Nie wybrano alertów, więc zostaną wyeksportowane wszystkie zarejestrowane alerty.</string>
+    <string name="export_all_alerts_warning">Nie wybrano alertów, więc są eksportowane wszystkie zarejestrowane alerty.</string>
     <string name="export_all">EKSPORTUJ WSZYSTKO</string>
     <string name="export_sensor_settings_description_complete">Kalibracja, próbkowanie, opcje działania i ustawienia połączeń.</string>
     <string name="export_variant_count_label">Liczba wariantów</string>
@@ -76,4 +76,5 @@
     <string name="share_chart_file_count">Pliki PNG: %1$d</string>
     <string name="share_readable_table_file_count">Pliki TXT: %1$d</string>
     <string name="export_file_count">Pliki %1$s: %2$d</string>
+    <string name="export_settings_description">Eksportuj wybrane ustawienia aplikacji i czujników.</string>
 </resources>

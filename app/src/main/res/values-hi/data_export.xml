@@ -13,7 +13,7 @@
     <string name="export_sensor_settings_description">कैलिब्रेशन, सैंपलिंग और संचालन विकल्प। क्रेडेंशियल और नेटवर्क पते शामिल नहीं हैं।</string>
     <string name="share_measurements">अधिग्रहण साझा करें</string>
     <string name="share_all_measurements_question">सभी सहेजे गए अधिग्रहण साझा करें?</string>
-    <string name="share_all_measurements_warning">कोई अधिग्रहण चयनित नहीं है, इसलिए सभी सहेजे गए अधिग्रहण साझा किए जाएंगे।</string>
+    <string name="share_all_measurements_warning">कोई अधिग्रहण चयनित नहीं है, इसलिए सभी सहेजे गए अधिग्रहण साझा किए जाते हैं।</string>
     <string name="share_as_csv">स्प्रेडशीट (CSV)</string>
     <string name="share_as_readable_table">पठनीय तालिका (TXT)</string>
     <string name="share_readable_table_by_acquisition">अधिग्रहण के अनुसार</string>
@@ -41,7 +41,7 @@
     <string name="share_subject">Uvir अधिग्रहण</string>
     <string name="share_error">अधिग्रहीत जानकारियाँ साझा करने में असमर्थ।</string>
     <string name="share_all_alerts_question">क्या सभी रिकॉर्ड किए गए अलर्ट साझा करें?</string>
-    <string name="share_all_alerts_warning">कोई अलर्ट चयनित नहीं है, इसलिए सभी रिकॉर्ड किए गए अलर्ट साझा किए जाएंगे।</string>
+    <string name="share_all_alerts_warning">कोई अलर्ट चयनित नहीं है, इसलिए सभी रिकॉर्ड किए गए अलर्ट साझा किए जाते हैं।</string>
     <string name="export_database_title">डेटाबेस निर्यात करें</string>
     <string name="export_database">डेटाबेस निर्यात करें</string>
     <string name="export_database_subject">Uvir डेटाबेस</string>
@@ -54,17 +54,17 @@
     <string name="export_format_preview_heading">पूर्वावलोकन</string>
     <string name="export_format_profile_summary">भाषा: %1$s · संख्याएँ: %2$s · दिनांक: %3$s · समय: %4$s · विकिरण: %5$s</string>
     <string name="export_database_dialog_title">डेटाबेस निर्यात करें</string>
-    <string name="export_database_dialog_description">इस फ़ोन में संग्रहीत ऐप का पूरा डेटाबेस निर्यात किया जाएगा, जिसमें सहेजे गए अधिग्रहण और अलर्ट शामिल हैं।</string>
+    <string name="export_database_dialog_description">इस फ़ोन में संग्रहीत ऐप का पूरा डेटाबेस निर्यात करें, जिसमें सहेजे गए माप और अलर्ट शामिल हैं।</string>
     <string name="export_error_log_dialog_title">त्रुटि लॉग निर्यात करें</string>
-    <string name="export_error_log_dialog_description">इस फ़ोन में संग्रहीत ऐप का त्रुटि लॉग तकनीकी फ़ाइल के रूप में निर्यात किया जाएगा। सहेजे गए अधिग्रहण और क्रेडेंशियल शामिल नहीं हैं।</string>
+    <string name="export_error_log_dialog_description">ऐप का त्रुटि लॉग तकनीकी फ़ाइल के रूप में निर्यात करें। सहेजे गए माप और क्रेडेंशियल शामिल नहीं हैं।</string>
     <string name="export_diagnostic_dialog_title">नैदानिक रिपोर्ट निर्यात करें</string>
-    <string name="export_diagnostic_dialog_description">सेंसर की नैदानिक रिपोर्ट निर्यात की जाएगी। इसमें तकनीकी परीक्षण परिणाम हैं, लेकिन पासवर्ड या क्रेडेंशियल नहीं हैं।</string>
+    <string name="export_diagnostic_dialog_description">सेंसर की नैदानिक रिपोर्ट निर्यात करें। इसमें तकनीकी परीक्षण परिणाम हैं, लेकिन पासवर्ड या क्रेडेंशियल नहीं हैं।</string>
     <string name="export_sensor_info_dialog_title">सेंसर जानकारी निर्यात करें</string>
-    <string name="export_sensor_info_dialog_description">सेंसर की सभी जानकारी टेक्स्ट फ़ाइल के रूप में निर्यात की जाएगी।</string>
+    <string name="export_sensor_info_dialog_description">सेंसर की सभी जानकारी टेक्स्ट फ़ाइल के रूप में निर्यात करें।</string>
     <string name="export_all_measurements_question">सभी सहेजे गए माप निर्यात करें?</string>
-    <string name="export_all_measurements_warning">कोई माप चयनित नहीं है, इसलिए सभी सहेजे गए माप निर्यात किए जाएँगे।</string>
+    <string name="export_all_measurements_warning">कोई माप चयनित नहीं है, इसलिए सभी सहेजे गए माप निर्यात किए जाते हैं।</string>
     <string name="export_all_alerts_question">सभी दर्ज अलर्ट निर्यात करें?</string>
-    <string name="export_all_alerts_warning">कोई अलर्ट चयनित नहीं है, इसलिए सभी दर्ज अलर्ट निर्यात किए जाएँगे।</string>
+    <string name="export_all_alerts_warning">कोई अलर्ट चयनित नहीं है, इसलिए सभी दर्ज अलर्ट निर्यात किए जाते हैं।</string>
     <string name="export_all">सभी निर्यात करें</string>
     <string name="export_sensor_settings_description_complete">कैलिब्रेशन, सैंपलिंग, संचालन विकल्प और कनेक्शन सेटिंग।</string>
     <string name="export_variant_count_label">वेरिएंट की संख्या</string>
@@ -76,4 +76,5 @@
     <string name="share_chart_file_count">PNG फ़ाइलें: %1$d</string>
     <string name="share_readable_table_file_count">TXT फ़ाइलें: %1$d</string>
     <string name="export_file_count">%1$s फ़ाइलें: %2$d</string>
+    <string name="export_settings_description">ऐप और सेंसर की चुनी गई सेटिंग्स निर्यात करें।</string>
 </resources>

@@ -107,7 +107,7 @@ internal fun UvirEncryptedDatabaseExportDialog(
             ) { Text(stringResource(R.string.share)) }
         },
         dismissButton = {
-            UvirDialogCloseButton(onDismiss, enabled = !inProgress,
+            UvirDialogCancelButton(onDismiss, enabled = !inProgress,
                 modifier = Modifier.testTag("database_export_close"))
         },
         containerColor = cardColor,
@@ -281,6 +281,11 @@ internal fun UvirSettingsExportDialog(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
+                Text(
+                    text = stringResource(R.string.export_settings_description),
+                    color = secondaryText,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
                 SettingsExportOptionRow(
                     selected = appSelected,
                     enabled = true,
@@ -372,7 +377,7 @@ internal fun UvirSettingsExportDialog(
             ) { Text(stringResource(R.string.share)) }
         },
         dismissButton = {
-            UvirDialogCloseButton(onDismiss, enabled = !exportRequest.inProgress,
+            UvirDialogCancelButton(onDismiss, enabled = !exportRequest.inProgress,
                 modifier = Modifier.testTag("settings_export_close"))
         },
         containerColor = cardColor,

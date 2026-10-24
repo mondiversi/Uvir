@@ -13,7 +13,7 @@
     <string name="export_sensor_settings_description">校准、采样和运行选项。不包含凭据和网络地址。</string>
     <string name="share_measurements">分享采集记录</string>
     <string name="share_all_measurements_question">分享所有已保存的采集记录？</string>
-    <string name="share_all_measurements_warning">未选择采集记录，因此将分享所有已保存的采集记录。</string>
+    <string name="share_all_measurements_warning">未选择采集记录，因此分享所有已保存的采集记录。</string>
     <string name="share_as_csv">电子表格 (CSV)</string>
     <string name="share_as_readable_table">易读表格 (TXT)</string>
     <string name="share_readable_table_by_acquisition">按采集</string>
@@ -41,7 +41,7 @@
     <string name="share_subject">Uvir 采集记录</string>
     <string name="share_error">无法分享采集记录。</string>
     <string name="share_all_alerts_question">分享所有已记录的警报？</string>
-    <string name="share_all_alerts_warning">未选择任何警报，因此将分享所有已记录的警报。</string>
+    <string name="share_all_alerts_warning">未选择任何警报，因此分享所有已记录的警报。</string>
     <string name="export_database_title">导出数据库</string>
     <string name="export_database">导出数据库</string>
     <string name="export_database_subject">Uvir 数据库</string>
@@ -54,17 +54,17 @@
     <string name="export_format_preview_heading">预览</string>
     <string name="export_format_profile_summary">语言：%1$s · 数字：%2$s · 日期：%3$s · 时间：%4$s · 辐照度：%5$s</string>
     <string name="export_database_dialog_title">导出数据库</string>
-    <string name="export_database_dialog_description">将导出此手机上存储的完整应用数据库，包括已保存的测量和警报。</string>
+    <string name="export_database_dialog_description">导出此手机上存储的完整应用数据库，包括已保存的测量和警报。</string>
     <string name="export_error_log_dialog_title">导出错误日志</string>
-    <string name="export_error_log_dialog_description">此手机上存储的应用错误日志将作为技术文件导出，不包含已保存的测量或凭据。</string>
+    <string name="export_error_log_dialog_description">将应用错误日志导出为技术文件，不包含已保存的测量或凭据。</string>
     <string name="export_diagnostic_dialog_title">导出诊断报告</string>
-    <string name="export_diagnostic_dialog_description">将导出传感器诊断报告。报告包含技术测试结果，但不包含密码或凭据。</string>
+    <string name="export_diagnostic_dialog_description">导出传感器诊断报告。报告包含技术测试结果，但不包含密码或凭据。</string>
     <string name="export_sensor_info_dialog_title">导出传感器信息</string>
-    <string name="export_sensor_info_dialog_description">传感器的全部信息将导出为文本文件。</string>
+    <string name="export_sensor_info_dialog_description">将传感器的全部信息导出为文本文件。</string>
     <string name="export_all_measurements_question">导出所有已保存的测量？</string>
-    <string name="export_all_measurements_warning">未选择任何测量，因此将导出所有已保存的测量。</string>
+    <string name="export_all_measurements_warning">未选择任何测量，因此导出所有已保存的测量。</string>
     <string name="export_all_alerts_question">导出所有已记录的警报？</string>
-    <string name="export_all_alerts_warning">未选择任何警报，因此将导出所有已记录的警报。</string>
+    <string name="export_all_alerts_warning">未选择任何警报，因此导出所有已记录的警报。</string>
     <string name="export_all">全部导出</string>
     <string name="export_sensor_settings_description_complete">校准、采样、运行选项和连接设置。</string>
     <string name="export_variant_count_label">变体数量</string>
@@ -76,4 +76,5 @@
     <string name="share_chart_file_count">PNG 文件：%1$d</string>
     <string name="share_readable_table_file_count">TXT 文件：%1$d</string>
     <string name="export_file_count">%1$s 文件：%2$d</string>
+    <string name="export_settings_description">导出所选的应用和传感器设置。</string>
 </resources>

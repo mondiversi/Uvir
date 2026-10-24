@@ -46,7 +46,7 @@
     <string name="debug_simulate_events">ΠΡΟΣΟΜΟΙΩΣΗ ΣΥΜΒΑΝΤΩΝ</string>
     <string name="debug_simulate_events_description">Πρόσθεσε προσομοιωμένες μετρήσεις και ειδοποιήσεις.</string>
     <string name="debug_simulate_events_question">Να προσομοιωθούν δοκιμαστικά συμβάντα;</string>
-    <string name="debug_simulate_events_confirmation">Θα προστεθούν δοκιμαστικές μετρήσεις και ειδοποιήσεις στη βάση δεδομένων. Οι υπάρχουσες εγγραφές δεν θα αλλάξουν.</string>
+    <string name="debug_simulate_events_confirmation">Προστίθενται δοκιμαστικές μετρήσεις και ειδοποιήσεις στη βάση δεδομένων. Οι υπάρχουσες εγγραφές δεν αλλάζουν.</string>
     <string name="debug_simulate_events_completed">Προστέθηκαν %1$d μετρήσεις και %2$d ειδοποιήσεις</string>
     <string name="debug_simulation_note">Προσομοίωση αποσφαλμάτωσης</string>
 </resources>

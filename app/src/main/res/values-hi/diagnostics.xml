@@ -46,7 +46,7 @@
     <string name="debug_simulate_events">ईवेंट का अनुकरण करें</string>
     <string name="debug_simulate_events_description">अनुकरण माप और अलर्ट जोड़ें।</string>
     <string name="debug_simulate_events_question">परीक्षण ईवेंट का अनुकरण करें?</string>
-    <string name="debug_simulate_events_confirmation">परीक्षण माप और मान चेतावनियाँ डेटाबेस में जोड़ी जाएँगी। मौजूदा रिकॉर्ड नहीं बदलेंगे।</string>
+    <string name="debug_simulate_events_confirmation">परीक्षण माप और मान चेतावनियाँ डेटाबेस में जोड़ी जाती हैं। मौजूदा रिकॉर्ड नहीं बदलते हैं।</string>
     <string name="debug_simulate_events_completed">%1$d माप और %2$d मान चेतावनियाँ जोड़ी गईं</string>
     <string name="debug_simulation_note">डीबग अनुकरण</string>
 </resources>

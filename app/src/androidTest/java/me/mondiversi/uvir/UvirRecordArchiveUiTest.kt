@@ -12,6 +12,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -37,6 +38,8 @@ class UvirRecordArchiveUiTest {
     private lateinit var database: UvirDatabaseHelper
     private val night = mutableStateOf(false)
     private val rtl = mutableStateOf(false)
+    private var cancelColor = Color.Unspecified
+    private var actionColor = Color.Unspecified
 
     @Before fun setup() {
         root = File(context.cacheDir, "archive-ui-${UUID.randomUUID()}").apply { check(mkdir()) }
@@ -51,6 +54,9 @@ class UvirRecordArchiveUiTest {
 
     @Test fun islandUsesStandardActionsAndUpdatesOnlyItsOwnExportAvailability() {
         fixture {
+            val red = UvirDestructiveActionColor
+            val purple = MaterialTheme.colorScheme.primary
+            SideEffect { cancelColor = red; actionColor = purple }
             Surface(Modifier.fillMaxSize()) {
                 Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
                     UvirRecordArchiveIsland(database, MaterialTheme.colorScheme.surface,
@@ -65,14 +71,39 @@ class UvirRecordArchiveUiTest {
         compose.runOnIdle { database.saveAcquisition(SensorSample(), "private fixture", timestamp = 1000) }
         compose.waitUntil { runCatching { compose.onNodeWithTag("archive_export_ACQUISITIONS").assertIsEnabled() }.isSuccess }
         compose.onNodeWithTag("archive_export_ALERTS").assertIsNotEnabled()
+        compose.runOnIdle {
+            database.insertThresholdAlertLog(listOf(ThresholdAlertViolation(
+                ThresholdAlertRule(ThresholdAlertMetric.UVB, true, ThresholdAlertDirection.ABOVE, .1f), .2)),
+                timestamp = 2000)
+        }
+        compose.waitUntil { runCatching { compose.onNodeWithTag("archive_export_ALERTS").assertIsEnabled() }.isSuccess }
         for (dark in listOf(false, true)) {
             compose.runOnIdle { night.value = dark }
             compose.onNodeWithTag("archive_export_ACQUISITIONS").performScrollTo()
             saveScreenshot("record-archive-island-${if (dark) "night" else "day"}")
+            for (direction in listOf(false, true)) for ((kind, title) in listOf(
+                UvirArchiveKind.ACQUISITIONS to R.string.record_archive_export_acquisitions_title,
+                UvirArchiveKind.ALERTS to R.string.record_archive_export_alerts_title)) {
+                compose.runOnIdle { rtl.value = direction }
+                compose.onNodeWithTag("archive_export_${kind.name}").performScrollTo().performClick()
+                compose.onNodeWithText(context.getString(title)).assertIsDisplayed()
+                compose.onNodeWithText(context.getString(R.string.record_archive_export_description)).assertIsDisplayed()
+                compose.onNodeWithText(context.getString(R.string.export_file_count, "JSON", 1)).assertIsDisplayed()
+                compose.onNodeWithText(context.getString(R.string.settings_encryption_password)).assertDoesNotExist()
+                compose.onNodeWithText(context.getString(R.string.close)).assertDoesNotExist()
+                compose.onNodeWithText(formatUvirActionLabel(context.getString(R.string.cancel), Locale.getDefault()),
+                    useUnmergedTree = true).assertUvirActionTextColor(cancelColor)
+                for (action in listOf(R.string.save, R.string.share)) {
+                    compose.onNodeWithText(formatUvirActionLabel(context.getString(action), Locale.getDefault()),
+                        useUnmergedTree = true).assertUvirActionTextColor(actionColor)
+                }
+                if (!direction) saveScreenshot("record-archive-export-${kind.name.lowercase()}-${if (dark) "night" else "day"}")
+                compose.onNodeWithTag("archive_export_close").assertIsEnabled().performClick()
+                compose.onNodeWithText(context.getString(title)).assertDoesNotExist()
+            }
         }
-        compose.onNodeWithTag("archive_export_ACQUISITIONS").performClick()
-        compose.onNodeWithText(context.getString(R.string.record_archive_export_description)).assertExists()
-        compose.onNodeWithText(context.getString(R.string.settings_encryption_password)).assertDoesNotExist()
+        assertEquals(1, database.readSavedRecords().size)
+        assertEquals(1, database.readThresholdAlertLog().size)
     }
 
     @Test fun importPreviewHasUppercaseActionsAndBlocksThemWhileWorkingInBothThemesAndDirections() {
@@ -120,7 +151,11 @@ class UvirRecordArchiveUiTest {
         }
     }
     private fun saveScreenshot(name: String) {
-        val node = if (name.contains("-preview-")) compose.onNodeWithTag("record_archive_import_dialog") else compose.onRoot()
+        val node = when {
+            name.contains("-preview-") -> compose.onNodeWithTag("record_archive_import_dialog")
+            name.contains("-export-") -> compose.onNode(isDialog())
+            else -> compose.onRoot()
+        }
         File(context.getExternalFilesDir(null), "$name.png").outputStream().use {
             assertTrue(node.captureToImage().asAndroidBitmap().compress(Bitmap.CompressFormat.PNG, 100, it))
         }

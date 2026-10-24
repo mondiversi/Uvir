@@ -11,8 +11,8 @@
     <string name="optional_note">Acquisition note</string>
     <string name="note_example">Acquisition note</string>
     <string name="single_acquisition">Single acquisition</string>
-    <string name="single_acquisition_ends_manual_session">The last manual session will end.</string>
-    <string name="automatic_start_ends_manual_session">The current manual session will end.</string>
+    <string name="single_acquisition_ends_manual_session">End the last manual session.</string>
+    <string name="automatic_start_ends_manual_session">End the current manual session.</string>
     <string name="interrupt_manual_session_title">Stop the current manual session?</string>
     <string name="interrupt_manual_session_message">To start an automatic acquisition session, you must stop the manual acquisition session currently in progress.</string>
     <string name="interrupt_manual_session_action">STOP</string>
@@ -90,12 +90,12 @@
         <item quantity="one">(%1$d acquisition per %2$d variants)</item>
         <item quantity="other">(%1$d acquisitions per %2$d variants)</item>
     </plurals>
-    <string name="session_variant_chart_files_info">%1$d PNG files will be generated, one for each variant.</string>
+    <string name="session_variant_chart_files_info">Generate %1$d PNG files, one for each variant.</string>
     <string name="share">SHARE</string>
     <string name="delete_selected_measurements_question">Delete selected acquisitions?</string>
     <plurals name="delete_selected_measurements_warning">
-        <item quantity="one">%1$d selected acquisition will be permanently deleted.</item>
-        <item quantity="other">%1$d selected acquisitions will be permanently deleted.</item>
+        <item quantity="one">Permanently delete the %1$d selected acquisition.</item>
+        <item quantity="other">Permanently delete the %1$d selected acquisitions.</item>
     </plurals>
     <string name="acquisition_session_id_label">Acquisition / session ID</string>
     <string name="session_date_duration_events_label">Date and time</string>
@@ -146,7 +146,7 @@
     <string name="automatic_stopping">Stopping automatic acquisition…</string>
     <string name="automatic_stop_failed">Unable to stop automatic acquisition. Check the sensor connection and try again.</string>
     <string name="stop_automatic_confirmation_title">Stop automatic acquisition?</string>
-    <string name="stop_automatic_confirmation_message">The current automatic acquisition will be stopped. Continue?</string>
+    <string name="stop_automatic_confirmation_message">Stop the current automatic acquisition. Continue?</string>
     <string name="continue_acquisition">KEEP RUNNING</string>
     <string name="acquisition_parameters">Settings</string>
     <string name="connectivity">Connectivity</string>
@@ -191,11 +191,11 @@
     <string name="sensor_source_disabled_hint">A disabled source can be re-enabled through the other active wireless connection. If both are disabled, connect the sensor by USB.</string>
     <string name="sensor_power_off">POWER OFF SENSOR</string>
     <string name="sensor_power_off_title">Power off the sensor?</string>
-    <string name="sensor_power_off_message">The sensor will enter a low-power shutdown and cannot be restarted from the app. To turn it on again, press EN/RESET or disconnect and reconnect its power. To confirm, press and hold POWER OFF for 5 seconds.</string>
+    <string name="sensor_power_off_message">The sensor enters a low-power shutdown and cannot be restarted from the app. To turn it on again, press EN/RESET or disconnect and reconnect its power. To confirm, press and hold POWER OFF for 5 seconds.</string>
     <string name="sensor_power_off_confirm">POWER OFF</string>
     <string name="sensor_disassociate_action">DISSOCIATE FROM APP</string>
     <string name="sensor_disassociate_title">Dissociate the sensor?</string>
-    <string name="sensor_disassociate_message">Dissociating removes the sensor from the selectable list, without deleting its name or saved records. You can associate it again by USB at any time. The sensor will not be changed. To confirm, press and hold DISSOCIATE for 5 seconds.</string>
+    <string name="sensor_disassociate_message">Dissociating removes the sensor from the selectable list, without deleting its name or saved records. You can associate it again by USB at any time. The sensor remains unchanged. To confirm, press and hold DISSOCIATE for 5 seconds.</string>
     <string name="sensor_selection_failed">Could not change sensor. Try again.</string>
     <string name="sensor_associate_action">Associate sensor</string>
     <string name="sensor_associate_usb_hint">Connect the new sensor by USB. Previously associated sensors remain in the list.</string>
@@ -206,11 +206,11 @@
     <string name="expand_all_settings_content_description">Expand all settings</string>
     <string name="collapse_all_settings_content_description">Collapse all settings</string>
     <string name="restore_defaults_title">Restore default settings?</string>
-    <string name="restore_defaults_message">All app and sensor settings will be restored to their default values. All saved acquisitions, recorded alerts and error logs will be permanently deleted. The sensor will then power off. To confirm, press and hold RESTORE ALL continuously for 10 seconds.</string>
+    <string name="restore_defaults_message">Restore all app and sensor settings to their defaults and permanently delete all saved acquisitions, recorded alerts and error logs. The sensor powers off afterwards. To confirm, press and hold RESTORE ALL continuously for 10 seconds.</string>
     <string name="restore_defaults_confirm">RESTORE ALL</string>
     <string name="restore_defaults_failed">The complete restore could not be performed. Check the sensor connection and try again.</string>
     <string name="restore_app_settings_title">Reset the app?</string>
-    <string name="restore_app_settings_message">All Uvir app settings and locally stored data will be deleted, including acquisitions, recorded alerts, error logs, counters, sensor profiles and saved connection credentials. The sensor itself will not be changed or powered off. To confirm, press and hold RESET for 5 seconds.</string>
+    <string name="restore_app_settings_message">Delete all Uvir app settings and locally stored data, including acquisitions, recorded alerts, error logs, counters, sensor profiles and saved connection credentials. The sensor itself is not changed or powered off. To confirm, press and hold RESET for 5 seconds.</string>
     <string name="restore_app_settings_confirm">RESET</string>
     <string name="restore_app_settings_failed">The app could not be reset.</string>
     <string name="sensor_status_no_sensor">Not connected</string>
@@ -284,18 +284,18 @@
     <string name="invalid_threshold_alert">Use non-negative limits and set a repeat interval between 1 second and 24 hours.</string>
     <string name="stop_all_value_alerts_accessibility">Stop alert session</string>
     <string name="stop_all_value_alerts_title">Stop alert session?</string>
-    <string name="stop_all_value_alerts_message">The current alert session will end. Configured and recorded alerts will be kept.</string>
+    <string name="stop_all_value_alerts_message">End the current alert session. Configured and recorded alerts are kept.</string>
     <string name="stop_all_value_alerts_action">@string/stop</string>
     <string name="continue_alert_monitoring">CONTINUE</string>
     <string name="start_value_alert_session_accessibility">Start alert session</string>
     <string name="start_value_alert_session_title">Start alert session</string>
-    <string name="start_value_alert_session_message">Monitoring will start using the configured alerts. You can add or remove alerts later without starting a new session.</string>
+    <string name="start_value_alert_session_message">Start monitoring using the configured alerts. You can add or remove alerts during the session.</string>
     <string name="start_value_alert_session_action">START</string>
     <string name="threshold_rules_reset">RESET ACTIVE ALERTS</string>
     <string name="threshold_rules_reset_confirm_action">RESET ALL</string>
     <string name="threshold_rules_reset_complete">Active alerts reset</string>
     <string name="threshold_rules_reset_confirmation_title">Reset all active alerts?</string>
-    <string name="threshold_rules_reset_confirmation_message">All active alerts will be reset. To confirm, press and hold RESET ALL continuously for 2 seconds.</string>
+    <string name="threshold_rules_reset_confirmation_message">Reset all active alerts. To confirm, press and hold RESET ALL continuously for 2 seconds.</string>
     <string name="threshold_bell_configure">Configure alerts for this group</string>
     <string name="threshold_bell_active">One or more active alerts in this group</string>
     <string name="threshold_group_editor_title">Alerts for\n%1$s</string>
@@ -318,8 +318,8 @@
     <string name="select_alerts">Select alerts</string>
     <string name="delete_selected_alerts_question">Delete the selected alerts?</string>
     <plurals name="delete_selected_alerts_warning">
-        <item quantity="one">The selected alert will be permanently deleted.</item>
-        <item quantity="other">The %1$d selected alerts will be permanently deleted.</item>
+        <item quantity="one">Permanently delete the selected alert.</item>
+        <item quantity="other">Permanently delete the %1$d selected alerts.</item>
     </plurals>
     <string name="threshold_alerts_deleted">Alerts deleted</string>
     <plurals name="threshold_alert_count_since">
@@ -328,7 +328,7 @@
     </plurals>
     <string name="threshold_alert_export_subject">Uvir alert log</string>
     <string name="threshold_alert_log_delete_title">Delete all recorded alerts?</string>
-    <string name="threshold_alert_log_delete_warning">All recorded alerts will be permanently deleted. To confirm, press and hold DELETE ALL continuously for 2 seconds.</string>
+    <string name="threshold_alert_log_delete_warning">Permanently delete all recorded alerts. To confirm, press and hold DELETE ALL continuously for 2 seconds.</string>
     <string name="threshold_alert_log_delete_all">DELETE ALL</string>
     <string name="threshold_alert_log_deleted">Alerts deleted</string>
     <string name="threshold_log_violation_above">%1$s: %2$s µW/cm² ≥ %3$s µW/cm²</string>
@@ -389,22 +389,22 @@
     <string name="sensor_restore_action">RESET SENSOR</string>
     <string name="sensor_restore_inline_warning">Deletes unsynchronized data stored on the sensor, resets its configuration and connection credentials, then powers it off.</string>
     <string name="sensor_restore_title">Reset the sensor?</string>
-    <string name="sensor_restore_message">Only the sensor will be reset. Its settings and connection credentials will return to their defaults; unsynchronized acquisitions, alerts and errors stored on it will be deleted, then the sensor will power off. App settings and records already saved in Uvir will not change. To confirm, press and hold RESET for 5 seconds.</string>
+    <string name="sensor_restore_message">Reset only the sensor. Its settings and connection credentials return to their defaults; unsynchronized acquisitions, alerts and errors stored on it are deleted, then the sensor powers off. App settings and records already saved in Uvir remain unchanged. To confirm, press and hold RESET for 5 seconds.</string>
     <string name="sensor_restore_confirm">RESET</string>
     <string name="sensor_restore_failed">The sensor could not be reset. Check the connection and try again.</string>
     <string name="reset_all_records_action">RESET COUNTERS</string>
     <string name="reset_all_records_warning">Deletes all saved acquisitions and recorded alerts, then resets their IDs and session IDs.</string>
     <string name="reset_all_records_confirmation_title">Reset all counters?</string>
-    <string name="reset_all_records_confirmation_message">All saved acquisitions and recorded alerts will be permanently deleted. Their IDs and session IDs will restart from the beginning. To confirm, press and hold RESET ALL continuously for 5 seconds.</string>
+    <string name="reset_all_records_confirmation_message">Permanently delete all saved acquisitions and recorded alerts. Their IDs and session IDs restart from the beginning. To confirm, press and hold RESET ALL continuously for 5 seconds.</string>
     <string name="all_counters_reset_complete">Records and counters reset</string>
     <string name="reset_acquisition_counters_action">RESET ACQUISITIONS</string>
     <string name="reset_acquisition_counters_warning">Permanently deletes all saved acquisitions and resets acquisition and session IDs.</string>
     <string name="reset_acquisition_counters_confirmation_title">Reset acquisitions?</string>
-    <string name="reset_acquisition_counters_confirmation_message">Permanently deletes all saved acquisitions and resets acquisition and session IDs. The alert log and alert settings will not be changed. To confirm, press and hold RESET ALL continuously for 2 seconds.</string>
+    <string name="reset_acquisition_counters_confirmation_message">Permanently delete all saved acquisitions and reset acquisition and session IDs. The alert log and alert settings remain unchanged. To confirm, press and hold RESET ALL continuously for 2 seconds.</string>
     <string name="reset_alert_counters_action">RESET ALERTS</string>
     <string name="reset_alert_counters_warning">Permanently deletes all recorded alerts and resets alert IDs.</string>
     <string name="reset_alert_counters_confirmation_title">Reset alerts?</string>
-    <string name="reset_alert_counters_confirmation_message">Permanently deletes all recorded alerts and resets alert IDs. Saved acquisitions and alert settings will not be changed. To confirm, press and hold RESET ALL continuously for 2 seconds.</string>
+    <string name="reset_alert_counters_confirmation_message">Permanently delete all recorded alerts and reset alert IDs. Saved acquisitions and alert settings remain unchanged. To confirm, press and hold RESET ALL continuously for 2 seconds.</string>
     <string name="reset_confirmation_action">RESET ALL</string>
     <string name="reset_counters_stop_auto">Stop automatic acquisition before resetting the counters.</string>
     <string name="acquisition_counters_reset_complete">Acquisition counters reset</string>
@@ -413,7 +413,7 @@
     <string name="import_database">IMPORT DATABASE</string>
     <string name="database_transfer_description">Export/restore the complete database with an encrypted ZIP backup.</string>
     <string name="import_database_dialog_title">Import the database?</string>
-    <string name="import_database_dialog_description">The records and sensor profiles on this phone will be replaced by those in the backup. The physical sensor will not be changed. Enter the ZIP password to continue.</string>
+    <string name="import_database_dialog_description">Replace the records and sensor profiles on this phone with those in the backup. The physical sensor remains unchanged. Enter the ZIP password to continue.</string>
     <string name="import_database_confirm">Import</string>
     <string name="import_database_failed">Unable to import the database. Check the password, archive and database version.</string>
     <string name="import_database_success">Database imported.</string>
@@ -436,7 +436,7 @@
     <string name="relative_spectral_index">Spectral relevance</string>
     <string name="relative_spectral_index_explanation">0–100 shows how strongly the acquired spectrum is concentrated in wavelengths weighted by this estimate. It describes spectral composition, not total intensity. It is not a percentage of damage and not a safety threshold.</string>
     <string name="delete_all_measurements_question">Delete all saved acquisitions?</string>
-    <string name="delete_all_measurements_warning">All saved acquisitions will be permanently deleted. To confirm, press and hold DELETE ALL continuously for 2 seconds.</string>
+    <string name="delete_all_measurements_warning">Permanently delete all saved acquisitions. To confirm, press and hold DELETE ALL continuously for 2 seconds.</string>
     <string name="delete_all">DELETE ALL</string>
     <plurals name="measurement_count_since">
         <item quantity="one">%1$d saved · since %2$s</item>
@@ -444,7 +444,7 @@
     </plurals>
     <string name="no_saved_measurements">No acquisitions saved.</string>
     <string name="delete_measurement_question">Delete this acquisition?</string>
-    <string name="delete_measurement_warning">This acquisition will be permanently deleted.</string>
+    <string name="delete_measurement_warning">Permanently delete this acquisition.</string>
     <string name="measurement_deleted">Acquisition deleted</string>
     <string name="measurements_deleted">Acquisitions deleted</string>
     <string name="delete">DELETE</string>
@@ -542,7 +542,7 @@
     <string name="session_chart_note">Session note</string>
     <string name="session_chart_total_acquisitions">Total acquisitions</string>
     <string name="delete_acquisition_session_question">Delete this session?</string>
-    <string name="delete_acquisition_session_warning">All acquisitions in this session will be permanently deleted.</string>
+    <string name="delete_acquisition_session_warning">Permanently delete all acquisitions in this session.</string>
     <string name="acquisition_session_deleted">Session deleted</string>
     <string name="alert_session_chart_empty">No data is available for this alert session.</string>
     <string name="alert_session_chart_unit">Value · %1$s</string>
@@ -562,10 +562,10 @@
     <string name="alert_session_detail_values">Value types</string>
     <string name="alert_session_detail_total">Total alerts</string>
     <string name="delete_alert_question">Delete this alert?</string>
-    <string name="delete_alert_warning">This recorded alert will be permanently deleted.</string>
+    <string name="delete_alert_warning">Permanently delete this recorded alert.</string>
     <string name="alert_deleted">Alert deleted</string>
     <string name="delete_alert_session_question">Delete this alert session?</string>
-    <string name="delete_alert_session_warning">All recorded alerts in this session will be permanently deleted.</string>
+    <string name="delete_alert_session_warning">Permanently delete all recorded alerts in this session.</string>
     <string name="alert_session_deleted">Alert session deleted</string>
     <string name="alert_chart_date">Recorded: %1$s</string>
     <string name="alert_chart_scale">Threshold comparison</string>
@@ -619,7 +619,7 @@
     <string name="offline_capacity_estimated_duration_unlimited">Estimated autonomy: unlimited</string>
     <string name="offline_capacity_conservative_hint">Conservative estimate: simultaneous threshold violations use one alert record per repeat interval.</string>
     <string name="offline_disconnection_description">The sensor connection was lost. This estimate combines the active automatic acquisition and alerts.</string>
-    <string name="offline_disconnection_recording_disabled">Offline autonomous recording is disabled. The sensor will not store new acquisitions or alerts until it reconnects.</string>
+    <string name="offline_disconnection_recording_disabled">Offline autonomous recording is disabled. The sensor does not store new acquisitions or alerts while disconnected.</string>
     <string name="offline_disconnection_estimate_unavailable">The latest sensor status does not contain enough information to estimate the remaining autonomy.</string>
     <string name="offline_duration_days_hours">%1$d d %2$d h</string>
     <string name="offline_duration_hours_minutes">%1$d h %2$d min</string>
@@ -741,7 +741,7 @@
     <string name="list_filter_no_results">No matching records.</string>
     <string name="list_filter_count">%1$d of %2$d displayed</string>
     <string name="list_filter_share_question">Share all displayed results?</string>
-    <string name="list_filter_share_warning">No records are selected. All records matching the current filters will be shared.</string>
+    <string name="list_filter_share_warning">No records are selected. Share all records matching the current filters.</string>
     <string name="settings_section_appearance">Appearance</string>
     <string name="settings_section_language_formats">Units</string>
     <string name="settings_section_sharing_export">Export</string>
@@ -757,11 +757,11 @@
     <string name="confirmation_question_suffix">?</string>
     <string name="threshold_alerts_sound_description_v2">Choose the feedback played by the app when a alert is recorded.</string>
     <string name="list_filter_export_question">Export all displayed results?</string>
-    <string name="list_filter_export_warning">No records are selected. All records matching the current filters will be exported.</string>
+    <string name="list_filter_export_warning">No records are selected. Export all records matching the current filters.</string>
     <string name="settings_include_sensitive_information">Include sensitive data</string>
-    <string name="settings_include_sensitive_information_description">Includes connection credentials and the sensor association, allowing it to be restored without USB. An encryption password will be required.</string>
+    <string name="settings_include_sensitive_information_description">Includes connection credentials and the sensor association, allowing it to be restored without USB. Requires an encryption password.</string>
     <string name="settings_encryption_password_title">Encryption password</string>
-    <string name="settings_encryption_password_description">Use at least 8 characters. You will need the same password to import the backup later.</string>
+    <string name="settings_encryption_password_description">Use at least 8 characters. Use the same password to import the backup later.</string>
     <string name="settings_encryption_password">Encryption password</string>
     <string name="settings_encryption_password_confirm">Confirm password</string>
     <string name="settings_encryption_password_too_short">Use at least %1$d characters.</string>
@@ -807,5 +807,5 @@
     <string name="alert_registration_count">Number of recordings</string>
     <string name="alert_configure_first">Configure at least one value before starting.</string>
     <string name="sensor_simulation_disable">Disable</string>
-    <string name="settings_import_confirmation_description">Settings contained in the selected files will replace the current ones.</string>
+    <string name="settings_import_confirmation_description">Replace the current settings with those contained in the selected files.</string>
 </resources>

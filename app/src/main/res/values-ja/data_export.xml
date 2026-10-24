@@ -56,7 +56,7 @@
     <string name="export_database_dialog_title">データベースをエクスポート</string>
     <string name="export_database_dialog_description">この端末に保存されているアプリのデータベース全体（保存済みの測定値とアラートを含む）をエクスポートします。</string>
     <string name="export_error_log_dialog_title">エラーログをエクスポート</string>
-    <string name="export_error_log_dialog_description">この端末に保存されているアプリのエラーログを技術ファイルとしてエクスポートします。保存済みの測定値や認証情報は含まれません。</string>
+    <string name="export_error_log_dialog_description">アプリのエラーログを技術ファイルとしてエクスポートします。保存済みの測定値や認証情報は含まれません。</string>
     <string name="export_diagnostic_dialog_title">診断レポートをエクスポート</string>
     <string name="export_diagnostic_dialog_description">センサーの診断レポートをエクスポートします。技術的なテスト結果は含まれますが、パスワードや認証情報は含まれません。</string>
     <string name="export_sensor_info_dialog_title">センサー情報をエクスポート</string>
@@ -76,4 +76,5 @@
     <string name="share_chart_file_count">PNGファイル: %1$d</string>
     <string name="share_readable_table_file_count">TXTファイル: %1$d</string>
     <string name="export_file_count">%1$sファイル: %2$d</string>
+    <string name="export_settings_description">選択したアプリとセンサーの設定をエクスポートします。</string>
 </resources>

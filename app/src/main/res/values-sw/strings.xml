@@ -11,8 +11,8 @@
     <string name="optional_note">Noti ya upataji</string>
     <string name="note_example">Noti ya upataji</string>
     <string name="single_acquisition">Upataji mmoja</string>
-    <string name="single_acquisition_ends_manual_session">Kipindi cha mwisho cha mwongozo kitaisha.</string>
-    <string name="automatic_start_ends_manual_session">Kipindi cha sasa cha mwongozo kitaisha.</string>
+    <string name="single_acquisition_ends_manual_session">Kipindi cha mwisho cha mwongozo kinaisha.</string>
+    <string name="automatic_start_ends_manual_session">Kipindi cha sasa cha mwongozo kinaisha.</string>
     <string name="interrupt_manual_session_title">Ungependa kukomesha kipindi cha sasa cha mwongozo?</string>
     <string name="interrupt_manual_session_message">Ili kuanzisha kipindi cha upataji wa kiotomatiki, lazima usitishe kipindi cha upataji wa programu mwenyewe kinachoendelea sasa.</string>
     <string name="interrupt_manual_session_action">SIMAMISHA</string>
@@ -79,12 +79,12 @@
         <item quantity="one">(upataji %1$d kwa aina %2$d)</item>
         <item quantity="other">(upataji %1$d kwa aina %2$d)</item>
     </plurals>
-    <string name="session_variant_chart_files_info">Faili %1$d za PNG zitatengenezwa, moja kwa kila aina.</string>
+    <string name="session_variant_chart_files_info">Faili %1$d za PNG zinatengenezwa, moja kwa kila aina.</string>
     <string name="share">SHIRIKI</string>
     <string name="delete_selected_measurements_question">Ungependa kufuta upataji uliochaguliwa?</string>
     <plurals name="delete_selected_measurements_warning">
-        <item quantity="one">Upataji uliochaguliwa wa %1$d utafutwa kabisa.</item>
-        <item quantity="other">Bidhaa zilizochaguliwa za %1$d zitafutwa kabisa.</item>
+        <item quantity="one">Upataji uliochaguliwa wa %1$d unafutwa kabisa.</item>
+        <item quantity="other">Bidhaa zilizochaguliwa za %1$d zinafutwa kabisa.</item>
     </plurals>
     <string name="acquisition_session_id_label">Kitambulisho cha kupata / kipindi</string>
     <string name="session_date_duration_events_label">Tarehe na wakati</string>
@@ -135,7 +135,7 @@
     <string name="automatic_stopping">Inasimamisha upataji kiotomatiki...</string>
     <string name="automatic_stop_failed">Imeshindwa kusimamisha upataji wa kiotomatiki. Angalia muunganisho wa kitambuzi kisha ujaribu tena.</string>
     <string name="stop_automatic_confirmation_title">Ungependa kuacha upataji wa kiotomatiki?</string>
-    <string name="stop_automatic_confirmation_message">Upataji wa sasa wa kiotomatiki utasimamishwa. Ungependa kuendelea?</string>
+    <string name="stop_automatic_confirmation_message">Upataji wa sasa wa kiotomatiki unasimamishwa. Ungependa kuendelea?</string>
     <string name="continue_acquisition">ENDELEA</string>
     <string name="acquisition_parameters">Mipangilio</string>
     <string name="connectivity">Muunganisho</string>
@@ -180,11 +180,11 @@
     <string name="sensor_source_disabled_hint">Chanzo kilichozimwa kinaweza kuwezeshwa tena kupitia muunganisho mwingine unaotumika wa pasiwaya. Ikiwa zote mbili zimezimwa, unganisha kitambuzi kwa USB.</string>
     <string name="sensor_power_off">ZIMA SENSOR</string>
     <string name="sensor_power_off_title">Ungependa kuzima kitambuzi?</string>
-    <string name="sensor_power_off_message">Sensor itaingia kwenye kuzima kwa nguvu ya chini na haiwezi kuwashwa upya kutoka kwa programu. Ili kuiwasha tena, bonyeza EN/SET UPYA au uondoe na uunganishe tena nishati yake. Ili kuthibitisha, bonyeza na ushikilie ZIMZIMA KWA sekunde 5.</string>
+    <string name="sensor_power_off_message">Sensor inaingia kwenye kuzima kwa nguvu ya chini na haiwezi kuwashwa upya kutoka kwa programu. Ili kuiwasha tena, bonyeza EN/SET UPYA au uondoe na uunganishe tena nishati yake. Ili kuthibitisha, bonyeza na ushikilie ZIMZIMA KWA sekunde 5.</string>
     <string name="sensor_power_off_confirm">UMEZIMWA</string>
     <string name="sensor_disassociate_action">TENGANISHA NA PROGRAMU</string>
     <string name="sensor_disassociate_title">Utenganishe kihisi?</string>
-    <string name="sensor_disassociate_message">Kutenganisha huondoa kihisi kwenye orodha ya kuchagua bila kufuta jina au rekodi zilizohifadhiwa. Unaweza kukihusisha tena kwa USB wakati wowote. Kihisi hakitabadilishwa. Ili kuthibitisha, bonyeza na ushikilie TENGANISHA kwa sekunde 5.</string>
+    <string name="sensor_disassociate_message">Kutenganisha huondoa kihisi kwenye orodha ya kuchagua bila kufuta jina au rekodi zilizohifadhiwa. Unaweza kukihusisha tena kwa USB wakati wowote. Kihisi hakibadilishwi. Ili kuthibitisha, bonyeza na ushikilie TENGANISHA kwa sekunde 5.</string>
     <string name="sensor_selection_failed">Imeshindikana kubadilisha kihisi. Jaribu tena.</string>
     <string name="sensor_associate_action">Husisha kihisi</string>
     <string name="sensor_associate_usb_hint">Unganisha kihisi kipya kwa USB. Vihisi vilivyohusishwa vinabaki kwenye orodha.</string>
@@ -195,7 +195,7 @@
     <string name="expand_all_settings_content_description">Panua mipangilio yote</string>
     <string name="collapse_all_settings_content_description">Kunja mipangilio yote</string>
     <string name="restore_defaults_title">Ungependa kurejesha mipangilio chaguomsingi?</string>
-    <string name="restore_defaults_message">Mipangilio yote ya programu na vitambuzi itarejeshwa kwa thamani zake chaguomsingi. Upataji wote uliohifadhiwa, arifa zilizorekodiwa na kumbukumbu za hitilafu zitafutwa kabisa. Kisha sensor itazima. Ili kuthibitisha, bonyeza na ushikilie REJESHA YOTE mfululizo kwa sekunde 10.</string>
+    <string name="restore_defaults_message">Mipangilio yote ya programu na vitambuzi inarejeshwa kwa thamani zake chaguomsingi. Upataji wote uliohifadhiwa, arifa zilizorekodiwa na kumbukumbu za hitilafu zinafutwa kabisa. Kisha sensor inazima. Ili kuthibitisha, bonyeza na ushikilie REJESHA YOTE mfululizo kwa sekunde 10.</string>
     <string name="restore_defaults_confirm">REJESHA YOTE</string>
     <string name="restore_defaults_failed">Urejeshaji kamili haukuweza kufanywa. Angalia muunganisho wa kitambuzi kisha ujaribu tena.</string>
     <string name="sensor_status_no_sensor">Haijaunganishwa</string>
@@ -269,18 +269,18 @@
     <string name="invalid_threshold_alert">Tumia vikomo visivyo hasi na uweke muda wa kurudia kati ya sekunde 1 na saa 24.</string>
     <string name="stop_all_value_alerts_accessibility">Simamisha kipindi cha arifa</string>
     <string name="stop_all_value_alerts_title">Ungependa kusimamisha kipindi cha arifa?</string>
-    <string name="stop_all_value_alerts_message">Kipindi cha sasa cha arifa kitaisha. Arifa zilizosanidiwa na zilizorekodiwa zitahifadhiwa.</string>
+    <string name="stop_all_value_alerts_message">Kipindi cha sasa cha arifa kinaisha. Arifa zilizosanidiwa na zilizorekodiwa zinahifadhiwa.</string>
     <string name="stop_all_value_alerts_action">@string/stop</string>
     <string name="continue_alert_monitoring">ENDELEA</string>
     <string name="start_value_alert_session_accessibility">Anza kipindi cha tahadhari</string>
     <string name="start_value_alert_session_title">Anzisha kipindi cha tahadhari</string>
-    <string name="start_value_alert_session_message">Ufuatiliaji utaanza kutumia tahadhari zilizowekwa. Unaweza kuongeza au kuondoa arifa baadaye bila kuanzisha kipindi kipya.</string>
+    <string name="start_value_alert_session_message">Ufuatiliaji unaanza kutumia tahadhari zilizowekwa. Unaweza kuongeza au kuondoa arifa baadaye bila kuanzisha kipindi kipya.</string>
     <string name="start_value_alert_session_action">ANZA</string>
     <string name="threshold_rules_reset">WEKA UPYA ARIFA ZINAZOFIKA</string>
     <string name="threshold_rules_reset_confirm_action">WEKA UPYA YOTE</string>
     <string name="threshold_rules_reset_complete">Arifa zinazotumika zimewekwa upya</string>
     <string name="threshold_rules_reset_confirmation_title">Ungependa kuweka upya arifa zote zinazotumika?</string>
-    <string name="threshold_rules_reset_confirmation_message">Arifa zote zinazotumika zitawekwa upya. Ili kuthibitisha, bonyeza na ushikilie WEKA UPYA YOTE mfululizo kwa sekunde 2.</string>
+    <string name="threshold_rules_reset_confirmation_message">Arifa zote zinazotumika zinawekwa upya. Ili kuthibitisha, bonyeza na ushikilie WEKA UPYA YOTE mfululizo kwa sekunde 2.</string>
     <string name="threshold_bell_configure">Sanidi arifa za kikundi hiki</string>
     <string name="threshold_bell_active">Arifa moja au zaidi amilifu katika kikundi hiki</string>
     <string name="threshold_group_editor_title">Tahadhari za\n%1$s</string>
@@ -303,8 +303,8 @@
     <string name="select_alerts">Chagua arifa</string>
     <string name="delete_selected_alerts_question">Je, ungependa kufuta arifa zilizochaguliwa?</string>
     <plurals name="delete_selected_alerts_warning">
-        <item quantity="one">Tahadhari iliyochaguliwa itafutwa kabisa.</item>
-        <item quantity="other">Arifa za %1$d zilizochaguliwa zitafutwa kabisa.</item>
+        <item quantity="one">Tahadhari iliyochaguliwa inafutwa kabisa.</item>
+        <item quantity="other">Arifa za %1$d zilizochaguliwa zinafutwa kabisa.</item>
     </plurals>
     <string name="threshold_alerts_deleted">Arifa zimefutwa</string>
     <plurals name="threshold_alert_count_since">
@@ -313,7 +313,7 @@
     </plurals>
     <string name="threshold_alert_export_subject">Rekodi ya tahadhari ya Uvir</string>
     <string name="threshold_alert_log_delete_title">Je, ungependa kufuta arifa zote zilizorekodiwa?</string>
-    <string name="threshold_alert_log_delete_warning">Arifa zote zilizorekodiwa zitafutwa kabisa. Ili kuthibitisha, bonyeza na ushikilie FUTA YOTE mfululizo kwa sekunde 2.</string>
+    <string name="threshold_alert_log_delete_warning">Arifa zote zilizorekodiwa zinafutwa kabisa. Ili kuthibitisha, bonyeza na ushikilie FUTA YOTE mfululizo kwa sekunde 2.</string>
     <string name="threshold_alert_log_delete_all">FUTA YOTE</string>
     <string name="threshold_alert_log_deleted">Arifa zimefutwa</string>
     <string name="threshold_log_violation_above">%1$s: %2$s µW/cm² ≥ %3$s µW/cm²</string>
@@ -367,16 +367,16 @@
     <string name="reset_all_records_action">WEKA UPYA KAUNTI</string>
     <string name="reset_all_records_warning">Hufuta upataji wote uliohifadhiwa na arifa zilizorekodiwa, kisha kuweka upya vitambulisho vyao na vitambulisho vya kipindi.</string>
     <string name="reset_all_records_confirmation_title">Ungependa kuweka upya vihesabio vyote?</string>
-    <string name="reset_all_records_confirmation_message">Upataji wote uliohifadhiwa na arifa zilizorekodiwa zitafutwa kabisa. Vitambulisho vyao na vitambulisho vyao vya kipindi vitaanza upya tangu mwanzo. Ili kuthibitisha, bonyeza na ushikilie WEKA UPYA YOTE mfululizo kwa sekunde 5.</string>
+    <string name="reset_all_records_confirmation_message">Upataji wote uliohifadhiwa na arifa zilizorekodiwa zinafutwa kabisa. Vitambulisho vyao na vitambulisho vyao vya kipindi vinaanza upya tangu mwanzo. Ili kuthibitisha, bonyeza na ushikilie WEKA UPYA YOTE mfululizo kwa sekunde 5.</string>
     <string name="all_counters_reset_complete">Rekodi na vihesabio huwekwa upya</string>
     <string name="reset_acquisition_counters_action">WEKA UPYA UPATIKANAJI</string>
     <string name="reset_acquisition_counters_warning">Hufuta kabisa upataji wote uliohifadhiwa na kuweka upya upataji na vitambulisho vya kipindi.</string>
     <string name="reset_acquisition_counters_confirmation_title">Ungependa kuweka upya upataji?</string>
-    <string name="reset_acquisition_counters_confirmation_message">Hufuta kabisa upataji wote uliohifadhiwa na kuweka upya upataji na vitambulisho vya kipindi. Logi ya arifa na mipangilio ya arifa haitabadilishwa. Ili kuthibitisha, bonyeza na ushikilie WEKA UPYA YOTE mfululizo kwa sekunde 2.</string>
+    <string name="reset_acquisition_counters_confirmation_message">Hufuta kabisa upataji wote uliohifadhiwa na kuweka upya upataji na vitambulisho vya kipindi. Logi ya arifa na mipangilio ya arifa haibadilishwi. Ili kuthibitisha, bonyeza na ushikilie WEKA UPYA YOTE mfululizo kwa sekunde 2.</string>
     <string name="reset_alert_counters_action">WEKA UPYA ARIFA</string>
     <string name="reset_alert_counters_warning">Hufuta kabisa arifa zote zilizorekodiwa na kuweka upya vitambulisho vya arifa.</string>
     <string name="reset_alert_counters_confirmation_title">Ungependa kuweka arifa upya?</string>
-    <string name="reset_alert_counters_confirmation_message">Hufuta kabisa arifa zote zilizorekodiwa na kuweka upya vitambulisho vya arifa. Upataji uliohifadhiwa na mipangilio ya arifa haitabadilishwa. Ili kuthibitisha, bonyeza na ushikilie WEKA UPYA YOTE mfululizo kwa sekunde 2.</string>
+    <string name="reset_alert_counters_confirmation_message">Hufuta kabisa arifa zote zilizorekodiwa na kuweka upya vitambulisho vya arifa. Upataji uliohifadhiwa na mipangilio ya arifa haibadilishwi. Ili kuthibitisha, bonyeza na ushikilie WEKA UPYA YOTE mfululizo kwa sekunde 2.</string>
     <string name="reset_confirmation_action">WEKA UPYA YOTE</string>
     <string name="reset_counters_stop_auto">Simamisha upataji kiotomatiki kabla ya kuweka upya vihesabio.</string>
     <string name="acquisition_counters_reset_complete">Kaunta za upataji zimewekwa upya</string>
@@ -385,7 +385,7 @@
     <string name="import_database">LETA HIFADHIDATA</string>
     <string name="database_transfer_description">Hamisha/rejesha hifadhidata yote kwa nakala ya ZIP iliyosimbwa.</string>
     <string name="import_database_dialog_title">Kuleta hifadhidata?</string>
-    <string name="import_database_dialog_description">Rekodi na wasifu wa sensa kwenye simu hii zitabadilishwa na zile za nakala rudufu. Sensa yenyewe haitabadilishwa. Weka nenosiri la ZIP ili kuendelea.</string>
+    <string name="import_database_dialog_description">Rekodi na wasifu wa sensa kwenye simu hii zinabadilishwa na zile za nakala rudufu. Sensa yenyewe haibadilishwi. Weka nenosiri la ZIP ili kuendelea.</string>
     <string name="import_database_confirm">Leta</string>
     <string name="import_database_failed">Imeshindikana kuleta hifadhidata. Kagua nenosiri, faili ya ZIP na toleo la hifadhidata.</string>
     <string name="import_database_success">Hifadhidata imeletwa.</string>
@@ -408,7 +408,7 @@
     <string name="relative_spectral_index">Umuhimu wa Spectral</string>
     <string name="relative_spectral_index_explanation">0–100 inaonyesha jinsi wigo uliopatikana umewekwa kwa nguvu katika urefu wa mawimbi uliopimwa na makadirio haya. Inaelezea utungaji wa spectral, sio nguvu kamili. Sio asilimia ya uharibifu na sio kizingiti cha usalama.</string>
     <string name="delete_all_measurements_question">Ungependa kufuta upataji wote uliohifadhiwa?</string>
-    <string name="delete_all_measurements_warning">Upataji wote uliohifadhiwa utafutwa kabisa. Ili kuthibitisha, bonyeza na ushikilie FUTA YOTE mfululizo kwa sekunde 2.</string>
+    <string name="delete_all_measurements_warning">Upataji wote uliohifadhiwa unafutwa kabisa. Ili kuthibitisha, bonyeza na ushikilie FUTA YOTE mfululizo kwa sekunde 2.</string>
     <string name="delete_all">FUTA YOTE</string>
     <plurals name="measurement_count_since">
         <item quantity="one">%1$d imehifadhiwa · tangu %2$s</item>
@@ -416,7 +416,7 @@
     </plurals>
     <string name="no_saved_measurements">Hakuna upataji uliohifadhiwa.</string>
     <string name="delete_measurement_question">Ungependa kufuta upataji huu?</string>
-    <string name="delete_measurement_warning">Upataji huu utafutwa kabisa.</string>
+    <string name="delete_measurement_warning">Upataji huu unafutwa kabisa.</string>
     <string name="measurement_deleted">Upataji umefutwa</string>
     <string name="measurements_deleted">Upataji umefutwa</string>
     <string name="delete">FUTA</string>
@@ -514,7 +514,7 @@
     <string name="session_chart_note">Ujumbe wa kikao</string>
     <string name="session_chart_total_acquisitions">Jumla ya upataji</string>
     <string name="delete_acquisition_session_question">Ungependa kufuta kipindi hiki?</string>
-    <string name="delete_acquisition_session_warning">Upataji wote katika kipindi hiki utafutwa kabisa.</string>
+    <string name="delete_acquisition_session_warning">Upataji wote katika kipindi hiki unafutwa kabisa.</string>
     <string name="acquisition_session_deleted">Kipindi kimefutwa</string>
     <string name="alert_session_chart_empty">Hakuna data inayopatikana kwa kipindi hiki cha arifa.</string>
     <string name="alert_session_chart_unit">Thamani · %1$s</string>
@@ -534,10 +534,10 @@
     <string name="alert_session_detail_values">Aina za thamani</string>
     <string name="alert_session_detail_total">Jumla ya tahadhari</string>
     <string name="delete_alert_question">Je, ungependa kufuta arifa hii?</string>
-    <string name="delete_alert_warning">Arifa hii iliyorekodiwa itafutwa kabisa.</string>
+    <string name="delete_alert_warning">Arifa hii iliyorekodiwa inafutwa kabisa.</string>
     <string name="alert_deleted">Tahadhari imefutwa</string>
     <string name="delete_alert_session_question">Je, ungependa kufuta kipindi hiki cha arifa?</string>
-    <string name="delete_alert_session_warning">Arifa zote zilizorekodiwa katika kipindi hiki zitafutwa kabisa.</string>
+    <string name="delete_alert_session_warning">Arifa zote zilizorekodiwa katika kipindi hiki zinafutwa kabisa.</string>
     <string name="alert_session_deleted">Kipindi cha tahadhari kimefutwa</string>
     <string name="alert_chart_date">Imerekodiwa: %1$s</string>
     <string name="alert_chart_scale">Ulinganisho wa kizingiti</string>
@@ -591,7 +591,7 @@
     <string name="offline_capacity_estimated_duration_unlimited">Kadirio la uhuru: usio na kikomo</string>
     <string name="offline_capacity_conservative_hint">Makadirio ya kihafidhina: ukiukaji wa kiwango cha juu kwa wakati mmoja hutumia rekodi moja ya arifa kwa muda wa kurudia.</string>
     <string name="offline_disconnection_description">Muunganisho wa kitambuzi umepotea. Kadirio hili linachanganya upataji wa kiotomatiki unaotumika na tahadhari.</string>
-    <string name="offline_disconnection_recording_disabled">Kurekodi kwa uhuru nje ya mtandao kumezimwa. Kihisi hakitahifadhi upataji mpya au arifa hadi kitakapounganishwa tena.</string>
+    <string name="offline_disconnection_recording_disabled">Kurekodi kwa uhuru nje ya mtandao kumezimwa. Kihisi hakihifadhi upataji mpya au arifa hadi kiunganishwe tena.</string>
     <string name="offline_disconnection_estimate_unavailable">Hali ya hivi punde ya kihisi haina maelezo ya kutosha kukadiria uhuru uliosalia.</string>
     <string name="offline_duration_days_hours">%1$d d %2$d h</string>
     <string name="offline_duration_hours_minutes">%1$d h %2$d dakika</string>
@@ -680,13 +680,13 @@
     <string name="restore_app_settings_confirm">WEKA UPYA</string>
     <string name="restore_app_settings_failed">Programu haikuweza kuwekwa upya.</string>
     <string name="restore_app_settings_inline_warning">Hufuta mipangilio yote na data yote iliyohifadhiwa kwenye programu. Kihisi na data iliyohifadhiwa humo havibadiliki.</string>
-    <string name="restore_app_settings_message">Mipangilio yote ya programu ya Uvir na data iliyohifadhiwa kwenye simu itafutwa, ikijumuisha vipimo, tahadhari zilizorekodiwa, kumbukumbu za hitilafu, vihesabu, wasifu wa vihisi na taarifa za muunganisho zilizohifadhiwa. Kihisi hakitabadilishwa wala kuzimwa. Ili kuthibitisha, shikilia «WEKA UPYA» kwa sekunde 5.</string>
+    <string name="restore_app_settings_message">Mipangilio yote ya programu ya Uvir na data iliyohifadhiwa kwenye simu inafutwa, ikijumuisha vipimo, tahadhari zilizorekodiwa, kumbukumbu za hitilafu, vihesabu, wasifu wa vihisi na taarifa za muunganisho zilizohifadhiwa. Kihisi hakibadilishwi wala kuzimwa. Ili kuthibitisha, shikilia «WEKA UPYA» kwa sekunde 5.</string>
     <string name="restore_app_settings_title">Uweke upya programu?</string>
     <string name="sensor_restore_action">WEKA UPYA KIHISI</string>
     <string name="sensor_restore_confirm">WEKA UPYA</string>
     <string name="sensor_restore_failed">Kihisi hakikuweza kuwekwa upya. Kagua muunganisho na ujaribu tena.</string>
     <string name="sensor_restore_inline_warning">Hufuta data isiyosawazishwa kwenye kihisi, huweka upya usanidi na taarifa zake za muunganisho, kisha hukizima.</string>
-    <string name="sensor_restore_message">Kihisi pekee ndicho kitakachowekwa upya. Mipangilio na taarifa zake za muunganisho zitarudi kwenye chaguo-msingi; vipimo, tahadhari na hitilafu zisizosawazishwa zilizohifadhiwa humo zitafutwa, kisha kihisi kitazimwa. Mipangilio ya programu na rekodi zilizohifadhiwa tayari kwenye Uvir hazitabadilika. Ili kuthibitisha, shikilia «WEKA UPYA» kwa sekunde 5.</string>
+    <string name="sensor_restore_message">Kihisi pekee ndicho kinachowekwa upya. Mipangilio na taarifa zake za muunganisho zinarudi kwenye chaguo-msingi; vipimo, tahadhari na hitilafu zisizosawazishwa zilizohifadhiwa humo zinafutwa, kisha kihisi kinazimwa. Mipangilio ya programu na rekodi zilizohifadhiwa tayari kwenye Uvir hazibadiliki. Ili kuthibitisha, shikilia «WEKA UPYA» kwa sekunde 5.</string>
     <string name="sensor_restore_title">Uweke upya kihisi?</string>
     <string name="sensor_usb_identity_mismatch">Kihisi cha USB hakijaidhinishwa. Kihisi tofauti tayari kimehusishwa na programu.</string>
     <string name="note_and_sensor">Hali, kihisi na mengine</string>
@@ -731,7 +731,7 @@
     <string name="list_filter_no_results">Hakuna rekodi zinazolingana na vichujio hivi.</string>
     <string name="list_filter_count">%1$d kati ya %2$d zimeonyeshwa</string>
     <string name="list_filter_share_question">Shiriki matokeo yote yaliyoonyeshwa?</string>
-    <string name="list_filter_share_warning">Hakuna rekodi zilizochaguliwa. Rekodi zote zinazolingana na vichujio vya sasa zitashirikiwa.</string>
+    <string name="list_filter_share_warning">Hakuna rekodi zilizochaguliwa. Rekodi zote zinazolingana na vichujio vya sasa zinashirikiwa.</string>
     <string name="settings_section_appearance">Mwonekano</string>
     <string name="settings_section_language_formats">Vipimo</string>
     <string name="settings_section_sharing_export">Hamisha</string>
@@ -754,11 +754,11 @@
     <string name="confirmation_question_suffix">?</string>
     <string name="threshold_alerts_sound_description_v2">Chagua ishara inayotolewa na programu wakati arifa inarekodiwa.</string>
     <string name="list_filter_export_question">Hamisha matokeo yote yanayoonekana?</string>
-    <string name="list_filter_export_warning">Hakuna rekodi iliyochaguliwa. Rekodi zote zinazolingana na vichujio vya sasa zitahamishwa.</string>
+    <string name="list_filter_export_warning">Hakuna rekodi iliyochaguliwa. Rekodi zote zinazolingana na vichujio vya sasa zinahamishwa.</string>
     <string name="settings_include_sensitive_information">Jumuisha data nyeti</string>
-    <string name="settings_include_sensitive_information_description">Inajumuisha vitambulisho vya muunganisho na uhusishaji wa sensa, ili iweze kurejeshwa bila USB. Nenosiri la usimbaji litaombwa.</string>
+    <string name="settings_include_sensitive_information_description">Inajumuisha vitambulisho vya muunganisho na uhusishaji wa sensa, ili iweze kurejeshwa bila USB. Nenosiri la usimbaji linaombwa.</string>
     <string name="settings_encryption_password_title">Nenosiri la usimbaji</string>
-    <string name="settings_encryption_password_description">Tumia angalau herufi 8. Utahitaji nenosiri hilo hilo kuingiza nakala rudufu baadaye.</string>
+    <string name="settings_encryption_password_description">Tumia angalau herufi 8. Unahitaji nenosiri hilo hilo kuingiza nakala rudufu baadaye.</string>
     <string name="settings_encryption_password">Nenosiri la usimbaji</string>
     <string name="settings_encryption_password_confirm">Thibitisha nenosiri</string>
     <string name="settings_encryption_password_too_short">Tumia angalau herufi %1$d.</string>
@@ -804,5 +804,5 @@
     <string name="alert_registration_count">Idadi ya rekodi</string>
     <string name="alert_configure_first">Sanidi angalau thamani moja kabla ya kuanza.</string>
     <string name="sensor_simulation_disable">Zima</string>
-    <string name="settings_import_confirmation_description">Mipangilio katika faili zilizochaguliwa itachukua nafasi ya mipangilio ya sasa.</string>
+    <string name="settings_import_confirmation_description">Mipangilio katika faili zilizochaguliwa inachukua nafasi ya mipangilio ya sasa.</string>
 </resources>

@@ -54,13 +54,13 @@
     <string name="export_format_preview_heading">Vorschau</string>
     <string name="export_format_profile_summary">Sprache: %1$s · Zahlen: %2$s · Datum: %3$s · Uhrzeit: %4$s · Bestrahlungsstärke: %5$s</string>
     <string name="export_database_dialog_title">Die Datenbank exportieren</string>
-    <string name="export_database_dialog_description">Die gesamte auf diesem Smartphone gespeicherte App-Datenbank wird exportiert, einschließlich gespeicherter Messungen und Wertwarnungen.</string>
+    <string name="export_database_dialog_description">Exportiere die gesamte auf diesem Smartphone gespeicherte App-Datenbank einschließlich gespeicherter Erfassungen und Warnungen.</string>
     <string name="export_error_log_dialog_title">Fehlerprotokoll exportieren</string>
-    <string name="export_error_log_dialog_description">Das auf diesem Smartphone gespeicherte Fehlerprotokoll der App wird als technische Datei exportiert. Gespeicherte Messungen und Zugangsdaten sind nicht enthalten.</string>
+    <string name="export_error_log_dialog_description">Exportiere das Fehlerprotokoll der App als technische Datei. Gespeicherte Erfassungen und Zugangsdaten sind nicht enthalten.</string>
     <string name="export_diagnostic_dialog_title">Diagnosebericht exportieren</string>
-    <string name="export_diagnostic_dialog_description">Der Diagnosebericht des Sensors wird exportiert. Er enthält technische Testergebnisse, jedoch keine Passwörter oder Zugangsdaten.</string>
+    <string name="export_diagnostic_dialog_description">Exportiere den Diagnosebericht des Sensors. Er enthält technische Testergebnisse, jedoch keine Passwörter oder Zugangsdaten.</string>
     <string name="export_sensor_info_dialog_title">Sensorinformationen exportieren</string>
-    <string name="export_sensor_info_dialog_description">Alle Informationen des Sensors werden als Textdatei exportiert.</string>
+    <string name="export_sensor_info_dialog_description">Exportiere alle Informationen des Sensors als Textdatei.</string>
     <string name="export_all_measurements_question">Alle gespeicherten Messungen exportieren?</string>
     <string name="export_all_measurements_warning">Es sind keine Messungen ausgewählt, daher werden alle gespeicherten Messungen exportiert.</string>
     <string name="export_all_alerts_question">Alle aufgezeichneten Alarme exportieren?</string>
@@ -76,4 +76,5 @@
     <string name="share_chart_file_count">PNG-Dateien: %1$d</string>
     <string name="share_readable_table_file_count">TXT-Dateien: %1$d</string>
     <string name="export_file_count">%1$s-Dateien: %2$d</string>
+    <string name="export_settings_description">Exportiere die ausgewählten App- und Sensoreinstellungen.</string>
 </resources>

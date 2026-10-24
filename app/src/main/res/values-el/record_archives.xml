@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="record_archive_title">Μετρήσεις και ειδοποιήσεις</string>
-    <string name="record_archive_description">Εξαγωγή/εισαγωγή μετρήσεων και ειδοποιήσεων, μαζί με τις συνεδρίες τους.</string>
-    <string name="record_archive_export_description">Εξαγάγετε όλες τις αποθηκευμένες εγγραφές αυτού του τύπου, μαζί με τις συνεδρίες, σε αρχείο UVIR χωρίς κωδικό πρόσβασης.</string>
-    <string name="record_archive_import_description">Τα δεδομένα θα προστεθούν στο αρχείο. Οι υπάρχουσες εγγραφές παραλείπονται. Οι άγνωστοι αισθητήρες εμφανίζονται με το αναγνωριστικό υλικού μέχρι να συσχετιστούν.</string>
+    <string name="record_archive_description">Εξαγωγή/εισαγωγή μετρήσεων ή ειδοποιήσεων σε ένα αρχείο, μαζί με τις συνεδρίες τους.</string>
+    <string name="record_archive_export_description">Εξαγάγετε όλες τις εγγραφές αυτού του τύπου, μαζί με τις συνεδρίες, σε ένα αρχείο.</string>
+    <string name="record_archive_import_description">Τα δεδομένα προστίθενται στο αρχείο. Οι υπάρχουσες εγγραφές παραλείπονται. Οι άγνωστοι αισθητήρες εμφανίζονται με το αναγνωριστικό υλικού μέχρι να συσχετιστούν.</string>
     <string name="record_archive_import_summary">Εγγραφές: %1$d · Συνεδρίες: %2$d</string>
     <string name="record_archive_import_success">Εισήχθησαν: %1$d · Ήδη υπάρχουν: %2$d</string>
     <string name="record_archive_failed">Δεν ήταν δυνατή η μεταφορά εγγραφών. Ελέγξτε το αρχείο και τον τύπο δεδομένων.</string>
+    <string name="record_archive_export_acquisitions_title">Εξαγωγή μετρήσεων</string>
+    <string name="record_archive_export_alerts_title">Εξαγωγή ειδοποιήσεων</string>
 </resources>

@@ -13,7 +13,7 @@
     <string name="export_sensor_settings_description">כיול, דגימה ואפשרויות פעולה. פרטי גישה וכתובות רשת אינם נכללים.</string>
     <string name="share_measurements">שתף רכישות</string>
     <string name="share_all_measurements_question">לשתף את כל הרכישות שנשמרו?</string>
-    <string name="share_all_measurements_warning">לא נבחרו רכישות, לכן כל הרכישות שנשמרו ישותפו.</string>
+    <string name="share_all_measurements_warning">לא נבחרו רכישות, לכן כל הרכישות שנשמרו משותפים.</string>
     <string name="share_as_csv">גיליון אלקטרוני (CSV)</string>
     <string name="share_as_readable_table">טבלה קריאה (TXT)</string>
     <string name="share_readable_table_by_acquisition">לפי רכישה</string>
@@ -41,7 +41,7 @@
     <string name="share_subject">רכישות Uvir</string>
     <string name="share_error">לא ניתן לשתף את הרכישות.</string>
     <string name="share_all_alerts_question">לשתף את כל ההתראות שנרשמו?</string>
-    <string name="share_all_alerts_warning">לא נבחרה התראה, ולכן כל ההתראות שנרשמו ישותפו.</string>
+    <string name="share_all_alerts_warning">לא נבחרה התראה, ולכן כל ההתראות שנרשמו משותפים.</string>
     <string name="export_database_title">ייצוא מסד נתונים</string>
     <string name="export_database">ייצוא מסד נתונים</string>
     <string name="export_database_subject">מסד נתונים Uvir</string>
@@ -54,17 +54,17 @@
     <string name="export_format_preview_heading">תצוגה מקדימה</string>
     <string name="export_format_profile_summary">שפה: %1$s · מספרים: %2$s · תאריך: %3$s · שעה: %4$s · עוצמת קרינה: %5$s</string>
     <string name="export_database_dialog_title">ייצוא מסד הנתונים</string>
-    <string name="export_database_dialog_description">כל מסד הנתונים של האפליקציה השמור בטלפון זה ייוצא, כולל מדידות והתראות שמורות.</string>
+    <string name="export_database_dialog_description">ייצאו את כל מסד הנתונים של האפליקציה השמור בטלפון זה, כולל מדידות והתראות שמורות.</string>
     <string name="export_error_log_dialog_title">ייצוא יומן השגיאות</string>
-    <string name="export_error_log_dialog_description">יומן השגיאות של האפליקציה השמור בטלפון זה ייוצא כקובץ טכני. מדידות שמורות ופרטי גישה אינם נכללים.</string>
+    <string name="export_error_log_dialog_description">ייצאו את יומן השגיאות של האפליקציה כקובץ טכני. מדידות שמורות ופרטי גישה אינם נכללים.</string>
     <string name="export_diagnostic_dialog_title">ייצוא דוח האבחון</string>
-    <string name="export_diagnostic_dialog_description">דוח האבחון של החיישן ייוצא. הוא מכיל תוצאות בדיקה טכניות, אך לא סיסמאות או פרטי גישה.</string>
+    <string name="export_diagnostic_dialog_description">ייצאו את דוח האבחון של החיישן. הוא מכיל תוצאות בדיקה טכניות, אך לא סיסמאות או פרטי גישה.</string>
     <string name="export_sensor_info_dialog_title">ייצוא פרטי החיישן</string>
-    <string name="export_sensor_info_dialog_description">כל המידע על החיישן ייוצא כקובץ טקסט.</string>
+    <string name="export_sensor_info_dialog_description">ייצאו את כל המידע על החיישן כקובץ טקסט.</string>
     <string name="export_all_measurements_question">לייצא את כל המדידות השמורות?</string>
-    <string name="export_all_measurements_warning">לא נבחרו מדידות, ולכן כל המדידות השמורות ייוצאו.</string>
+    <string name="export_all_measurements_warning">לא נבחרו מדידות, ולכן כל המדידות השמורות מיוצאים.</string>
     <string name="export_all_alerts_question">לייצא את כל ההתראות שנרשמו?</string>
-    <string name="export_all_alerts_warning">לא נבחרו התראות, ולכן כל ההתראות שנרשמו ייוצאו.</string>
+    <string name="export_all_alerts_warning">לא נבחרו התראות, ולכן כל ההתראות שנרשמו מיוצאים.</string>
     <string name="export_all">ייצוא הכול</string>
     <string name="export_sensor_settings_description_complete">כיול, דגימה, אפשרויות הפעלה והגדרות חיבור.</string>
     <string name="export_variant_count_label">מספר וריאציות</string>
@@ -76,4 +76,5 @@
     <string name="share_chart_file_count">קובצי PNG: %1$d</string>
     <string name="share_readable_table_file_count">קובצי TXT: %1$d</string>
     <string name="export_file_count">קובצי %1$s: %2$d</string>
+    <string name="export_settings_description">ייצאו את ההגדרות שנבחרו עבור האפליקציה והחיישנים.</string>
 </resources>

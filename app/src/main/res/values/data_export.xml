@@ -13,7 +13,7 @@
     <string name="export_sensor_settings_description">Calibration, sampling and operating options. Credentials and network addresses are not included.</string>
     <string name="share_measurements">Share acquisitions</string>
     <string name="share_all_measurements_question">Share all saved acquisitions?</string>
-    <string name="share_all_measurements_warning">No acquisitions are selected, so all saved acquisitions will be shared.</string>
+    <string name="share_all_measurements_warning">No acquisitions are selected. Share all saved acquisitions.</string>
     <string name="share_as_csv">Spreadsheet (CSV)</string>
     <string name="share_as_readable_table">Readable table (TXT)</string>
     <string name="share_readable_table_by_acquisition">By acquisition</string>
@@ -41,7 +41,7 @@
     <string name="share_subject">Uvir acquisitions</string>
     <string name="share_error">Unable to share the acquisitions.</string>
     <string name="share_all_alerts_question">Share all recorded alerts?</string>
-    <string name="share_all_alerts_warning">No alerts are selected, so all recorded alerts will be shared.</string>
+    <string name="share_all_alerts_warning">No alerts are selected. Share all recorded alerts.</string>
     <string name="export_database_title">Export database</string>
     <string name="export_database">EXPORT DATABASE</string>
     <string name="export_database_subject">Uvir database</string>
@@ -54,17 +54,17 @@
     <string name="export_format_preview_heading">Preview</string>
     <string name="export_format_profile_summary">Language: %1$s · Numbers: %2$s · Date: %3$s · Time: %4$s · Irradiance: %5$s</string>
     <string name="export_database_dialog_title">Export the database</string>
-    <string name="export_database_dialog_description">The entire app database stored on this phone will be exported, including saved acquisitions and alerts.</string>
+    <string name="export_database_dialog_description">Export the entire app database stored on this phone, including saved acquisitions and alerts.</string>
     <string name="export_error_log_dialog_title">Export the error log</string>
-    <string name="export_error_log_dialog_description">The app error log stored on this phone will be exported as a technical file. Saved acquisitions and credentials are not included.</string>
+    <string name="export_error_log_dialog_description">Export the app error log as a technical file. Saved acquisitions and credentials are not included.</string>
     <string name="export_diagnostic_dialog_title">Export the diagnostic report</string>
-    <string name="export_diagnostic_dialog_description">The sensor diagnostic report will be exported. It contains technical test results, but no passwords or credentials.</string>
+    <string name="export_diagnostic_dialog_description">Export the sensor diagnostic report. It contains technical test results, but no passwords or credentials.</string>
     <string name="export_sensor_info_dialog_title">Export sensor information</string>
-    <string name="export_sensor_info_dialog_description">All sensor information will be exported as a text file.</string>
+    <string name="export_sensor_info_dialog_description">Export all sensor information as a text file.</string>
     <string name="export_all_measurements_question">Export all saved acquisitions?</string>
-    <string name="export_all_measurements_warning">No acquisitions are selected, so all saved acquisitions will be exported.</string>
+    <string name="export_all_measurements_warning">No acquisitions are selected. Export all saved acquisitions.</string>
     <string name="export_all_alerts_question">Export all recorded alerts?</string>
-    <string name="export_all_alerts_warning">No alerts are selected, so all recorded alerts will be exported.</string>
+    <string name="export_all_alerts_warning">No alerts are selected. Export all recorded alerts.</string>
     <string name="export_all">EXPORT ALL</string>
     <string name="export_sensor_settings_description_complete">Calibration, sampling, operating options and connection settings.</string>
     <string name="export_variant_count_label">Variant count</string>
@@ -76,4 +76,5 @@
     <string name="share_chart_file_count">PNG files: %1$d</string>
     <string name="share_readable_table_file_count">TXT files: %1$d</string>
     <string name="export_file_count">%1$s files: %2$d</string>
+    <string name="export_settings_description">Export the selected app and sensor settings.</string>
 </resources>

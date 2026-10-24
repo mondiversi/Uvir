@@ -46,7 +46,7 @@
     <string name="debug_simulate_events">SIMULATE EVENTS</string>
     <string name="debug_simulate_events_description">Add simulated acquisitions and alerts.</string>
     <string name="debug_simulate_events_question">Simulate test events?</string>
-    <string name="debug_simulate_events_confirmation">Test acquisitions and alerts will be added to the database. Existing records will not be changed.</string>
+    <string name="debug_simulate_events_confirmation">Add test acquisitions and alerts to the database. Existing records remain unchanged.</string>
     <string name="debug_simulate_events_completed">%1$d acquisitions and %2$d alerts added</string>
     <string name="debug_simulation_note">Debug simulation</string>
 </resources>

@@ -10,8 +10,8 @@
     <string name="optional_note">ölçüm notu</string>
     <string name="note_example">ölçüm notu</string>
     <string name="single_acquisition">Tek ölçüm</string>
-    <string name="single_acquisition_ends_manual_session">Son manuel oturum sona erecek.</string>
-    <string name="automatic_start_ends_manual_session">Mevcut manuel oturum sona erecek.</string>
+    <string name="single_acquisition_ends_manual_session">Son manuel oturum sona erer.</string>
+    <string name="automatic_start_ends_manual_session">Mevcut manuel oturum sona erer.</string>
     <string name="interrupt_manual_session_title">Mevcut manuel oturum durdurulsun mu?</string>
     <string name="interrupt_manual_session_message">Otomatik ölçüm oturumunu başlatmak için, halihazırda devam eden manuel ölçüm oturumunu durdurmanız gerekir.</string>
     <string name="interrupt_manual_session_action">DUR</string>
@@ -78,12 +78,12 @@
         <item quantity="one">(%2$d varyant için %1$d alım)</item>
         <item quantity="other">(%2$d varyant için %1$d alım)</item>
     </plurals>
-    <string name="session_variant_chart_files_info">Her varyant için bir tane olmak üzere %1$d PNG dosyası oluşturulacak.</string>
+    <string name="session_variant_chart_files_info">Her varyant için bir tane olmak üzere %1$d PNG dosyası oluşturulur.</string>
     <string name="share">PAYLAŞ</string>
     <string name="delete_selected_measurements_question">Seçilen ölçümler silinsin mi?</string>
     <plurals name="delete_selected_measurements_warning">
-        <item quantity="one">%1$d seçilen ölçüm kalıcı olarak silinecek.</item>
-        <item quantity="other">%1$d seçilen ölçümler kalıcı olarak silinecek.</item>
+        <item quantity="one">%1$d seçilen ölçüm kalıcı olarak silinir.</item>
+        <item quantity="other">%1$d seçilen ölçümler kalıcı olarak silinir.</item>
     </plurals>
     <string name="acquisition_session_id_label">ölçüm / oturum kimliği</string>
     <string name="session_date_duration_events_label">Tarih ve saat</string>
@@ -134,7 +134,7 @@
     <string name="automatic_stopping">Otomatik ölçüm durduruluyor…</string>
     <string name="automatic_stop_failed">Otomatik ölçüm durdurulamıyor. Sensör bağlantısını kontrol edin ve tekrar deneyin.</string>
     <string name="stop_automatic_confirmation_title">Otomatik ölçüm durdurulsun mu?</string>
-    <string name="stop_automatic_confirmation_message">Mevcut otomatik ölçüm durdurulacaktır. Devam etmek?</string>
+    <string name="stop_automatic_confirmation_message">Mevcut otomatik ölçüm durdurulur. Devam etmek?</string>
     <string name="continue_acquisition">KOŞMAYA DEVAM EDİN</string>
     <string name="acquisition_parameters">Ayarlar</string>
     <string name="connectivity">Bağlantı</string>
@@ -165,11 +165,11 @@
     <string name="sensor_source_disabled_hint">Devre dışı bırakılan bir kaynak, diğer aktif kablosuz bağlantı üzerinden yeniden etkinleştirilebilir. Her ikisi de devre dışıysa sensörü USB ile bağlayın.</string>
     <string name="sensor_power_off">GÜÇ KAPATMA SENSÖRÜ</string>
     <string name="sensor_power_off_title">Sensör kapatılsın mı?</string>
-    <string name="sensor_power_off_message">Sensör düşük güçte kapanma durumuna girecek ve uygulamadan yeniden başlatılamayacak. Tekrar açmak için EN/RESET tuşuna basın veya gücünü kesip yeniden bağlayın. Onaylamak için KAPAT düğmesini 5 saniye basılı tutun.</string>
+    <string name="sensor_power_off_message">Sensör düşük güçte kapanma durumuna girer ve uygulamadan yeniden başlatılamaz. Tekrar açmak için EN/RESET tuşuna basın veya gücünü kesip yeniden bağlayın. Onaylamak için KAPAT düğmesini 5 saniye basılı tutun.</string>
     <string name="sensor_power_off_confirm">KAPAT</string>
     <string name="sensor_disassociate_action">UYGULAMADAN EŞLEŞMEYİ KALDIR</string>
     <string name="sensor_disassociate_title">Sensörün eşleşmesi kaldırılsın mı?</string>
-    <string name="sensor_disassociate_message">Eşleştirmeyi kaldırmak sensörü seçim listesinden çıkarır, ancak adını ve kayıtları silmez. İstediğiniz zaman USB ile yeniden eşleştirebilirsiniz. Sensör değiştirilmeyecektir. Onaylamak için EŞLEŞTİRMEYİ KALDIR düğmesini 5 saniye basılı tutun.</string>
+    <string name="sensor_disassociate_message">Eşleştirmeyi kaldırmak sensörü seçim listesinden çıkarır, ancak adını ve kayıtları silmez. İstediğiniz zaman USB ile yeniden eşleştirebilirsiniz. Sensör değiştirilmez. Onaylamak için EŞLEŞTİRMEYİ KALDIR düğmesini 5 saniye basılı tutun.</string>
     <string name="sensor_selection_failed">Sensör değiştirilemedi. Tekrar deneyin.</string>
     <string name="sensor_associate_action">Sensör eşleştir</string>
     <string name="sensor_associate_usb_hint">Yeni sensörü USB ile bağlayın. Eşleştirilmiş sensörler listede kalır.</string>
@@ -180,7 +180,7 @@
     <string name="expand_all_settings_content_description">Tüm ayarları genişlet</string>
     <string name="collapse_all_settings_content_description">Tüm ayarları daralt</string>
     <string name="restore_defaults_title">Varsayılan ayarlar geri yüklensin mi?</string>
-    <string name="restore_defaults_message">Tüm uygulama ve sensör ayarları varsayılan değerlerine geri yüklenecektir. Kaydedilen tüm ölçümler, kaydedilen uyarılar ve hata günlükleri kalıcı olarak silinecektir. Daha sonra sensör kapanacaktır. Onaylamak için TÜMÜNÜ GERİ YÜKLE düğmesini 10 saniye boyunca sürekli olarak basılı tutun.</string>
+    <string name="restore_defaults_message">Tüm uygulama ve sensör ayarları varsayılan değerlerine geri yüklenir. Kaydedilen tüm ölçümler, kaydedilen uyarılar ve hata günlükleri kalıcı olarak silinir. Daha sonra sensör kapanır. Onaylamak için TÜMÜNÜ GERİ YÜKLE düğmesini 10 saniye boyunca sürekli olarak basılı tutun.</string>
     <string name="restore_defaults_confirm">TÜMÜNÜ GERİ YÜKLE</string>
     <string name="restore_defaults_failed">Tam geri yükleme gerçekleştirilemedi. Sensör bağlantısını kontrol edin ve tekrar deneyin.</string>
     <string name="sensor_wifi_esp32_description">Uygulama ve sensör aynı Wi-Fi ağını kullandığında iletişim kurar.</string>
@@ -252,18 +252,18 @@
     <string name="invalid_threshold_alert">Negatif olmayan sınırlar kullanın ve 1 saniye ile 24 saat arasında bir tekrar aralığı ayarlayın.</string>
     <string name="stop_all_value_alerts_accessibility">Uyarı oturumunu durdur</string>
     <string name="stop_all_value_alerts_title">Uyarı oturumu durdurulsun mu?</string>
-    <string name="stop_all_value_alerts_message">Mevcut uyarı oturumu sonlandırılacaktır. Yapılandırılmış ve kaydedilen uyarılar korunacaktır.</string>
+    <string name="stop_all_value_alerts_message">Mevcut uyarı oturumu sonlandırılır. Yapılandırılmış ve kaydedilen uyarılar korunur.</string>
     <string name="stop_all_value_alerts_action">@string/stop</string>
     <string name="continue_alert_monitoring">DEVAM ET</string>
     <string name="start_value_alert_session_accessibility">Uyarılar oturumunu başlat</string>
     <string name="start_value_alert_session_title">Uyarı oturumu başlat</string>
-    <string name="start_value_alert_session_message">İzleme, yapılandırılmış uyarılarnı kullanmaya başlayacaktır. Uyarıları daha sonra yeni bir oturum başlatmadan ekleyebilir veya kaldırabilirsiniz.</string>
+    <string name="start_value_alert_session_message">İzleme, yapılandırılmış uyarıları kullanmaya başlar. Uyarıları daha sonra yeni bir oturum başlatmadan ekleyebilir veya kaldırabilirsiniz.</string>
     <string name="start_value_alert_session_action">BAŞLA</string>
     <string name="threshold_rules_reset">AKTİF UYARILARI SIFIRLAYIN</string>
     <string name="threshold_rules_reset_confirm_action">TÜMÜNÜ SIFIRLA</string>
     <string name="threshold_rules_reset_complete">Aktif uyarılar sıfırlandı</string>
     <string name="threshold_rules_reset_confirmation_title">Tüm etkin uyarılar sıfırlansın mı?</string>
-    <string name="threshold_rules_reset_confirmation_message">Tüm etkin uyarılar sıfırlanacaktır. Onaylamak için TÜMÜNÜ SIFIRLA düğmesini 2 saniye boyunca sürekli olarak basılı tutun.</string>
+    <string name="threshold_rules_reset_confirmation_message">Tüm etkin uyarılar sıfırlanır. Onaylamak için TÜMÜNÜ SIFIRLA düğmesini 2 saniye boyunca sürekli olarak basılı tutun.</string>
     <string name="threshold_bell_configure">Bu grup için uyarıları yapılandırın</string>
     <string name="threshold_bell_active">Bu grupta bir veya daha fazla etkin uyarı</string>
     <string name="threshold_group_editor_title">\n%1$s için uyarılar</string>
@@ -286,8 +286,8 @@
     <string name="select_alerts">Uyarıları seçin</string>
     <string name="delete_selected_alerts_question">Seçilen uyarılar silinsin mi?</string>
     <plurals name="delete_selected_alerts_warning">
-        <item quantity="one">Seçilen uyarı kalıcı olarak silinecek.</item>
-        <item quantity="other">%1$d seçilen uyarılar kalıcı olarak silinecek.</item>
+        <item quantity="one">Seçilen uyarı kalıcı olarak silinir.</item>
+        <item quantity="other">%1$d seçilen uyarılar kalıcı olarak silinir.</item>
     </plurals>
     <string name="threshold_alerts_deleted">Uyarılar silindi</string>
     <plurals name="threshold_alert_count_since">
@@ -296,7 +296,7 @@
     </plurals>
     <string name="threshold_alert_export_subject">Uvir eşik uyarı günlüğü</string>
     <string name="threshold_alert_log_delete_title">Kaydedilen tüm uyarılar silinsin mi?</string>
-    <string name="threshold_alert_log_delete_warning">Kaydedilen tüm uyarılar kalıcı olarak silinecektir. Onaylamak için TÜMÜNÜ SİL düğmesini 2 saniye boyunca sürekli olarak basılı tutun.</string>
+    <string name="threshold_alert_log_delete_warning">Kaydedilen tüm uyarılar kalıcı olarak silinir. Onaylamak için TÜMÜNÜ SİL düğmesini 2 saniye boyunca sürekli olarak basılı tutun.</string>
     <string name="threshold_alert_log_delete_all">TÜMÜNÜ SİL</string>
     <string name="threshold_alert_log_deleted">Uyarılar silindi</string>
     <string name="threshold_log_violation_above">%1$s: %2$s µW/cm² ≥ %3$s µW/cm²</string>
@@ -343,16 +343,16 @@
     <string name="reset_all_records_action">SAYAÇLARI SIFIRLAYIN</string>
     <string name="reset_all_records_warning">Kaydedilen tüm ölçümleri ve kayıtlı uyarıları siler, ardından kimliklerini ve oturum kimliklerini sıfırlar.</string>
     <string name="reset_all_records_confirmation_title">Tüm sayaçlar sıfırlansın mı?</string>
-    <string name="reset_all_records_confirmation_message">Kaydedilen tüm ölçümler ve kaydedilen uyarılar kalıcı olarak silinecektir. Kimlikleri ve oturum kimlikleri baştan yeniden başlatılacaktır. Onaylamak için TÜMÜNÜ SIFIRLA düğmesini 5 saniye boyunca sürekli olarak basılı tutun.</string>
+    <string name="reset_all_records_confirmation_message">Kaydedilen tüm ölçümler ve kaydedilen uyarılar kalıcı olarak silinir. Kimlikleri ve oturum kimlikleri baştan yeniden başlatılır. Onaylamak için TÜMÜNÜ SIFIRLA düğmesini 5 saniye boyunca sürekli olarak basılı tutun.</string>
     <string name="all_counters_reset_complete">Kayıtlar ve sayaçlar sıfırlandı</string>
     <string name="reset_acquisition_counters_action">ÖLÇÜMLERİ SIFIRLAYIN</string>
     <string name="reset_acquisition_counters_warning">Kaydedilen tüm ölçümleri kalıcı olarak siler ve ölçüm ile oturum kimliklerini sıfırlar.</string>
     <string name="reset_acquisition_counters_confirmation_title">Ölçümler sıfırlansın mı?</string>
-    <string name="reset_acquisition_counters_confirmation_message">Kaydedilen tüm ölçümleri kalıcı olarak siler ve ölçüm ile oturum kimliklerini sıfırlar. Uyarı günlüğü ve uyarı ayarları değiştirilmeyecektir. Onaylamak için TÜMÜNÜ SIFIRLA düğmesini 2 saniye boyunca sürekli olarak basılı tutun.</string>
+    <string name="reset_acquisition_counters_confirmation_message">Kaydedilen tüm ölçümleri kalıcı olarak siler ve ölçüm ile oturum kimliklerini sıfırlar. Uyarı günlüğü ve uyarı ayarları değiştirilmez. Onaylamak için TÜMÜNÜ SIFIRLA düğmesini 2 saniye boyunca sürekli olarak basılı tutun.</string>
     <string name="reset_alert_counters_action">UYARILARI SIFIRLAYIN</string>
     <string name="reset_alert_counters_warning">Kaydedilen tüm uyarıları kalıcı olarak siler ve uyarı kimliklerini sıfırlar.</string>
     <string name="reset_alert_counters_confirmation_title">Uyarılar sıfırlansın mı?</string>
-    <string name="reset_alert_counters_confirmation_message">Kaydedilen tüm uyarıları kalıcı olarak siler ve uyarı kimliklerini sıfırlar. Kaydedilen ölçümler ve uyarı ayarları değiştirilmeyecektir. Onaylamak için TÜMÜNÜ SIFIRLA düğmesini 2 saniye boyunca sürekli olarak basılı tutun.</string>
+    <string name="reset_alert_counters_confirmation_message">Kaydedilen tüm uyarıları kalıcı olarak siler ve uyarı kimliklerini sıfırlar. Kaydedilen ölçümler ve uyarı ayarları değiştirilmez. Onaylamak için TÜMÜNÜ SIFIRLA düğmesini 2 saniye boyunca sürekli olarak basılı tutun.</string>
     <string name="reset_confirmation_action">TÜMÜNÜ SIFIRLA</string>
     <string name="reset_counters_stop_auto">Sayaçları sıfırlamadan önce otomatik ölçümü durdurun.</string>
     <string name="acquisition_counters_reset_complete">ölçüm sayaçları sıfırlandı</string>
@@ -361,7 +361,7 @@
     <string name="import_database">VERİTABANINI İÇE AKTAR</string>
     <string name="database_transfer_description">Tüm veritabanını şifreli bir ZIP yedeğiyle dışa aktarır/geri yükler.</string>
     <string name="import_database_dialog_title">Veritabanı içe aktarılsın mı?</string>
-    <string name="import_database_dialog_description">Bu telefondaki kayıtlar ve sensör profilleri yedekteki verilerle değiştirilecek. Fiziksel sensör değişmeyecek. Devam etmek için ZIP parolasını girin.</string>
+    <string name="import_database_dialog_description">Bu telefondaki kayıtlar ve sensör profilleri yedekteki verilerle değiştirilir. Fiziksel sensör değişmez. Devam etmek için ZIP parolasını girin.</string>
     <string name="import_database_confirm">İçe aktar</string>
     <string name="import_database_failed">Veritabanı içe aktarılamadı. Parolayı, arşivi ve veritabanı sürümünü kontrol edin.</string>
     <string name="import_database_success">Veritabanı içe aktarıldı.</string>
@@ -384,7 +384,7 @@
     <string name="relative_spectral_index">Spektral alaka</string>
     <string name="relative_spectral_index_explanation">0-100, elde edilen spektrumun bu tahminle ağırlıklandırılan dalga boylarında ne kadar güçlü şekilde yoğunlaştığını gösterir. Toplam yoğunluğu değil, spektral bileşimi tanımlar. Bu, bir hasar yüzdesi veya bir güvenlik eşiği değildir.</string>
     <string name="delete_all_measurements_question">Kaydedilen tüm ölçümler silinsin mi?</string>
-    <string name="delete_all_measurements_warning">Kaydedilen tüm ölçümler kalıcı olarak silinecektir. Onaylamak için TÜMÜNÜ SİL düğmesini 2 saniye boyunca sürekli olarak basılı tutun.</string>
+    <string name="delete_all_measurements_warning">Kaydedilen tüm ölçümler kalıcı olarak silinir. Onaylamak için TÜMÜNÜ SİL düğmesini 2 saniye boyunca sürekli olarak basılı tutun.</string>
     <string name="delete_all">TÜMÜNÜ SİL</string>
     <plurals name="measurement_count_since">
         <item quantity="one">%1$d kaydedildi · %2$s\'den beri</item>
@@ -392,7 +392,7 @@
     </plurals>
     <string name="no_saved_measurements">Hiçbir ölçüm kaydedilmedi.</string>
     <string name="delete_measurement_question">Bu ölçüm silinsin mi?</string>
-    <string name="delete_measurement_warning">Bu ölçüm kalıcı olarak silinecek.</string>
+    <string name="delete_measurement_warning">Bu ölçüm kalıcı olarak silinir.</string>
     <string name="measurement_deleted">ölçüm silindi</string>
     <string name="measurements_deleted">ölçümler silindi</string>
     <string name="delete">SİL</string>
@@ -490,7 +490,7 @@
     <string name="session_chart_note">Oturum notu</string>
     <string name="session_chart_total_acquisitions">Toplam ölçümler</string>
     <string name="delete_acquisition_session_question">Bu oturum silinsin mi?</string>
-    <string name="delete_acquisition_session_warning">Bu oturumdaki tüm ölçümler kalıcı olarak silinecek.</string>
+    <string name="delete_acquisition_session_warning">Bu oturumdaki tüm ölçümler kalıcı olarak silinir.</string>
     <string name="acquisition_session_deleted">Oturum silindi</string>
     <string name="alert_session_chart_empty">Bu uyarı oturumu için veri yok.</string>
     <string name="alert_session_chart_unit">Değer · %1$s</string>
@@ -510,10 +510,10 @@
     <string name="alert_session_detail_values">Değer türleri</string>
     <string name="alert_session_detail_total">Toplam uyarılar</string>
     <string name="delete_alert_question">Bu uyarı silinsin mi?</string>
-    <string name="delete_alert_warning">Kaydedilen bu uyarı kalıcı olarak silinecek.</string>
+    <string name="delete_alert_warning">Kaydedilen bu uyarı kalıcı olarak silinir.</string>
     <string name="alert_deleted">uyarı silindi</string>
     <string name="delete_alert_session_question">Bu uyarı oturumu silinsin mi?</string>
-    <string name="delete_alert_session_warning">Bu oturumda kaydedilen tüm uyarılar kalıcı olarak silinecek.</string>
+    <string name="delete_alert_session_warning">Bu oturumda kaydedilen tüm uyarılar kalıcı olarak silinir.</string>
     <string name="alert_session_deleted">uyarı oturumu silindi</string>
     <string name="alert_chart_date">Kaydedilen: %1$s</string>
     <string name="alert_chart_scale">Eşik karşılaştırması</string>
@@ -567,7 +567,7 @@
     <string name="offline_capacity_estimated_duration_unlimited">Tahmini özerklik: sınırsız</string>
     <string name="offline_capacity_conservative_hint">İhtiyatlı tahmin: eşzamanlı eşik ihlalleri, tekrar aralığı başına bir uyarı kaydı kullanır.</string>
     <string name="offline_disconnection_description">Sensör bağlantısı kesildi. Bu tahmin, aktif otomatik ölçümü ve uyarılarnı birleştirir.</string>
-    <string name="offline_disconnection_recording_disabled">Çevrimdışı otonom kayıt devre dışı bırakıldı. Sensör, yeniden bağlanana kadar yeni ölçümleri veya uyarıları saklamayacaktır.</string>
+    <string name="offline_disconnection_recording_disabled">Çevrimdışı otonom kayıt devre dışı bırakıldı. Sensör, yeniden bağlanana kadar yeni ölçümleri veya uyarıları saklamaz.</string>
     <string name="offline_disconnection_estimate_unavailable">En son sensör durumu, kalan özerkliği tahmin etmek için yeterli bilgi içermiyor.</string>
     <string name="offline_duration_days_hours">%1$d d %2$d h</string>
     <string name="offline_duration_hours_minutes">%1$d h %2$d dk</string>
@@ -677,7 +677,7 @@
     <string name="restore_app_settings_confirm">SIFIRLA</string>
     <string name="restore_app_settings_failed">Uygulama ayarları sıfırlanamadı.</string>
     <string name="restore_app_settings_inline_warning">Uygulamada saklanan tüm ayarları ve verileri siler. Sensör ve sensördeki veriler değişmeden kalır.</string>
-    <string name="restore_app_settings_message">Ölçümler, kaydedilmiş uyarılar, hata günlükleri, sayaçlar, sensör profilleri ve kayıtlı bağlantı bilgileri dahil Uvir uygulamasının tüm ayarları ve yerel verileri silinecektir. Sensör değiştirilmez veya kapatılmaz. Onaylamak için “SIFIRLA” düğmesini 5 saniye basılı tutun.</string>
+    <string name="restore_app_settings_message">Ölçümler, kaydedilmiş uyarılar, hata günlükleri, sayaçlar, sensör profilleri ve kayıtlı bağlantı bilgileri dahil Uvir uygulamasının tüm ayarları ve yerel verileri silinir. Sensör değiştirilmez veya kapatılmaz. Onaylamak için “SIFIRLA” düğmesini 5 saniye basılı tutun.</string>
     <string name="restore_app_settings_title">Uygulama sıfırlansın mı?</string>
     <string name="sensor_status_no_sensor">Bağlı değil</string>
     <string name="sensor_status_no_associated_sensor">Eşleştirilmiş sensör yok</string>
@@ -685,7 +685,7 @@
     <string name="sensor_restore_confirm">SIFIRLA</string>
     <string name="sensor_restore_failed">Sensör sıfırlanamadı. Bağlantıyı kontrol edip tekrar deneyin.</string>
     <string name="sensor_restore_inline_warning">Sensördeki eşitlenmemiş verileri siler, yapılandırmasını ve bağlantı bilgilerini sıfırlar, ardından sensörü kapatır.</string>
-    <string name="sensor_restore_message">Yalnızca sensör sıfırlanacaktır. Ayarları ve bağlantı bilgileri varsayılanlara döner; sensördeki eşitlenmemiş ölçümler, uyarılar ve hatalar silinir ve ardından sensör kapanır. Uvir’de önceden kaydedilmiş uygulama ayarları ve kayıtlar değişmez. Onaylamak için “SIFIRLA” düğmesini 5 saniye basılı tutun.</string>
+    <string name="sensor_restore_message">Yalnızca sensör sıfırlanır. Ayarları ve bağlantı bilgileri varsayılanlara döner; sensördeki eşitlenmemiş ölçümler, uyarılar ve hatalar silinir ve ardından sensör kapanır. Uvir’de önceden kaydedilmiş uygulama ayarları ve kayıtlar değişmez. Onaylamak için “SIFIRLA” düğmesini 5 saniye basılı tutun.</string>
     <string name="sensor_restore_title">Sensör sıfırlansın mı?</string>
     <string name="sensor_usb_identity_mismatch">USB sensörü yetkili değil. Uygulamayla zaten farklı bir sensör ilişkilendirilmiş.</string>
     <string name="show_password">Parolayı göster</string>
@@ -731,7 +731,7 @@
     <string name="list_filter_no_results">Bu filtrelere uygun sonuç yok.</string>
     <string name="list_filter_count">%2$d kayıttan %1$d gösteriliyor</string>
     <string name="list_filter_share_question">Gösterilen tüm sonuçlar paylaşılsın mı?</string>
-    <string name="list_filter_share_warning">Hiçbir kayıt seçilmedi. Geçerli filtrelerle eşleşen tüm kayıtlar paylaşılacak.</string>
+    <string name="list_filter_share_warning">Hiçbir kayıt seçilmedi. Geçerli filtrelerle eşleşen tüm kayıtlar paylaşılır.</string>
     <string name="settings_section_appearance">Görünüm</string>
     <string name="settings_section_language_formats">Birimler</string>
     <string name="settings_section_sharing_export">Dışa aktarma</string>
@@ -754,7 +754,7 @@
     <string name="confirmation_question_suffix">?</string>
     <string name="threshold_alerts_sound_description_v2">Bir uyarı kaydedildiğinde uygulamanın çalacağı bildirimi seçin.</string>
     <string name="list_filter_export_question">Gösterilen tüm sonuçlar dışa aktarılsın mı?</string>
-    <string name="list_filter_export_warning">Hiçbir kayıt seçilmedi. Geçerli filtrelerle eşleşen tüm kayıtlar dışa aktarılacak.</string>
+    <string name="list_filter_export_warning">Hiçbir kayıt seçilmedi. Geçerli filtrelerle eşleşen tüm kayıtlar dışa aktarılır.</string>
     <string name="settings_include_sensitive_information">Hassas verileri dahil et</string>
     <string name="settings_include_sensitive_information_description">Bağlantı kimlik bilgilerini ve sensör ilişkilendirmesini içerir; böylece sensör USB olmadan geri yüklenebilir. Bir şifreleme parolası istenir.</string>
     <string name="settings_encryption_password_title">Şifreleme parolası</string>
@@ -804,5 +804,5 @@
     <string name="alert_registration_count">Kayıt sayısı</string>
     <string name="alert_configure_first">Başlamadan önce en az bir değer yapılandırın.</string>
     <string name="sensor_simulation_disable">Devre dışı bırak</string>
-    <string name="settings_import_confirmation_description">Seçilen dosyalardaki ayarlar mevcut ayarların yerini alacak.</string>
+    <string name="settings_import_confirmation_description">Seçilen dosyalardaki ayarlar mevcut ayarların yerini alır.</string>
 </resources>

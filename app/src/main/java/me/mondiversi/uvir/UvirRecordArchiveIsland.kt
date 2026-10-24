@@ -89,7 +89,8 @@ internal fun UvirRecordArchiveIsland(
     }
     exportKind?.let { kind ->
         UvirRecordArchiveExportDialog(cardColor, primaryText, secondaryText, busy,
-            title = stringResource(R.string.export) + " · " + archiveKindLabel(kind),
+            title = stringResource(if (kind == UvirArchiveKind.ACQUISITIONS)
+                R.string.record_archive_export_acquisitions_title else R.string.record_archive_export_alerts_title),
             description = stringResource(R.string.record_archive_export_description),
             onDismiss = { if (!busy) exportKind = null },
             onExport = { destination ->
@@ -158,8 +159,9 @@ private fun UvirRecordArchiveExportDialog(cardColor: Color, primaryText: Color, 
     UvirAlertDialog(onDismissRequest = { if (!busy) onDismiss() },
         title = { Text(title) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(description, color = secondaryText, fontSize = 13.sp, lineHeight = 18.sp)
+                UvirExportFileCountText(UvirExportFileFormat.JSON, 1, secondaryText)
                 if (busy) LinearProgressIndicator(Modifier.fillMaxWidth())
             }
         },
@@ -167,7 +169,10 @@ private fun UvirRecordArchiveExportDialog(cardColor: Color, primaryText: Color, 
             TextButton(onClick = { onExport(UvirExportDestination.SAVE) }, enabled = !busy) { Text(uvirActionLabel(R.string.save)) }
             TextButton(onClick = { onExport(UvirExportDestination.SHARE) }, enabled = !busy) { Text(uvirActionLabel(R.string.share)) }
         },
-        dismissButton = { UvirDialogCloseButton(onDismiss, enabled = !busy) },
+        dismissButton = {
+            UvirDialogCancelButton(onDismiss, enabled = !busy,
+                modifier = Modifier.testTag("archive_export_close"))
+        },
         containerColor = cardColor, titleContentColor = primaryText, textContentColor = secondaryText)
 }
 

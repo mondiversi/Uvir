@@ -322,6 +322,7 @@ internal fun UvirSettingsGeneralSections(
                     UvirStandaloneExport.ERROR_LOG ->
                         UvirExportFileFormat.TXT
                 },
+            dismissLabelRes = R.string.cancel,
             onDismiss = { standaloneExport = null },
             onExport = { destination ->
                 runCatching {

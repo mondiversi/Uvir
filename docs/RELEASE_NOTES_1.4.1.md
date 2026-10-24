@@ -17,6 +17,16 @@ Portable acquisition and alert archives, clearer spectral displays and consisten
 - Acquisition TXT/CSV tables include both total and group percentage columns. These extra columns do not apply to selective alerts or PNG charts. Sensor model and spectral-reference metadata remain available in exports. Scientific exports retain W/m² and full stored precision; custom exports follow selected units and decimal places.
 - Refined dialog actions, disabled states, mock-data notifications and USB-update readiness/recovery checks. All six in-app release highlights are translated into the 20 supported languages.
 
+## Updated 1.4.1 publication
+
+The existing 1.4.1 release now includes the final data-management dialog refinements, without changing the app version, version code or firmware version:
+
+- Database, error-log, settings, acquisition and alert exports use a red **Cancel** action and purple **Save/Share** actions, with day/night colors. Reset confirmations retain the red reset action first and purple **Cancel** second.
+- Acquisition and alert exports have dedicated titles, a concise single-file description and a **JSON files: 1** summary. Settings exports include an introductory description above the selections.
+- Export, import, reset, deletion, session and simulation confirmations use present-tense action wording. The 20 language catalogs and applicable plural forms are checked; operation behavior and hold durations are unchanged.
+
+The APK, signed update catalog and checksums have been regenerated from the updated source. The sensor firmware remains 0.5.112.
+
 ## Release files
 
 - `Uvir-1.4.1.apk`: signed Android app, version code 6, Android 8 or newer.

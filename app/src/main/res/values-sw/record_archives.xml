@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="record_archive_title">Vipimo na tahadhari</string>
-    <string name="record_archive_description">Hamisha/leta vipimo na tahadhari, pamoja na vipindi vyake.</string>
-    <string name="record_archive_export_description">Hamisha rekodi zote zilizohifadhiwa za aina hii, pamoja na vipindi, kama faili la UVIR lisilo na nenosiri.</string>
-    <string name="record_archive_import_description">Data itaongezwa kwenye kumbukumbu. Rekodi zilizopo zitarukwa. Vihisi visivyojulikana vitaonyeshwa kwa kitambulisho cha maunzi hadi vitakapooanishwa.</string>
+    <string name="record_archive_description">Hamisha/leta vipimo au tahadhari katika faili moja, pamoja na vipindi vyake.</string>
+    <string name="record_archive_export_description">Hamisha rekodi zote za aina hii, pamoja na vipindi, katika faili moja.</string>
+    <string name="record_archive_import_description">Data inaongezwa kwenye kumbukumbu. Rekodi zilizopo zinarukwa. Vihisi visivyojulikana vinaonyeshwa kwa kitambulisho cha maunzi hadi vioanishwe.</string>
     <string name="record_archive_import_summary">Rekodi: %1$d · Vipindi: %2$d</string>
     <string name="record_archive_import_success">Zilizoingizwa: %1$d · Zilizopo tayari: %2$d</string>
     <string name="record_archive_failed">Imeshindikana kuhamisha rekodi. Kagua faili na aina ya data.</string>
+    <string name="record_archive_export_acquisitions_title">Hamisha vipimo</string>
+    <string name="record_archive_export_alerts_title">Hamisha tahadhari</string>
 </resources>

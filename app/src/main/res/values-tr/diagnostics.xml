@@ -46,7 +46,7 @@
     <string name="debug_simulate_events">OLAYLARI SİMÜLE ET</string>
     <string name="debug_simulate_events_description">Simüle edilmiş ölçümler ve uyarılar ekleyin.</string>
     <string name="debug_simulate_events_question">Test olayları simüle edilsin mi?</string>
-    <string name="debug_simulate_events_confirmation">Veritabanına test ölçümleri ve uyarılar eklenecek. Mevcut kayıtlar değiştirilmeyecek.</string>
+    <string name="debug_simulate_events_confirmation">Veritabanına test ölçümleri ve uyarılar eklenir. Mevcut kayıtlar değiştirilmez.</string>
     <string name="debug_simulate_events_completed">%1$d ölçüm ve %2$d uyarı eklendi</string>
     <string name="debug_simulation_note">Hata ayıklama simülasyonu</string>
 </resources>

@@ -13,7 +13,7 @@
     <string name="export_sensor_settings_description">Kalibrasyon, örnekleme ve çalışma seçenekleri. Kimlik bilgileri ve ağ adresleri dahil değildir.</string>
     <string name="share_measurements">Ölçümleri paylaş</string>
     <string name="share_all_measurements_question">Kaydedilen tüm ölçümler paylaşılsın mı?</string>
-    <string name="share_all_measurements_warning">Hiçbir ölçüm seçilmediğinden kaydedilen tüm ölçümler paylaşılacaktır.</string>
+    <string name="share_all_measurements_warning">Hiçbir ölçüm seçilmediğinden kaydedilen tüm ölçümler paylaşılır.</string>
     <string name="share_as_csv">Elektronik tablo (CSV)</string>
     <string name="share_as_readable_table">Okunabilir tablo (TXT)</string>
     <string name="share_readable_table_by_acquisition">Ölçüme göre</string>
@@ -41,7 +41,7 @@
     <string name="share_subject">Uvir ölçümleri</string>
     <string name="share_error">Ölçümler paylaşılamıyor.</string>
     <string name="share_all_alerts_question">Kaydedilen tüm uyarılar paylaşılsın mı?</string>
-    <string name="share_all_alerts_warning">Hiçbir uyarı seçilmediğinden kaydedilen tüm uyarılar paylaşılacaktır.</string>
+    <string name="share_all_alerts_warning">Hiçbir uyarı seçilmediğinden kaydedilen tüm uyarılar paylaşılır.</string>
     <string name="export_database_title">Veritabanını dışa aktar</string>
     <string name="export_database">İHRACAT VERİTABANI</string>
     <string name="export_database_subject">Uvir veritabanı</string>
@@ -54,17 +54,17 @@
     <string name="export_format_preview_heading">Önizleme</string>
     <string name="export_format_profile_summary">Dil: %1$s · Sayılar: %2$s · Tarih: %3$s · Saat: %4$s · Işınım: %5$s</string>
     <string name="export_database_dialog_title">Veritabanını dışa aktar</string>
-    <string name="export_database_dialog_description">Bu telefonda saklanan uygulama veritabanının tamamı, kayıtlı ölçümler ve uyarılaryla birlikte dışa aktarılacaktır.</string>
+    <string name="export_database_dialog_description">Bu telefonda saklanan uygulama veritabanının tamamını, kayıtlı ölçümler ve uyarılarla birlikte dışa aktarın.</string>
     <string name="export_error_log_dialog_title">Hata günlüğünü dışa aktar</string>
-    <string name="export_error_log_dialog_description">Bu telefonda saklanan uygulama hata günlüğü teknik bir dosya olarak dışa aktarılacaktır. Kayıtlı ölçümler ve kimlik bilgileri dahil değildir.</string>
+    <string name="export_error_log_dialog_description">Uygulama hata günlüğünü teknik bir dosya olarak dışa aktarın. Kayıtlı ölçümler ve kimlik bilgileri dahil değildir.</string>
     <string name="export_diagnostic_dialog_title">Tanılama raporunu dışa aktar</string>
-    <string name="export_diagnostic_dialog_description">Sensör tanılama raporu dışa aktarılacaktır. Teknik test sonuçlarını içerir ancak parola veya kimlik bilgisi içermez.</string>
+    <string name="export_diagnostic_dialog_description">Sensör tanılama raporunu dışa aktarın. Teknik test sonuçlarını içerir ancak parola veya kimlik bilgisi içermez.</string>
     <string name="export_sensor_info_dialog_title">Sensör bilgilerini dışa aktar</string>
-    <string name="export_sensor_info_dialog_description">Sensörün tüm bilgileri metin dosyası olarak dışa aktarılacaktır.</string>
+    <string name="export_sensor_info_dialog_description">Sensörün tüm bilgilerini metin dosyası olarak dışa aktarın.</string>
     <string name="export_all_measurements_question">Kaydedilen tüm ölçümler dışa aktarılsın mı?</string>
-    <string name="export_all_measurements_warning">Hiçbir ölçüm seçilmedi; bu nedenle kaydedilen tüm ölçümler dışa aktarılacak.</string>
+    <string name="export_all_measurements_warning">Hiçbir ölçüm seçilmedi; bu nedenle kaydedilen tüm ölçümler dışa aktarılır.</string>
     <string name="export_all_alerts_question">Kaydedilen tüm uyarılar dışa aktarılsın mı?</string>
-    <string name="export_all_alerts_warning">Hiçbir uyarı seçilmedi; bu nedenle kaydedilen tüm uyarılar dışa aktarılacak.</string>
+    <string name="export_all_alerts_warning">Hiçbir uyarı seçilmedi; bu nedenle kaydedilen tüm uyarılar dışa aktarılır.</string>
     <string name="export_all">TÜMÜNÜ DIŞA AKTAR</string>
     <string name="export_sensor_settings_description_complete">Kalibrasyon, örnekleme, çalışma seçenekleri ve bağlantı ayarları.</string>
     <string name="export_variant_count_label">Varyant sayısı</string>
@@ -76,4 +76,5 @@
     <string name="share_chart_file_count">PNG dosyaları: %1$d</string>
     <string name="share_readable_table_file_count">TXT dosyaları: %1$d</string>
     <string name="export_file_count">%1$s dosyaları: %2$d</string>
+    <string name="export_settings_description">Seçilen uygulama ve sensör ayarlarını dışa aktarın.</string>
 </resources>

@@ -46,7 +46,7 @@
     <string name="debug_simulate_events">SIMULER DES ÉVÉNEMENTS</string>
     <string name="debug_simulate_events_description">Ajoute des mesures et des alertes simulées.</string>
     <string name="debug_simulate_events_question">Simuler des événements de test ?</string>
-    <string name="debug_simulate_events_confirmation">Des mesures et alertes de test seront ajoutées à la base de données. Les enregistrements existants ne seront pas modifiés.</string>
+    <string name="debug_simulate_events_confirmation">Des mesures et alertes de test sont ajoutées à la base de données. Les enregistrements existants ne sont pas modifiés.</string>
     <string name="debug_simulate_events_completed">%1$d mesures et %2$d alertes ajoutées</string>
     <string name="debug_simulation_note">Simulation de débogage</string>
 </resources>

@@ -12,8 +12,8 @@
     <string name="optional_note">Catatan pengukuran</string>
     <string name="note_example">Catatan pengukuran</string>
     <string name="single_acquisition">Pengukuran tunggal</string>
-    <string name="single_acquisition_ends_manual_session">Sesi manual terakhir akan berakhir.</string>
-    <string name="automatic_start_ends_manual_session">Sesi manual saat ini akan berakhir.</string>
+    <string name="single_acquisition_ends_manual_session">Sesi manual terakhir berakhir.</string>
+    <string name="automatic_start_ends_manual_session">Sesi manual saat ini berakhir.</string>
     <string name="interrupt_manual_session_title">Hentikan sesi manual saat ini?</string>
     <string name="interrupt_manual_session_message">Untuk memulai sesi pengukuran otomatis, hentikan sesi pengukuran manual yang sedang berlangsung.</string>
     <string name="interrupt_manual_session_action">HENTIKAN</string>
@@ -87,11 +87,11 @@
     <plurals name="session_variant_structure_summary">
         <item quantity="other">(%1$d pengukuran per %2$d varian)</item>
     </plurals>
-    <string name="session_variant_chart_files_info">%1$d file PNG akan dibuat, satu untuk setiap varian.</string>
+    <string name="session_variant_chart_files_info">%1$d file PNG dibuat, satu untuk setiap varian.</string>
     <string name="share">BAGIKAN</string>
     <string name="delete_selected_measurements_question">Hapus pengukuran yang dipilih?</string>
     <plurals name="delete_selected_measurements_warning">
-        <item quantity="other">%1$d pengukuran terpilih akan dihapus permanen.</item>
+        <item quantity="other">%1$d pengukuran terpilih dihapus permanen.</item>
     </plurals>
     <string name="acquisition_session_id_label">ID pengukuran / sesi</string>
     <string name="session_date_duration_events_label">Tanggal dan waktu</string>
@@ -141,7 +141,7 @@
     <string name="automatic_stopping">Menghentikan pengukuran otomatis…</string>
     <string name="automatic_stop_failed">Pengukuran otomatis tidak dapat dihentikan. Periksa koneksi sensor dan coba lagi.</string>
     <string name="stop_automatic_confirmation_title">Hentikan pengukuran otomatis?</string>
-    <string name="stop_automatic_confirmation_message">Pengukuran otomatis saat ini akan dihentikan. Lanjutkan?</string>
+    <string name="stop_automatic_confirmation_message">Pengukuran otomatis saat ini dihentikan. Lanjutkan?</string>
     <string name="continue_acquisition">TETAP JALANKAN</string>
     <string name="acquisition_parameters">Pengaturan</string>
     <string name="connectivity">Konektivitas</string>
@@ -186,7 +186,7 @@
     <string name="sensor_source_disabled_hint">Sumber yang dinonaktifkan dapat diaktifkan kembali melalui koneksi nirkabel aktif lainnya. Jika keduanya dinonaktifkan, hubungkan sensor melalui USB.</string>
     <string name="sensor_power_off">MATIKAN SENSOR</string>
     <string name="sensor_power_off_title">Matikan sensor?</string>
-    <string name="sensor_power_off_message">Sensor akan mati dengan daya rendah dan tidak dapat dimulai ulang dari aplikasi. Untuk menyalakannya kembali, tekan EN/RESET atau lepas dan hubungkan kembali daya. Untuk konfirmasi, tahan MATIKAN selama 5 detik.</string>
+    <string name="sensor_power_off_message">Sensor mati dengan daya rendah dan tidak dapat dimulai ulang dari aplikasi. Untuk menyalakannya kembali, tekan EN/RESET atau lepas dan hubungkan kembali daya. Untuk konfirmasi, tahan MATIKAN selama 5 detik.</string>
     <string name="sensor_power_off_confirm">MATIKAN</string>
     <string name="sensor_disassociate_action">LEPAS KAITAN DARI APLIKASI</string>
     <string name="sensor_disassociate_title">Lepas kaitan sensor?</string>
@@ -201,11 +201,11 @@
     <string name="expand_all_settings_content_description">Bentangkan semua pengaturan</string>
     <string name="collapse_all_settings_content_description">Ciutkan semua pengaturan</string>
     <string name="restore_defaults_title">Pulihkan pengaturan bawaan?</string>
-    <string name="restore_defaults_message">Semua pengaturan aplikasi dan sensor akan dipulihkan ke nilai bawaan. Semua pengukuran, peringatan, dan log kesalahan tersimpan akan dihapus permanen. Sensor lalu dimatikan. Untuk konfirmasi, tahan PULIHKAN SEMUA terus selama 10 detik.</string>
+    <string name="restore_defaults_message">Semua pengaturan aplikasi dan sensor dipulihkan ke nilai bawaan. Semua pengukuran, peringatan, dan log kesalahan tersimpan dihapus permanen. Sensor lalu dimatikan. Untuk konfirmasi, tahan PULIHKAN SEMUA terus selama 10 detik.</string>
     <string name="restore_defaults_confirm">PULIHKAN SEMUA</string>
     <string name="restore_defaults_failed">Pemulihan lengkap tidak dapat dilakukan. Periksa koneksi sensor dan coba lagi.</string>
     <string name="restore_app_settings_title">Reset aplikasi?</string>
-    <string name="restore_app_settings_message">Semua pengaturan dan data lokal Uvir akan dihapus, termasuk pengukuran, peringatan, log kesalahan, penghitung, profil sensor, dan kredensial koneksi. Sensor sendiri tidak diubah atau dimatikan. Untuk konfirmasi, tahan RESET selama 5 detik.</string>
+    <string name="restore_app_settings_message">Semua pengaturan dan data lokal Uvir dihapus, termasuk pengukuran, peringatan, log kesalahan, penghitung, profil sensor, dan kredensial koneksi. Sensor sendiri tidak diubah atau dimatikan. Untuk konfirmasi, tahan RESET selama 5 detik.</string>
     <string name="restore_app_settings_confirm">RESET</string>
     <string name="restore_app_settings_failed">Aplikasi tidak dapat direset.</string>
     <string name="sensor_status_no_sensor">Tidak terhubung</string>
@@ -279,7 +279,7 @@
     <string name="invalid_threshold_alert">Gunakan batas nonnegatif dan atur interval pengulangan antara 1 detik dan 24 jam.</string>
     <string name="stop_all_value_alerts_accessibility">Hentikan sesi peringatan</string>
     <string name="stop_all_value_alerts_title">Hentikan sesi peringatan?</string>
-    <string name="stop_all_value_alerts_message">Sesi peringatan saat ini akan berakhir. Peringatan yang diatur dan dicatat tetap disimpan.</string>
+    <string name="stop_all_value_alerts_message">Sesi peringatan saat ini berakhir. Peringatan yang diatur dan dicatat tetap disimpan.</string>
     <string name="stop_all_value_alerts_action">@string/stop</string>
     <string name="continue_alert_monitoring">LANJUTKAN</string>
     <string name="start_value_alert_session_accessibility">Mulai sesi peringatan</string>
@@ -290,7 +290,7 @@
     <string name="threshold_rules_reset_confirm_action">RESET SEMUA</string>
     <string name="threshold_rules_reset_complete">Peringatan aktif direset</string>
     <string name="threshold_rules_reset_confirmation_title">Reset semua peringatan aktif?</string>
-    <string name="threshold_rules_reset_confirmation_message">Semua peringatan aktif akan direset. Untuk konfirmasi, tahan RESET SEMUA terus selama 2 detik.</string>
+    <string name="threshold_rules_reset_confirmation_message">Semua peringatan aktif direset. Untuk konfirmasi, tahan RESET SEMUA terus selama 2 detik.</string>
     <string name="threshold_bell_configure">Atur peringatan untuk kelompok ini</string>
     <string name="threshold_bell_active">Satu atau lebih peringatan aktif dalam kelompok ini</string>
     <string name="threshold_group_editor_title">Peringatan untuk\n%1$s</string>
@@ -313,7 +313,7 @@
     <string name="select_alerts">Pilih peringatan</string>
     <string name="delete_selected_alerts_question">Hapus peringatan yang dipilih?</string>
     <plurals name="delete_selected_alerts_warning">
-        <item quantity="other">%1$d peringatan terpilih akan dihapus permanen.</item>
+        <item quantity="other">%1$d peringatan terpilih dihapus permanen.</item>
     </plurals>
     <string name="threshold_alerts_deleted">Peringatan dihapus</string>
     <plurals name="threshold_alert_count_since">
@@ -321,7 +321,7 @@
     </plurals>
     <string name="threshold_alert_export_subject">Log peringatan Uvir</string>
     <string name="threshold_alert_log_delete_title">Hapus semua peringatan tercatat?</string>
-    <string name="threshold_alert_log_delete_warning">Semua peringatan tercatat akan dihapus permanen. Untuk konfirmasi, tahan HAPUS SEMUA terus selama 2 detik.</string>
+    <string name="threshold_alert_log_delete_warning">Semua peringatan tercatat dihapus permanen. Untuk konfirmasi, tahan HAPUS SEMUA terus selama 2 detik.</string>
     <string name="threshold_alert_log_delete_all">HAPUS SEMUA</string>
     <string name="threshold_alert_log_deleted">Peringatan dihapus</string>
     <string name="threshold_log_violation_above">%1$s: %2$s µW/cm² ≥ %3$s µW/cm²</string>
@@ -403,7 +403,7 @@
     <string name="import_database">IMPOR BASIS DATA</string>
     <string name="database_transfer_description">Ekspor/pulihkan seluruh basis data dengan cadangan ZIP terenkripsi.</string>
     <string name="import_database_dialog_title">Impor basis data?</string>
-    <string name="import_database_dialog_description">Rekaman dan profil sensor di ponsel ini akan diganti dengan yang ada di cadangan. Sensor fisik tidak diubah. Masukkan kata sandi ZIP untuk melanjutkan.</string>
+    <string name="import_database_dialog_description">Rekaman dan profil sensor di ponsel ini diganti dengan yang ada di cadangan. Sensor fisik tidak diubah. Masukkan kata sandi ZIP untuk melanjutkan.</string>
     <string name="import_database_confirm">Impor</string>
     <string name="import_database_failed">Basis data tidak dapat diimpor. Periksa kata sandi, arsip, dan versi basis data.</string>
     <string name="import_database_success">Basis data diimpor.</string>
@@ -426,14 +426,14 @@
     <string name="relative_spectral_index">Relevansi spektral</string>
     <string name="relative_spectral_index_explanation">0–100 menunjukkan seberapa kuat spektrum terukur terkonsentrasi pada panjang gelombang berbobot dalam estimasi ini. Menjelaskan komposisi spektral, bukan intensitas total. Bukan persentase kerusakan atau ambang keselamatan.</string>
     <string name="delete_all_measurements_question">Hapus semua pengukuran tersimpan?</string>
-    <string name="delete_all_measurements_warning">Semua pengukuran tersimpan akan dihapus permanen. Untuk konfirmasi, tahan HAPUS SEMUA terus selama 2 detik.</string>
+    <string name="delete_all_measurements_warning">Semua pengukuran tersimpan dihapus permanen. Untuk konfirmasi, tahan HAPUS SEMUA terus selama 2 detik.</string>
     <string name="delete_all">HAPUS SEMUA</string>
     <plurals name="measurement_count_since">
         <item quantity="other">%1$d disimpan · sejak %2$s</item>
     </plurals>
     <string name="no_saved_measurements">Tidak ada pengukuran tersimpan.</string>
     <string name="delete_measurement_question">Hapus pengukuran ini?</string>
-    <string name="delete_measurement_warning">Pengukuran ini akan dihapus permanen.</string>
+    <string name="delete_measurement_warning">Pengukuran ini dihapus permanen.</string>
     <string name="measurement_deleted">Pengukuran dihapus</string>
     <string name="measurements_deleted">Pengukuran dihapus</string>
     <string name="delete">HAPUS</string>
@@ -530,7 +530,7 @@
     <string name="session_chart_note">Catatan sesi</string>
     <string name="session_chart_total_acquisitions">Total pengukuran</string>
     <string name="delete_acquisition_session_question">Hapus sesi ini?</string>
-    <string name="delete_acquisition_session_warning">Semua pengukuran dalam sesi ini akan dihapus permanen.</string>
+    <string name="delete_acquisition_session_warning">Semua pengukuran dalam sesi ini dihapus permanen.</string>
     <string name="acquisition_session_deleted">Sesi dihapus</string>
     <string name="alert_session_chart_empty">Tidak ada data tersedia untuk sesi peringatan ini.</string>
     <string name="alert_session_chart_unit">Nilai · %1$s</string>
@@ -549,10 +549,10 @@
     <string name="alert_session_detail_values">Jenis nilai</string>
     <string name="alert_session_detail_total">Total peringatan</string>
     <string name="delete_alert_question">Hapus peringatan ini?</string>
-    <string name="delete_alert_warning">Peringatan tercatat ini akan dihapus permanen.</string>
+    <string name="delete_alert_warning">Peringatan tercatat ini dihapus permanen.</string>
     <string name="alert_deleted">Peringatan dihapus</string>
     <string name="delete_alert_session_question">Hapus sesi peringatan ini?</string>
-    <string name="delete_alert_session_warning">Semua peringatan tercatat dalam sesi ini akan dihapus permanen.</string>
+    <string name="delete_alert_session_warning">Semua peringatan tercatat dalam sesi ini dihapus permanen.</string>
     <string name="alert_session_deleted">Sesi peringatan dihapus</string>
     <string name="alert_chart_date">Dicatat: %1$s</string>
     <string name="alert_chart_scale">Perbandingan ambang</string>
@@ -728,7 +728,7 @@
     <string name="list_filter_no_results">Tidak ada rekaman yang cocok.</string>
     <string name="list_filter_count">%1$d dari %2$d ditampilkan</string>
     <string name="list_filter_share_question">Bagikan semua hasil yang ditampilkan?</string>
-    <string name="list_filter_share_warning">Tidak ada rekaman yang dipilih. Semua rekaman yang sesuai dengan filter saat ini akan dibagikan.</string>
+    <string name="list_filter_share_warning">Tidak ada rekaman yang dipilih. Semua rekaman yang sesuai dengan filter saat ini dibagikan.</string>
     <string name="settings_section_appearance">Tampilan</string>
     <string name="settings_section_language_formats">Satuan</string>
     <string name="settings_section_sharing_export">Ekspor</string>
@@ -744,9 +744,9 @@
     <string name="confirmation_question_suffix">?</string>
     <string name="threshold_alerts_sound_description_v2">Pilih umpan balik yang diputar aplikasi saat peringatan dicatat.</string>
     <string name="list_filter_export_question">Ekspor semua hasil yang ditampilkan?</string>
-    <string name="list_filter_export_warning">Tidak ada rekaman yang dipilih. Semua rekaman yang sesuai dengan filter saat ini akan diekspor.</string>
+    <string name="list_filter_export_warning">Tidak ada rekaman yang dipilih. Semua rekaman yang sesuai dengan filter saat ini diekspor.</string>
     <string name="settings_include_sensitive_information">Sertakan data sensitif</string>
-    <string name="settings_include_sensitive_information_description">Menyertakan kredensial koneksi dan asosiasi sensor, sehingga dapat dipulihkan tanpa USB. Kata sandi enkripsi akan diperlukan.</string>
+    <string name="settings_include_sensitive_information_description">Menyertakan kredensial koneksi dan asosiasi sensor, sehingga dapat dipulihkan tanpa USB. Kata sandi enkripsi diperlukan.</string>
     <string name="settings_encryption_password_title">Kata sandi enkripsi</string>
     <string name="settings_encryption_password_description">Gunakan setidaknya 8 karakter. Kata sandi yang sama diperlukan untuk mengimpor cadangan nanti.</string>
     <string name="settings_encryption_password">Kata sandi enkripsi</string>
@@ -797,5 +797,5 @@
     <string name="language_polish">Polski</string>
     <string name="language_dutch">Nederlands</string>
     <string name="language_indonesian">Bahasa Indonesia</string>
-    <string name="settings_import_confirmation_description">Pengaturan dalam berkas yang dipilih akan menggantikan pengaturan saat ini.</string>
+    <string name="settings_import_confirmation_description">Pengaturan dalam berkas yang dipilih menggantikan pengaturan saat ini.</string>
 </resources>

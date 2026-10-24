@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="record_archive_title">Aquisições e alertas</string>
-    <string name="record_archive_description">Exporta/importa aquisições e alertas, incluindo as respetivas sessões.</string>
-    <string name="record_archive_export_description">Exporte todos os registos guardados deste tipo, incluindo sessões, num ficheiro UVIR sem palavra-passe.</string>
-    <string name="record_archive_import_description">Os dados serão adicionados ao arquivo. Os registos existentes são ignorados. Os sensores desconhecidos são apresentados com o ID de hardware até serem associados.</string>
+    <string name="record_archive_description">Exporta/importa aquisições ou alertas num único ficheiro, incluindo as respetivas sessões.</string>
+    <string name="record_archive_export_description">Exporte todos os registos deste tipo, incluindo sessões, num único ficheiro.</string>
+    <string name="record_archive_import_description">Os dados são adicionados ao arquivo. Os registos existentes são ignorados. Os sensores desconhecidos são apresentados com o ID de hardware até serem associados.</string>
     <string name="record_archive_import_summary">Registos: %1$d · Sessões: %2$d</string>
     <string name="record_archive_import_success">Importados: %1$d · Já existentes: %2$d</string>
     <string name="record_archive_failed">Não foi possível transferir os registos. Verifique o ficheiro e o tipo de dados.</string>
+    <string name="record_archive_export_acquisitions_title">Exportar as aquisições</string>
+    <string name="record_archive_export_alerts_title">Exportar os alertas</string>
 </resources>

@@ -13,7 +13,7 @@
     <string name="export_sensor_settings_description">کالیبراسیون، نمونه‌برداری و گزینه‌های عملیاتی. اطلاعات ورود و نشانی‌های شبکه شامل نمی‌شوند.</string>
     <string name="share_measurements">اندازه گیری ها را به اشتراک بگذارید</string>
     <string name="share_all_measurements_question">همه اندازه گیری های ذخیره شده به اشتراک گذاشته شود؟</string>
-    <string name="share_all_measurements_warning">هیچ اندازه گیری انتخاب نشده است، بنابراین تمام اندازه گیری های ذخیره شده به اشتراک گذاشته خواهد شد.</string>
+    <string name="share_all_measurements_warning">هیچ اندازه گیری انتخاب نشده است، بنابراین تمام اندازه گیری های ذخیره شده به اشتراک گذاشته می‌شود.</string>
     <string name="share_as_csv">صفحه‌گسترده (CSV)</string>
     <string name="share_as_readable_table">جدول خواندنی (TXT)</string>
     <string name="share_readable_table_by_acquisition">بر اساس ثبت</string>
@@ -54,13 +54,13 @@
     <string name="export_format_preview_heading">پیش‌نمایش</string>
     <string name="export_format_profile_summary">زبان: %1$s · اعداد: %2$s · تاریخ: %3$s · زمان: %4$s · تابندگی: %5$s</string>
     <string name="export_database_dialog_title">صادر کردن پایگاه داده</string>
-    <string name="export_database_dialog_description">کل پایگاه داده برنامه ذخیره‌شده در این تلفن، از جمله اندازه‌گیری‌ها و هشدارها ذخیره‌شده، صادر خواهد شد.</string>
+    <string name="export_database_dialog_description">کل پایگاه دادهٔ برنامه ذخیره‌شده در این تلفن، از جمله اندازه‌گیری‌ها و هشدارهای ذخیره‌شده را صادر کنید.</string>
     <string name="export_error_log_dialog_title">صادر کردن گزارش خطاها</string>
-    <string name="export_error_log_dialog_description">گزارش خطاهای برنامه ذخیره‌شده در این تلفن به‌صورت یک فایل فنی صادر خواهد شد. اندازه‌گیری‌های ذخیره‌شده و اطلاعات ورود در آن نیست.</string>
+    <string name="export_error_log_dialog_description">گزارش خطاهای برنامه را به‌صورت یک فایل فنی صادر کنید. اندازه‌گیری‌های ذخیره‌شده و اطلاعات ورود در آن نیست.</string>
     <string name="export_diagnostic_dialog_title">صادر کردن گزارش عیب‌یابی</string>
-    <string name="export_diagnostic_dialog_description">گزارش عیب‌یابی حسگر صادر خواهد شد. این گزارش نتایج فنی آزمایش را دارد، اما شامل گذرواژه یا اطلاعات ورود نیست.</string>
+    <string name="export_diagnostic_dialog_description">گزارش عیب‌یابی حسگر را صادر کنید. این گزارش نتایج فنی آزمایش را دارد، اما شامل گذرواژه یا اطلاعات ورود نیست.</string>
     <string name="export_sensor_info_dialog_title">صادر کردن اطلاعات حسگر</string>
-    <string name="export_sensor_info_dialog_description">همه اطلاعات حسگر به‌صورت فایل متنی صادر می‌شود.</string>
+    <string name="export_sensor_info_dialog_description">همهٔ اطلاعات حسگر را به‌صورت فایل متنی صادر کنید.</string>
     <string name="export_all_measurements_question">همه اندازه‌گیری‌های ذخیره‌شده صادر شوند؟</string>
     <string name="export_all_measurements_warning">هیچ اندازه‌گیری انتخاب نشده است؛ بنابراین همه اندازه‌گیری‌های ذخیره‌شده صادر می‌شوند.</string>
     <string name="export_all_alerts_question">همه هشدارها ثبت‌شده صادر شوند؟</string>
@@ -76,4 +76,5 @@
     <string name="share_chart_file_count">فایل‌های PNG: %1$d</string>
     <string name="share_readable_table_file_count">فایل‌های TXT: %1$d</string>
     <string name="export_file_count">فایل‌های %1$s: %2$d</string>
+    <string name="export_settings_description">تنظیمات انتخاب‌شدهٔ برنامه و حسگرها را صادر کنید.</string>
 </resources>

@@ -13,7 +13,7 @@
     <string name="export_sensor_settings_description">Urekebishaji, uchukuaji sampuli na chaguo za uendeshaji. Vitambulisho na anwani za mtandao hazijajumuishwa.</string>
     <string name="share_measurements">Shiriki upataji</string>
     <string name="share_all_measurements_question">Je, ungependa kushiriki upataji wote uliohifadhiwa?</string>
-    <string name="share_all_measurements_warning">Hakuna upataji uliochaguliwa, kwa hivyo upataji wote uliohifadhiwa utashirikiwa.</string>
+    <string name="share_all_measurements_warning">Hakuna upataji uliochaguliwa, kwa hivyo upataji wote uliohifadhiwa unashirikiwa.</string>
     <string name="share_as_csv">Lahajedwali (CSV)</string>
     <string name="share_as_readable_table">Jedwali linaloweza kusomeka (TXT)</string>
     <string name="share_readable_table_by_acquisition">Kwa upataji</string>
@@ -41,7 +41,7 @@
     <string name="share_subject">Ununuzi wa Uvir</string>
     <string name="share_error">Imeshindwa kushiriki upataji.</string>
     <string name="share_all_alerts_question">Je, ungependa kushiriki arifa zote zilizorekodiwa?</string>
-    <string name="share_all_alerts_warning">Hakuna tahadhari zilizochaguliwa, kwa hivyo arifa zote zilizorekodiwa zitashirikiwa.</string>
+    <string name="share_all_alerts_warning">Hakuna tahadhari zilizochaguliwa, kwa hivyo arifa zote zilizorekodiwa zinashirikiwa.</string>
     <string name="export_database_title">Hamisha hifadhidata</string>
     <string name="export_database">HUDUMA YA HABARI</string>
     <string name="export_database_subject">Karatasi ya data ya Uvir</string>
@@ -54,17 +54,17 @@
     <string name="export_format_preview_heading">Onyesho la kukagua</string>
     <string name="export_format_profile_summary">Lugha: %1$s · Nambari: %2$s · Tarehe: %3$s · Saa: %4$s · Mwangaza: %5$s</string>
     <string name="export_database_dialog_title">Hamisha hifadhidata</string>
-    <string name="export_database_dialog_description">Hifadhidata yote ya programu iliyohifadhiwa kwenye simu hii itahamishwa, pamoja na vipimo na tahadhari zilizohifadhiwa.</string>
+    <string name="export_database_dialog_description">Hamisha hifadhidata yote ya programu iliyohifadhiwa kwenye simu hii, pamoja na vipimo na tahadhari zilizohifadhiwa.</string>
     <string name="export_error_log_dialog_title">Hamisha kumbukumbu ya hitilafu</string>
-    <string name="export_error_log_dialog_description">Kumbukumbu ya hitilafu ya programu iliyohifadhiwa kwenye simu hii itahamishwa kama faili ya kiufundi. Vipimo vilivyohifadhiwa na taarifa za kuingia hazitajumuishwa.</string>
+    <string name="export_error_log_dialog_description">Hamisha kumbukumbu ya hitilafu ya programu kama faili ya kiufundi. Vipimo vilivyohifadhiwa na taarifa za kuingia hazijumuishwi.</string>
     <string name="export_diagnostic_dialog_title">Hamisha ripoti ya uchunguzi</string>
-    <string name="export_diagnostic_dialog_description">Ripoti ya uchunguzi wa sensa itahamishwa. Ina matokeo ya kiufundi ya jaribio, lakini haina nenosiri au taarifa za kuingia.</string>
+    <string name="export_diagnostic_dialog_description">Hamisha ripoti ya uchunguzi wa sensa. Ina matokeo ya kiufundi ya jaribio, lakini haina nenosiri au taarifa za kuingia.</string>
     <string name="export_sensor_info_dialog_title">Hamisha taarifa za sensa</string>
-    <string name="export_sensor_info_dialog_description">Taarifa zote za kihisi zitahamishwa kama faili ya maandishi.</string>
+    <string name="export_sensor_info_dialog_description">Hamisha taarifa zote za kihisi kama faili ya maandishi.</string>
     <string name="export_all_measurements_question">Hamisha vipimo vyote vilivyohifadhiwa?</string>
-    <string name="export_all_measurements_warning">Hakuna kipimo kilichochaguliwa, kwa hivyo vipimo vyote vilivyohifadhiwa vitahamishwa.</string>
+    <string name="export_all_measurements_warning">Hakuna kipimo kilichochaguliwa, kwa hivyo vipimo vyote vilivyohifadhiwa vinahamishwa.</string>
     <string name="export_all_alerts_question">Hamisha arifa zote zilizorekodiwa?</string>
-    <string name="export_all_alerts_warning">Hakuna arifa iliyochaguliwa, kwa hivyo arifa zote zilizorekodiwa zitahamishwa.</string>
+    <string name="export_all_alerts_warning">Hakuna arifa iliyochaguliwa, kwa hivyo arifa zote zilizorekodiwa zinahamishwa.</string>
     <string name="export_all">HAMISHA ZOTE</string>
     <string name="export_sensor_settings_description_complete">Urekebishaji, uchukuaji sampuli, chaguo za uendeshaji na mipangilio ya muunganisho.</string>
     <string name="export_variant_count_label">Idadi ya aina</string>
@@ -76,4 +76,5 @@
     <string name="share_chart_file_count">Faili za PNG: %1$d</string>
     <string name="share_readable_table_file_count">Faili za TXT: %1$d</string>
     <string name="export_file_count">Faili za %1$s: %2$d</string>
+    <string name="export_settings_description">Hamisha mipangilio iliyochaguliwa ya programu na vihisi.</string>
 </resources>

@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="record_archive_title">Akuisisi dan peringatan</string>
-    <string name="record_archive_description">Ekspor/impor akuisisi serta peringatan, termasuk sesinya.</string>
-    <string name="record_archive_export_description">Ekspor semua rekaman tersimpan dari jenis ini, termasuk sesi, sebagai berkas UVIR tanpa kata sandi.</string>
-    <string name="record_archive_import_description">Data akan ditambahkan ke arsip. Rekaman yang sudah ada dilewati. Sensor yang belum dikenal ditampilkan dengan ID perangkat keras hingga dipasangkan.</string>
+    <string name="record_archive_description">Ekspor/impor akuisisi atau peringatan dalam satu berkas, termasuk sesinya.</string>
+    <string name="record_archive_export_description">Ekspor semua rekaman dari jenis ini, termasuk sesi, dalam satu berkas.</string>
+    <string name="record_archive_import_description">Data ditambahkan ke arsip. Rekaman yang sudah ada dilewati. Sensor yang belum dikenal ditampilkan dengan ID perangkat keras hingga dipasangkan.</string>
     <string name="record_archive_import_summary">Rekaman: %1$d · Sesi: %2$d</string>
     <string name="record_archive_import_success">Diimpor: %1$d · Sudah ada: %2$d</string>
     <string name="record_archive_failed">Tidak dapat mentransfer rekaman. Periksa berkas dan jenis datanya.</string>
+    <string name="record_archive_export_acquisitions_title">Ekspor akuisisi</string>
+    <string name="record_archive_export_alerts_title">Ekspor peringatan</string>
 </resources>

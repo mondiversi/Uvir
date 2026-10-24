@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="record_archive_title">Измерения и оповещения</string>
-    <string name="record_archive_description">Экспорт/импорт измерений и оповещений, включая их сеансы.</string>
-    <string name="record_archive_export_description">Экспорт всех сохранённых записей этого типа, включая сеансы, в файл UVIR без пароля.</string>
-    <string name="record_archive_import_description">Данные будут добавлены в архив. Существующие записи пропускаются. Неизвестные датчики отображаются с аппаратным ID до привязки.</string>
+    <string name="record_archive_description">Экспорт/импорт измерений или оповещений в одном файле, включая их сеансы.</string>
+    <string name="record_archive_export_description">Экспортируйте все записи этого типа, включая сеансы, в один файл.</string>
+    <string name="record_archive_import_description">Данные добавляются в архив. Существующие записи пропускаются. Неизвестные датчики отображаются с аппаратным ID до привязки.</string>
     <string name="record_archive_import_summary">Записи: %1$d · Сеансы: %2$d</string>
     <string name="record_archive_import_success">Импортировано: %1$d · Уже есть: %2$d</string>
     <string name="record_archive_failed">Не удалось перенести записи. Проверьте файл и тип данных.</string>
+    <string name="record_archive_export_acquisitions_title">Экспорт измерений</string>
+    <string name="record_archive_export_alerts_title">Экспорт оповещений</string>
 </resources>

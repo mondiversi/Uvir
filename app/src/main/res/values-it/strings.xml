@@ -10,8 +10,8 @@
     <string name="optional_note">Nota acquisizione</string>
     <string name="note_example">Nota acquisizione</string>
     <string name="single_acquisition">Acquisizione singola</string>
-    <string name="single_acquisition_ends_manual_session">L’ultima sessione manuale verrà terminata.</string>
-    <string name="automatic_start_ends_manual_session">La sessione manuale in corso verrà terminata.</string>
+    <string name="single_acquisition_ends_manual_session">Termina l’ultima sessione manuale.</string>
+    <string name="automatic_start_ends_manual_session">Termina la sessione manuale in corso.</string>
     <string name="interrupt_manual_session_title">Interrompere la sessione manuale in corso?</string>
     <string name="interrupt_manual_session_message">Per avviare una sessione di acquisizione automatica devi interrompere la sessione di acquisizione manuale attualmente in corso.</string>
     <string name="interrupt_manual_session_action">INTERROMPI</string>
@@ -93,13 +93,13 @@
         <item quantity="many">(%1$d acquisizioni per %2$d varianti)</item>
         <item quantity="other">(%1$d acquisizioni per %2$d varianti)</item>
     </plurals>
-    <string name="session_variant_chart_files_info">Verranno generati %1$d file PNG, uno per ogni variante.</string>
+    <string name="session_variant_chart_files_info">Genera %1$d file PNG, uno per ogni variante.</string>
     <string name="share">CONDIVIDI</string>
     <string name="delete_selected_measurements_question">Eliminare le acquisizioni selezionate?</string>
     <plurals name="delete_selected_measurements_warning">
-        <item quantity="one">L’acquisizione selezionata verrà eliminata definitivamente.</item>
-        <item quantity="many">Le %1$d acquisizioni selezionate verranno eliminate definitivamente.</item>
-        <item quantity="other">Le %1$d acquisizioni selezionate verranno eliminate definitivamente.</item>
+        <item quantity="one">Elimina definitivamente l’acquisizione selezionata.</item>
+        <item quantity="many">Elimina definitivamente le %1$d acquisizioni selezionate.</item>
+        <item quantity="other">Elimina definitivamente le %1$d acquisizioni selezionate.</item>
     </plurals>
     <string name="acquisition_session_id_label">ID acquisizione / sessione</string>
     <string name="session_date_duration_events_label">Data e ora</string>
@@ -151,7 +151,7 @@
     <string name="automatic_stopping">Arresto dell’acquisizione in corso…</string>
     <string name="automatic_stop_failed">Impossibile fermare l’acquisizione automatica. Controlla la connessione al sensore e riprova.</string>
     <string name="stop_automatic_confirmation_title">Fermare l’acquisizione automatica?</string>
-    <string name="stop_automatic_confirmation_message">L’acquisizione automatica in corso verrà interrotta. Vuoi davvero fermarla?</string>
+    <string name="stop_automatic_confirmation_message">Interrompi l’acquisizione automatica in corso. Vuoi davvero fermarla?</string>
     <string name="continue_acquisition">CONTINUA</string>
     <string name="acquisition_parameters">Impostazioni</string>
     <string name="connectivity">Connettività</string>
@@ -196,11 +196,11 @@
     <string name="sensor_source_disabled_hint">Una sorgente disabilitata può essere riattivata tramite l’altra connessione wireless attiva. Se sono entrambe disabilitate, collega il sensore via USB.</string>
     <string name="sensor_power_off">SPEGNI SENSORE</string>
     <string name="sensor_power_off_title">Spegnere il sensore?</string>
-    <string name="sensor_power_off_message">Il sensore entrerà in arresto a basso consumo e non potrà essere riacceso dall’app. Per riattivarlo dovrai premere EN/RESET oppure scollegare e ricollegare l’alimentazione. Per confermare, tieni premuto SPEGNI per 5 secondi.</string>
+    <string name="sensor_power_off_message">Il sensore entra in arresto a basso consumo e non si riaccende dall’app. Per riattivarlo, premi EN/RESET oppure scollega e ricollega l’alimentazione. Per confermare, tieni premuto SPEGNI per 5 secondi.</string>
     <string name="sensor_power_off_confirm">SPEGNI</string>
     <string name="sensor_disassociate_action">DISSOCIA DALL’APP</string>
     <string name="sensor_disassociate_title">Dissociare il sensore?</string>
-    <string name="sensor_disassociate_message">La dissociazione rimuove il sensore dall’elenco selezionabile, senza cancellarne il nome o i record salvati. Potrai riassociarlo via USB in qualsiasi momento. Il sensore non verrà modificato. Per confermare, tieni premuto DISSOCIA per 5 secondi.</string>
+    <string name="sensor_disassociate_message">La dissociazione rimuove il sensore dall’elenco selezionabile, senza cancellarne il nome o i record salvati. Puoi riassociarlo via USB in qualsiasi momento. Il sensore resta invariato. Per confermare, tieni premuto DISSOCIA per 5 secondi.</string>
     <string name="sensor_selection_failed">Impossibile cambiare sensore. Riprova.</string>
     <string name="sensor_associate_action">Associa sensore</string>
     <string name="sensor_associate_usb_hint">Collega il nuovo sensore via USB. I sensori già associati rimangono nell’elenco.</string>
@@ -211,11 +211,11 @@
     <string name="expand_all_settings_content_description">Espandi tutte le impostazioni</string>
     <string name="collapse_all_settings_content_description">Comprimi tutte le impostazioni</string>
     <string name="restore_defaults_title">Ripristinare le impostazioni predefinite?</string>
-    <string name="restore_defaults_message">Tutte le impostazioni dell’app e del sensore verranno ripristinate ai valori predefiniti. Tutte le acquisizioni salvate, le allerte registrate e i log degli errori verranno eliminati definitivamente. Il sensore verrà quindi spento. Per confermare, tieni premuto RIPRISTINA TUTTO senza rilasciare per 10 secondi.</string>
+    <string name="restore_defaults_message">Ripristina tutte le impostazioni dell’app e del sensore ai valori predefiniti ed elimina definitivamente tutte le acquisizioni salvate, le allerte registrate e i log degli errori. Il sensore si spegne al termine. Per confermare, tieni premuto RIPRISTINA TUTTO senza rilasciare per 10 secondi.</string>
     <string name="restore_defaults_confirm">RIPRISTINA TUTTO</string>
     <string name="restore_defaults_failed">Impossibile completare il ripristino. Controlla la connessione del sensore e riprova.</string>
     <string name="restore_app_settings_title">Resettare l’app?</string>
-    <string name="restore_app_settings_message">Verranno eliminate tutte le impostazioni e tutti i dati salvati nell’app Uvir, comprese acquisizioni, allerte registrate, log degli errori, contatori, profili dei sensori e credenziali di connessione memorizzate. Il sensore non verrà modificato né spento. Per confermare, tieni premuto RESETTA senza rilasciare per 5 secondi.</string>
+    <string name="restore_app_settings_message">Elimina tutte le impostazioni e tutti i dati salvati nell’app Uvir, comprese acquisizioni, allerte registrate, log degli errori, contatori, profili dei sensori e credenziali di connessione memorizzate. Il sensore non viene modificato né spento. Per confermare, tieni premuto RESETTA senza rilasciare per 5 secondi.</string>
     <string name="restore_app_settings_confirm">RESETTA</string>
     <string name="restore_app_settings_failed">Impossibile resettare l’app.</string>
     <string name="sensor_status_no_sensor">Non connesso</string>
@@ -289,18 +289,18 @@
     <string name="invalid_threshold_alert">Usa limiti non negativi e imposta una ripetizione compresa tra 1 secondo e 24 ore.</string>
     <string name="stop_all_value_alerts_accessibility">Ferma la sessione di allerte</string>
     <string name="stop_all_value_alerts_title">Fermare la sessione di allerte?</string>
-    <string name="stop_all_value_alerts_message">La sessione di allerte in corso verrà terminata. Le allerte configurate e quelle già registrate verranno conservate.</string>
+    <string name="stop_all_value_alerts_message">Termina la sessione di allerte in corso. Le allerte configurate e quelle già registrate restano memorizzate.</string>
     <string name="stop_all_value_alerts_action">@string/stop</string>
     <string name="continue_alert_monitoring">CONTINUA</string>
     <string name="start_value_alert_session_accessibility">Avvia sessione di allerte</string>
     <string name="start_value_alert_session_title">Avvia sessione di allerte</string>
-    <string name="start_value_alert_session_message">Il monitoraggio verrà avviato usando le allerte configurate. Potrai aggiungerne o rimuoverne in seguito senza avviare una nuova sessione.</string>
+    <string name="start_value_alert_session_message">Avvia il monitoraggio usando le allerte configurate. Puoi aggiungerne o rimuoverne durante la sessione.</string>
     <string name="start_value_alert_session_action">AVVIA</string>
     <string name="threshold_rules_reset">RESETTA ALLERTE ATTIVE</string>
     <string name="threshold_rules_reset_confirm_action">RESETTA TUTTE</string>
     <string name="threshold_rules_reset_complete">Allerte attive resettate</string>
     <string name="threshold_rules_reset_confirmation_title">Resettare tutte le allerte attive?</string>
-    <string name="threshold_rules_reset_confirmation_message">Tutte le allerte attive verranno resettate. Per confermare, tieni premuto RESETTA TUTTE senza rilasciare per 2 secondi.</string>
+    <string name="threshold_rules_reset_confirmation_message">Resetta tutte le allerte attive. Per confermare, tieni premuto RESETTA TUTTE senza rilasciare per 2 secondi.</string>
     <string name="threshold_bell_configure">Configura le allerte del gruppo</string>
     <string name="threshold_bell_active">Una o più allerte attive nel gruppo</string>
     <string name="threshold_group_editor_title">Allerte per\n%1$s</string>
@@ -323,9 +323,9 @@
     <string name="select_alerts">Seleziona allerte</string>
     <string name="delete_selected_alerts_question">Eliminare le allerte selezionate?</string>
     <plurals name="delete_selected_alerts_warning">
-        <item quantity="one">L’allerta selezionata verrà eliminata definitivamente.</item>
-        <item quantity="many">Le %1$d allerte selezionate verranno eliminate definitivamente.</item>
-        <item quantity="other">Le %1$d allerte selezionate verranno eliminate definitivamente.</item>
+        <item quantity="one">Elimina definitivamente l’allerta selezionata.</item>
+        <item quantity="many">Elimina definitivamente le %1$d allerte selezionate.</item>
+        <item quantity="other">Elimina definitivamente le %1$d allerte selezionate.</item>
     </plurals>
     <string name="threshold_alerts_deleted">Allerte eliminate</string>
     <plurals name="threshold_alert_count_since">
@@ -335,7 +335,7 @@
     </plurals>
     <string name="threshold_alert_export_subject">Registro allerte Uvir</string>
     <string name="threshold_alert_log_delete_title">Eliminare tutte le allerte registrate?</string>
-    <string name="threshold_alert_log_delete_warning">Tutte le allerte registrate verranno eliminate definitivamente. Per confermare, tieni premuto ELIMINA TUTTO senza rilasciare per 2 secondi.</string>
+    <string name="threshold_alert_log_delete_warning">Elimina definitivamente tutte le allerte registrate. Per confermare, tieni premuto ELIMINA TUTTO senza rilasciare per 2 secondi.</string>
     <string name="threshold_alert_log_delete_all">ELIMINA TUTTO</string>
     <string name="threshold_alert_log_deleted">Allerte eliminate</string>
     <string name="threshold_log_violation_above">%1$s: %2$s µW/cm² ≥ %3$s µW/cm²</string>
@@ -391,22 +391,22 @@
     <string name="sensor_restore_action">RESETTA SENSORE</string>
     <string name="sensor_restore_inline_warning">Elimina i dati non sincronizzati presenti sul sensore, ne resetta configurazione e credenziali di connessione, quindi lo spegne.</string>
     <string name="sensor_restore_title">Resettare il sensore?</string>
-    <string name="sensor_restore_message">Verrà resettato soltanto il sensore. Le sue impostazioni e credenziali di connessione torneranno ai valori predefiniti; le acquisizioni, le allerte e gli errori non sincronizzati salvati sul sensore verranno eliminati, quindi il sensore verrà spento. Le impostazioni dell’app e i record già salvati in Uvir non verranno modificati. Per confermare, tieni premuto RESETTA senza rilasciare per 5 secondi.</string>
+    <string name="sensor_restore_message">Resetta soltanto il sensore. Le sue impostazioni e credenziali di connessione tornano ai valori predefiniti; le acquisizioni, le allerte e gli errori non sincronizzati salvati sul sensore vengono eliminati, quindi il sensore si spegne. Le impostazioni dell’app e i record già salvati in Uvir restano invariati. Per confermare, tieni premuto RESETTA senza rilasciare per 5 secondi.</string>
     <string name="sensor_restore_confirm">RESETTA</string>
     <string name="sensor_restore_failed">Impossibile resettare il sensore. Controlla la connessione e riprova.</string>
     <string name="reset_all_records_action">RESETTA CONTATORI</string>
     <string name="reset_all_records_warning">Elimina tutte le acquisizioni salvate e le allerte registrate, quindi resetta i relativi ID e quelli di sessione.</string>
     <string name="reset_all_records_confirmation_title">Resettare tutti i contatori?</string>
-    <string name="reset_all_records_confirmation_message">Tutte le acquisizioni salvate e le allerte registrate verranno eliminate definitivamente. I relativi ID e quelli di sessione ripartiranno dall’inizio. Per confermare, tieni premuto RESETTA TUTTI senza rilasciare per 5 secondi.</string>
+    <string name="reset_all_records_confirmation_message">Elimina definitivamente tutte le acquisizioni salvate e le allerte registrate. I relativi ID e quelli di sessione ripartono dall’inizio. Per confermare, tieni premuto RESETTA TUTTI senza rilasciare per 5 secondi.</string>
     <string name="all_counters_reset_complete">Record e contatori resettati</string>
     <string name="reset_acquisition_counters_action">AZZERA ACQUISIZIONI</string>
     <string name="reset_acquisition_counters_warning">Elimina definitivamente tutte le acquisizioni salvate e azzera gli ID delle acquisizioni e delle sessioni.</string>
     <string name="reset_acquisition_counters_confirmation_title">Azzerare le acquisizioni?</string>
-    <string name="reset_acquisition_counters_confirmation_message">Elimina definitivamente tutte le acquisizioni salvate e azzera gli ID delle acquisizioni e delle sessioni. Il registro allerte e le impostazioni delle allerte non verranno modificati. Per confermare, tieni premuto AZZERA TUTTE senza rilasciare per 2 secondi.</string>
+    <string name="reset_acquisition_counters_confirmation_message">Elimina definitivamente tutte le acquisizioni salvate e azzera gli ID delle acquisizioni e delle sessioni. Il registro allerte e le impostazioni delle allerte restano invariati. Per confermare, tieni premuto AZZERA TUTTE senza rilasciare per 2 secondi.</string>
     <string name="reset_alert_counters_action">AZZERA ALLERTE</string>
     <string name="reset_alert_counters_warning">Elimina definitivamente tutte le allerte registrate e azzera gli ID delle allerte.</string>
     <string name="reset_alert_counters_confirmation_title">Azzerare le allerte?</string>
-    <string name="reset_alert_counters_confirmation_message">Elimina definitivamente tutte le allerte registrate e azzera gli ID delle allerte. Le acquisizioni salvate e le impostazioni delle allerte non verranno modificate. Per confermare, tieni premuto AZZERA TUTTE senza rilasciare per 2 secondi.</string>
+    <string name="reset_alert_counters_confirmation_message">Elimina definitivamente tutte le allerte registrate e azzera gli ID delle allerte. Le acquisizioni salvate e le impostazioni delle allerte restano invariate. Per confermare, tieni premuto AZZERA TUTTE senza rilasciare per 2 secondi.</string>
     <string name="reset_confirmation_action">RESETTA TUTTI</string>
     <string name="reset_counters_stop_auto">Ferma l’acquisizione automatica prima di resettare i contatori.</string>
     <string name="acquisition_counters_reset_complete">Contatori acquisizioni azzerati</string>
@@ -415,7 +415,7 @@
     <string name="import_database">IMPORTA DATABASE</string>
     <string name="database_transfer_description">Esporta/ripristina l’intero database tramite un archivio ZIP cifrato.</string>
     <string name="import_database_dialog_title">Importare il database?</string>
-    <string name="import_database_dialog_description">I record e i profili dei sensori su questo telefono saranno sostituiti da quelli del backup. Il sensore fisico non verrà modificato. Inserisci la password dello ZIP per continuare.</string>
+    <string name="import_database_dialog_description">Sostituisci i record e i profili dei sensori su questo telefono con quelli del backup. Il sensore fisico resta invariato. Inserisci la password dello ZIP per continuare.</string>
     <string name="import_database_confirm">Importa</string>
     <string name="import_database_failed">Impossibile importare il database. Controlla password, archivio e versione del database.</string>
     <string name="import_database_success">Database importato.</string>
@@ -438,7 +438,7 @@
     <string name="relative_spectral_index">Rilevanza spettrale</string>
     <string name="relative_spectral_index_explanation">La scala 0–100 indica quanto lo spettro acquisito è concentrato nelle lunghezze d’onda pesate da questa stima. Descrive la composizione spettrale, non l’intensità totale. Non è una percentuale di danno né una soglia di sicurezza.</string>
     <string name="delete_all_measurements_question">Eliminare tutte le acquisizioni?</string>
-    <string name="delete_all_measurements_warning">Tutte le acquisizioni verranno eliminate definitivamente. Per confermare, tieni premuto ELIMINA TUTTO senza rilasciare per 2 secondi.</string>
+    <string name="delete_all_measurements_warning">Elimina definitivamente tutte le acquisizioni. Per confermare, tieni premuto ELIMINA TUTTO senza rilasciare per 2 secondi.</string>
     <string name="delete_all">ELIMINA TUTTO</string>
     <plurals name="measurement_count_since">
         <item quantity="one">%1$d salvata · dal %2$s</item>
@@ -447,7 +447,7 @@
     </plurals>
     <string name="no_saved_measurements">Nessuna acquisizione salvata.</string>
     <string name="delete_measurement_question">Eliminare l’acquisizione?</string>
-    <string name="delete_measurement_warning">Questa acquisizione verrà eliminata definitivamente.</string>
+    <string name="delete_measurement_warning">Elimina definitivamente questa acquisizione.</string>
     <string name="measurement_deleted">Acquisizione eliminata</string>
     <string name="measurements_deleted">Acquisizioni eliminate</string>
     <string name="delete">ELIMINA</string>
@@ -546,7 +546,7 @@
     <string name="session_chart_note">Nota sessione</string>
     <string name="session_chart_total_acquisitions">Totale acquisizioni</string>
     <string name="delete_acquisition_session_question">Eliminare questa sessione?</string>
-    <string name="delete_acquisition_session_warning">Tutte le acquisizioni della sessione verranno eliminate definitivamente.</string>
+    <string name="delete_acquisition_session_warning">Elimina definitivamente tutte le acquisizioni della sessione.</string>
     <string name="acquisition_session_deleted">Sessione eliminata</string>
     <string name="alert_session_chart_empty">Non sono disponibili dati per questa sessione di allerte.</string>
     <string name="alert_session_chart_unit">Valore · %1$s</string>
@@ -567,10 +567,10 @@
     <string name="alert_session_detail_values">Tipi di valori</string>
     <string name="alert_session_detail_total">Totale allerte</string>
     <string name="delete_alert_question">Eliminare questa allerta?</string>
-    <string name="delete_alert_warning">Questa allerta registrata verrà eliminata definitivamente.</string>
+    <string name="delete_alert_warning">Elimina definitivamente questa allerta registrata.</string>
     <string name="alert_deleted">Allerta eliminata</string>
     <string name="delete_alert_session_question">Eliminare questa sessione di allerte?</string>
-    <string name="delete_alert_session_warning">Tutte le allerte registrate nella sessione verranno eliminate definitivamente.</string>
+    <string name="delete_alert_session_warning">Elimina definitivamente tutte le allerte registrate nella sessione.</string>
     <string name="alert_session_deleted">Sessione di allerte eliminata</string>
     <string name="alert_chart_date">Registrata: %1$s</string>
     <string name="alert_chart_scale">Confronto con la soglia</string>
@@ -624,7 +624,7 @@
     <string name="offline_capacity_estimated_duration_unlimited">Autonomia stimata: illimitata</string>
     <string name="offline_capacity_conservative_hint">Stima prudenziale: più soglie superate insieme usano un solo record di allerta per intervallo di ripetizione.</string>
     <string name="offline_disconnection_description">La connessione al sensore è stata persa. La stima considera insieme l’acquisizione automatica e le allerte attive.</string>
-    <string name="offline_disconnection_recording_disabled">La registrazione autonoma offline è disattivata. Il sensore non conserverà nuove acquisizioni o allerte finché non verrà riconnesso.</string>
+    <string name="offline_disconnection_recording_disabled">La registrazione autonoma offline è disattivata. Il sensore non conserva nuove acquisizioni o allerte finché resta scollegato.</string>
     <string name="offline_disconnection_estimate_unavailable">L’ultimo stato del sensore non contiene informazioni sufficienti per stimare l’autonomia residua.</string>
     <string name="offline_duration_days_hours">%1$d g %2$d h</string>
     <string name="offline_duration_hours_minutes">%1$d h %2$d min</string>
@@ -752,7 +752,7 @@
     <string name="list_filter_no_results">Nessun risultato per questi filtri.</string>
     <string name="list_filter_count">%1$d di %2$d visualizzati</string>
     <string name="list_filter_share_question">Condividere tutti i risultati visualizzati?</string>
-    <string name="list_filter_share_warning">Nessun record selezionato. Verranno condivisi tutti i record che corrispondono ai filtri attuali.</string>
+    <string name="list_filter_share_warning">Nessun record selezionato. Condividi tutti i record che corrispondono ai filtri attuali.</string>
     <string name="settings_section_appearance">Aspetto</string>
     <string name="settings_section_language_formats">Unità</string>
     <string name="settings_section_sharing_export">Esportazione</string>
@@ -768,11 +768,11 @@
     <string name="confirmation_question_suffix">?</string>
     <string name="threshold_alerts_sound_description_v2">Scegli il segnale riprodotto dall’app quando viene registrata un’allerta.</string>
     <string name="list_filter_export_question">Esportare tutti i risultati visualizzati?</string>
-    <string name="list_filter_export_warning">Nessun record selezionato. Verranno esportati tutti i record che corrispondono ai filtri attuali.</string>
+    <string name="list_filter_export_warning">Nessun record selezionato. Esporta tutti i record che corrispondono ai filtri attuali.</string>
     <string name="settings_include_sensitive_information">Includi dati sensibili</string>
-    <string name="settings_include_sensitive_information_description">Include le credenziali di connessione e l’associazione del sensore, consentendo di ripristinarlo senza USB. Verrà richiesta una password di cifratura.</string>
+    <string name="settings_include_sensitive_information_description">Include le credenziali di connessione e l’associazione del sensore, consentendo di ripristinarlo senza USB. Richiede una password di cifratura.</string>
     <string name="settings_encryption_password_title">Password di cifratura</string>
-    <string name="settings_encryption_password_description">Usa almeno 8 caratteri. La stessa password servirà per importare successivamente il backup.</string>
+    <string name="settings_encryption_password_description">Usa almeno 8 caratteri. Usa la stessa password per importare successivamente il backup.</string>
     <string name="settings_encryption_password">Password di cifratura</string>
     <string name="settings_encryption_password_confirm">Conferma password</string>
     <string name="settings_encryption_password_too_short">Usa almeno %1$d caratteri.</string>
@@ -818,5 +818,5 @@
     <string name="alert_registration_count">Numero di registrazioni</string>
     <string name="alert_configure_first">Configura almeno un valore prima di avviare.</string>
     <string name="sensor_simulation_disable">Disattiva</string>
-    <string name="settings_import_confirmation_description">Le impostazioni contenute nei file selezionati sostituiranno quelle attuali.</string>
+    <string name="settings_import_confirmation_description">Sostituisci le impostazioni attuali con quelle contenute nei file selezionati.</string>
 </resources>

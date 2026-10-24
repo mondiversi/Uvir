@@ -46,7 +46,7 @@
     <string name="debug_simulate_events">SYMULUJ ZDARZENIA</string>
     <string name="debug_simulate_events_description">Dodaj symulowane pomiary i alerty.</string>
     <string name="debug_simulate_events_question">Symulować zdarzenia testowe?</string>
-    <string name="debug_simulate_events_confirmation">Do bazy danych zostaną dodane testowe pomiary i alerty. Istniejące rekordy nie zostaną zmienione.</string>
+    <string name="debug_simulate_events_confirmation">Do bazy danych są dodawane testowe pomiary i alerty. Istniejące rekordy nie są zmieniane.</string>
     <string name="debug_simulate_events_completed">Dodano %1$d pomiarów i %2$d alertów</string>
     <string name="debug_simulation_note">Symulacja diagnostyczna</string>
 </resources>

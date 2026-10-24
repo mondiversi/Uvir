@@ -13,7 +13,7 @@
     <string name="export_sensor_settings_description">Calibración, muestreo y opciones operativas. No incluye credenciales ni direcciones de red.</string>
     <string name="share_measurements">Compartir adquisiciones</string>
     <string name="share_all_measurements_question">¿Compartir todas las adquisiciones guardadas?</string>
-    <string name="share_all_measurements_warning">No hay adquisiciones seleccionadas, por lo que se compartirán todas las adquisiciones guardadas.</string>
+    <string name="share_all_measurements_warning">No hay adquisiciones seleccionadas, por lo que se comparten todas las adquisiciones guardadas.</string>
     <string name="share_as_csv">Hoja de cálculo (CSV)</string>
     <string name="share_as_readable_table">Tabla legible (TXT)</string>
     <string name="share_readable_table_by_acquisition">Por adquisición</string>
@@ -41,7 +41,7 @@
     <string name="share_subject">Adquisiciones Uvir</string>
     <string name="share_error">No se pudieron compartir las adquisiciones.</string>
     <string name="share_all_alerts_question">¿Compartir todas las alertas registradas?</string>
-    <string name="share_all_alerts_warning">No hay ninguna alerta seleccionada, por lo que se compartirán todas las alertas registradas.</string>
+    <string name="share_all_alerts_warning">No hay ninguna alerta seleccionada, por lo que se comparten todas las alertas registradas.</string>
     <string name="export_database_title">Exportar base de datos</string>
     <string name="export_database">EXPORTAR BASE DE DATOS</string>
     <string name="export_database_subject">Base de datos de Uvir</string>
@@ -54,17 +54,17 @@
     <string name="export_format_preview_heading">Vista previa</string>
     <string name="export_format_profile_summary">Idioma: %1$s · Números: %2$s · Fecha: %3$s · Hora: %4$s · Irradiancia: %5$s</string>
     <string name="export_database_dialog_title">Exportar la base de datos</string>
-    <string name="export_database_dialog_description">Se exportará toda la base de datos de la aplicación almacenada en este teléfono, incluidas las adquisiciones y las alertas guardadas.</string>
+    <string name="export_database_dialog_description">Exporta toda la base de datos de la aplicación almacenada en este teléfono, incluidas las adquisiciones y las alertas guardadas.</string>
     <string name="export_error_log_dialog_title">Exportar el registro de errores</string>
-    <string name="export_error_log_dialog_description">El registro de errores de la aplicación almacenado en este teléfono se exportará como archivo técnico. No incluye adquisiciones guardadas ni credenciales.</string>
+    <string name="export_error_log_dialog_description">Exporta el registro de errores de la aplicación como archivo técnico. No incluye adquisiciones guardadas ni credenciales.</string>
     <string name="export_diagnostic_dialog_title">Exportar el informe de diagnóstico</string>
-    <string name="export_diagnostic_dialog_description">Se exportará el informe de diagnóstico del sensor. Contiene resultados técnicos de las pruebas, pero no contraseñas ni credenciales.</string>
+    <string name="export_diagnostic_dialog_description">Exporta el informe de diagnóstico del sensor. Contiene resultados técnicos de las pruebas, pero no contraseñas ni credenciales.</string>
     <string name="export_sensor_info_dialog_title">Exportar la información del sensor</string>
-    <string name="export_sensor_info_dialog_description">Toda la información del sensor se exportará como archivo de texto.</string>
+    <string name="export_sensor_info_dialog_description">Exporta toda la información del sensor como archivo de texto.</string>
     <string name="export_all_measurements_question">¿Exportar todas las adquisiciones guardadas?</string>
-    <string name="export_all_measurements_warning">No hay adquisiciones seleccionadas, por lo que se exportarán todas las adquisiciones guardadas.</string>
+    <string name="export_all_measurements_warning">No hay adquisiciones seleccionadas, por lo que se exportan todas las adquisiciones guardadas.</string>
     <string name="export_all_alerts_question">¿Exportar todas las alertas registradas?</string>
-    <string name="export_all_alerts_warning">No hay alertas seleccionadas, por lo que se exportarán todas las alertas registradas.</string>
+    <string name="export_all_alerts_warning">No hay alertas seleccionadas, por lo que se exportan todas las alertas registradas.</string>
     <string name="export_all">EXPORTAR TODO</string>
     <string name="export_sensor_settings_description_complete">Calibración, muestreo, opciones operativas y ajustes de conexión.</string>
     <string name="export_variant_count_label">Número de variantes</string>
@@ -76,4 +76,5 @@
     <string name="share_chart_file_count">Archivos PNG: %1$d</string>
     <string name="share_readable_table_file_count">Archivos TXT: %1$d</string>
     <string name="export_file_count">Archivos %1$s: %2$d</string>
+    <string name="export_settings_description">Exporta los ajustes seleccionados de la aplicación y de los sensores.</string>
 </resources>

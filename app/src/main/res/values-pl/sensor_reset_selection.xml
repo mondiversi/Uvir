@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="sensor_reset_selection_title">Zresetować wybrane czujniki?</string>
-    <string name="sensor_reset_selection_message">Wybierz czujniki do zresetowania. Ich ustawienia, dane uwierzytelniania i niezsynchronizowane dane zostaną usunięte, a czujniki wyłączone. Dane w aplikacji pozostaną bez zmian. Można wybrać tylko połączone czujniki bez aktywności w toku.</string>
+    <string name="sensor_reset_selection_message">Wybierz czujniki do zresetowania. Ich ustawienia, dane uwierzytelniania i niezsynchronizowane dane są usuwane, a czujniki wyłączone. Dane w aplikacji pozostają bez zmian. Można wybrać tylko połączone czujniki bez aktywności w toku.</string>
     <string name="sensor_reset_selection_failed">Resetowanie nie powiodło się: %1$s. Sprawdź połączenie i spróbuj ponownie.</string>
 </resources>

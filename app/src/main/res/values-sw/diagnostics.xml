@@ -46,7 +46,7 @@
     <string name="debug_simulate_events">IGA MATUKIO</string>
     <string name="debug_simulate_events_description">Ongeza vipimo na tahadhari za kuiga.</string>
     <string name="debug_simulate_events_question">Uige matukio ya majaribio?</string>
-    <string name="debug_simulate_events_confirmation">Vipimo na tahadhari za majaribio zitaongezwa kwenye hifadhidata. Rekodi zilizopo hazitabadilishwa.</string>
+    <string name="debug_simulate_events_confirmation">Vipimo na tahadhari za majaribio zinaongezwa kwenye hifadhidata. Rekodi zilizopo hazibadilishwi.</string>
     <string name="debug_simulate_events_completed">Vipimo %1$d na tahadhari %2$d zimeongezwa</string>
     <string name="debug_simulation_note">Uigaji wa utatuzi</string>
 </resources>

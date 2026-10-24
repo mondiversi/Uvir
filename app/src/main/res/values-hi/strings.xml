@@ -12,8 +12,8 @@
     <string name="optional_note">अधिग्रहण नोट</string>
     <string name="note_example">अधिग्रहण नोट</string>
     <string name="single_acquisition">एकल अधिग्रहण</string>
-    <string name="single_acquisition_ends_manual_session">अंतिम मैनुअल सत्र समाप्त होगा।</string>
-    <string name="automatic_start_ends_manual_session">वर्तमान मैनुअल सत्र समाप्त होगा।</string>
+    <string name="single_acquisition_ends_manual_session">अंतिम मैनुअल सत्र समाप्त होता है।</string>
+    <string name="automatic_start_ends_manual_session">वर्तमान मैनुअल सत्र समाप्त होता है।</string>
     <string name="interrupt_manual_session_title">वर्तमान मैनुअल सत्र रोकना चाहते हैं?</string>
     <string name="interrupt_manual_session_message">स्वचालित अधिग्रहण सत्र शुरू करने के लिए, आपको वर्तमान में चल रहे मैनुअल अधिग्रहण सत्र को रोकना होगा।</string>
     <string name="interrupt_manual_session_action">रोकें</string>
@@ -80,12 +80,12 @@
         <item quantity="one">(%2$d वेरिएंट के लिए %1$d अधिग्रहण)</item>
         <item quantity="other">(%2$d वेरिएंट के लिए %1$d अधिग्रहण)</item>
     </plurals>
-    <string name="session_variant_chart_files_info">प्रत्येक वेरिएंट के लिए एक, कुल %1$d PNG फ़ाइलें बनाई जाएँगी।</string>
+    <string name="session_variant_chart_files_info">प्रत्येक वेरिएंट के लिए एक, कुल %1$d PNG फ़ाइलें बनाई जाती हैं।</string>
     <string name="share">शेयर करें</string>
     <string name="delete_selected_measurements_question">चयनित अधिग्रहण हटाएँ?</string>
     <plurals name="delete_selected_measurements_warning">
-        <item quantity="one">%1$d चयनित अधिग्रहण स्थायी रूप से हटा दिया जाएगा।</item>
-        <item quantity="other">%1$d चयनित अधिग्रहण स्थायी रूप से हटा दिए जाएंगे।</item>
+        <item quantity="one">%1$d चयनित अधिग्रहण स्थायी रूप से हटा दिया जाता है।</item>
+        <item quantity="other">%1$d चयनित अधिग्रहण स्थायी रूप से हटा दिए जाते हैं।</item>
     </plurals>
     <string name="acquisition_session_id_label">अधिग्रहण / सत्र ID</string>
     <string name="session_date_duration_events_label">दिनांक और समय</string>
@@ -136,7 +136,7 @@
     <string name="automatic_stopping">स्वचालित अधिग्रहण रोकना…</string>
     <string name="automatic_stop_failed">स्वचालित अधिग्रहण रोकने में असमर्थ। सेंसर कनेक्शन की जाँच करें और पुनः प्रयास करें।</string>
     <string name="stop_automatic_confirmation_title">स्वचालित अधिग्रहण रोकें?</string>
-    <string name="stop_automatic_confirmation_message">वर्तमान स्वचालित अधिग्रहण को रोक दिया जाएगा। जारी रखना?</string>
+    <string name="stop_automatic_confirmation_message">वर्तमान स्वचालित अधिग्रहण को रोक दिया जाता है। जारी रखना?</string>
     <string name="continue_acquisition">चलाते रहें</string>
     <string name="acquisition_parameters">सेटिंग्स</string>
     <string name="connectivity">कनेक्टिविटी</string>
@@ -167,11 +167,11 @@
     <string name="sensor_source_disabled_hint">एक अक्षम स्रोत को अन्य सक्रिय वायरलेस कनेक्शन के माध्यम से पुनः सक्षम किया जा सकता है। यदि दोनों अक्षम हैं, तो सेंसर को USB के माध्यम से कनेक्ट करें।</string>
     <string name="sensor_power_off">सेंसर बंद करें</string>
     <string name="sensor_power_off_title">सेंसर को बंद करें?</string>
-    <string name="sensor_power_off_message">सेंसर कम पावर शटडाउन में चला जाएगा और ऐप से इसे फिर से चालू नहीं किया जा सकता। इसे फिर से चालू करने के लिए, EN/RESET दबाएँ या इसकी पावर को डिस्कनेक्ट करके पुनः कनेक्ट करें। पुष्टि करने के लिए, POWER OFF को 5 सेकंड के लिए दबाए रखें।</string>
+    <string name="sensor_power_off_message">सेंसर कम पावर शटडाउन में चला जाता है और ऐप से इसे फिर से चालू नहीं किया जा सकता। इसे फिर से चालू करने के लिए, EN/RESET दबाएँ या इसकी पावर को डिस्कनेक्ट करके पुनः कनेक्ट करें। पुष्टि करने के लिए, POWER OFF को 5 सेकंड के लिए दबाए रखें।</string>
     <string name="sensor_power_off_confirm">बंद करें</string>
     <string name="sensor_disassociate_action">ऐप से अलग करें</string>
     <string name="sensor_disassociate_title">सेंसर को अलग करें?</string>
-    <string name="sensor_disassociate_message">अलग करने पर सेंसर चयन सूची से हटेगा, लेकिन उसका नाम और सहेजे गए रिकॉर्ड नहीं मिटेंगे। आप उसे किसी भी समय USB से फिर जोड़ सकते हैं। सेंसर में कोई बदलाव नहीं होगा। पुष्टि के लिए अलग करें को 5 सेकंड दबाए रखें।</string>
+    <string name="sensor_disassociate_message">अलग करने पर सेंसर चयन सूची से हटेगा, लेकिन उसका नाम और सहेजे गए रिकॉर्ड नहीं मिटेंगे। आप उसे किसी भी समय USB से फिर जोड़ सकते हैं। सेंसर में कोई बदलाव नहीं होता है। पुष्टि के लिए अलग करें को 5 सेकंड दबाए रखें।</string>
     <string name="sensor_selection_failed">सेंसर बदला नहीं जा सका। फिर कोशिश करें।</string>
     <string name="sensor_associate_action">सेंसर जोड़ें</string>
     <string name="sensor_associate_usb_hint">नए सेंसर को USB से जोड़ें। पहले से जुड़े सेंसर सूची में बने रहेंगे।</string>
@@ -182,7 +182,7 @@
     <string name="expand_all_settings_content_description">सभी सेटिंग्स विस्तार करें</string>
     <string name="collapse_all_settings_content_description">सभी सेटिंग्स संक्षेप करें</string>
     <string name="restore_defaults_title">डिफ़ॉल्ट सेटिंग्स पुनर्स्थापित करें?</string>
-    <string name="restore_defaults_message">सभी ऐप और सेंसर सेटिंग्स को उनके डिफ़ॉल्ट मानों पर पुनर्स्थापित कर दिया जाएगा। सभी सहेजे गए अधिग्रहण, रिकॉर्ड किए गए अलर्ट और त्रुटि लॉग स्थायी रूप से हटा दिए जाएंगे। इसके बाद सेंसर बंद हो जाएगा। पुष्टि करने के लिए, RESTORE ALL को लगातार 10 सेकंड तक दबाए रखें।</string>
+    <string name="restore_defaults_message">सभी ऐप और सेंसर सेटिंग्स को उनके डिफ़ॉल्ट मानों पर पुनर्स्थापित कर दिया जाता है। सभी सहेजे गए अधिग्रहण, रिकॉर्ड किए गए अलर्ट और त्रुटि लॉग स्थायी रूप से हटा दिए जाते हैं। इसके बाद सेंसर बंद हो जाता है। पुष्टि करने के लिए, RESTORE ALL को लगातार 10 सेकंड तक दबाए रखें।</string>
     <string name="restore_defaults_confirm">सभी पुनर्स्थापित करें</string>
     <string name="restore_defaults_failed">पूर्ण पुनर्स्थापना नहीं की जा सकी। सेंसर कनेक्शन जांचें और फिर से प्रयास करें।</string>
     <string name="sensor_wifi_esp32_description">ऐप और सेंसर एक ही Wi-Fi नेटवर्क का उपयोग करने पर संचार करते हैं।</string>
@@ -254,18 +254,18 @@
     <string name="invalid_threshold_alert">असकारात्मक सीमाओं का उपयोग न करें और 1 सेकंड से 24 घंटे के बीच पुनरावृत्ति अंतराल सेट करें।</string>
     <string name="stop_all_value_alerts_accessibility">अलर्ट सत्र रोकें</string>
     <string name="stop_all_value_alerts_title">अलर्ट सत्र रोकें?</string>
-    <string name="stop_all_value_alerts_message">वर्तमान अलर्ट सत्र समाप्त हो जाएगा। कॉन्फ़िगर किए गए और दर्ज किए गए अलर्ट सुरक्षित रहेंगे।</string>
+    <string name="stop_all_value_alerts_message">वर्तमान अलर्ट सत्र समाप्त हो जाता है। कॉन्फ़िगर किए गए और दर्ज किए गए अलर्ट सुरक्षित रहते हैं।</string>
     <string name="stop_all_value_alerts_action">@string/stop</string>
     <string name="continue_alert_monitoring">जारी रखें</string>
     <string name="start_value_alert_session_accessibility">अलर्ट सत्र शुरू करें</string>
     <string name="start_value_alert_session_title">अलर्ट सत्र शुरू करें</string>
-    <string name="start_value_alert_session_message">निगरानी कॉन्फ़िगर की गई अलर्ट का उपयोग करके शुरू की जाएगी। आप बाद में नई सत्र शुरू किए बिना चेतावनियां जोड़ या हटा सकते हैं।</string>
+    <string name="start_value_alert_session_message">निगरानी कॉन्फ़िगर की गई अलर्ट का उपयोग करके शुरू की जाती है। आप बाद में नई सत्र शुरू किए बिना चेतावनियां जोड़ या हटा सकते हैं।</string>
     <string name="start_value_alert_session_action">प्रारंभ करें</string>
     <string name="threshold_rules_reset">सक्रिय चेतावनियों को रीसेट करें</string>
     <string name="threshold_rules_reset_confirm_action">सभी को रीसेट करें</string>
     <string name="threshold_rules_reset_complete">सक्रिय चेतावनियां रीसेट कर दी गई हैं</string>
     <string name="threshold_rules_reset_confirmation_title">सभी सक्रिय चेतावनियों को रीसेट करें?</string>
-    <string name="threshold_rules_reset_confirmation_message">सभी सक्रिय चेतावनियां रीसेट कर दी जाएंगी। पुष्टि करने के लिए, RESET ALL को लगातार 2 सेकंड के लिए दबाकर रखें।</string>
+    <string name="threshold_rules_reset_confirmation_message">सभी सक्रिय चेतावनियां रीसेट कर दी जाती हैं। पुष्टि करने के लिए, RESET ALL को लगातार 2 सेकंड के लिए दबाकर रखें।</string>
     <string name="threshold_bell_configure">इस समूह के लिए चेतावनियां कॉन्फ़िगर करें</string>
     <string name="threshold_bell_active">इस समूह में एक या अधिक सक्रिय चेतावनियां</string>
     <string name="threshold_group_editor_title">अलर्ट \n%1$s</string>
@@ -288,8 +288,8 @@
     <string name="select_alerts">अलर्ट चुनें</string>
     <string name="delete_selected_alerts_question">चयनित अलर्ट हटाएँ?</string>
     <plurals name="delete_selected_alerts_warning">
-        <item quantity="one">%1$d चयनित अलर्ट स्थायी रूप से हटा दिया जाएगा।</item>
-        <item quantity="other">%1$d चयनित अलर्ट स्थायी रूप से हटा दिए जाएंगे।</item>
+        <item quantity="one">%1$d चयनित अलर्ट स्थायी रूप से हटा दिया जाता है।</item>
+        <item quantity="other">%1$d चयनित अलर्ट स्थायी रूप से हटा दिए जाते हैं।</item>
     </plurals>
     <string name="threshold_alerts_deleted">अलर्ट हटा दिए गए</string>
     <plurals name="threshold_alert_count_since">
@@ -298,7 +298,7 @@
     </plurals>
     <string name="threshold_alert_export_subject">Uvir अलर्ट लॉग</string>
     <string name="threshold_alert_log_delete_title">सभी रिकॉर्ड किए गए अलर्ट हटाएँ?</string>
-    <string name="threshold_alert_log_delete_warning">सभी रिकॉर्ड किए गए अलर्ट स्थायी रूप से हटा दिए जाएंगे। पुष्टि करने के लिए, DELETE ALL को लगातार 2 सेकंड के लिए दबाकर रखें।</string>
+    <string name="threshold_alert_log_delete_warning">सभी रिकॉर्ड किए गए अलर्ट स्थायी रूप से हटा दिए जाते हैं। पुष्टि करने के लिए, DELETE ALL को लगातार 2 सेकंड के लिए दबाकर रखें।</string>
     <string name="threshold_alert_log_delete_all">सभी हटाएँ</string>
     <string name="threshold_alert_log_deleted">अलर्ट हटाए गए</string>
     <string name="threshold_log_violation_above">%1$s: %2$s µW/cm² ≥ %3$s µW/cm²</string>
@@ -347,16 +347,16 @@
     <string name="reset_all_records_action">काउंटर्स रीसेट करें</string>
     <string name="reset_all_records_warning">सभी सहेजे गए अधिग्रहण और रिकॉर्ड किए गए अलर्ट हटा देता है, फिर उनके ID और सत्र ID को रीसेट करता है।</string>
     <string name="reset_all_records_confirmation_title">सभी काउंटर्स रीसेट करें?</string>
-    <string name="reset_all_records_confirmation_message">सभी सहेजे गए अधिग्रहण और रिकॉर्ड किए गए अलर्ट स्थायी रूप से हटा दिए जाएंगे। उनके ID और सत्र ID फिर से शुरुआत से शुरू होंगे। पुष्टि करने के लिए, RESET ALL को लगातार 5 सेकंड तक दबाकर रखें।</string>
+    <string name="reset_all_records_confirmation_message">सभी सहेजे गए अधिग्रहण और रिकॉर्ड किए गए अलर्ट स्थायी रूप से हटा दिए जाते हैं। उनके ID और सत्र ID फिर से शुरुआत से शुरू होते हैं। पुष्टि करने के लिए, RESET ALL को लगातार 5 सेकंड तक दबाकर रखें।</string>
     <string name="all_counters_reset_complete">रिकॉर्ड और काउंटर्स रीसेट हो गए</string>
     <string name="reset_acquisition_counters_action">अधिग्रहण रीसेट करें</string>
     <string name="reset_acquisition_counters_warning">सभी सहेजे गए अधिग्रहणों को स्थायी रूप से हटाता है और अधिग्रहण और सत्र आईडी को रीसेट करता है।</string>
     <string name="reset_acquisition_counters_confirmation_title">अधिग्रहण रीसेट करें?</string>
-    <string name="reset_acquisition_counters_confirmation_message">सभी सहेजे गए अधिग्रहणों को स्थायी रूप से हटाता है और अधिग्रहण और सत्र आईडी को रीसेट करता है। अलर्ट लॉग और अलर्ट सेटिंग्स में कोई बदलाव नहीं होगा। पुष्टि करने के लिए, RESET ALL को लगातार 2 सेकंड के लिए दबाए रखें।</string>
+    <string name="reset_acquisition_counters_confirmation_message">सभी सहेजे गए अधिग्रहणों को स्थायी रूप से हटाता है और अधिग्रहण और सत्र आईडी को रीसेट करता है। अलर्ट लॉग और अलर्ट सेटिंग्स में कोई बदलाव नहीं होता है। पुष्टि करने के लिए, RESET ALL को लगातार 2 सेकंड के लिए दबाए रखें।</string>
     <string name="reset_alert_counters_action">अलर्ट रीसेट करें</string>
     <string name="reset_alert_counters_warning">सभी रिकॉर्डेड अलर्ट्स को स्थायी रूप से हटाता है और अलर्ट आईडी को रीसेट करता है।</string>
     <string name="reset_alert_counters_confirmation_title">अलर्ट्स रीसेट करें?</string>
-    <string name="reset_alert_counters_confirmation_message">सभी रिकॉर्ड की गई अलर्ट्स को स्थायी रूप से हटा देता है और अलर्ट आईडी को रीसेट करता है। सेव किए गए अधिग्रहण और अलर्ट सेटिंग्स में कोई बदलाव नहीं होगा। पुष्टि करने के लिए, लगातार 2 सेकंड के लिए RESET ALL दबाकर रखें।</string>
+    <string name="reset_alert_counters_confirmation_message">सभी रिकॉर्ड की गई अलर्ट्स को स्थायी रूप से हटा देता है और अलर्ट आईडी को रीसेट करता है। सेव किए गए अधिग्रहण और अलर्ट सेटिंग्स में कोई बदलाव नहीं होता है। पुष्टि करने के लिए, लगातार 2 सेकंड के लिए RESET ALL दबाकर रखें।</string>
     <string name="reset_confirmation_action">सभी रीसेट करें</string>
     <string name="reset_counters_stop_auto">काउंटर रीसेट करने से पहले स्वचालित अधिग्रहण रोकें।</string>
     <string name="acquisition_counters_reset_complete">अधिग्रहण काउंटर रीसेट हो गए</string>
@@ -365,7 +365,7 @@
     <string name="import_database">डेटाबेस आयात करें</string>
     <string name="database_transfer_description">एन्क्रिप्टेड ZIP बैकअप से पूरा डेटाबेस निर्यात/बहाल करें।</string>
     <string name="import_database_dialog_title">डेटाबेस आयात करें?</string>
-    <string name="import_database_dialog_description">इस फ़ोन के रिकॉर्ड और सेंसर प्रोफ़ाइल बैकअप वाले डेटा से बदल दिए जाएँगे। वास्तविक सेंसर में बदलाव नहीं होगा। जारी रखने के लिए ZIP का पासवर्ड डालें।</string>
+    <string name="import_database_dialog_description">इस फ़ोन के रिकॉर्ड और सेंसर प्रोफ़ाइल बैकअप वाले डेटा से बदल दिए जाते हैं। वास्तविक सेंसर में बदलाव नहीं होता है। जारी रखने के लिए ZIP का पासवर्ड डालें।</string>
     <string name="import_database_confirm">आयात करें</string>
     <string name="import_database_failed">डेटाबेस आयात नहीं हो सका। पासवर्ड, फ़ाइल और डेटाबेस संस्करण जाँचें।</string>
     <string name="import_database_success">डेटाबेस आयात हो गया।</string>
@@ -388,7 +388,7 @@
     <string name="relative_spectral_index">स्पेक्ट्रल प्रासंगिकता</string>
     <string name="relative_spectral_index_explanation">0–100 यह दिखाता है कि अधिग्रहित स्पेक्ट्रम इस अनुमान द्वारा भारित तरंग दैर्ध्य में कितनी केंद्रित है। यह स्पेक्ट्रल संरचना का वर्णन करता है, कुल तीव्रता का नहीं। यह क्षति का प्रतिशत या सुरक्षा सीमा नहीं है।</string>
     <string name="delete_all_measurements_question">क्या सभी सहेजे गए अधिग्रहण हटाएँ?</string>
-    <string name="delete_all_measurements_warning">सभी सहेजे गए अधिग्रहण स्थायी रूप से हटा दिए जाएंगे। पुष्टि करने के लिए, DELETE ALL को लगातार 2 सेकंड के लिए दबाएँ और रखें।</string>
+    <string name="delete_all_measurements_warning">सभी सहेजे गए अधिग्रहण स्थायी रूप से हटा दिए जाते हैं। पुष्टि करने के लिए, DELETE ALL को लगातार 2 सेकंड के लिए दबाएँ और रखें।</string>
     <string name="delete_all">सभी हटाएँ</string>
     <plurals name="measurement_count_since">
         <item quantity="one">%1$d सहेजा गया · %2$s से</item>
@@ -396,7 +396,7 @@
     </plurals>
     <string name="no_saved_measurements">कोई अधिग्रहण नहीं सहेजा गया।</string>
     <string name="delete_measurement_question">क्या इस अधिग्रहण को हटाएँ?</string>
-    <string name="delete_measurement_warning">यह अधिग्रहण स्थायी रूप से हटा दिया जाएगा।</string>
+    <string name="delete_measurement_warning">यह अधिग्रहण स्थायी रूप से हटा दिया जाता है।</string>
     <string name="measurement_deleted">अधिग्रहण हटाया गया</string>
     <string name="measurements_deleted">अधिग्रहण हटा दिए गए</string>
     <string name="delete">हटाएँ</string>
@@ -494,7 +494,7 @@
     <string name="session_chart_note">सत्र नोट</string>
     <string name="session_chart_total_acquisitions">कुल अधिग्रहण</string>
     <string name="delete_acquisition_session_question">क्या आप इस सत्र को हटाना चाहते हैं?</string>
-    <string name="delete_acquisition_session_warning">इस सत्र में सभी अधिग्रहण स्थायी रूप से हटाए जाएंगे।</string>
+    <string name="delete_acquisition_session_warning">इस सत्र में सभी अधिग्रहण स्थायी रूप से हटाए जाते हैं।</string>
     <string name="acquisition_session_deleted">सत्र हटाया गया</string>
     <string name="alert_session_chart_empty">इस अलर्ट सत्र के लिए कोई डेटा उपलब्ध नहीं है।</string>
     <string name="alert_session_chart_unit">मान · %1$s</string>
@@ -514,10 +514,10 @@
     <string name="alert_session_detail_values">मूल्य प्रकार</string>
     <string name="alert_session_detail_total">कुल अलर्ट</string>
     <string name="delete_alert_question">क्या इस अलर्ट को हटाया जाए?</string>
-    <string name="delete_alert_warning">यह दर्ज किया गया अलर्ट स्थायी रूप से हटा दिया जाएगा।</string>
+    <string name="delete_alert_warning">यह दर्ज किया गया अलर्ट स्थायी रूप से हटा दिया जाता है।</string>
     <string name="alert_deleted">अलर्ट हटा दिया गया</string>
     <string name="delete_alert_session_question">क्या इस अलर्ट सत्र को हटाया जाए?</string>
-    <string name="delete_alert_session_warning">इस सत्र में सभी दर्ज अलर्ट स्थायी रूप से हटा दिए जाएंगे।</string>
+    <string name="delete_alert_session_warning">इस सत्र में सभी दर्ज अलर्ट स्थायी रूप से हटा दिए जाते हैं।</string>
     <string name="alert_session_deleted">अलर्ट सत्र हटा दिया गया</string>
     <string name="alert_chart_date">दर्ज किया गया: %1$s</string>
     <string name="alert_chart_scale">सीमा तुलना</string>
@@ -571,7 +571,7 @@
     <string name="offline_capacity_estimated_duration_unlimited">अनुमानित स्वायत्तता: असीमित</string>
     <string name="offline_capacity_conservative_hint">संरक्षणात्मक अनुमान: एक ही समय में थ्रेशोल्ड उल्लंघन एक ही अलर्ट रिकॉर्ड प्रति पुनरावृत्ति अंतराल का उपयोग करते हैं।</string>
     <string name="offline_disconnection_description">सेंसर कनेक्शन खो गया। यह अनुमान सक्रिय स्वचालित अधिग्रहण और अलर्ट को जोड़ता है।</string>
-    <string name="offline_disconnection_recording_disabled">ऑफ़लाइन स्वायत्त रिकॉर्डिंग अक्षम है। सेंसर नए अधिग्रहण या अलर्ट तब तक संग्रहित नहीं करेगा जब तक यह पुन: कनेक्ट नहीं हो जाता।</string>
+    <string name="offline_disconnection_recording_disabled">ऑफ़लाइन स्वायत्त रिकॉर्डिंग अक्षम है। सेंसर नए अधिग्रहण या अलर्ट तब तक संग्रहित नहीं करता है जब तक यह पुन: कनेक्ट नहीं हो जाता।</string>
     <string name="offline_disconnection_estimate_unavailable">नवीनतम सेंसर स्थिति में शेष स्वायत्तता का अनुमान लगाने के लिए पर्याप्त जानकारी नहीं है।</string>
     <string name="offline_duration_days_hours">%1$d डी %2$d एच</string>
     <string name="offline_duration_hours_minutes">%1$d एच %2$d मिनट</string>
@@ -678,7 +678,7 @@
     <string name="restore_app_settings_confirm">रीसेट करें</string>
     <string name="restore_app_settings_failed">ऐप की सेटिंग रीसेट नहीं हो सकीं।</string>
     <string name="restore_app_settings_inline_warning">ऐप में सहेजी गई सभी सेटिंग और डेटा मिटाता है। सेंसर और उसमें सहेजा डेटा अपरिवर्तित रहता है।</string>
-    <string name="restore_app_settings_message">Uvir ऐप की सभी सेटिंग और स्थानीय डेटा मिटा दिए जाएँगे, जिनमें अधिग्रहण, दर्ज अलर्ट, त्रुटि लॉग, काउंटर, सेंसर प्रोफ़ाइल और सहेजे गए कनेक्शन क्रेडेंशियल शामिल हैं। सेंसर स्वयं न बदलेगा और न बंद होगा। पुष्टि के लिए “रीसेट करें” को 5 सेकंड तक दबाए रखें।</string>
+    <string name="restore_app_settings_message">Uvir ऐप की सभी सेटिंग और स्थानीय डेटा मिटा दिए जाते हैं, जिनमें अधिग्रहण, दर्ज अलर्ट, त्रुटि लॉग, काउंटर, सेंसर प्रोफ़ाइल और सहेजे गए कनेक्शन क्रेडेंशियल शामिल हैं। सेंसर स्वयं न बदलता है और न बंद होता है। पुष्टि के लिए “रीसेट करें” को 5 सेकंड तक दबाए रखें।</string>
     <string name="restore_app_settings_title">ऐप रीसेट करें?</string>
     <string name="sensor_status_no_sensor">कनेक्ट नहीं है</string>
     <string name="sensor_status_no_associated_sensor">कोई सेंसर पेयर नहीं किया गया</string>
@@ -686,7 +686,7 @@
     <string name="sensor_restore_confirm">रीसेट करें</string>
     <string name="sensor_restore_failed">सेंसर रीसेट नहीं हो सका। कनेक्शन जाँचें और फिर प्रयास करें।</string>
     <string name="sensor_restore_inline_warning">सेंसर में सहेजा असिंक्रनाइज़ डेटा मिटाता है, उसकी कॉन्फ़िगरेशन और कनेक्शन क्रेडेंशियल रीसेट करता है, फिर उसे बंद कर देता है।</string>
-    <string name="sensor_restore_message">केवल सेंसर रीसेट होगा। उसकी सेटिंग और कनेक्शन क्रेडेंशियल डिफ़ॉल्ट पर लौटेंगे; उसमें सहेजे असिंक्रनाइज़ अधिग्रहण, अलर्ट और त्रुटियाँ मिट जाएँगी, फिर सेंसर बंद होगा। Uvir में पहले से सहेजी ऐप सेटिंग और रिकॉर्ड नहीं बदलेंगे। पुष्टि के लिए “रीसेट करें” को 5 सेकंड तक दबाए रखें।</string>
+    <string name="sensor_restore_message">केवल सेंसर रीसेट होता है। उसकी सेटिंग और कनेक्शन क्रेडेंशियल डिफ़ॉल्ट पर लौटते हैं; उसमें सहेजे असिंक्रनाइज़ अधिग्रहण, अलर्ट और त्रुटियाँ मिट जाती हैं, फिर सेंसर बंद होता है। Uvir में पहले से सहेजी ऐप सेटिंग और रिकॉर्ड नहीं बदलते हैं। पुष्टि के लिए “रीसेट करें” को 5 सेकंड तक दबाए रखें।</string>
     <string name="sensor_restore_title">सेंसर रीसेट करें?</string>
     <string name="sensor_usb_identity_mismatch">USB सेंसर अधिकृत नहीं है। ऐप से पहले ही कोई दूसरा सेंसर जुड़ा है।</string>
     <string name="show_password">पासवर्ड दिखाएँ</string>
@@ -732,7 +732,7 @@
     <string name="list_filter_no_results">इन फ़िल्टर के लिए कोई परिणाम नहीं है।</string>
     <string name="list_filter_count">%2$d में से %1$d दिखाए गए</string>
     <string name="list_filter_share_question">दिखाए गए सभी परिणाम साझा करें?</string>
-    <string name="list_filter_share_warning">कोई रिकॉर्ड नहीं चुना गया है। मौजूदा फ़िल्टर से मेल खाने वाले सभी रिकॉर्ड साझा किए जाएँगे।</string>
+    <string name="list_filter_share_warning">कोई रिकॉर्ड नहीं चुना गया है। मौजूदा फ़िल्टर से मेल खाने वाले सभी रिकॉर्ड साझा किए जाते हैं।</string>
     <string name="settings_section_appearance">दिखावट</string>
     <string name="settings_section_language_formats">इकाइयाँ</string>
     <string name="settings_section_sharing_export">निर्यात</string>
@@ -755,11 +755,11 @@
     <string name="confirmation_question_suffix">?</string>
     <string name="threshold_alerts_sound_description_v2">अलर्ट दर्ज होने पर ऐप द्वारा बजाया जाने वाला संकेत चुनें।</string>
     <string name="list_filter_export_question">सभी दिखाए गए परिणाम निर्यात करें?</string>
-    <string name="list_filter_export_warning">कोई रिकॉर्ड चयनित नहीं है। वर्तमान फ़िल्टर से मेल खाने वाले सभी रिकॉर्ड निर्यात किए जाएँगे।</string>
+    <string name="list_filter_export_warning">कोई रिकॉर्ड चयनित नहीं है। वर्तमान फ़िल्टर से मेल खाने वाले सभी रिकॉर्ड निर्यात किए जाते हैं।</string>
     <string name="settings_include_sensitive_information">संवेदनशील डेटा शामिल करें</string>
-    <string name="settings_include_sensitive_information_description">कनेक्शन क्रेडेंशियल और सेंसर संबद्धता शामिल करता है, जिससे उसे USB के बिना पुनर्स्थापित किया जा सके। एन्क्रिप्शन पासवर्ड मांगा जाएगा।</string>
+    <string name="settings_include_sensitive_information_description">कनेक्शन क्रेडेंशियल और सेंसर संबद्धता शामिल करता है, जिससे उसे USB के बिना पुनर्स्थापित किया जा सके। एन्क्रिप्शन पासवर्ड मांगा जाता है।</string>
     <string name="settings_encryption_password_title">एन्क्रिप्शन पासवर्ड</string>
-    <string name="settings_encryption_password_description">कम से कम 8 वर्ण इस्तेमाल करें। बाद में बैकअप आयात करने के लिए यही पासवर्ड चाहिए होगा।</string>
+    <string name="settings_encryption_password_description">कम से कम 8 वर्ण इस्तेमाल करें। बाद में बैकअप आयात करने के लिए यही पासवर्ड चाहिए।</string>
     <string name="settings_encryption_password">एन्क्रिप्शन पासवर्ड</string>
     <string name="settings_encryption_password_confirm">पासवर्ड की पुष्टि करें</string>
     <string name="settings_encryption_password_too_short">कम से कम %1$d वर्ण इस्तेमाल करें।</string>
@@ -805,5 +805,5 @@
     <string name="alert_registration_count">रिकॉर्डिंग की संख्या</string>
     <string name="alert_configure_first">शुरू करने से पहले कम से कम एक मान कॉन्फ़िगर करें।</string>
     <string name="sensor_simulation_disable">बंद करें</string>
-    <string name="settings_import_confirmation_description">चुनी गई फ़ाइलों की सेटिंग मौजूदा सेटिंग को बदल देंगी।</string>
+    <string name="settings_import_confirmation_description">चुनी गई फ़ाइलों की सेटिंग मौजूदा सेटिंग को बदल देती हैं।</string>
 </resources>

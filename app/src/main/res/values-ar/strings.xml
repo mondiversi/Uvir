@@ -10,8 +10,8 @@
     <string name="optional_note">ملاحظة الالتقاط</string>
     <string name="note_example">ملاحظة الالتقاط</string>
     <string name="single_acquisition">التقاط فردي</string>
-    <string name="single_acquisition_ends_manual_session">ستنتهي الجلسة اليدوية السابقة.</string>
-    <string name="automatic_start_ends_manual_session">ستنتهي الجلسة اليدوية الحالية.</string>
+    <string name="single_acquisition_ends_manual_session">تنتهي الجلسة اليدوية السابقة.</string>
+    <string name="automatic_start_ends_manual_session">تنتهي الجلسة اليدوية الحالية.</string>
     <string name="interrupt_manual_session_title">هل تريد إيقاف الجلسة اليدوية الحالية؟</string>
     <string name="interrupt_manual_session_message">لبدء جلسة التقاط تلقائية، يجب إيقاف جلسة الالتقاط اليدوية الجارية.</string>
     <string name="interrupt_manual_session_action">إيقاف</string>
@@ -76,10 +76,10 @@
         <item quantity="many">(%1$d عملية اكتساب لكل %2$d تنويعات)</item>
         <item quantity="other">(%1$d عمليات اكتساب لكل %2$d تنويعات)</item>
     </plurals>
-    <string name="session_variant_chart_files_info">سيتم إنشاء %1$d ملفات PNG، ملف واحد لكل تنويع.</string>
+    <string name="session_variant_chart_files_info">يتم إنشاء %1$d ملفات PNG، ملف واحد لكل تنويع.</string>
     <string name="share">مشاركة</string>
     <string name="delete_selected_measurements_question">هل تريد حذف الالتقاطات المحددة؟</string>
-    <plurals name="delete_selected_measurements_warning"><item quantity="zero">سيتم حذف %1$d من الالتقاطات المحددة نهائيًا.</item><item quantity="one">سيتم حذف الالتقاط المحدد نهائيًا.</item><item quantity="two">سيتم حذف %1$d من الالتقاطات المحددة نهائيًا.</item><item quantity="few">سيتم حذف %1$d من الالتقاطات المحددة نهائيًا.</item><item quantity="many">سيتم حذف %1$d من الالتقاطات المحددة نهائيًا.</item><item quantity="other">سيتم حذف %1$d من الالتقاطات المحددة نهائيًا.</item></plurals>
+    <plurals name="delete_selected_measurements_warning"><item quantity="zero">يتم حذف %1$d من الالتقاطات المحددة نهائيًا.</item><item quantity="one">يتم حذف الالتقاط المحدد نهائيًا.</item><item quantity="two">يتم حذف %1$d من الالتقاطات المحددة نهائيًا.</item><item quantity="few">يتم حذف %1$d من الالتقاطات المحددة نهائيًا.</item><item quantity="many">يتم حذف %1$d من الالتقاطات المحددة نهائيًا.</item><item quantity="other">يتم حذف %1$d من الالتقاطات المحددة نهائيًا.</item></plurals>
     <string name="acquisition_session_id_label">معرّف الالتقاط / الجلسة</string>
     <string name="session_date_duration_events_label">التاريخ والوقت</string>
     <string name="session_start_end_duration_label">البدء والانتهاء والمدة</string>
@@ -126,7 +126,7 @@
     <string name="automatic_stopping">جارٍ إيقاف الالتقاط التلقائي…</string>
     <string name="automatic_stop_failed">تعذر إيقاف الالتقاط التلقائي. تحقق من اتصال المستشعر وحاول مجددًا.</string>
     <string name="stop_automatic_confirmation_title">إيقاف الالتقاط التلقائي؟</string>
-    <string name="stop_automatic_confirmation_message">سيتم إيقاف الالتقاط التلقائي الحالي. هل تريد المتابعة؟</string>
+    <string name="stop_automatic_confirmation_message">يتم إيقاف الالتقاط التلقائي الحالي. هل تريد المتابعة؟</string>
     <string name="continue_acquisition">إبقاء التشغيل</string>
     <string name="acquisition_parameters">الإعدادات</string>
     <string name="connectivity">الاتصال</string>
@@ -157,11 +157,11 @@
     <string name="sensor_source_disabled_hint">يمكن إعادة تمكين مصدر معطّل عبر الاتصال اللاسلكي الآخر النشط. إذا عُطّل الاثنان، صِل المستشعر عبر USB.</string>
     <string name="sensor_power_off">إيقاف تشغيل المستشعر</string>
     <string name="sensor_power_off_title">إيقاف تشغيل المستشعر؟</string>
-    <string name="sensor_power_off_message">سيدخل المستشعر في إيقاف منخفض الطاقة ولا يمكن تشغيله من التطبيق. لتشغيله مجددًا، اضغط EN/RESET أو افصل الطاقة وأعد توصيلها. للتأكيد، اضغط مطولاً على إيقاف التشغيل لمدة 5 ثوانٍ.</string>
+    <string name="sensor_power_off_message">يدخل المستشعر في إيقاف منخفض الطاقة ولا يمكن تشغيله من التطبيق. لتشغيله مجددًا، اضغط EN/RESET أو افصل الطاقة وأعد توصيلها. للتأكيد، اضغط مطولاً على إيقاف التشغيل لمدة 5 ثوانٍ.</string>
     <string name="sensor_power_off_confirm">إيقاف التشغيل</string>
     <string name="sensor_disassociate_action">إلغاء الارتباط بالتطبيق</string>
     <string name="sensor_disassociate_title">إلغاء ارتباط المستشعر؟</string>
-    <string name="sensor_disassociate_message">يزيل إلغاء الإقران المستشعر من قائمة الاختيار دون حذف اسمه أو السجلات المحفوظة. يمكنك إقرانه مجددًا عبر USB في أي وقت. لن يتغير المستشعر. للتأكيد، اضغط مطولًا على إلغاء الإقران لمدة 5 ثوانٍ.</string>
+    <string name="sensor_disassociate_message">يزيل إلغاء الإقران المستشعر من قائمة الاختيار دون حذف اسمه أو السجلات المحفوظة. يمكنك إقرانه مجددًا عبر USB في أي وقت. لا يتغير المستشعر. للتأكيد، اضغط مطولًا على إلغاء الإقران لمدة 5 ثوانٍ.</string>
     <string name="sensor_selection_failed">تعذر تغيير المستشعر. حاول مجددًا.</string>
     <string name="sensor_associate_action">إقران مستشعر</string>
     <string name="sensor_associate_usb_hint">وصّل المستشعر الجديد عبر USB. تبقى المستشعرات المقترنة سابقًا في القائمة.</string>
@@ -172,7 +172,7 @@
     <string name="expand_all_settings_content_description">توسيع جميع الإعدادات</string>
     <string name="collapse_all_settings_content_description">طي جميع الإعدادات</string>
     <string name="restore_defaults_title">استعادة الإعدادات الافتراضية؟</string>
-    <string name="restore_defaults_message">ستُستعاد جميع إعدادات التطبيق والمستشعر إلى قيمها الافتراضية. ستُحذف نهائيًا كل الالتقاطات والتنبيهات وسجلات الأخطاء المحفوظة، ثم سيتوقف المستشعر. للتأكيد، اضغط مطولاً على استعادة الكل لمدة 10 ثوانٍ متواصلة.</string>
+    <string name="restore_defaults_message">تُستعاد جميع إعدادات التطبيق والمستشعر إلى قيمها الافتراضية. تُحذف نهائيًا كل الالتقاطات والتنبيهات وسجلات الأخطاء المحفوظة، ثم يتوقف المستشعر. للتأكيد، اضغط مطولاً على استعادة الكل لمدة 10 ثوانٍ متواصلة.</string>
     <string name="restore_defaults_confirm">استعادة الكل</string>
     <string name="restore_defaults_failed">تعذر إجراء الاستعادة الكاملة. تحقق من اتصال المستشعر وحاول مجددًا.</string>
     <string name="sensor_wifi_esp32_description">يتواصل التطبيق مع المستشعر عندما يستخدمان شبكة Wi-Fi نفسها.</string>
@@ -244,18 +244,18 @@
     <string name="invalid_threshold_alert">استخدم حدودًا غير سالبة واضبط فاصل التكرار بين ثانية و24 ساعة.</string>
     <string name="stop_all_value_alerts_accessibility">إيقاف جلسة التنبيهات</string>
     <string name="stop_all_value_alerts_title">إيقاف جلسة التنبيهات؟</string>
-    <string name="stop_all_value_alerts_message">سيتم إنهاء جلسة التنبيهات الحالية. ستبقى التنبيهات المضبوطة والمسجلة محفوظة.</string>
+    <string name="stop_all_value_alerts_message">يتم إنهاء جلسة التنبيهات الحالية. تبقى التنبيهات المضبوطة والمسجلة محفوظة.</string>
     <string name="stop_all_value_alerts_action">@string/stop</string>
     <string name="continue_alert_monitoring">متابعة</string>
     <string name="start_value_alert_session_accessibility">بدء جلسة التنبيهات</string>
     <string name="start_value_alert_session_title">بدء جلسة التنبيهات</string>
-    <string name="start_value_alert_session_message">ستبدأ المراقبة باستخدام التنبيهات المضبوطة. يمكنك إضافة تنبيهات أو إزالتها لاحقًا دون بدء جلسة جديدة.</string>
+    <string name="start_value_alert_session_message">تبدأ المراقبة باستخدام التنبيهات المضبوطة. يمكنك إضافة تنبيهات أو إزالتها لاحقًا دون بدء جلسة جديدة.</string>
     <string name="start_value_alert_session_action">بدء</string>
     <string name="threshold_rules_reset">إعادة ضبط التنبيهات النشطة</string>
     <string name="threshold_rules_reset_confirm_action">إعادة ضبط الكل</string>
     <string name="threshold_rules_reset_complete">تمت إعادة ضبط التنبيهات النشطة</string>
     <string name="threshold_rules_reset_confirmation_title">إعادة ضبط كل التنبيهات النشطة؟</string>
-    <string name="threshold_rules_reset_confirmation_message">ستتم إعادة ضبط جميع التنبيهات النشطة. للتأكيد، اضغط مطولاً على إعادة ضبط الكل لمدة ثانيتين متواصلتين.</string>
+    <string name="threshold_rules_reset_confirmation_message">تتم إعادة ضبط جميع التنبيهات النشطة. للتأكيد، اضغط مطولاً على إعادة ضبط الكل لمدة ثانيتين متواصلتين.</string>
     <string name="threshold_bell_configure">ضبط تنبيهات هذه المجموعة</string>
     <string name="threshold_bell_active">تنبيه نشط واحد أو أكثر في هذه المجموعة</string>
     <string name="threshold_group_editor_title">التنبيهات لـ\n%1$s</string>
@@ -277,12 +277,12 @@
     <string name="threshold_alert_log_share">مشاركة التنبيهات</string>
     <string name="select_alerts">تحديد التنبيهات</string>
     <string name="delete_selected_alerts_question">حذف التنبيهات المحددة؟</string>
-    <plurals name="delete_selected_alerts_warning"><item quantity="zero">سيتم حذف %1$d من التنبيهات المحددة نهائيًا.</item><item quantity="one">سيتم حذف التنبيه المحدد نهائيًا.</item><item quantity="two">سيتم حذف %1$d من التنبيهات المحددة نهائيًا.</item><item quantity="few">سيتم حذف %1$d من التنبيهات المحددة نهائيًا.</item><item quantity="many">سيتم حذف %1$d من التنبيهات المحددة نهائيًا.</item><item quantity="other">سيتم حذف %1$d من التنبيهات المحددة نهائيًا.</item></plurals>
+    <plurals name="delete_selected_alerts_warning"><item quantity="zero">يتم حذف %1$d من التنبيهات المحددة نهائيًا.</item><item quantity="one">يتم حذف التنبيه المحدد نهائيًا.</item><item quantity="two">يتم حذف %1$d من التنبيهات المحددة نهائيًا.</item><item quantity="few">يتم حذف %1$d من التنبيهات المحددة نهائيًا.</item><item quantity="many">يتم حذف %1$d من التنبيهات المحددة نهائيًا.</item><item quantity="other">يتم حذف %1$d من التنبيهات المحددة نهائيًا.</item></plurals>
     <string name="threshold_alerts_deleted">تم حذف التنبيهات</string>
     <plurals name="threshold_alert_count_since"><item quantity="zero">تم حفظ %1$d · منذ %2$s</item><item quantity="one">تم حفظ %1$d · منذ %2$s</item><item quantity="two">تم حفظ %1$d · منذ %2$s</item><item quantity="few">تم حفظ %1$d · منذ %2$s</item><item quantity="many">تم حفظ %1$d · منذ %2$s</item><item quantity="other">تم حفظ %1$d · منذ %2$s</item></plurals>
     <string name="threshold_alert_export_subject">سجل تنبيهات Uvir</string>
     <string name="threshold_alert_log_delete_title">حذف كل التنبيهات المسجلة؟</string>
-    <string name="threshold_alert_log_delete_warning">سيتم حذف كل التنبيهات المسجلة نهائيًا. للتأكيد، اضغط مطولاً على حذف الكل لمدة ثانيتين.</string>
+    <string name="threshold_alert_log_delete_warning">يتم حذف كل التنبيهات المسجلة نهائيًا. للتأكيد، اضغط مطولاً على حذف الكل لمدة ثانيتين.</string>
     <string name="threshold_alert_log_delete_all">حذف الكل</string>
     <string name="threshold_alert_log_deleted">تم حذف التنبيهات</string>
     <string name="threshold_log_violation_above">%1$s: %2$s µW/cm² ≥ %3$s µW/cm²</string>
@@ -329,16 +329,16 @@
     <string name="reset_all_records_action">إعادة ضبط العدادات</string>
     <string name="reset_all_records_warning">يحذف جميع القياسات المحفوظة والتنبيهات المسجلة، ثم يعيد ضبط معرّفاتها ومعرّفات الجلسات.</string>
     <string name="reset_all_records_confirmation_title">إعادة ضبط جميع العدادات؟</string>
-    <string name="reset_all_records_confirmation_message">ستُحذف جميع القياسات المحفوظة والتنبيهات المسجلة نهائيًا. وستبدأ معرّفاتها ومعرّفات الجلسات من البداية. للتأكيد، اضغط مطولًا على إعادة ضبط الكل لمدة 5 ثوانٍ متواصلة.</string>
+    <string name="reset_all_records_confirmation_message">تُحذف جميع القياسات المحفوظة والتنبيهات المسجلة نهائيًا. وتبدأ معرّفاتها ومعرّفات الجلسات من البداية. للتأكيد، اضغط مطولًا على إعادة ضبط الكل لمدة 5 ثوانٍ متواصلة.</string>
     <string name="all_counters_reset_complete">تمت إعادة ضبط السجلات والعدادات</string>
     <string name="reset_acquisition_counters_action">إعادة ضبط القياسات</string>
     <string name="reset_acquisition_counters_warning">يحذف نهائيًا جميع القياسات المحفوظة ويعيد ضبط معرّفات القياسات والجلسات.</string>
     <string name="reset_acquisition_counters_confirmation_title">إعادة ضبط القياسات؟</string>
-    <string name="reset_acquisition_counters_confirmation_message">يحذف نهائيًا جميع القياسات المحفوظة ويعيد ضبط معرّفات القياسات والجلسات. لن يتغير سجل التنبيهات أو إعداداتها. للتأكيد، اضغط مطولًا على إعادة ضبط الكل لمدة ثانيتين متواصلتين.</string>
+    <string name="reset_acquisition_counters_confirmation_message">يحذف نهائيًا جميع القياسات المحفوظة ويعيد ضبط معرّفات القياسات والجلسات. لا يتغير سجل التنبيهات أو إعداداتها. للتأكيد، اضغط مطولًا على إعادة ضبط الكل لمدة ثانيتين متواصلتين.</string>
     <string name="reset_alert_counters_action">إعادة ضبط التنبيهات</string>
     <string name="reset_alert_counters_warning">يحذف نهائيًا جميع التنبيهات المسجلة ويعيد ضبط معرّفاتها.</string>
     <string name="reset_alert_counters_confirmation_title">إعادة ضبط التنبيهات؟</string>
-    <string name="reset_alert_counters_confirmation_message">يحذف نهائيًا جميع التنبيهات المسجلة ويعيد ضبط معرّفاتها. لن تتغير القياسات المحفوظة أو إعدادات التنبيهات. للتأكيد، اضغط مطولًا على إعادة ضبط الكل لمدة ثانيتين متواصلتين.</string>
+    <string name="reset_alert_counters_confirmation_message">يحذف نهائيًا جميع التنبيهات المسجلة ويعيد ضبط معرّفاتها. لا تتغير القياسات المحفوظة أو إعدادات التنبيهات. للتأكيد، اضغط مطولًا على إعادة ضبط الكل لمدة ثانيتين متواصلتين.</string>
     <string name="reset_confirmation_action">إعادة ضبط الكل</string>
     <string name="reset_counters_stop_auto">أوقف القياس التلقائي قبل إعادة ضبط العدادات.</string>
     <string name="acquisition_counters_reset_complete">تمت إعادة ضبط عدادات القياسات</string>
@@ -347,7 +347,7 @@
     <string name="import_database">استيراد قاعدة البيانات</string>
     <string name="database_transfer_description">تصدير/استعادة قاعدة البيانات كاملة عبر أرشيف ZIP مشفّر.</string>
     <string name="import_database_dialog_title">هل تريد استيراد قاعدة البيانات؟</string>
-    <string name="import_database_dialog_description">ستُستبدل السجلات وملفات تعريف المستشعرات على هذا الهاتف بمحتويات النسخة الاحتياطية. لن يتغير المستشعر الفعلي. أدخل كلمة مرور ملف ZIP للمتابعة.</string>
+    <string name="import_database_dialog_description">تُستبدل السجلات وملفات تعريف المستشعرات على هذا الهاتف بمحتويات النسخة الاحتياطية. لا يتغير المستشعر الفعلي. أدخل كلمة مرور ملف ZIP للمتابعة.</string>
     <string name="import_database_confirm">استيراد</string>
     <string name="import_database_failed">تعذّر استيراد قاعدة البيانات. تحقّق من كلمة المرور والأرشيف وإصدار قاعدة البيانات.</string>
     <string name="import_database_success">تم استيراد قاعدة البيانات.</string>
@@ -370,7 +370,7 @@
     <string name="relative_spectral_index">الأهمية الطيفية</string>
     <string name="relative_spectral_index_explanation">توضح القيمة من 0 إلى 100 مدى تركّز الطيف المقاس في الأطوال الموجية المرجحة بهذا التقدير. وهي تصف التركيب الطيفي لا الشدة الكلية، وليست نسبة للضرر ولا حدًا للسلامة.</string>
     <string name="delete_all_measurements_question">حذف جميع القياسات المحفوظة؟</string>
-    <string name="delete_all_measurements_warning">ستُحذف جميع القياسات المحفوظة نهائيًا. للتأكيد، اضغط مطولًا على حذف الكل لمدة ثانيتين متواصلتين.</string>
+    <string name="delete_all_measurements_warning">تُحذف جميع القياسات المحفوظة نهائيًا. للتأكيد، اضغط مطولًا على حذف الكل لمدة ثانيتين متواصلتين.</string>
     <string name="delete_all">حذف الكل</string>
     <plurals name="measurement_count_since">
         <item quantity="zero">%1$d محفوظ · منذ %2$s</item>
@@ -382,7 +382,7 @@
     </plurals>
     <string name="no_saved_measurements">لا توجد قياسات محفوظة.</string>
     <string name="delete_measurement_question">حذف هذا القياس؟</string>
-    <string name="delete_measurement_warning">سيُحذف هذا القياس نهائيًا.</string>
+    <string name="delete_measurement_warning">يُحذف هذا القياس نهائيًا.</string>
     <string name="measurement_deleted">تم حذف القياس</string>
     <string name="measurements_deleted">تم حذف القياسات</string>
     <string name="delete">حذف</string>
@@ -484,7 +484,7 @@
     <string name="session_chart_note">ملاحظة الجلسة</string>
     <string name="session_chart_total_acquisitions">إجمالي القياسات</string>
     <string name="delete_acquisition_session_question">حذف هذه الجلسة؟</string>
-    <string name="delete_acquisition_session_warning">ستُحذف جميع القياسات في هذه الجلسة نهائيًا.</string>
+    <string name="delete_acquisition_session_warning">تُحذف جميع القياسات في هذه الجلسة نهائيًا.</string>
     <string name="acquisition_session_deleted">تم حذف الجلسة</string>
     <string name="alert_session_chart_empty">لا توجد بيانات متاحة لجلسة التنبيهات هذه.</string>
     <string name="alert_session_chart_unit">القيمة · %1$s</string>
@@ -508,10 +508,10 @@
     <string name="alert_session_detail_values">أنواع القيم</string>
     <string name="alert_session_detail_total">إجمالي التنبيهات</string>
     <string name="delete_alert_question">حذف التنبيه هذا؟</string>
-    <string name="delete_alert_warning">سيُحذف التنبيه المسجل هذا نهائيًا.</string>
+    <string name="delete_alert_warning">يُحذف التنبيه المسجل هذا نهائيًا.</string>
     <string name="alert_deleted">تم حذف التنبيه</string>
     <string name="delete_alert_session_question">حذف جلسة التنبيهات هذه؟</string>
-    <string name="delete_alert_session_warning">ستُحذف جميع التنبيهات المسجلة في هذه الجلسة نهائيًا.</string>
+    <string name="delete_alert_session_warning">تُحذف جميع التنبيهات المسجلة في هذه الجلسة نهائيًا.</string>
     <string name="alert_session_deleted">تم حذف جلسة التنبيهات</string>
     <string name="alert_chart_date">تاريخ التسجيل: %1$s</string>
     <string name="alert_chart_scale">المقارنة بالحد</string>
@@ -565,7 +565,7 @@
     <string name="offline_capacity_estimated_duration_unlimited">الاستقلالية المقدّرة: غير محدودة</string>
     <string name="offline_capacity_conservative_hint">تقدير متحفظ: تستخدم تجاوزات الحدود المتزامنة سجل تنبيه واحدًا لكل فاصل تكرار.</string>
     <string name="offline_disconnection_description">فُقد اتصال المستشعر. يجمع هذا التقدير بين القياس التلقائي النشط والتنبيهات.</string>
-    <string name="offline_disconnection_recording_disabled">التسجيل الذاتي دون اتصال معطل. لن يخزن المستشعر قياسات أو تنبيهات جديدة حتى يعيد الاتصال.</string>
+    <string name="offline_disconnection_recording_disabled">التسجيل الذاتي دون اتصال معطل. لا يخزن المستشعر قياسات أو تنبيهات جديدة حتى يعيد الاتصال.</string>
     <string name="offline_disconnection_estimate_unavailable">لا تتضمن أحدث حالة للمستشعر معلومات كافية لتقدير الاستقلالية المتبقية.</string>
     <string name="offline_duration_days_hours">%1$d ي %2$d س</string>
     <string name="offline_duration_hours_minutes">%1$d س %2$d د</string>
@@ -675,7 +675,7 @@
     <string name="restore_app_settings_confirm">إعادة ضبط</string>
     <string name="restore_app_settings_failed">تعذرت إعادة ضبط التطبيق.</string>
     <string name="restore_app_settings_inline_warning">يحذف جميع الإعدادات وكل البيانات المخزنة في التطبيق. يبقى المستشعر والبيانات المخزنة عليه دون تغيير.</string>
-    <string name="restore_app_settings_message">سيتم حذف جميع إعدادات تطبيق Uvir والبيانات المخزنة محلياً، بما في ذلك القياسات والتنبيهات المسجلة وسجلات الأخطاء والعدادات وملفات تعريف المستشعر وبيانات الاتصال المحفوظة. لن يتغير المستشعر نفسه ولن يتم إيقاف تشغيله. للتأكيد، اضغط مطولاً على «إعادة ضبط» لمدة 5 ثوانٍ.</string>
+    <string name="restore_app_settings_message">يتم حذف جميع إعدادات تطبيق Uvir والبيانات المخزنة محلياً، بما في ذلك القياسات والتنبيهات المسجلة وسجلات الأخطاء والعدادات وملفات تعريف المستشعر وبيانات الاتصال المحفوظة. لا يتغير المستشعر نفسه ولا يتم إيقاف تشغيله. للتأكيد، اضغط مطولاً على «إعادة ضبط» لمدة 5 ثوانٍ.</string>
     <string name="restore_app_settings_title">إعادة ضبط التطبيق؟</string>
     <string name="sensor_status_no_sensor">غير متصل</string>
     <string name="sensor_status_no_associated_sensor">لا يوجد مستشعر مقترن</string>
@@ -683,7 +683,7 @@
     <string name="sensor_restore_confirm">إعادة ضبط</string>
     <string name="sensor_restore_failed">تعذرت إعادة ضبط المستشعر. تحقق من الاتصال وحاول مرة أخرى.</string>
     <string name="sensor_restore_inline_warning">يحذف البيانات غير المتزامنة المخزنة على المستشعر، ويعيد ضبط إعداداته وبيانات اتصاله، ثم يوقف تشغيله.</string>
-    <string name="sensor_restore_message">ستتم إعادة ضبط المستشعر فقط. ستعود إعداداته وبيانات اتصاله إلى القيم الافتراضية، وستُحذف القياسات والتنبيهات والأخطاء غير المتزامنة المخزنة عليه، ثم سيتوقف المستشعر. لن تتغير إعدادات التطبيق والسجلات المحفوظة في Uvir. للتأكيد، اضغط مطولاً على «إعادة ضبط» لمدة 5 ثوانٍ.</string>
+    <string name="sensor_restore_message">تتم إعادة ضبط المستشعر فقط. تعود إعداداته وبيانات اتصاله إلى القيم الافتراضية، وتُحذف القياسات والتنبيهات والأخطاء غير المتزامنة المخزنة عليه، ثم يتوقف المستشعر. لا تتغير إعدادات التطبيق والسجلات المحفوظة في Uvir. للتأكيد، اضغط مطولاً على «إعادة ضبط» لمدة 5 ثوانٍ.</string>
     <string name="sensor_restore_title">إعادة ضبط المستشعر؟</string>
     <string name="sensor_usb_identity_mismatch">مستشعر USB غير مصرح به. يوجد مستشعر مختلف مرتبط بالتطبيق بالفعل.</string>
     <string name="show_password">إظهار كلمة المرور</string>
@@ -729,7 +729,7 @@
     <string name="list_filter_no_results">لا توجد نتائج لهذه التصفية.</string>
     <string name="list_filter_count">عرض %1$d من %2$d</string>
     <string name="list_filter_share_question">مشاركة جميع النتائج المعروضة؟</string>
-    <string name="list_filter_share_warning">لم يتم تحديد أي سجلات. ستتم مشاركة جميع السجلات المطابقة لعوامل التصفية الحالية.</string>
+    <string name="list_filter_share_warning">لم يتم تحديد أي سجلات. تتم مشاركة جميع السجلات المطابقة لعوامل التصفية الحالية.</string>
     <string name="settings_section_appearance">المظهر</string>
     <string name="settings_section_language_formats">الوحدات</string>
     <string name="settings_section_sharing_export">التصدير</string>
@@ -752,11 +752,11 @@
     <string name="confirmation_question_suffix">؟</string>
     <string name="threshold_alerts_sound_description_v2">اختر الإشارة التي يصدرها التطبيق عند تسجيل تنبيه.</string>
     <string name="list_filter_export_question">تصدير جميع النتائج المعروضة؟</string>
-    <string name="list_filter_export_warning">لم يتم تحديد أي سجلات. سيتم تصدير جميع السجلات المطابقة لعوامل التصفية الحالية.</string>
+    <string name="list_filter_export_warning">لم يتم تحديد أي سجلات. يتم تصدير جميع السجلات المطابقة لعوامل التصفية الحالية.</string>
     <string name="settings_include_sensitive_information">تضمين البيانات الحساسة</string>
-    <string name="settings_include_sensitive_information_description">يتضمن بيانات اعتماد الاتصال وربط المستشعر، مما يتيح استعادته دون USB. ستُطلب كلمة مرور للتشفير.</string>
+    <string name="settings_include_sensitive_information_description">يتضمن بيانات اعتماد الاتصال وربط المستشعر، مما يتيح استعادته دون USB. تُطلب كلمة مرور للتشفير.</string>
     <string name="settings_encryption_password_title">كلمة مرور التشفير</string>
-    <string name="settings_encryption_password_description">استخدم 8 أحرف على الأقل. ستحتاج إلى كلمة المرور نفسها لاستيراد النسخة الاحتياطية لاحقًا.</string>
+    <string name="settings_encryption_password_description">استخدم 8 أحرف على الأقل. تحتاج إلى كلمة المرور نفسها لاستيراد النسخة الاحتياطية لاحقًا.</string>
     <string name="settings_encryption_password">كلمة مرور التشفير</string>
     <string name="settings_encryption_password_confirm">تأكيد كلمة المرور</string>
     <string name="settings_encryption_password_too_short">استخدم %1$d أحرف على الأقل.</string>
@@ -802,5 +802,5 @@
     <string name="alert_registration_count">عدد التسجيلات</string>
     <string name="alert_configure_first">اضبط قيمة واحدة على الأقل قبل البدء.</string>
     <string name="sensor_simulation_disable">تعطيل</string>
-    <string name="settings_import_confirmation_description">ستحل الإعدادات الموجودة في الملفات المحددة محل الإعدادات الحالية.</string>
+    <string name="settings_import_confirmation_description">تحل الإعدادات الموجودة في الملفات المحددة محل الإعدادات الحالية.</string>
 </resources>

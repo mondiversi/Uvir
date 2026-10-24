@@ -12,8 +12,8 @@
     <string name="optional_note">Notatka pomiaru</string>
     <string name="note_example">Notatka pomiaru</string>
     <string name="single_acquisition">Pojedynczy pomiar</string>
-    <string name="single_acquisition_ends_manual_session">Ostatnia sesja ręczna zostanie zakończona.</string>
-    <string name="automatic_start_ends_manual_session">Bieżąca sesja ręczna zostanie zakończona.</string>
+    <string name="single_acquisition_ends_manual_session">Ostatnia sesja ręczna jest kończona.</string>
+    <string name="automatic_start_ends_manual_session">Bieżąca sesja ręczna jest kończona.</string>
     <string name="interrupt_manual_session_title">Zatrzymać bieżącą sesję ręczną?</string>
     <string name="interrupt_manual_session_message">Aby rozpocząć sesję pomiarów automatycznych, zatrzymaj trwającą sesję pomiarów ręcznych.</string>
     <string name="interrupt_manual_session_action">STOP</string>
@@ -99,14 +99,14 @@
         <item quantity="many">(%1$d pomiarów × liczba wariantów: %2$d)</item>
         <item quantity="other">(%1$d pomiarów × liczba wariantów: %2$d)</item>
     </plurals>
-    <string name="session_variant_chart_files_info">Powstaną pliki PNG: %1$d, po jednym na wariant.</string>
+    <string name="session_variant_chart_files_info">Powstają pliki PNG: %1$d, po jednym na wariant.</string>
     <string name="share">UDOSTĘPNIJ</string>
     <string name="delete_selected_measurements_question">Usunąć wybrane pomiary?</string>
     <plurals name="delete_selected_measurements_warning">
-        <item quantity="one">%1$d wybrany pomiar zostanie trwale usunięty.</item>
-        <item quantity="few">Wybrane pomiary zostaną trwale usunięte: %1$d.</item>
-        <item quantity="many">Wybrane pomiary zostaną trwale usunięte: %1$d.</item>
-        <item quantity="other">Wybrane pomiary zostaną trwale usunięte: %1$d.</item>
+        <item quantity="one">%1$d wybrany pomiar jest trwale usuwany.</item>
+        <item quantity="few">Wybrane pomiary są trwale usuwane: %1$d.</item>
+        <item quantity="many">Wybrane pomiary są trwale usuwane: %1$d.</item>
+        <item quantity="other">Wybrane pomiary są trwale usuwane: %1$d.</item>
     </plurals>
     <string name="acquisition_session_id_label">ID pomiaru / sesji</string>
     <string name="session_date_duration_events_label">Data i godzina</string>
@@ -159,7 +159,7 @@
     <string name="automatic_stopping">Zatrzymywanie pomiarów automatycznych…</string>
     <string name="automatic_stop_failed">Nie można zatrzymać pomiarów automatycznych. Sprawdź połączenie czujnika i spróbuj ponownie.</string>
     <string name="stop_automatic_confirmation_title">Zatrzymać pomiary automatyczne?</string>
-    <string name="stop_automatic_confirmation_message">Bieżący pomiar automatyczny zostanie zatrzymany. Kontynuować?</string>
+    <string name="stop_automatic_confirmation_message">Bieżący pomiar automatyczny jest zatrzymywany. Kontynuować?</string>
     <string name="continue_acquisition">POZOSTAW AKTYWNE</string>
     <string name="acquisition_parameters">Ustawienia</string>
     <string name="connectivity">Łączność</string>
@@ -204,11 +204,11 @@
     <string name="sensor_source_disabled_hint">Wyłączone źródło można włączyć przez drugie aktywne połączenie bezprzewodowe. Jeśli oba są wyłączone, podłącz czujnik przez USB.</string>
     <string name="sensor_power_off">WYŁĄCZ CZUJNIK</string>
     <string name="sensor_power_off_title">Wyłączyć czujnik?</string>
-    <string name="sensor_power_off_message">Czujnik przejdzie w stan wyłączenia o niskim poborze energii i nie będzie można go ponownie uruchomić z aplikacji. Aby go włączyć, naciśnij EN/RESET lub odłącz i podłącz zasilanie. Aby potwierdzić, przytrzymaj WYŁĄCZ przez 5 sekund.</string>
+    <string name="sensor_power_off_message">Czujnik przechodzi w stan wyłączenia o niskim poborze energii i nie można go ponownie uruchomić z aplikacji. Aby go włączyć, naciśnij EN/RESET lub odłącz i podłącz zasilanie. Aby potwierdzić, przytrzymaj WYŁĄCZ przez 5 sekund.</string>
     <string name="sensor_power_off_confirm">WYŁĄCZ</string>
     <string name="sensor_disassociate_action">ODŁĄCZ OD APLIKACJI</string>
     <string name="sensor_disassociate_title">Odłączyć czujnik od aplikacji?</string>
-    <string name="sensor_disassociate_message">Odłączenie usuwa czujnik z listy wyboru, bez usuwania nazwy i zapisanych rekordów. Możesz ponownie powiązać go przez USB. Czujnik pozostanie bez zmian. Aby potwierdzić, przytrzymaj ODŁĄCZ przez 5 sekund.</string>
+    <string name="sensor_disassociate_message">Odłączenie usuwa czujnik z listy wyboru, bez usuwania nazwy i zapisanych rekordów. Możesz ponownie powiązać go przez USB. Czujnik pozostaje bez zmian. Aby potwierdzić, przytrzymaj ODŁĄCZ przez 5 sekund.</string>
     <string name="sensor_selection_failed">Nie można zmienić czujnika. Spróbuj ponownie.</string>
     <string name="sensor_associate_action">Powiąż czujnik</string>
     <string name="sensor_associate_usb_hint">Podłącz nowy czujnik przez USB. Wcześniej powiązane czujniki pozostaną na liście.</string>
@@ -219,11 +219,11 @@
     <string name="expand_all_settings_content_description">Rozwiń wszystkie ustawienia</string>
     <string name="collapse_all_settings_content_description">Zwiń wszystkie ustawienia</string>
     <string name="restore_defaults_title">Przywrócić ustawienia domyślne?</string>
-    <string name="restore_defaults_message">Wszystkie ustawienia aplikacji i czujnika zostaną przywrócone do wartości domyślnych. Zapisane pomiary, alerty i dzienniki błędów zostaną trwale usunięte. Czujnik zostanie wyłączony. Aby potwierdzić, przytrzymaj PRZYWRÓĆ WSZYSTKO przez 10 sekund bez puszczania.</string>
+    <string name="restore_defaults_message">Wszystkie ustawienia aplikacji i czujnika są przywracane do wartości domyślnych. Zapisane pomiary, alerty i dzienniki błędów są trwale usuwane. Czujnik jest wyłączany. Aby potwierdzić, przytrzymaj PRZYWRÓĆ WSZYSTKO przez 10 sekund bez puszczania.</string>
     <string name="restore_defaults_confirm">PRZYWRÓĆ WSZYSTKO</string>
     <string name="restore_defaults_failed">Nie można wykonać pełnego przywrócenia. Sprawdź połączenie czujnika i spróbuj ponownie.</string>
     <string name="restore_app_settings_title">Zresetować aplikację?</string>
-    <string name="restore_app_settings_message">Wszystkie ustawienia i lokalne dane Uvir zostaną usunięte, w tym pomiary, alerty, dzienniki błędów, liczniki, profile czujników i zapisane dane dostępu. Czujnik nie zostanie zmieniony ani wyłączony. Aby potwierdzić, przytrzymaj RESETUJ przez 5 sekund.</string>
+    <string name="restore_app_settings_message">Wszystkie ustawienia i lokalne dane Uvir są usuwane, w tym pomiary, alerty, dzienniki błędów, liczniki, profile czujników i zapisane dane dostępu. Czujnik nie jest zmieniany ani wyłączany. Aby potwierdzić, przytrzymaj RESETUJ przez 5 sekund.</string>
     <string name="restore_app_settings_confirm">RESETUJ</string>
     <string name="restore_app_settings_failed">Nie można zresetować aplikacji.</string>
     <string name="sensor_status_no_sensor">Nie połączono</string>
@@ -297,18 +297,18 @@
     <string name="invalid_threshold_alert">Użyj nieujemnych limitów i ustaw interwał powtarzania od 1 sekundy do 24 godzin.</string>
     <string name="stop_all_value_alerts_accessibility">Zatrzymaj sesję alertów</string>
     <string name="stop_all_value_alerts_title">Zatrzymać sesję alertów?</string>
-    <string name="stop_all_value_alerts_message">Bieżąca sesja alertów zostanie zakończona. Skonfigurowane i zarejestrowane alerty zostaną zachowane.</string>
+    <string name="stop_all_value_alerts_message">Bieżąca sesja alertów jest kończona. Skonfigurowane i zarejestrowane alerty są zachowywane.</string>
     <string name="stop_all_value_alerts_action">@string/stop</string>
     <string name="continue_alert_monitoring">KONTYNUUJ</string>
     <string name="start_value_alert_session_accessibility">Rozpocznij sesję alertów</string>
     <string name="start_value_alert_session_title">Rozpocznij sesję alertów</string>
-    <string name="start_value_alert_session_message">Monitorowanie rozpocznie się z ustawionymi alertami. Możesz później dodawać lub usuwać alerty bez rozpoczynania nowej sesji.</string>
+    <string name="start_value_alert_session_message">Monitorowanie rozpoczyna się z ustawionymi alertami. Możesz później dodawać lub usuwać alerty bez rozpoczynania nowej sesji.</string>
     <string name="start_value_alert_session_action">ROZPOCZNIJ</string>
     <string name="threshold_rules_reset">ZRESETUJ AKTYWNE ALERTY</string>
     <string name="threshold_rules_reset_confirm_action">ZRESETUJ WSZYSTKO</string>
     <string name="threshold_rules_reset_complete">Aktywne alerty zresetowane</string>
     <string name="threshold_rules_reset_confirmation_title">Zresetować wszystkie aktywne alerty?</string>
-    <string name="threshold_rules_reset_confirmation_message">Wszystkie aktywne alerty zostaną zresetowane. Aby potwierdzić, przytrzymaj ZRESETUJ WSZYSTKO przez 2 sekundy bez puszczania.</string>
+    <string name="threshold_rules_reset_confirmation_message">Wszystkie aktywne alerty są resetowane. Aby potwierdzić, przytrzymaj ZRESETUJ WSZYSTKO przez 2 sekundy bez puszczania.</string>
     <string name="threshold_bell_configure">Skonfiguruj alerty tej grupy</string>
     <string name="threshold_bell_active">Co najmniej jeden aktywny alert w tej grupie</string>
     <string name="threshold_group_editor_title">Alerty dla\n%1$s</string>
@@ -331,10 +331,10 @@
     <string name="select_alerts">Wybierz alerty</string>
     <string name="delete_selected_alerts_question">Usunąć wybrane alerty?</string>
     <plurals name="delete_selected_alerts_warning">
-        <item quantity="one">Wybrany alert zostanie trwale usunięty.</item>
-        <item quantity="few">Wybrane alerty zostaną trwale usunięte: %1$d.</item>
-        <item quantity="many">Wybrane alerty zostaną trwale usunięte: %1$d.</item>
-        <item quantity="other">Wybrane alerty zostaną trwale usunięte: %1$d.</item>
+        <item quantity="one">Wybrany alert jest trwale usuwany.</item>
+        <item quantity="few">Wybrane alerty są trwale usuwane: %1$d.</item>
+        <item quantity="many">Wybrane alerty są trwale usuwane: %1$d.</item>
+        <item quantity="other">Wybrane alerty są trwale usuwane: %1$d.</item>
     </plurals>
     <string name="threshold_alerts_deleted">Alerty usunięte</string>
     <plurals name="threshold_alert_count_since">
@@ -345,7 +345,7 @@
     </plurals>
     <string name="threshold_alert_export_subject">Dziennik alertów Uvir</string>
     <string name="threshold_alert_log_delete_title">Usunąć wszystkie zarejestrowane alerty?</string>
-    <string name="threshold_alert_log_delete_warning">Wszystkie zarejestrowane alerty zostaną trwale usunięte. Aby potwierdzić, przytrzymaj USUŃ WSZYSTKO przez 2 sekundy bez puszczania.</string>
+    <string name="threshold_alert_log_delete_warning">Wszystkie zarejestrowane alerty są trwale usuwane. Aby potwierdzić, przytrzymaj USUŃ WSZYSTKO przez 2 sekundy bez puszczania.</string>
     <string name="threshold_alert_log_delete_all">USUŃ WSZYSTKO</string>
     <string name="threshold_alert_log_deleted">Alerty usunięte</string>
     <string name="threshold_log_violation_above">%1$s: %2$s µW/cm² ≥ %3$s µW/cm²</string>
@@ -403,22 +403,22 @@
     <string name="sensor_restore_action">ZRESETUJ CZUJNIK</string>
     <string name="sensor_restore_inline_warning">Usuwa niezsynchronizowane dane czujnika, resetuje jego konfigurację i dane dostępu, a następnie go wyłącza.</string>
     <string name="sensor_restore_title">Zresetować czujnik?</string>
-    <string name="sensor_restore_message">Zresetowany zostanie tylko czujnik. Ustawienia i dane dostępu wrócą do wartości domyślnych; niezsynchronizowane pomiary, alerty i błędy zostaną usunięte, a czujnik wyłączony. Ustawienia aplikacji i rekordy zapisane w Uvir nie zmienią się. Aby potwierdzić, przytrzymaj RESETUJ przez 5 sekund.</string>
+    <string name="sensor_restore_message">Resetowany jest tylko czujnik. Ustawienia i dane dostępu wracają do wartości domyślnych; niezsynchronizowane pomiary, alerty i błędy są usuwane, a czujnik jest wyłączany. Ustawienia aplikacji i rekordy zapisane w Uvir nie zmieniają się. Aby potwierdzić, przytrzymaj RESETUJ przez 5 sekund.</string>
     <string name="sensor_restore_confirm">RESETUJ</string>
     <string name="sensor_restore_failed">Nie można zresetować czujnika. Sprawdź połączenie i spróbuj ponownie.</string>
     <string name="reset_all_records_action">ZRESETUJ LICZNIKI</string>
     <string name="reset_all_records_warning">Usuwa zapisane pomiary i alerty, a następnie resetuje ich ID i ID sesji.</string>
     <string name="reset_all_records_confirmation_title">Zresetować wszystkie liczniki?</string>
-    <string name="reset_all_records_confirmation_message">Zapisane pomiary i alerty zostaną trwale usunięte. Ich ID i ID sesji zaczną się od początku. Aby potwierdzić, przytrzymaj ZRESETUJ WSZYSTKO przez 5 sekund bez puszczania.</string>
+    <string name="reset_all_records_confirmation_message">Zapisane pomiary i alerty są trwale usuwane. Ich ID i ID sesji zaczynają się od początku. Aby potwierdzić, przytrzymaj ZRESETUJ WSZYSTKO przez 5 sekund bez puszczania.</string>
     <string name="all_counters_reset_complete">Rekordy i liczniki zresetowane</string>
     <string name="reset_acquisition_counters_action">ZRESETUJ POMIARY</string>
     <string name="reset_acquisition_counters_warning">Trwale usuwa zapisane pomiary i resetuje ID pomiarów i sesji.</string>
     <string name="reset_acquisition_counters_confirmation_title">Zresetować pomiary?</string>
-    <string name="reset_acquisition_counters_confirmation_message">Trwale usuwa zapisane pomiary i resetuje ID pomiarów i sesji. Dziennik i ustawienia alertów pozostaną bez zmian. Aby potwierdzić, przytrzymaj ZRESETUJ WSZYSTKO przez 2 sekundy bez puszczania.</string>
+    <string name="reset_acquisition_counters_confirmation_message">Trwale usuwa zapisane pomiary i resetuje ID pomiarów i sesji. Dziennik i ustawienia alertów pozostają bez zmian. Aby potwierdzić, przytrzymaj ZRESETUJ WSZYSTKO przez 2 sekundy bez puszczania.</string>
     <string name="reset_alert_counters_action">ZRESETUJ ALERTY</string>
     <string name="reset_alert_counters_warning">Trwale usuwa zarejestrowane alerty i resetuje ich ID.</string>
     <string name="reset_alert_counters_confirmation_title">Zresetować alerty?</string>
-    <string name="reset_alert_counters_confirmation_message">Trwale usuwa zarejestrowane alerty i resetuje ich ID. Zapisane pomiary i ustawienia alertów pozostaną bez zmian. Aby potwierdzić, przytrzymaj ZRESETUJ WSZYSTKO przez 2 sekundy bez puszczania.</string>
+    <string name="reset_alert_counters_confirmation_message">Trwale usuwa zarejestrowane alerty i resetuje ich ID. Zapisane pomiary i ustawienia alertów pozostają bez zmian. Aby potwierdzić, przytrzymaj ZRESETUJ WSZYSTKO przez 2 sekundy bez puszczania.</string>
     <string name="reset_confirmation_action">ZRESETUJ WSZYSTKO</string>
     <string name="reset_counters_stop_auto">Zatrzymaj pomiary automatyczne przed resetowaniem liczników.</string>
     <string name="acquisition_counters_reset_complete">Liczniki pomiarów zresetowane</string>
@@ -427,7 +427,7 @@
     <string name="import_database">IMPORTUJ BAZĘ DANYCH</string>
     <string name="database_transfer_description">Eksportuj/przywróć całą bazę danych za pomocą zaszyfrowanej kopii ZIP.</string>
     <string name="import_database_dialog_title">Zaimportować bazę danych?</string>
-    <string name="import_database_dialog_description">Rekordy i profile czujników na tym telefonie zostaną zastąpione tymi z kopii zapasowej. Fizyczny czujnik nie zmieni się. Wprowadź hasło ZIP, aby kontynuować.</string>
+    <string name="import_database_dialog_description">Rekordy i profile czujników na tym telefonie są zastępowane tymi z kopii zapasowej. Fizyczny czujnik nie zmienia się. Wprowadź hasło ZIP, aby kontynuować.</string>
     <string name="import_database_confirm">Importuj</string>
     <string name="import_database_failed">Nie można zaimportować bazy danych. Sprawdź hasło, archiwum i wersję bazy danych.</string>
     <string name="import_database_success">Baza danych zaimportowana.</string>
@@ -450,7 +450,7 @@
     <string name="relative_spectral_index">Znaczenie widmowe</string>
     <string name="relative_spectral_index_explanation">0–100 pokazuje koncentrację zarejestrowanego widma w długościach fal ważonych w tym oszacowaniu. Opisuje skład widmowy, nie całkowite natężenie. Nie jest procentem uszkodzeń ani progiem bezpieczeństwa.</string>
     <string name="delete_all_measurements_question">Usunąć wszystkie zapisane pomiary?</string>
-    <string name="delete_all_measurements_warning">Wszystkie zapisane pomiary zostaną trwale usunięte. Aby potwierdzić, przytrzymaj USUŃ WSZYSTKO przez 2 sekundy bez puszczania.</string>
+    <string name="delete_all_measurements_warning">Wszystkie zapisane pomiary są trwale usuwane. Aby potwierdzić, przytrzymaj USUŃ WSZYSTKO przez 2 sekundy bez puszczania.</string>
     <string name="delete_all">USUŃ WSZYSTKO</string>
     <plurals name="measurement_count_since">
         <item quantity="one">Zapisane: %1$d · od %2$s</item>
@@ -460,7 +460,7 @@
     </plurals>
     <string name="no_saved_measurements">Brak zapisanych pomiarów.</string>
     <string name="delete_measurement_question">Usunąć ten pomiar?</string>
-    <string name="delete_measurement_warning">Ten pomiar zostanie trwale usunięty.</string>
+    <string name="delete_measurement_warning">Ten pomiar jest trwale usuwany.</string>
     <string name="measurement_deleted">Pomiar usunięty</string>
     <string name="measurements_deleted">Pomiary usunięte</string>
     <string name="delete">USUŃ</string>
@@ -560,7 +560,7 @@
     <string name="session_chart_note">Notatka sesji</string>
     <string name="session_chart_total_acquisitions">Całkowita liczba pomiarów</string>
     <string name="delete_acquisition_session_question">Usunąć tę sesję?</string>
-    <string name="delete_acquisition_session_warning">Wszystkie pomiary w tej sesji zostaną trwale usunięte.</string>
+    <string name="delete_acquisition_session_warning">Wszystkie pomiary w tej sesji są trwale usuwane.</string>
     <string name="acquisition_session_deleted">Sesja usunięta</string>
     <string name="alert_session_chart_empty">Brak danych dla tej sesji alertów.</string>
     <string name="alert_session_chart_unit">Wartość · %1$s</string>
@@ -582,10 +582,10 @@
     <string name="alert_session_detail_values">Typy wartości</string>
     <string name="alert_session_detail_total">Całkowita liczba alertów</string>
     <string name="delete_alert_question">Usunąć ten alert?</string>
-    <string name="delete_alert_warning">Ten zarejestrowany alert zostanie trwale usunięty.</string>
+    <string name="delete_alert_warning">Ten zarejestrowany alert jest trwale usuwany.</string>
     <string name="alert_deleted">Alert usunięty</string>
     <string name="delete_alert_session_question">Usunąć tę sesję alertów?</string>
-    <string name="delete_alert_session_warning">Wszystkie zarejestrowane alerty w tej sesji zostaną trwale usunięte.</string>
+    <string name="delete_alert_session_warning">Wszystkie zarejestrowane alerty w tej sesji są trwale usuwane.</string>
     <string name="alert_session_deleted">Sesja alertów usunięta</string>
     <string name="alert_chart_date">Zarejestrowano: %1$s</string>
     <string name="alert_chart_scale">Porównanie z progiem</string>
@@ -639,7 +639,7 @@
     <string name="offline_capacity_estimated_duration_unlimited">Szacowana autonomia: nieograniczona</string>
     <string name="offline_capacity_conservative_hint">Oszacowanie zachowawcze: jednoczesne przekroczenia progów używają jednego rekordu alertu na interwał powtarzania.</string>
     <string name="offline_disconnection_description">Połączenie z czujnikiem utracone. Oszacowanie łączy aktywne pomiary automatyczne i alerty.</string>
-    <string name="offline_disconnection_recording_disabled">Autonomiczne rejestrowanie offline jest wyłączone. Czujnik nie zapisze nowych pomiarów ani alertów do ponownego połączenia.</string>
+    <string name="offline_disconnection_recording_disabled">Autonomiczne rejestrowanie offline jest wyłączone. Czujnik nie zapisuje nowych pomiarów ani alertów do ponownego połączenia.</string>
     <string name="offline_disconnection_estimate_unavailable">Ostatni stan czujnika nie zawiera wystarczających informacji do oszacowania pozostałej autonomii.</string>
     <string name="offline_duration_days_hours">%1$d d %2$d h</string>
     <string name="offline_duration_hours_minutes">%1$d h %2$d min</string>
@@ -761,7 +761,7 @@
     <string name="list_filter_no_results">Brak pasujących rekordów.</string>
     <string name="list_filter_count">Wyświetlono %1$d z %2$d</string>
     <string name="list_filter_share_question">Udostępnić wszystkie wyświetlone wyniki?</string>
-    <string name="list_filter_share_warning">Nie wybrano żadnych rekordów. Wszystkie rekordy pasujące do bieżących filtrów zostaną udostępnione.</string>
+    <string name="list_filter_share_warning">Nie wybrano żadnych rekordów. Wszystkie rekordy pasujące do bieżących filtrów są udostępniane.</string>
     <string name="settings_section_appearance">Wygląd</string>
     <string name="settings_section_language_formats">Jednostki</string>
     <string name="settings_section_sharing_export">Eksport</string>
@@ -777,11 +777,11 @@
     <string name="confirmation_question_suffix">?</string>
     <string name="threshold_alerts_sound_description_v2">Wybierz sygnał odtwarzany przez aplikację po zapisaniu alertu.</string>
     <string name="list_filter_export_question">Wyeksportować wszystkie wyświetlone wyniki?</string>
-    <string name="list_filter_export_warning">Nie wybrano żadnych rekordów. Wszystkie rekordy pasujące do bieżących filtrów zostaną wyeksportowane.</string>
+    <string name="list_filter_export_warning">Nie wybrano żadnych rekordów. Wszystkie rekordy pasujące do bieżących filtrów są eksportowane.</string>
     <string name="settings_include_sensitive_information">Uwzględnij dane wrażliwe</string>
-    <string name="settings_include_sensitive_information_description">Uwzględnia dane uwierzytelniające połączeń i powiązanie czujnika, umożliwiając jego przywrócenie bez USB. Wymagane będzie hasło szyfrowania.</string>
+    <string name="settings_include_sensitive_information_description">Uwzględnia dane uwierzytelniające połączeń i powiązanie czujnika, umożliwiając jego przywrócenie bez USB. Wymagane jest hasło szyfrowania.</string>
     <string name="settings_encryption_password_title">Hasło szyfrowania</string>
-    <string name="settings_encryption_password_description">Użyj co najmniej 8 znaków. To samo hasło będzie potrzebne do późniejszego importu kopii zapasowej.</string>
+    <string name="settings_encryption_password_description">Użyj co najmniej 8 znaków. To samo hasło jest potrzebne do późniejszego importu kopii zapasowej.</string>
     <string name="settings_encryption_password">Hasło szyfrowania</string>
     <string name="settings_encryption_password_confirm">Potwierdź hasło</string>
     <string name="settings_encryption_password_too_short">Użyj co najmniej %1$d znaków.</string>
@@ -830,5 +830,5 @@
     <string name="language_polish">Polski</string>
     <string name="language_dutch">Nederlands</string>
     <string name="language_indonesian">Bahasa Indonesia</string>
-    <string name="settings_import_confirmation_description">Ustawienia z wybranych plików zastąpią bieżące ustawienia.</string>
+    <string name="settings_import_confirmation_description">Ustawienia z wybranych plików zastępują bieżące ustawienia.</string>
 </resources>

@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="record_archive_title">מדידות והתראות</string>
-    <string name="record_archive_description">ייצוא/ייבוא של מדידות והתראות, כולל ההפעלות שלהן.</string>
-    <string name="record_archive_export_description">ייצוא כל הרשומות השמורות מסוג זה, כולל הפעלות, לקובץ UVIR ללא סיסמה.</string>
-    <string name="record_archive_import_description">הנתונים יתווספו לארכיון. רשומות קיימות ידולגו. חיישנים לא מוכרים יוצגו עם מזהה החומרה שלהם עד לשיוך.</string>
+    <string name="record_archive_description">ייצוא/ייבוא של מדידות או התראות בקובץ אחד, כולל ההפעלות שלהן.</string>
+    <string name="record_archive_export_description">ייצאו את כל הרשומות מסוג זה, כולל הפעלות, לקובץ אחד.</string>
+    <string name="record_archive_import_description">הנתונים מתווספים לארכיון. רשומות קיימות מדולגות. חיישנים לא מוכרים מוצגים עם מזהה החומרה שלהם עד לשיוך.</string>
     <string name="record_archive_import_summary">רשומות: %1$d · הפעלות: %2$d</string>
     <string name="record_archive_import_success">יובאו: %1$d · קיימות כבר: %2$d</string>
     <string name="record_archive_failed">לא ניתן להעביר את הרשומות. יש לבדוק את הקובץ ואת סוג הנתונים.</string>
+    <string name="record_archive_export_acquisitions_title">ייצוא מדידות</string>
+    <string name="record_archive_export_alerts_title">ייצוא התראות</string>
 </resources>

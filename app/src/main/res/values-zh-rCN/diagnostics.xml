@@ -46,7 +46,7 @@
     <string name="debug_simulate_events">模拟事件</string>
     <string name="debug_simulate_events_description">添加模拟采集和警报。</string>
     <string name="debug_simulate_events_question">模拟测试事件？</string>
-    <string name="debug_simulate_events_confirmation">测试测量和警报将添加到数据库。现有记录不会更改。</string>
+    <string name="debug_simulate_events_confirmation">测试测量和警报添加到数据库。现有记录不会更改。</string>
     <string name="debug_simulate_events_completed">已添加%1$d条测量和%2$d条警报</string>
     <string name="debug_simulation_note">调试模拟</string>
 </resources>

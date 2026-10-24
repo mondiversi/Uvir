@@ -13,7 +13,7 @@
     <string name="export_sensor_settings_description">Kalibrasi, pengambilan sampel, dan opsi operasi. Kredensial dan alamat jaringan tidak disertakan.</string>
     <string name="share_measurements">Bagikan pengukuran</string>
     <string name="share_all_measurements_question">Bagikan semua pengukuran tersimpan?</string>
-    <string name="share_all_measurements_warning">Tidak ada pengukuran yang dipilih, sehingga semua pengukuran tersimpan akan dibagikan.</string>
+    <string name="share_all_measurements_warning">Tidak ada pengukuran yang dipilih, sehingga semua pengukuran tersimpan dibagikan.</string>
     <string name="share_as_csv">Lembar kerja (CSV)</string>
     <string name="share_as_readable_table">Tabel terbaca (TXT)</string>
     <string name="share_readable_table_by_acquisition">Per pengukuran</string>
@@ -41,7 +41,7 @@
     <string name="share_subject">Pengukuran Uvir</string>
     <string name="share_error">Pengukuran tidak dapat dibagikan.</string>
     <string name="share_all_alerts_question">Bagikan semua peringatan tercatat?</string>
-    <string name="share_all_alerts_warning">Tidak ada peringatan yang dipilih, sehingga semua peringatan tercatat akan dibagikan.</string>
+    <string name="share_all_alerts_warning">Tidak ada peringatan yang dipilih, sehingga semua peringatan tercatat dibagikan.</string>
     <string name="export_database_title">Ekspor basis data</string>
     <string name="export_database">EKSPOR BASIS DATA</string>
     <string name="export_database_subject">Basis data Uvir</string>
@@ -54,17 +54,17 @@
     <string name="export_format_preview_heading">Pratinjau</string>
     <string name="export_format_profile_summary">Bahasa: %1$s · Angka: %2$s · Tanggal: %3$s · Waktu: %4$s · Irradiansi: %5$s</string>
     <string name="export_database_dialog_title">Ekspor basis data</string>
-    <string name="export_database_dialog_description">Seluruh basis data aplikasi di ponsel ini akan diekspor, termasuk pengukuran dan peringatan tersimpan.</string>
+    <string name="export_database_dialog_description">Ekspor seluruh basis data aplikasi di ponsel ini, termasuk akuisisi dan peringatan tersimpan.</string>
     <string name="export_error_log_dialog_title">Ekspor log kesalahan</string>
-    <string name="export_error_log_dialog_description">Log kesalahan aplikasi di ponsel ini akan diekspor sebagai file teknis. Pengukuran tersimpan dan kredensial tidak disertakan.</string>
+    <string name="export_error_log_dialog_description">Ekspor log kesalahan aplikasi sebagai berkas teknis. Akuisisi tersimpan dan kredensial tidak disertakan.</string>
     <string name="export_diagnostic_dialog_title">Ekspor laporan diagnostik</string>
-    <string name="export_diagnostic_dialog_description">Laporan diagnostik sensor akan diekspor. Berisi hasil pengujian teknis, tanpa kata sandi atau kredensial.</string>
+    <string name="export_diagnostic_dialog_description">Ekspor laporan diagnostik sensor. Berisi hasil pengujian teknis, tanpa kata sandi atau kredensial.</string>
     <string name="export_sensor_info_dialog_title">Ekspor informasi sensor</string>
-    <string name="export_sensor_info_dialog_description">Semua informasi sensor akan diekspor sebagai file teks.</string>
+    <string name="export_sensor_info_dialog_description">Ekspor semua informasi sensor sebagai berkas teks.</string>
     <string name="export_all_measurements_question">Ekspor semua pengukuran tersimpan?</string>
-    <string name="export_all_measurements_warning">Tidak ada pengukuran yang dipilih, sehingga semua pengukuran tersimpan akan diekspor.</string>
+    <string name="export_all_measurements_warning">Tidak ada pengukuran yang dipilih, sehingga semua pengukuran tersimpan diekspor.</string>
     <string name="export_all_alerts_question">Ekspor semua peringatan tercatat?</string>
-    <string name="export_all_alerts_warning">Tidak ada peringatan yang dipilih, sehingga semua peringatan tercatat akan diekspor.</string>
+    <string name="export_all_alerts_warning">Tidak ada peringatan yang dipilih, sehingga semua peringatan tercatat diekspor.</string>
     <string name="export_all">EKSPOR SEMUA</string>
     <string name="export_sensor_settings_description_complete">Kalibrasi, pengambilan sampel, opsi operasi, dan pengaturan koneksi.</string>
     <string name="export_variant_count_label">Jumlah varian</string>
@@ -76,4 +76,5 @@
     <string name="share_chart_file_count">File PNG: %1$d</string>
     <string name="share_readable_table_file_count">File TXT: %1$d</string>
     <string name="export_file_count">File %1$s: %2$d</string>
+    <string name="export_settings_description">Ekspor pengaturan aplikasi dan sensor yang dipilih.</string>
 </resources>

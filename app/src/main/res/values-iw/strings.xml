@@ -10,8 +10,8 @@
     <string name="optional_note">הערת רכישה</string>
     <string name="note_example">הערת רכישה</string>
     <string name="single_acquisition">רכישה בודדת</string>
-    <string name="single_acquisition_ends_manual_session">ההפעלה הידנית הנוכחית תסתיים.</string>
-    <string name="automatic_start_ends_manual_session">ההפעלה הידנית הנוכחית תסתיים.</string>
+    <string name="single_acquisition_ends_manual_session">ההפעלה הידנית הנוכחית מסתיימת.</string>
+    <string name="automatic_start_ends_manual_session">ההפעלה הידנית הנוכחית מסתיימת.</string>
     <string name="interrupt_manual_session_title">לעצור את ההפעלה הידנית הנוכחית?</string>
     <string name="interrupt_manual_session_message">כדי להתחיל הפעלת רכישה אוטומטית, עליך לעצור את הפעלת הרכישה הידנית המתנהלת כעת.</string>
     <string name="interrupt_manual_session_action">עצור</string>
@@ -81,13 +81,13 @@
         <item quantity="two">(%1$d רכישות לכל %2$d וריאציות)</item>
         <item quantity="other">(%1$d רכישות לכל %2$d וריאציות)</item>
     </plurals>
-    <string name="session_variant_chart_files_info">ייווצרו %1$d קובצי PNG, אחד לכל וריאציה.</string>
+    <string name="session_variant_chart_files_info">נוצרים %1$d קובצי PNG, אחד לכל וריאציה.</string>
     <string name="share">שתף</string>
     <string name="delete_selected_measurements_question">למחוק את הרכישות שנבחרו?</string>
     <plurals name="delete_selected_measurements_warning">
-        <item quantity="one">הרכישה שנבחרה ב-%1$d תימחק לצמיתות.</item>
-        <item quantity="two">%1$d רכישות שנבחרו יימחקו לצמיתות.</item>
-        <item quantity="other">%1$d רכישות שנבחרו יימחקו לצמיתות.</item>
+        <item quantity="one">הרכישה שנבחרה ב-%1$d נמחקת לצמיתות.</item>
+        <item quantity="two">%1$d רכישות שנבחרו נמחקות לצמיתות.</item>
+        <item quantity="other">%1$d רכישות שנבחרו נמחקות לצמיתות.</item>
     </plurals>
     <string name="acquisition_session_id_label">מזהה רכישה / הפעלה</string>
     <string name="session_date_duration_events_label">תאריך ושעה</string>
@@ -139,7 +139,7 @@
     <string name="automatic_stopping">מפסיק את הרכישה האוטומטית...</string>
     <string name="automatic_stop_failed">לא ניתן לעצור את הרכישה האוטומטית. בדוק את חיבור החיישן ונסה שוב.</string>
     <string name="stop_automatic_confirmation_title">להפסיק את הרכישה האוטומטית?</string>
-    <string name="stop_automatic_confirmation_message">הרכישה האוטומטית הנוכחית תופסק. להמשיך?</string>
+    <string name="stop_automatic_confirmation_message">הרכישה האוטומטית הנוכחית מופסקת. להמשיך?</string>
     <string name="continue_acquisition">המשך בהפעלה</string>
     <string name="acquisition_parameters">הגדרות</string>
     <string name="connectivity">קישוריות</string>
@@ -170,11 +170,11 @@
     <string name="sensor_source_disabled_hint">ניתן להפעיל מחדש מקור מושבת דרך החיבור האלחוטי הפעיל האחר. אם שניהם מושבתים, חבר את החיישן באמצעות USB.</string>
     <string name="sensor_power_off">כיבוי חיישן</string>
     <string name="sensor_power_off_title">לכבות את החיישן?</string>
-    <string name="sensor_power_off_message">החיישן יעבור למצב כיבוי חסכוני ולא ניתן יהיה להפעילו מחדש מהאפליקציה. כדי להפעיל אותו שוב, לחץ על EN/RESET או נתק וחבר מחדש את אספקת החשמל. לאישור, לחץ לחיצה ממושכת על כיבוי במשך 5 שניות.</string>
+    <string name="sensor_power_off_message">החיישן עובר למצב כיבוי חסכוני ולא ניתן להפעילו מחדש מהאפליקציה. כדי להפעיל אותו שוב, לחץ על EN/RESET או נתק וחבר מחדש את אספקת החשמל. לאישור, לחץ לחיצה ממושכת על כיבוי במשך 5 שניות.</string>
     <string name="sensor_power_off_confirm">כבה</string>
     <string name="sensor_disassociate_action">נתק מהאפליקציה</string>
     <string name="sensor_disassociate_title">לנתק את שיוך החיישן?</string>
-    <string name="sensor_disassociate_message">ביטול השיוך מסיר את החיישן מרשימת הבחירה בלי למחוק את שמו או את הרשומות השמורות. ניתן לשייך אותו שוב באמצעות USB בכל עת. החיישן לא ישתנה. לאישור, לחצו והחזיקו את ביטול השיוך למשך 5 שניות.</string>
+    <string name="sensor_disassociate_message">ביטול השיוך מסיר את החיישן מרשימת הבחירה בלי למחוק את שמו או את הרשומות השמורות. ניתן לשייך אותו שוב באמצעות USB בכל עת. החיישן נותר ללא שינוי. לאישור, לחצו והחזיקו את ביטול השיוך למשך 5 שניות.</string>
     <string name="sensor_selection_failed">לא ניתן להחליף חיישן. נסו שוב.</string>
     <string name="sensor_associate_action">שיוך חיישן</string>
     <string name="sensor_associate_usb_hint">חברו את החיישן החדש באמצעות USB. החיישנים שכבר שויכו נשארים ברשימה.</string>
@@ -185,7 +185,7 @@
     <string name="expand_all_settings_content_description">הרחב את כל ההגדרות</string>
     <string name="collapse_all_settings_content_description">כווץ את כל ההגדרות</string>
     <string name="restore_defaults_title">לשחזר את הגדרות ברירת המחדל?</string>
-    <string name="restore_defaults_message">כל הגדרות האפליקציה והחיישן ישוחזרו לערכי ברירת המחדל. כל הרכישות שנשמרו, ההתראות שנרשמו ויומני השגיאות יימחקו לצמיתות. לאחר מכן החיישן ייכבה. לאישור, לחץ לחיצה ממושכת על שחזר הכול במשך 10 שניות.</string>
+    <string name="restore_defaults_message">כל הגדרות האפליקציה והחיישן משוחזרות לערכי ברירת המחדל. כל הרכישות שנשמרו, ההתראות שנרשמו ויומני השגיאות נמחקים לצמיתות. לאחר מכן החיישן נכבה. לאישור, לחץ לחיצה ממושכת על שחזר הכול במשך 10 שניות.</string>
     <string name="restore_defaults_confirm">שחזר הכל</string>
     <string name="restore_defaults_failed">לא ניתן לבצע את השחזור המלא. בדוק את חיבור החיישן ונסה שוב.</string>
     <string name="sensor_wifi_esp32_description">היישום מתקשר עם החיישן כאשר שניהם משתמשים באותה רשת Wi-Fi.</string>
@@ -257,18 +257,18 @@
     <string name="invalid_threshold_alert">השתמש במגבלות לא שליליות והגדר מרווח חוזר בין שנייה אחת ל-24 שעות.</string>
     <string name="stop_all_value_alerts_accessibility">עצירת הפעלת התראות</string>
     <string name="stop_all_value_alerts_title">לעצור את הפעלת ההתראות?</string>
-    <string name="stop_all_value_alerts_message">הפעלת ההתראות הנוכחית תסתיים. ההתראות שהוגדרו ונרשמו יישמרו.</string>
+    <string name="stop_all_value_alerts_message">הפעלת ההתראות הנוכחית מסתיימת. ההתראות שהוגדרו ונרשמו נשמרות.</string>
     <string name="stop_all_value_alerts_action">@string/stop</string>
     <string name="continue_alert_monitoring">המשך</string>
     <string name="start_value_alert_session_accessibility">התחל הפעלת התראה</string>
     <string name="start_value_alert_session_title">התחלת הפעלת התראות</string>
-    <string name="start_value_alert_session_message">הניטור יתחיל להשתמש בההתראות המוגדרות. אתה יכול להוסיף או להסיר התראות מאוחר יותר מבלי להתחיל הפעלה חדשה.</string>
+    <string name="start_value_alert_session_message">הניטור מתחיל להשתמש בהתראות המוגדרות. אתה יכול להוסיף או להסיר התראות מאוחר יותר מבלי להתחיל הפעלה חדשה.</string>
     <string name="start_value_alert_session_action">התחל</string>
     <string name="threshold_rules_reset">אפס התראות פעילות</string>
     <string name="threshold_rules_reset_confirm_action">אפס הכל</string>
     <string name="threshold_rules_reset_complete">איפוס התראות פעילות</string>
     <string name="threshold_rules_reset_confirmation_title">לאפס את כל ההתראות הפעילות?</string>
-    <string name="threshold_rules_reset_confirmation_message">כל ההתראות הפעילות יאופסו. לאישור, לחץ לחיצה ממושכת על אפס הכול במשך 2 שניות.</string>
+    <string name="threshold_rules_reset_confirmation_message">כל ההתראות הפעילות מאופסות. לאישור, לחץ לחיצה ממושכת על אפס הכול במשך 2 שניות.</string>
     <string name="threshold_bell_configure">הגדר התראות עבור קבוצה זו</string>
     <string name="threshold_bell_active">התראה פעילות אחת או יותר בקבוצה זו</string>
     <string name="threshold_group_editor_title">התראות עבור\n%1$s</string>
@@ -291,9 +291,9 @@
     <string name="select_alerts">בחר התראות</string>
     <string name="delete_selected_alerts_question">למחוק את ההתראות שנבחרו?</string>
     <plurals name="delete_selected_alerts_warning">
-        <item quantity="one">ההתראה שנבחרה תימחק לצמיתות.</item>
-        <item quantity="two">ההתראות שנבחרו ב-%1$d יימחקו לצמיתות.</item>
-        <item quantity="other">ההתראות שנבחרו ב-%1$d יימחקו לצמיתות.</item>
+        <item quantity="one">ההתראה שנבחרה נמחקת לצמיתות.</item>
+        <item quantity="two">ההתראות שנבחרו ב-%1$d נמחקות לצמיתות.</item>
+        <item quantity="other">ההתראות שנבחרו ב-%1$d נמחקות לצמיתות.</item>
     </plurals>
     <string name="threshold_alerts_deleted">התראות נמחקו</string>
     <plurals name="threshold_alert_count_since">
@@ -303,7 +303,7 @@
     </plurals>
     <string name="threshold_alert_export_subject">יומן התראות Uvir</string>
     <string name="threshold_alert_log_delete_title">למחוק את כל ההתראות המוקלטות?</string>
-    <string name="threshold_alert_log_delete_warning">כל ההתראות שנרשמו יימחקו לצמיתות. לאישור, לחץ לחיצה ממושכת על מחק הכול במשך 2 שניות.</string>
+    <string name="threshold_alert_log_delete_warning">כל ההתראות שנרשמו נמחקות לצמיתות. לאישור, לחץ לחיצה ממושכת על מחק הכול במשך 2 שניות.</string>
     <string name="threshold_alert_log_delete_all">מחק הכל</string>
     <string name="threshold_alert_log_deleted">התראות נמחקו</string>
     <string name="threshold_log_violation_above">%1$s: %2$s µW/cm² ≥ %3$s µW/cm²</string>
@@ -350,16 +350,16 @@
     <string name="reset_all_records_action">אפס מונים</string>
     <string name="reset_all_records_warning">מוחק את כל הרכישות שנשמרו וההתראות המוקלטות, ואז מאפס את המזהים ומזהי הפגישה שלהם.</string>
     <string name="reset_all_records_confirmation_title">לאפס את כל המונים?</string>
-    <string name="reset_all_records_confirmation_message">כל הרכישות שנשמרו וההתראות שנרשמו יימחקו לצמיתות. המזהים ומזהי ההפעלה יאותחלו. לאישור, לחץ לחיצה ממושכת על אפס הכול במשך 5 שניות.</string>
+    <string name="reset_all_records_confirmation_message">כל הרכישות שנשמרו וההתראות שנרשמו נמחקות לצמיתות. המזהים ומזהי ההפעלה מאותחלים. לאישור, לחץ לחיצה ממושכת על אפס הכול במשך 5 שניות.</string>
     <string name="all_counters_reset_complete">רשומות ומונים מאופסים</string>
     <string name="reset_acquisition_counters_action">איפוס רכישות</string>
     <string name="reset_acquisition_counters_warning">מוחק לצמיתות את כל הרכישות השמורות ומאפס את מזהי הרכישה וההפעלה.</string>
     <string name="reset_acquisition_counters_confirmation_title">לאפס רכישות?</string>
-    <string name="reset_acquisition_counters_confirmation_message">מוחק לצמיתות את כל הרכישות שנשמרו ומאפס את מזהי הרכישה וההפעלה. יומן ההתראות והגדרות ההתראה לא ישתנו. לאישור, לחץ לחיצה ממושכת על אפס הכול במשך 2 שניות.</string>
+    <string name="reset_acquisition_counters_confirmation_message">מוחק לצמיתות את כל הרכישות שנשמרו ומאפס את מזהי הרכישה וההפעלה. יומן ההתראות והגדרות ההתראה נותרים ללא שינוי. לאישור, לחץ לחיצה ממושכת על אפס הכול במשך 2 שניות.</string>
     <string name="reset_alert_counters_action">אפס התראות</string>
     <string name="reset_alert_counters_warning">מוחק לצמיתות את כל ההתראות המוקלטות ומאפס את מזהי ההתראות.</string>
     <string name="reset_alert_counters_confirmation_title">לאפס התראות?</string>
-    <string name="reset_alert_counters_confirmation_message">מוחק לצמיתות את כל ההתראות שנרשמו ומאפס את מזהי ההתראות. הרכישות שנשמרו והגדרות ההתראות לא ישתנו. לאישור, לחץ לחיצה ממושכת על אפס הכול במשך 2 שניות.</string>
+    <string name="reset_alert_counters_confirmation_message">מוחק לצמיתות את כל ההתראות שנרשמו ומאפס את מזהי ההתראות. הרכישות שנשמרו והגדרות ההתראות נותרים ללא שינוי. לאישור, לחץ לחיצה ממושכת על אפס הכול במשך 2 שניות.</string>
     <string name="reset_confirmation_action">אפס הכל</string>
     <string name="reset_counters_stop_auto">עצור את הרכישה האוטומטית לפני איפוס המונים.</string>
     <string name="acquisition_counters_reset_complete">מוני רכישה מאופסים</string>
@@ -368,7 +368,7 @@
     <string name="import_database">ייבוא מסד נתונים</string>
     <string name="database_transfer_description">ייצוא/שחזור מסד הנתונים כולו באמצעות ארכיון ZIP מוצפן.</string>
     <string name="import_database_dialog_title">לייבא את מסד הנתונים?</string>
-    <string name="import_database_dialog_description">הרשומות ופרופילי החיישנים בטלפון הזה יוחלפו באלו שבגיבוי. החיישן הפיזי לא ישתנה. יש להזין את סיסמת קובץ ה-ZIP כדי להמשיך.</string>
+    <string name="import_database_dialog_description">הרשומות ופרופילי החיישנים בטלפון הזה מוחלפים באלו שבגיבוי. החיישן הפיזי נותר ללא שינוי. יש להזין את סיסמת קובץ ה-ZIP כדי להמשיך.</string>
     <string name="import_database_confirm">ייבוא</string>
     <string name="import_database_failed">לא ניתן לייבא את מסד הנתונים. יש לבדוק את הסיסמה, הארכיון וגרסת מסד הנתונים.</string>
     <string name="import_database_success">מסד הנתונים יובא.</string>
@@ -391,7 +391,7 @@
     <string name="relative_spectral_index">רלוונטיות ספקטרלית</string>
     <string name="relative_spectral_index_explanation">0–100 מראה באיזו חזקה הספקטרום הנרכש מרוכז באורכי גל המשוקללים על ידי הערכה זו. הוא מתאר הרכב ספקטרלי, לא עוצמה מוחלטת. זה לא אחוז נזק ולא סף בטיחות.</string>
     <string name="delete_all_measurements_question">למחוק את כל הרכישות שנשמרו?</string>
-    <string name="delete_all_measurements_warning">כל הרכישות שנשמרו יימחקו לצמיתות. לאישור, לחץ לחיצה ממושכת על מחק הכול במשך 2 שניות.</string>
+    <string name="delete_all_measurements_warning">כל הרכישות שנשמרו נמחקים לצמיתות. לאישור, לחץ לחיצה ממושכת על מחק הכול במשך 2 שניות.</string>
     <string name="delete_all">מחק הכל</string>
     <plurals name="measurement_count_since">
         <item quantity="one">%1$d נשמר · מאז %2$s</item>
@@ -400,7 +400,7 @@
     </plurals>
     <string name="no_saved_measurements">לא נשמרו רכישות.</string>
     <string name="delete_measurement_question">למחוק את הרכישה הזו?</string>
-    <string name="delete_measurement_warning">רכישה זו תימחק לצמיתות.</string>
+    <string name="delete_measurement_warning">רכישה זו נמחקת לצמיתות.</string>
     <string name="measurement_deleted">הרכישה נמחקה</string>
     <string name="measurements_deleted">רכישות נמחקו</string>
     <string name="delete">מחק</string>
@@ -499,7 +499,7 @@
     <string name="session_chart_note">הערת הפעלה</string>
     <string name="session_chart_total_acquisitions">סך כל הרכישות</string>
     <string name="delete_acquisition_session_question">למחוק הפעלה זו?</string>
-    <string name="delete_acquisition_session_warning">כל הרכישות בהפעלה זו יימחקו לצמיתות.</string>
+    <string name="delete_acquisition_session_warning">כל הרכישות בהפעלה זו נמחקות לצמיתות.</string>
     <string name="acquisition_session_deleted">ההפעלה נמחקה</string>
     <string name="alert_session_chart_empty">אין נתונים זמינים עבור הפעלת התראה זו.</string>
     <string name="alert_session_chart_unit">ערך · %1$s</string>
@@ -520,10 +520,10 @@
     <string name="alert_session_detail_values">סוגי ערכים</string>
     <string name="alert_session_detail_total">התראות כולל</string>
     <string name="delete_alert_question">האם למחוק את ההתראה הזו?</string>
-    <string name="delete_alert_warning">התראה מוקלט זו תימחק לצמיתות.</string>
+    <string name="delete_alert_warning">התראה מוקלט זו נמחקת לצמיתות.</string>
     <string name="alert_deleted">התראה נמחקה</string>
     <string name="delete_alert_session_question">האם למחוק את הפעלת ההתראה הזו?</string>
-    <string name="delete_alert_session_warning">כל ההתראות המוקלטות בהפעלה זו יימחקו לצמיתות.</string>
+    <string name="delete_alert_session_warning">כל ההתראות המוקלטות בהפעלה זו נמחקות לצמיתות.</string>
     <string name="alert_session_deleted">הפעלת התראה נמחקה</string>
     <string name="alert_chart_date">מוקלט: %1$s</string>
     <string name="alert_chart_scale">השוואת סף</string>
@@ -577,7 +577,7 @@
     <string name="offline_capacity_estimated_duration_unlimited">אוטונומיה משוערת: בלתי מוגבלת</string>
     <string name="offline_capacity_conservative_hint">הערכה שמרנית: הפרות סף בו-זמנית משתמשות ברשומת התראה אחת לכל מרווח חוזר.</string>
     <string name="offline_disconnection_description">החיבור לחיישן אבד. הערכה זו משלבת את הרכישה האוטומטית ואת ההתראות הפעילות.</string>
-    <string name="offline_disconnection_recording_disabled">הקלטה אוטונומית במצב לא מקוון מושבתת. החיישן לא יאחסן רכישות או התראות חדשות עד שיתחבר מחדש.</string>
+    <string name="offline_disconnection_recording_disabled">הקלטה אוטונומית במצב לא מקוון מושבתת. החיישן אינו מאחסן רכישות או התראות חדשות עד שיתחבר מחדש.</string>
     <string name="offline_disconnection_estimate_unavailable">מצב החיישן האחרון אינו מכיל מספיק מידע כדי להעריך את האוטונומיה שנותרה.</string>
     <string name="offline_duration_days_hours">%1$d d %2$d h</string>
     <string name="offline_duration_hours_minutes">%1$d h %2$d דקות</string>
@@ -687,7 +687,7 @@
     <string name="restore_app_settings_confirm">איפוס</string>
     <string name="restore_app_settings_failed">לא ניתן היה לאפס את הגדרות היישום.</string>
     <string name="restore_app_settings_inline_warning">מוחק את כל ההגדרות והנתונים השמורים ביישום. החיישן והנתונים השמורים בו לא ישתנו.</string>
-    <string name="restore_app_settings_message">כל הגדרות Uvir והנתונים המקומיים יימחקו, כולל מדידות, התראות שנרשמו, יומני שגיאות, מונים, פרופילי חיישנים ופרטי התחברות שמורים. החיישן עצמו לא ישתנה ולא יכובה. לאישור, יש ללחוץ לחיצה ארוכה על „איפוס” במשך 5 שניות.</string>
+    <string name="restore_app_settings_message">כל הגדרות Uvir והנתונים המקומיים נמחקים, כולל מדידות, התראות שנרשמו, יומני שגיאות, מונים, פרופילי חיישנים ופרטי התחברות שמורים. החיישן עצמו נותר ללא שינוי ולא נכבה. לאישור, יש ללחוץ לחיצה ארוכה על „איפוס” במשך 5 שניות.</string>
     <string name="restore_app_settings_title">לאפס את היישום?</string>
     <string name="sensor_status_no_sensor">לא מחובר</string>
     <string name="sensor_status_no_associated_sensor">אין חיישן משויך</string>
@@ -695,7 +695,7 @@
     <string name="sensor_restore_confirm">איפוס</string>
     <string name="sensor_restore_failed">לא ניתן היה לאפס את החיישן. יש לבדוק את החיבור ולנסות שוב.</string>
     <string name="sensor_restore_inline_warning">מוחק נתונים לא מסונכרנים מהחיישן, מאפס את התצורה ואת פרטי החיבור שלו ולאחר מכן מכבה אותו.</string>
-    <string name="sensor_restore_message">רק החיישן יאופס. ההגדרות ופרטי החיבור שלו יחזרו לברירת המחדל; מדידות, התראות ושגיאות לא מסונכרנות יימחקו ולאחר מכן החיישן יכובה. הגדרות היישום והרשומות שכבר נשמרו ב-Uvir לא ישתנו. לאישור, יש ללחוץ לחיצה ארוכה על „איפוס” במשך 5 שניות.</string>
+    <string name="sensor_restore_message">רק החיישן מאופס. ההגדרות ופרטי החיבור שלו חוזרים לברירת המחדל; מדידות, התראות ושגיאות לא מסונכרנות נמחקות ולאחר מכן החיישן נכבה. הגדרות היישום והרשומות שכבר נשמרו ב-Uvir נותרות ללא שינוי. לאישור, יש ללחוץ לחיצה ארוכה על „איפוס” במשך 5 שניות.</string>
     <string name="sensor_restore_title">לאפס את החיישן?</string>
     <string name="sensor_usb_identity_mismatch">חיישן USB אינו מורשה. חיישן אחר כבר משויך ליישום.</string>
     <string name="show_password">הצגת סיסמה</string>
@@ -741,7 +741,7 @@
     <string name="list_filter_no_results">אין תוצאות התואמות למסננים.</string>
     <string name="list_filter_count">מוצגים %1$d מתוך %2$d</string>
     <string name="list_filter_share_question">לשתף את כל התוצאות המוצגות?</string>
-    <string name="list_filter_share_warning">לא נבחרו רשומות. כל הרשומות התואמות למסננים הנוכחיים ישותפו.</string>
+    <string name="list_filter_share_warning">לא נבחרו רשומות. כל הרשומות התואמות למסננים הנוכחיים משותפים.</string>
     <string name="settings_section_appearance">מראה</string>
     <string name="settings_section_language_formats">יחידות</string>
     <string name="settings_section_sharing_export">ייצוא</string>
@@ -764,11 +764,11 @@
     <string name="confirmation_question_suffix">?</string>
     <string name="threshold_alerts_sound_description_v2">בחר את המשוב שהיישום משמיע כאשר התראה נרשמת.</string>
     <string name="list_filter_export_question">לייצא את כל התוצאות המוצגות?</string>
-    <string name="list_filter_export_warning">לא נבחרו רשומות. כל הרשומות המתאימות למסננים הנוכחיים ייוצאו.</string>
+    <string name="list_filter_export_warning">לא נבחרו רשומות. כל הרשומות המתאימות למסננים הנוכחיים מיוצאים.</string>
     <string name="settings_include_sensitive_information">כלול נתונים רגישים</string>
-    <string name="settings_include_sensitive_information_description">כולל את פרטי החיבור ואת שיוך החיישן, כך שניתן יהיה לשחזר אותו ללא USB. תתבקש סיסמת הצפנה.</string>
+    <string name="settings_include_sensitive_information_description">כולל את פרטי החיבור ואת שיוך החיישן, כך שניתן לשחזר אותו ללא USB. נדרשת סיסמת הצפנה.</string>
     <string name="settings_encryption_password_title">סיסמת הצפנה</string>
-    <string name="settings_encryption_password_description">יש להשתמש ב-8 תווים לפחות. אותה סיסמה תידרש כדי לייבא את הגיבוי מאוחר יותר.</string>
+    <string name="settings_encryption_password_description">יש להשתמש ב-8 תווים לפחות. אותה סיסמה נדרשת כדי לייבא את הגיבוי מאוחר יותר.</string>
     <string name="settings_encryption_password">סיסמת הצפנה</string>
     <string name="settings_encryption_password_confirm">אישור סיסמה</string>
     <string name="settings_encryption_password_too_short">יש להשתמש ב-%1$d תווים לפחות.</string>
@@ -814,5 +814,5 @@
     <string name="alert_registration_count">מספר רישומים</string>
     <string name="alert_configure_first">יש להגדיר לפחות ערך אחד לפני ההפעלה.</string>
     <string name="sensor_simulation_disable">כיבוי</string>
-    <string name="settings_import_confirmation_description">ההגדרות בקבצים שנבחרו יחליפו את ההגדרות הנוכחיות.</string>
+    <string name="settings_import_confirmation_description">ההגדרות בקבצים שנבחרו מחליפות את ההגדרות הנוכחיות.</string>
 </resources>

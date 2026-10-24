@@ -10,7 +10,7 @@
     <string name="optional_note">یادداشت اندازه گیری</string>
     <string name="note_example">یادداشت اندازه گیری</string>
     <string name="single_acquisition">اندازه گیری تکی</string>
-    <string name="single_acquisition_ends_manual_session">آخرین جلسه دستی به پایان خواهد رسید.</string>
+    <string name="single_acquisition_ends_manual_session">آخرین جلسه دستی به پایان می‌رسد.</string>
     <string name="automatic_start_ends_manual_session">جلسه دستی فعلی به پایان می رسد.</string>
     <string name="interrupt_manual_session_title">جلسه دستی فعلی متوقف شود؟</string>
     <string name="interrupt_manual_session_message">برای شروع یک جلسه اندازه گیری خودکار، باید جلسه اندازه گیری دستی را که در حال حاضر در حال انجام است متوقف کنید.</string>
@@ -82,8 +82,8 @@
     <string name="share">به اشتراک بگذارید</string>
     <string name="delete_selected_measurements_question">اندازه گیری های انتخابی حذف شود؟</string>
     <plurals name="delete_selected_measurements_warning">
-        <item quantity="one">اندازه گیری انتخاب شده %1$d برای همیشه حذف خواهد شد.</item>
-        <item quantity="other">اندازه‌گیری‌های انتخاب شده %1$d برای همیشه حذف خواهند شد.</item>
+        <item quantity="one">اندازه گیری انتخاب شده %1$d برای همیشه حذف می‌شود.</item>
+        <item quantity="other">اندازه‌گیری‌های انتخاب شده %1$d برای همیشه حذف می‌شوند.</item>
     </plurals>
     <string name="acquisition_session_id_label">اندازه گیری / شناسه جلسه</string>
     <string name="session_date_duration_events_label">تاریخ و زمان</string>
@@ -134,7 +134,7 @@
     <string name="automatic_stopping">توقف اندازه‌گیری خودکار…</string>
     <string name="automatic_stop_failed">قادر به توقف اندازه گیری خودکار نیست. اتصال سنسور را بررسی کنید و دوباره امتحان کنید.</string>
     <string name="stop_automatic_confirmation_title">اندازه گیری خودکار متوقف شود؟</string>
-    <string name="stop_automatic_confirmation_message">اندازه گیری خودکار فعلی متوقف خواهد شد. ادامه دهید؟</string>
+    <string name="stop_automatic_confirmation_message">اندازه گیری خودکار فعلی متوقف می‌شود. ادامه دهید؟</string>
     <string name="continue_acquisition">به دویدن ادامه دهید</string>
     <string name="acquisition_parameters">تنظیمات</string>
     <string name="connectivity">قابلیت اتصال</string>
@@ -180,7 +180,7 @@
     <string name="expand_all_settings_content_description">همه تنظیمات را گسترش دهید</string>
     <string name="collapse_all_settings_content_description">همه تنظیمات را جمع کنید</string>
     <string name="restore_defaults_title">تنظیمات پیش فرض بازیابی شود؟</string>
-    <string name="restore_defaults_message">همه تنظیمات برنامه و حسگر به مقادیر پیش‌فرض خود بازیابی می‌شوند. تمام اندازه گیری های ذخیره شده، هشدارهای ثبت شده و سیاهههای مربوط به خطا به طور دائم حذف خواهند شد. سپس سنسور خاموش می شود. برای تأیید، بازیابی همه را به طور مداوم به مدت 10 ثانیه فشار داده و نگه دارید.</string>
+    <string name="restore_defaults_message">همه تنظیمات برنامه و حسگر به مقادیر پیش‌فرض خود بازیابی می‌شوند. تمام اندازه گیری های ذخیره شده، هشدارهای ثبت شده و سیاهههای مربوط به خطا به طور دائم حذف می‌شوند. سپس سنسور خاموش می شود. برای تأیید، بازیابی همه را به طور مداوم به مدت 10 ثانیه فشار داده و نگه دارید.</string>
     <string name="restore_defaults_confirm">بازیابی همه</string>
     <string name="restore_defaults_failed">بازیابی کامل انجام نشد. اتصال سنسور را بررسی کنید و دوباره امتحان کنید.</string>
     <string name="sensor_wifi_esp32_description">برنامه زمانی با حسگر ارتباط برقرار می‌کند که هر دو از یک شبکه Wi-Fi استفاده کنند.</string>
@@ -252,7 +252,7 @@
     <string name="invalid_threshold_alert">از محدودیت های غیر منفی استفاده کنید و فاصله تکرار را بین 1 ثانیه تا 24 ساعت تعیین کنید.</string>
     <string name="stop_all_value_alerts_accessibility">توقف جلسه هشدار</string>
     <string name="stop_all_value_alerts_title">جلسه هشدار متوقف شود؟</string>
-    <string name="stop_all_value_alerts_message">جلسه فعلی هشدار پایان خواهد یافت. هشدارهای پیکربندی‌شده و ثبت‌شده حفظ خواهند شد.</string>
+    <string name="stop_all_value_alerts_message">جلسه فعلی هشدار پایان می‌یابد. هشدارهای پیکربندی‌شده و ثبت‌شده حفظ می‌شوند.</string>
     <string name="stop_all_value_alerts_action">@string/stop</string>
     <string name="continue_alert_monitoring">ادامه دهید</string>
     <string name="start_value_alert_session_accessibility">شروع جلسه هشدار</string>
@@ -263,7 +263,7 @@
     <string name="threshold_rules_reset_confirm_action">بازنشانی همه</string>
     <string name="threshold_rules_reset_complete">هشدارهای فعال بازنشانی می شود</string>
     <string name="threshold_rules_reset_confirmation_title">همه هشدارهای فعال بازنشانی شوند؟</string>
-    <string name="threshold_rules_reset_confirmation_message">همه هشدارهای فعال بازنشانی خواهند شد. برای تأیید، بازنشانی همه را به طور مداوم به مدت 2 ثانیه فشار داده و نگه دارید.</string>
+    <string name="threshold_rules_reset_confirmation_message">همه هشدارهای فعال بازنشانی می‌شوند. برای تأیید، بازنشانی همه را به طور مداوم به مدت 2 ثانیه فشار داده و نگه دارید.</string>
     <string name="threshold_bell_configure">هشدارها را برای این گروه پیکربندی کنید</string>
     <string name="threshold_bell_active">یک یا چند هشدار فعال در این گروه</string>
     <string name="threshold_group_editor_title">هشدارها برای\n%1$s</string>
@@ -286,8 +286,8 @@
     <string name="select_alerts">هشدارها را انتخاب کنید</string>
     <string name="delete_selected_alerts_question">هشدارهای انتخابی حذف شود؟</string>
     <plurals name="delete_selected_alerts_warning">
-        <item quantity="one">%1$d هشدار انتخاب‌شده برای همیشه حذف خواهد شد.</item>
-        <item quantity="other">هشدارهای انتخاب شده %1$d برای همیشه حذف خواهند شد.</item>
+        <item quantity="one">%1$d هشدار انتخاب‌شده برای همیشه حذف می‌شود.</item>
+        <item quantity="other">هشدارهای انتخاب شده %1$d برای همیشه حذف می‌شوند.</item>
     </plurals>
     <string name="threshold_alerts_deleted">هشدارها حذف شد</string>
     <plurals name="threshold_alert_count_since">
@@ -296,7 +296,7 @@
     </plurals>
     <string name="threshold_alert_export_subject">گزارش هشدار Uvir</string>
     <string name="threshold_alert_log_delete_title">همه هشدارهای ضبط شده حذف شود؟</string>
-    <string name="threshold_alert_log_delete_warning">همه هشدارها ثبت شده برای همیشه حذف خواهند شد. برای تأیید، همه را حذف کنید را به طور مداوم به مدت 2 ثانیه فشار داده و نگه دارید.</string>
+    <string name="threshold_alert_log_delete_warning">همه هشدارها ثبت شده برای همیشه حذف می‌شوند. برای تأیید، همه را حذف کنید را به طور مداوم به مدت 2 ثانیه فشار داده و نگه دارید.</string>
     <string name="threshold_alert_log_delete_all">همه را حذف کنید</string>
     <string name="threshold_alert_log_deleted">هشدارها حذف شد</string>
     <string name="threshold_log_violation_above">%1$s: %2$s µW/cm² ≥ %3$s µW/cm²</string>
@@ -343,16 +343,16 @@
     <string name="reset_all_records_action">تنظیم مجدد شمارنده</string>
     <string name="reset_all_records_warning">تمام اندازه‌گیری‌های ذخیره‌شده و هشدارهای ضبط‌شده را حذف می‌کند، سپس شناسه‌ها و شناسه‌های جلسه آن‌ها را بازنشانی می‌کند.</string>
     <string name="reset_all_records_confirmation_title">همه شمارنده ها بازنشانی شوند؟</string>
-    <string name="reset_all_records_confirmation_message">تمام اندازه گیری های ذخیره شده و هشدارهای ثبت شده برای همیشه حذف خواهند شد. شناسه و شناسه جلسه آنها از ابتدا راه اندازی مجدد می شود. برای تأیید، بازنشانی همه را به طور مداوم به مدت 5 ثانیه فشار داده و نگه دارید.</string>
+    <string name="reset_all_records_confirmation_message">تمام اندازه گیری های ذخیره شده و هشدارهای ثبت شده برای همیشه حذف می‌شوند. شناسه و شناسه جلسه آنها از ابتدا راه اندازی مجدد می شود. برای تأیید، بازنشانی همه را به طور مداوم به مدت 5 ثانیه فشار داده و نگه دارید.</string>
     <string name="all_counters_reset_complete">رکوردها و شمارنده ها بازنشانی می شوند</string>
     <string name="reset_acquisition_counters_action">بازنشانی اندازه‌گیری‌ها</string>
     <string name="reset_acquisition_counters_warning">همه اندازه‌گیری‌های ذخیره‌شده را به‌طور دائم حذف می‌کند و اندازه‌گیری‌ها و شناسه‌های جلسه را بازنشانی می‌کند.</string>
     <string name="reset_acquisition_counters_confirmation_title">اندازه گیری ها بازنشانی شود؟</string>
-    <string name="reset_acquisition_counters_confirmation_message">همه اندازه‌گیری‌های ذخیره‌شده را به‌طور دائم حذف می‌کند و اندازه‌گیری‌ها و شناسه‌های جلسه را بازنشانی می‌کند. گزارش هشدار و تنظیمات هشدار تغییر نخواهد کرد. برای تأیید، بازنشانی همه را به طور مداوم به مدت 2 ثانیه فشار داده و نگه دارید.</string>
+    <string name="reset_acquisition_counters_confirmation_message">همه اندازه‌گیری‌های ذخیره‌شده را به‌طور دائم حذف می‌کند و اندازه‌گیری‌ها و شناسه‌های جلسه را بازنشانی می‌کند. گزارش هشدار و تنظیمات هشدار تغییر نمی‌کند. برای تأیید، بازنشانی همه را به طور مداوم به مدت 2 ثانیه فشار داده و نگه دارید.</string>
     <string name="reset_alert_counters_action">بازنشانی هشدارها</string>
     <string name="reset_alert_counters_warning">همه هشدارهای ضبط شده را برای همیشه حذف می کند و شناسه های هشدار را بازنشانی می کند.</string>
     <string name="reset_alert_counters_confirmation_title">هشدارها بازنشانی شود؟</string>
-    <string name="reset_alert_counters_confirmation_message">همه هشدارهای ضبط شده را برای همیشه حذف می کند و شناسه های هشدار را بازنشانی می کند. اندازه گیری های ذخیره شده و تنظیمات هشدار تغییر نخواهند کرد. برای تأیید، بازنشانی همه را به طور مداوم به مدت 2 ثانیه فشار داده و نگه دارید.</string>
+    <string name="reset_alert_counters_confirmation_message">همه هشدارهای ضبط شده را برای همیشه حذف می کند و شناسه های هشدار را بازنشانی می کند. اندازه گیری های ذخیره شده و تنظیمات هشدار تغییر نمی‌کنند. برای تأیید، بازنشانی همه را به طور مداوم به مدت 2 ثانیه فشار داده و نگه دارید.</string>
     <string name="reset_confirmation_action">بازنشانی همه</string>
     <string name="reset_counters_stop_auto">قبل از تنظیم مجدد شمارنده ها، اندازه گیری خودکار را متوقف کنید.</string>
     <string name="acquisition_counters_reset_complete">شمارنده های اندازه گیری تنظیم مجدد</string>
@@ -392,7 +392,7 @@
     </plurals>
     <string name="no_saved_measurements">هیچ اندازه گیری ذخیره نشد.</string>
     <string name="delete_measurement_question">این اندازه گیری حذف شود؟</string>
-    <string name="delete_measurement_warning">این اندازه گیری برای همیشه حذف خواهد شد.</string>
+    <string name="delete_measurement_warning">این اندازه گیری برای همیشه حذف می‌شود.</string>
     <string name="measurement_deleted">اندازه گیری حذف شد</string>
     <string name="measurements_deleted">اندازه گیری ها حذف شد</string>
     <string name="delete">حذف کنید</string>
@@ -490,7 +490,7 @@
     <string name="session_chart_note">یادداشت جلسه</string>
     <string name="session_chart_total_acquisitions">کل اندازه گیری ها</string>
     <string name="delete_acquisition_session_question">این جلسه حذف شود؟</string>
-    <string name="delete_acquisition_session_warning">تمام اندازه‌گیری‌های این جلسه برای همیشه حذف خواهند شد.</string>
+    <string name="delete_acquisition_session_warning">تمام اندازه‌گیری‌های این جلسه برای همیشه حذف می‌شوند.</string>
     <string name="acquisition_session_deleted">جلسه حذف شد</string>
     <string name="alert_session_chart_empty">هیچ داده ای برای این جلسه هشدار موجود نیست.</string>
     <string name="alert_session_chart_unit">مقدار · %1$s</string>
@@ -510,10 +510,10 @@
     <string name="alert_session_detail_values">انواع ارزش</string>
     <string name="alert_session_detail_total">کل هشدارها</string>
     <string name="delete_alert_question">این هشدار حذف شود؟</string>
-    <string name="delete_alert_warning">این هشدار ثبت شده برای همیشه حذف خواهد شد.</string>
+    <string name="delete_alert_warning">این هشدار ثبت شده برای همیشه حذف می‌شود.</string>
     <string name="alert_deleted">هشدار حذف شد</string>
     <string name="delete_alert_session_question">این جلسه هشدار حذف شود؟</string>
-    <string name="delete_alert_session_warning">همه هشدارها ثبت شده در این جلسه برای همیشه حذف خواهند شد.</string>
+    <string name="delete_alert_session_warning">همه هشدارها ثبت شده در این جلسه برای همیشه حذف می‌شوند.</string>
     <string name="alert_session_deleted">جلسه هشدار حذف شد</string>
     <string name="alert_chart_date">ضبط شده: %1$s</string>
     <string name="alert_chart_scale">مقایسه آستانه</string>
@@ -677,7 +677,7 @@
     <string name="restore_app_settings_confirm">بازنشانی</string>
     <string name="restore_app_settings_failed">بازنشانی تنظیمات برنامه ممکن نشد.</string>
     <string name="restore_app_settings_inline_warning">همه تنظیمات و داده‌های ذخیره‌شده در برنامه را حذف می‌کند. حسگر و داده‌های ذخیره‌شده روی آن بدون تغییر می‌مانند.</string>
-    <string name="restore_app_settings_message">همه تنظیمات برنامه Uvir و داده‌های ذخیره‌شده محلی، از جمله اندازه‌گیری‌ها، هشدارها ثبت‌شده، گزارش‌های خطا، شمارنده‌ها، نمایه‌های حسگر و اطلاعات اتصال ذخیره‌شده حذف خواهند شد. خود حسگر تغییر نمی‌کند و خاموش نمی‌شود. برای تأیید، «بازنشانی» را ۵ ثانیه نگه دارید.</string>
+    <string name="restore_app_settings_message">همه تنظیمات برنامه Uvir و داده‌های ذخیره‌شده محلی، از جمله اندازه‌گیری‌ها، هشدارها ثبت‌شده، گزارش‌های خطا، شمارنده‌ها، نمایه‌های حسگر و اطلاعات اتصال ذخیره‌شده حذف می‌شوند. خود حسگر تغییر نمی‌کند و خاموش نمی‌شود. برای تأیید، «بازنشانی» را ۵ ثانیه نگه دارید.</string>
     <string name="restore_app_settings_title">برنامه بازنشانی شود؟</string>
     <string name="sensor_status_no_sensor">متصل نیست</string>
     <string name="sensor_status_no_associated_sensor">هیچ حسگری جفت نشده است</string>
@@ -685,7 +685,7 @@
     <string name="sensor_restore_confirm">بازنشانی</string>
     <string name="sensor_restore_failed">بازنشانی حسگر ممکن نشد. اتصال را بررسی و دوباره تلاش کنید.</string>
     <string name="sensor_restore_inline_warning">داده‌های همگام‌نشده حسگر را حذف می‌کند، پیکربندی و اطلاعات اتصال آن را بازنشانی می‌کند و سپس حسگر را خاموش می‌کند.</string>
-    <string name="sensor_restore_message">فقط حسگر بازنشانی خواهد شد. تنظیمات و اطلاعات اتصال آن به حالت پیش‌فرض بازمی‌گردند؛ اندازه‌گیری‌ها، هشدارها و خطاهای همگام‌نشده حذف می‌شوند و سپس حسگر خاموش خواهد شد. تنظیمات و رکوردهای ذخیره‌شده در Uvir تغییر نمی‌کنند. برای تأیید، «بازنشانی» را ۵ ثانیه نگه دارید.</string>
+    <string name="sensor_restore_message">فقط حسگر بازنشانی می‌شود. تنظیمات و اطلاعات اتصال آن به حالت پیش‌فرض بازمی‌گردند؛ اندازه‌گیری‌ها، هشدارها و خطاهای همگام‌نشده حذف می‌شوند و سپس حسگر خاموش می‌شود. تنظیمات و رکوردهای ذخیره‌شده در Uvir تغییر نمی‌کنند. برای تأیید، «بازنشانی» را ۵ ثانیه نگه دارید.</string>
     <string name="sensor_restore_title">حسگر بازنشانی شود؟</string>
     <string name="sensor_usb_identity_mismatch">حسگر USB مجاز نیست. حسگر دیگری از قبل با برنامه مرتبط است.</string>
     <string name="show_password">نمایش گذرواژه</string>
@@ -731,7 +731,7 @@
     <string name="list_filter_no_results">نتیجه‌ای برای این فیلترها وجود ندارد.</string>
     <string name="list_filter_count">نمایش %1$d از %2$d</string>
     <string name="list_filter_share_question">همهٔ نتایج نمایش‌داده‌شده به اشتراک گذاشته شوند؟</string>
-    <string name="list_filter_share_warning">هیچ رکوردی انتخاب نشده است. تمام رکوردهای مطابق با فیلترهای فعلی به اشتراک گذاشته خواهند شد.</string>
+    <string name="list_filter_share_warning">هیچ رکوردی انتخاب نشده است. تمام رکوردهای مطابق با فیلترهای فعلی به اشتراک گذاشته می‌شوند.</string>
     <string name="settings_section_appearance">ظاهر</string>
     <string name="settings_section_language_formats">واحدها</string>
     <string name="settings_section_sharing_export">خروجی</string>
@@ -756,9 +756,9 @@
     <string name="list_filter_export_question">همه نتایج نمایش‌داده‌شده صادر شوند؟</string>
     <string name="list_filter_export_warning">هیچ رکوردی انتخاب نشده است. همه رکوردهای مطابق با فیلترهای فعلی صادر می‌شوند.</string>
     <string name="settings_include_sensitive_information">گنجاندن داده‌های حساس</string>
-    <string name="settings_include_sensitive_information_description">اطلاعات ورود اتصال و پیوند حسگر را شامل می‌شود تا بتوان آن را بدون USB بازیابی کرد. گذرواژهٔ رمزگذاری درخواست خواهد شد.</string>
+    <string name="settings_include_sensitive_information_description">اطلاعات ورود اتصال و پیوند حسگر را شامل می‌شود تا بتوان آن را بدون USB بازیابی کرد. گذرواژهٔ رمزگذاری درخواست می‌شود.</string>
     <string name="settings_encryption_password_title">گذرواژهٔ رمزگذاری</string>
-    <string name="settings_encryption_password_description">حداقل از ۸ نویسه استفاده کنید. برای وارد کردن نسخه پشتیبان در آینده به همین گذرواژه نیاز خواهید داشت.</string>
+    <string name="settings_encryption_password_description">حداقل از ۸ نویسه استفاده کنید. برای وارد کردن نسخه پشتیبان در آینده به همین گذرواژه نیاز دارید.</string>
     <string name="settings_encryption_password">گذرواژهٔ رمزگذاری</string>
     <string name="settings_encryption_password_confirm">تأیید گذرواژه</string>
     <string name="settings_encryption_password_too_short">حداقل %1$d نویسه استفاده کنید.</string>

@@ -46,7 +46,7 @@
     <string name="debug_simulate_events">ИМИТИРОВАТЬ СОБЫТИЯ</string>
     <string name="debug_simulate_events_description">Добавьте имитированные измерения и оповещения.</string>
     <string name="debug_simulate_events_question">Имитировать тестовые события?</string>
-    <string name="debug_simulate_events_confirmation">В базу данных будут добавлены тестовые измерения и предупреждения. Существующие записи не изменятся.</string>
+    <string name="debug_simulate_events_confirmation">В базу данных добавляются тестовые измерения и предупреждения. Существующие записи не изменяются.</string>
     <string name="debug_simulate_events_completed">Добавлено измерений: %1$d, предупреждений: %2$d</string>
     <string name="debug_simulation_note">Отладочная имитация</string>
 </resources>

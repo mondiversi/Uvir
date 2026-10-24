@@ -10,8 +10,8 @@
     <string name="optional_note">采集备注</string>
     <string name="note_example">采集备注</string>
     <string name="single_acquisition">单次采集</string>
-    <string name="single_acquisition_ends_manual_session">上一个手动会话将结束。</string>
-    <string name="automatic_start_ends_manual_session">当前手动会话将结束。</string>
+    <string name="single_acquisition_ends_manual_session">上一个手动会话结束。</string>
+    <string name="automatic_start_ends_manual_session">当前手动会话结束。</string>
     <string name="interrupt_manual_session_title">停止当前手动会话？</string>
     <string name="interrupt_manual_session_message">要启动自动采集会话，必须先停止正在进行的手动采集会话。</string>
     <string name="interrupt_manual_session_action">停止</string>
@@ -71,10 +71,10 @@
     <plurals name="session_variant_structure_summary">
         <item quantity="other">（%2$d 个变体对应 %1$d 次采集）</item>
     </plurals>
-    <string name="session_variant_chart_files_info">将生成 %1$d 个 PNG 文件，每个变体一个。</string>
+    <string name="session_variant_chart_files_info">生成 %1$d 个 PNG 文件，每个变体一个。</string>
     <string name="share">分享</string>
     <string name="delete_selected_measurements_question">删除所选采集记录？</string>
-    <plurals name="delete_selected_measurements_warning"><item quantity="other">将永久删除所选的 %1$d 个采集记录。</item></plurals>
+    <plurals name="delete_selected_measurements_warning"><item quantity="other">永久删除所选的 %1$d 个采集记录。</item></plurals>
     <string name="acquisition_session_id_label">采集 / 会话 ID</string>
     <string name="session_date_duration_events_label">日期和时间</string>
     <string name="session_start_end_duration_label">开始、结束和持续时间</string>
@@ -121,7 +121,7 @@
     <string name="automatic_stopping">正在停止自动采集…</string>
     <string name="automatic_stop_failed">无法停止自动采集。请检查传感器连接并重试。</string>
     <string name="stop_automatic_confirmation_title">停止自动采集？</string>
-    <string name="stop_automatic_confirmation_message">当前自动采集将停止。是否继续？</string>
+    <string name="stop_automatic_confirmation_message">当前自动采集停止。是否继续？</string>
     <string name="continue_acquisition">保持运行</string>
     <string name="acquisition_parameters">设置</string>
     <string name="connectivity">连接</string>
@@ -152,11 +152,11 @@
     <string name="sensor_source_disabled_hint">可通过另一个活动无线连接重新启用已禁用来源。如果两者均禁用，请通过 USB 连接传感器。</string>
     <string name="sensor_power_off">关闭传感器</string>
     <string name="sensor_power_off_title">关闭传感器？</string>
-    <string name="sensor_power_off_message">传感器将进入低功耗关机状态，无法从应用重启。要再次开启，请按 EN/RESET 或断开并重新连接电源。确认时按住“关闭”5 秒。</string>
+    <string name="sensor_power_off_message">传感器进入低功耗关机状态，无法从应用重启。要再次开启，请按 EN/RESET 或断开并重新连接电源。确认时按住“关闭”5 秒。</string>
     <string name="sensor_power_off_confirm">关闭</string>
     <string name="sensor_disassociate_action">从应用中解除关联</string>
     <string name="sensor_disassociate_title">解除传感器关联？</string>
-    <string name="sensor_disassociate_message">解除关联会将传感器从选择列表中移除，但不会删除名称或已保存的记录。您可以随时通过USB重新关联。传感器本身不会被修改。确认时请长按“解除关联”5秒。</string>
+    <string name="sensor_disassociate_message">解除关联会传感器从选择列表中移除，但不会删除名称或已保存的记录。您可以随时通过USB重新关联。传感器本身不会被修改。确认时请长按“解除关联”5秒。</string>
     <string name="sensor_selection_failed">无法切换传感器。请重试。</string>
     <string name="sensor_associate_action">关联传感器</string>
     <string name="sensor_associate_usb_hint">请通过USB连接新传感器。已关联的传感器仍保留在列表中。</string>
@@ -167,7 +167,7 @@
     <string name="expand_all_settings_content_description">展开所有设置</string>
     <string name="collapse_all_settings_content_description">折叠所有设置</string>
     <string name="restore_defaults_title">恢复默认设置？</string>
-    <string name="restore_defaults_message">应用和传感器的所有设置将恢复默认值。所有已保存采集、已记录警报和错误日志将被永久删除，随后传感器将关闭。确认时连续按住“全部恢复”10 秒。</string>
+    <string name="restore_defaults_message">应用和传感器的所有设置恢复默认值。所有已保存采集、已记录警报和错误日志被永久删除，随后传感器关闭。确认时连续按住“全部恢复”10 秒。</string>
     <string name="restore_defaults_confirm">全部恢复</string>
     <string name="restore_defaults_failed">无法完成恢复。请检查传感器连接并重试。</string>
     <string name="sensor_wifi_esp32_description">应用和传感器使用同一 Wi-Fi 网络时即可通信。</string>
@@ -239,18 +239,18 @@
     <string name="invalid_threshold_alert">请使用非负限值，并将重复间隔设为 1 秒到 24 小时。</string>
     <string name="stop_all_value_alerts_accessibility">停止警报会话</string>
     <string name="stop_all_value_alerts_title">停止警报会话？</string>
-    <string name="stop_all_value_alerts_message">当前警报会话将结束。已配置和已记录的警报将保留。</string>
+    <string name="stop_all_value_alerts_message">当前警报会话结束。已配置和已记录的警报保留。</string>
     <string name="stop_all_value_alerts_action">@string/stop</string>
     <string name="continue_alert_monitoring">继续</string>
     <string name="start_value_alert_session_accessibility">启动警报会话</string>
     <string name="start_value_alert_session_title">启动警报会话</string>
-    <string name="start_value_alert_session_message">将使用当前配置的警报开始监测。之后可添加或移除警报，无需启动新会话。</string>
+    <string name="start_value_alert_session_message">使用当前配置的警报开始监测。之后可添加或移除警报，无需启动新会话。</string>
     <string name="start_value_alert_session_action">启动</string>
     <string name="threshold_rules_reset">重置活动警报</string>
     <string name="threshold_rules_reset_confirm_action">全部重置</string>
     <string name="threshold_rules_reset_complete">活动警报已重置</string>
     <string name="threshold_rules_reset_confirmation_title">重置所有活动警报？</string>
-    <string name="threshold_rules_reset_confirmation_message">所有活动警报都将重置。确认时连续按住“全部重置”2 秒。</string>
+    <string name="threshold_rules_reset_confirmation_message">所有活动警报都重置。确认时连续按住“全部重置”2 秒。</string>
     <string name="threshold_bell_configure">配置此组警报</string>
     <string name="threshold_bell_active">此组有一个或多个活动警报</string>
     <string name="threshold_group_editor_title">警报：\n%1$s</string>
@@ -272,12 +272,12 @@
     <string name="threshold_alert_log_share">分享警报</string>
     <string name="select_alerts">选择警报</string>
     <string name="delete_selected_alerts_question">删除所选警报？</string>
-    <plurals name="delete_selected_alerts_warning"><item quantity="other">所选的 %1$d 个警报将被永久删除。</item></plurals>
+    <plurals name="delete_selected_alerts_warning"><item quantity="other">所选的 %1$d 个警报被永久删除。</item></plurals>
     <string name="threshold_alerts_deleted">警报已删除</string>
     <plurals name="threshold_alert_count_since"><item quantity="other">已保存 %1$d 个 · 自 %2$s</item></plurals>
     <string name="threshold_alert_export_subject">Uvir 警报日志</string>
     <string name="threshold_alert_log_delete_title">删除所有已记录警报？</string>
-    <string name="threshold_alert_log_delete_warning">所有已记录的警报将被永久删除。确认时连续按住“全部删除”2 秒。</string>
+    <string name="threshold_alert_log_delete_warning">所有已记录的警报被永久删除。确认时连续按住“全部删除”2 秒。</string>
     <string name="threshold_alert_log_delete_all">全部删除</string>
     <string name="threshold_alert_log_deleted">警报已删除</string>
     <string name="threshold_log_violation_above">%1$s：%2$s µW/cm² ≥ %3$s µW/cm²</string>
@@ -324,7 +324,7 @@
     <string name="reset_all_records_action">重置计数器</string>
     <string name="reset_all_records_warning">删除所有已保存采集和已记录警报，然后重置其 ID 和会话 ID。</string>
     <string name="reset_all_records_confirmation_title">重置所有计数器？</string>
-    <string name="reset_all_records_confirmation_message">所有已保存采集和已记录警报将被永久删除。其 ID 和会话 ID 将从头开始。确认时连续按住“全部重置”5 秒。</string>
+    <string name="reset_all_records_confirmation_message">所有已保存采集和已记录警报被永久删除。其 ID 和会话 ID 从头开始。确认时连续按住“全部重置”5 秒。</string>
     <string name="all_counters_reset_complete">记录和计数器已重置</string>
     <string name="reset_acquisition_counters_action">重置采集</string>
     <string name="reset_acquisition_counters_warning">永久删除所有已保存采集，并重置采集和会话 ID。</string>
@@ -342,7 +342,7 @@
     <string name="import_database">导入数据库</string>
     <string name="database_transfer_description">通过加密 ZIP 备份导出或恢复整个数据库。</string>
     <string name="import_database_dialog_title">导入数据库？</string>
-    <string name="import_database_dialog_description">此手机上的记录和传感器资料将被备份中的内容替换。实体传感器不会改变。请输入 ZIP 密码以继续。</string>
+    <string name="import_database_dialog_description">此手机上的记录和传感器资料被备份中的内容替换。实体传感器不会改变。请输入 ZIP 密码以继续。</string>
     <string name="import_database_confirm">导入</string>
     <string name="import_database_failed">无法导入数据库。请检查密码、压缩包和数据库版本。</string>
     <string name="import_database_success">数据库已导入。</string>
@@ -365,12 +365,12 @@
     <string name="relative_spectral_index">光谱相关度</string>
     <string name="relative_spectral_index_explanation">0–100 表示采集光谱在此估算所加权波长上的集中程度。它描述光谱组成而非总强度，不是损伤百分比，也不是安全阈值。</string>
     <string name="delete_all_measurements_question">删除所有已保存采集？</string>
-    <string name="delete_all_measurements_warning">所有已保存采集将被永久删除。确认时连续按住“全部删除”2 秒。</string>
+    <string name="delete_all_measurements_warning">所有已保存采集被永久删除。确认时连续按住“全部删除”2 秒。</string>
     <string name="delete_all">全部删除</string>
     <plurals name="measurement_count_since"><item quantity="other">已保存 %1$d 个 · 自 %2$s</item></plurals>
     <string name="no_saved_measurements">没有已保存的采集。</string>
     <string name="delete_measurement_question">删除此采集？</string>
-    <string name="delete_measurement_warning">此采集将被永久删除。</string>
+    <string name="delete_measurement_warning">此采集被永久删除。</string>
     <string name="measurement_deleted">采集已删除</string>
     <string name="measurements_deleted">采集已删除</string>
     <string name="delete">删除</string>
@@ -465,7 +465,7 @@
     <string name="session_chart_note">会话备注</string>
     <string name="session_chart_total_acquisitions">采集总数</string>
     <string name="delete_acquisition_session_question">删除此会话？</string>
-    <string name="delete_acquisition_session_warning">此会话中的所有采集将被永久删除。</string>
+    <string name="delete_acquisition_session_warning">此会话中的所有采集被永久删除。</string>
     <string name="acquisition_session_deleted">会话已删除</string>
     <string name="alert_session_chart_empty">此警报会话没有可用数据。</string>
     <string name="alert_session_chart_unit">数值 · %1$s</string>
@@ -482,10 +482,10 @@
     <string name="alert_session_detail_values">数值类型</string>
     <string name="alert_session_detail_total">警报总数</string>
     <string name="delete_alert_question">删除此警报？</string>
-    <string name="delete_alert_warning">此已记录警报将被永久删除。</string>
+    <string name="delete_alert_warning">此已记录警报被永久删除。</string>
     <string name="alert_deleted">警报已删除</string>
     <string name="delete_alert_session_question">删除此警报会话？</string>
-    <string name="delete_alert_session_warning">此会话中所有已记录警报将被永久删除。</string>
+    <string name="delete_alert_session_warning">此会话中所有已记录警报被永久删除。</string>
     <string name="alert_session_deleted">警报会话已删除</string>
     <string name="alert_chart_date">记录于：%1$s</string>
     <string name="alert_chart_scale">阈值比较</string>
@@ -649,7 +649,7 @@
     <string name="restore_app_settings_confirm">重置</string>
     <string name="restore_app_settings_failed">无法重置应用设置。</string>
     <string name="restore_app_settings_inline_warning">删除应用中保存的所有设置和数据。传感器及其中保存的数据不会改变。</string>
-    <string name="restore_app_settings_message">Uvir 应用的所有设置和本地数据都将被删除，包括测量、已记录的警报、错误日志、计数器、传感器配置文件和保存的连接凭据。传感器本身不会被更改或关闭。若要确认，请长按“重置”5秒。</string>
+    <string name="restore_app_settings_message">Uvir 应用的所有设置和本地数据都被删除，包括测量、已记录的警报、错误日志、计数器、传感器配置文件和保存的连接凭据。传感器本身不会被更改或关闭。若要确认，请长按“重置”5秒。</string>
     <string name="restore_app_settings_title">重置应用？</string>
     <string name="sensor_status_no_sensor">未连接</string>
     <string name="sensor_status_no_associated_sensor">没有已配对的传感器</string>
@@ -657,7 +657,7 @@
     <string name="sensor_restore_confirm">重置</string>
     <string name="sensor_restore_failed">无法重置传感器。请检查连接后重试。</string>
     <string name="sensor_restore_inline_warning">删除传感器中未同步的数据，重置其配置和连接凭据，然后关闭传感器。</string>
-    <string name="sensor_restore_message">仅重置传感器。其设置和连接凭据将恢复默认值；传感器中保存的未同步测量、警报和错误将被删除，随后传感器将关闭。Uvir 中已保存的应用设置和记录不会改变。若要确认，请长按“重置”5秒。</string>
+    <string name="sensor_restore_message">仅重置传感器。其设置和连接凭据恢复默认值；传感器中保存的未同步测量、警报和错误被删除，随后传感器关闭。Uvir 中已保存的应用设置和记录不会改变。若要确认，请长按“重置”5秒。</string>
     <string name="sensor_restore_title">重置传感器？</string>
     <string name="sensor_usb_identity_mismatch">USB传感器未获授权。应用已关联其他传感器。</string>
     <string name="show_password">显示密码</string>
@@ -703,7 +703,7 @@
     <string name="list_filter_no_results">没有符合筛选条件的记录。</string>
     <string name="list_filter_count">显示 %1$d / %2$d 条</string>
     <string name="list_filter_share_question">分享所有显示的结果？</string>
-    <string name="list_filter_share_warning">未选择任何记录。将分享所有符合当前筛选条件的记录。</string>
+    <string name="list_filter_share_warning">未选择任何记录。分享所有符合当前筛选条件的记录。</string>
     <string name="settings_section_appearance">外观</string>
     <string name="settings_section_language_formats">单位</string>
     <string name="settings_section_sharing_export">导出</string>
@@ -726,9 +726,9 @@
     <string name="confirmation_question_suffix">?</string>
     <string name="threshold_alerts_sound_description_v2">选择应用在记录警报时播放的提示。</string>
     <string name="list_filter_export_question">导出所有显示的结果？</string>
-    <string name="list_filter_export_warning">未选择任何记录。将导出符合当前筛选条件的所有记录。</string>
+    <string name="list_filter_export_warning">未选择任何记录。导出符合当前筛选条件的所有记录。</string>
     <string name="settings_include_sensitive_information">包含敏感数据</string>
-    <string name="settings_include_sensitive_information_description">包含连接凭据和传感器关联信息，以便无需 USB 即可恢复。系统将要求设置加密密码。</string>
+    <string name="settings_include_sensitive_information_description">包含连接凭据和传感器关联信息，以便无需 USB 即可恢复。系统要求设置加密密码。</string>
     <string name="settings_encryption_password_title">加密密码</string>
     <string name="settings_encryption_password_description">请至少使用 8 个字符。以后导入备份时需要使用同一密码。</string>
     <string name="settings_encryption_password">加密密码</string>
@@ -776,5 +776,5 @@
     <string name="alert_registration_count">记录数量</string>
     <string name="alert_configure_first">开始前请至少配置一个数值。</string>
     <string name="sensor_simulation_disable">禁用</string>
-    <string name="settings_import_confirmation_description">所选文件中的设置将替换当前设置。</string>
+    <string name="settings_import_confirmation_description">所选文件中的设置替换当前设置。</string>
 </resources>

@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="record_archive_title">測定とアラート</string>
-    <string name="record_archive_description">セッションを含む測定とアラートを書き出し／読み込みます。</string>
-    <string name="record_archive_export_description">この種類の保存済みレコードをセッションも含め、パスワードなしのUVIRファイルにエクスポートします。</string>
+    <string name="record_archive_description">測定またはアラートをセッションも含めて1つのファイルで書き出し／読み込みます。</string>
+    <string name="record_archive_export_description">この種類のすべてのレコードをセッションも含めて1つのファイルにエクスポートします。</string>
     <string name="record_archive_import_description">データはアーカイブに追加されます。既存のレコードはスキップされます。不明なセンサーは、関連付けられるまでハードウェアIDで表示されます。</string>
     <string name="record_archive_import_summary">レコード：%1$d · セッション：%2$d</string>
     <string name="record_archive_import_success">インポート済み：%1$d · 既存：%2$d</string>
     <string name="record_archive_failed">レコードを転送できません。ファイルとデータの種類を確認してください。</string>
+    <string name="record_archive_export_acquisitions_title">測定をエクスポート</string>
+    <string name="record_archive_export_alerts_title">アラートをエクスポート</string>
 </resources>

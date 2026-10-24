@@ -46,7 +46,7 @@
     <string name="debug_simulate_events">הדמיית אירועים</string>
     <string name="debug_simulate_events_description">הוסף מדידות והתראות מדומות.</string>
     <string name="debug_simulate_events_question">להדמות אירועי בדיקה?</string>
-    <string name="debug_simulate_events_confirmation">מדידות והתראות לבדיקה יתווספו למסד הנתונים. הרשומות הקיימות לא ישתנו.</string>
+    <string name="debug_simulate_events_confirmation">מדידות והתראות לבדיקה מתווספים למסד הנתונים. הרשומות הקיימות נותרים ללא שינוי.</string>
     <string name="debug_simulate_events_completed">נוספו %1$d מדידות ו־%2$d התראות</string>
     <string name="debug_simulation_note">הדמיית ניפוי שגיאות</string>
 </resources>

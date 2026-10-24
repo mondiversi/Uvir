@@ -10,8 +10,8 @@
     <string name="optional_note">Nota de aquisição</string>
     <string name="note_example">Nota de aquisição</string>
     <string name="single_acquisition">Aquisição única</string>
-    <string name="single_acquisition_ends_manual_session">A sessão manual atual será encerrada.</string>
-    <string name="automatic_start_ends_manual_session">A sessão manual atual terminará.</string>
+    <string name="single_acquisition_ends_manual_session">A sessão manual atual é encerrada.</string>
+    <string name="automatic_start_ends_manual_session">A sessão manual atual termina.</string>
     <string name="interrupt_manual_session_title">Interromper a sessão manual atual?</string>
     <string name="interrupt_manual_session_message">Para iniciar uma sessão de aquisição automática, você deve interromper a sessão de aquisição manual em andamento.</string>
     <string name="interrupt_manual_session_action">PARAR</string>
@@ -81,13 +81,13 @@
         <item quantity="many">(%1$d aquisições por %2$d variantes)</item>
         <item quantity="other">(%1$d aquisições por %2$d variantes)</item>
     </plurals>
-    <string name="session_variant_chart_files_info">Serão gerados %1$d ficheiros PNG, um para cada variante.</string>
+    <string name="session_variant_chart_files_info">São gerados %1$d ficheiros PNG, um para cada variante.</string>
     <string name="share">COMPARTILHAR</string>
     <string name="delete_selected_measurements_question">Excluir aquisições selecionadas?</string>
     <plurals name="delete_selected_measurements_warning">
-        <item quantity="one">A aquisição selecionada %1$d será excluída permanentemente.</item>
-        <item quantity="many">As aquisições selecionadas %1$d serão excluídas permanentemente.</item>
-        <item quantity="other">As aquisições selecionadas %1$d serão excluídas permanentemente.</item>
+        <item quantity="one">A aquisição selecionada %1$d é excluída permanentemente.</item>
+        <item quantity="many">As aquisições selecionadas %1$d são excluídas permanentemente.</item>
+        <item quantity="other">As aquisições selecionadas %1$d são excluídas permanentemente.</item>
     </plurals>
     <string name="acquisition_session_id_label">ID de aquisição/sessão</string>
     <string name="session_date_duration_events_label">Data e hora</string>
@@ -139,7 +139,7 @@
     <string name="automatic_stopping">Interrompendo a aquisição automática…</string>
     <string name="automatic_stop_failed">Não é possível interromper a aquisição automática. Verifique a conexão do sensor e tente novamente.</string>
     <string name="stop_automatic_confirmation_title">Interromper a aquisição automática?</string>
-    <string name="stop_automatic_confirmation_message">A aquisição automática atual será interrompida. Continuar?</string>
+    <string name="stop_automatic_confirmation_message">A aquisição automática atual é interrompida. Continuar?</string>
     <string name="continue_acquisition">MANTER EM EXECUÇÃO</string>
     <string name="acquisition_parameters">Configurações</string>
     <string name="connectivity">Conectividade</string>
@@ -170,11 +170,11 @@
     <string name="sensor_source_disabled_hint">Uma fonte desativada pode ser reativada através de outra conexão sem fio ativa. Se ambos estiverem desabilitados, conecte o sensor por USB.</string>
     <string name="sensor_power_off">DESLIGAR SENSOR</string>
     <string name="sensor_power_off_title">Desligar o sensor?</string>
-    <string name="sensor_power_off_message">O sensor entrará em modo de baixo consumo e não poderá ser reiniciado pela aplicação. Para ligá-lo novamente, pressione EN/RESET ou desligue e volte a ligar a alimentação. Para confirmar, mantenha DESLIGAR premido durante 5 segundos.</string>
+    <string name="sensor_power_off_message">O sensor entra em modo de baixo consumo e não pode ser reiniciado pela aplicação. Para ligá-lo novamente, pressione EN/RESET ou desligue e volte a ligar a alimentação. Para confirmar, mantenha DESLIGAR premido durante 5 segundos.</string>
     <string name="sensor_power_off_confirm">DESLIGAR</string>
     <string name="sensor_disassociate_action">DISSOCIAR DA APLICAÇÃO</string>
     <string name="sensor_disassociate_title">Dissociar o sensor?</string>
-    <string name="sensor_disassociate_message">A desassociação remove o sensor da lista de seleção, sem apagar o nome nem os registos guardados. Poderá associá-lo novamente por USB a qualquer momento. O sensor não será alterado. Para confirmar, mantenha DESASSOCIAR premido durante 5 segundos.</string>
+    <string name="sensor_disassociate_message">A desassociação remove o sensor da lista de seleção, sem apagar o nome nem os registos guardados. Pode associá-lo novamente por USB a qualquer momento. O sensor não é alterado. Para confirmar, mantenha DESASSOCIAR premido durante 5 segundos.</string>
     <string name="sensor_selection_failed">Não foi possível mudar de sensor. Tente novamente.</string>
     <string name="sensor_associate_action">Associar sensor</string>
     <string name="sensor_associate_usb_hint">Ligue o novo sensor por USB. Os sensores já associados permanecem na lista.</string>
@@ -185,7 +185,7 @@
     <string name="expand_all_settings_content_description">Expanda todas as configurações</string>
     <string name="collapse_all_settings_content_description">Recolher todas as configurações</string>
     <string name="restore_defaults_title">Restaurar as configurações padrão?</string>
-    <string name="restore_defaults_message">Todas as configurações da aplicação e do sensor serão restauradas aos valores predefinidos. Todas as aquisições salvas, alertas registrados e registros de erros serão excluídos permanentemente. Em seguida, o sensor será desligado. Para confirmar, mantenha RESTAURAR TUDO premido durante 10 segundos.</string>
+    <string name="restore_defaults_message">Todas as configurações da aplicação e do sensor são restauradas aos valores predefinidos. Todas as aquisições salvas, alertas registrados e registros de erros são excluídos permanentemente. Em seguida, o sensor é desligado. Para confirmar, mantenha RESTAURAR TUDO premido durante 10 segundos.</string>
     <string name="restore_defaults_confirm">RESTAURAR TUDO</string>
     <string name="restore_defaults_failed">A restauração completa não pôde ser executada. Verifique a conexão do sensor e tente novamente.</string>
     <string name="sensor_wifi_esp32_description">A aplicação comunica com o sensor quando ambos usam a mesma rede Wi-Fi.</string>
@@ -257,18 +257,18 @@
     <string name="invalid_threshold_alert">Use limites não negativos e defina um intervalo de repetição entre 1 segundo e 24 horas.</string>
     <string name="stop_all_value_alerts_accessibility">Parar a sessão de alertas</string>
     <string name="stop_all_value_alerts_title">Parar a sessão de alertas?</string>
-    <string name="stop_all_value_alerts_message">A sessão atual de alertas será encerrada. Os alertas configurados e registrados serão mantidos.</string>
+    <string name="stop_all_value_alerts_message">A sessão atual de alertas é encerrada. Os alertas configurados e registrados são mantidos.</string>
     <string name="stop_all_value_alerts_action">@string/stop</string>
     <string name="continue_alert_monitoring">CONTINUAR</string>
     <string name="start_value_alert_session_accessibility">Iniciar sessão de alertas</string>
     <string name="start_value_alert_session_title">Iniciar sessão de alertas</string>
-    <string name="start_value_alert_session_message">O monitoramento começará usando os alertas configurados. Você poderá adicionar ou remover alertas posteriormente sem iniciar uma nova sessão.</string>
+    <string name="start_value_alert_session_message">O monitoramento começa usando os alertas configurados. Você pode adicionar ou remover alertas posteriormente sem iniciar uma nova sessão.</string>
     <string name="start_value_alert_session_action">COMEÇAR</string>
     <string name="threshold_rules_reset">REINICIAR ALERTAS ATIVOS</string>
     <string name="threshold_rules_reset_confirm_action">REINICIAR TUDO</string>
     <string name="threshold_rules_reset_complete">Alertas ativos redefinidos</string>
     <string name="threshold_rules_reset_confirmation_title">Redefinir todos os alertas ativos?</string>
-    <string name="threshold_rules_reset_confirmation_message">Todos os alertas ativos serão redefinidos. Para confirmar, mantenha REDEFINIR TUDO premido durante 2 segundos.</string>
+    <string name="threshold_rules_reset_confirmation_message">Todos os alertas ativos são redefinidos. Para confirmar, mantenha REDEFINIR TUDO premido durante 2 segundos.</string>
     <string name="threshold_bell_configure">Configurar alertas para este grupo</string>
     <string name="threshold_bell_active">Um ou mais alertas ativos neste grupo</string>
     <string name="threshold_group_editor_title">Alertas para\n%1$s</string>
@@ -291,9 +291,9 @@
     <string name="select_alerts">Selecione alertas</string>
     <string name="delete_selected_alerts_question">Excluir os alertas selecionados?</string>
     <plurals name="delete_selected_alerts_warning">
-        <item quantity="one">O alerta selecionado (%1$d) será excluído permanentemente.</item>
-        <item quantity="many">Os alertas %1$d selecionados serão excluídos permanentemente.</item>
-        <item quantity="other">Os alertas %1$d selecionados serão excluídos permanentemente.</item>
+        <item quantity="one">O alerta selecionado (%1$d) é excluído permanentemente.</item>
+        <item quantity="many">Os alertas %1$d selecionados são excluídos permanentemente.</item>
+        <item quantity="other">Os alertas %1$d selecionados são excluídos permanentemente.</item>
     </plurals>
     <string name="threshold_alerts_deleted">Alertas excluídos</string>
     <plurals name="threshold_alert_count_since">
@@ -303,7 +303,7 @@
     </plurals>
     <string name="threshold_alert_export_subject">Registro de alerta Uvir</string>
     <string name="threshold_alert_log_delete_title">Excluir todos os alertas registrados?</string>
-    <string name="threshold_alert_log_delete_warning">Todos os alertas registrados serão excluídos permanentemente. Para confirmar, mantenha EXCLUIR TUDO premido durante 2 segundos.</string>
+    <string name="threshold_alert_log_delete_warning">Todos os alertas registrados são excluídos permanentemente. Para confirmar, mantenha EXCLUIR TUDO premido durante 2 segundos.</string>
     <string name="threshold_alert_log_delete_all">EXCLUIR TUDO</string>
     <string name="threshold_alert_log_deleted">Alertas excluídos</string>
     <string name="threshold_log_violation_above">%1$s: %2$s µW/cm² ≥ %3$s µW/cm²</string>
@@ -350,16 +350,16 @@
     <string name="reset_all_records_action">REDEFINIR CONTADORES</string>
     <string name="reset_all_records_warning">Exclui todas as aquisições salvas e alertas gravados e, em seguida, redefine seus IDs e IDs de sessão.</string>
     <string name="reset_all_records_confirmation_title">Redefinir todos os contadores?</string>
-    <string name="reset_all_records_confirmation_message">Todas as aquisições salvas e alertas registrados serão excluídos permanentemente. Os respetivos IDs e IDs de sessão serão reiniciados. Para confirmar, mantenha REDEFINIR TUDO premido durante 5 segundos.</string>
+    <string name="reset_all_records_confirmation_message">Todas as aquisições salvas e alertas registrados são excluídos permanentemente. Os respetivos IDs e IDs de sessão são reiniciados. Para confirmar, mantenha REDEFINIR TUDO premido durante 5 segundos.</string>
     <string name="all_counters_reset_complete">Registros e contadores redefinidos</string>
     <string name="reset_acquisition_counters_action">REINICIAR AQUISIÇÕES</string>
     <string name="reset_acquisition_counters_warning">Exclui permanentemente todas as aquisições salvas e redefine os IDs de aquisição e sessão.</string>
     <string name="reset_acquisition_counters_confirmation_title">Redefinir aquisições?</string>
-    <string name="reset_acquisition_counters_confirmation_message">Exclui permanentemente todas as aquisições salvas e redefine os IDs de aquisição e sessão. O registro e as configurações dos alertas não serão alterados. Para confirmar, mantenha REDEFINIR TUDO premido durante 2 segundos.</string>
+    <string name="reset_acquisition_counters_confirmation_message">Exclui permanentemente todas as aquisições salvas e redefine os IDs de aquisição e sessão. O registro e as configurações dos alertas não são alterados. Para confirmar, mantenha REDEFINIR TUDO premido durante 2 segundos.</string>
     <string name="reset_alert_counters_action">REDEFINIR ALERTAS</string>
     <string name="reset_alert_counters_warning">Exclui permanentemente todos os alertas registrados e redefine os IDs de alerta.</string>
     <string name="reset_alert_counters_confirmation_title">Redefinir alertas?</string>
-    <string name="reset_alert_counters_confirmation_message">Exclui permanentemente todos os alertas registrados e redefine os IDs de alerta. As aquisições salvas e as configurações dos alertas não serão alteradas. Para confirmar, mantenha REDEFINIR TUDO premido durante 2 segundos.</string>
+    <string name="reset_alert_counters_confirmation_message">Exclui permanentemente todos os alertas registrados e redefine os IDs de alerta. As aquisições salvas e as configurações dos alertas não são alteradas. Para confirmar, mantenha REDEFINIR TUDO premido durante 2 segundos.</string>
     <string name="reset_confirmation_action">REINICIAR TUDO</string>
     <string name="reset_counters_stop_auto">Pare a aquisição automática antes de redefinir os contadores.</string>
     <string name="acquisition_counters_reset_complete">Contadores de aquisição redefinidos</string>
@@ -368,7 +368,7 @@
     <string name="import_database">IMPORTAR BASE DE DADOS</string>
     <string name="database_transfer_description">Exporta/restaura toda a base de dados através de um arquivo ZIP cifrado.</string>
     <string name="import_database_dialog_title">Importar a base de dados?</string>
-    <string name="import_database_dialog_description">Os registos e perfis dos sensores neste telemóvel serão substituídos pelos da cópia. O sensor físico não será alterado. Introduz a palavra-passe do ZIP para continuar.</string>
+    <string name="import_database_dialog_description">Os registos e perfis dos sensores neste telemóvel são substituídos pelos da cópia. O sensor físico não é alterado. Introduz a palavra-passe do ZIP para continuar.</string>
     <string name="import_database_confirm">Importar</string>
     <string name="import_database_failed">Não foi possível importar a base de dados. Verifica a palavra-passe, o arquivo e a versão da base.</string>
     <string name="import_database_success">Base de dados importada.</string>
@@ -391,7 +391,7 @@
     <string name="relative_spectral_index">Relevância espectral</string>
     <string name="relative_spectral_index_explanation">0–100 mostra quão fortemente o espectro adquirido está concentrado em comprimentos de onda ponderados por esta estimativa. Descreve a composição espectral, não a intensidade total. Não é uma percentagem de danos nem um limite de segurança.</string>
     <string name="delete_all_measurements_question">Excluir todas as aquisições salvas?</string>
-    <string name="delete_all_measurements_warning">Todas as aquisições salvas serão excluídas permanentemente. Para confirmar, mantenha EXCLUIR TUDO premido durante 2 segundos.</string>
+    <string name="delete_all_measurements_warning">Todas as aquisições salvas são excluídas permanentemente. Para confirmar, mantenha EXCLUIR TUDO premido durante 2 segundos.</string>
     <string name="delete_all">EXCLUIR TUDO</string>
     <plurals name="measurement_count_since">
         <item quantity="one">%1$d salvo · desde %2$s</item>
@@ -400,7 +400,7 @@
     </plurals>
     <string name="no_saved_measurements">Nenhuma aquisição salva.</string>
     <string name="delete_measurement_question">Excluir esta aquisição?</string>
-    <string name="delete_measurement_warning">Esta aquisição será excluída permanentemente.</string>
+    <string name="delete_measurement_warning">Esta aquisição é excluída permanentemente.</string>
     <string name="measurement_deleted">Aquisição excluída</string>
     <string name="measurements_deleted">Aquisições excluídas</string>
     <string name="delete">EXCLUIR</string>
@@ -499,7 +499,7 @@
     <string name="session_chart_note">Nota da sessão</string>
     <string name="session_chart_total_acquisitions">Aquisições totais</string>
     <string name="delete_acquisition_session_question">Excluir esta sessão?</string>
-    <string name="delete_acquisition_session_warning">Todas as aquisições nesta sessão serão excluídas permanentemente.</string>
+    <string name="delete_acquisition_session_warning">Todas as aquisições nesta sessão são excluídas permanentemente.</string>
     <string name="acquisition_session_deleted">Sessão excluída</string>
     <string name="alert_session_chart_empty">Não há dados disponíveis para esta sessão de alerta.</string>
     <string name="alert_session_chart_unit">Valor · %1$s</string>
@@ -520,10 +520,10 @@
     <string name="alert_session_detail_values">Tipos de valor</string>
     <string name="alert_session_detail_total">Alertas total</string>
     <string name="delete_alert_question">Excluir este alerta?</string>
-    <string name="delete_alert_warning">Este alerta registrado será excluído permanentemente.</string>
+    <string name="delete_alert_warning">Este alerta registrado é excluído permanentemente.</string>
     <string name="alert_deleted">Alerta excluído</string>
     <string name="delete_alert_session_question">Excluir esta sessão de alerta?</string>
-    <string name="delete_alert_session_warning">Todos os alertas registrados nesta sessão serão excluídos permanentemente.</string>
+    <string name="delete_alert_session_warning">Todos os alertas registrados nesta sessão são excluídos permanentemente.</string>
     <string name="alert_session_deleted">Sessão de alerta excluída</string>
     <string name="alert_chart_date">Gravado: %1$s</string>
     <string name="alert_chart_scale">Comparação de limites</string>
@@ -577,7 +577,7 @@
     <string name="offline_capacity_estimated_duration_unlimited">Autonomia estimada: ilimitada</string>
     <string name="offline_capacity_conservative_hint">Estimativa conservadora: violações simultâneas de limite usam um registro de alerta por intervalo de repetição.</string>
     <string name="offline_disconnection_description">A conexão do sensor foi perdida. Esta estimativa combina a aquisição automática ativa e alertas.</string>
-    <string name="offline_disconnection_recording_disabled">A gravação autônoma offline está desativada. O sensor não armazenará novas aquisições ou alertas até se reconectar.</string>
+    <string name="offline_disconnection_recording_disabled">A gravação autônoma offline está desativada. O sensor não armazena novas aquisições ou alertas até se reconectar.</string>
     <string name="offline_disconnection_estimate_unavailable">O estado mais recente do sensor não contém informações suficientes para estimar a autonomia restante.</string>
     <string name="offline_duration_days_hours">%1$d d %2$d h</string>
     <string name="offline_duration_hours_minutes">%1$d h %2$d min</string>
@@ -687,7 +687,7 @@
     <string name="restore_app_settings_confirm">REPOR</string>
     <string name="restore_app_settings_failed">Não foi possível repor a aplicação.</string>
     <string name="restore_app_settings_inline_warning">Elimina todas as definições e todos os dados guardados na aplicação. O sensor e os dados nele armazenados permanecem inalterados.</string>
-    <string name="restore_app_settings_message">Todas as definições da aplicação Uvir e os dados locais serão eliminados, incluindo aquisições, alertas registados, registos de erros, contadores, perfis de sensores e credenciais de ligação guardadas. O sensor não será alterado nem desligado. Para confirmar, mantenha «REPOR» premido durante 5 segundos.</string>
+    <string name="restore_app_settings_message">Todas as definições da aplicação Uvir e os dados locais são eliminados, incluindo aquisições, alertas registados, registos de erros, contadores, perfis de sensores e credenciais de ligação guardadas. O sensor não é alterado nem desligado. Para confirmar, mantenha «REPOR» premido durante 5 segundos.</string>
     <string name="restore_app_settings_title">Repor a aplicação?</string>
     <string name="sensor_status_no_sensor">Não conectado</string>
     <string name="sensor_status_no_associated_sensor">Nenhum sensor associado</string>
@@ -695,7 +695,7 @@
     <string name="sensor_restore_confirm">REPOR</string>
     <string name="sensor_restore_failed">Não foi possível repor o sensor. Verifique a ligação e tente novamente.</string>
     <string name="sensor_restore_inline_warning">Elimina os dados não sincronizados do sensor, repõe a configuração e as credenciais de ligação e depois desliga-o.</string>
-    <string name="sensor_restore_message">Apenas o sensor será reposto. As definições e credenciais de ligação voltarão aos valores predefinidos; as aquisições, alertas e erros não sincronizados serão eliminados e o sensor será desligado. As definições e registos já guardados no Uvir não serão alterados. Para confirmar, mantenha «REPOR» premido durante 5 segundos.</string>
+    <string name="sensor_restore_message">Apenas o sensor é reposto. As definições e credenciais de ligação voltam aos valores predefinidos; as aquisições, alertas e erros não sincronizados são eliminados e o sensor é desligado. As definições e registos já guardados no Uvir não são alterados. Para confirmar, mantenha «REPOR» premido durante 5 segundos.</string>
     <string name="sensor_restore_title">Repor o sensor?</string>
     <string name="sensor_usb_identity_mismatch">Sensor USB não autorizado. Já existe outro sensor associado à aplicação.</string>
     <string name="show_password">Mostrar palavra-passe</string>
@@ -741,7 +741,7 @@
     <string name="list_filter_no_results">Nenhum resultado para estes filtros.</string>
     <string name="list_filter_count">%1$d de %2$d apresentados</string>
     <string name="list_filter_share_question">Partilhar todos os resultados apresentados?</string>
-    <string name="list_filter_share_warning">Nenhum registo selecionado. Serão partilhados todos os registos que correspondem aos filtros atuais.</string>
+    <string name="list_filter_share_warning">Nenhum registo selecionado. São partilhados todos os registos que correspondem aos filtros atuais.</string>
     <string name="settings_section_appearance">Aparência</string>
     <string name="settings_section_language_formats">Unidades</string>
     <string name="settings_section_sharing_export">Exportação</string>
@@ -764,11 +764,11 @@
     <string name="confirmation_question_suffix">?</string>
     <string name="threshold_alerts_sound_description_v2">Escolha o sinal reproduzido pela aplicação quando um alerta é registado.</string>
     <string name="list_filter_export_question">Exportar todos os resultados apresentados?</string>
-    <string name="list_filter_export_warning">Nenhum registo está selecionado. Serão exportados todos os registos correspondentes aos filtros atuais.</string>
+    <string name="list_filter_export_warning">Nenhum registo está selecionado. São exportados todos os registos correspondentes aos filtros atuais.</string>
     <string name="settings_include_sensitive_information">Incluir dados sensíveis</string>
-    <string name="settings_include_sensitive_information_description">Inclui as credenciais de ligação e a associação do sensor, permitindo restaurá-lo sem USB. Será pedida uma palavra-passe de encriptação.</string>
+    <string name="settings_include_sensitive_information_description">Inclui as credenciais de ligação e a associação do sensor, permitindo restaurá-lo sem USB. É pedida uma palavra-passe de encriptação.</string>
     <string name="settings_encryption_password_title">Palavra-passe de encriptação</string>
-    <string name="settings_encryption_password_description">Use pelo menos 8 caracteres. Será necessária a mesma palavra-passe para importar a cópia de segurança posteriormente.</string>
+    <string name="settings_encryption_password_description">Use pelo menos 8 caracteres. É necessária a mesma palavra-passe para importar a cópia de segurança posteriormente.</string>
     <string name="settings_encryption_password">Palavra-passe de encriptação</string>
     <string name="settings_encryption_password_confirm">Confirmar palavra-passe</string>
     <string name="settings_encryption_password_too_short">Use pelo menos %1$d caracteres.</string>
@@ -814,5 +814,5 @@
     <string name="alert_registration_count">Número de registros</string>
     <string name="alert_configure_first">Configure pelo menos um valor antes de iniciar.</string>
     <string name="sensor_simulation_disable">Desativar</string>
-    <string name="settings_import_confirmation_description">As definições dos ficheiros selecionados substituirão as atuais.</string>
+    <string name="settings_import_confirmation_description">As definições dos ficheiros selecionados substituem as atuais.</string>
 </resources>

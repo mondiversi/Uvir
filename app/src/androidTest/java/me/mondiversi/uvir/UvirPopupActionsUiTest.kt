@@ -48,6 +48,7 @@ class UvirPopupActionsUiTest {
     private val page = mutableStateOf(0)
     private var exports = 0
     private var expectedCloseColor = Color.Unspecified
+    private var expectedCancelColor = Color.Unspecified
 
     private fun fixture() {
         compose.setContent {
@@ -58,10 +59,12 @@ class UvirPopupActionsUiTest {
             MaterialTheme(colorScheme = if (dark.value) darkColorScheme() else lightColorScheme()) {
                 val colors = MaterialTheme.colorScheme
                 val closeColor = colors.primary
-                SideEffect { expectedCloseColor = closeColor }
+                val cancelColor = UvirDestructiveActionColor
+                SideEffect { expectedCloseColor = closeColor; expectedCancelColor = cancelColor }
                 if (open.value) when (page.value) {
                     0 -> UvirSaveOrShareDialog(colors.surface, colors.onSurface, colors.onSurfaceVariant,
                         "Export", "Preview", UvirExportFileFormat.TXT,
+                        dismissLabelRes = R.string.cancel,
                         onDismiss = { open.value = false }, onExport = { exports++ })
                     1 -> MeasurementShareFormatDialog(colors.surface, colors.onSurface, colors.onSurfaceVariant,
                         onDismiss = { open.value = false }, onFormatSelected = { _, _ -> exports++ })
@@ -79,20 +82,33 @@ class UvirPopupActionsUiTest {
         }
     }
 
-    @Test fun exportPopupsHavePurpleCloseBeforeActionsInBothThemesWithoutExporting() {
+    @Test fun exportPopupsHaveRedCancelAndInformationalCloseStaysPurpleInBothThemesWithoutExporting() {
         fixture()
         val tags = listOf("export_dialog_close", "export_format_close", "database_export_close", "settings_export_close")
         for (night in listOf(false, true)) for ((index, tag) in tags.withIndex()) {
             compose.runOnIdle { dark.value = night; page.value = index; open.value = true }
+            if (index == 2 || index == 3) {
+                val description = if (index == 2) R.string.export_database_dialog_description
+                    else R.string.export_settings_description
+                compose.onNodeWithText(resources.getString(description)).performScrollTo().assertIsDisplayed()
+            }
             compose.onNodeWithTag(tag).assertIsDisplayed().assertIsEnabled()
-            compose.onNodeWithText(resources.getString(R.string.close), useUnmergedTree = true)
-                .assertUvirActionTextColor(expectedCloseColor)
-            compose.onNodeWithText(resources.getString(R.string.cancel)).assertDoesNotExist()
+            val dismissLabel = if (index == 1) R.string.close else R.string.cancel
+            val otherLabel = if (index == 1) R.string.cancel else R.string.close
+            compose.onNodeWithText(resources.getString(dismissLabel), useUnmergedTree = true)
+                .assertUvirActionTextColor(if (index == 1) expectedCloseColor else expectedCancelColor)
+            compose.onNodeWithText(resources.getString(otherLabel)).assertDoesNotExist()
             val close = compose.onNodeWithTag(tag).getUnclippedBoundsInRoot()
             val save = compose.onNodeWithText(resources.getString(R.string.save)).getUnclippedBoundsInRoot()
-            assertTrue("Close precedes save", close.left < save.left || close.top < save.top)
-            if (index == 0) {
-                File(context.getExternalFilesDir(null), "popup-export-${if (night) "night" else "day"}.png").outputStream().use {
+            // Longer localized labels can wrap. The shared dialog keeps the
+            // export actions on the first row and dismissal below them.
+            if (close.top < save.bottom && save.top < close.bottom) {
+                assertTrue("Dismissal precedes save on the same row", close.left < save.left)
+            } else {
+                assertTrue("Wrapped dismissal follows the export row", close.top >= save.bottom)
+            }
+            if (index == 0 || index == 2 || index == 3) {
+                File(context.getExternalFilesDir(null), "popup-export-$index-${if (night) "night" else "day"}.png").outputStream().use {
                     assertTrue(compose.onNode(isDialog()).captureToImage().asAndroidBitmap().compress(Bitmap.CompressFormat.PNG, 100, it))
                 }
             }

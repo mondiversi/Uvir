@@ -56,7 +56,7 @@
     <string name="export_database_dialog_title">데이터베이스 내보내기</string>
     <string name="export_database_dialog_description">이 휴대전화에 저장된 앱의 전체 데이터베이스를 내보냅니다. 저장된 측정값과 알림도 포함됩니다.</string>
     <string name="export_error_log_dialog_title">오류 로그 내보내기</string>
-    <string name="export_error_log_dialog_description">이 휴대전화에 저장된 앱 오류 로그를 기술 파일로 내보냅니다. 저장된 측정값과 자격 증명은 포함되지 않습니다.</string>
+    <string name="export_error_log_dialog_description">앱 오류 로그를 기술 파일로 내보냅니다. 저장된 측정값과 자격 증명은 포함되지 않습니다.</string>
     <string name="export_diagnostic_dialog_title">진단 보고서 내보내기</string>
     <string name="export_diagnostic_dialog_description">센서 진단 보고서를 내보냅니다. 기술 테스트 결과는 포함되지만 비밀번호나 자격 증명은 포함되지 않습니다.</string>
     <string name="export_sensor_info_dialog_title">센서 정보 내보내기</string>
@@ -76,4 +76,5 @@
     <string name="share_chart_file_count">PNG 파일: %1$d</string>
     <string name="share_readable_table_file_count">TXT 파일: %1$d</string>
     <string name="export_file_count">%1$s 파일: %2$d</string>
+    <string name="export_settings_description">선택한 앱 및 센서 설정을 내보냅니다.</string>
 </resources>
