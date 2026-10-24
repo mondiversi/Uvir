@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="record_archive_title">Ölçümler ve uyarılar</string>
+    <string name="record_archive_description">Ölçümleri ve uyarıları oturumlarıyla birlikte dışa/içe aktarır.</string>
+    <string name="record_archive_export_description">Bu türdeki tüm kayıtları, oturumlar dahil, parolasız bir UVIR dosyası olarak dışa aktarın.</string>
+    <string name="record_archive_import_description">Veriler arşive eklenecek. Mevcut kayıtlar atlanır. Bilinmeyen sensörler eşleştirilene kadar donanım kimlikleriyle gösterilir.</string>
+    <string name="record_archive_import_summary">Kayıtlar: %1$d · Oturumlar: %2$d</string>
+    <string name="record_archive_import_success">İçe aktarılan: %1$d · Zaten mevcut: %2$d</string>
+    <string name="record_archive_failed">Kayıtlar aktarılamadı. Dosyayı ve veri türünü kontrol edin.</string>
+</resources>

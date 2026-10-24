@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="export_percentages_total">Persentase dari total</string>
+    <string name="export_percentages_group">Persentase dalam kelompok</string>
     <string name="data_export_files_heading">Berkas</string>
     <string name="export_saved_successfully">File disimpan.</string>
     <string name="export_save_failed">File tidak dapat disimpan.</string>

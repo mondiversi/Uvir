@@ -10,9 +10,11 @@
     <string name="update_download">Inapakua na kuthibitisha…</string>
     <string name="update_flash">Inasasisha kihisi…</string>
     <string name="update_verify">Inathibitisha kihisi…</string>
-    <string name="update_keep_connected">Usikate USB au kuzima kihisi. Ikihitajika shikilia BOOT na ujaribu tena.</string>
+    <string name="update_app_verify">Inathibitisha programu…</string>
+    <string name="update_app_failed">Usasishaji wa programu umeshindikana. Angalia kumbukumbu ya hitilafu na ujaribu tena.</string>
+    <string name="update_keep_connected">Usikate USB wala kuzima sensa.</string>
     <string name="update_done">Kihisi kimesasishwa</string>
     <string name="update_failed">Sasisho limeshindwa. Angalia kumbukumbu ya hitilafu. Kihisi kisipoanza, rejesha programu dhibiti kwa USB kutoka kompyuta.</string>
     <string name="update_permission">Ruhusu Uvir kusakinisha masasisho katika mipangilio ya Android.</string>
-    <string name="update_whats_new">Uhamishaji wa CSV, TXT na PNG wenye modeli za sensa, marejeo mafupi ya spektra na maelezo ya grafu yanayosomeka zaidi.</string>
+    <string name="update_whats_new">Uhamishaji wa TXT na CSV wa vipimo una asilimia za jumla na kikundi, rangi za PNG zinazolingana na uthibitisho wa kuingiza kwa kushikilia sekunde tano.</string>
 </resources>

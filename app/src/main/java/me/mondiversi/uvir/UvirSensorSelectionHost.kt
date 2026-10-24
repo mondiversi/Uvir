@@ -41,6 +41,8 @@ fun UvirApp(
     val scope = rememberCoroutineScope()
     // Simulation replaces sensor state, but must not move the user's settings page.
     val settingsRouteState = rememberUvirSettingsRouteState()
+    // Unlike the sensor-specific UI below, the open picker survives a source switch.
+    val sensorSelectionState = rememberSaveable { mutableStateOf(false) }
     var epoch by rememberSaveable { mutableIntStateOf(0) }
     var switching by remember { mutableStateOf(false) }
     var contentSuspended by remember { mutableStateOf(false) }
@@ -64,6 +66,7 @@ fun UvirApp(
     }
     LaunchedEffect(openHomeRequestId) {
         if (openHomeRequestId > 0L) {
+            sensorSelectionState.value = false
             settingsRouteState.close()
             settingsRouteState.scrollState.scrollTo(0)
         }
@@ -96,6 +99,7 @@ fun UvirApp(
             multiSensorRuntime = multiSensorRuntime,
             simulationActive = simulationActive,
             settingsRouteState = settingsRouteState,
+            sensorSelectionState = sensorSelectionState,
             onSimulationChanged = { enabled ->
                 if (!switching && simulationActive != enabled) scope.launch {
                     frozenFrame = runCatching { view.drawToBitmap().asImageBitmap() }.getOrNull()

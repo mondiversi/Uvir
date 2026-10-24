@@ -13,48 +13,36 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 internal val UvirDestructiveActionBaseColor = Color(0xFFD32F2F)
-internal val UvirDestructiveOutlinedBorderWidth = 1.5.dp
+internal val UvirDestructiveOutlinedBorderWidth = 1.dp
 internal const val UvirDestructiveOutlinedIconStrokeScale = 1.25f
-/** Scoped to Settings/About bodies and data-export bottom buttons, never to dialog text actions or toolbars. */
-internal val LocalUvirSettingsActionButtons = staticCompositionLocalOf { false }
+/** Standard action typography everywhere; dialog text actions explicitly opt out. */
+internal val LocalUvirSettingsActionButtons = staticCompositionLocalOf { true }
 internal val LocalUvirActionGlyphStrokeScale = staticCompositionLocalOf { 1f }
-
-@Composable
-private fun uvirOutlinedRestingContainer(color: Color): Color =
-    if (LocalUvirSettingsActionButtons.current) Color.Transparent else color
+internal val UvirOutlinedActionIconStrokeWidth = 2.dp
 
 @Composable
 private fun uvirOutlinedDisabledContainer(): Color =
-    if (LocalUvirSettingsActionButtons.current) {
-        if (isSystemInDarkTheme()) Color(0xFF33343C) else Color(0xFFECEDEF)
-    } else uvirDisabledActionContainerColor()
+    if (isSystemInDarkTheme()) Color(0xFF33343C) else Color(0xFFECEDEF)
 
 @Composable
 private fun uvirOutlinedDisabledContent(): Color =
-    if (LocalUvirSettingsActionButtons.current) {
-        if (isSystemInDarkTheme()) Color(0xFFA1A5AE) else Color(0xFF808790)
-    }
-    else uvirDisabledActionContentColor()
+    if (isSystemInDarkTheme()) Color(0xFFA1A5AE) else Color(0xFF808790)
 
 @Composable
 private fun uvirOutlinedButtonBorder(
     enabled: Boolean,
-    color: Color,
-    defaultWidth: Dp
-): BorderStroke? = if (LocalUvirSettingsActionButtons.current) {
+    color: Color
+): BorderStroke {
     val borderColor = if (enabled) {
         color.copy(alpha = if (isSystemInDarkTheme()) 0.48f else 0.38f)
     } else {
         MaterialTheme.colorScheme.onSurface.copy(alpha = if (isSystemInDarkTheme()) 0.20f else 0.12f)
     }
-    BorderStroke(1.dp, borderColor)
-} else if (enabled) {
-    BorderStroke(defaultWidth, uvirQuietActionBorderColor(color))
-} else null
+    return BorderStroke(1.dp, borderColor)
+}
 
 internal const val UvirFloatingPressedTargetScale = 1.11f
 
@@ -143,7 +131,7 @@ internal fun uvirDestructiveOutlinedActionColor(): Color =
 @Composable
 internal fun uvirDestructiveOutlinedButtonColors(): ButtonColors =
     ButtonDefaults.outlinedButtonColors(
-        containerColor = uvirOutlinedRestingContainer(uvirSubtleOutlinedContainerColor(uvirDestructiveOutlinedActionColor())),
+        containerColor = Color.Transparent,
         contentColor = uvirDestructiveOutlinedActionColor(),
         disabledContainerColor = uvirOutlinedDisabledContainer(),
         disabledContentColor = uvirOutlinedDisabledContent()
@@ -154,14 +142,14 @@ internal fun uvirDestructiveOutlinedButtonColors(): ButtonColors =
 internal fun uvirDestructiveOutlinedButtonBorder(
     enabled: Boolean,
     secondaryText: Color
-): BorderStroke? = uvirOutlinedButtonBorder(enabled, uvirDestructiveOutlinedActionColor(), UvirDestructiveOutlinedBorderWidth)
+): BorderStroke? = uvirOutlinedButtonBorder(enabled, uvirDestructiveOutlinedActionColor())
 
 /** Purple actions outside dialogs use the same quiet outlined treatment as
  * the red warning actions. The theme provides the correct day/night purple. */
 @Composable
 internal fun uvirPrimaryOutlinedButtonColors(): ButtonColors =
     ButtonDefaults.outlinedButtonColors(
-        containerColor = uvirOutlinedRestingContainer(uvirSubtleOutlinedContainerColor(MaterialTheme.colorScheme.primary)),
+        containerColor = Color.Transparent,
         contentColor = MaterialTheme.colorScheme.primary,
         disabledContainerColor = uvirOutlinedDisabledContainer(),
         disabledContentColor = uvirOutlinedDisabledContent()
@@ -172,37 +160,21 @@ internal fun uvirPrimaryOutlinedButtonColors(): ButtonColors =
 internal fun uvirPrimaryOutlinedButtonBorder(
     enabled: Boolean,
     secondaryText: Color
-): BorderStroke? = uvirOutlinedButtonBorder(enabled, MaterialTheme.colorScheme.primary, 1.dp)
+): BorderStroke? = uvirOutlinedButtonBorder(enabled, MaterialTheme.colorScheme.primary)
 
-/** Settings/About use transparent active surfaces and a neutral disabled fill.
- * Other flows retain their existing palette. */
+/** All standard outlined actions use transparent active surfaces and a neutral disabled fill. */
 @Composable
 internal fun uvirOutlinedActionColors(contentColor: Color): ButtonColors =
     ButtonDefaults.outlinedButtonColors(
-        containerColor = uvirOutlinedRestingContainer(uvirNeutralOutlinedContainerColor(contentColor)),
+        containerColor = Color.Transparent,
         contentColor = contentColor,
         disabledContainerColor = uvirOutlinedDisabledContainer(),
         disabledContentColor = uvirOutlinedDisabledContent()
     )
-
-/** A faint tint makes full-size outlined buttons recognizable without adding
- * visual weight to dialog text actions or toolbar icons. */
-@Composable
-internal fun uvirSubtleOutlinedContainerColor(color: Color): Color =
-    color.copy(alpha = if (isSystemInDarkTheme()) 0.16f else 0.10f)
-
-/** Neutral actions stay lighter than the opaque disabled surface in daylight. */
-@Composable
-internal fun uvirNeutralOutlinedContainerColor(color: Color): Color =
-    color.copy(alpha = if (isSystemInDarkTheme()) 0.16f else 0.04f)
-
-@Composable
-private fun uvirQuietActionBorderColor(color: Color): Color =
-    color.copy(alpha = if (isSystemInDarkTheme()) 0.38f else 0.30f)
 
 /** Neutral and accent actions share outline opacity; the neutral hue still matches its label. */
 @Composable
 internal fun uvirOutlinedActionBorder(
     enabled: Boolean,
     contentColor: Color
-): BorderStroke? = uvirOutlinedButtonBorder(enabled, contentColor, 1.dp)
+): BorderStroke? = uvirOutlinedButtonBorder(enabled, contentColor)

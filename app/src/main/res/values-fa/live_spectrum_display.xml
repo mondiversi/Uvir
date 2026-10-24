@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_percent_total" formatted="false">٪ کل</string>
+    <string name="live_percent_group" formatted="false">٪ گروه</string>
+    <string name="live_channel_hide">پنهان کردن %1$s در نمایش زنده</string>
+    <string name="live_channel_show">نمایش %1$s در نمایش زنده</string>
+</resources>

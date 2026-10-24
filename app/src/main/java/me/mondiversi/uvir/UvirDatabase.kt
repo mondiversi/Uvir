@@ -15,7 +15,7 @@ class UvirDatabaseHelper(
     context.applicationContext,
     "uvir.db",
     null,
-    25
+    26
 ) {
 
     private val appContext =
@@ -279,6 +279,7 @@ class UvirDatabaseHelper(
         createSessionTables(db)
         createSensorSettingsTables(db)
         UvirLegacyCameraArchive.createTable(db)
+        createUvirRecordArchiveSchema(db)
     }
 
     override fun onUpgrade(
@@ -444,6 +445,7 @@ class UvirDatabaseHelper(
             addColumnIfMissing(db, "sensor_settings", "alert_recording_enabled", "INTEGER")
         }
         if (oldVersion < 25 && newVersion >= 25) migrateUvirDatabaseToSi(db)
+        if (oldVersion < 26) createUvirRecordArchiveSchema(db)
     }
 
     private fun migrateAcquisitionVariantsToVersion18(

@@ -1,0 +1,4 @@
+<resources>
+    <string name="main_island_move_up">انتقال %1$s به بالا</string>
+    <string name="main_island_move_down">انتقال %1$s به پایین</string>
+</resources>

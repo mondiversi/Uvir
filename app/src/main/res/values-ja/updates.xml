@@ -10,9 +10,11 @@
     <string name="update_download">ダウンロードと検証中…</string>
     <string name="update_flash">センサーを更新中…</string>
     <string name="update_verify">センサーを検証中…</string>
-    <string name="update_keep_connected">USB を抜いたりセンサーの電源を切ったりしないでください。必要なら BOOT を押したまま再試行してください。</string>
+    <string name="update_app_verify">アプリを検証中…</string>
+    <string name="update_app_failed">アプリの更新に失敗しました。エラーログを確認して再試行してください。</string>
+    <string name="update_keep_connected">USBを抜いたり、センサーの電源を切ったりしないでください。</string>
     <string name="update_done">センサーを更新しました</string>
     <string name="update_failed">更新に失敗しました。エラーログをご覧ください。センサーが起動しない場合は、パソコンから USB でファームウェアを復元してください。</string>
     <string name="update_permission">Android 設定で Uvir に更新のインストールを許可してください。</string>
-    <string name="update_whats_new">CSV、TXT、PNGにセンサーモデルと簡潔な分光情報を追加し、グラフの凡例を改善。</string>
+    <string name="update_whats_new">測定のTXT・CSV出力に全体とグループの割合を追加しました。PNGの色も統一し、読み込みの確認には5秒間の長押しが必要です。</string>
 </resources>

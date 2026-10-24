@@ -49,10 +49,14 @@ includes a signed update index for verified in-app downloads.
 ## Android app
 
 - Package: `me.mondiversi.uvir`
-- Current app version: **1.4.0**; sensor firmware: **0.5.112**.
-- [Version 1.4.0 release notes](docs/RELEASE_NOTES_1.4.0.md): per-channel
-  calibration and window compensation, canonical SI storage, configurable
-  display/export precision, spectral references and updated construction guides.
+- Current app version: **1.4.1**; sensor firmware: **0.5.112**.
+- [Version 1.4.1 release notes](docs/RELEASE_NOTES_1.4.1.md): portable record
+  transfers, persistent home-display choices, consistent spectral colors and
+  five-second import confirmations. The release includes both APK and firmware.
+- [Record transfer](docs/RECORD_TRANSFER.md): password-free acquisition and alert
+  archives, hardware identity matching, session remapping and duplicate handling.
+- [Version 1.4.0 release notes](docs/RELEASE_NOTES_1.4.0.md) document the earlier
+  calibration, SI-storage and construction-guide changes.
 - [Optical bands and optional window compensation](docs/OPTICAL_WINDOW.md): nominal channel coverage, correction limits and deferred hardware validation.
 - Signed GitHub update checks at startup and from Info, verified APK downloads,
   and identity-checked USB sensor updates. The app is updated before the sensor.

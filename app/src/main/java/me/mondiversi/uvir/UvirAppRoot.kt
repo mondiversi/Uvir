@@ -156,7 +156,8 @@ internal fun UvirAppContent(
     multiSensorRuntime: UvirMultiSensorRuntime? = null,
     simulationActive: Boolean = false,
     onSimulationChanged: (Boolean) -> Unit = {},
-    settingsRouteState: UvirSettingsRouteState = rememberUvirSettingsRouteState()
+    settingsRouteState: UvirSettingsRouteState = rememberUvirSettingsRouteState(),
+    sensorSelectionState: androidx.compose.runtime.MutableState<Boolean> = rememberSaveable { mutableStateOf(false) }
 ) {
 
     val context = LocalContext.current
@@ -520,7 +521,7 @@ internal fun UvirAppContent(
         mutableStateOf(AppScreen.HISTORY)
     }
 
-    var sessionChartNavigationState by rememberSaveable {
+    var sessionChartNavigationState by remember {
         mutableStateOf<SessionChartNavigationState?>(null)
     }
 
@@ -1419,13 +1420,14 @@ internal fun UvirAppContent(
                     transientActivity = notificationActivityInProgress)
             }),
         profiles = sensorProfiles,
-        selectedDeviceId = selectedSensorDeviceId
+        selectedDeviceId = selectedSensorDeviceId,
+        simulationActive = useFakeSensorData
     )
     LaunchedEffect(sensorConnectionPersistenceActive, connectionNotification,
         selectedSensorConnectionMode, connectionResources) {
         UvirConnectionForegroundService.update(
             context = context,
-            active = sensorConnectionPersistenceActive || connectionResources.active,
+            active = useFakeSensorData || sensorConnectionPersistenceActive || connectionResources.active,
             notification = connectionNotification,
             wifiLockRequired = connectionResources.wifiRequired ||
                 (sensorConnectionPersistenceActive && (selectedSensorConnectionMode == SensorConnectionMode.WIFI ||
@@ -4131,6 +4133,7 @@ internal fun UvirAppContent(
                 parametersScrollState =
                     parametersScrollState,
                 settingsRouteState = settingsRouteState,
+                sensorSelectionState = sensorSelectionState,
 
                 viewMode = viewMode,
                 onViewModeChanged = {

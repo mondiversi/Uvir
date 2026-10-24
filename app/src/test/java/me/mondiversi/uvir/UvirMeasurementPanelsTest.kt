@@ -119,8 +119,10 @@ class UvirMeasurementPanelsTest {
         assertTrue(live.contains("UvirLiveLandscapeIslands("))
         assertTrue(live.contains("homeMenuContent(homeMenuPinned)"))
         val islands = File(directory, "UvirLiveLandscapeIslands.kt").readText()
-        assertTrue(islands.indexOf("Island(SensorGroup.UV)") < islands.indexOf("Island(SensorGroup.NIR)"))
-        assertTrue(islands.contains("Column(Modifier.weight(1f)) { Island(SensorGroup.VISIBLE) }"))
+        assertTrue(islands.contains("order: List<SensorGroup> = UvirDefaultMainIslandOrder"))
+        assertTrue(islands.contains("val column = index % 2"))
+        assertTrue(live.contains("order = groups"))
+        assertEquals(listOf(SensorGroup.UV, SensorGroup.NIR), UvirDefaultMainIslandOrder.filterIndexed { index, _ -> index % 2 == 0 })
         val motion = File(directory, "UvirExpansionMotion.kt").readText()
         assertTrue(motion.contains("if (LocalUvirMeasurementPanels.current) return false"))
     }

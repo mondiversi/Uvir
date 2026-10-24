@@ -12,7 +12,10 @@ class UvirLiveIrradianceBarsTest {
     @Test fun displayedZerosHaveEmptyBarsInEveryUnit() {
         for (unit in UvirIrradianceUnit.entries) {
             val digits = defaultUvirLiveIrradianceDecimals(unit)
-            for (value in listOf(.001, .01, .1, .49)) {
+            val halfDisplayStepInLegacyUnits = unit.toCanonicalWm2(
+                .5 / Math.pow(10.0, digits.toDouble())) * 100
+            for (fraction in listOf(.001, .01, .1, .99)) {
+                val value = halfDisplayStepInLegacyUnits * fraction
                 assertEquals(0f, legacyFixtureFraction(value, value, digits, unit), 0f)
                 assertEquals(0f, legacyFixtureGroupShare(value, value, value, value, digits, unit), 0f)
             }

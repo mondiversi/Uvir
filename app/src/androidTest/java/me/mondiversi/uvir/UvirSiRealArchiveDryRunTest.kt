@@ -49,7 +49,7 @@ class UvirSiRealArchiveDryRunTest {
         repeat(2) {
             UvirDatabaseHelper(isolated).use { helper ->
                 val db = helper.writableDatabase
-                assertEquals(25, db.version)
+                assertEquals(26, db.version)
                 tables.forEach { table ->
                     val after = rows(db, table)
                     assertEquals(table, before.getValue(table).size, after.size)

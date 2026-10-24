@@ -50,7 +50,7 @@ class UvirMeasuredChannelLabelsUiTest {
         }
     }
 
-    @Test fun liveGroupHeadersShowSensorModelsAbovePercentagesInBothThemesAndDirections() {
+    @Test fun liveGroupHeadersShowCompactPercentageControlsInBothThemesAndDirections() {
         val groups = listOf(SensorGroup.UV, SensorGroup.VISIBLE, SensorGroup.NIR)
         fixture { colors ->
             for (group in groups) Box(Modifier.testTag("model_header_$group")) {
@@ -64,14 +64,14 @@ class UvirMeasuredChannelLabelsUiTest {
             compose.runOnIdle { dark.value = night; direction.value = layout }
             for (group in groups) {
                 compose.onNodeWithTag("model_header_$group").performScrollTo()
-                val model = compose.onNode(hasText(liveSpectralSensorModel(group)) and
-                    hasAnyAncestor(hasTestTag("model_header_$group")), useUnmergedTree = true).assertIsDisplayed()
+                val model = compose.onNodeWithTag("live_percentage_base_$group", useUnmergedTree = true)
+                    .assertIsDisplayed().assertHasClickAction()
                 val layouts = mutableListOf<TextLayoutResult>()
                 model.performSemanticsAction(SemanticsActions.GetTextLayoutResult) { it(layouts) }
                 org.junit.Assert.assertEquals(FontWeight.Normal, layouts.single().layoutInput.style.fontWeight)
                 val percentageLayouts = mutableListOf<TextLayoutResult>()
-                compose.onNode(hasText("%", substring = true) and hasAnyAncestor(hasTestTag("model_header_$group")),
-                    useUnmergedTree = true).performSemanticsAction(SemanticsActions.GetTextLayoutResult) { it(percentageLayouts) }
+                compose.onNodeWithTag("live_group_percentage_$group", useUnmergedTree = true)
+                    .performSemanticsAction(SemanticsActions.GetTextLayoutResult) { it(percentageLayouts) }
                 org.junit.Assert.assertEquals(FontWeight.Bold, percentageLayouts.single().layoutInput.style.fontWeight)
             }
             compose.onNodeWithText(UvirSensorBands.UV_CHANNELS).assertDoesNotExist()
@@ -109,20 +109,22 @@ class UvirMeasuredChannelLabelsUiTest {
         }
     }
 
-    @Test fun savedAcquisitionValuesUseTheSameReferencesWithoutChangingReadings() {
+    @Test fun savedAcquisitionValuesUsePlainNamesWithoutChangingReadings() {
         val records = listOf(SavedRecordDetail(1L, 1L, "", false, sample))
         fixture { colors ->
+            var display by rememberUvirSavedValueDisplay("measured-fixture")
             SessionAcquisitionValuesCard(records, SessionChartGroup.VISIBLE,
                 showRecordHeader = false, expanded = true, onToggle = {},
                 cardColor = colors.surface, primaryText = colors.onSurface,
-                secondaryText = colors.onSurfaceVariant)
+                secondaryText = colors.onSurfaceVariant, display = display, onDisplayChange = { display = it })
         }
-        compose.onNodeWithText(context.resources.sensorChannelLabel(R.string.yellow))
+        compose.onNodeWithText(context.getString(R.string.yellow))
             .performScrollTo().assertIsDisplayed()
-        compose.onNodeWithText(context.resources.sensorChannelLabel(R.string.green))
+        compose.onNodeWithText(context.getString(R.string.green))
             .performScrollTo().assertIsDisplayed()
-        compose.onNodeWithText(sensorChannelLabel("HEV", R.string.threshold_channel_hev))
+        compose.onNodeWithText(context.getString(R.string.threshold_channel_hev))
             .performScrollTo().assertIsDisplayed()
+        compose.onAllNodes(hasText("nm", substring = true)).assertCountEquals(0)
     }
 
     @Test fun thresholdEditorsShowGreenYellowAndItsReferenceWithoutExtraDescriptions() {

@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="export_percentages_total">Toplam içindeki yüzdeler</string>
+    <string name="export_percentages_group">Grup içindeki yüzdeler</string>
     <string name="data_export_files_heading">Dosyalar</string>
     <string name="export_saved_successfully">Dosyalar kaydedildi.</string>
     <string name="export_save_failed">Dosyalar kaydedilemedi.</string>

@@ -19,14 +19,15 @@ class UvirLiveIrradianceDecimalsTest {
         assertTrue(chart.contains("val liveDigits = currentUvirLiveIrradianceDecimals()"))
     }
 
-    @Test fun defaultsHaveEquivalentResolutionAndIndependentKeys() {
+    @Test fun defaultsUseRequestedPerUnitPrecisionAndIndependentKeys() {
         assertEquals(2, defaultUvirLiveIrradianceDecimals(UvirIrradianceUnit.W_M2))
         assertEquals(3, defaultUvirLiveIrradianceDecimals(UvirIrradianceUnit.MW_CM2))
-        assertEquals(0, defaultUvirLiveIrradianceDecimals(UvirIrradianceUnit.UW_CM2))
+        assertEquals(1, defaultUvirLiveIrradianceDecimals(UvirIrradianceUnit.UW_CM2))
         assertEquals(3, UvirIrradianceUnit.entries.map(::uvirLiveIrradianceDecimalsKey).toSet().size)
         for (unit in UvirIrradianceUnit.entries) {
-            val step = unit.fromCanonicalWm2(.01)
-            assertEquals(1.0, step * Math.pow(10.0, defaultUvirLiveIrradianceDecimals(unit).toDouble()), 0.0)
+            val displayStep = 1.0 / Math.pow(10.0, defaultUvirLiveIrradianceDecimals(unit).toDouble())
+            assertEquals(if (unit == UvirIrradianceUnit.UW_CM2) .001 else .01,
+                unit.toCanonicalWm2(displayStep), 1e-12)
         }
     }
 

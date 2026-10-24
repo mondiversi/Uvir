@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_percent_total" formatted="false">% कुल</string>
+    <string name="live_percent_group" formatted="false">% समूह</string>
+    <string name="live_channel_hide">लाइव दृश्य से %1$s छिपाएँ</string>
+    <string name="live_channel_show">लाइव दृश्य में %1$s दिखाएँ</string>
+</resources>

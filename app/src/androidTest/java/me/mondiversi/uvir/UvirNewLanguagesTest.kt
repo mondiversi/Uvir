@@ -38,7 +38,7 @@ class UvirNewLanguagesTest {
             val res = resources(tag)
             assertEquals("Pengaturan", res.getString(R.string.acquisition_parameters))
             assertEquals("Bahasa Indonesia", res.getString(R.string.language_indonesian))
-            assertEquals("Pengaturan", res.getString(R.string.sensor_simulation_open_settings))
+            assertEquals("Nonaktifkan", res.getString(R.string.sensor_simulation_disable))
             for (count in listOf(0, 1, 2, 5, 21)) {
                 assertEquals("$count pengukuran",
                     res.getQuantityString(R.plurals.session_chart_acquisition_count, count, count))
@@ -65,7 +65,7 @@ class UvirNewLanguagesTest {
 
     @Test fun settingsDiagnosticsAndExportMessagesResolveInEachNewLanguage() {
         val keys = listOf(R.string.acquisition_parameters, R.string.sensor_info_title,
-            R.string.debug_simulate_events_description, R.string.sensor_simulation_open_settings,
+            R.string.debug_simulate_events_description, R.string.sensor_simulation_disable,
             R.string.session_sequence_filter_title, R.string.export_save_failed)
         val english = resources("en")
         for (tag in listOf("pl", "nl", "id")) {

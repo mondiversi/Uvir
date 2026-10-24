@@ -10,7 +10,9 @@ int main() {
   UvirConditionPlan p; uint64_t duration=999;
   assert(uvirParseCondition("START ANY 30 2 UV_TOTAL ABOVE 6 NIR_TOTAL BELOW 4",p,duration));
   assert(duration==30 && p.count==2 && p.action==UvirConditionAction::Start);
-  float bands[11]={1,2,3,4,5,0,0,0,0,2,3};
+  assert(p.rules[0].threshold == 0.06f && p.rules[1].threshold == 0.04f);
+  // Serial v1 thresholds use µW/cm², while sampled values use internal W/m².
+  float bands[11]={0.01f,0.02f,0.03f,0.04f,0.05f,0,0,0,0,0.02f,0.03f};
   assert(uvirEvaluateCondition(p,bands,true)==UvirConditionResult::True);
   assert(uvirConditionDecision(p,false,UvirConditionResult::False)==UvirConditionDecision::Skip);
   assert(uvirConditionDecision(p,false,UvirConditionResult::True)==UvirConditionDecision::StartAndRecord);
@@ -20,7 +22,7 @@ int main() {
   assert(uvirEvaluateCondition(p,bands,true)==UvirConditionResult::False);
   p.match=UvirConditionMatch::None;
   assert(uvirEvaluateCondition(p,bands,true)==UvirConditionResult::False);
-  float other[11]={0,0,0,0,0,0,0,0,0,0,10};
+  float other[11]={0,0,0,0,0,0,0,0,0,0,0.1f};
   assert(uvirEvaluateCondition(p,other,true)==UvirConditionResult::True);
   assert(uvirEvaluateCondition(p,other,false)==UvirConditionResult::Invalid);
   assert(uvirEvaluateCondition(p,bands,true,false)==UvirConditionResult::Invalid);

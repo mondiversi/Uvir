@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_percent_total" formatted="false">% 全体</string>
+    <string name="live_percent_group" formatted="false">% グループ</string>
+    <string name="live_channel_hide">ライブ表示から %1$s を非表示にする</string>
+    <string name="live_channel_show">ライブ表示に %1$s を表示する</string>
+</resources>

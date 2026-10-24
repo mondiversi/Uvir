@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="export_percentages_total">Percentages of total</string>
+    <string name="export_percentages_group">Percentages within group</string>
     <string name="data_export_files_heading">Files</string>
     <string name="export_saved_successfully">Files saved.</string>
     <string name="export_save_failed">Unable to save the files.</string>

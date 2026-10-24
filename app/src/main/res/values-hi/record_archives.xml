@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="record_archive_title">माप और अलर्ट</string>
+    <string name="record_archive_description">माप और अलर्ट को उनके सत्रों सहित निर्यात/आयात करें।</string>
+    <string name="record_archive_export_description">इस प्रकार के सभी सहेजे गए रिकॉर्ड, सत्रों सहित, बिना पासवर्ड वाली UVIR फ़ाइल में निर्यात करें।</string>
+    <string name="record_archive_import_description">डेटा संग्रह में जोड़ा जाएगा। मौजूदा रिकॉर्ड छोड़ दिए जाते हैं। अज्ञात सेंसर जोड़े जाने तक उनकी हार्डवेयर आईडी से दिखाए जाते हैं।</string>
+    <string name="record_archive_import_summary">रिकॉर्ड: %1$d · सत्र: %2$d</string>
+    <string name="record_archive_import_success">आयात किए गए: %1$d · पहले से मौजूद: %2$d</string>
+    <string name="record_archive_failed">रिकॉर्ड स्थानांतरित नहीं किए जा सके। फ़ाइल और डेटा प्रकार जाँचें।</string>
+</resources>

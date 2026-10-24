@@ -43,7 +43,8 @@ internal fun UvirExportBottomActions(
                 ) {
                     UvirTitleSaveToFolderIcon(
                         modifier = Modifier.size(20.dp),
-                        tint = LocalContentColor.current
+                        tint = LocalContentColor.current,
+                        strokeWidth = UvirOutlinedActionIconStrokeWidth
                     )
                 }
             }
@@ -59,10 +60,11 @@ internal fun UvirExportBottomActions(
                     maxFontSize = 14.sp,
                     minFontSize = 10.sp
                 ) {
-                    UvirTitleActionIcon(
+                    UvirMenuIcon(
                         type = MenuIconType.SHARE,
                         modifier = Modifier.size(20.dp),
-                        tint = LocalContentColor.current
+                        tint = LocalContentColor.current,
+                        uniformStrokeWidth = UvirOutlinedActionIconStrokeWidth
                     )
                 }
             }

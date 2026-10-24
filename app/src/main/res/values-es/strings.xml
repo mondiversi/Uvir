@@ -166,7 +166,7 @@
     <string name="sensor_source_title">Fuente del sensor</string>
     <string name="sensor_source_accessibility">Fuente del sensor: %1$s</string>
     <string name="sensor_source_debug_accessibility">Sustitución por datos simulados activa</string>
-    <string name="sensor_source_debug_hint">Datos simulados activos: para seleccionar un sensor, desactívalos en Ajustes → Sensor → Diagnóstico.</string>
+    <string name="sensor_source_debug_hint">Datos simulados activos. Desactívalos para seleccionar un sensor.</string>
     <string name="sensor_source_disabled_hint">Una fuente desactivada puede reactivarse mediante la otra conexión inalámbrica activa. Si ambas están desactivadas, conecta el sensor mediante USB.</string>
     <string name="sensor_power_off">APAGAR SENSOR</string>
     <string name="sensor_power_off_title">¿Apagar el sensor?</string>
@@ -436,11 +436,11 @@
     <string name="app_version">Versión de la aplicación: %1$s</string>
     <string name="package_name_value">Paquete: %1$s</string>
     <string name="about_whats_new_title">Novedades de la versión %1$s</string>
-    <string name="about_whats_new_connectivity">Factores de corrección y offsets por canal, con medición guiada de los offsets medios y confirmaciones de restablecimiento.</string>
-    <string name="about_whats_new_connections">Compensación de la ventana óptica con multiplicador general y por canal; rangos AS7331 y picos de sensibilidad AS7343 más claros.</string>
-    <string name="about_whats_new_measurements">Almacenamiento interno de la irradiancia en W/m², con migración automática que conserva las mediciones y los ajustes existentes.</string>
-    <string name="about_whats_new_interface">Decimales configurables para valores en directo, datos guardados y exportaciones personalizadas; las exportaciones científicas conservan toda la precisión guardada.</string>
-    <string name="about_whats_new_github">Menú de ajustes y diálogos mejorados; guías de cableado, montaje y calibración actualizadas, incluidos tubos direccionales y requisitos del difusor.</string>
+    <string name="about_whats_new_connectivity">Exporta/importa adquisiciones y alertas en archivos .uvirrecords sin contraseña, incluidas sesiones, notas y variantes.</string>
+    <string name="about_whats_new_connections">La identificación por hardware, los nuevos ID locales y la detección de duplicados conservan el origen de los datos importados.</string>
+    <string name="about_whats_new_measurements">La vista principal recuerda el orden de las tarjetas y las bandas ocultas; las adquisiciones guardadas ofrecen controles temporales y porcentajes totales o por grupo.</string>
+    <string name="about_whats_new_interface">Colores espectrales uniformes, nombres neutros con puntos de color en los datos guardados, filas de sesión más claras y reordenación animada.</string>
+    <string name="about_whats_new_github">Diálogos, acciones de día/noche y avisos de datos simulados mejorados; comprobaciones actualizadas de preparación y recuperación de actualizaciones USB.</string>
     <string name="about_description">Aplicación de adquisición espectral de radiación ultravioleta, visible e infrarroja.</string>
     <string name="about_spectral_ranges">Bandas espectrales: Ultravioleta • Luz visible • Infrarrojo</string>
     <string name="about_sensors">Sensores compatibles: AS7331 UV • AS7343 multiespectral</string>
@@ -813,5 +813,6 @@
     <string name="alert_max_registrations">Registros máximos</string>
     <string name="alert_registration_count">Número de registros</string>
     <string name="alert_configure_first">Configura al menos un valor antes de iniciar.</string>
-    <string name="sensor_simulation_open_settings">Ajustes</string>
+    <string name="sensor_simulation_disable">Desactivar</string>
+    <string name="settings_import_confirmation_description">Los ajustes de los archivos seleccionados sustituirán a los actuales.</string>
 </resources>

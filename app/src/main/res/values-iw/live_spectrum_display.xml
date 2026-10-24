@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_percent_total" formatted="false">% מהסך</string>
+    <string name="live_percent_group" formatted="false">% מהקבוצה</string>
+    <string name="live_channel_hide">הסתרת %1$s מהתצוגה החיה</string>
+    <string name="live_channel_show">הצגת %1$s בתצוגה החיה</string>
+</resources>

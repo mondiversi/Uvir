@@ -65,17 +65,14 @@ internal fun AcquisitionChartScreen(
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
-    var selectedGroup by rememberSaveable {
+    var selectedGroup by remember(record.id) {
         mutableStateOf(AcquisitionChartGroup.IRRADIANCE)
     }
     var showShareDialog by rememberSaveable {
         mutableStateOf(false)
     }
     val bars = remember(record, selectedGroup) {
-        acquisitionChartBars(
-            sample = record.sample,
-            group = selectedGroup
-        )
+        acquisitionChartBars(sample = record.sample, group = selectedGroup)
     }
     val shareDescription =
         stringResource(R.string.acquisition_chart_share)
@@ -313,7 +310,8 @@ internal fun AcquisitionVerticalBarChart(
     group: AcquisitionChartGroup,
     cardColor: Color,
     primaryText: Color,
-    secondaryText: Color
+    secondaryText: Color,
+    mutedGroups: Set<SensorGroup> = emptySet()
 ) {
     val irradianceUnit = LocalUvirIrradianceUnit.current
     val expandedSections =
@@ -344,7 +342,9 @@ internal fun AcquisitionVerticalBarChart(
                 },
                 cardColor = cardColor,
                 primaryText = primaryText,
-                secondaryText = secondaryText
+                secondaryText = secondaryText,
+                titleColor = if (section.spectrumIconGroup() in mutedGroups)
+                    secondaryText.copy(alpha = .55f) else primaryText
             ) {
                 Column(
                     modifier =

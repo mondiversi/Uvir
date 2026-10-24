@@ -1,28 +1,19 @@
 package me.mondiversi.uvir
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -40,13 +31,15 @@ internal fun SessionAcquisitionValuesCard(
     cardColor: Color,
     primaryText: Color,
     secondaryText: Color,
+    display: UvirSavedValueDisplay,
+    onDisplayChange: (UvirSavedValueDisplay) -> Unit,
     onOpenRecord: ((SavedRecordDetail) -> Unit)? = null
 ) {
     val series =
         remember(records, group) {
             sessionChartSeries(records, group)
         }
-    val darkMode = isSystemInDarkTheme()
+    val metrics = remember(group) { savedAcquisitionMetrics(group) }
     val numericFormat = LocalUvirNumericFormat.current
     val irradianceUnit = LocalUvirIrradianceUnit.current
     val displayDigits = currentUvirLiveIrradianceDecimals()
@@ -67,7 +60,12 @@ internal fun SessionAcquisitionValuesCard(
         cardColor = cardColor,
         primaryText = primaryText,
         secondaryText = secondaryText,
-        titleFontWeight = if (group.biological) FontWeight.SemiBold else FontWeight.Bold
+        titleFontWeight = if (group.biological) FontWeight.SemiBold else FontWeight.Bold,
+        titleColor = if (!group.biological && !display.spectrum.groupVisible(group.spectrumIconGroup()))
+            secondaryText.copy(alpha = .55f) else primaryText,
+        headerTrailing = if (!group.biological && showRelativeBreakdown) {
+            { UvirSavedPercentageBase(group, display, onDisplayChange, secondaryText) }
+        } else null
     ) {
         if (records.isEmpty()) {
             Text(
@@ -81,32 +79,18 @@ internal fun SessionAcquisitionValuesCard(
             )
         } else {
             Column(
-                modifier = Modifier.padding(vertical = 15.dp),
-                verticalArrangement = Arrangement.spacedBy(15.dp)
+                modifier = Modifier.padding(vertical = UvirSavedValueHalfGap)
             ) {
                 records.forEachIndexed { recordIndex, record ->
                     if (showRecordHeader) {
-                        val chevronInteractionSource =
-                            remember(record.id) { MutableInteractionSource() }
-                        val chevronPressed by
-                            chevronInteractionSource.collectIsPressedAsState()
                         val elapsedText =
                             sessionRecordElapsedText(
                                 currentTimestamp = record.timestamp,
                                 previousTimestamp =
                                     records.getOrNull(recordIndex - 1)?.timestamp
                             )
-                        Row(
-                            modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .padding(
-                                        horizontal = 16.dp,
-                                        vertical = 0.dp
-                                    ),
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
+                        UvirSessionRecordHeader("acquisition_${group.name}_${record.id}", primaryText, secondaryText,
+                            onOpenRecord?.let { open -> { open(record) } }) {
                             Row(
                                 modifier = Modifier.weight(1f),
                                 horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -165,37 +149,6 @@ internal fun SessionAcquisitionValuesCard(
                                     )
                                 }
                             }
-                            onOpenRecord?.let { openRecord ->
-                                Box(
-                                    modifier =
-                                        Modifier
-                                            .size(32.dp)
-                                            .clickable(
-                                                interactionSource =
-                                                    chevronInteractionSource,
-                                                indication = null,
-                                                onClick = { openRecord(record) }
-                                            ),
-                                    contentAlignment = Alignment.CenterEnd
-                                ) {
-                                    Box(
-                                        modifier =
-                                            Modifier
-                                                .size(28.dp)
-                                                .background(
-                                                    color = if (chevronPressed) {
-                                                        secondaryText.copy(alpha = 0.10f)
-                                                    } else {
-                                                        Color.Transparent
-                                                    },
-                                                    shape = CircleShape
-                                                ),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        UvirDisclosureChevron(tint = secondaryText)
-                                    }
-                                }
-                            }
                         }
                     }
 
@@ -213,56 +166,48 @@ internal fun SessionAcquisitionValuesCard(
                         }
 
                     series.forEachIndexed { itemIndex, item ->
-                        Column(
-                            modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp),
-                            verticalArrangement = Arrangement.spacedBy(3.dp)
-                        ) {
+                        val metric = metrics[itemIndex]
+                        val totalRow = itemIndex == 0 && !group.biological
+                        val included = display.acquisitionVisible(metric)
+                        val key = "acquisition_${record.id}_${metric.name}"
+                        val value = if (group.biological) item.values[recordIndex] else display.acquisitionValue(metric, record.sample)
+                        val valueColor = if (included) primaryText else secondaryText.copy(alpha = .55f)
+                        UvirSavedValueRow(key, included, primaryText,
+                            onToggle = { onDisplayChange(display.toggleAcquisition(metric)) }) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(
-                                    text =
-                                        sensorChannelLabel(item.displayLabelResource
-                                            ?.let { resource ->
-                                                stringResource(resource)
-                                            }
-                                            ?: item.label, item.displayLabelResource, item.label),
-                                    modifier = Modifier.weight(1f),
-                                    color =
-                                        uvirSessionValueLabelColor(
-                                            base = item.color,
-                                            darkMode = darkMode
-                                        ),
-                                    fontSize = 12.sp,
-                                    lineHeight = 14.sp,
-                                    fontWeight = if (itemIndex == 0 && !group.biological) {
-                                        FontWeight.Bold
-                                    } else {
-                                        FontWeight.SemiBold
-                                    }
-                                )
-                                val valueOutOfRange =
-                                    if (group.biological) {
-                                        record.sample.isOutOfRange(
-                                            if (itemIndex < 2) SensorGroup.UV
-                                            else SensorGroup.VISIBLE
+                                Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    verticalAlignment = Alignment.CenterVertically) {
+                                    UvirSpectralDot(metric, Modifier.testTag("saved_dot_$key"),
+                                        tint = if (included) uvirSpectralColor(metric) else valueColor)
+                                    Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                        verticalAlignment = Alignment.CenterVertically) {
+                                        Text(
+                                            text = item.displayLabelResource?.let { stringResource(it) } ?: item.label,
+                                            modifier = Modifier.weight(1f, fill = false).testTag("saved_name_$key"),
+                                            color = valueColor,
+                                            fontSize = 12.sp,
+                                            lineHeight = 14.sp,
+                                            fontWeight = if (itemIndex == 0 && !group.biological) FontWeight.Bold else FontWeight.SemiBold
                                         )
-                                    } else {
-                                        record.sample.isOutOfRange(group.spectrumIconGroup())
+                                        UvirSavedValueMark(key, included, valueColor)
                                     }
+                                }
+                                val valueOutOfRange = display.acquisitionOutOfRange(metric, record.sample)
                                 Text(
                                     text =
-                                        if (valueOutOfRange) {
+                                        if (!included) {
+                                            "—"
+                                        } else if (valueOutOfRange) {
                                             stringResource(R.string.out_of_range_short)
                                         } else {
-                                            displayedUvirIrradianceNumber(item.values[recordIndex])
+                                            displayedUvirIrradianceNumber(value)
                                         },
-                                    color = primaryText,
+                                    modifier = Modifier.testTag("saved_value_$key"),
+                                    color = valueColor,
                                     fontSize = 12.sp,
                                     fontWeight = if (itemIndex == 0 && !group.biological) {
                                         FontWeight.Bold
@@ -274,9 +219,10 @@ internal fun SessionAcquisitionValuesCard(
 
                                 if (!group.biological) {
                                     val contribution =
-                                        if (itemIndex == 0 || showRelativeBreakdown) {
-                                            record.sample.spectralTotals().displayShare(
-                                                item.values[recordIndex], displayDigits, irradianceUnit)
+                                        if (!included) {
+                                            "—"
+                                        } else if (totalRow || showRelativeBreakdown) {
+                                            display.share(group, totalRow, value, record.sample, displayDigits, irradianceUnit)
                                                 ?.let { share ->
                                                     formatUvirNumber(share.toDouble() * 100.0, 1, numericFormat) + "%"
                                                 } ?: "—"
@@ -286,8 +232,8 @@ internal fun SessionAcquisitionValuesCard(
 
                                     Text(
                                         text = contribution,
-                                        modifier = Modifier.width(44.dp),
-                                        color = primaryText,
+                                        modifier = Modifier.width(44.dp).testTag("saved_percentage_$key"),
+                                        color = valueColor,
                                         fontSize = 12.sp,
                                         fontWeight = if (itemIndex == 0) {
                                             FontWeight.Bold
@@ -309,16 +255,16 @@ internal fun SessionAcquisitionValuesCard(
                                     Text(
                                         text = stringResource(R.string.relative_spectral_index),
                                         modifier = Modifier.weight(1f),
-                                        color = secondaryText,
+                                        color = if (included) secondaryText else valueColor,
                                         fontSize = 11.sp
                                     )
                                     Text(
                                         text =
-                                            stringResource(
+                                            if (!included) "—" else stringResource(
                                                 R.string.biological_compact_relevance,
                                                 biologicalRelevance[itemIndex] * 100f
                                             ),
-                                        color = primaryText,
+                                        color = valueColor,
                                         fontSize = 11.sp,
                                         maxLines = 1
                                     )
@@ -329,7 +275,7 @@ internal fun SessionAcquisitionValuesCard(
 
                     if (showRecordHeader && recordIndex < records.lastIndex) {
                         HorizontalDivider(
-                            modifier = Modifier.padding(horizontal = 16.dp),
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = UvirSavedValueHalfGap),
                             color = secondaryText.copy(alpha = 0.16f)
                         )
                     }
@@ -339,13 +285,3 @@ internal fun SessionAcquisitionValuesCard(
         }
     }
 }
-
-internal fun uvirSessionValueLabelColor(
-    base: Color,
-    darkMode: Boolean
-): Color =
-    if (darkMode) {
-        lerp(base, Color.White, 0.28f)
-    } else {
-        lerp(base, Color.Black, 0.18f)
-    }

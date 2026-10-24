@@ -15,7 +15,7 @@ internal const val UVIR_LIVE_IRRADIANCE_MAX_DECIMALS = 6
 internal fun defaultUvirLiveIrradianceDecimals(unit: UvirIrradianceUnit): Int = when (unit) {
     UvirIrradianceUnit.W_M2 -> 2
     UvirIrradianceUnit.MW_CM2 -> 3
-    UvirIrradianceUnit.UW_CM2 -> 0
+    UvirIrradianceUnit.UW_CM2 -> 1
 }
 
 internal fun uvirLiveIrradianceDecimalsKey(unit: UvirIrradianceUnit): String =

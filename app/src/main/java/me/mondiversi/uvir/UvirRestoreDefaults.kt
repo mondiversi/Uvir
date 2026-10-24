@@ -54,6 +54,8 @@ internal fun restoreUvirApplicationDefaults(
             // does not notify preference observers.
             .putBoolean(KEY_SHOW_RTC_BATTERY_WARNING, true)
             .putString(KEY_APP_THEME, UvirAppTheme.DEFAULT.storedValue)
+            .putStringSet(KEY_MAIN_HIDDEN_SPECTRUM_CHANNELS, emptySet())
+            .putString(KEY_MAIN_ISLAND_ORDER, UvirDefaultMainIslandOrder.joinToString(",") { it.name })
             .commit()
     val credentialsCleared =
         UvirSensorCredentialStore.clear(applicationContext)
@@ -81,12 +83,7 @@ internal fun UvirRestoreDefaultsIcon(
     modifier: Modifier = Modifier,
     tint: Color
 ) {
-    Icon(
-        painter = painterResource(R.drawable.ic_restore),
-        contentDescription = null,
-        tint = tint,
-        modifier = modifier.size(UvirTitleActionIconSize)
-    )
+    UvirButtonGlyphIcon(UvirButtonGlyph.RESTORE, modifier, tint)
 }
 
 @Composable

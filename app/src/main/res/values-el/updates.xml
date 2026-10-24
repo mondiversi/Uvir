@@ -10,9 +10,11 @@
     <string name="update_download">Λήψη και επαλήθευση…</string>
     <string name="update_flash">Ενημέρωση αισθητήρα…</string>
     <string name="update_verify">Επαλήθευση αισθητήρα…</string>
-    <string name="update_keep_connected">Μην αποσυνδέσετε το USB ή σβήσετε τον αισθητήρα. Αν χρειάζεται, κρατήστε το BOOT και δοκιμάστε ξανά.</string>
+    <string name="update_app_verify">Επαλήθευση εφαρμογής…</string>
+    <string name="update_app_failed">Η ενημέρωση της εφαρμογής απέτυχε. Δείτε το αρχείο σφαλμάτων και δοκιμάστε ξανά.</string>
+    <string name="update_keep_connected">Μην αποσυνδέετε το USB και μην απενεργοποιείτε τον αισθητήρα.</string>
     <string name="update_done">Ο αισθητήρας ενημερώθηκε</string>
     <string name="update_failed">Η ενημέρωση απέτυχε. Δείτε το αρχείο σφαλμάτων. Αν ο αισθητήρας δεν ξεκινά, ανακτήστε το firmware με USB από υπολογιστή.</string>
     <string name="update_permission">Επιτρέψτε στο Uvir να εγκαθιστά ενημερώσεις στις ρυθμίσεις Android.</string>
-    <string name="update_whats_new">Εξαγωγές CSV, TXT και PNG με μοντέλα αισθητήρων, συνοπτικές φασματικές αναφορές και πιο ευανάγνωστα υπομνήματα γραφημάτων.</string>
+    <string name="update_whats_new">Οι εξαγωγές TXT και CSV μετρήσεων περιλαμβάνουν ποσοστά συνόλου και ομάδας, με συνεπή χρώματα PNG και επιβεβαίωση εισαγωγής με παρατεταμένο πάτημα πέντε δευτερολέπτων.</string>
 </resources>

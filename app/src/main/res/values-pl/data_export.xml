@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="export_percentages_total">Udział procentowy w całości</string>
+    <string name="export_percentages_group">Udział procentowy w grupie</string>
     <string name="data_export_files_heading">Pliki</string>
     <string name="export_saved_successfully">Pliki zapisane.</string>
     <string name="export_save_failed">Nie można zapisać plików.</string>

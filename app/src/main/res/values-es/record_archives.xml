@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="record_archive_title">Adquisiciones y alertas</string>
+    <string name="record_archive_description">Exporta/importa adquisiciones y alertas, incluidas sus sesiones.</string>
+    <string name="record_archive_export_description">Exporta todos los registros guardados de este tipo, incluidas las sesiones, a un archivo UVIR sin contraseña.</string>
+    <string name="record_archive_import_description">Los datos se añadirán al archivo. Se omiten los registros existentes. Los sensores desconocidos se muestran con su ID de hardware hasta que se asocien.</string>
+    <string name="record_archive_import_summary">Registros: %1$d · Sesiones: %2$d</string>
+    <string name="record_archive_import_success">Importados: %1$d · Ya existentes: %2$d</string>
+    <string name="record_archive_failed">No se pueden transferir los registros. Comprueba el archivo y el tipo de datos.</string>
+</resources>

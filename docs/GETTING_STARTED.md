@@ -31,6 +31,10 @@ per-unit decimal count, including trailing zeros, in CSV, readable text and
 chart values. Chart axes remain compact in scientific mode. Neither mode
 rewrites or rounds stored readings.
 
+Default displayed decimal places are **1 for µW/cm², 2 for W/m² and 3 for
+mW/cm²**. Each unit retains its own saved choice; changing a default does not
+overwrite a user's explicit choice, including zero decimal places.
+
 CSV exports append UV and visible/infrared component-model columns; readable
 tables and charts include compact model captions. Models are resolved from
 each record's source profile, not the selected sensor. Missing identities use
@@ -45,7 +49,7 @@ The explicitly labelled v1 sensor interface remains `uW/cm2` for compatibility;
 both Android and firmware convert at that boundary. See the
 [SI migration notes](SI_IRRADIANCE_MIGRATION.md) for backup and compatibility details.
 
-Spectral channel percentages use the total **UV + visible + infrared** of the
+By default, spectral channel percentages use the total **UV + visible + infrared** of the
 same measurement, not the channel's own spectral group. Group totals and the
 overlapping HEV subset are not counted again in that denominator. UI shares
 use displayed, rounded irradiances so a displayed zero has an empty progress
@@ -53,6 +57,18 @@ bar; exported shares use the original values. If part of the required spectrum
 is out of range, the global percentage is unavailable instead of inferred.
 Alert percentages remain relative to their configured thresholds, and the
 biological indices retain their separate spectral-weighting meaning.
+
+In the **Main View only**, the underlined **% total / % group** control changes
+the percentage/bar denominator of the **internal channels** independently for each
+irradiance island. Each island header always keeps its percentage and bar relative
+to the complete displayed total, regardless of that internal choice. Tapping a
+channel row hides its reading and bar and removes its contribution from the
+live displayed totals. Tap the grey row again to restore the reading. HEV is an overlapping
+violet/blue aggregate: its row controls those two contributing channels, never an
+extra amount added to or subtracted from the total. Live charts follow the same
+inclusion choices without rewriting their raw sample history. These presentation
+controls do **not** filter sensor measurements, recordings, alerts, biological
+estimates, saved-value views or exports: those retain all original readings.
 
 ## 2. Hardware and wiring
 
@@ -178,6 +194,11 @@ may remain connected in the background. Before disconnecting or updating a senso
 check its active job and pending synchronization state.
 
 ## 7. Records, backups and external integrations
+
+- **Data management → Acquisitions and alerts** transfers saved measurements and
+  sessions between phones using password-free `.uvirrecords` files. Imports add
+  records, preserve timestamps and match sensors by hardware identity; they do
+  not pair sensors or replace the existing archive. See [Record transfer](RECORD_TRANSFER.md).
 
 - App/sensor settings exports are password-encrypted. Store both the files and
   their password securely; Android cloud backup is not a substitute.

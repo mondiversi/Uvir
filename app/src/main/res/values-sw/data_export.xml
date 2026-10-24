@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="export_percentages_total">Asilimia ya jumla</string>
+    <string name="export_percentages_group">Asilimia ndani ya kundi</string>
     <string name="data_export_files_heading">Faili</string>
     <string name="export_saved_successfully">Faili zimehifadhiwa.</string>
     <string name="export_save_failed">Imeshindikana kuhifadhi faili.</string>

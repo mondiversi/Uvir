@@ -166,7 +166,7 @@
     <string name="sensor_source_title">Source du capteur</string>
     <string name="sensor_source_accessibility">Source du capteur : %1$s</string>
     <string name="sensor_source_debug_accessibility">Remplacement par les données fictives actif</string>
-    <string name="sensor_source_debug_hint">Données fictives actives : pour sélectionner un capteur, désactivez-les dans Paramètres → Capteur → Diagnostic.</string>
+    <string name="sensor_source_debug_hint">Les données fictives sont actives. Désactivez-les pour sélectionner un capteur.</string>
     <string name="sensor_source_disabled_hint">Une source désactivée peut être réactivée via l’autre connexion sans fil active. Si les deux sont désactivées, connectez le capteur par USB.</string>
     <string name="sensor_power_off">ÉTEINDRE LE CAPTEUR</string>
     <string name="sensor_power_off_title">Éteindre le capteur ?</string>
@@ -436,11 +436,11 @@
     <string name="app_version">Version de l’application : %1$s</string>
     <string name="package_name_value">Package : %1$s</string>
     <string name="about_whats_new_title">Nouveautés de la version %1$s</string>
-    <string name="about_whats_new_connectivity">Facteurs de correction et décalages par canal, avec mesure guidée des décalages moyens et confirmation des réinitialisations.</string>
-    <string name="about_whats_new_connections">Compensation de la fenêtre optique avec multiplicateur général et multiplicateurs par canal ; plages AS7331 et pics de sensibilité AS7343 mieux précisés.</string>
-    <string name="about_whats_new_measurements">Stockage interne de l’irradiance en W/m², avec migration automatique préservant les mesures et réglages existants.</string>
-    <string name="about_whats_new_interface">Nombre de décimales réglable pour les valeurs en direct, les données enregistrées et les exports personnalisés ; les exports scientifiques conservent toute la précision enregistrée.</string>
-    <string name="about_whats_new_github">Menu des réglages et boîtes de dialogue améliorés ; guides de câblage, de montage et de calibration actualisés, avec tubes directionnels et exigences du diffuseur.</string>
+    <string name="about_whats_new_connectivity">Exporte/importe les acquisitions et alertes dans des fichiers .uvirrecords sans mot de passe, avec sessions, notes et variantes.</string>
+    <string name="about_whats_new_connections">La correspondance des identifiants matériels, les nouveaux identifiants locaux et la détection des doublons préservent la provenance des données importées.</string>
+    <string name="about_whats_new_measurements">La vue principale mémorise l’ordre des cartes et les bandes masquées ; les acquisitions enregistrées proposent des contrôles temporaires et des pourcentages totaux ou par groupe.</string>
+    <string name="about_whats_new_interface">Couleurs spectrales uniformes, noms neutres avec pastilles colorées dans les données enregistrées, lignes de session plus claires et déplacement animé des cartes.</string>
+    <string name="about_whats_new_github">Dialogues, actions jour/nuit et notifications de données simulées améliorés ; vérifications actualisées pour les mises à jour USB et leur récupération.</string>
     <string name="about_description">Application d’acquisition spectrale du rayonnement ultraviolet, visible et infrarouge.</string>
     <string name="about_spectral_ranges">Bandes spectrales : Ultraviolet • Lumière visible • Infrarouge</string>
     <string name="about_sensors">Capteurs pris en charge : AS7331 UV • AS7343 multispectral</string>
@@ -813,5 +813,6 @@
     <string name="alert_max_registrations">Enregistrements maximum</string>
     <string name="alert_registration_count">Nombre d’enregistrements</string>
     <string name="alert_configure_first">Configurez au moins une valeur avant de démarrer.</string>
-    <string name="sensor_simulation_open_settings">Paramètres</string>
+    <string name="sensor_simulation_disable">Désactiver</string>
+    <string name="settings_import_confirmation_description">Les réglages contenus dans les fichiers sélectionnés remplaceront les réglages actuels.</string>
 </resources>

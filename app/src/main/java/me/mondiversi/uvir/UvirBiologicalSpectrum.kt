@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -38,7 +39,8 @@ fun BiologicalEffectsContent(
     onConfigureAlerts: (() -> Unit)? = null,
     cardColor: Color,
     primaryText: Color,
-    secondaryText: Color
+    secondaryText: Color,
+    collapsible: Boolean = true
 ) {
     val estimate = biologicalEffects(sample)
     val displayedDigits = currentUvirLiveIrradianceDecimals()
@@ -65,7 +67,7 @@ fun BiologicalEffectsContent(
         )
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().testTag("live_biological_card"),
         shape = RoundedCornerShape(18.dp),
         colors =
             CardDefaults.cardColors(
@@ -84,12 +86,12 @@ fun BiologicalEffectsContent(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable(onClick = onToggle)
-                    .uvirNestedAccessibleAction(
+                    .then(if (collapsible) Modifier.clickable(onClick = onToggle).uvirNestedAccessibleAction(
                         label = title,
                         stateText = accessibilityState,
                         onClick = onToggle
-                    )
+                    ) else Modifier)
+                    .testTag("live_biological_header")
                     .padding(UvirIslandContentPadding),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -108,12 +110,10 @@ fun BiologicalEffectsContent(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-                    Spacer(Modifier.width(5.dp))
-                    ExpansionChevron(
-                        expanded = expanded,
-                        tint = secondaryText,
-                        iconSize = 18.dp
-                    )
+                    if (collapsible) {
+                        Spacer(Modifier.width(5.dp))
+                        ExpansionChevron(expanded = expanded, tint = secondaryText, iconSize = 18.dp)
+                    }
                 }
 
                 onConfigureAlerts?.let { configureAlerts ->
@@ -127,7 +127,7 @@ fun BiologicalEffectsContent(
 
             }
 
-            UvirVerticalReveal(expanded) {
+            UvirVerticalReveal(!collapsible || expanded) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()

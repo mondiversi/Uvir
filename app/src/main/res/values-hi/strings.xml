@@ -163,7 +163,7 @@
     <string name="sensor_source_title">सेंसर स्रोत</string>
     <string name="sensor_source_accessibility">सेंसर स्रोत: %1$s</string>
     <string name="sensor_source_debug_accessibility">मॉक-डेटा ओवरराइड सक्रिय</string>
-    <string name="sensor_source_debug_hint">अनुकरण डेटा सक्रिय है: सेंसर चुनने के लिए सेटिंग्स → सेंसर → निदान में इसे बंद करें।</string>
+    <string name="sensor_source_debug_hint">अनुकरण डेटा सक्रिय है। सेंसर चुनने के लिए इसे बंद करें।</string>
     <string name="sensor_source_disabled_hint">एक अक्षम स्रोत को अन्य सक्रिय वायरलेस कनेक्शन के माध्यम से पुनः सक्षम किया जा सकता है। यदि दोनों अक्षम हैं, तो सेंसर को USB के माध्यम से कनेक्ट करें।</string>
     <string name="sensor_power_off">सेंसर बंद करें</string>
     <string name="sensor_power_off_title">सेंसर को बंद करें?</string>
@@ -432,11 +432,11 @@
     <string name="app_version">ऐप संस्करण: %1$s</string>
     <string name="package_name_value">पैकेज: %1$s</string>
     <string name="about_whats_new_title">संस्करण %1$s में क्या नया है</string>
-    <string name="about_whats_new_connectivity">प्रत्येक चैनल के लिए सुधार गुणक और ऑफ़सेट, औसत ऑफ़सेट के निर्देशित मापन और रीसेट की पुष्टि के साथ।</string>
-    <string name="about_whats_new_connections">सामान्य मुख्य गुणक और चैनल गुणकों से ऑप्टिकल विंडो क्षतिपूर्ति; AS7331 की सीमाओं और AS7343 के संवेदनशीलता शिखरों का अधिक स्पष्ट विवरण।</string>
-    <string name="about_whats_new_measurements">विकिरण का आंतरिक संग्रहण W/m² में, स्वचालित माइग्रेशन के साथ जो मौजूदा माप और सेटिंग सुरक्षित रखता है।</string>
-    <string name="about_whats_new_interface">लाइव मानों, सहेजे गए डेटा और कस्टम निर्यात के लिए दशमलव स्थान चुनें; वैज्ञानिक निर्यात पूरी संग्रहीत परिशुद्धता बनाए रखते हैं।</string>
-    <string name="about_whats_new_github">सेटिंग मेनू और संवाद बेहतर किए गए; वायरिंग, असेंबली और कैलिब्रेशन गाइड अपडेट किए गए, जिनमें दिशात्मक ट्यूब और डिफ्यूज़र की आवश्यकताएँ शामिल हैं।</string>
+    <string name="about_whats_new_connectivity">माप और अलर्ट को सत्रों, नोट और प्रकारों सहित बिना पासवर्ड वाली .uvirrecords फ़ाइलों में निर्यात/आयात करें।</string>
+    <string name="about_whats_new_connections">हार्डवेयर आईडी मिलान, नई स्थानीय आईडी और डुप्लिकेट पहचान से आयात किए गए डेटा का स्रोत सुरक्षित रहता है।</string>
+    <string name="about_whats_new_measurements">मुख्य दृश्य कार्ड का क्रम और छिपे बैंड याद रखता है; सहेजे गए मापों में अस्थायी नियंत्रण और कुल या समूह प्रतिशत मिलते हैं।</string>
+    <string name="about_whats_new_interface">एकसमान वर्णक्रमीय रंग, सहेजे गए डेटा में रंगीन बिंदुओं वाले सामान्य नाम, स्पष्ट सत्र पंक्तियाँ और कार्ड क्रम बदलने का एनीमेशन।</string>
+    <string name="about_whats_new_github">संवाद, दिन/रात की कार्रवाइयाँ और नकली डेटा सूचनाएँ बेहतर हुईं; USB अपडेट की तैयारी और पुनर्प्राप्ति जाँच अपडेट की गईं।</string>
     <string name="about_description">पराबैंगनी, दृश्य और अवरक्त विकिरण के वर्णक्रमीय मापन का ऐप।</string>
     <string name="about_spectral_ranges">वर्णक्रमीय बैंड: पराबैंगनी • दृश्य प्रकाश • अवरक्त</string>
     <string name="about_sensors">समर्थित सेंसर: AS7331 यूवी • AS7343 मल्टीस्पेक्ट्रल</string>
@@ -804,5 +804,6 @@
     <string name="alert_max_registrations">अधिकतम रिकॉर्डिंग</string>
     <string name="alert_registration_count">रिकॉर्डिंग की संख्या</string>
     <string name="alert_configure_first">शुरू करने से पहले कम से कम एक मान कॉन्फ़िगर करें।</string>
-    <string name="sensor_simulation_open_settings">सेटिंग्स</string>
+    <string name="sensor_simulation_disable">बंद करें</string>
+    <string name="settings_import_confirmation_description">चुनी गई फ़ाइलों की सेटिंग मौजूदा सेटिंग को बदल देंगी।</string>
 </resources>

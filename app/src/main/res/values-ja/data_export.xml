@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="export_percentages_total">全体に対する割合</string>
+    <string name="export_percentages_group">グループ内の割合</string>
     <string name="data_export_files_heading">ファイル</string>
     <string name="export_saved_successfully">ファイルを保存しました。</string>
     <string name="export_save_failed">ファイルを保存できませんでした。</string>

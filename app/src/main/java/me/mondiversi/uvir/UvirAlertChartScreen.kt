@@ -84,16 +84,16 @@ internal fun AlertChartScreen(
                 }
             )
         }
-    var viewMode by rememberSaveable(entry.id) {
+    var viewMode by remember(entry.id) {
         mutableStateOf(initialViewMode)
     }
-    var showChart by rememberSaveable(entry.id) {
+    var showChart by remember(entry.id) {
         mutableStateOf(false)
     }
-    var chartExpanded by rememberSaveable(entry.id) {
+    var chartExpanded by remember(entry.id) {
         mutableStateOf(true)
     }
-    var dataExpanded by rememberSaveable(entry.id) {
+    var dataExpanded by remember(entry.id) {
         mutableStateOf(true)
     }
     var showDeleteConfirmation by rememberSaveable(entry.id) {

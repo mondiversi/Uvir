@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="record_archive_title">Metingen en waarschuwingen</string>
+    <string name="record_archive_description">Exporteer/importeer metingen en waarschuwingen, inclusief hun sessies.</string>
+    <string name="record_archive_export_description">Exporteer alle opgeslagen gegevens van dit type, inclusief sessies, als een UVIR-bestand zonder wachtwoord.</string>
+    <string name="record_archive_import_description">De gegevens worden aan het archief toegevoegd. Bestaande gegevens worden overgeslagen. Onbekende sensoren worden tot het koppelen met hun hardware-ID weergegeven.</string>
+    <string name="record_archive_import_summary">Records: %1$d · Sessies: %2$d</string>
+    <string name="record_archive_import_success">Geïmporteerd: %1$d · Al aanwezig: %2$d</string>
+    <string name="record_archive_failed">Gegevens kunnen niet worden overgedragen. Controleer het bestand en het gegevenstype.</string>
+</resources>

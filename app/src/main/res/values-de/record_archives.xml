@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="record_archive_title">Erfassungen und Warnungen</string>
+    <string name="record_archive_description">Erfassungen und Warnungen einschließlich ihrer Sitzungen exportieren/importieren.</string>
+    <string name="record_archive_export_description">Alle gespeicherten Datensätze dieses Typs einschließlich Sitzungen als UVIR-Datei ohne Passwort exportieren.</string>
+    <string name="record_archive_import_description">Die Daten werden dem Archiv hinzugefügt. Vorhandene Datensätze werden übersprungen. Unbekannte Sensoren werden bis zur Kopplung mit ihrer Hardware-ID angezeigt.</string>
+    <string name="record_archive_import_summary">Datensätze: %1$d · Sitzungen: %2$d</string>
+    <string name="record_archive_import_success">Importiert: %1$d · Bereits vorhanden: %2$d</string>
+    <string name="record_archive_failed">Datensätze konnten nicht übertragen werden. Datei und Datentyp prüfen.</string>
+</resources>

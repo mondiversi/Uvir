@@ -1,0 +1,4 @@
+<resources>
+    <string name="main_island_move_up">Déplacer %1$s vers le haut</string>
+    <string name="main_island_move_down">Déplacer %1$s vers le bas</string>
+</resources>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_percent_total" formatted="false">٪ الإجمالي</string>
+    <string name="live_percent_group" formatted="false">٪ المجموعة</string>
+    <string name="live_channel_hide">إخفاء %1$s من العرض المباشر</string>
+    <string name="live_channel_show">إظهار %1$s في العرض المباشر</string>
+</resources>

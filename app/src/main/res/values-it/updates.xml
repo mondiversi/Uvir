@@ -10,9 +10,11 @@
     <string name="update_download">Scaricamento e verifica…</string>
     <string name="update_flash">Aggiornamento sensore…</string>
     <string name="update_verify">Verifica sensore…</string>
-    <string name="update_keep_connected">Non scollegare l’USB e non spegnere il sensore. Se necessario, tieni premuto BOOT e riprova.</string>
+    <string name="update_app_verify">Verifica app…</string>
+    <string name="update_app_failed">Aggiornamento dell’app non riuscito. Consulta il log errori e riprova.</string>
+    <string name="update_keep_connected">Non scollegare l’USB e non spegnere il sensore.</string>
     <string name="update_done">Sensore aggiornato</string>
     <string name="update_failed">Aggiornamento non riuscito. Consulta il log errori. Se il sensore non si avvia più, recupera il firmware tramite USB da un computer.</string>
     <string name="update_permission">Consenti a Uvir di installare aggiornamenti nelle impostazioni Android.</string>
-    <string name="update_whats_new">Esportazioni CSV, TXT e PNG con modelli dei sensori e riferimenti spettrali compatti, con legende dei grafici più leggibili.</string>
+    <string name="update_whats_new">Esportazioni TXT e CSV delle acquisizioni con percentuali sul totale e sul gruppo, colori PNG coerenti e conferma di importazione con pressione di cinque secondi.</string>
 </resources>

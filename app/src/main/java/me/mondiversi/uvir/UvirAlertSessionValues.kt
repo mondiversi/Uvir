@@ -1,10 +1,5 @@
 package me.mondiversi.uvir
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,17 +7,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -98,10 +90,6 @@ internal fun AlertSessionValuesCard(
             verticalArrangement = Arrangement.spacedBy(15.dp)
         ) {
             events.forEachIndexed { eventIndex, event ->
-                val chevronInteractionSource =
-                    remember(event.entry.id) { MutableInteractionSource() }
-                val chevronPressed by
-                    chevronInteractionSource.collectIsPressedAsState()
                 val sequence = event.entry.sessionSequence ?: eventIndex + 1
                 val elapsedText =
                     sessionRecordElapsedText(
@@ -110,17 +98,8 @@ internal fun AlertSessionValuesCard(
                             events.getOrNull(eventIndex - 1)?.entry?.timestamp
                     )
 
-                Row(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(
-                                horizontal = 16.dp,
-                                vertical = 0.dp
-                            ),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                UvirSessionRecordHeader("alert_${biologicalEffects}_${event.entry.id}", primaryText, secondaryText,
+                    onOpenAlert?.let { open -> { open(event.entry) } }) {
                     Text(
                         text = "#$sequence",
                         modifier = Modifier.weight(1f),
@@ -153,50 +132,20 @@ internal fun AlertSessionValuesCard(
                             )
                         }
                     }
-                    onOpenAlert?.let { openAlert ->
-                        Box(
-                            modifier =
-                                Modifier
-                                    .size(32.dp)
-                                    .clickable(
-                                        interactionSource =
-                                            chevronInteractionSource,
-                                        indication = null,
-                                        onClick = { openAlert(event.entry) }
-                                    ),
-                            contentAlignment = Alignment.CenterEnd
-                        ) {
-                            Box(
-                                modifier =
-                                    Modifier
-                                        .size(28.dp)
-                                        .background(
-                                            color = if (chevronPressed) {
-                                                secondaryText.copy(alpha = 0.10f)
-                                            } else {
-                                                Color.Transparent
-                                            },
-                                            shape = CircleShape
-                                        ),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                UvirDisclosureChevron(tint = secondaryText)
-                            }
-                        }
-                    }
                 }
 
                 event.violations
                     .sortedBy { it.rule.metric.ordinal }
                     .forEach { violation ->
-                    Box(modifier = Modifier.padding(horizontal = 16.dp)) {
-                        AlertViolationDataRow(
-                            violation = violation,
-                            qualityFlags = event.entry.qualityFlags,
-                            primaryText = primaryText,
-                            secondaryText = secondaryText
-                        )
-                    }
+                        Box(modifier = Modifier.padding(horizontal = 16.dp)) {
+                            AlertViolationDataRow(
+                                violation = violation,
+                                qualityFlags = event.entry.qualityFlags,
+                                primaryText = primaryText,
+                                secondaryText = secondaryText,
+                                key = "alert_${event.entry.id}_${violation.rule.metric.name}"
+                            )
+                        }
                     }
 
                 if (eventIndex < events.lastIndex) {
@@ -256,7 +205,8 @@ internal fun AlertViolationDataCard(
                         violation = violation,
                         qualityFlags = qualityFlags,
                         primaryText = primaryText,
-                        secondaryText = secondaryText
+                        secondaryText = secondaryText,
+                        key = "alert_single_${violation.rule.metric.name}"
                     )
                 }
         }
@@ -268,14 +218,10 @@ private fun AlertViolationDataRow(
     violation: ThresholdAlertViolation,
     qualityFlags: Int,
     primaryText: Color,
-    secondaryText: Color
+    secondaryText: Color,
+    key: String
 ) {
-    val metricLabel = sensorChannelLabel(
-        stringResource(
-            thresholdAlertMetricLabelResource(
-                violation.rule.metric
-            )
-        ), thresholdAlertMetricLabelResource(violation.rule.metric))
+    val metricLabel = stringResource(thresholdAlertMetricLabelResource(violation.rule.metric))
     val symbol =
         if (violation.rule.direction == ThresholdAlertDirection.ABOVE) {
             "≥"
@@ -283,7 +229,6 @@ private fun AlertViolationDataRow(
             "≤"
         }
     val numericFormat = LocalUvirNumericFormat.current
-    val irradianceUnit = LocalUvirIrradianceUnit.current
     val outOfRange = qualityFlags.isOutOfRange(violation.rule.metric)
     val recordedValue =
         if (outOfRange) {
@@ -313,31 +258,29 @@ private fun AlertViolationDataRow(
         } ?: "—"
 
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().testTag("saved_row_$key"),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = metricLabel,
-            modifier = Modifier.weight(1f),
-            color =
-                uvirSessionValueLabelColor(
-                    base =
-                        thresholdAlertMetricDisplayColor(
-                            violation.rule.metric
-                        ),
-                    darkMode = isSystemInDarkTheme()
-                ),
-            fontSize = 12.sp,
-            lineHeight = 14.sp,
-            fontWeight = FontWeight.SemiBold
-        )
+        Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically) {
+            UvirSpectralDot(violation.rule.metric, Modifier.testTag("saved_dot_$key"))
+            Text(
+                text = metricLabel,
+                modifier = Modifier.weight(1f).testTag("saved_name_$key"),
+                color = primaryText,
+                fontSize = 12.sp,
+                lineHeight = 14.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
         Column(
             horizontalAlignment = Alignment.End,
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             Text(
                 text = recordedValue,
+                modifier = Modifier.testTag("saved_value_$key"),
                 color = primaryText,
                 fontSize = 12.sp,
                 textAlign = TextAlign.End,
@@ -346,6 +289,7 @@ private fun AlertViolationDataRow(
             )
             Text(
                 text = thresholdValue,
+                modifier = Modifier.testTag("saved_threshold_$key"),
                 color = secondaryText,
                 fontSize = 10.sp,
                 textAlign = TextAlign.End,
@@ -355,7 +299,7 @@ private fun AlertViolationDataRow(
         }
         Text(
             text = deltaText,
-            modifier = Modifier.width(72.dp),
+            modifier = Modifier.width(72.dp).testTag("saved_percentage_$key"),
             color = primaryText,
             fontSize = 12.sp,
             textAlign = TextAlign.End,

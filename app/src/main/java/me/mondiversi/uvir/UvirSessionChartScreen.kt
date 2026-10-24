@@ -144,7 +144,7 @@ internal fun SessionChartScreen(
         database.acquisitionSessionUsesExternalCommand(sessionId)
     }
     val expandedChartGroups =
-        remember {
+        remember(sessionId) {
             mutableStateMapOf<SessionChartGroup, Boolean>()
         }
     var showShareDialog by rememberSaveable {
@@ -166,21 +166,22 @@ internal fun SessionChartScreen(
     LaunchedEffect(noteEditingEnabled) {
         if (!noteEditingEnabled) showNoteEditor = false
     }
-    var showSequenceFilterPanel by rememberSaveable {
+    var showSequenceFilterPanel by remember(sessionId) {
         mutableStateOf(false)
     }
     var sequenceFilterCycleSize by remember(sessionId, database) {
         mutableIntStateOf(database.readAcquisitionSessionVariantsPerPosition(sessionId))
     }
-    var sequenceFilterPosition by rememberSaveable(sessionId) {
+    var sequenceFilterPosition by remember(sessionId) {
         mutableIntStateOf(initialNavigationState?.sequenceFilterPosition ?: 1)
     }
-    var showChart by rememberSaveable(sessionId) {
+    var showChart by remember(sessionId) {
         mutableStateOf(initialNavigationState?.showChart ?: false)
     }
-    var viewMode by rememberSaveable(sessionId) {
+    var viewMode by remember(sessionId) {
         mutableStateOf(initialNavigationState?.viewMode ?: ViewMode.IRRADIANCE)
     }
+    var valueDisplay by rememberUvirSavedValueDisplay("acquisition-session:$sessionId")
     val chartShareDescription =
         stringResource(
             R.string.session_chart_share
@@ -613,8 +614,8 @@ internal fun SessionChartScreen(
                     key = { "chart_${it.name}" }
                 ) { group ->
                     val series =
-                        remember(displayedRecords, group) {
-                            sessionChartSeries(displayedRecords, group)
+                        remember(displayedRecords, group, valueDisplay) {
+                            savedSessionChartSeries(displayedRecords, group, valueDisplay)
                         }
                     val expanded =
                         expandedChartGroups[group] ?: true
@@ -636,7 +637,9 @@ internal fun SessionChartScreen(
                         },
                         cardColor = cardColor,
                         primaryText = primaryText,
-                        secondaryText = secondaryText
+                        secondaryText = secondaryText,
+                        titleColor = if (!group.biological && !valueDisplay.spectrum.groupVisible(group.spectrumIconGroup()))
+                            secondaryText.copy(alpha = .55f) else primaryText
                     ) {
                         if (displayedRecords.isEmpty()) {
                             Text(
@@ -685,6 +688,8 @@ internal fun SessionChartScreen(
                         cardColor = cardColor,
                         primaryText = primaryText,
                         secondaryText = secondaryText,
+                        display = valueDisplay,
+                        onDisplayChange = { valueDisplay = it },
                         onOpenRecord = { record ->
                             onOpenRecord(
                                 record,

@@ -9,7 +9,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun SensorGroupContent(
+internal fun SensorGroupContent(
     group: SensorGroup,
     expanded: Boolean,
     onToggle: () -> Unit,
@@ -37,70 +37,75 @@ fun SensorGroupContent(
     primaryText: Color,
     secondaryText: Color,
     trackColor: Color,
-    sensorModel: String = liveSpectralSensorModel(group)
+    display: UvirLiveSpectrumDisplay = UvirLiveSpectrumDisplay(),
+    onDisplayChange: (UvirLiveSpectrumDisplay) -> Unit = {},
+    reorderControls: (@Composable (String) -> Unit)? = null,
+    collapsible: Boolean = true
 ) {
     val displayedDigits = currentUvirLiveIrradianceDecimals()
     val displayedUnit = LocalUvirIrradianceUnit.current
-    val displayedTotals = UvirSpectralTotals(uvTotal, visibleTotal, nirTotal, sample.hasAnyOutOfRangeValue())
-    fun displayShare(value: Double) = displayedTotals.displayShare(value, displayedDigits, displayedUnit)
-    val allGroupsInRange =
-        !sample.isOutOfRange(SensorGroup.UV) &&
-            !sample.isOutOfRange(SensorGroup.VISIBLE) &&
-            !sample.isOutOfRange(SensorGroup.NIR)
-    fun totalShare(groupTotal: Double): Float? =
-        if (allGroupsInRange) {
-            uvirLiveIrradianceGroupShare(groupTotal, uvTotal, visibleTotal, nirTotal, displayedDigits, displayedUnit)
-        } else null
+    fun displayShare(value: Double) = display.share(group, value, sample, displayedDigits, displayedUnit)
+    val groupShare = display.groupShare(group, sample, displayedDigits, displayedUnit)
+    val groupTotal = if (display.excludedChannels.isEmpty()) when (group) {
+        SensorGroup.UV -> uvTotal
+        SensorGroup.VISIBLE -> visibleTotal
+        SensorGroup.NIR -> nirTotal
+        SensorGroup.BIOLOGICAL -> 0.0
+    } else display.total(group, sample)
+    val displayedHev = if (display.excludedChannels.isEmpty()) hev else display.value(ThresholdAlertMetric.HEV, sample)
+    val percentageLabel = stringResource(
+        if (group in display.groupPercentages) R.string.live_percent_group else R.string.live_percent_total
+    )
 
-    val liveChartSeries =
+    val allLiveChartSeries =
         when (group) {
             SensorGroup.UV ->
                 listOf(
                     LiveChartSeries(
                         stringResource(R.string.uv_radiation),
-                        Color(0xFF6A1B9A)
+                        uvirSpectralColor(ThresholdAlertMetric.UV_TOTAL)
                     ) { it.uvc + it.uvb + it.uva },
-                    LiveChartSeries("UVC", Color(0xFF9C27B0)) { it.uvc },
-                    LiveChartSeries("UVB", Color(0xFF673AB7)) { it.uvb },
-                    LiveChartSeries("UVA", Color(0xFF3F51B5)) { it.uva }
+                    LiveChartSeries("UVC", uvirSpectralColor(ThresholdAlertMetric.UVC)) { it.uvc },
+                    LiveChartSeries("UVB", uvirSpectralColor(ThresholdAlertMetric.UVB)) { it.uvb },
+                    LiveChartSeries("UVA", uvirSpectralColor(ThresholdAlertMetric.UVA)) { it.uva }
                 )
 
             SensorGroup.VISIBLE ->
                 listOf(
                     LiveChartSeries(
                         stringResource(R.string.visible_light),
-                        Color(0xFF00897B)
+                        uvirSpectralColor(ThresholdAlertMetric.VISIBLE_TOTAL)
                     ) {
                         it.violetto + it.blu + it.verde +
                             it.giallo + it.arancione + it.rosso
                     },
                     LiveChartSeries(
                         stringResource(R.string.threshold_channel_hev),
-                        Color(0xFF3949AB)
+                        uvirSpectralColor(ThresholdAlertMetric.HEV)
                     ) { it.violetto + it.blu },
                     LiveChartSeries(
                         stringResource(R.string.violet),
-                        Color(0xFF8E24AA)
+                        uvirSpectralColor(ThresholdAlertMetric.VIOLET)
                     ) { it.violetto },
                     LiveChartSeries(
                         stringResource(R.string.blue),
-                        Color(0xFF1E88E5)
+                        uvirSpectralColor(ThresholdAlertMetric.BLUE)
                     ) { it.blu },
                     LiveChartSeries(
                         stringResource(R.string.green),
-                        Color(0xFF43A047)
+                        uvirSpectralColor(ThresholdAlertMetric.GREEN)
                     ) { it.verde },
                     LiveChartSeries(
                         stringResource(R.string.yellow),
-                        Color(0xFFFDD835)
+                        uvirSpectralColor(ThresholdAlertMetric.YELLOW)
                     ) { it.giallo },
                     LiveChartSeries(
                         stringResource(R.string.orange),
-                        Color(0xFFFB8C00)
+                        uvirSpectralColor(ThresholdAlertMetric.ORANGE)
                     ) { it.arancione },
                     LiveChartSeries(
                         stringResource(R.string.red),
-                        Color(0xFFE53935)
+                        uvirSpectralColor(ThresholdAlertMetric.RED)
                     ) { it.rosso }
                 )
 
@@ -108,17 +113,30 @@ fun SensorGroupContent(
                 listOf(
                     LiveChartSeries(
                         stringResource(R.string.far_red_nir),
-                        Color(0xFF6D4C41)
+                        uvirSpectralColor(ThresholdAlertMetric.NIR_TOTAL)
                     ) { it.f8 + it.nir },
                     LiveChartSeries(
                         stringResource(R.string.session_chart_series_far_red),
-                        Color(0xFFD32F2F)
+                        uvirSpectralColor(ThresholdAlertMetric.FAR_RED)
                     ) { it.f8 },
-                    LiveChartSeries("NIR", Color(0xFF8D6E63)) { it.nir }
+                    LiveChartSeries("NIR", uvirSpectralColor(ThresholdAlertMetric.NIR)) { it.nir }
                 )
 
             SensorGroup.BIOLOGICAL -> emptyList()
         }
+
+    // Filter/select only the plotted values; do not mutate the rolling raw history.
+    val chartMetrics = when (group) {
+        SensorGroup.UV -> listOf(ThresholdAlertMetric.UV_TOTAL) + UvirLiveSpectrumDisplay.channels(group)
+        SensorGroup.VISIBLE -> listOf(ThresholdAlertMetric.VISIBLE_TOTAL, ThresholdAlertMetric.HEV) + UvirLiveSpectrumDisplay.channels(group)
+        SensorGroup.NIR -> listOf(ThresholdAlertMetric.NIR_TOTAL) + UvirLiveSpectrumDisplay.channels(group)
+        SensorGroup.BIOLOGICAL -> emptyList()
+    }
+    val liveChartSeries = allLiveChartSeries.mapIndexedNotNull { index, series ->
+        val metric = chartMetrics[index]
+        if (index > 0 && !display.visible(metric)) null
+        else LiveChartSeries(series.label, series.color) { display.value(metric, it) }
+    }
 
     when (group) {
 
@@ -127,14 +145,20 @@ fun SensorGroupContent(
             SpectrumCard(
                 group = group,
                 title = stringResource(R.string.uv_radiation),
-                total = uvTotal,
-                bandLabel = sensorModel,
-                relativePercent = totalShare(uvTotal),
+                total = groupTotal,
+                bandLabel = percentageLabel,
+                onPercentageBaseToggle = { onDisplayChange(display.togglePercentageBase(group)) },
+                relativePercent = groupShare,
                 trackColor = trackColor,
-                barColor = Color(0xFF6A1B9A),
-                outOfRange = sample.isOutOfRange(SensorGroup.UV),
+                barColor = uvirSpectralColor(ThresholdAlertMetric.UV_TOTAL),
+                outOfRange = display.outOfRange(group, sample),
+                chartOutOfRange = { display.outOfRange(group, it) },
                 expanded = expanded,
                 onToggle = onToggle,
+                reorderControls = reorderControls,
+                collapsible = collapsible,
+                groupVisible = display.groupVisible(group),
+                onGroupVisibilityToggle = { onDisplayChange(display.toggleGroup(group)) },
                 showChart = showChart,
                 liveHistory = liveHistory,
                 liveChartSeries = liveChartSeries,
@@ -174,7 +198,10 @@ fun SensorGroupContent(
                     primaryText = primaryText,
                     secondaryText = secondaryText,
                     trackColor = trackColor,
-                    barColor = Color(0xFF9C27B0),
+                    barColor = uvirSpectralColor(ThresholdAlertMetric.UVC),
+                    metric = ThresholdAlertMetric.UVC,
+                    visible = display.visible(ThresholdAlertMetric.UVC),
+                    onVisibilityToggle = { onDisplayChange(display.toggle(ThresholdAlertMetric.UVC)) },
                     alerted =
                         ThresholdAlertMetric.UVC in
                                 alertedMetrics,
@@ -202,7 +229,10 @@ fun SensorGroupContent(
                     primaryText = primaryText,
                     secondaryText = secondaryText,
                     trackColor = trackColor,
-                    barColor = Color(0xFF673AB7),
+                    barColor = uvirSpectralColor(ThresholdAlertMetric.UVB),
+                    metric = ThresholdAlertMetric.UVB,
+                    visible = display.visible(ThresholdAlertMetric.UVB),
+                    onVisibilityToggle = { onDisplayChange(display.toggle(ThresholdAlertMetric.UVB)) },
                     alerted =
                         ThresholdAlertMetric.UVB in
                                 alertedMetrics,
@@ -230,7 +260,10 @@ fun SensorGroupContent(
                     primaryText = primaryText,
                     secondaryText = secondaryText,
                     trackColor = trackColor,
-                    barColor = Color(0xFF3F51B5),
+                    barColor = uvirSpectralColor(ThresholdAlertMetric.UVA),
+                    metric = ThresholdAlertMetric.UVA,
+                    visible = display.visible(ThresholdAlertMetric.UVA),
+                    onVisibilityToggle = { onDisplayChange(display.toggle(ThresholdAlertMetric.UVA)) },
                     alerted =
                         ThresholdAlertMetric.UVA in
                                 alertedMetrics,
@@ -255,14 +288,20 @@ fun SensorGroupContent(
             SpectrumCard(
                 group = group,
                 title = stringResource(R.string.visible_light),
-                total = visibleTotal,
-                bandLabel = sensorModel,
-                relativePercent = totalShare(visibleTotal),
+                total = groupTotal,
+                bandLabel = percentageLabel,
+                onPercentageBaseToggle = { onDisplayChange(display.togglePercentageBase(group)) },
+                relativePercent = groupShare,
                 trackColor = trackColor,
-                barColor = Color(0xFF00897B),
-                outOfRange = sample.isOutOfRange(SensorGroup.VISIBLE),
+                barColor = uvirSpectralColor(ThresholdAlertMetric.VISIBLE_TOTAL),
+                outOfRange = display.outOfRange(group, sample),
+                chartOutOfRange = { display.outOfRange(group, it) },
                 expanded = expanded,
                 onToggle = onToggle,
+                reorderControls = reorderControls,
+                collapsible = collapsible,
+                groupVisible = display.groupVisible(group),
+                onGroupVisibilityToggle = { onDisplayChange(display.toggleGroup(group)) },
                 showChart = showChart,
                 liveHistory = liveHistory,
                 liveChartSeries = liveChartSeries,
@@ -294,12 +333,15 @@ fun SensorGroupContent(
                 SpectrumRow(
                     name = "HEV¹",
                     band = "",
-                    value = hev,
-                    percent = displayShare(hev),
+                    value = displayedHev,
+                    percent = displayShare(displayedHev),
                     primaryText = primaryText,
                     secondaryText = secondaryText,
                     trackColor = trackColor,
-                    barColor = Color(0xFF3949AB),
+                    barColor = uvirSpectralColor(ThresholdAlertMetric.HEV),
+                    metric = ThresholdAlertMetric.HEV,
+                    visible = display.visible(ThresholdAlertMetric.HEV),
+                    onVisibilityToggle = { onDisplayChange(display.toggle(ThresholdAlertMetric.HEV)) },
                     alerted = ThresholdAlertMetric.HEV in alertedMetrics,
                     alertConfigured =
                         ThresholdAlertMetric.HEV in configuredAlertMetrics,
@@ -319,7 +361,10 @@ fun SensorGroupContent(
                     primaryText,
                     secondaryText,
                     trackColor,
-                    Color(0xFF8E24AA),
+                    uvirSpectralColor(ThresholdAlertMetric.VIOLET),
+                    metric = ThresholdAlertMetric.VIOLET,
+                    visible = display.visible(ThresholdAlertMetric.VIOLET),
+                    onVisibilityToggle = { onDisplayChange(display.toggle(ThresholdAlertMetric.VIOLET)) },
                     alerted =
                         ThresholdAlertMetric.VIOLET in
                                 alertedMetrics,
@@ -346,7 +391,10 @@ fun SensorGroupContent(
                     primaryText,
                     secondaryText,
                     trackColor,
-                    Color(0xFF1E88E5),
+                    uvirSpectralColor(ThresholdAlertMetric.BLUE),
+                    metric = ThresholdAlertMetric.BLUE,
+                    visible = display.visible(ThresholdAlertMetric.BLUE),
+                    onVisibilityToggle = { onDisplayChange(display.toggle(ThresholdAlertMetric.BLUE)) },
                     alerted =
                         ThresholdAlertMetric.BLUE in
                                 alertedMetrics,
@@ -373,7 +421,10 @@ fun SensorGroupContent(
                     primaryText,
                     secondaryText,
                     trackColor,
-                    Color(0xFF43A047),
+                    uvirSpectralColor(ThresholdAlertMetric.GREEN),
+                    metric = ThresholdAlertMetric.GREEN,
+                    visible = display.visible(ThresholdAlertMetric.GREEN),
+                    onVisibilityToggle = { onDisplayChange(display.toggle(ThresholdAlertMetric.GREEN)) },
                     alerted =
                         ThresholdAlertMetric.GREEN in
                                 alertedMetrics,
@@ -400,7 +451,10 @@ fun SensorGroupContent(
                     primaryText,
                     secondaryText,
                     trackColor,
-                    Color(0xFFFDD835),
+                    uvirSpectralColor(ThresholdAlertMetric.YELLOW),
+                    metric = ThresholdAlertMetric.YELLOW,
+                    visible = display.visible(ThresholdAlertMetric.YELLOW),
+                    onVisibilityToggle = { onDisplayChange(display.toggle(ThresholdAlertMetric.YELLOW)) },
                     alerted =
                         ThresholdAlertMetric.YELLOW in
                                 alertedMetrics,
@@ -427,7 +481,10 @@ fun SensorGroupContent(
                     primaryText,
                     secondaryText,
                     trackColor,
-                    Color(0xFFFB8C00),
+                    uvirSpectralColor(ThresholdAlertMetric.ORANGE),
+                    metric = ThresholdAlertMetric.ORANGE,
+                    visible = display.visible(ThresholdAlertMetric.ORANGE),
+                    onVisibilityToggle = { onDisplayChange(display.toggle(ThresholdAlertMetric.ORANGE)) },
                     alerted =
                         ThresholdAlertMetric.ORANGE in
                                 alertedMetrics,
@@ -454,7 +511,10 @@ fun SensorGroupContent(
                     primaryText,
                     secondaryText,
                     trackColor,
-                    Color(0xFFE53935),
+                    uvirSpectralColor(ThresholdAlertMetric.RED),
+                    metric = ThresholdAlertMetric.RED,
+                    visible = display.visible(ThresholdAlertMetric.RED),
+                    onVisibilityToggle = { onDisplayChange(display.toggle(ThresholdAlertMetric.RED)) },
                     alerted =
                         ThresholdAlertMetric.RED in
                                 alertedMetrics,
@@ -473,7 +533,8 @@ fun SensorGroupContent(
 
                 Text(
                     text = stringResource(R.string.hev_visible_footnote),
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().padding(start = UvirIslandContentPadding,
+                        end = UvirIslandContentPadding, bottom = UvirIslandContentPadding),
                     color = secondaryText,
                     fontSize = 10.sp,
                     lineHeight = 13.sp
@@ -486,14 +547,20 @@ fun SensorGroupContent(
             SpectrumCard(
                 group = group,
                 title = stringResource(R.string.far_red_nir),
-                total = nirTotal,
-                bandLabel = sensorModel,
-                relativePercent = totalShare(nirTotal),
+                total = groupTotal,
+                bandLabel = percentageLabel,
+                onPercentageBaseToggle = { onDisplayChange(display.togglePercentageBase(group)) },
+                relativePercent = groupShare,
                 trackColor = trackColor,
-                barColor = Color(0xFF6D4C41),
-                outOfRange = sample.isOutOfRange(SensorGroup.NIR),
+                barColor = uvirSpectralColor(ThresholdAlertMetric.NIR_TOTAL),
+                outOfRange = display.outOfRange(group, sample),
+                chartOutOfRange = { display.outOfRange(group, it) },
                 expanded = expanded,
                 onToggle = onToggle,
+                reorderControls = reorderControls,
+                collapsible = collapsible,
+                groupVisible = display.groupVisible(group),
+                onGroupVisibilityToggle = { onDisplayChange(display.toggleGroup(group)) },
                 showChart = showChart,
                 liveHistory = liveHistory,
                 liveChartSeries = liveChartSeries,
@@ -533,7 +600,10 @@ fun SensorGroupContent(
                     primaryText = primaryText,
                     secondaryText = secondaryText,
                     trackColor = trackColor,
-                    barColor = Color(0xFFD32F2F),
+                    barColor = uvirSpectralColor(ThresholdAlertMetric.FAR_RED),
+                    metric = ThresholdAlertMetric.FAR_RED,
+                    visible = display.visible(ThresholdAlertMetric.FAR_RED),
+                    onVisibilityToggle = { onDisplayChange(display.toggle(ThresholdAlertMetric.FAR_RED)) },
                     alerted =
                         ThresholdAlertMetric.FAR_RED in
                                 alertedMetrics,
@@ -561,7 +631,10 @@ fun SensorGroupContent(
                     primaryText = primaryText,
                     secondaryText = secondaryText,
                     trackColor = trackColor,
-                    barColor = Color(0xFF8D6E63),
+                    barColor = uvirSpectralColor(ThresholdAlertMetric.NIR),
+                    metric = ThresholdAlertMetric.NIR,
+                    visible = display.visible(ThresholdAlertMetric.NIR),
+                    onVisibilityToggle = { onDisplayChange(display.toggle(ThresholdAlertMetric.NIR)) },
                     alerted =
                         ThresholdAlertMetric.NIR in
                                 alertedMetrics,

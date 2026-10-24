@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="export_percentages_total">Ποσοστά επί του συνόλου</string>
+    <string name="export_percentages_group">Ποσοστά ανά ομάδα</string>
     <string name="data_export_files_heading">Αρχεία</string>
     <string name="export_saved_successfully">Τα αρχεία αποθηκεύτηκαν.</string>
     <string name="export_save_failed">Δεν ήταν δυνατή η αποθήκευση των αρχείων.</string>

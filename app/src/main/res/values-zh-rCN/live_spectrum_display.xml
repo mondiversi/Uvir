@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_percent_total" formatted="false">% 总量</string>
+    <string name="live_percent_group" formatted="false">% 分组</string>
+    <string name="live_channel_hide">在实时视图中隐藏%1$s</string>
+    <string name="live_channel_show">在实时视图中显示%1$s</string>
+</resources>

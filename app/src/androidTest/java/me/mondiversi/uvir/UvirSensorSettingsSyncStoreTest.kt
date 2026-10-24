@@ -147,7 +147,7 @@ class UvirSensorSettingsSyncStoreTest {
             assertEquals(0L, migrated.updatedAtMs)
             assertEquals(snapshot().sensorParameters, migrated.sensorParameters)
             assertNull(migrated.alertRecordingEnabled)
-            assertEquals(25, database.readableDatabase.version)
+            assertEquals(26, database.readableDatabase.version)
         }
     }
 }

@@ -299,7 +299,8 @@ internal fun LiveScreen(
     trackColor: Color,
 
     onOpenHistory: () -> Unit,
-    settingsRouteState: UvirSettingsRouteState = rememberUvirSettingsRouteState()
+    settingsRouteState: UvirSettingsRouteState = rememberUvirSettingsRouteState(),
+    sensorSelectionState: androidx.compose.runtime.MutableState<Boolean> = rememberSaveable { mutableStateOf(false) }
 ) {
 
     DisposableEffect(Unit) {
@@ -648,35 +649,15 @@ internal fun LiveScreen(
         }
     }
 
-    val groups = remember {
-        listOf(
-            SensorGroup.UV,
-            SensorGroup.VISIBLE,
-            SensorGroup.NIR
-        )
-    }
-
-    val expandedStates = remember {
-        mutableStateMapOf<
-                SensorGroup,
-                Boolean
-                >().apply {
-
-            SensorGroup.values()
-                .forEach { group ->
-
-                    this[group] =
-                        loadExpandedState(
-                            context,
-                            group
-                        )
-                }
-        }
-    }
+    val mainIslandOrder = rememberUvirMainIslandOrder()
+    val groups = mainIslandOrder.value
 
     var showLiveChart by rememberSaveable {
         mutableStateOf(loadLiveChartMode(context))
     }
+
+    // UI-only state: never sent to the sensor or used by recording, alerts or exports.
+    var liveSpectrumDisplay by rememberUvirLiveSpectrumDisplay("$selectedSensorDeviceId:$useFakeSensorData")
 
     val liveChartHistory = remember {
         mutableStateListOf<LiveSamplePoint>()
@@ -783,10 +764,8 @@ internal fun LiveScreen(
     }
 
 
-    // Keep the selection dialog open while its sensor information page replaces the home UI.
-    var sensorSelectionExpanded by rememberSaveable {
-        mutableStateOf(false)
-    }
+    // Retained by the host across simulation-context rebuilds and sensor info navigation.
+    var sensorSelectionExpanded by sensorSelectionState
 
     var showSensorPowerOffConfirmation by rememberSaveable {
         mutableStateOf(false)
@@ -4301,9 +4280,9 @@ val homeHeaderContent: @Composable () -> Unit = {
             selectedSettingsPage = page
             settingsApplyScope.launch { parametersScrollState.scrollTo(0) }
         },
-        onOpenSimulationSettings = {
-            openSettingsFromHome()
-            settingsRouteState.openSimulationSettings()
+        onDisableSimulation = {
+            fakeSensorDataEnabled = false
+            onUseFakeSensorDataChanged(false)
         }
     )
 }
@@ -4667,27 +4646,9 @@ floatingActionButton = {
                 SensorGroupContent(
                     group = group,
 
-                    expanded =
-                        expandedStates[group]
-                            ?: false,
-
-                    onToggle = {
-
-                        val newState =
-                            !(
-                                    expandedStates[group]
-                                        ?: false
-                                    )
-
-                        expandedStates[group] =
-                            newState
-
-                        saveExpandedState(
-                            context,
-                            group,
-                            newState
-                        )
-                    },
+                    expanded = true,
+                    onToggle = {},
+                    collapsible = false,
 
                     showChart = showLiveChart,
 
@@ -4728,19 +4689,31 @@ floatingActionButton = {
 
                     trackColor =
                         trackColor,
-                    sensorModel = liveSpectralSensorModel(group, selectedSensorInfo)
+                    display = liveSpectrumDisplay,
+                    onDisplayChange = { liveSpectrumDisplay = it },
+                    reorderControls = { title ->
+                        val index = groups.indexOf(group)
+                        UvirMainIslandMoveControls(group, title, secondaryText,
+                            onMoveUp = if (index > 0) ({
+                                mainIslandOrder.value = moveUvirMainIsland(mainIslandOrder.value, group, -1)
+                            }) else null,
+                            onMoveDown = if (index < groups.lastIndex) ({
+                                mainIslandOrder.value = moveUvirMainIsland(mainIslandOrder.value, group, 1)
+                            }) else null)
+                    }
                 )
             }
             if (liveUsesLandscapeIslands) {
                 item(key = "landscape_irradiance_islands") {
                     UvirLiveLandscapeIslands(
                         onGroupBounds = { group, bounds -> liveIslandBounds[group] = bounds },
+                        order = groups,
                         content = drawIsland
                     )
                 }
             } else {
                 itemsIndexed(items = groups, key = { _, group -> group.name }) { _, group ->
-                    drawIsland(group)
+                    UvirAnimatedMainIsland { drawIsland(group) }
                 }
             }
 
@@ -4752,12 +4725,9 @@ floatingActionButton = {
                     sample =
                         measurement,
 
-                    expanded = expandedStates[SensorGroup.BIOLOGICAL] ?: true,
-                    onToggle = {
-                        val newState = !(expandedStates[SensorGroup.BIOLOGICAL] ?: true)
-                        expandedStates[SensorGroup.BIOLOGICAL] = newState
-                        saveExpandedState(context, SensorGroup.BIOLOGICAL, newState)
-                    },
+                    expanded = true,
+                    onToggle = {},
+                    collapsible = false,
 
                     showChart = showLiveChart,
 

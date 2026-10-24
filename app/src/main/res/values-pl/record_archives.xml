@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="record_archive_title">Pomiary i alerty</string>
+    <string name="record_archive_description">Eksportuj/importuj pomiary oraz alerty, w tym ich sesje.</string>
+    <string name="record_archive_export_description">Eksportuj wszystkie zapisane rekordy tego typu, w tym sesje, do pliku UVIR bez hasła.</string>
+    <string name="record_archive_import_description">Dane zostaną dodane do archiwum. Istniejące rekordy są pomijane. Nieznane czujniki są wyświetlane z identyfikatorem sprzętowym do czasu powiązania.</string>
+    <string name="record_archive_import_summary">Rekordy: %1$d · Sesje: %2$d</string>
+    <string name="record_archive_import_success">Zaimportowano: %1$d · Już istnieją: %2$d</string>
+    <string name="record_archive_failed">Nie można przenieść rekordów. Sprawdź plik i typ danych.</string>
+</resources>

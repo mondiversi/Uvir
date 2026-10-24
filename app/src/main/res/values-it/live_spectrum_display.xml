@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_percent_total" formatted="false">% totale</string>
+    <string name="live_percent_group" formatted="false">% gruppo</string>
+    <string name="live_channel_hide">Nascondi %1$s dalla visualizzazione live</string>
+    <string name="live_channel_show">Mostra %1$s nella visualizzazione live</string>
+</resources>

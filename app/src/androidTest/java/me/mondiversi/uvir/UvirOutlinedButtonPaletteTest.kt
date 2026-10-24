@@ -24,7 +24,7 @@ import kotlin.math.abs
 class UvirOutlinedButtonPaletteTest {
     @get:Rule val compose = createComposeRule()
 
-    @Test fun redAndPurpleRestoreTintedSurfacesAndBordersButKeepSharedDisabledStates() {
+    @Test fun allOutlinedFamiliesUseTransparentSurfacesAndTheSameDisabledStyleOutsideSettingsToo() {
         val night = mutableStateOf(false)
         val enabled = mutableStateOf(true)
         var palettes = emptyList<ButtonColors>()
@@ -32,6 +32,7 @@ class UvirOutlinedButtonPaletteTest {
         var red = Color.Unspecified
         var purple = Color.Unspecified
         var card = Color.Unspecified
+        var neutralOnSurface = Color.Unspecified
         compose.setContent {
             val configuration = Configuration(LocalConfiguration.current).apply {
                 uiMode = (uiMode and Configuration.UI_MODE_NIGHT_MASK.inv()) or
@@ -45,6 +46,7 @@ class UvirOutlinedButtonPaletteTest {
                         card = if (night.value) Color(0xFF1C242B) else Color.White
                         red = uvirDestructiveOutlinedActionColor()
                         purple = MaterialTheme.colorScheme.primary
+                        neutralOnSurface = MaterialTheme.colorScheme.onSurface
                         palettes = listOf(uvirOutlinedActionColors(primary),
                             uvirDestructiveOutlinedButtonColors(), uvirPrimaryOutlinedButtonColors())
                         borders = listOf(uvirOutlinedActionBorder(enabled.value, primary),
@@ -74,19 +76,19 @@ class UvirOutlinedButtonPaletteTest {
             assertEquals(purple, palettes[2].contentColor)
             assertNotEquals(normal.contentColor, palettes[1].contentColor)
             assertNotEquals(normal.contentColor, palettes[2].contentColor)
-            assertEquals((if (dark) Color.White else Color(0xFF101418)).copy(alpha = if (dark) 0.16f else 0.04f),
-                normal.containerColor)
-            if (active) assertEquals(BorderStroke(1.dp, normal.contentColor.copy(alpha = if (dark) .38f else .30f)), borders[0])
-            else assertNull(borders[0])
+            assertEquals(Color.Transparent, normal.containerColor)
+            assertEquals(if (dark) Color(0xFF33343C) else Color(0xFFECEDEF), normal.disabledContainerColor)
+            assertEquals(if (dark) Color(0xFFA1A5AE) else Color(0xFF808790), normal.disabledContentColor)
+            val neutralBorder = if (active) normal.contentColor.copy(alpha = if (dark) .48f else .38f)
+                else neutralOnSurface.copy(alpha = if (dark) .20f else .12f)
+            assertEquals(BorderStroke(1.dp, neutralBorder), borders[0])
             for (index in 1..2) {
                 val accent = if (index == 1) red else purple
-                assertEquals(accent.copy(alpha = if (dark) 0.16f else 0.10f), palettes[index].containerColor)
-                assertNotEquals(normal.containerColor, palettes[index].containerColor)
+                assertEquals(Color.Transparent, palettes[index].containerColor)
                 if (active) {
-                    val width = if (index == 1) UvirDestructiveOutlinedBorderWidth else 1.dp
-                    assertEquals(BorderStroke(width, accent.copy(alpha = if (dark) 0.38f else 0.30f)), borders[index])
+                    assertEquals(BorderStroke(1.dp, accent.copy(alpha = if (dark) 0.48f else 0.38f)), borders[index])
                     assertNotEquals(borders[0], borders[index])
-                } else assertNull(borders[index])
+                } else assertEquals(borders[0], borders[index])
             }
             for (index in palettes.indices) {
                 val palette = palettes[index]

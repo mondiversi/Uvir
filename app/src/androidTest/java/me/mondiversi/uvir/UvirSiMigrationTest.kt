@@ -92,12 +92,16 @@ class UvirSiMigrationTest {
             // Make a real v24 file; backup is checkpointed before the upgrade begins.
             SQLiteDatabase.openOrCreateDatabase(isolated.getDatabasePath("uvir.db"), null).use { db ->
                 db.execSQL("CREATE TABLE acquisitions(id INTEGER PRIMARY KEY,uvc REAL)")
+                // v24 also has these tables; schema 26 attaches transfer cleanup triggers.
+                db.execSQL("CREATE TABLE acquisition_sessions(session_id INTEGER PRIMARY KEY)")
+                db.execSQL("CREATE TABLE alerts(id INTEGER PRIMARY KEY)")
+                db.execSQL("CREATE TABLE alert_sessions(session_id INTEGER PRIMARY KEY)")
                 db.execSQL("INSERT INTO acquisitions VALUES(7,200)"); db.version = 24
             }
             repeat(2) {
                 UvirDatabaseHelper(isolated).use { helper ->
                     val db = helper.writableDatabase
-                    assertEquals(25, db.version)
+                    assertEquals(26, db.version)
                     db.rawQuery("SELECT uvc FROM acquisitions", null).use { c ->
                         assertTrue(c.moveToFirst()); assertEquals(2.0, c.getDouble(0), 0.0)
                     }

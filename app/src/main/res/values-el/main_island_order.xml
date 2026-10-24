@@ -1,0 +1,4 @@
+<resources>
+    <string name="main_island_move_up">Μετακίνηση %1$s προς τα πάνω</string>
+    <string name="main_island_move_down">Μετακίνηση %1$s προς τα κάτω</string>
+</resources>

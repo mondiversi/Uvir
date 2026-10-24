@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="export_percentages_total">占总量百分比</string>
+    <string name="export_percentages_group">组内百分比</string>
     <string name="data_export_files_heading">文件</string>
     <string name="export_saved_successfully">文件已保存。</string>
     <string name="export_save_failed">无法保存文件。</string>

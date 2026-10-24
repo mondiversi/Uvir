@@ -114,6 +114,8 @@ class UvirLiveIrradianceDecimalsUiTest {
         saveUvirLiveIrradianceDecimals(isolated, UvirIrradianceUnit.MW_CM2, 1)
         assertEquals(5, loadUvirLiveIrradianceDecimals(isolated, UvirIrradianceUnit.W_M2))
         assertEquals(1, loadUvirLiveIrradianceDecimals(isolated, UvirIrradianceUnit.MW_CM2))
+        assertEquals(1, loadUvirLiveIrradianceDecimals(isolated, UvirIrradianceUnit.UW_CM2))
+        saveUvirLiveIrradianceDecimals(isolated, UvirIrradianceUnit.UW_CM2, 0)
         assertEquals(0, loadUvirLiveIrradianceDecimals(isolated, UvirIrradianceUnit.UW_CM2))
         saveUvirLiveIrradianceDecimals(isolated, UvirIrradianceUnit.W_M2, 50)
         assertEquals(6, loadUvirLiveIrradianceDecimals(isolated, UvirIrradianceUnit.W_M2))
@@ -165,7 +167,7 @@ class UvirLiveIrradianceDecimalsUiTest {
         compose.runOnIdle { unit.value = UvirIrradianceUnit.MW_CM2 }
         compose.onAllNodesWithText("0,012 mW/cm²").onFirst().performScrollTo().assertIsDisplayed()
         compose.runOnIdle { unit.value = UvirIrradianceUnit.UW_CM2 }
-        compose.onAllNodesWithText("12 µW/cm²").onFirst().performScrollTo().assertIsDisplayed()
+        compose.onAllNodesWithText("12,3 µW/cm²").onFirst().performScrollTo().assertIsDisplayed()
         compose.runOnIdle { unit.value = UvirIrradianceUnit.W_M2 }
         compose.onAllNodesWithText("0,1235 W/m²").onFirst().performScrollTo().assertIsDisplayed()
     }
@@ -184,7 +186,7 @@ class UvirLiveIrradianceDecimalsUiTest {
         for ((current, expected) in listOf(
             UvirIrradianceUnit.W_M2 to "0,12 W/m²",
             UvirIrradianceUnit.MW_CM2 to "0,012 mW/cm²",
-            UvirIrradianceUnit.UW_CM2 to "12 µW/cm²"
+            UvirIrradianceUnit.UW_CM2 to "12,3 µW/cm²"
         )) {
             compose.runOnIdle { unit.value = current }
             compose.onAllNodesWithText(expected).onFirst().performScrollTo().assertIsDisplayed()

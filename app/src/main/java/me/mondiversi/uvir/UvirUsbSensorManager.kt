@@ -46,6 +46,8 @@ data class UvirUsbSensorState(
     val sensorName: String? = null,
     val firmwareVersion: String? = null,
     val appConnectionConfirmed: Boolean = false,
+    // True only after the application has processed a successful queue sync.
+    val offlineSyncComplete: Boolean = false,
     val runtimeInfo: UvirSensorRuntimeInfo = UvirSensorRuntimeInfo(),
     val calibrationKind: String = "datasheet_estimate",
     val credentials: UvirSensorCredentials = UvirSensorCredentials(),
@@ -705,13 +707,16 @@ class UvirUsbSensorManager(
     }
 
     fun markOfflineSyncComplete() {
-        offlineSyncCompleted = true
-        val current = mutableState.value
-        val runtime = current.runtimeInfo
-        mutableState.value =
-            current.copy(
-                runtimeInfo =
-                    runtime.copy(
+        // Serialize completion with incoming frames so an older sample/status
+        // cannot overwrite the processed-sync flag with its pre-completion copy.
+        synchronized(lineBuffer) {
+            offlineSyncCompleted = true
+            val current = mutableState.value
+            val runtime = current.runtimeInfo
+            mutableState.value =
+                current.copy(
+                    offlineSyncComplete = true,
+                    runtimeInfo = runtime.copy(
                         offlineUsed = 0,
                         offlineRemaining = runtime.offlineCapacity,
                         offlineStorageFull = false,
@@ -719,7 +724,8 @@ class UvirUsbSensorManager(
                         offlineAlerts = 0,
                         offlineErrors = 0
                     )
-            )
+                )
+        }
         sendSensorControlCommands(listOf("HELLO"))
     }
 
@@ -1117,6 +1123,9 @@ class UvirUsbSensorManager(
             offlineSyncLastProgressAtMs = SystemClock.elapsedRealtime()
             if (frameType == "sync_complete" || frameType == "sync_failed") {
                 offlineSyncCompleted = true
+            }
+            if (frameType == "sync_start" || frameType == "offline_record" || frameType == "sync_failed") {
+                mutableState.value = mutableState.value.copy(offlineSyncComplete = false)
             }
         }
 
@@ -1562,6 +1571,7 @@ class UvirUsbSensorManager(
         if (desiredStreaming && !offlineSyncRequested) {
             offlineSyncRequested = true
             offlineSyncCompleted = false
+            mutableState.value = mutableState.value.copy(offlineSyncComplete = false)
             offlineSyncLastProgressAtMs =
                 SystemClock.elapsedRealtime()
             writeCommand("APP_CONNECT")
@@ -1687,6 +1697,20 @@ class UvirUsbSensorManager(
         }
     }
 
+    /** Validate the live USB connection before downloading a firmware image. */
+    internal fun requireFirmwareUpdateReady(expectedUid: String, release: UvirFirmwareRelease): UvirSensorRuntimeInfo =
+        executor.submit<UvirSensorRuntimeInfo> {
+            synchronized(connectionLock) {
+                check(!firmwareUpdateLease && protocolAccepted && offlineSyncCompleted) { "USB sensor not ready" }
+                val current = mutableState.value
+                check(uvirFirmwareUpdateReady(current, expectedUid, release)) { "Sensor update prerequisites not met" }
+                check(serialPort != null && usbManager.deviceList.values.any { it.deviceId == currentDeviceId }) {
+                    "USB sensor missing"
+                }
+                current.runtimeInfo
+            }
+        }.get(5, TimeUnit.SECONDS)
+
     /** Exclusive, bounded ownership transfer: the normal reader cannot consume ROM packets. */
     internal fun withFirmwarePort(expectedUid: String, update: (UsbSerialPort, UvirSensorRuntimeInfo) -> Unit) {
         try { executor.submit {
@@ -1694,7 +1718,9 @@ class UvirUsbSensorManager(
                 check(!firmwareUpdateLease && protocolAccepted) { "USB sensor not ready" }
                 val info = mutableState.value.runtimeInfo
                 check(info.deviceId.equals(expectedUid, true) && info.operationActive == false) { "Sensor identity or idle state not confirmed" }
-                check(offlineSyncCompleted && (info.offlineAcquisitions ?: -1) == 0 && (info.offlineAlerts ?: -1) == 0) { "Synchronize sensor records before updating" }
+                check(mutableState.value.appConnectionConfirmed && mutableState.value.offlineSyncComplete &&
+                    offlineSyncCompleted && info.offlineAcquisitions == 0 && info.offlineAlerts == 0 &&
+                    info.offlineErrors == 0) { "Synchronize sensor records before updating" }
                 val device = usbManager.deviceList.values.firstOrNull { it.deviceId == currentDeviceId }
                     ?: error("USB sensor missing")
                 firmwareUpdateLease = true
@@ -1781,6 +1807,7 @@ class UvirUsbSensorManager(
     private fun resetOfflineSyncState() {
         offlineSyncRequested = false
         offlineSyncCompleted = false
+        mutableState.value = mutableState.value.copy(offlineSyncComplete = false)
         offlineSyncLastProgressAtMs = 0L
     }
 

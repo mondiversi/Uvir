@@ -10,9 +10,11 @@
     <string name="update_download">Transferência e verificação…</string>
     <string name="update_flash">A atualizar sensor…</string>
     <string name="update_verify">A verificar sensor…</string>
-    <string name="update_keep_connected">Não desligue o USB nem o sensor. Se necessário, mantenha BOOT premido e tente novamente.</string>
+    <string name="update_app_verify">A verificar a app…</string>
+    <string name="update_app_failed">A atualização da app falhou. Consulte o registo de erros e tente novamente.</string>
+    <string name="update_keep_connected">Não desligue o USB nem o sensor.</string>
     <string name="update_done">Sensor atualizado</string>
     <string name="update_failed">Atualização falhou. Consulte o registo de erros. Se o sensor não arrancar, recupere o firmware por USB num computador.</string>
     <string name="update_permission">Permita que Uvir instale atualizações nas definições Android.</string>
-    <string name="update_whats_new">Exportações CSV, TXT e PNG com modelos dos sensores, referências espectrais compactas e legendas de gráficos mais legíveis.</string>
+    <string name="update_whats_new">As exportações TXT e CSV das aquisições incluem percentagens totais e por grupo, com cores PNG coerentes e confirmação de importação por pressão de cinco segundos.</string>
 </resources>

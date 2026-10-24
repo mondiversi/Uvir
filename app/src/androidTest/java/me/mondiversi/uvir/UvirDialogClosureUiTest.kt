@@ -25,6 +25,7 @@ class UvirDialogClosureUiTest {
     private var closures = 0
     private var operations = 0
     private var expectedPurple = Color.Unspecified
+    private var expectedRed = Color.Unspecified
 
     private fun fixture() {
         compose.setContent {
@@ -34,7 +35,8 @@ class UvirDialogClosureUiTest {
             CompositionLocalProvider(LocalConfiguration provides configuration) {
                 MaterialTheme(colorScheme = if (dark.value) darkColorScheme() else lightColorScheme()) {
                     val colors = MaterialTheme.colorScheme
-                    SideEffect { expectedPurple = colors.primary }
+                    val red = UvirDestructiveActionColor
+                    SideEffect { expectedPurple = colors.primary; expectedRed = red }
                     val dismiss = { closures++; open.value = false }
                     if (open.value) when (page.intValue) {
                         0 -> UvirStatusLedInfoDialog(colors.onSurface, colors.onSurfaceVariant,
@@ -59,7 +61,7 @@ class UvirDialogClosureUiTest {
                             primaryText = colors.onSurface, secondaryText = colors.onSurfaceVariant,
                             containerColor = colors.surface, onSensorSelected = { operations++ },
                             simulationActive = simulation.value,
-                            onOpenSimulationSettings = { operations++; open.value = false })
+                            onDisableSimulation = { operations++; simulation.value = false })
                     }
                 }
             }
@@ -93,7 +95,7 @@ class UvirDialogClosureUiTest {
         }
     }
 
-    @Test fun onlyMockSensorSelectionHasPurpleCloseBeforeSettingsWithoutChangingSimulation() {
+    @Test fun onlyMockSensorSelectionHasPurpleCloseBeforeRedDisableWithoutChangingSimulation() {
         page.intValue = 7
         fixture()
         for (night in listOf(false, true)) for (simulated in listOf(false, true)) {
@@ -102,10 +104,12 @@ class UvirDialogClosureUiTest {
                 val close = compose.onNodeWithTag("home_sensor_simulation_close")
                 close.assertIsDisplayed().assertIsEnabled()
                 compose.onNodeWithText(context.getString(R.string.close)).assertUvirActionTextColor(expectedPurple)
-                val settings = compose.onNodeWithTag("home_sensor_simulation_settings")
-                settings.assertIsDisplayed().assertTextEquals(formatUvirActionLabel(
-                    context.getString(R.string.acquisition_parameters), context.resources.configuration.locales[0]))
-                assertTrue(close.getUnclippedBoundsInRoot().left < settings.getUnclippedBoundsInRoot().left)
+                val disable = compose.onNodeWithTag("home_sensor_simulation_disable")
+                disable.assertIsDisplayed().assertTextEquals(formatUvirActionLabel(
+                    context.getString(R.string.sensor_simulation_disable), context.resources.configuration.locales[0]))
+                compose.onNodeWithText(formatUvirActionLabel(context.getString(R.string.sensor_simulation_disable),
+                    context.resources.configuration.locales[0])).assertUvirActionTextColor(expectedRed)
+                assertTrue(close.getUnclippedBoundsInRoot().left < disable.getUnclippedBoundsInRoot().left)
                 File(context.getExternalFilesDir(null), "sensor-mock-close-${if (night) "night" else "day"}.png")
                     .outputStream().use {
                         assertTrue(compose.onNode(isDialog()).captureToImage().asAndroidBitmap()
@@ -126,16 +130,20 @@ class UvirDialogClosureUiTest {
         }
     }
 
-    @Test fun mockSettingsActionStillOpensSettingsWithoutDisablingSimulation() {
+    @Test fun mockDisableActionKeepsTheNormalPickerOpenAndDoesNotDismissOrOpenSettings() {
         page.intValue = 7
         simulation.value = true
         fixture()
-        compose.onNodeWithTag("home_sensor_simulation_settings").performClick()
+        compose.onNodeWithTag("home_sensor_simulation_disable").performClick()
+        compose.onNodeWithTag("home_sensor_dialog").assertIsDisplayed()
+        compose.onNodeWithTag("home_sensor_add").assertIsDisplayed()
+        compose.onNodeWithTag("home_sensor_connection_footer").assertIsDisplayed()
+        compose.onNodeWithTag("home_sensor_simulation_warning").assertDoesNotExist()
         compose.runOnIdle {
             assertEquals(0, closures)
             assertEquals(1, operations)
-            assertFalse(open.value)
-            assertTrue(simulation.value)
+            assertTrue(open.value)
+            assertFalse(simulation.value)
         }
     }
 }

@@ -161,7 +161,7 @@ class UvirSettingsActionButtonStyleTest {
         compose.runOnIdle { assertEquals(2, clicks) }
     }
 
-    @Test fun dialogDoesNotInheritTheSettingsTrial() {
+    @Test fun dialogKeepsItsOwnTypographyButSharesTheTransparentOutlinedPalette() {
         var palette: ButtonColors? = null
         compose.setContent {
             KeepScreenOn()
@@ -182,7 +182,7 @@ class UvirSettingsActionButtonStyleTest {
         }
         assertWeight("Dialog button", FontWeight.Medium)
         assertWeight("Dialog action", FontWeight.Medium)
-        assertNotEquals(Color.Transparent, palette!!.containerColor)
+        assertEquals(Color.Transparent, palette!!.containerColor)
         assertNotEquals(Color.Transparent, palette!!.disabledContainerColor)
     }
 
@@ -200,6 +200,30 @@ class UvirSettingsActionButtonStyleTest {
             compose.onNodeWithText(label, useUnmergedTree = true).performScrollTo()
             assertWeight(label, FontWeight.SemiBold, fits = true)
         }
+    }
+
+    @Test fun normalActionsOutsideSettingsUseTheSameTextAndIconWeight() {
+        compose.setContent {
+            KeepScreenOn()
+            MaterialTheme {
+                Column(Modifier.width(280.dp)) {
+                    OutlinedButton({}, modifier = Modifier.fillMaxWidth()) {
+                        UvirLabeledButtonContent("Normal action") {
+                            assertEquals(1.25f, LocalUvirActionGlyphStrokeScale.current)
+                            AutomaticSettingIcon(AutomaticSettingIconType.CONFIGURE)
+                        }
+                    }
+                    OutlinedButton({}, modifier = Modifier.fillMaxWidth()) {
+                        UvirLabeledButtonContent("Destructive action", fontWeight = FontWeight.Bold) {
+                            assertEquals(1.25f, LocalUvirActionGlyphStrokeScale.current)
+                            UvirRestoreDefaultsIcon(tint = LocalContentColor.current)
+                        }
+                    }
+                }
+            }
+        }
+        assertWeight("Normal action", FontWeight.SemiBold, fits = true)
+        assertWeight("Destructive action", FontWeight.SemiBold, fits = true)
     }
 
     private fun assertWeight(label: String, weight: FontWeight, fits: Boolean = false) {

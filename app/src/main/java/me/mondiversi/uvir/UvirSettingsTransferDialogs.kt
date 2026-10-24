@@ -430,6 +430,7 @@ internal fun UvirSettingsPasswordDialog(
     cardColor: Color,
     primaryText: Color,
     secondaryText: Color,
+    passwordRequired: Boolean = true,
     busy: Boolean = false,
     errorMessage: String? = null,
     onInputChanged: () -> Unit = {},
@@ -443,9 +444,9 @@ internal fun UvirSettingsPasswordDialog(
     var confirmationVisible by remember { mutableStateOf(false) }
     var validationAttempted by remember { mutableStateOf(false) }
     val passwordTooShort =
-        validationAttempted && password.length < UVIR_SETTINGS_MINIMUM_PASSWORD_LENGTH
+        passwordRequired && validationAttempted && password.length < UVIR_SETTINGS_MINIMUM_PASSWORD_LENGTH
     val passwordsDoNotMatch =
-        validationAttempted && confirmationRequired && password != confirmation
+        passwordRequired && validationAttempted && confirmationRequired && password != confirmation
     val validationMessage =
         when {
             passwordTooShort ->
@@ -462,10 +463,10 @@ internal fun UvirSettingsPasswordDialog(
         if (busy) return
         validationAttempted = true
         if (
-            password.length >= UVIR_SETTINGS_MINIMUM_PASSWORD_LENGTH &&
-            (!confirmationRequired || password == confirmation)
+            !passwordRequired || (password.length >= UVIR_SETTINGS_MINIMUM_PASSWORD_LENGTH &&
+            (!confirmationRequired || password == confirmation))
         ) {
-            onConfirm(password.toCharArray())
+            onConfirm(if (passwordRequired) password.toCharArray() else charArrayOf())
         }
     }
 
@@ -483,7 +484,7 @@ internal fun UvirSettingsPasswordDialog(
                     fontSize = 12.sp,
                     lineHeight = 16.sp
                 )
-                UvirSettingsPasswordField(
+                if (passwordRequired) UvirSettingsPasswordField(
                     value = password,
                     onValueChange = {
                         password = it
@@ -496,7 +497,7 @@ internal fun UvirSettingsPasswordDialog(
                     primaryText = primaryText,
                     isError = validationMessage != null
                 )
-                if (confirmationRequired) {
+                if (passwordRequired && confirmationRequired) {
                     UvirSettingsPasswordField(
                         value = confirmation,
                         onValueChange = {
@@ -521,6 +522,7 @@ internal fun UvirSettingsPasswordDialog(
                         lineHeight = 14.sp
                     )
                 }
+                UvirHoldConfirmationInstruction(uvirActionLabel(confirmLabel), UvirImportHoldSeconds)
             }
         },
         confirmButton = {
@@ -529,9 +531,8 @@ internal fun UvirSettingsPasswordDialog(
                 horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.End),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                TextButton(onClick = ::submit, enabled = !busy) {
-                    Text(uvirActionLabel(confirmLabel))
-                }
+                UvirHoldToImportButton(label = uvirActionLabel(confirmLabel), enabled = !busy,
+                    modifier = Modifier.testTag("encrypted_import_confirm"), onConfirmed = ::submit)
                 TextButton(
                     onClick = onDismiss,
                     enabled = !busy,

@@ -16,23 +16,6 @@ internal fun readableMeasurementSpectralAreaBody(
     val locale = context.resources.configuration.locales[0]
     val orderedRecords = records.sortedBy { it.timestamp }
 
-    fun readableValue(
-        record: SavedRecordDetail,
-        value: Double,
-        group: SensorGroup
-    ): String =
-        if (record.sample.isOutOfRange(group)) {
-            context.getString(R.string.out_of_range_short)
-        } else {
-            "${formatUvirIrradianceExportNumber(value, numericFormat, irradianceUnit, irradianceDecimals)} " +
-                irradianceUnit.symbol
-        }
-
-    fun readablePercentage(record: SavedRecordDetail, value: Double): String =
-        record.sample.spectralTotals().shareOfTotal(value)?.let { share ->
-            formatUvirExportPercentage(share.toDouble() * 100.0, numericFormat, irradianceDecimals) + "%"
-        } ?: "—"
-
     fun appendAcquisitionHeading(record: SavedRecordDetail) {
         appendLine(
             "${context.getString(R.string.share_measurement_id_label)}: ${record.id} · " +
@@ -44,24 +27,14 @@ internal fun readableMeasurementSpectralAreaBody(
         title: String,
         group: SensorGroup,
         totalLabel: String,
-        total: (SavedRecordDetail) -> Double,
         components: (SavedRecordDetail) -> List<Pair<String, Double>>
     ) {
         appendLine(title.uppercase(locale))
         appendLine()
         orderedRecords.forEachIndexed { index, record ->
             appendAcquisitionHeading(record)
-            val totalValue = total(record)
-            val share = record.sample.spectralTotals().share(group)?.let { value ->
-                formatUvirExportPercentage(value.toDouble() * 100.0, numericFormat, irradianceDecimals) + "%"
-            } ?: "—"
-            appendLine("$totalLabel: ${readableValue(record, totalValue, group)} · $share")
-            components(record).forEach { (name, value) ->
-                appendLine(
-                    "$name: ${readableValue(record, value, group)} · " +
-                        readablePercentage(record, value)
-                )
-            }
+            append(readableIrradianceExportTable(context, record.sample, group, totalLabel,
+                components(record), numericFormat, irradianceUnit, irradianceDecimals))
             if (index < orderedRecords.lastIndex) {
                 appendLine()
                 appendLine("────────────────────")
@@ -123,7 +96,6 @@ internal fun readableMeasurementSpectralAreaBody(
         title = context.getString(R.string.threshold_channel_uv_total),
         group = SensorGroup.UV,
         totalLabel = context.getString(R.string.threshold_channel_uv_total),
-        total = { it.sample.uvc + it.sample.uvb + it.sample.uva },
         components = {
             listOf(
                 sensorChannelLabel("UVC", null, "UVC") to it.sample.uvc,
@@ -140,10 +112,6 @@ internal fun readableMeasurementSpectralAreaBody(
         title = context.getString(R.string.threshold_channel_visible_total),
         group = SensorGroup.VISIBLE,
         totalLabel = context.getString(R.string.threshold_channel_visible_total),
-        total = {
-            it.sample.violetto + it.sample.blu + it.sample.verde +
-                it.sample.giallo + it.sample.arancione + it.sample.rosso
-        },
         components = {
             listOf(
                 sensorChannelLabel("HEV", null, "HEV") to (it.sample.violetto + it.sample.blu),
@@ -164,7 +132,6 @@ internal fun readableMeasurementSpectralAreaBody(
         title = context.getString(R.string.threshold_channel_nir_total),
         group = SensorGroup.NIR,
         totalLabel = context.getString(R.string.threshold_channel_nir_total),
-        total = { it.sample.f8 + it.sample.nir },
         components = {
             listOf(
                 context.resources.sensorChannelLabel(R.string.session_chart_series_far_red) to it.sample.f8,

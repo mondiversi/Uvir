@@ -24,6 +24,7 @@ internal enum class UvirExportFileFormat(
     DATABASE("DB", "db", "application/vnd.sqlite3"),
     ZIP("ZIP", "zip", "application/zip"),
     SETTINGS("UVIRSETTINGS", "uvirsettings", "application/json"),
+    RECORDS("UVIRRECORDS", "uvirrecords", "application/json"),
     JSON("JSON", "json", "application/json"),
     LOG("LOG", "log", "text/plain"),
     SQLITE("SQLITE", "sqlite", "application/vnd.sqlite3"),

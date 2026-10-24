@@ -1,0 +1,4 @@
+<resources>
+    <string name="main_island_move_up">%1$s 위로 이동</string>
+    <string name="main_island_move_down">%1$s 아래로 이동</string>
+</resources>

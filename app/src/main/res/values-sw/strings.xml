@@ -176,7 +176,7 @@
     <string name="sensor_source_title">Chanzo cha sensorer</string>
     <string name="sensor_source_accessibility">Chanzo cha Sensor: %1$s</string>
     <string name="sensor_source_debug_accessibility">Ubatilishaji wa data ya kejeli umewashwa</string>
-    <string name="sensor_source_debug_hint">Data za kuiga zimewashwa: ili kuchagua kihisi, zizime katika Mipangilio → Kihisi → Uchunguzi.</string>
+    <string name="sensor_source_debug_hint">Data za kuiga zimewashwa. Zizime ili kuchagua kihisi.</string>
     <string name="sensor_source_disabled_hint">Chanzo kilichozimwa kinaweza kuwezeshwa tena kupitia muunganisho mwingine unaotumika wa pasiwaya. Ikiwa zote mbili zimezimwa, unganisha kitambuzi kwa USB.</string>
     <string name="sensor_power_off">ZIMA SENSOR</string>
     <string name="sensor_power_off_title">Ungependa kuzima kitambuzi?</string>
@@ -452,11 +452,11 @@
     <string name="app_version">Toleo la programu: %1$s</string>
     <string name="package_name_value">Kifurushi: %1$s</string>
     <string name="about_whats_new_title">Nini kipya katika toleo %1$s</string>
-    <string name="about_whats_new_connectivity">Vigezo vya kusahihisha na offseti kwa kila chaneli, pamoja na kipimo kinachoongozwa cha offseti wastani na uthibitisho wa kuweka upya.</string>
-    <string name="about_whats_new_connections">Fidia ya dirisha la macho kwa kizidishi cha jumla na vizidishi vya chaneli; masafa ya AS7331 na vilele vya unyeti wa AS7343 vilivyo wazi zaidi.</string>
-    <string name="about_whats_new_measurements">Hifadhi ya ndani ya iradiansi katika W/m², pamoja na uhamishaji wa kiotomatiki unaohifadhi vipimo na mipangilio iliyopo.</string>
-    <string name="about_whats_new_interface">Nafasi za desimali zinazoweza kuchaguliwa kwa thamani za moja kwa moja, data iliyohifadhiwa na uhamishaji maalumu; uhamishaji wa kisayansi huhifadhi usahihi wote uliohifadhiwa.</string>
-    <string name="about_whats_new_github">Menyu ya mipangilio na visanduku vya mazungumzo vimeboreshwa; miongozo ya nyaya, uunganishaji na kalibresheni imesasishwa, ikijumuisha mirija elekezi na mahitaji ya kisambazaji cha mwanga.</string>
+    <string name="about_whats_new_connectivity">Hamisha/leta vipimo na tahadhari kama faili za .uvirrecords zisizo na nenosiri, pamoja na vipindi, madokezo na vibadala.</string>
+    <string name="about_whats_new_connections">Ulinganishaji wa kitambulisho cha maunzi, vitambulisho vipya vya ndani na utambuzi wa marudio huhifadhi chanzo cha data iliyoingizwa.</string>
+    <string name="about_whats_new_measurements">Mwonekano mkuu hukumbuka mpangilio wa kadi na bendi zilizofichwa; vipimo vilivyohifadhiwa vina vidhibiti vya muda na asilimia za jumla au kikundi.</string>
+    <string name="about_whats_new_interface">Rangi za spektra zinazolingana, majina ya kawaida yenye nukta za rangi kwenye data iliyohifadhiwa, safu wazi za vipindi na uhamishaji wa kadi wenye uhuishaji.</string>
+    <string name="about_whats_new_github">Vidirisha, vitendo vya mchana/usiku na arifa za data ya kuiga zimeboreshwa, pamoja na ukaguzi wa utayari na urejeshaji wa masasisho ya USB.</string>
     <string name="about_description">Programu ya vipimo vya wigo wa mionzi ya urujuanimno, mwanga unaoonekana na mionzi ya infraredi.</string>
     <string name="about_spectral_ranges">Bendi za wigo: Urujuanimno • Mwanga unaoonekana • Mionzi ya infraredi</string>
     <string name="about_sensors">Vihisi vinavyotumika: AS7331 UV • AS7343 yenye spectra nyingi</string>
@@ -803,5 +803,6 @@
     <string name="alert_max_registrations">Idadi ya juu ya rekodi</string>
     <string name="alert_registration_count">Idadi ya rekodi</string>
     <string name="alert_configure_first">Sanidi angalau thamani moja kabla ya kuanza.</string>
-    <string name="sensor_simulation_open_settings">Mipangilio</string>
+    <string name="sensor_simulation_disable">Zima</string>
+    <string name="settings_import_confirmation_description">Mipangilio katika faili zilizochaguliwa itachukua nafasi ya mipangilio ya sasa.</string>
 </resources>

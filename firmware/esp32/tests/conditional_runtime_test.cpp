@@ -32,8 +32,9 @@ void matchingActionMatrix() {
         Job current = job(command);
         Sample sample;
         const bool first = (pattern & 1) != 0, second = (pattern & 2) != 0;
-        sample.values[0] = first ? 1.0f : 4.0f;
-        sample.values[2] = second ? 4.0f : 1.0f;
+        // Commands retain v1 µW/cm² units; samples are stored internally in W/m².
+        sample.values[0] = first ? 0.01f : 0.04f;
+        sample.values[2] = second ? 0.04f : 0.01f;
         const bool met = match == 0 ? first || second :
             match == 1 ? first && second : !first && !second;
         uvirObserveConditionSample(current, sample, 1000, true, true, false);
@@ -59,7 +60,7 @@ void matchingActionMatrix() {
       snprintf(command, sizeof(command), "%s %s 0 2 UVC BELOW 3 UVA ABOVE 3",
           actions[action], matches[match]);
       Job equal = job(command); Sample boundary;
-      boundary.values[0] = boundary.values[2] = 3.0f;
+      boundary.values[0] = boundary.values[2] = 0.03f;
       uvirObserveConditionSample(equal, boundary, 1000, true, true, false);
       assert(equal.conditionTriggered == (match != 2 && action != 1));
       assert(equal.conditionStopPending == (match != 2 && action == 1));
@@ -71,7 +72,7 @@ void matchingActionMatrix() {
 void priorityAndAvailabilityGuards() {
   for (const char *action : {"START", "STOP", "ACQUIRE"}) {
     char command[80]; snprintf(command, sizeof(command), "%s ANY 0 1 UVA BELOW 3", action);
-    Sample sample; sample.values[2] = 2.0f;
+    Sample sample; sample.values[2] = 0.02f;
     Job current = job(command); current.enabled = false;
     uvirObserveConditionSample(current, sample, 1000, true, true, false);
     assert(!current.conditionTriggered && !current.conditionStopPending);
@@ -96,7 +97,7 @@ void priorityAndAvailabilityGuards() {
 int main() {
   matchingActionMatrix();
   priorityAndAvailabilityGuards();
-  Sample low; low.values[2]=2; Sample high; high.values[2]=4;
+  Sample low; low.values[2]=0.02f; Sample high; high.values[2]=0.04f;
   Job start=job("START ANY 0 1 UVA BELOW 3");
   uvirObserveConditionSample(start,low,999,true,true,false);
   assert(!start.conditionTriggered && start.startedAtMs==0);
@@ -105,9 +106,9 @@ int main() {
   uvirObserveConditionSample(start,low,2500,true,true,false);
   assert(start.conditionTriggered && start.conditionStarted && start.conditionStartSignalPending);
   assert(start.startedAtMs==2500 && start.nextAtMs==2500 && start.endAtMs==32500);
-  assert(start.conditionTriggerSample.values[2]==2);
+  assert(start.conditionTriggerSample.values[2]==0.02f);
   uvirObserveConditionSample(start,high,2650,true,true,false);
-  assert(start.conditionTriggerSample.values[2]==2); // first matching sample remains latched
+  assert(start.conditionTriggerSample.values[2]==0.02f); // first matching sample remains latched
   uvirConditionAfterRecord(start,3100,2500,5000);
   assert(!start.conditionTriggered && start.nextAtMs==7500);
   uvirObserveConditionSample(start,high,3200,true,true,false);
@@ -124,7 +125,7 @@ int main() {
   uvirObserveConditionSample(acquire,high,1000,true,true,false);
   assert(!acquire.conditionTriggered && acquire.nextAtMs==1000);
   uvirObserveConditionSample(acquire,low,1150,true,true,false);
-  assert(acquire.conditionTriggered && acquire.conditionTriggerSample.values[2]==2);
+  assert(acquire.conditionTriggered && acquire.conditionTriggerSample.values[2]==0.02f);
   uvirConditionAfterRecord(acquire,1750,1150,5000);
   assert(acquire.nextAtMs==6750 && acquire.conditionNextCheckAtMs==6750);
   uvirObserveConditionSample(acquire,low,6749,true,true,false);

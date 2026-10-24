@@ -206,14 +206,15 @@ fun RecordDetailScreen(
     }
 
     var showChart
-            by rememberSaveable(record.id) {
+            by remember(record.id) {
                 mutableStateOf(false)
             }
 
     var viewMode
-            by rememberSaveable(record.id) {
+            by remember(record.id) {
                 mutableStateOf(ViewMode.IRRADIANCE)
             }
+    var valueDisplay by rememberUvirSavedValueDisplay("acquisition:${record.id}")
 
     val deleteDescription =
         stringResource(
@@ -230,7 +231,7 @@ fun RecordDetailScreen(
             R.string.share_error
         )
 
-    val expandedStates = remember {
+    val expandedStates = remember(record.id) {
         mutableStateMapOf(
             SessionChartGroup.UV to true,
             SessionChartGroup.VISIBLE to true,
@@ -255,11 +256,8 @@ fun RecordDetailScreen(
         }
 
     val chartBars =
-        remember(measurement, selectedChartGroup) {
-            acquisitionChartBars(
-                sample = measurement,
-                group = selectedChartGroup
-            )
+        remember(measurement, selectedChartGroup, valueDisplay) {
+            savedAcquisitionChartBars(measurement, selectedChartGroup, valueDisplay)
         }
 
     val singleRecord =
@@ -584,7 +582,10 @@ fun RecordDetailScreen(
                         group = selectedChartGroup,
                         cardColor = cardColor,
                         primaryText = primaryText,
-                        secondaryText = secondaryText
+                        secondaryText = secondaryText,
+                        mutedGroups = UvirLiveSpectrumDisplay.irradianceGroups.filterNot {
+                            valueDisplay.spectrum.groupVisible(it)
+                        }.toSet()
                     )
                 }
 
@@ -614,7 +615,9 @@ fun RecordDetailScreen(
                         },
                         cardColor = cardColor,
                         primaryText = primaryText,
-                        secondaryText = secondaryText
+                        secondaryText = secondaryText,
+                        display = valueDisplay,
+                        onDisplayChange = { valueDisplay = it }
                     )
                 }
             }

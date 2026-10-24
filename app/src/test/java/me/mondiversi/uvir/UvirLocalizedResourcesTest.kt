@@ -104,6 +104,21 @@ class UvirLocalizedResourcesTest {
         }
     }
 
+    @Test fun appUpdatesNeverReuseFirmwareRecoveryOrVerificationWording() {
+        assertEquals(20, catalogs.size)
+        for ((locale, catalog) in catalogs) {
+            val appVerify = catalog.getValue("string:update_app_verify").text
+            val appFailure = catalog.getValue("string:update_app_failed").text
+            assertNotEquals(locale, appVerify, catalog.getValue("string:update_verify").text)
+            assertNotEquals(locale, appFailure, catalog.getValue("string:update_failed").text)
+            for (term in listOf("USB", "BOOT")) {
+                assertFalse(locale, appVerify.contains(term, ignoreCase = true))
+                assertFalse(locale, appFailure.contains(term, ignoreCase = true))
+            }
+            assertFalse(locale, catalog.getValue("string:update_keep_connected").text.contains("BOOT"))
+        }
+    }
+
     @Test fun removedProjectNumbersLeaveNoUnusedTranslations() {
         for ((locale, catalog) in catalogs) {
             assertTrue("Obsolete project counters: $locale",
@@ -269,30 +284,30 @@ class UvirLocalizedResourcesTest {
         }
     }
 
-    @Test fun mockSensorSelectionHintExplainsSelectionBeforeTheSettingsPath() {
+    @Test fun mockSensorSelectionHintExplainsDirectDisablingWithoutASettingsPath() {
         assertEquals(
-            "Dati fittizi attivi: per selezionare un sensore, disattivali in Impostazioni → Sensore → Diagnostica.",
+            "Dati fittizi attivi. Per selezionare un sensore disattivali.",
             catalogs.getValue("values-it").getValue("string:sensor_source_debug_hint").text
         )
         assertEquals(
-            "Mock data is active: to select a sensor, disable it in Settings → Sensor → Diagnostics.",
+            "Mock data is active. To select a sensor, disable it.",
             catalogs.getValue("values").getValue("string:sensor_source_debug_hint").text
         )
         for ((locale, catalog) in catalogs) {
             val text = catalog.getValue("string:sensor_source_debug_hint").text
-            assertTrue("Missing explanation separator: $locale", text.contains(':') || text.contains('：'))
-            assertEquals("Settings path: $locale", 2, text.count { it == '→' })
+            assertTrue("Missing explanation: $locale", text.isNotBlank())
+            assertFalse("Obsolete settings path: $locale", text.contains('→'))
         }
     }
 
-    @Test fun mockSettingsShortcutUsesTheSettingsLabelInEveryLanguage() {
-        assertEquals("Impostazioni",
-            catalogs.getValue("values-it").getValue("string:sensor_simulation_open_settings").text)
-        assertEquals("Settings",
-            catalogs.getValue("values").getValue("string:sensor_simulation_open_settings").text)
+    @Test fun mockSensorSelectionHasADirectDisableActionInEveryLanguage() {
+        assertEquals("Disattiva",
+            catalogs.getValue("values-it").getValue("string:sensor_simulation_disable").text)
+        assertEquals("Disable",
+            catalogs.getValue("values").getValue("string:sensor_simulation_disable").text)
         for ((locale, catalog) in catalogs) {
-            assertEquals(locale, catalog.getValue("string:acquisition_parameters").text,
-                catalog.getValue("string:sensor_simulation_open_settings").text)
+            assertTrue(locale, catalog.getValue("string:sensor_simulation_disable").text.isNotBlank())
+            assertFalse(locale, catalog.containsKey("string:sensor_simulation_open_settings"))
         }
     }
 

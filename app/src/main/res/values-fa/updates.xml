@@ -10,9 +10,11 @@
     <string name="update_download">دانلود و بررسی…</string>
     <string name="update_flash">به‌روزرسانی حسگر…</string>
     <string name="update_verify">بررسی حسگر…</string>
-    <string name="update_keep_connected">USB را جدا نکنید و حسگر را خاموش نکنید. در صورت نیاز BOOT را نگه دارید و دوباره تلاش کنید.</string>
+    <string name="update_app_verify">در حال بررسی برنامه…</string>
+    <string name="update_app_failed">به‌روزرسانی برنامه ناموفق بود. گزارش خطا را بررسی کنید و دوباره تلاش کنید.</string>
+    <string name="update_keep_connected">اتصال USB را قطع نکنید و حسگر را خاموش نکنید.</string>
     <string name="update_done">حسگر به‌روز شد</string>
     <string name="update_failed">به‌روزرسانی ناموفق بود. گزارش خطا را ببینید. اگر حسگر راه‌اندازی نشد، میان‌افزار را با USB از رایانه بازیابی کنید.</string>
     <string name="update_permission">در تنظیمات Android به Uvir اجازه نصب به‌روزرسانی بدهید.</string>
-    <string name="update_whats_new">خروجی CSV، TXT و PNG با مدل حسگرها، ارجاعات طیفی فشرده و راهنماهای خواناتر نمودار.</string>
+    <string name="update_whats_new">خروجی TXT و CSV اندازه‌گیری‌ها شامل درصد کل و گروه است؛ رنگ‌های PNG هماهنگ‌اند و ورود با نگه‌داشتن دکمه به مدت پنج ثانیه تأیید می‌شود.</string>
 </resources>

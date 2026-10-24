@@ -85,7 +85,8 @@ class UvirMeasurementPanelsTest {
         val visible = compose.onNodeWithTag("VISIBLE").getUnclippedBoundsInRoot()
         assertEquals(uv.left.value, ir.left.value, 0.1f)
         assertEquals(uv.top.value, visible.top.value, 0.1f)
-        assertEquals(UvirIslandSpacing.value, ir.top.value - uv.bottom.value, 0.1f)
+        val expectedGap = with(compose.density) { UvirIslandSpacing.roundToPx().toDp().value }
+        assertEquals(expectedGap, ir.top.value - uv.bottom.value, 0.01f)
         assertTrue(visible.left > uv.right)
     }
 

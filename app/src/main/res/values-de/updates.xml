@@ -10,9 +10,11 @@
     <string name="update_download">Download und Prüfung…</string>
     <string name="update_flash">Sensor wird aktualisiert…</string>
     <string name="update_verify">Sensor wird geprüft…</string>
-    <string name="update_keep_connected">USB nicht trennen und Sensor nicht ausschalten. Bei Bedarf BOOT gedrückt halten und erneut versuchen.</string>
+    <string name="update_app_verify">App wird überprüft…</string>
+    <string name="update_app_failed">App-Aktualisierung fehlgeschlagen. Sieh im Fehlerprotokoll nach und versuche es erneut.</string>
+    <string name="update_keep_connected">USB nicht trennen und den Sensor nicht ausschalten.</string>
     <string name="update_done">Sensor aktualisiert</string>
     <string name="update_failed">Update fehlgeschlagen. Siehe Fehlerprotokoll. Startet der Sensor nicht mehr, Firmware per USB am Computer wiederherstellen.</string>
     <string name="update_permission">Uvir in den Android-Einstellungen die Installation von Updates erlauben.</string>
-    <string name="update_whats_new">CSV-, TXT- und PNG-Exporte mit Sensormodellen, kompakten Spektralangaben und besser lesbaren Diagrammlegenden.</string>
+    <string name="update_whats_new">TXT- und CSV-Erfassungsexporte enthalten Gesamt-/Gruppenanteile; einheitliche PNG-Farben und Importbestätigung durch fünf Sekunden langes Drücken.</string>
 </resources>

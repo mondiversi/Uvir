@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_percent_total" formatted="false">% συνόλου</string>
+    <string name="live_percent_group" formatted="false">% ομάδας</string>
+    <string name="live_channel_hide">Απόκρυψη του %1$s από τη ζωντανή προβολή</string>
+    <string name="live_channel_show">Εμφάνιση του %1$s στη ζωντανή προβολή</string>
+</resources>

@@ -100,8 +100,14 @@ internal fun buildUvirConnectionNotification(
     resources: Resources,
     sensors: List<UvirConnectionSensorState>,
     profiles: List<UvirSensorProfile>,
-    selectedDeviceId: String
+    selectedDeviceId: String,
+    simulationActive: Boolean = false
 ): UvirConnectionNotification {
+    // The simulated source has no hardware ID and must not inherit a real sensor's status.
+    if (simulationActive) {
+        val text = "${UvirStatusDot.DEBUG.glyph} ${resources.getString(R.string.sensor_status_simulated)}"
+        return UvirConnectionNotification(text, listOf(text), UvirStatusDot.DEBUG.colorArgb)
+    }
     val states = uvirConnectionNotificationSensors(sensors, null)
     if (states.isEmpty()) return UvirConnectionNotification(resources.getString(R.string.sensor_status_no_sensor))
     val selectedId = normalizeSensorDeviceId(selectedDeviceId)

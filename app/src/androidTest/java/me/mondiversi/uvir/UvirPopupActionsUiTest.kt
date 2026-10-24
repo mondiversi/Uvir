@@ -104,7 +104,7 @@ class UvirPopupActionsUiTest {
     @Test fun importConfirmationIsUppercaseWithoutChangingTheTitle() {
         page.value = 4
         fixture()
-        compose.onNodeWithText("IMPORTA").assertIsDisplayed()
+        compose.onNodeWithText("IMPORTA", useUnmergedTree = true).assertIsDisplayed()
         compose.onNodeWithText("Import").assertIsDisplayed()
         compose.onNodeWithText(resources.getString(R.string.cancel)).performClick()
         assertEquals(0, exports)

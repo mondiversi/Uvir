@@ -1,0 +1,4 @@
+<resources>
+    <string name="main_island_move_up">הזזת %1$s למעלה</string>
+    <string name="main_island_move_down">הזזת %1$s למטה</string>
+</resources>

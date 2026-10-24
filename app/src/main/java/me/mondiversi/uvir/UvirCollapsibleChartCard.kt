@@ -16,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -35,6 +36,8 @@ internal fun UvirCollapsibleChartCard(
     primaryText: Color,
     secondaryText: Color,
     titleFontWeight: FontWeight = FontWeight.SemiBold,
+    headerTrailing: (@Composable () -> Unit)? = null,
+    titleColor: Color = primaryText,
     content: @Composable ColumnScope.() -> Unit
 ) {
     val accessibilityState =
@@ -55,6 +58,7 @@ internal fun UvirCollapsibleChartCard(
                         .uvirAccessibleAction(
                             label = title,
                             stateText = accessibilityState,
+                            preserveChildActions = headerTrailing != null,
                             onClick = onToggle
                         )
                         .padding(UvirIslandContentPadding),
@@ -79,8 +83,9 @@ internal fun UvirCollapsibleChartCard(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             text = title,
-                            modifier = Modifier.weight(1f, fill = false),
-                            color = primaryText,
+                            modifier = Modifier.weight(1f, fill = false)
+                                .testTag("chart_group_title_${iconGroup?.name ?: iconViewMode?.name.orEmpty()}"),
+                            color = titleColor,
                             fontSize = 15.sp,
                             fontWeight = titleFontWeight,
                             maxLines = 1,
@@ -104,6 +109,7 @@ internal fun UvirCollapsibleChartCard(
                     }
                 }
 
+                headerTrailing?.invoke()
             }
 
             UvirVerticalReveal(expanded) {

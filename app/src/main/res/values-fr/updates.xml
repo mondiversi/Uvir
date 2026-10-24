@@ -10,9 +10,11 @@
     <string name="update_download">Téléchargement et vérification…</string>
     <string name="update_flash">Mise à jour du capteur…</string>
     <string name="update_verify">Vérification du capteur…</string>
-    <string name="update_keep_connected">Ne débranchez pas l’USB et n’éteignez pas le capteur. Si nécessaire, maintenez BOOT et réessayez.</string>
+    <string name="update_app_verify">Vérification de l’application…</string>
+    <string name="update_app_failed">Échec de la mise à jour de l’application. Consultez le journal des erreurs et réessayez.</string>
+    <string name="update_keep_connected">Ne débranchez pas le câble USB et n’éteignez pas le capteur.</string>
     <string name="update_done">Capteur mis à jour</string>
     <string name="update_failed">Échec de la mise à jour. Consultez le journal des erreurs. Si le capteur ne démarre plus, restaurez le firmware par USB depuis un ordinateur.</string>
     <string name="update_permission">Autorisez Uvir à installer des mises à jour dans les paramètres Android.</string>
-    <string name="update_whats_new">Exports CSV, TXT et PNG avec modèles des capteurs, références spectrales compactes et légendes des graphiques plus lisibles.</string>
+    <string name="update_whats_new">Les exports TXT et CSV des acquisitions incluent les pourcentages totaux et par groupe, avec des couleurs PNG cohérentes et une confirmation d’importation par appui de cinq secondes.</string>
 </resources>

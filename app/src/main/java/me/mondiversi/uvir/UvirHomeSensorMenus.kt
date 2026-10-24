@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
@@ -59,7 +60,7 @@ internal fun UvirHomeSensorSelectionDialog(
     bluetoothEnabled: Boolean = true,
     internetEnabled: Boolean = true,
     simulationActive: Boolean = false,
-    onOpenSimulationSettings: () -> Unit = {},
+    onDisableSimulation: () -> Unit = {},
     onAddSensor: () -> Unit = {}
 ) {
     if (!expanded) return
@@ -81,10 +82,11 @@ internal fun UvirHomeSensorSelectionDialog(
             confirmButton = if (simulationActive) {
                 {
                     TextButton(
-                        onClick = onOpenSimulationSettings,
-                        modifier = Modifier.testTag("home_sensor_simulation_settings")
+                        onClick = onDisableSimulation,
+                        colors = ButtonDefaults.textButtonColors(contentColor = UvirDestructiveActionColor),
+                        modifier = Modifier.testTag("home_sensor_simulation_disable")
                     ) {
-                        Text(uvirActionLabel(R.string.sensor_simulation_open_settings))
+                        Text(uvirActionLabel(R.string.sensor_simulation_disable))
                     }
                 }
             } else null,

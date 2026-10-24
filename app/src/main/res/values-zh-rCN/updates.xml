@@ -10,9 +10,11 @@
     <string name="update_download">正在下载并验证…</string>
     <string name="update_flash">正在更新传感器…</string>
     <string name="update_verify">正在验证传感器…</string>
-    <string name="update_keep_connected">请勿断开 USB 或关闭传感器。必要时按住 BOOT 并重试。</string>
+    <string name="update_app_verify">正在验证应用…</string>
+    <string name="update_app_failed">应用更新失败。请查看错误日志后重试。</string>
+    <string name="update_keep_connected">请勿断开 USB 或关闭传感器。</string>
     <string name="update_done">传感器已更新</string>
     <string name="update_failed">更新失败。请查看错误日志。如果传感器无法启动，请通过计算机 USB 恢复固件。</string>
     <string name="update_permission">请在 Android 设置中允许 Uvir 安装更新。</string>
-    <string name="update_whats_new">CSV、TXT 和 PNG 导出包含传感器型号、精简光谱参考信息及更清晰的图例。</string>
+    <string name="update_whats_new">采集的 TXT 和 CSV 导出包含总量和分组百分比，统一 PNG 颜色，导入需长按五秒确认。</string>
 </resources>

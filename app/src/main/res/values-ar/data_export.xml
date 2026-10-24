@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="export_percentages_total">النسب من الإجمالي</string>
+    <string name="export_percentages_group">النسب داخل المجموعة</string>
     <string name="data_export_files_heading">الملفات</string>
     <string name="export_saved_successfully">تم حفظ الملفات.</string>
     <string name="export_save_failed">تعذر حفظ الملفات.</string>

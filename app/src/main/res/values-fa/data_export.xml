@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="export_percentages_total">درصدها از کل</string>
+    <string name="export_percentages_group">درصدها درون گروه</string>
     <string name="data_export_files_heading">فایل‌ها</string>
     <string name="export_saved_successfully">فایل‌ها ذخیره شدند.</string>
     <string name="export_save_failed">ذخیره فایل‌ها ممکن نشد.</string>

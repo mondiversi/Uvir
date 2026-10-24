@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_percent_total" formatted="false">% toplam</string>
+    <string name="live_percent_group" formatted="false">% grup</string>
+    <string name="live_channel_hide">Canlı görünümde %1$s değerini gizle</string>
+    <string name="live_channel_show">Canlı görünümde %1$s değerini göster</string>
+</resources>

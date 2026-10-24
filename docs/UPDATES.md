@@ -19,6 +19,10 @@ display-name order, with current and available versions. Sensor versions are the
 last authenticated versions received from each sensor, not guesses. Unassociated
 or never-identified hardware is not silently adopted by the updater.
 
+Update actions are uppercase, purple text actions with no resting outline or
+fill, in both themes. App verification/failure messages never mention sensor
+recovery or keeping USB connected; that warning belongs only to firmware work.
+
 ## Authenticity and download
 
 The public index is `releases/latest/download/uvir-update.json`. It is an envelope
@@ -48,6 +52,14 @@ are checked again against signed release metadata before erase.
 Secure boot, encrypted flash, custom flash pin wiring and other ESP32 families
 are not supported by this updater.
 
+The firmware action remains disabled until the matching USB device is attached
+and authenticated, the sensor is idle, and a successful record synchronization
+has been processed with no queued acquisitions, alerts or errors remaining.
+App-version, firmware-version and hardware-layout prerequisites are checked by
+the same policy. Live USB presence is checked before the download, again after
+it, and before transferring ownership of the port for writing. A Wi-Fi,
+Bluetooth or Internet connection alone never enables firmware installation.
+
 Only the application at `0x10000`, up to `0x300000` bytes, is written. Bootloader,
 partition table, NVS settings, SPIFFS, FRAM and microSD are not rewritten. An
 independent foreground service and CPU wake lock protect the operation when the
@@ -73,9 +85,9 @@ publishing so the repository and the GitHub release stay consistent.
 2. Run all tests, build the signed release APK and compile the ESP32 huge_app image.
 3. Run `tools/ReleaseTool.java` with Java 17 or newer:
 
-   `java tools/ReleaseTool.java ROOT OUTPUT FIRMWARE_BUILD 1.4.0 5 0.5.112`
+   `java tools/ReleaseTool.java ROOT OUTPUT FIRMWARE_BUILD 1.4.1 6 0.5.112`
 
-4. Create a draft GitHub release tagged `v1.4.0`. Upload every generated asset:
+4. Create a draft GitHub release tagged `v1.4.1`. Upload every generated asset:
    APK, application BIN, USB archive, signed index and SHA256SUMS.
 5. Publish only after all uploads and validation succeed. The updater ignores
    drafts and prereleases through GitHub's latest-stable endpoint.

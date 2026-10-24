@@ -89,14 +89,14 @@ internal fun AlertSessionChartScreen(
             )
         }
     val expandedValueSections =
-        remember {
+        remember(sessionId) {
             mutableStateMapOf<ViewMode, Boolean>()
         }
     val expandedCombinedCharts =
-        remember {
+        remember(sessionId) {
             mutableStateMapOf<ViewMode, Boolean>()
         }
-    var viewMode by rememberSaveable(sessionId) {
+    var viewMode by remember(sessionId) {
         mutableStateOf(initialViewMode)
     }
     var showShareDialog by rememberSaveable {
@@ -117,7 +117,7 @@ internal fun AlertSessionChartScreen(
     LaunchedEffect(noteEditingEnabled) {
         if (!noteEditingEnabled) showNoteEditor = false
     }
-    var showChart by rememberSaveable(sessionId) {
+    var showChart by remember(sessionId) {
         mutableStateOf(false)
     }
     val visibleSeries =

@@ -20,11 +20,17 @@ import java.io.File
 import java.security.cert.CertificateFactory
 
 internal data class UvirSensorUpdate(val uid: String, val name: String, val current: String)
+internal enum class UvirUpdateOperation { APP, FIRMWARE }
+
+internal fun uvirUpdateFailureMessage(operation: UvirUpdateOperation): Int =
+    if (operation == UvirUpdateOperation.APP) R.string.update_app_failed else R.string.update_failed
+
 internal data class UvirUpdateState(
     val dialog: Boolean = false, val checking: Boolean = false, val busy: Boolean = false,
     val progress: Float? = null, val stage: Int = R.string.update_download,
     val catalog: UvirUpdateCatalog? = null, val sensors: List<UvirSensorUpdate> = emptyList(),
-    val message: Int? = null
+    val message: Int? = null,
+    val operation: UvirUpdateOperation? = null
 )
 
 /** Process-owned jobs survive navigation. Only explicit user actions install or flash. */
@@ -79,7 +85,7 @@ internal object UvirUpdates {
     fun appUpdate(context: Context, install: (File) -> Unit) {
         val catalog = mutableState.value.catalog ?: return
         if (mutableState.value.busy || catalog.app.code <= BuildConfig.VERSION_CODE) return
-        run(context, R.string.update_download, "update_app") {
+        run(context, R.string.update_download, "update_app", UvirUpdateOperation.APP) {
             require(Build.VERSION.SDK_INT >= catalog.app.minSdk) { "Android version not supported by release" }
             val file = UvirUpdateClient(context).download(catalog.app.asset, "apk") { progress(it) }
             verifyApk(context, file, catalog.app)
@@ -95,7 +101,7 @@ internal object UvirUpdates {
 
     fun continueInstall(context: Context, install: (File) -> Unit) {
         if (mutableState.value.busy) return
-        run(context, R.string.update_verify, "update_install") {
+        run(context, R.string.update_app_verify, "update_install", UvirUpdateOperation.APP) {
             val file = UvirUpdateClient(context).pendingInstaller()
             withContext(Dispatchers.Main) { install(file) }
         }
@@ -133,17 +139,14 @@ internal object UvirUpdates {
     fun firmware(context: Context, manager: UvirUsbSensorManager, target: UvirSensorUpdate) {
         val catalog = mutableState.value.catalog ?: return
         if (mutableState.value.busy || catalog.app.code > BuildConfig.VERSION_CODE) return
-        run(context, R.string.update_download, "firmware_update") {
+        run(context, R.string.update_download, "firmware_update", UvirUpdateOperation.FIRMWARE) {
             require(BuildConfig.VERSION_CODE >= catalog.sensor.minAppCode) { "Update app before sensor" }
+            manager.requireFirmwareUpdateReady(target.uid, catalog.sensor)
             val file = UvirUpdateClient(context).download(catalog.sensor.asset, "bin") { progress(it) }
             val image = file.readBytes()
             require(UvirUpdatePolicy.validFirmwareImage(image))
-            val initial = manager.state.value.runtimeInfo
-            require(initial.deviceId.equals(target.uid, true) &&
-                initial.boardName == "ESP32 Dev Module" && initial.chipModel.startsWith("ESP32-D0WD") &&
-                initial.appPartitionSizeBytes == UvirUpdatePolicy.APP_CAPACITY.toLong() &&
-                compareFirmwareVersions(initial.firmwareVersion, "0.5.102") >= 0 &&
-                compareFirmwareVersions(catalog.sensor.version, initial.firmwareVersion) > 0) { "Unsupported sensor identity, version or partition layout" }
+            // The device may have disconnected or started a job while downloading.
+            manager.requireFirmwareUpdateReady(target.uid, catalog.sensor)
             withContext(Dispatchers.Main) { UvirFirmwareUpdateService.start(context) }
             try {
                 mutableState.value = mutableState.value.copy(stage = R.string.update_flash, progress = 0f)
@@ -178,13 +181,15 @@ internal object UvirUpdates {
         }
     }
     private fun progress(value: Float) { mutableState.value = mutableState.value.copy(progress = value) }
-    private fun run(context: Context, stage: Int, source: String, block: suspend () -> Unit) {
-        mutableState.value = mutableState.value.copy(busy = true, stage = stage, progress = 0f, message = null)
+    private fun run(context: Context, stage: Int, source: String, operation: UvirUpdateOperation,
+        block: suspend () -> Unit) {
+        mutableState.value = mutableState.value.copy(busy = true, stage = stage, progress = 0f,
+            message = null, operation = operation)
         scope.launch {
             try { withContext(Dispatchers.IO) { block() } }
             catch (error: Exception) {
                 UvirErrorLog.record(context, source, error)
-                mutableState.value = mutableState.value.copy(message = R.string.update_failed)
+                mutableState.value = mutableState.value.copy(message = uvirUpdateFailureMessage(operation))
             } finally { mutableState.value = mutableState.value.copy(busy = false, progress = null) }
         }
     }

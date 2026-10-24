@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_percent_total" formatted="false">% 전체</string>
+    <string name="live_percent_group" formatted="false">% 그룹</string>
+    <string name="live_channel_hide">실시간 화면에서 %1$s 숨기기</string>
+    <string name="live_channel_show">실시간 화면에 %1$s 표시</string>
+</resources>

@@ -45,7 +45,8 @@ private val UVIR_DATABASE_TABLES = listOf(
     "sensor_alert_rules",
     "acquisitions",
     "alerts",
-    "camera_estimates"
+    "camera_estimates",
+    "record_transfer_ids"
 )
 
 internal fun extractEncryptedUvirDatabaseArchive(
@@ -161,6 +162,10 @@ internal suspend fun importEncryptedUvirDatabaseArchive(
                     source.setTransactionSuccessful()
                 } finally { source.endTransaction() }
             }
+            if (source.version == 25 && target.version >= 26) {
+                createUvirRecordArchiveSchema(source)
+                source.version = 26
+            }
             validateImportedDatabase(source, target)
         }
 
@@ -174,6 +179,8 @@ internal suspend fun importEncryptedUvirDatabaseArchive(
                     target.execSQL("DELETE FROM main.$table")
                 }
                 UVIR_DATABASE_TABLES.forEach { table ->
+                    // Measurement inserts generated temporary identities; restore the backup's originals.
+                    if (table == "record_transfer_ids") target.execSQL("DELETE FROM main.record_transfer_ids")
                     // Upgraded and fresh databases can have a different physical column order.
                     val columns = databaseTableColumns(target, table)
                         .joinToString(",") { "\"" + it.substringBefore(':') + "\"" }

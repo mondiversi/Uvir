@@ -49,7 +49,7 @@ internal fun UvirSensorSelector(
     bluetoothEnabled: Boolean = true,
     internetEnabled: Boolean = true,
     simulationActive: Boolean = false,
-    onOpenSimulationSettings: () -> Unit = {},
+    onDisableSimulation: () -> Unit = {},
     onAddSensor: () -> Unit = {}
 ) {
     val menuEnabled = sensorSelectionEnabled
@@ -116,10 +116,7 @@ internal fun UvirSensorSelector(
             connectionSelectionEnabled = connectionSelectionEnabled,
             wifiEnabled = wifiEnabled, bluetoothEnabled = bluetoothEnabled, internetEnabled = internetEnabled,
             simulationActive = simulationActive,
-            onOpenSimulationSettings = {
-                onSelectionExpandedChange(false)
-                onOpenSimulationSettings()
-            },
+            onDisableSimulation = onDisableSimulation,
             onAddSensor = {
                 onSelectionExpandedChange(false)
                 onAddSensor()

@@ -211,7 +211,7 @@ internal fun UvirHomeHeader(
     sensorStatusIndicators: Map<String, UvirStatusIndicator> = emptyMap(),
     sensorAlertMonitoringDeviceIds: Set<String> = emptySet(),
     sensorDialogColor: Color = MaterialTheme.colorScheme.surface,
-    onOpenSimulationSettings: () -> Unit = {},
+    onDisableSimulation: () -> Unit = {},
     onAddSensor: () -> Unit = {},
     onOpenSettingsPage: ((UvirSettingsPage) -> Unit)? = null
 ) {
@@ -312,7 +312,7 @@ internal fun UvirHomeHeader(
             UvirSensorSelector(
                 sensorDisplayName = sensorDisplayName,
                 simulationActive = useFakeSensorData,
-                onOpenSimulationSettings = onOpenSimulationSettings,
+                onDisableSimulation = onDisableSimulation,
                 onAddSensor = onAddSensor,
                 sensorSelectionEnabled = sensorSelectionEnabled,
                 sensorInfoEnabled = selectedConnectionIsConfirmed && !useFakeSensorData && selectedSensorDeviceId.isNotBlank(),

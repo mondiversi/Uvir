@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="export_percentages_total">전체 대비 백분율</string>
+    <string name="export_percentages_group">그룹 내 백분율</string>
     <string name="data_export_files_heading">파일</string>
     <string name="export_saved_successfully">파일을 저장했습니다.</string>
     <string name="export_save_failed">파일을 저장할 수 없습니다.</string>

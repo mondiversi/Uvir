@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -110,7 +112,8 @@ internal fun UvirTitleSaveIcon(
 @Composable
 internal fun UvirTitleSaveToFolderIcon(
     modifier: Modifier = Modifier,
-    tint: Color = LocalContentColor.current
+    tint: Color = LocalContentColor.current,
+    strokeWidth: Dp = UvirTitleActionIconStrokeWidth
 ) {
     Canvas(
         modifier =
@@ -119,7 +122,7 @@ internal fun UvirTitleSaveToFolderIcon(
                 .graphicsLayer(alpha = tint.alpha)
     ) {
         val tint = tint.copy(alpha = 1f)
-        val strokeWidth = UvirTitleActionIconStrokeWidth.toPx()
+        val strokeWidth = strokeWidth.toPx()
         val folder = Path().apply {
             moveTo(size.width * 3f / 24f, size.height * 6f / 24f)
             lineTo(size.width * 9f / 24f, size.height * 6f / 24f)
@@ -168,7 +171,8 @@ internal fun UvirTitleSaveToFolderIcon(
 internal enum class UvirButtonGlyph {
     PLAY,
     STOP,
-    REFRESH
+    REFRESH,
+    RESTORE
 }
 
 @Composable
@@ -211,6 +215,22 @@ internal fun UvirButtonGlyphIcon(
                     size = Size(size.width * 0.46f + emphasis * 2f, size.height * 0.46f + emphasis * 2f),
                     cornerRadius = CornerRadius(size.minDimension * 0.07f + emphasis)
                 )
+            }
+            UvirButtonGlyph.RESTORE -> {
+                drawArc(
+                    color = tint, startAngle = 135f, sweepAngle = -315f,
+                    useCenter = false,
+                    topLeft = Offset(size.width * 0.22f, size.height * 0.18f),
+                    size = Size(size.width * 0.64f, size.height * 0.64f),
+                    style = Stroke(stroke, cap = StrokeCap.Round)
+                )
+                val head = Path().apply {
+                    moveTo(size.width * 0.10f, size.height * 0.48f)
+                    lineTo(size.width * 0.22f, size.height * 0.62f)
+                    lineTo(size.width * 0.34f, size.height * 0.48f)
+                    close()
+                }
+                drawPath(head, tint)
             }
             UvirButtonGlyph.REFRESH -> {
                 drawArc(
@@ -1203,6 +1223,7 @@ fun AutomaticSettingIcon(
     modifier: Modifier = Modifier,
     tint: Color = LocalContentColor.current
 ) {
+    val actionStrokeScale = LocalUvirActionGlyphStrokeScale.current
     Canvas(
         modifier =
             modifier
@@ -1214,7 +1235,7 @@ fun AutomaticSettingIcon(
             maxOf(
                 1.6.dp.toPx(),
                 size.minDimension * 0.08f
-            )
+            ) * actionStrokeScale
 
         when (type) {
             AutomaticSettingIconType.INTERVAL -> {
@@ -1572,8 +1593,10 @@ internal fun UvirPasswordVisibilityIcon(
 @Composable
 internal fun UvirDisclosureChevron(
     modifier: Modifier = Modifier,
-    tint: Color = LocalContentColor.current
+    tint: Color = LocalContentColor.current,
+    edgeAligned: Boolean = false
 ) {
+    val mirrored = edgeAligned && LocalLayoutDirection.current == LayoutDirection.Rtl
     Canvas(
         modifier =
             modifier
@@ -1585,26 +1608,27 @@ internal fun UvirDisclosureChevron(
     ) {
         val tint = tint.copy(alpha = 1f)
         val centerY = size.height / 2f
-        val startX = size.width * 0.22f
-        val tipX = size.width * 0.76f
         val halfHeight = size.height * 0.32f
         val strokeWidth =
             maxOf(
                 1.8.dp.toPx(),
                 size.minDimension * 0.17f
             )
+        val tipX = if (edgeAligned) size.width - strokeWidth / 2f else size.width * .76f
+        val startX = if (edgeAligned) tipX - size.width * .54f else size.width * .22f
+        fun x(value: Float) = if (mirrored) size.width - value else value
 
         drawLine(
             color = tint,
-            start = Offset(startX, centerY - halfHeight),
-            end = Offset(tipX, centerY),
+            start = Offset(x(startX), centerY - halfHeight),
+            end = Offset(x(tipX), centerY),
             strokeWidth = strokeWidth,
             cap = StrokeCap.Round
         )
         drawLine(
             color = tint,
-            start = Offset(tipX, centerY),
-            end = Offset(startX, centerY + halfHeight),
+            start = Offset(x(tipX), centerY),
+            end = Offset(x(startX), centerY + halfHeight),
             strokeWidth = strokeWidth,
             cap = StrokeCap.Round
         )

@@ -98,23 +98,23 @@ internal fun sessionChartSeries(
             listOf(
                 SessionChartSeries(
                     "Ultraviolet",
-                    Color(0xFF512DA8),
+                    uvirSpectralColor(ThresholdAlertMetric.UV_TOTAL),
                     values { it.uvc + it.uvb + it.uva },
                     R.string.uv_radiation
                 ),
                 SessionChartSeries(
                     "UVC",
-                    Color(0xFF7E57C2),
+                    uvirSpectralColor(ThresholdAlertMetric.UVC),
                     values { it.uvc }
                 ),
                 SessionChartSeries(
                     "UVB",
-                    Color(0xFF5C6BC0),
+                    uvirSpectralColor(ThresholdAlertMetric.UVB),
                     values { it.uvb }
                 ),
                 SessionChartSeries(
                     "UVA",
-                    Color(0xFF42A5F5),
+                    uvirSpectralColor(ThresholdAlertMetric.UVA),
                     values { it.uva }
                 )
             )
@@ -123,7 +123,7 @@ internal fun sessionChartSeries(
             listOf(
                 SessionChartSeries(
                     "Visible light",
-                    Color(0xFF00897B),
+                    uvirSpectralColor(ThresholdAlertMetric.VISIBLE_TOTAL),
                     values {
                         it.violetto + it.blu + it.verde +
                             it.giallo + it.arancione + it.rosso
@@ -132,43 +132,43 @@ internal fun sessionChartSeries(
                 ),
                 SessionChartSeries(
                     "HEV",
-                    Color(0xFF3949AB),
+                    uvirSpectralColor(ThresholdAlertMetric.HEV),
                     values { it.violetto + it.blu },
                     R.string.threshold_channel_hev
                 ),
                 SessionChartSeries(
                     "Violet",
-                    Color(0xFF8E24AA),
+                    uvirSpectralColor(ThresholdAlertMetric.VIOLET),
                     values { it.violetto },
                     R.string.violet
                 ),
                 SessionChartSeries(
                     "Blue",
-                    Color(0xFF1E88E5),
+                    uvirSpectralColor(ThresholdAlertMetric.BLUE),
                     values { it.blu },
                     R.string.blue
                 ),
                 SessionChartSeries(
                     "Green",
-                    Color(0xFF43A047),
+                    uvirSpectralColor(ThresholdAlertMetric.GREEN),
                     values { it.verde },
                     R.string.green
                 ),
                 SessionChartSeries(
                     "Green-yellow",
-                    Color(0xFFF9A825),
+                    uvirSpectralColor(ThresholdAlertMetric.YELLOW),
                     values { it.giallo },
                     R.string.yellow
                 ),
                 SessionChartSeries(
                     "Orange",
-                    Color(0xFFEF6C00),
+                    uvirSpectralColor(ThresholdAlertMetric.ORANGE),
                     values { it.arancione },
                     R.string.orange
                 ),
                 SessionChartSeries(
                     "Red",
-                    Color(0xFFE53935),
+                    uvirSpectralColor(ThresholdAlertMetric.RED),
                     values { it.rosso },
                     R.string.red
                 )
@@ -178,19 +178,19 @@ internal fun sessionChartSeries(
             listOf(
                 SessionChartSeries(
                     "Infrared",
-                    Color(0xFF6D4C41),
+                    uvirSpectralColor(ThresholdAlertMetric.NIR_TOTAL),
                     values { it.f8 + it.nir },
                     R.string.far_red_nir
                 ),
                 SessionChartSeries(
                     "Far-red",
-                    Color(0xFFEF5350),
+                    uvirSpectralColor(ThresholdAlertMetric.FAR_RED),
                     values { it.f8 },
                     R.string.session_chart_series_far_red
                 ),
                 SessionChartSeries(
                     "NIR",
-                    Color(0xFFFF8A65),
+                    uvirSpectralColor(ThresholdAlertMetric.NIR),
                     values { it.nir }
                 )
             )

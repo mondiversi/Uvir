@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="export_percentages_total">कुल के प्रतिशत</string>
+    <string name="export_percentages_group">समूह के भीतर प्रतिशत</string>
     <string name="data_export_files_heading">फ़ाइलें</string>
     <string name="export_saved_successfully">फ़ाइलें सहेजी गईं।</string>
     <string name="export_save_failed">फ़ाइलें सहेजी नहीं जा सकीं।</string>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="record_archive_title">اندازه‌گیری‌ها و هشدارها</string>
+    <string name="record_archive_description">صدور/ورود اندازه‌گیری‌ها و هشدارها همراه با نشست‌هایشان.</string>
+    <string name="record_archive_export_description">همهٔ رکوردهای ذخیره‌شدهٔ این نوع را همراه با نشست‌ها در یک فایل UVIR بدون گذرواژه صادر کنید.</string>
+    <string name="record_archive_import_description">داده‌ها به بایگانی افزوده می‌شوند. رکوردهای موجود نادیده گرفته می‌شوند. حسگرهای ناشناخته تا زمان جفت‌شدن با شناسهٔ سخت‌افزاری نمایش داده می‌شوند.</string>
+    <string name="record_archive_import_summary">رکوردها: %1$d · نشست‌ها: %2$d</string>
+    <string name="record_archive_import_success">واردشده: %1$d · از قبل موجود: %2$d</string>
+    <string name="record_archive_failed">انتقال رکوردها ممکن نشد. فایل و نوع داده را بررسی کنید.</string>
+</resources>

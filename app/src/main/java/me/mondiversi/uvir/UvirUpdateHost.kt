@@ -12,6 +12,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 
@@ -65,7 +66,6 @@ internal fun UvirUpdateDialog(
         val catalog = state.catalog ?: return
         val appFirst = catalog.app.code > BuildConfig.VERSION_CODE
         val text = if (darkTheme) Color.White else Color(0xFF101418)
-        val secondary = if (darkTheme) Color(0xFF90A4AE) else Color(0xFF546E7A)
         UvirAlertDialog(
             onDismissRequest = { if (!state.busy) onDismiss() },
             confirmButton = null,
@@ -82,23 +82,20 @@ internal fun UvirUpdateDialog(
                     if (appFirst) {
                         Text("Uvir", fontWeight = FontWeight.SemiBold)
                         Text("${BuildConfig.VERSION_NAME} → ${catalog.app.version}")
-                        OutlinedButton(enabled = !state.busy, modifier = Modifier.fillMaxWidth(),
-                            colors = uvirPrimaryOutlinedButtonColors(),
-                            border = uvirPrimaryOutlinedButtonBorder(!state.busy, secondary), onClick = onAppUpdate
-                        ) { Text(uvirActionLabel(R.string.update_app)) }
+                        UvirUpdateTextAction(R.string.update_app, !state.busy && !state.checking,
+                            "update_app_action", onAppUpdate)
                     }
                     state.sensors.forEach { sensor ->
                         HorizontalDivider()
                         Text(sensor.name, fontWeight = FontWeight.SemiBold)
                         Text("${sensor.current} → ${catalog.sensor.version}")
-                        val available = usb.runtimeInfo.deviceId.equals(sensor.uid, true) &&
-                            usb.runtimeInfo.operationActive == false && usb.appConnectionConfirmed
-                        Text(stringResource(if (appFirst) R.string.update_app_first else R.string.update_usb_required), style = MaterialTheme.typography.bodySmall)
-                        OutlinedButton(enabled = !state.busy && !appFirst && available, modifier = Modifier.fillMaxWidth(),
-                            colors = uvirPrimaryOutlinedButtonColors(),
-                            border = uvirPrimaryOutlinedButtonBorder(!state.busy && !appFirst && available, secondary), onClick = {
-                            onSensorUpdate(sensor)
-                        }) { Text(uvirActionLabel(R.string.update_sensor)) }
+                        val available = uvirFirmwareUpdateReady(usb, sensor.uid, catalog.sensor)
+                        val appRequired = appFirst || BuildConfig.VERSION_CODE < catalog.sensor.minAppCode
+                        Text(stringResource(if (appRequired) R.string.update_app_first else R.string.update_usb_required),
+                            style = MaterialTheme.typography.bodySmall)
+                        UvirUpdateTextAction(R.string.update_sensor,
+                            !state.busy && !state.checking && !appRequired && available,
+                            "update_sensor_action_${sensor.uid}") { onSensorUpdate(sensor) }
                     }
                     if (state.busy) {
                         HorizontalDivider()
@@ -106,11 +103,28 @@ internal fun UvirUpdateDialog(
                         val progress = state.progress
                         if (progress == null) LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                         else LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth())
-                        Text(stringResource(R.string.update_keep_connected), style = MaterialTheme.typography.bodySmall)
+                        if (state.operation == UvirUpdateOperation.FIRMWARE) {
+                            Text(stringResource(R.string.update_keep_connected), style = MaterialTheme.typography.bodySmall)
+                        }
                     }
-                    state.message?.let { Text(stringResource(it), color = if (it == R.string.update_failed) UvirDestructiveActionColor else text) }
+                    state.message?.let {
+                        val failure = it == R.string.update_failed || it == R.string.update_app_failed
+                        Text(stringResource(it), color = if (failure) UvirDestructiveActionColor else text)
+                    }
                 }
             }
         )
+    }
+}
+
+/** Popup actions are text-only; use the same day/night purple as Close. */
+@Composable
+private fun UvirUpdateTextAction(label: Int, enabled: Boolean, tag: String, onClick: () -> Unit) {
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+        TextButton(onClick = onClick, enabled = enabled, modifier = Modifier.testTag(tag),
+            colors = ButtonDefaults.textButtonColors(containerColor = Color.Transparent,
+                disabledContainerColor = Color.Transparent, contentColor = MaterialTheme.colorScheme.primary)) {
+            Text(uvirActionLabel(label))
+        }
     }
 }

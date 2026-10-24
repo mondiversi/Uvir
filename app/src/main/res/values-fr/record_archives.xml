@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="record_archive_title">Acquisitions et alertes</string>
+    <string name="record_archive_description">Exporte/importe les acquisitions et les alertes, y compris leurs sessions.</string>
+    <string name="record_archive_export_description">Exportez tous les enregistrements de ce type, sessions comprises, dans un fichier UVIR sans mot de passe.</string>
+    <string name="record_archive_import_description">Les données seront ajoutées aux archives. Les enregistrements existants sont ignorés. Les capteurs inconnus sont affichés avec leur identifiant matériel jusqu’à leur association.</string>
+    <string name="record_archive_import_summary">Enregistrements : %1$d · Sessions : %2$d</string>
+    <string name="record_archive_import_success">Importés : %1$d · Déjà présents : %2$d</string>
+    <string name="record_archive_failed">Impossible de transférer les enregistrements. Vérifiez le fichier et le type de données.</string>
+</resources>

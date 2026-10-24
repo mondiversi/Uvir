@@ -441,6 +441,9 @@ class MainActivity : ComponentActivity(), UvirExportSaveHost, UvirSettingsImport
     private val settingsImportPasswordRejectedState =
         mutableStateOf(false)
 
+    private val settingsImportPasswordRequiredState = mutableStateOf(true)
+    private val settingsImportInProgressState = mutableStateOf(false)
+
     private val pendingDatabaseImportUriState = mutableStateOf<Uri?>(null)
 
     private val databaseImportInProgressState = mutableStateOf(false)
@@ -504,12 +507,9 @@ class MainActivity : ComponentActivity(), UvirExportSaveHost, UvirSettingsImport
             if (uris.isEmpty()) {
                 return@registerForActivityResult
             }
-            if (uvirSettingsFilesRequirePassword(this, uris)) {
-                settingsImportPasswordRejectedState.value = false
-                pendingSettingsImportUrisState.value = uris
-            } else {
-                importSelectedUvirSettings(uris)
-            }
+            settingsImportPasswordRequiredState.value = uvirSettingsFilesRequirePassword(this, uris)
+            settingsImportPasswordRejectedState.value = false
+            pendingSettingsImportUrisState.value = uris
         }
 
     private val databaseImportLauncher =
@@ -559,6 +559,11 @@ class MainActivity : ComponentActivity(), UvirExportSaveHost, UvirSettingsImport
         uris: List<Uri>,
         decryptionPassword: CharArray? = null
     ) {
+        if (settingsImportInProgressState.value) {
+            decryptionPassword?.fill('\u0000')
+            return
+        }
+        settingsImportInProgressState.value = true
         lifecycleScope.launch {
             try {
                 val result = withContext(Dispatchers.IO) {
@@ -631,6 +636,7 @@ class MainActivity : ComponentActivity(), UvirExportSaveHost, UvirSettingsImport
                 }
             } finally {
                 decryptionPassword?.fill('\u0000')
+                settingsImportInProgressState.value = false
             }
         }
     }
@@ -761,22 +767,25 @@ class MainActivity : ComponentActivity(), UvirExportSaveHost, UvirSettingsImport
                 val pendingSettingsImportUris =
                     pendingSettingsImportUrisState.value
                 if (pendingSettingsImportUris.isNotEmpty()) {
+                    val passwordRequired = settingsImportPasswordRequiredState.value
                     UvirSettingsPasswordDialog(
                         title =
-                            stringResource(
-                                R.string.settings_decryption_password_title
-                            ),
+                            if (passwordRequired) stringResource(R.string.settings_decryption_password_title)
+                            else stringResource(R.string.data_management_import_button) + " · " + stringResource(R.string.data_management_settings_group),
                         description =
                             stringResource(
-                                R.string.settings_decryption_password_description
+                                if (passwordRequired) R.string.settings_decryption_password_description
+                                else R.string.settings_import_confirmation_description
                             ),
                         confirmationRequired = false,
                         confirmLabel =
-                            stringResource(R.string.settings_decrypt),
+                            stringResource(R.string.data_management_import_button),
                         cardColor = MaterialTheme.colorScheme.surface,
                         primaryText = MaterialTheme.colorScheme.onSurface,
                         secondaryText =
                             MaterialTheme.colorScheme.onSurfaceVariant,
+                        passwordRequired = passwordRequired,
+                        busy = settingsImportInProgressState.value,
                         errorMessage =
                             if (settingsImportPasswordRejectedState.value) {
                                 stringResource(
@@ -795,7 +804,7 @@ class MainActivity : ComponentActivity(), UvirExportSaveHost, UvirSettingsImport
                         onConfirm = { password ->
                             importSelectedUvirSettings(
                                 pendingSettingsImportUris,
-                                password
+                                password.takeIf { passwordRequired }
                             )
                         }
                     )

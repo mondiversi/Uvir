@@ -161,7 +161,7 @@
     <string name="sensor_source_title">منبع سنسور</string>
     <string name="sensor_source_accessibility">منبع سنسور: %1$s</string>
     <string name="sensor_source_debug_accessibility">نادیده گرفتن داده های ساختگی فعال است</string>
-    <string name="sensor_source_debug_hint">داده‌های شبیه‌سازی‌شده فعال هستند: برای انتخاب حسگر، آن‌ها را در تنظیمات → حسگر → عیب‌یابی غیرفعال کنید.</string>
+    <string name="sensor_source_debug_hint">داده‌های شبیه‌سازی‌شده فعال هستند. برای انتخاب حسگر، آن‌ها را غیرفعال کنید.</string>
     <string name="sensor_source_disabled_hint">منبع غیرفعال شده را می توان از طریق دیگر اتصال بی سیم فعال مجدداً فعال کرد. اگر هر دو غیرفعال هستند، سنسور را با USB وصل کنید.</string>
     <string name="sensor_power_off">سنسور خاموش</string>
     <string name="sensor_power_off_title">سنسور را خاموش کنم؟</string>
@@ -428,11 +428,11 @@
     <string name="app_version">نسخه برنامه: %1$s</string>
     <string name="package_name_value">بسته بندی: %1$s</string>
     <string name="about_whats_new_title">موارد جدید در نسخه %1$s</string>
-    <string name="about_whats_new_connectivity">ضرایب تصحیح و آفست برای هر کانال، همراه با اندازه‌گیری هدایت‌شده میانگین آفست‌ها و تأیید بازنشانی.</string>
-    <string name="about_whats_new_connections">جبران پنجره نوری با ضریب اصلی و ضرایب کانال؛ توضیح روشن‌تر بازه‌های AS7331 و قله‌های حساسیت AS7343.</string>
-    <string name="about_whats_new_measurements">ذخیره‌سازی داخلی تابش در W/m²، با مهاجرت خودکار که اندازه‌گیری‌ها و تنظیمات موجود را حفظ می‌کند.</string>
-    <string name="about_whats_new_interface">تعداد اعشار قابل تنظیم برای مقادیر زنده، داده‌های ذخیره‌شده و خروجی سفارشی؛ خروجی علمی تمام دقت ذخیره‌شده را حفظ می‌کند.</string>
-    <string name="about_whats_new_github">بهبود منوی تنظیمات و پنجره‌های گفتگو؛ به‌روزرسانی راهنمای سیم‌کشی، مونتاژ و کالیبراسیون، شامل لوله‌های جهت‌دار و الزامات پخش‌کننده نور.</string>
+    <string name="about_whats_new_connectivity">صدور/ورود اندازه‌گیری‌ها و هشدارها در فایل‌های .uvirrecords بدون گذرواژه، همراه با نشست‌ها، یادداشت‌ها و گونه‌ها.</string>
+    <string name="about_whats_new_connections">تطبیق شناسهٔ سخت‌افزاری، شناسه‌های محلی جدید و تشخیص موارد تکراری، منشأ داده‌های واردشده را حفظ می‌کنند.</string>
+    <string name="about_whats_new_measurements">نمای اصلی ترتیب کارت‌ها و باندهای پنهان را به یاد می‌سپارد؛ اندازه‌گیری‌های ذخیره‌شده کنترل‌های موقت و درصد کل یا گروه دارند.</string>
+    <string name="about_whats_new_interface">رنگ‌های طیفی یکسان، نام‌های خنثی با نقطه‌های رنگی در داده‌های ذخیره‌شده، ردیف‌های روشن‌تر نشست و جابه‌جایی پویانمایی‌شدهٔ کارت‌ها.</string>
+    <string name="about_whats_new_github">بهبود پنجره‌ها، کنش‌های روز/شب و اعلان‌های دادهٔ شبیه‌سازی‌شده، همراه با بررسی‌های به‌روز آمادگی و بازیابی به‌روزرسانی USB.</string>
     <string name="about_description">برنامهٔ ثبت طیفی تابش فرابنفش، مرئی و فروسرخ.</string>
     <string name="about_spectral_ranges">باندهای طیفی: فرابنفش • نور مرئی • فروسرخ</string>
     <string name="about_sensors">سنسورهای پشتیبانی شده: AS7331 UV • AS7343 چند طیفی</string>
@@ -803,5 +803,6 @@
     <string name="alert_max_registrations">حداکثر ثبت‌ها</string>
     <string name="alert_registration_count">تعداد ثبت‌ها</string>
     <string name="alert_configure_first">پیش از شروع دست‌کم یک مقدار را تنظیم کنید.</string>
-    <string name="sensor_simulation_open_settings">تنظیمات</string>
+    <string name="sensor_simulation_disable">غیرفعال کردن</string>
+    <string name="settings_import_confirmation_description">تنظیمات موجود در فایل‌های انتخاب‌شده جایگزین تنظیمات فعلی می‌شوند.</string>
 </resources>

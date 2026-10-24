@@ -29,7 +29,7 @@ class UvirExportPrecisionTest {
             irradianceUnit = UvirIrradianceUnit.UW_CM2, irradianceDecimals = 2).lines()
         val row = lines[0].split(';').zip(lines[1].split(';')).toMap()
         assertEquals("1,23", row["UVA_315_410_nm_uW_cm2"])
-        assertEquals("100,00", row["UVA_percent"])
+        assertEquals("100,00", row["UVA_Percentages_of_total"])
         assertEquals("123", row["Acquisition_ID"])
         assertEquals("123456789", row["Timestamp_ms"])
     }

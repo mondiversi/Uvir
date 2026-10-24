@@ -31,7 +31,7 @@ internal fun liveSpectralSensorModel(group: SensorGroup, info: UvirSensorRuntime
     SensorGroup.BIOLOGICAL -> ""
 }
 
-/** Shared by saved values, threshold editors and human-readable exports. */
+/** Spectral references for threshold editors and exports; saved views use plain names. */
 internal fun sensorChannelReference(labelResource: Int?, code: String = ""): String? = when (labelResource) {
     R.string.violet -> UvirSensorBands.VIOLET_CHANNELS
     R.string.blue, R.string.threshold_channel_heb -> UvirSensorBands.BLUE_CHANNELS

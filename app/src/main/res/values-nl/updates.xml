@@ -10,9 +10,11 @@
     <string name="update_download">Downloaden en controleren…</string>
     <string name="update_flash">Sensor bijwerken…</string>
     <string name="update_verify">Sensor controleren…</string>
-    <string name="update_keep_connected">Koppel USB niet los en schakel de sensor niet uit. Houd indien nodig BOOT ingedrukt en probeer opnieuw.</string>
+    <string name="update_app_verify">App verifiëren…</string>
+    <string name="update_app_failed">App-update mislukt. Bekijk het foutenlogboek en probeer het opnieuw.</string>
+    <string name="update_keep_connected">Koppel USB niet los en schakel de sensor niet uit.</string>
     <string name="update_done">Sensor bijgewerkt</string>
     <string name="update_failed">Update mislukt. Bekijk het foutenlogboek. Als de sensor niet meer opstart, herstel dan de firmware via USB vanaf een computer.</string>
     <string name="update_permission">Sta Uvir toe om updates te installeren in de Android-instellingen.</string>
-    <string name="update_whats_new">CSV-, TXT- en PNG-exports met sensormodellen, compacte spectrale verwijzingen en beter leesbare grafieklegenda’s.</string>
+    <string name="update_whats_new">TXT- en CSV-export van metingen bevat totaal- en groepspercentages, met consistente PNG-kleuren en importbevestiging door vijf seconden ingedrukt te houden.</string>
 </resources>

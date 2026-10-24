@@ -8,6 +8,7 @@ import android.database.DatabaseErrorHandler
 import android.database.sqlite.SQLiteDatabase
 import android.graphics.BitmapFactory
 import android.graphics.Paint
+import androidx.compose.ui.graphics.toArgb
 import androidx.test.platform.app.InstrumentationRegistry
 import java.io.File
 import java.util.Locale
@@ -74,6 +75,88 @@ class UvirExportConsistencyTest {
         format.dateFormat, format.language, format.context.resources.configuration.locales[0], format.context,
         format.timeFormat, format.irradianceUnit)
 
+    @Test fun readableAcquisitionsAndBothSessionGroupingsHaveAlignedTotalAndGroupPercentageColumns() {
+        val sample = SensorSample(uvc = 1.0, uvb = 1.0, uva = 2.0,
+            violetto = 2.0, blu = 2.0, verde = 2.0, giallo = 2.0, arancione = 2.0, rosso = 2.0, f8 = 3.0, nir = 1.0)
+        val fixture = records.mapIndexed { i, record -> record.copy(
+            sample = if (i == 0) sample else sample.copy(uva = 8.0), variantIndex = i + 1) }
+        for (mode in UvirExportMode.entries) {
+            saveUvirExportMode(context, mode)
+            saveUvirIrradianceUnit(context, UvirIrradianceUnit.W_M2)
+            saveUvirLiveIrradianceDecimals(context, UvirIrradianceUnit.W_M2, 2)
+            val format = uvirExportFormatting(context)
+            for (grouping in UvirReadableTableGrouping.entries) for (single in listOf(false, true)) {
+                val text = readableMeasurementTable(format.context, if (single) fixture.take(1) else fixture,
+                    format.numericFormat, irradianceUnit = format.irradianceUnit,
+                    groupByVariant = !single, grouping = grouping)
+                val headings = text.lines().filter { it.contains(format.context.getString(R.string.export_percentages_total)) }
+                assertEquals(if (single) 3 else 6, headings.size)
+                assertTrue(headings.all { it.contains(format.context.getString(R.string.export_percentages_group)) })
+                val uvc = text.lines().filter { it.startsWith("UVC ") }.map { it.trim().split(Regex(" {2,}")) }
+                assertEquals(if (single) 1 else 2, uvc.size)
+                assertTrue(uvc.all { it.size == 4 })
+                assertEquals(format.displayValue(5.0) + "%", uvc[0][2])
+                assertEquals(format.displayValue(25.0) + "%", uvc[0][3])
+                if (!single) {
+                    assertEquals(format.displayValue(100.0 / 26.0) + "%", uvc[1][2])
+                    assertEquals(format.displayValue(10.0) + "%", uvc[1][3])
+                }
+                val biologicalHeading = format.context.getString(R.string.share_biological_effects_heading, BIOLOGICAL_MODEL_VERSION)
+                text.split(biologicalHeading).drop(1).forEach { body ->
+                    assertFalse(body.substringBefore("────────────────────")
+                        .contains(format.context.getString(R.string.export_percentages_group)))
+                }
+                if (grouping == UvirReadableTableGrouping.BY_ACQUISITION) {
+                    val lines = text.lines()
+                    headings.forEach { header ->
+                        val start = lines.indexOf(header)
+                        lines.drop(start + 1).takeWhile { it.isNotBlank() }.forEach { row ->
+                            assertEquals("Column alignment: $mode", header.length, row.length)
+                        }
+                    }
+                }
+                if (mode == UvirExportMode.SELECTED && !single) {
+                    File(base.getExternalFilesDir(null), "group-percentages-${grouping.name}.txt").writeText(text)
+                }
+            }
+        }
+    }
+
+    @Test fun bothPercentageColumnsAreLocalizedAndCsvSchemasStayAlignedInEveryLanguage() {
+        for (language in AppLanguage.entries.filter { it != AppLanguage.SYSTEM }) {
+            val locale = Locale.forLanguageTag(language.languageTag)
+            val localized = context.createConfigurationContext(Configuration(context.resources.configuration).apply { setLocale(locale) })
+            val output = measurementCsv(records.take(1), UvirNumericFormat.INTERNATIONAL,
+                language = locale.language, locale = locale, labelContext = localized,
+                irradianceUnit = UvirIrradianceUnit.W_M2, irradianceDecimals = 2).trim().lines()
+            val headers = output.first().split(';')
+            val values = output[1].split(';')
+            assertEquals(language.name, headers.size, values.size)
+            assertEquals(language.name, headers.size, headers.toSet().size)
+            assertEquals(66, headers.size)
+            val totalHeading = localized.getString(R.string.export_percentages_total)
+            val groupHeading = localized.getString(R.string.export_percentages_group)
+            assertNotEquals(language.name, totalHeading, groupHeading)
+            val text = readableMeasurementTable(localized, records.take(1), UvirNumericFormat.INTERNATIONAL,
+                irradianceUnit = UvirIrradianceUnit.W_M2, irradianceDecimals = 2)
+            assertEquals(3, text.lines().count { it.contains(totalHeading) && it.contains(groupHeading) })
+        }
+    }
+
+    @Test fun alertTablesAndSpreadsheetsNeverAcquireAcquisitionGroupPercentages() {
+        for (mode in UvirExportMode.entries) {
+            val format = uvirExportFormatting(context, mode)
+            val csv = thresholdAlertLogCsv(format.context, alerts, format.numericFormat, irradianceUnit = format.irradianceUnit)
+            val text = readableThresholdAlertLog(format.context, alerts, format.numericFormat, irradianceUnit = format.irradianceUnit)
+            for (resource in listOf(R.string.export_percentages_total, R.string.export_percentages_group)) {
+                assertFalse(csv.contains(format.context.getString(resource)))
+                assertFalse(text.contains(format.context.getString(resource)))
+            }
+            assertFalse(csv.contains("Percentages_within_group"))
+            assertFalse(csv.contains("Percentuali_per_gruppo"))
+        }
+    }
+
     @Test fun scientificAndCustomExportsUseTheirOwnPrecisionAndSourceModels() {
         for (unit in UvirIrradianceUnit.entries) {
             saveUvirIrradianceUnit(context, unit)
@@ -101,6 +184,10 @@ class UvirExportConsistencyTest {
             assertTrue(alertCsv.contains("AS7331;AS7343"))
             val alertText = readableThresholdAlertLog(selected.context, alerts, selected.numericFormat, irradianceUnit = unit)
             assertTrue(alertText.contains(selected.irradiance(records[0].sample.uva)))
+            assertTrue(alertText.contains(UvirSensorBands.UVA))
+            assertTrue(alertText.contains(UvirSensorBands.BLUE_CHANNELS))
+            assertTrue(chartExportChannelLabel(selected.context, R.string.yellow, "Green-yellow")
+                .contains(UvirSensorBands.GREEN_YELLOW_CHANNELS))
 
             saveUvirExportMode(context, UvirExportMode.INTERNATIONAL)
             val scientific = uvirExportFormatting(context)
@@ -144,15 +231,29 @@ class UvirExportConsistencyTest {
             saveUvirExportMode(context, mode)
             saveUvirLiveIrradianceDecimals(context, UvirIrradianceUnit.W_M2, 3)
             saveUvirIrradianceUnit(context, UvirIrradianceUnit.W_M2)
+            val spectralGroups = SessionChartGroup.entries.filterNot { it.biological }
             val files = createAcquisitionChartFiles(context, records[0], AcquisitionChartGroup.IRRADIANCE) +
-                createSessionChartFile(context, 12, records, SessionChartGroup.VISIBLE) +
+                spectralGroups.map { createSessionChartFile(context, 12, records, it) } +
                 createAlertSeparateChartFiles(context, alerts[0]) +
                 createAlertSessionChartFile(context, 13, alerts, ThresholdAlertMetric.UVA) +
                 createAlertSessionCombinedChartFile(context, 13, alerts)
+            val expectedMetrics = spectralGroups.map(::savedAcquisitionMetrics) +
+                spectralGroups.map(::savedAcquisitionMetrics) + listOf(
+                    listOf(ThresholdAlertMetric.UVA, ThresholdAlertMetric.BLUE),
+                    listOf(ThresholdAlertMetric.UVA),
+                    listOf(ThresholdAlertMetric.UVA, ThresholdAlertMetric.BLUE))
+            assertEquals(expectedMetrics.size, files.size)
             files.forEachIndexed { i, file ->
                 val bitmap = requireNotNull(BitmapFactory.decodeFile(file.path))
                 assertEquals(1600, bitmap.width)
                 assertTrue("Export panel $i in $mode: height=${bitmap.height}", bitmap.height in 400..6000)
+                val pixels = IntArray(bitmap.width * bitmap.height)
+                bitmap.getPixels(pixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
+                val palette = pixels.toHashSet()
+                expectedMetrics[i].forEach { metric ->
+                    assertTrue("Export panel $i / $mode must retain the Main View color for $metric",
+                        uvirSpectralColor(metric).toArgb() in palette)
+                }
                 bitmap.recycle()
                 file.copyTo(File(output, "${mode.name.lowercase()}-$i.png"), overwrite = true)
             }

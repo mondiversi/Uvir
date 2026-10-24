@@ -95,7 +95,7 @@ class UvirHomeSensorDropdownTest {
     private val profileModes = mutableStateOf(mapOf("a" to SensorConnectionMode.WIFI,
         "b" to SensorConnectionMode.BLUETOOTH))
     private var infoRequests = 0
-    private var simulationSettingsRequests = 0
+    private var disableSimulationRequests = 0
     private val sensorRequests = mutableListOf<String>()
     private val modes = mutableListOf<SensorConnectionMode>()
     private val profiles = mutableStateOf(listOf(
@@ -150,7 +150,7 @@ class UvirHomeSensorDropdownTest {
                             primaryText = if (night.value) Color.White else Color.Black,
                             secondaryText = colors.onSurfaceVariant,
                             onOpenVersionInfo = {}, onOpenSettings = {},
-                            onOpenSimulationSettings = { simulationSettingsRequests++ },
+                            onDisableSimulation = { disableSimulationRequests++; fakeData.value = false },
                             sensorSelectionExpanded = selectionExpanded.value,
                             onSensorSelectionExpandedChange = { selectionExpanded.value = it },
                             sensorDisplayName = if (selectedId.value.isBlank()) "" else selectedDisplayName.value,
@@ -936,7 +936,7 @@ class UvirHomeSensorDropdownTest {
             compose.onNode(hasText("—") and hasAnyAncestor(hasTestTag("home_sensor_name_text")),
                 useUnmergedTree = true).assertIsDisplayed()
             compose.onNodeWithTag("home_sensor_simulation_warning").assertIsDisplayed()
-            compose.onNodeWithTag("home_sensor_simulation_settings").assertIsDisplayed().assertIsEnabled()
+            compose.onNodeWithTag("home_sensor_simulation_disable").assertIsDisplayed().assertIsEnabled()
             val layouts = mutableListOf<androidx.compose.ui.text.TextLayoutResult>()
             compose.onNodeWithTag("home_sensor_simulation_warning").performSemanticsAction(
                 androidx.compose.ui.semantics.SemanticsActions.GetTextLayoutResult) { it(layouts) }
@@ -960,7 +960,7 @@ class UvirHomeSensorDropdownTest {
         compose.runOnIdle { fakeData.value = false }
         compose.mainClock.advanceTimeBy(100)
         compose.onNodeWithTag("home_sensor_simulation_warning").assertDoesNotExist()
-        compose.onNodeWithTag("home_sensor_simulation_settings").assertDoesNotExist()
+        compose.onNodeWithTag("home_sensor_simulation_disable").assertDoesNotExist()
         compose.onNodeWithTag("home_sensor_profiles").assertIsDisplayed()
         compose.onNodeWithTag("home_sensor_connection_footer").assertIsDisplayed()
         compose.onNodeWithTag("home_sensor_option_A").assertIsEnabled().assertIsSelected()
@@ -970,17 +970,22 @@ class UvirHomeSensorDropdownTest {
         }
     }
 
-    @Test fun simulationShortcutClosesMenuWithoutDisablingDataOrChangingSensors() {
+    @Test fun disableSimulationRevealsTheNormalPickerWithoutChangingSensorsOrOpeningSettings() {
         fakeData.value = true
         compactDialog.value = true
         fontScale.value = 1.6f
         showHeader()
         compose.onNodeWithTag("home_sensor_name").performClick()
-        compose.onNodeWithTag("home_sensor_simulation_settings").assertIsDisplayed().performClick()
-        compose.onNodeWithTag("home_sensor_dialog").assertDoesNotExist()
+        compose.onNodeWithTag("home_sensor_simulation_disable").assertIsDisplayed().performClick()
+        compose.onNodeWithTag("home_sensor_dialog").assertIsDisplayed()
+        compose.onNodeWithTag("home_sensor_simulation_warning").assertDoesNotExist()
+        compose.onNodeWithTag("home_sensor_profiles").assertIsDisplayed()
+        compose.onNodeWithTag("home_sensor_connection_footer").assertIsDisplayed()
+        compose.onNodeWithTag("home_sensor_option_A").assertIsSelected()
         compose.runOnIdle {
-            assertEquals(1, simulationSettingsRequests)
-            assertTrue(fakeData.value)
+            assertEquals(1, disableSimulationRequests)
+            assertFalse(fakeData.value)
+            assertTrue(selectionExpanded.value)
             assertEquals("A", selectedId.value)
             assertTrue(sensorRequests.isEmpty())
             assertTrue(modes.isEmpty())

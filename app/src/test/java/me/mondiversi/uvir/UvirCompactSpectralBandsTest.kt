@@ -62,9 +62,9 @@ class UvirCompactSpectralBandsTest {
             .single { it.displayLabelResource == R.string.yellow }
         assertEquals("Green-yellow", series.label)
         assertEquals(listOf(7.25), series.values)
-        assertEquals(25, MEASUREMENT_EXPORT_COLUMNS_EN.indexOf("Green_yellow_peaks_550_555_nm_uW_cm2"))
-        assertEquals(25, MEASUREMENT_EXPORT_COLUMNS_IT.indexOf("Verde_giallo_peaks_550_555_nm_uW_cm2"))
-        assertEquals(17, MEASUREMENT_EXPORT_COLUMNS_EN.indexOf("HEV_uW_cm2"))
+        assertEquals(33, MEASUREMENT_EXPORT_COLUMNS_EN.indexOf("Green_yellow_peaks_550_555_nm_uW_cm2"))
+        assertEquals(33, MEASUREMENT_EXPORT_COLUMNS_IT.indexOf("Verde_giallo_peaks_550_555_nm_uW_cm2"))
+        assertEquals(21, MEASUREMENT_EXPORT_COLUMNS_EN.indexOf("HEV_uW_cm2"))
         assertFalse(MEASUREMENT_EXPORT_COLUMNS_EN.any { "400_500" in it || "570_590" in it })
     }
 

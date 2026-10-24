@@ -3,7 +3,10 @@ package me.mondiversi.uvir
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.indication
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -13,11 +16,14 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -46,6 +52,12 @@ fun SpectrumCard(
     onAlertClick: (() -> Unit)? = null,
     footnote: String? = null,
     outOfRange: Boolean = false,
+    onPercentageBaseToggle: (() -> Unit)? = null,
+    chartOutOfRange: ((SensorSample) -> Boolean)? = null,
+    reorderControls: (@Composable (String) -> Unit)? = null,
+    collapsible: Boolean = true,
+    groupVisible: Boolean = true,
+    onGroupVisibilityToggle: (() -> Unit)? = null,
     content:
     @Composable ColumnScope.() -> Unit
 ) {
@@ -53,9 +65,27 @@ fun SpectrumCard(
         stringResource(
             if (expanded) R.string.accessibility_expanded else R.string.accessibility_collapsed
         )
+    val headerInteraction = remember { MutableInteractionSource() }
+    val groupMuted = onGroupVisibilityToggle != null && !groupVisible
+    val mutedColor = secondaryText.copy(alpha = .55f)
+    val titleColor = when {
+        groupMuted -> mutedColor
+        alerted -> UvirAttentionColor
+        else -> primaryText
+    }
+    val headerAction = when {
+        onGroupVisibilityToggle != null -> Modifier.toggleable(
+            value = groupVisible, role = Role.Checkbox, interactionSource = headerInteraction,
+            indication = null, onValueChange = { onGroupVisibilityToggle() }
+        ).uvirAccessibleAction(label = title, role = Role.Checkbox, checkedState = groupVisible,
+            preserveChildActions = true, onClick = onGroupVisibilityToggle)
+        collapsible -> Modifier.clickable(onClick = onToggle).uvirNestedAccessibleAction(
+            label = title, stateText = accessibilityState, onClick = onToggle)
+        else -> Modifier
+    }
     Card(
         modifier =
-            Modifier.fillMaxWidth(),
+            Modifier.fillMaxWidth().testTag("live_spectrum_card_${group.name}"),
 
         shape =
             RoundedCornerShape(18.dp),
@@ -79,14 +109,10 @@ fun SpectrumCard(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable {
-                        onToggle()
-                    }
-                    .uvirNestedAccessibleAction(
-                        label = title,
-                        stateText = accessibilityState,
-                        onClick = onToggle
-                    )
+                    .then(if (onGroupVisibilityToggle == null) headerAction
+                        else Modifier.indication(headerInteraction, ripple(color = primaryText)))
+                    .testTag(if (onGroupVisibilityToggle == null) "live_island_header_${group.name}"
+                        else "live_island_heading_${group.name}")
                     .padding(UvirIslandContentPadding),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
@@ -94,46 +120,62 @@ fun SpectrumCard(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    UvirSpectrumGroupIcon(
-                        group = group,
-                        tint = if (alerted) UvirAttentionColor else primaryText
-                    )
-                    Spacer(Modifier.width(8.dp))
-
-                    Column(
-                        modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(3.dp)
+                    // Only the left area toggles visibility. Its interaction source drives
+                    // feedback on the full heading without making the other controls toggle it.
+                    Row(
+                        modifier = Modifier.weight(1f)
+                            .then(if (onGroupVisibilityToggle != null) headerAction
+                                .testTag("live_island_header_${group.name}") else Modifier),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+                        UvirSpectrumGroupIcon(
+                            group = group,
+                            tint = titleColor,
+                            modifier = Modifier.testTag("live_group_icon_${group.name}")
+                        )
+                        Spacer(Modifier.width(8.dp))
+
+                        Column(
+                            modifier = Modifier.weight(1f),
+                            verticalArrangement = Arrangement.spacedBy(3.dp)
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = title,
+                                    modifier = Modifier.weight(1f, fill = false).testTag("live_group_title_${group.name}"),
+                                    color = titleColor,
+                                    fontSize = 16.sp,
+                                    lineHeight = 19.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                if (onGroupVisibilityToggle != null) {
+                                    Spacer(Modifier.width(4.dp))
+                                    UvirSpectrumVisibilityMark(groupVisible, titleColor,
+                                        Modifier.size(16.dp).testTag("live_group_${group.name}_${if (groupVisible) "check" else "cross"}"))
+                                }
+                                if (collapsible && reorderControls == null && onGroupVisibilityToggle == null) {
+                                    Spacer(Modifier.width(5.dp))
+                                    ExpansionChevron(expanded = expanded, tint = secondaryText, iconSize = 18.dp)
+                                }
+                            }
+
                             Text(
-                                text = title,
-                                modifier = Modifier.weight(1f, fill = false),
-                                color = if (alerted) UvirAttentionColor else primaryText,
-                                fontSize = 16.sp,
-                                lineHeight = 19.sp,
-                                fontWeight = FontWeight.Bold,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                            Spacer(Modifier.width(5.dp))
-                            ExpansionChevron(
-                                expanded = expanded,
-                                tint = secondaryText,
-                                iconSize = 18.dp
+                                text = if (groupMuted) {
+                                    "—"
+                                } else if (outOfRange) {
+                                    stringResource(R.string.out_of_range_short)
+                                } else {
+                                    "${mainViewIrradianceNumber(total)} ${LocalUvirIrradianceUnit.current.symbol}"
+                                },
+                                modifier = Modifier.testTag("live_group_total_${group.name}"),
+                                color = if (groupMuted) mutedColor else if (alerted) Color(0xFFF57C00) else primaryText,
+                                fontSize = 12.sp,
+                                lineHeight = 15.sp,
+                                fontWeight = FontWeight.Bold
                             )
                         }
-
-                        Text(
-                            text = if (outOfRange) {
-                                stringResource(R.string.out_of_range_short)
-                            } else {
-                                "${mainViewIrradianceNumber(total)} ${LocalUvirIrradianceUnit.current.symbol}"
-                            },
-                            color = if (alerted) Color(0xFFF57C00) else primaryText,
-                            fontSize = 12.sp,
-                            lineHeight = 15.sp,
-                            fontWeight = FontWeight.Bold
-                        )
                     }
 
                     onAlertClick?.let { alertClick ->
@@ -145,27 +187,36 @@ fun SpectrumCard(
                         Spacer(Modifier.width(10.dp))
                     }
 
+                    reorderControls?.invoke(title)
+
                     Column(
                         horizontalAlignment = Alignment.End,
                         verticalArrangement = Arrangement.spacedBy(3.dp)
                     ) {
                         Text(
                             text = bandLabel,
-                            color = secondaryText,
+                            modifier = Modifier
+                                .testTag("live_percentage_base_${group.name}")
+                                .then(if (onPercentageBaseToggle != null) Modifier.clickable(
+                                    role = Role.Button, onClick = onPercentageBaseToggle
+                                ).padding(vertical = 2.dp) else Modifier),
+                            textDecoration = if (onPercentageBaseToggle != null) TextDecoration.Underline else null,
+                            color = if (groupMuted) mutedColor else secondaryText,
                             fontSize = 12.sp,
                             lineHeight = 19.sp,
                             fontWeight = FontWeight.Normal,
                             maxLines = 1
                         )
                         Text(
-                            text = relativePercent?.let {
+                            text = relativePercent?.takeUnless { groupMuted }?.let {
                                 "${formatUvirNumber(
                                     it.toDouble() * 100.0,
                                     1,
                                     LocalUvirNumericFormat.current
                                 )}%"
                             } ?: "—",
-                            color = secondaryText,
+                            modifier = Modifier.testTag("live_group_percentage_${group.name}"),
+                            color = if (groupMuted) mutedColor else secondaryText,
                             fontSize = 12.sp,
                             lineHeight = 15.sp,
                             fontWeight = FontWeight.Bold
@@ -174,40 +225,38 @@ fun SpectrumCard(
                 }
 
                 SpectrumBar(
-                    percent = relativePercent ?: 0f,
+                    percent = if (groupMuted) 0f else relativePercent ?: 0f,
                     trackColor = trackColor,
-                    barColor = barColor
+                    barColor = barColor,
+                    modifier = Modifier.testTag("live_group_bar_${group.name}")
                 )
             }
 
-            UvirVerticalReveal(expanded) {
+            UvirVerticalReveal(onGroupVisibilityToggle != null || !collapsible || expanded) {
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(
-                            start = UvirIslandContentPadding,
-                            end = UvirIslandContentPadding,
-                            bottom = UvirIslandContentPadding
-                        ),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     UvirIslandHeaderDivider(
-                        color = secondaryText.copy(alpha = 0.20f)
+                        color = secondaryText.copy(alpha = 0.20f),
+                        modifier = Modifier.padding(horizontal = UvirIslandContentPadding)
                     )
 
                     if (showChart) {
-                        LiveRollingChart(
-                            history = liveHistory,
-                            series = liveChartSeries,
-                            unit = LocalUvirIrradianceUnit.current.symbol,
-                            valueScale = LocalUvirIrradianceUnit.current::fromCanonicalWm2,
-                            outOfRange = { it.isOutOfRange(group) },
-                            primaryText = primaryText,
-                            secondaryText = secondaryText
-                        )
+                        Column(Modifier.padding(UvirIslandContentPadding)) {
+                            LiveRollingChart(
+                                history = liveHistory,
+                                series = liveChartSeries,
+                                unit = LocalUvirIrradianceUnit.current.symbol,
+                                valueScale = LocalUvirIrradianceUnit.current::fromCanonicalWm2,
+                                outOfRange = chartOutOfRange ?: { it.isOutOfRange(group) },
+                                primaryText = primaryText,
+                                secondaryText = secondaryText
+                            )
+                        }
                     } else {
                         CompositionLocalProvider(
-                            LocalUvirDisplayedOutOfRange provides outOfRange
+                            LocalUvirDisplayedOutOfRange provides outOfRange,
+                            LocalUvirSpectrumRowSideInset provides UvirIslandContentPadding
                         ) {
                             content()
                         }
@@ -215,7 +264,8 @@ fun SpectrumCard(
                     footnote?.let { note ->
                         Text(
                             text = note,
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier.fillMaxWidth().padding(start = UvirIslandContentPadding,
+                                end = UvirIslandContentPadding, bottom = UvirIslandContentPadding),
                             color = secondaryText,
                             fontSize = 10.sp,
                             lineHeight = 13.sp
@@ -246,12 +296,34 @@ fun SpectrumRow(
     barColor: Color,
     alerted: Boolean = false,
     alertConfigured: Boolean = false,
-    onAlertClick: (() -> Unit)? = null
+    onAlertClick: (() -> Unit)? = null,
+    metric: ThresholdAlertMetric? = null,
+    visible: Boolean = true,
+    onVisibilityToggle: (() -> Unit)? = null
 ) {
-
+    val rowPrimaryText = if (visible) primaryText else secondaryText.copy(alpha = .55f)
+    val rowSecondaryText = if (visible) secondaryText else rowPrimaryText
+    val rowNameText = if (alerted && visible) Color(0xFFF57C00) else rowPrimaryText
+    val interactive = metric != null && onVisibilityToggle != null
+    val sideInset = LocalUvirSpectrumRowSideInset.current
+    val topInset = if (sideInset > 0.dp) spectrumRowPressTopInset(metric) else 0.dp
+    val bottomInset = if (sideInset > 0.dp) spectrumRowPressBottomInset(metric) else 0.dp
+    val rowInteraction = if (interactive) {
+        Modifier
+            .toggleable(
+                value = visible,
+                interactionSource = remember { MutableInteractionSource() },
+                indication = ripple(color = primaryText),
+                role = Role.Checkbox,
+                onValueChange = { onVisibilityToggle?.invoke() }
+            )
+    } else Modifier
     Column(
         modifier =
-            Modifier.fillMaxWidth(),
+            Modifier.fillMaxWidth()
+                .then(rowInteraction)
+                .testTag("live_row_${metric?.name ?: name}")
+                .padding(start = sideInset, end = sideInset, top = topInset, bottom = bottomInset),
 
         verticalArrangement =
             Arrangement.spacedBy(2.dp)
@@ -262,17 +334,13 @@ fun SpectrumRow(
                 Modifier.fillMaxWidth(),
 
             horizontalArrangement =
-                Arrangement.SpaceBetween
+                Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-
             Text(
                 text = name,
-                color =
-                    if (alerted) {
-                        Color(0xFFF57C00)
-                    } else {
-                        primaryText
-                    },
+                modifier = Modifier.testTag("live_name_${metric?.name ?: name}"),
+                color = rowNameText,
                 fontSize =
                     16.sp,
                 lineHeight = 19.sp,
@@ -280,13 +348,23 @@ fun SpectrumRow(
                     FontWeight.Bold
             )
 
+            if (interactive) {
+                Spacer(Modifier.width(4.dp))
+                // Fixed decorative slot after the name; the full row owns the action.
+                Box(Modifier.size(16.dp).testTag("live_selection_slot_${metric?.name}"),
+                    contentAlignment = Alignment.Center) {
+                    UvirSpectrumVisibilityMark(visible, rowNameText,
+                        Modifier.testTag("live_${if (visible) "check" else "cross"}_${metric?.name}"))
+                }
+            }
+
             Spacer(
                 Modifier.weight(1f)
             )
 
             Text(
                 text = band,
-                color = secondaryText,
+                color = rowSecondaryText,
                 fontSize =
                     12.sp,
                 lineHeight = 19.sp
@@ -306,16 +384,19 @@ fun SpectrumRow(
 
             Text(
                 text =
-                    if (LocalUvirDisplayedOutOfRange.current) {
+                    if (!visible) {
+                        "—"
+                    } else if (LocalUvirDisplayedOutOfRange.current) {
                         stringResource(R.string.out_of_range_short)
                     } else {
                         "${mainViewIrradianceNumber(value)} ${LocalUvirIrradianceUnit.current.symbol}"
                     },
+                modifier = Modifier.testTag("live_value_${metric?.name ?: name}"),
                 color =
-                    if (alerted) {
+                    if (alerted && visible) {
                         Color(0xFFF57C00)
                     } else {
-                        primaryText
+                        rowPrimaryText
                     },
                 fontSize =
                     12.sp,
@@ -324,13 +405,13 @@ fun SpectrumRow(
 
             Text(
                 text =
-                    percent?.let { "${formatUvirNumber(
+                    percent?.takeIf { visible }?.let { "${formatUvirNumber(
                         it.toDouble() * 100.0,
                         1,
                         LocalUvirNumericFormat.current
                     )}%" } ?: "—",
-                color =
-                    secondaryText,
+                modifier = Modifier.testTag("live_percentage_${metric?.name ?: name}"),
+                color = rowSecondaryText,
                 fontSize =
                     12.sp,
                 lineHeight = 15.sp
@@ -338,9 +419,10 @@ fun SpectrumRow(
         }
 
         SpectrumBar(
-            percent = percent ?: 0f,
+            percent = if (visible) percent ?: 0f else 0f,
             trackColor = trackColor,
-            barColor = barColor
+            barColor = barColor,
+            modifier = Modifier.testTag("live_bar_${metric?.name ?: name}")
         )
     }
 }
@@ -474,7 +556,8 @@ fun DerivedSpectrumRow(
 fun SpectrumBar(
     percent: Float,
     trackColor: Color,
-    barColor: Color
+    barColor: Color,
+    modifier: Modifier = Modifier
 ) {
 
     val fraction =
@@ -485,7 +568,7 @@ fun SpectrumBar(
 
     Canvas(
         modifier =
-            Modifier
+            modifier
                 .fillMaxWidth()
                 .height(7.dp)
                 .semantics { progressBarRangeInfo = ProgressBarRangeInfo(fraction, 0f..1f) }

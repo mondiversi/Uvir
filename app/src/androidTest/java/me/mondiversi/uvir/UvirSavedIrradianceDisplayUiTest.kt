@@ -9,6 +9,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
@@ -35,12 +37,14 @@ class UvirSavedIrradianceDisplayUiTest {
     private val direction = mutableStateOf(LayoutDirection.Ltr)
     private val group = mutableStateOf(SessionChartGroup.UV)
     private val session = mutableStateOf(false)
+    private var currentPrimaryText = Color.Unspecified
     private val sample = SensorSample(uvc = 100.0, uvb = 100.0, uva = 200.0,
         violetto = 200.0, blu = 200.0, verde = 200.0, giallo = 200.0,
         arancione = 100.0, rosso = 100.0, f8 = 300.0, nir = 100.0).scaledIrradiance(.01)
     private val records = listOf(SavedRecordDetail(1L, 1L, "", false, sample))
     private val violation = ThresholdAlertViolation(
         ThresholdAlertRule(ThresholdAlertMetric.UVC, true, ThresholdAlertDirection.ABOVE, .5f), 1.0)
+    private val alertViolations = mutableStateOf(listOf(violation))
 
     private fun fixture() {
         compose.setContent {
@@ -54,6 +58,8 @@ class UvirSavedIrradianceDisplayUiTest {
                 LocalUvirLiveIrradianceDecimals provides digits.value) {
                 MaterialTheme(colorScheme = if (dark.value) darkColorScheme() else lightColorScheme()) {
                     val colors = MaterialTheme.colorScheme
+                    currentPrimaryText = colors.onSurface
+                    var display by rememberUvirSavedValueDisplay("saved-fixture")
                     Surface {
                         Column(Modifier.width(340.dp).height(640.dp).padding(12.dp)
                             .verticalScroll(rememberScrollState())) {
@@ -61,17 +67,21 @@ class UvirSavedIrradianceDisplayUiTest {
                                 "saved" -> SessionAcquisitionValuesCard(records, group.value,
                                     showRecordHeader = session.value, showRelativeBreakdown = true,
                                     expanded = true, onToggle = {}, cardColor = colors.surfaceVariant,
-                                    primaryText = colors.onSurface, secondaryText = colors.onSurfaceVariant)
+                                    primaryText = colors.onSurface, secondaryText = colors.onSurfaceVariant,
+                                    display = display, onDisplayChange = { display = it })
                                 "live" -> SensorGroupContent(group.value.spectrumIconGroup(), true, {},
                                     sample = sample, uvTotal = 4.0, visibleTotal = 10.0, nirTotal = 4.0, hev = 4.0,
                                     cardColor = colors.surfaceVariant, primaryText = colors.onSurface,
                                     secondaryText = colors.onSurfaceVariant, trackColor = colors.outlineVariant)
-                                "alert" -> AlertViolationDataCard(false, listOf(violation), expanded = true,
+                                "alert" -> AlertViolationDataCard(false, alertViolations.value, expanded = true,
                                     onToggle = {}, cardColor = colors.surfaceVariant,
                                     primaryText = colors.onSurface, secondaryText = colors.onSurfaceVariant)
                                 "session_alert" -> AlertSessionValuesCard(listOf(AlertSessionValueEvent(
-                                    ThresholdAlertLogEntry(1L, 1L, "", sessionId = 1, sessionSequence = 1), listOf(violation))),
+                                    ThresholdAlertLogEntry(1L, 1L, "", sessionId = 1, sessionSequence = 1), alertViolations.value)),
                                     false, true, {}, colors.surfaceVariant, colors.onSurface, colors.onSurfaceVariant)
+                                "alert_summary" -> alertViolations.value.forEach {
+                                    AlertViolationSummary(it, primaryText = colors.onSurface, secondaryText = colors.onSurfaceVariant)
+                                }
                                 "chart" -> AcquisitionVerticalBarChart(acquisitionChartBars(sample),
                                     AcquisitionChartGroup.IRRADIANCE, colors.surfaceVariant, colors.onSurface, colors.onSurfaceVariant)
                             }
@@ -79,6 +89,71 @@ class UvirSavedIrradianceDisplayUiTest {
                     }
                 }
             }
+        }
+    }
+
+    @Test fun singleAndSessionAcquisitionsKeepPlainChannelNamesInBothThemes() {
+        fixture()
+        for (night in listOf(false, true)) for (showHeader in listOf(false, true)) {
+            for (spectralGroup in listOf(SessionChartGroup.UV, SessionChartGroup.VISIBLE, SessionChartGroup.FAR_RED_NIR)) {
+                compose.runOnIdle { dark.value = night; session.value = showHeader; group.value = spectralGroup }
+                for (series in sessionChartSeries(records, spectralGroup)) {
+                    val label = series.displayLabelResource?.let(context::getString) ?: series.label
+                    compose.onAllNodesWithText(label).onLast().performScrollTo().assertIsDisplayed()
+                }
+                compose.onAllNodes(hasText("nm", substring = true)).assertCountEquals(0)
+            }
+        }
+    }
+
+    @Test fun alertListSummaryUsesNeutralNamesAndAlignedPaletteDotsInBothThemesAndDirections() {
+        val metrics = SessionChartGroup.entries.flatMap(::savedAcquisitionMetrics)
+        alertViolations.value = metrics.map {
+            ThresholdAlertViolation(ThresholdAlertRule(it, true, ThresholdAlertDirection.ABOVE, .5f), 1.0)
+        }
+        page.value = "alert_summary"
+        fixture()
+        for (night in listOf(false, true)) for (layout in listOf(LayoutDirection.Ltr, LayoutDirection.Rtl)) {
+            compose.runOnIdle { dark.value = night; direction.value = layout }
+            for (metric in metrics) {
+                val name = compose.onNodeWithTag("alert_summary_name_${metric.name}", useUnmergedTree = true)
+                    .performScrollTo()
+                name.assertUvirActionTextColor(currentPrimaryText)
+                val dot = compose.onNodeWithTag("alert_summary_dot_${metric.name}", useUnmergedTree = true)
+                val nameBounds = name.getUnclippedBoundsInRoot()
+                val dotBounds = dot.getUnclippedBoundsInRoot()
+                assertEquals(10f, (dotBounds.right - dotBounds.left).value, .1f)
+                assertEquals(10f, (dotBounds.bottom - dotBounds.top).value, .1f)
+                val gap = if (layout == LayoutDirection.Ltr) nameBounds.left - dotBounds.right else dotBounds.left - nameBounds.right
+                assertEquals(8f, gap.value, .1f)
+                assertEquals((nameBounds.top.value + nameBounds.bottom.value) / 2f,
+                    (dotBounds.top.value + dotBounds.bottom.value) / 2f, .1f)
+                val pixels = dot.captureToImage().toPixelMap()
+                val actual = pixels[pixels.width / 2, pixels.height / 2]
+                val expected = uvirSpectralColor(metric)
+                assertEquals(expected.red, actual.red, .01f)
+                assertEquals(expected.green, actual.green, .01f)
+                assertEquals(expected.blue, actual.blue, .01f)
+            }
+            if (layout == LayoutDirection.Ltr) screenshot("alert-summary-neutral-${if (night) "night" else "day"}.png")
+        }
+    }
+
+    @Test fun singleSessionAndListAlertsKeepPlainChannelNamesInBothThemes() {
+        val metrics = listOf(ThresholdAlertMetric.UVC, ThresholdAlertMetric.UVB, ThresholdAlertMetric.UVA,
+            ThresholdAlertMetric.YELLOW, ThresholdAlertMetric.NIR)
+        alertViolations.value = metrics.map {
+            ThresholdAlertViolation(ThresholdAlertRule(it, true, ThresholdAlertDirection.ABOVE, .5f), 1.0)
+        }
+        fixture()
+        for (night in listOf(false, true)) for (currentPage in listOf("alert", "session_alert", "alert_summary")) {
+            compose.runOnIdle { dark.value = night; page.value = currentPage }
+            for (metric in metrics) {
+                compose.onNodeWithText(context.getString(thresholdAlertMetricLabelResource(metric)))
+                    .performScrollTo().assertIsDisplayed()
+            }
+            compose.onAllNodes(hasText("nm", substring = true)).assertCountEquals(0)
+            screenshot("saved-$currentPage-plain-${if (night) "night" else "day"}.png")
         }
     }
 

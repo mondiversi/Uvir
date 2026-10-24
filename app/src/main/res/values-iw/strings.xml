@@ -166,7 +166,7 @@
     <string name="sensor_source_title">מקור חיישן</string>
     <string name="sensor_source_accessibility">מקור חיישן: %1$s</string>
     <string name="sensor_source_debug_accessibility">עקיפת נתונים מדומים פעילה</string>
-    <string name="sensor_source_debug_hint">נתונים מדומים פעילים: כדי לבחור חיישן, כבו אותם בהגדרות → חיישן → אבחון.</string>
+    <string name="sensor_source_debug_hint">נתונים מדומים פעילים. כבו אותם כדי לבחור חיישן.</string>
     <string name="sensor_source_disabled_hint">ניתן להפעיל מחדש מקור מושבת דרך החיבור האלחוטי הפעיל האחר. אם שניהם מושבתים, חבר את החיישן באמצעות USB.</string>
     <string name="sensor_power_off">כיבוי חיישן</string>
     <string name="sensor_power_off_title">לכבות את החיישן?</string>
@@ -436,11 +436,11 @@
     <string name="app_version">גרסת האפליקציה: %1$s</string>
     <string name="package_name_value">חבילה: %1$s</string>
     <string name="about_whats_new_title">מה חדש בגרסה %1$s</string>
-    <string name="about_whats_new_connectivity">מקדמי תיקון והיסטים לכל ערוץ, עם מדידה מודרכת של ההיסטים הממוצעים ואישור לפני איפוס.</string>
-    <string name="about_whats_new_connections">פיצוי חלון אופטי באמצעות מכפיל כללי ומכפילי ערוצים; הבהרת טווחי AS7331 ושיאי הרגישות של AS7343.</string>
-    <string name="about_whats_new_measurements">אחסון פנימי של עוצמת הקרינה ב-W/m², עם העברה אוטומטית השומרת על המדידות וההגדרות הקיימות.</string>
-    <string name="about_whats_new_interface">מספר ספרות עשרוניות ניתן להגדרה לערכים חיים, נתונים שמורים וייצוא מותאם; ייצוא מדעי שומר על מלוא הדיוק המאוחסן.</string>
-    <string name="about_whats_new_github">תפריט הגדרות וחלונות דו-שיח משופרים; מדריכי חיווט, הרכבה וכיול מעודכנים, כולל צינורות כיווניים ודרישות למפזר אור.</string>
+    <string name="about_whats_new_connectivity">ייצוא/ייבוא מדידות והתראות כקובצי .uvirrecords ללא סיסמה, כולל הפעלות, הערות וגרסאות מדידה.</string>
+    <string name="about_whats_new_connections">התאמת מזהי חומרה, מזהים מקומיים חדשים וזיהוי כפילויות שומרים על מקור הנתונים המיובאים.</string>
+    <string name="about_whats_new_measurements">התצוגה הראשית זוכרת את סדר הכרטיסים ואת התחומים המוסתרים; במדידות שמורות יש פקדים זמניים ואחוזים מהסך הכול או מהקבוצה.</string>
+    <string name="about_whats_new_interface">צבעים ספקטרליים אחידים, שמות ניטרליים עם נקודות צבע בנתונים שמורים, שורות הפעלה ברורות יותר ושינוי סדר הכרטיסים בהנפשה.</string>
+    <string name="about_whats_new_github">שופרו תיבות דו-שיח, פעולות יום/לילה והתראות על נתונים מדומים, ועודכנו בדיקות המוכנות והשחזור של עדכוני USB.</string>
     <string name="about_description">אפליקציה לאיסוף נתונים ספקטרליים של קרינה על־סגולה, נראית ותת־אדומה.</string>
     <string name="about_spectral_ranges">תחומים ספקטרליים: על־סגול • אור נראה • תת־אדום</string>
     <string name="about_sensors">חיישנים נתמכים: AS7331 UV • AS7343 multispectral</string>
@@ -813,5 +813,6 @@
     <string name="alert_max_registrations">מספר רישומים מרבי</string>
     <string name="alert_registration_count">מספר רישומים</string>
     <string name="alert_configure_first">יש להגדיר לפחות ערך אחד לפני ההפעלה.</string>
-    <string name="sensor_simulation_open_settings">הגדרות</string>
+    <string name="sensor_simulation_disable">כיבוי</string>
+    <string name="settings_import_confirmation_description">ההגדרות בקבצים שנבחרו יחליפו את ההגדרות הנוכחיות.</string>
 </resources>

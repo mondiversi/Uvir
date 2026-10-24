@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_percent_total" formatted="false">% jumla</string>
+    <string name="live_percent_group" formatted="false">% kundi</string>
+    <string name="live_channel_hide">Ficha %1$s kwenye mwonekano wa moja kwa moja</string>
+    <string name="live_channel_show">Onyesha %1$s kwenye mwonekano wa moja kwa moja</string>
+</resources>

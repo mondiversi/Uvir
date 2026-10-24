@@ -1,0 +1,4 @@
+<resources>
+    <string name="main_island_move_up">%1$s yukarı taşı</string>
+    <string name="main_island_move_down">%1$s aşağı taşı</string>
+</resources>

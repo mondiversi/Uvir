@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="export_percentages_total">אחוזים מתוך הסך הכולל</string>
+    <string name="export_percentages_group">אחוזים בתוך הקבוצה</string>
     <string name="data_export_files_heading">קבצים</string>
     <string name="export_saved_successfully">הקבצים נשמרו.</string>
     <string name="export_save_failed">לא ניתן לשמור את הקבצים.</string>

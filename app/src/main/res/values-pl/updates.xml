@@ -10,9 +10,11 @@
     <string name="update_download">Pobieranie i weryfikacja…</string>
     <string name="update_flash">Aktualizowanie czujnika…</string>
     <string name="update_verify">Weryfikowanie czujnika…</string>
-    <string name="update_keep_connected">Nie odłączaj USB ani nie wyłączaj czujnika. W razie potrzeby przytrzymaj BOOT i spróbuj ponownie.</string>
+    <string name="update_app_verify">Weryfikacja aplikacji…</string>
+    <string name="update_app_failed">Aktualizacja aplikacji nie powiodła się. Sprawdź dziennik błędów i spróbuj ponownie.</string>
+    <string name="update_keep_connected">Nie odłączaj USB ani nie wyłączaj czujnika.</string>
     <string name="update_done">Czujnik zaktualizowany</string>
     <string name="update_failed">Aktualizacja nie powiodła się. Zobacz dziennik błędów. Jeśli czujnik nie uruchamia się, odzyskaj firmware przez USB z komputera.</string>
     <string name="update_permission">Zezwól Uvir na instalowanie aktualizacji w ustawieniach Androida.</string>
-    <string name="update_whats_new">Eksporty CSV, TXT i PNG z modelami czujników, zwięzłymi danymi widmowymi i czytelniejszymi legendami wykresów.</string>
+    <string name="update_whats_new">Eksporty TXT i CSV pomiarów zawierają procenty całości i grupy, ze spójnymi kolorami PNG oraz potwierdzeniem importu przez przytrzymanie przez pięć sekund.</string>
 </resources>

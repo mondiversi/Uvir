@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="record_archive_title">القياسات والتنبيهات</string>
+    <string name="record_archive_description">تصدير/استيراد القياسات والتنبيهات، بما في ذلك جلساتها.</string>
+    <string name="record_archive_export_description">صدّر جميع السجلات المحفوظة من هذا النوع، بما في ذلك الجلسات، إلى ملف UVIR دون كلمة مرور.</string>
+    <string name="record_archive_import_description">ستُضاف البيانات إلى الأرشيف. تُتخطى السجلات الموجودة. تظهر المستشعرات غير المعروفة بمعرّف العتاد حتى يتم إقرانها.</string>
+    <string name="record_archive_import_summary">السجلات: %1$d · الجلسات: %2$d</string>
+    <string name="record_archive_import_success">تم الاستيراد: %1$d · موجود مسبقًا: %2$d</string>
+    <string name="record_archive_failed">تعذّر نقل السجلات. تحقّق من الملف ونوع البيانات.</string>
+</resources>

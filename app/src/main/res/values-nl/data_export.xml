@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="export_percentages_total">Percentages van het totaal</string>
+    <string name="export_percentages_group">Percentages binnen de groep</string>
     <string name="data_export_files_heading">Bestanden</string>
     <string name="export_saved_successfully">Bestanden opgeslagen.</string>
     <string name="export_save_failed">De bestanden kunnen niet worden opgeslagen.</string>

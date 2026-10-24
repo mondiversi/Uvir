@@ -1175,12 +1175,7 @@ internal fun AlertViolationSummary(
     showBiologicalEquivalentUnit: Boolean = true,
     showThresholdDeltaOnly: Boolean = false
 ) {
-    val metricLabel = sensorChannelLabel(
-        stringResource(
-            thresholdAlertMetricLabelResource(
-                violation.rule.metric
-            )
-        ), thresholdAlertMetricLabelResource(violation.rule.metric))
+    val metricLabel = stringResource(thresholdAlertMetricLabelResource(violation.rule.metric))
     val irradianceUnit = LocalUvirIrradianceUnit.current
     val unit =
         if (
@@ -1228,16 +1223,17 @@ internal fun AlertViolationSummary(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        UvirSpectralDot(violation.rule.metric,
+            Modifier.testTag("alert_summary_dot_${violation.rule.metric.name}"))
+        Spacer(Modifier.width(8.dp))
         Text(
             text = metricLabel,
             modifier =
                 Modifier
                     .weight(1f)
+                    .testTag("alert_summary_name_${violation.rule.metric.name}")
                     .padding(end = 8.dp),
-            color =
-                thresholdAlertMetricDisplayColor(
-                    violation.rule.metric
-                ),
+            color = primaryText,
             fontSize = 12.sp,
             fontWeight = FontWeight.Medium,
             maxLines = 1,

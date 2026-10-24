@@ -10,9 +10,11 @@
     <string name="update_download">İndirme ve doğrulama…</string>
     <string name="update_flash">Sensör güncelleniyor…</string>
     <string name="update_verify">Sensör doğrulanıyor…</string>
-    <string name="update_keep_connected">USB bağlantısını kesmeyin veya sensörü kapatmayın. Gerekirse BOOT düğmesini basılı tutup tekrar deneyin.</string>
+    <string name="update_app_verify">Uygulama doğrulanıyor…</string>
+    <string name="update_app_failed">Uygulama güncellenemedi. Hata günlüğünü inceleyip tekrar deneyin.</string>
+    <string name="update_keep_connected">USB bağlantısını kesmeyin veya sensörü kapatmayın.</string>
     <string name="update_done">Sensör güncellendi</string>
     <string name="update_failed">Güncelleme başarısız. Hata günlüğüne bakın. Sensör açılmıyorsa bilgisayardan USB ile ürün yazılımını kurtarın.</string>
     <string name="update_permission">Android ayarlarında Uvir uygulamasına güncelleme yükleme izni verin.</string>
-    <string name="update_whats_new">Sensör modelleri, kısa spektral bilgiler ve daha okunaklı grafik açıklamaları içeren CSV, TXT ve PNG dışa aktarımları.</string>
+    <string name="update_whats_new">Ölçümlerin TXT ve CSV dışa aktarımları toplam/grup yüzdelerini içerir; PNG renkleri tutarlıdır ve içe aktarma beş saniye basılı tutularak onaylanır.</string>
 </resources>

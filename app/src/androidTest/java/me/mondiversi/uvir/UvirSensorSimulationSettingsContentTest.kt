@@ -182,17 +182,20 @@ class UvirSensorSimulationSettingsContentTest {
     }
 
     @Test
-    fun menuShortcutOpensDiagnosticsAtMockControlsWithoutChangingSimulation() {
+    fun menuDisableSurvivesSensorContextRebuildAndRestorationWithoutOpeningSettings() {
         val simulation = mutableStateOf(UvirSensorSimulationSettings(enabled = true))
         val generation = mutableStateOf(0)
         lateinit var route: UvirSettingsRouteState
-        compose.setContent {
+        val restorer = StateRestorationTester(compose)
+        restorer.setContent {
+            KeepUvirVerificationScreenOn()
             route = rememberUvirSettingsRouteState()
+            val menuOpen = androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(true) }
             MaterialTheme {
-                if (!route.isOpen.value) {
+                key(generation.value) {
                     UvirHomeSensorSelectionDialog(
-                        expanded = true,
-                        onDismissRequest = {},
+                        expanded = menuOpen.value,
+                        onDismissRequest = { menuOpen.value = false },
                         sensorProfiles = emptyList(),
                         selectedSensorDeviceId = "",
                         sensorConnectionModes = emptyMap(),
@@ -204,50 +207,30 @@ class UvirSensorSimulationSettingsContentTest {
                         containerColor = MaterialTheme.colorScheme.surface,
                         onSensorSelected = {},
                         simulationActive = simulation.value.enabled,
-                        onOpenSimulationSettings = route::openSimulationSettings
-                    )
-                } else {
-                    Column {
-                        Text(route.page.value!!.name, Modifier.testTag("shortcut-page"))
-                        Column(Modifier.fillMaxWidth().height(240.dp).verticalScroll(route.scrollState)) {
-                            key(generation.value) {
-                                Text("Full diagnostic test", Modifier.height(600.dp))
-                                UvirSensorSimulationSettingsContent(
-                                    enabled = simulation.value.enabled,
-                                    outOfRange = simulation.value.outOfRange,
-                                    onEnabledChange = {
-                                        simulation.value = simulation.value.copy(enabled = it)
-                                        generation.value++
-                                    },
-                                    onOutOfRangeChange = {
-                                        simulation.value = simulation.value.copy(outOfRange = it)
-                                    },
-                                    primaryText = MaterialTheme.colorScheme.onSurface,
-                                    secondaryText = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    scrollIntoView = route.simulationFocusRequested.value,
-                                    onShown = { route.simulationFocusRequested.value = false }
-                                )
-                                Text("Sensor concert", Modifier.height(600.dp))
-                            }
+                        onDisableSimulation = {
+                            simulation.value = simulation.value.copy(enabled = false)
+                            generation.value++
                         }
-                    }
+                    )
                 }
             }
         }
-        compose.onNodeWithTag("home_sensor_simulation_settings").performClick()
-        compose.onNodeWithTag("home_sensor_dialog").assertDoesNotExist()
-        compose.onNodeWithTag("shortcut-page").assertTextEquals(UvirSettingsPage.DEBUG.name)
-        compose.waitUntil(5_000) { !route.simulationFocusRequested.value }
-        compose.onNodeWithTag("simulation_settings_controls").assertIsDisplayed()
-        compose.onAllNodes(isToggleable())[0].assertIsOn()
-        var initialScroll = 0
-        compose.runOnIdle {
-            initialScroll = route.scrollState.value
-            org.junit.Assert.assertTrue(initialScroll > 0)
-            org.junit.Assert.assertTrue(simulation.value.enabled)
+        compose.onNodeWithTag("home_sensor_simulation_disable").performClick()
+        compose.onNodeWithTag("home_sensor_dialog").assertIsDisplayed()
+        compose.onNodeWithTag("home_sensor_simulation_warning").assertDoesNotExist()
+        compose.onNodeWithTag("home_sensor_add").assertIsDisplayed()
+        compose.onNodeWithTag("home_sensor_connection_footer").assertIsDisplayed()
+        for (mode in SensorConnectionMode.entries) {
+            compose.onNodeWithTag("home_source_option_${mode.name}").assertIsNotEnabled()
         }
-        compose.onAllNodes(isToggleable())[0].performClick().assertIsOff()
-        compose.onNodeWithTag("shortcut-page").assertTextEquals(UvirSettingsPage.DEBUG.name)
-        compose.runOnIdle { org.junit.Assert.assertEquals(initialScroll, route.scrollState.value) }
+        compose.runOnIdle {
+            org.junit.Assert.assertFalse(simulation.value.enabled)
+            org.junit.Assert.assertFalse(route.isOpen.value)
+            org.junit.Assert.assertEquals(1, generation.value)
+        }
+        restorer.emulateSavedInstanceStateRestore()
+        compose.onNodeWithTag("home_sensor_dialog").assertIsDisplayed()
+        compose.onNodeWithTag("home_sensor_simulation_warning").assertDoesNotExist()
+        compose.runOnIdle { org.junit.Assert.assertFalse(route.isOpen.value) }
     }
 }

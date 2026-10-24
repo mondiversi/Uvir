@@ -10,9 +10,11 @@
     <string name="update_download">Mengunduh dan memverifikasi…</string>
     <string name="update_flash">Memperbarui sensor…</string>
     <string name="update_verify">Memverifikasi sensor…</string>
-    <string name="update_keep_connected">Jangan lepaskan USB atau matikan sensor. Jika perlu, tahan BOOT dan coba lagi.</string>
+    <string name="update_app_verify">Memverifikasi aplikasi…</string>
+    <string name="update_app_failed">Pembaruan aplikasi gagal. Lihat log kesalahan dan coba lagi.</string>
+    <string name="update_keep_connected">Jangan putuskan USB atau matikan sensor.</string>
     <string name="update_done">Sensor diperbarui</string>
     <string name="update_failed">Pembaruan gagal. Lihat log kesalahan. Jika sensor tidak lagi menyala, pulihkan firmware melalui USB dari komputer.</string>
     <string name="update_permission">Izinkan Uvir memasang pembaruan di pengaturan Android.</string>
-    <string name="update_whats_new">Ekspor CSV, TXT, dan PNG dengan model sensor, referensi spektral ringkas, serta legenda grafik yang lebih mudah dibaca.</string>
+    <string name="update_whats_new">Ekspor TXT dan CSV akuisisi menyertakan persentase total dan kelompok, dengan warna PNG konsisten serta konfirmasi impor melalui tekan tahan lima detik.</string>
 </resources>

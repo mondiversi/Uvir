@@ -537,28 +537,7 @@ internal fun thresholdAlertMetricLabelResource(
 
 internal fun thresholdAlertMetricDisplayColor(
     metric: ThresholdAlertMetric
-): Color =
-    when (metric) {
-        ThresholdAlertMetric.UV_TOTAL -> Color(0xFF7E57C2)
-        ThresholdAlertMetric.UVC -> Color(0xFF9C27B0)
-        ThresholdAlertMetric.UVB -> Color(0xFF673AB7)
-        ThresholdAlertMetric.UVA -> Color(0xFF3F51B5)
-        ThresholdAlertMetric.HEV -> Color(0xFF3949AB)
-        ThresholdAlertMetric.HEB -> Color(0xFF7B1FA2)
-        ThresholdAlertMetric.VISIBLE_TOTAL -> Color(0xFF00ACC1)
-        ThresholdAlertMetric.VIOLET -> Color(0xFF8E24AA)
-        ThresholdAlertMetric.BLUE -> Color(0xFF1E88E5)
-        ThresholdAlertMetric.GREEN -> Color(0xFF43A047)
-        ThresholdAlertMetric.YELLOW -> Color(0xFFFDD835)
-        ThresholdAlertMetric.ORANGE -> Color(0xFFFB8C00)
-        ThresholdAlertMetric.RED -> Color(0xFFE53935)
-        ThresholdAlertMetric.FAR_RED -> Color(0xFFD32F2F)
-        ThresholdAlertMetric.NIR_TOTAL -> Color(0xFF795548)
-        ThresholdAlertMetric.NIR -> Color(0xFF8D6E63)
-        ThresholdAlertMetric.BIO_DNA_UV -> Color(0xFF673AB7)
-        ThresholdAlertMetric.BIO_UVA_PHOTOAGING -> Color(0xFF3F51B5)
-        ThresholdAlertMetric.BIO_HEV_OXIDATIVE -> Color(0xFF1E88E5)
-    }
+): Color = uvirSpectralColor(metric)
 
 internal fun parseThresholdAlertLogDetails(
     details: String

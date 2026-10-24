@@ -1,0 +1,4 @@
+<resources>
+    <string name="main_island_move_up">Pindahkan %1$s ke atas</string>
+    <string name="main_island_move_down">Pindahkan %1$s ke bawah</string>
+</resources>

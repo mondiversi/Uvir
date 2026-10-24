@@ -31,7 +31,7 @@ class UvirConnectionNotificationTest {
         UvirSensorProfile(3, "C", "Terzo", 0, 0)
     )
 
-    @Test fun oneSensorShowsItsNameAndActualStateIncludingSimulation() {
+    @Test fun realSensorKeepsItsNameButMockSelectionOnlyShowsItsOwnStatus() {
         val res = context().resources
         val connected = buildUvirConnectionNotification(res,
             listOf(UvirConnectionSensorState("a", UvirConnectionState.CONNECTED)), profiles, "a")
@@ -39,9 +39,51 @@ class UvirConnectionNotificationTest {
         assertEquals(UvirStatusDot.GREEN.colorArgb, connected.colorArgb)
         assertFalse(connected.busy)
         val fake = buildUvirConnectionNotification(res,
-            listOf(UvirConnectionSensorState("a", UvirConnectionState.SIMULATED, true)), profiles, "a")
-        assertEquals("🟠 Portatile · Simulazione", fake.text)
+            listOf(UvirConnectionSensorState("a", UvirConnectionState.SIMULATED, true)), profiles, "a",
+            simulationActive = true)
+        assertEquals("🟠 Dati fittizi attivi", fake.text)
+        assertEquals(listOf(fake.text), fake.lines)
+        assertEquals(UvirStatusDot.DEBUG.colorArgb, fake.colorArgb)
         assertFalse(fake.busy)
+    }
+
+    @Test fun mockSelectionWorksWithoutAnAssociatedSensorAndIgnoresRealBackgroundActivity() {
+        val res = context().resources
+        val states = listOf(
+            UvirConnectionSensorState("a", UvirConnectionState.CONNECTED, true),
+            UvirConnectionSensorState("b", UvirConnectionState.CONNECTING))
+        val real = buildUvirConnectionNotification(res, states, profiles, "a")
+        for (background in listOf(emptyList(), states)) {
+            val fake = buildUvirConnectionNotification(res, background, profiles, "", simulationActive = true)
+            assertEquals("🟠 Dati fittizi attivi", fake.text)
+            assertEquals(listOf(fake.text), fake.lines)
+            assertEquals(UvirStatusDot.DEBUG.colorArgb, fake.colorArgb)
+            assertFalse(fake.busy)
+        }
+        // Leaving simulation restores the same real summary, without changing any worker state.
+        assertEquals(real, buildUvirConnectionNotification(res, states, profiles, "a"))
+        assertEquals(UvirConnectionCounts(1, 1, 1, 0), uvirConnectionCounts(states))
+    }
+
+    @Test fun mockNotificationUsesTheOrangeUvirIconAndOnlyTheLocalizedStatusInBothThemes() {
+        for (mode in listOf(Configuration.UI_MODE_NIGHT_NO, Configuration.UI_MODE_NIGHT_YES)) {
+            val ctx = context().let { base -> base.createConfigurationContext(
+                Configuration(base.resources.configuration).apply {
+                    uiMode = (uiMode and Configuration.UI_MODE_NIGHT_MASK.inv()) or mode
+                }) }
+            val payload = buildUvirConnectionNotification(ctx.resources, emptyList(), emptyList(), "",
+                simulationActive = true)
+            val notification = uvirConnectionNotificationBuilder(ctx, "test_unposted", payload).build()
+            assertEquals(ctx.getString(R.string.app_name), notification.extras.getCharSequence(Notification.EXTRA_TITLE).toString())
+            assertEquals("🟠 Dati fittizi attivi", notification.extras.getCharSequence(Notification.EXTRA_TEXT).toString())
+            assertEquals(payload.text, notification.extras.getCharSequence(Notification.EXTRA_BIG_TEXT).toString())
+            assertEquals(R.drawable.ic_notification_uvir, notification.smallIcon.resId)
+            assertEquals(UvirStatusDot.DEBUG.colorArgb, notification.color)
+            assertFalse(notification.extras.getBoolean(Notification.EXTRA_PROGRESS_INDETERMINATE))
+            assertNull(notification.sound)
+            assertNull(notification.vibrate)
+            assertTrue(notification.flags and Notification.FLAG_ONGOING_EVENT != 0)
+        }
     }
 
     @Test fun multipleSensorsShowStableCountsAndExpandedNamedRows() {
@@ -103,6 +145,10 @@ class UvirConnectionNotificationTest {
                     UvirConnectionSensorState("b", UvirConnectionState.SIMULATED)), profiles, "a")
             assertEquals(2, payload.lines.size)
             assertTrue(payload.lines.first().contains("Portatile"))
+            val fake = buildUvirConnectionNotification(res, emptyList(), emptyList(), "", simulationActive = true)
+            assertEquals("🟠 ${res.getString(R.string.sensor_status_simulated)}", fake.text)
+            assertEquals(listOf(fake.text), fake.lines)
+            assertEquals(UvirStatusDot.DEBUG.colorArgb, fake.colorArgb)
         }
     }
 

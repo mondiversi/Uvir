@@ -764,6 +764,8 @@ internal fun UvirSettingsGeneralSections(
             }
         }
 
+        UvirRecordArchiveIsland(database, cardColor, primaryText, secondaryText)
+
         SettingsIsland(containerColor = cardColor, contentColor = primaryText) {
             val exportDescription = stringResource(R.string.export_database)
             val importDescription = stringResource(R.string.import_database)

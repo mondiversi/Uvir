@@ -10,9 +10,11 @@
     <string name="update_download">डाउनलोड और सत्यापन…</string>
     <string name="update_flash">सेंसर अपडेट हो रहा है…</string>
     <string name="update_verify">सेंसर सत्यापन…</string>
-    <string name="update_keep_connected">USB न निकालें और सेंसर बंद न करें। जरूरत हो तो BOOT दबाए रखें और फिर कोशिश करें।</string>
+    <string name="update_app_verify">ऐप सत्यापित किया जा रहा है…</string>
+    <string name="update_app_failed">ऐप अपडेट विफल हुआ। त्रुटि लॉग देखें और फिर से प्रयास करें।</string>
+    <string name="update_keep_connected">USB न निकालें और सेंसर बंद न करें।</string>
     <string name="update_done">सेंसर अपडेट हुआ</string>
     <string name="update_failed">अपडेट विफल रहा। त्रुटि लॉग देखें। सेंसर चालू न हो तो कंप्यूटर से USB द्वारा फ़र्मवेयर पुनर्स्थापित करें।</string>
     <string name="update_permission">Android सेटिंग में Uvir को अपडेट स्थापित करने दें।</string>
-    <string name="update_whats_new">सेंसर मॉडल, संक्षिप्त वर्णक्रमीय संदर्भ और अधिक स्पष्ट ग्राफ़ संकेतों सहित CSV, TXT और PNG निर्यात।</string>
+    <string name="update_whats_new">मापों के TXT और CSV निर्यात में कुल और समूह प्रतिशत हैं; PNG रंग एकसमान हैं और आयात की पुष्टि के लिए पाँच सेकंड दबाए रखना होता है।</string>
 </resources>
