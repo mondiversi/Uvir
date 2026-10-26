@@ -16,5 +16,5 @@
     <string name="update_done">센서가 업데이트되었습니다</string>
     <string name="update_failed">업데이트에 실패했습니다. 오류 로그를 확인하세요. 센서가 시작되지 않으면 컴퓨터에서 USB로 펌웨어를 복구하세요.</string>
     <string name="update_permission">Android 설정에서 Uvir의 업데이트 설치를 허용하세요.</string>
-    <string name="update_whats_new">측정의 TXT 및 CSV 내보내기에 전체와 그룹 비율을 포함합니다. PNG 색상을 통일하고 가져오기는 5초 길게 눌러 확인합니다.</string>
+    <string name="update_whats_new">펌웨어 0.5.119는 최신 측정값 확인과 Wi-Fi 복구를 개선합니다.</string>
 </resources>

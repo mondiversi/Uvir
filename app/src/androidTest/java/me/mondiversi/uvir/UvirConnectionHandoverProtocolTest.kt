@@ -6,11 +6,15 @@ import android.content.SharedPreferences
 import androidx.test.platform.app.InstrumentationRegistry
 import com.hoho.android.usbserial.driver.UsbSerialPort
 import java.io.ByteArrayOutputStream
+import java.io.ByteArrayInputStream
+import java.io.IOException
 import java.io.File
 import java.lang.reflect.Proxy
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
+import org.json.JSONObject
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.After
 import org.junit.Assert.*
@@ -75,6 +79,92 @@ class UvirConnectionHandoverProtocolTest {
     }
 
     private val accepted = "{\"type\":\"status\",\"protocol\":\"uvir-sensor-v1\",\"wireless_mode\":\"bluetooth\"}"
+
+    private fun hello(boot: String, connected: Boolean = true) = JSONObject()
+        .put("type", "hello").put("protocol", "uvir-sensor-v1").put("device_id", deviceId)
+        .put("boot_id", boot).put("app_connected", connected).put("sensor_available", true)
+        .put("firmware", "0.5.115").toString()
+
+    private fun sample(boot: String, age: Int = 0, valid: Boolean = true) = JSONObject()
+        .put("type", "sample").put("protocol", "uvir-sensor-v1").put("boot_id", boot)
+        .put("unit", "W/m2").put("seq", 7).put("sample_seq", 3)
+        .put("sample_valid", valid).put("sample_age_ms", age).put("sample_max_age_ms", 500)
+        .put("bands", JSONObject().put("uva", 1.25).put("blue", 2.5)).toString()
+
+    @Test fun restartedSensorClearsOldReadingsAndReopensTheLogicalSessionExactlyOnce() {
+        val output = ByteArrayOutputStream()
+        val manager = wireless(output)
+        try {
+            receive(manager, hello("A")); receive(manager, sample("A"))
+            assertNotNull(manager.state.value.sample)
+            output.reset()
+            receive(manager, hello("B", connected = false))
+            assertNull(manager.state.value.sample)
+            assertFalse(manager.state.value.appConnectionConfirmed)
+            assertEquals(0L, manager.state.value.sampleSequence)
+            assertEquals(1, output.toString().lines().count { it == "APP_CONNECT" })
+            receive(manager, hello("B", connected = false))
+            assertEquals(1, output.toString().lines().count { it == "APP_CONNECT" })
+            receive(manager, sample("A")); receive(manager, hello("A"))
+            assertNull(manager.state.value.sample)
+            receive(manager, sample("B"))
+            assertEquals(1.25, requireNotNull(manager.state.value.sample).uva, 0.0)
+        } finally { manager.stop() }
+    }
+
+    @Test fun staleAndTemporarilyMissingSamplesClearNumbersWithoutInventingZeros() {
+        val manager = wireless(ByteArrayOutputStream())
+        try {
+            receive(manager, hello("A")); receive(manager, sample("A"))
+            receive(manager, sample("A", age = 501))
+            assertNull(manager.state.value.sample)
+            receive(manager, sample("A")); assertNotNull(manager.state.value.sample)
+            receive(manager, """{"type":"sample_status","protocol":"uvir-sensor-v1","boot_id":"A","sample_valid":false}""")
+            assertNull(manager.state.value.sample)
+            receive(manager, sample("A")); assertNotNull(manager.state.value.sample)
+        } finally { manager.stop() }
+    }
+
+    @Test fun expiredAppSessionWithTheSameBootIsReestablished() {
+        val output = ByteArrayOutputStream()
+        val manager = wireless(output)
+        try {
+            receive(manager, hello("A")); receive(manager, sample("A")); output.reset()
+            receive(manager, hello("A", connected = false))
+            assertNull(manager.state.value.sample)
+            assertFalse(manager.state.value.appConnectionConfirmed)
+            assertTrue(output.toString().contains("APP_CONNECT\n"))
+        } finally { manager.stop() }
+    }
+
+    @Test fun closedWifiSocketIsDetectedImmediatelyEvenWhenAvailableReturnsZero() {
+        val manager = wireless(ByteArrayOutputStream())
+        try {
+            val generation = manager.javaClass.getDeclaredField("generation").apply { isAccessible = true }
+                .get(manager) as AtomicInteger
+            val method = manager.javaClass.getDeclaredMethod("runProtocol", java.io.InputStream::class.java,
+                java.io.OutputStream::class.java, UvirSensorCredentials::class.java,
+                SensorConnectionMode::class.java, Int::class.javaPrimitiveType).apply { isAccessible = true }
+            val started = System.nanoTime()
+            try {
+                method.invoke(manager, ByteArrayInputStream(byteArrayOf()), ByteArrayOutputStream(),
+                    UvirSensorCredentials(deviceId = deviceId), SensorConnectionMode.WIFI, generation.get())
+                fail("TCP EOF must close the session")
+            } catch (error: java.lang.reflect.InvocationTargetException) {
+                assertTrue(error.cause is IOException)
+                assertEquals("wireless_connection_closed", error.cause?.message)
+            }
+            assertTrue(TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - started) < 1_000)
+        } finally { manager.stop() }
+    }
+
+    @Test fun malformedAndForeignFramesCannotKeepAConnectionAlive() {
+        assertFalse(uvirValidLiveProtocolFrame("garbage", deviceId))
+        assertFalse(uvirValidLiveProtocolFrame("{}", deviceId))
+        assertFalse(uvirValidLiveProtocolFrame(hello("A").replace(deviceId, "OTHER"), deviceId))
+        assertTrue(uvirValidLiveProtocolFrame(hello("A"), deviceId))
+        assertTrue(uvirValidLiveProtocolFrame(sample("A"), deviceId))
+    }
 
     @Test fun wirelessStatusConfirmsSwitchWhileBackgroundRefreshRemainsResponsive() {
         val reader = Executors.newSingleThreadExecutor()
@@ -147,6 +237,24 @@ class UvirConnectionHandoverProtocolTest {
             setState(it, UvirUsbSensorState(status = UsbSensorConnectionStatus.CONNECTED,
                 deviceId = deviceId, appConnectionConfirmed = true))
         }
+    }
+
+    @Test fun usbRebootClearsOldNumbersAndRejectsPreviousBootSamples() {
+        UvirSensorCredentialStore.save(context, UvirSensorCredentials(deviceId = deviceId,
+            authToken = "isolated-test-token", wifiSsid = "fixture"))
+        val manager = usb { }
+        val parse = manager.javaClass.getDeclaredMethod("parseLine", String::class.java)
+            .apply { isAccessible = true }
+        try {
+            parse.invoke(manager, hello("A")); parse.invoke(manager, sample("A"))
+            assertNotNull(manager.state.value.sample)
+            parse.invoke(manager, hello("B", connected = false))
+            assertNull(manager.state.value.sample)
+            assertFalse(manager.state.value.appConnectionConfirmed)
+            parse.invoke(manager, sample("A")); assertNull(manager.state.value.sample)
+            parse.invoke(manager, sample("B")); assertNotNull(manager.state.value.sample)
+            parse.invoke(manager, sample("B", valid = false)); assertNull(manager.state.value.sample)
+        } finally { manager.stop() }
     }
 
     @Test fun usbStatusConfirmsTheSelectedSensorsWirelessMode() {

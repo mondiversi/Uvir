@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="dark_offsets_calculate">오프셋 계산</string>
-    <string name="dark_offsets_instructions">안정적인 기준 조건에서 약 30초 동안 측정합니다. 어두운 곳에서는 센서 배경값을 보정하고, 조명이 있는 곳에서는 현재 빛도 빼므로 상대 측정값이 됩니다. 어두운 곳에서 측정할 때는 근적외선도 차단하는 재료로 광학 입력을 덮고 LED를 정상 작동 상태로 유지하세요. 평균값은 무작위 잡음을 제거하거나 게인을 교정하지 않습니다.</string>
+    <string name="dark_offsets_instructions">안정적인 기준 조건에서 약 30초 동안 측정하세요. 암실 기준 측정 시 근적외선도 차단하는 소재로 광학 입력부를 덮고 LED는 정상 작동 상태로 유지하세요. 조명이 있으면 기준광도 차감되므로 측정값은 상대값이 됩니다. 이 절차는 게인을 보정하지 않습니다.</string>
+    <string name="dark_offsets_uv_method">UVC, UVB, UVA는 각 채널 측정값의 평균을 제안합니다. UV 이득은 빛의 세기에 따라 자동으로 조절됩니다.</string>
+    <string name="dark_offsets_visible_method">각 가시광선/적외선 채널은 측정값의 평균을 제안합니다.</string>
     <string name="dark_offsets_progress">측정 중: %1$s / 30초</string>
     <string name="dark_offsets_result">%1$s회 판독에 따른 제안입니다. 설정은 변경되지 않았습니다.</string>
     <string name="dark_offsets_failed">측정이 중단되었거나 사용할 수 없습니다. 연결과 센서를 확인하고 다시 시도하세요.</string>

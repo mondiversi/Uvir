@@ -54,8 +54,8 @@ android {
         applicationId = "me.mondiversi.uvir"
         minSdk = 26
         targetSdk = 37
-        versionCode = 6
-        versionName = "1.4.1"
+        versionCode = 7
+        versionName = "1.4.2"
         buildConfigField(
             "String",
             "GITHUB_REPOSITORY_URL",

@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicLong
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import org.json.JSONObject
 
 enum class UsbSensorConnectionStatus {
@@ -141,6 +142,7 @@ class UvirUsbSensorManager(
 
     @Volatile
     private var protocolAccepted = false
+    private val bootSession = UvirBootSession()
 
     @Volatile
     private var offlineSyncRequested = false
@@ -607,8 +609,21 @@ class UvirUsbSensorManager(
         )
     }
 
+    internal suspend fun measureOpticalWindow(hardwareId: String, expected: OpticalWindowMeasurementContext?,
+        onProgress: (Int) -> Unit): OpticalWindowReading {
+        fun frame(value: UvirUsbSensorState) = opticalWindowMeasurementFrame(value.deviceId,
+            SensorConnectionMode.USB, serialGeneration.get(),
+            value.status == UsbSensorConnectionStatus.CONNECTED && value.appConnectionConfirmed,
+            value.runtimeInfo, value.sampleSequence, value.sample, value.uvAvailable)
+        return measureOpticalWindowReading(hardwareId, expected, state.map(::frame),
+            { frame(state.value) }, onProgress)
+    }
+
     internal suspend fun measureDarkOffsets(hardwareId: String, group: CalibrationGroup,
         onProgress: (Int) -> Unit): DarkOffsetReading {
+        check(firmwareSupportsDarkOffsetMeasurement(mutableState.value.runtimeInfo.firmwareVersion, group)) {
+            "dark_offsets_firmware_required"
+        }
         val generation = serialGeneration.get()
         return darkOffsetClient.measure(hardwareId, group, connectionValid = {
             val current = mutableState.value
@@ -1139,7 +1154,10 @@ class UvirUsbSensorManager(
 
         when (frameType) {
             "hello" -> parseHello(json)
-            "sample" -> parseSample(json)
+            "sample" -> if (bootSession.accepts(json.optString("boot_id"))) parseSample(json)
+            "sample_status" -> if (bootSession.accepts(json.optString("boot_id"))) {
+                mutableState.value = mutableState.value.copy(sample = null, sampleSequence = 0L)
+            }
             "alert_event" -> parseAlertEvent(json)
             "status" -> {
                 wirelessModeAcknowledgement.get()?.confirm(
@@ -1389,6 +1407,21 @@ class UvirUsbSensorManager(
             )
             return
         }
+        when (bootSession.observe(json.optString("boot_id"))) {
+            UvirBootObservation.RETIRED -> return
+            UvirBootObservation.RESTARTED -> {
+                resetOfflineSyncState()
+                mutableState.value = mutableState.value.copy(appConnectionConfirmed = false,
+                    sample = null, sampleSequence = 0L, runtimeInfo = UvirSensorRuntimeInfo())
+            }
+            else -> Unit
+        }
+        if (mutableState.value.appConnectionConfirmed && json.has("app_connected") &&
+            !json.optBoolean("app_connected")) {
+            resetOfflineSyncState()
+            mutableState.value = mutableState.value.copy(appConnectionConfirmed = false,
+                sample = null, sampleSequence = 0L)
+        }
         val sensorStoredCredentials =
             UvirSensorCredentialStore.loadForDevice(
                 applicationContext,
@@ -1634,6 +1667,10 @@ class UvirUsbSensorManager(
 
     private fun parseSample(json: JSONObject) {
         if (!protocolAccepted) return
+        if (!json.liveSampleIsFresh()) {
+            mutableState.value = mutableState.value.copy(sample = null, sampleSequence = 0L)
+            return
+        }
         val sample = json.toUvirSensorSampleOrNull() ?: return
         val previous = mutableState.value
         UvirSensorConnectionHistory.recordIfStarted(applicationContext,
@@ -1760,6 +1797,7 @@ class UvirUsbSensorManager(
         statusTestAcknowledgement?.countDown()
         synchronized(connectionLock) {
             closeSerialResources()
+            bootSession.reset()
             protocolAccepted = false
             resetOfflineSyncState()
 

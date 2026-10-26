@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="window_measure_calculate">Multiplikatoren berechnen</string>
+    <string name="window_measure_reference_instructions">Halte den Sensor ohne Fenster oder Filter unter gleichbleibender Beleuchtung still. Miss 30 Sekunden lang. Stelle zuvor geeignete Offsets ein.</string>
+    <string name="window_measure_filtered_instructions">Bringe das Fenster oder den Filter an, ohne Sensor oder Lichtquelle zu bewegen. Warte auf gleichbleibende Beleuchtung und starte dann die zweite Messung über 30 Sekunden.</string>
+    <string name="window_measure_reference_progress">Ohne Fenster: %1$s / %2$s s</string>
+    <string name="window_measure_filtered_progress">Mit Fenster: %1$s / %2$s s</string>
+    <string name="window_measure_results">Prüfe die vorgeschlagenen Kanalfaktoren. Nicht nutzbare Kanäle und der allgemeine Multiplikator bleiben unverändert.</string>
+    <string name="window_measure_valid_channels">Nutzbare Kanäle: %1$s / %2$s</string>
+    <string name="window_measure_apply">Multiplikatoren übernehmen</string>
+    <string name="window_measure_failed">Messung nicht verfügbar oder Bedingungen geändert. Prüfe Beleuchtung, Verbindung und Einstellungen und beginne ohne Fenster neu.</string>
+    <string name="window_measure_unavailable">Kanal nicht verfügbar</string>
+    <string name="window_measure_insufficient">Unzureichende Daten</string>
+    <string name="window_measure_unstable">Schwankende Beleuchtung</string>
+    <string name="window_measure_saturated">Signal außerhalb des Messbereichs</string>
+    <string name="window_measure_brighter">Gefilterter Wert höher</string>
+    <string name="window_measure_out_of_range">Faktor außerhalb des zulässigen Bereichs</string>
+</resources>

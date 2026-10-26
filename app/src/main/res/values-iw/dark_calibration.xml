@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="dark_offsets_calculate">חישוב היסטים</string>
-    <string name="dark_offsets_instructions">יש למדוד במשך כ־30 שניות בתנאי ייחוס יציבים. בחושך מפצים על רקע החיישן; בתאורה מפחיתים גם את האור הקיים ומקבלים מדידות יחסיות. למדידה בחושך יש לכסות את הפתחים האופטיים בחומר אטום גם לתת־אדום קרוב ולהשאיר את נוריות ה־LED במצב העבודה הרגיל. הממוצע אינו מבטל רעש אקראי ואינו מכייל את ההגבר.</string>
+    <string name="dark_offsets_instructions">יש למדוד במשך כ־30 שניות בתנאי ייחוס יציבים. לייחוס בחושך, יש לכסות את הכניסות האופטיות בחומר החוסם גם תת־אדום קרוב ולהשאיר את נוריות ה־LED במצב העבודה הרגיל. בתאורה מופחת גם אור הייחוס ולכן המדידות יחסיות. ההליך אינו מכייל את ההגבר.</string>
+    <string name="dark_offsets_uv_method">עבור UVC, UVB ו־UVA מוצע ממוצע הקריאות בכל ערוץ. הגבר ה־UV מותאם אוטומטית לרמת האור.</string>
+    <string name="dark_offsets_visible_method">עבור כל ערוץ נראה/תת־אדום מוצע ממוצע הקריאות.</string>
     <string name="dark_offsets_progress">מדידה: %1$s / 30 שנ׳</string>
     <string name="dark_offsets_result">הצעה מתוך %1$s קריאות. לא שונו הגדרות.</string>
     <string name="dark_offsets_failed">המדידה הופסקה או אינה זמינה. בדקו את החיבור והחיישן ונסו שוב.</string>

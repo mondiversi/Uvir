@@ -452,11 +452,11 @@
     <string name="app_version">Toleo la programu: %1$s</string>
     <string name="package_name_value">Kifurushi: %1$s</string>
     <string name="about_whats_new_title">Nini kipya katika toleo %1$s</string>
-    <string name="about_whats_new_connectivity">Hamisha/leta vipimo na tahadhari kama faili za .uvirrecords zisizo na nenosiri, pamoja na vipindi, madokezo na vibadala.</string>
-    <string name="about_whats_new_connections">Ulinganishaji wa kitambulisho cha maunzi, vitambulisho vipya vya ndani na utambuzi wa marudio huhifadhi chanzo cha data iliyoingizwa.</string>
-    <string name="about_whats_new_measurements">Mwonekano mkuu hukumbuka mpangilio wa kadi na bendi zilizofichwa; vipimo vilivyohifadhiwa vina vidhibiti vya muda na asilimia za jumla au kikundi.</string>
-    <string name="about_whats_new_interface">Rangi za spektra zinazolingana, majina ya kawaida yenye nukta za rangi kwenye data iliyohifadhiwa, safu wazi za vipindi na uhamishaji wa kadi wenye uhuishaji.</string>
-    <string name="about_whats_new_github">Vidirisha, vitendo vya mchana/usiku na arifa za data ya kuiga zimeboreshwa, pamoja na ukaguzi wa utayari na urejeshaji wa masasisho ya USB.</string>
+    <string name="about_whats_new_connectivity">Programu na miunganisho ya kihisi hufanya kazi; maendeleo yamesitishwa hadi uthibitishaji wa optiki.</string>
+    <string name="about_whats_new_connections">Kifuniko na matundu ni mifano ya kinadharia, si optiki za kipimo zilizothibitishwa.</string>
+    <string name="about_whats_new_measurements">Zana zina ofseti za wastani, ukuzaji wa UV unaojirekebisha na ukokotoaji elekezi wa vigezo vya dirisha.</string>
+    <string name="about_whats_new_interface">Kadi hufunguka kwa ulaini; chaguo za mwonekano wa data huhifadhiwa katika kipindi hiki cha programu.</string>
+    <string name="about_whats_new_github">Vipimo kamili vya kuaminika bado vinahitaji optiki za mwisho na urekebishaji kwa marejeo.</string>
     <string name="about_description">Programu ya vipimo vya wigo wa mionzi ya urujuanimno, mwanga unaoonekana na mionzi ya infraredi.</string>
     <string name="about_spectral_ranges">Bendi za wigo: Urujuanimno • Mwanga unaoonekana • Mionzi ya infraredi</string>
     <string name="about_sensors">Vihisi vinavyotumika: AS7331 UV • AS7343 yenye spectra nyingi</string>

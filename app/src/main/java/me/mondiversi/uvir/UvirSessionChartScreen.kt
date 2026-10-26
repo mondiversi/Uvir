@@ -37,7 +37,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -68,9 +67,6 @@ import kotlin.math.max
 import kotlin.math.roundToInt
 
 internal data class SessionChartNavigationState(
-    val showChart: Boolean,
-    val viewMode: ViewMode,
-    val sequenceFilterPosition: Int,
     val firstVisibleItemIndex: Int,
     val firstVisibleItemScrollOffset: Int
 ) : java.io.Serializable
@@ -143,10 +139,8 @@ internal fun SessionChartScreen(
     val externalOnlySession = remember(sessionId, database, records) {
         database.acquisitionSessionUsesExternalCommand(sessionId)
     }
-    val expandedChartGroups =
-        remember(sessionId) {
-            mutableStateMapOf<SessionChartGroup, Boolean>()
-        }
+    val presentation = rememberUvirSavedScreenPresentation("acquisition-session:$sessionId")
+    val expandedChartGroups = presentation.expandedGroups
     var showShareDialog by rememberSaveable {
         mutableStateOf(false)
     }
@@ -172,16 +166,10 @@ internal fun SessionChartScreen(
     var sequenceFilterCycleSize by remember(sessionId, database) {
         mutableIntStateOf(database.readAcquisitionSessionVariantsPerPosition(sessionId))
     }
-    var sequenceFilterPosition by remember(sessionId) {
-        mutableIntStateOf(initialNavigationState?.sequenceFilterPosition ?: 1)
-    }
-    var showChart by remember(sessionId) {
-        mutableStateOf(initialNavigationState?.showChart ?: false)
-    }
-    var viewMode by remember(sessionId) {
-        mutableStateOf(initialNavigationState?.viewMode ?: ViewMode.IRRADIANCE)
-    }
-    var valueDisplay by rememberUvirSavedValueDisplay("acquisition-session:$sessionId")
+    var sequenceFilterPosition by presentation.sequencePosition
+    var showChart by presentation.showChart
+    var viewMode by presentation.viewMode
+    var valueDisplay by presentation.valueDisplay
     val chartShareDescription =
         stringResource(
             R.string.session_chart_share
@@ -637,9 +625,7 @@ internal fun SessionChartScreen(
                         },
                         cardColor = cardColor,
                         primaryText = primaryText,
-                        secondaryText = secondaryText,
-                        titleColor = if (!group.biological && !valueDisplay.spectrum.groupVisible(group.spectrumIconGroup()))
-                            secondaryText.copy(alpha = .55f) else primaryText
+                        secondaryText = secondaryText
                     ) {
                         if (displayedRecords.isEmpty()) {
                             Text(
@@ -694,9 +680,6 @@ internal fun SessionChartScreen(
                             onOpenRecord(
                                 record,
                                 SessionChartNavigationState(
-                                    showChart = showChart,
-                                    viewMode = viewMode,
-                                    sequenceFilterPosition = sequenceFilterPosition,
                                     firstVisibleItemIndex =
                                         listState.firstVisibleItemIndex,
                                     firstVisibleItemScrollOffset =

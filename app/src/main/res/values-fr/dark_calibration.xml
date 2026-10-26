@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="dark_offsets_calculate">Calculer les décalages</string>
-    <string name="dark_offsets_instructions">Mesure pendant environ 30 secondes dans des conditions de référence stables. Dans le noir, le fond du capteur est compensé ; sous éclairage, la lumière présente est aussi soustraite et les mesures deviennent relatives. Pour une mesure dans le noir, couvre les entrées optiques avec un matériau opaque aussi au proche infrarouge et garde les LED en fonctionnement normal. La moyenne ne supprime pas le bruit aléatoire et ne calibre pas le gain.</string>
+    <string name="dark_offsets_instructions">Mesure pendant environ 30 secondes dans des conditions de référence stables. Pour une référence dans le noir, couvre les entrées optiques avec un matériau également opaque au proche infrarouge et laisse les LED dans leur état de fonctionnement normal. Sous éclairage, la lumière de référence est aussi soustraite et les mesures deviennent relatives. Cette procédure ne calibre pas le gain.</string>
+    <string name="dark_offsets_uv_method">Pour les UVC, UVB et UVA, la moyenne des mesures de chaque canal est proposée. Le gain UV s’adapte automatiquement au niveau de lumière.</string>
+    <string name="dark_offsets_visible_method">Pour chaque canal visible/infrarouge, la moyenne des mesures est proposée.</string>
     <string name="dark_offsets_progress">Mesure : %1$s / 30 s</string>
     <string name="dark_offsets_result">Proposition issue de %1$s mesures. Aucun réglage n’a été modifié.</string>
     <string name="dark_offsets_failed">Mesure interrompue ou indisponible. Vérifiez la connexion et le capteur, puis réessayez.</string>

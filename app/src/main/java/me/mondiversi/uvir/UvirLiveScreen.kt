@@ -190,6 +190,8 @@ internal fun LiveScreen(
         suspend (String, SensorConnectionMode) -> UvirDiagnosticProbe,
     onMeasureDarkOffsets:
         suspend (String, SensorConnectionMode, CalibrationGroup, (Int) -> Unit) -> DarkOffsetReading,
+    onMeasureOpticalWindow:
+        suspend (String, SensorConnectionMode, OpticalWindowMeasurementContext?, (Int) -> Unit) -> OpticalWindowReading,
     onPowerOffSensor:
         suspend () -> Boolean,
     onDisassociateSensor:
@@ -651,6 +653,7 @@ internal fun LiveScreen(
 
     val mainIslandOrder = rememberUvirMainIslandOrder()
     val groups = mainIslandOrder.value
+    val mainIslandsReordering = rememberUvirMainIslandReordering(groups)
 
     var showLiveChart by rememberSaveable {
         mutableStateOf(loadLiveChartMode(context))
@@ -3947,7 +3950,8 @@ if (showParametersDialog) {
                     channelFactorsSupported = firmwareSupportsCalibrationChannels(selectedSensorInfo.firmwareVersion),
                     onChannelFactorsChange = { calibrationChannelFactorsDraft = it },
                     sensorDeviceId = sensorProfileHardwareUid,
-                    darkMeasurementSupported = compareFirmwareVersions(selectedSensorInfo.firmwareVersion, DARK_OFFSETS_MINIMUM_FIRMWARE) >= 0,
+                    darkMeasurementSupported = firmwareSupportsDarkOffsetMeasurement(selectedSensorInfo.firmwareVersion, CalibrationGroup.VISIBLE),
+                    uvDarkMeasurementSupported = firmwareSupportsDarkOffsetMeasurement(selectedSensorInfo.firmwareVersion, CalibrationGroup.UV),
                     onMeasureDarkOffsets = { group, progress ->
                         onMeasureDarkOffsets(sensorProfileHardwareUid, sensorConnectionMode, group, progress)
                     },
@@ -3973,6 +3977,9 @@ if (showParametersDialog) {
                     masterSupported = firmwareSupportsOpticalWindowMaster(selectedSensorInfo.firmwareVersion),
                     cardColor = cardColor, primaryText = primaryText, secondaryText = secondaryText,
                     sensorDeviceId = sensorProfileHardwareUid,
+                    onMeasureWindow = { expected, progress ->
+                        onMeasureOpticalWindow(sensorProfileHardwareUid, sensorConnectionMode, expected, progress)
+                    },
                     onFirmwareUpdateRequired = {
                         if (selectedSensorInfo.firmwareVersion.isNotBlank()) showFirmwareUpdateRequiredDialog = true
                     })
@@ -4538,7 +4545,10 @@ floatingActionButton = {
             }
         }
     } else {
-    CompositionLocalProvider(LocalUvirLiveIrradianceDecimals provides liveIrradianceDecimals.getValue(irradianceUnit)) {
+    CompositionLocalProvider(
+        LocalUvirLiveIrradianceDecimals provides liveIrradianceDecimals.getValue(irradianceUnit),
+        LocalUvirLiveReadingAvailable provides liveReady
+    ) {
     LazyColumn(
         state =
             liveListState,
@@ -4713,7 +4723,7 @@ floatingActionButton = {
                 }
             } else {
                 itemsIndexed(items = groups, key = { _, group -> group.name }) { _, group ->
-                    UvirAnimatedMainIsland { drawIsland(group) }
+                    UvirAnimatedMainIsland(mainIslandsReordering) { drawIsland(group) }
                 }
             }
 

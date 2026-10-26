@@ -420,11 +420,11 @@
     <string name="app_version">アプリバージョン: %1$s</string>
     <string name="package_name_value">パッケージ: %1$s</string>
     <string name="about_whats_new_title">バージョン %1$s の新機能</string>
-    <string name="about_whats_new_connectivity">セッション、メモ、バリアントを含む測定とアラートを、パスワード不要の .uvirrecords ファイルに書き出し／読み込みできます。</string>
-    <string name="about_whats_new_connections">ハードウェアIDの照合、新しいローカルID、重複検出により、読み込んだデータの出所を保持します。</string>
-    <string name="about_whats_new_measurements">メイン画面はカードの順序と非表示の帯域を記憶します。保存済み測定では一時的な表示設定と全体・グループの割合を選べます。</string>
-    <string name="about_whats_new_interface">スペクトルの色を統一し、保存済みデータは通常色の名前と色付きの点で表示します。セッション行を整理し、カード移動をアニメーション化しました。</string>
-    <string name="about_whats_new_github">ダイアログ、昼夜の操作色、模擬データの通知を改善し、USB更新の準備状態と復旧の確認を更新しました。</string>
+    <string name="about_whats_new_connectivity">アプリとセンサー接続は動作しますが、光学検証が完了するまで開発を休止しています。</string>
+    <string name="about_whats_new_connections">蓋と開口部は理論上の試作品であり、検証済みの測定光学系ではありません。</string>
+    <string name="about_whats_new_measurements">校正ツールには平均オフセット、適応型UVゲイン、窓係数のガイド付き計算があります。</string>
+    <string name="about_whats_new_interface">カード展開を滑らかにし、保存データの表示設定を現在のアプリセッション中保持します。</string>
+    <string name="about_whats_new_github">信頼できる絶対測定には、最終光学系と基準による校正が引き続き必要です。</string>
     <string name="about_description">紫外線、可視光、赤外線のスペクトル測定アプリ。</string>
     <string name="about_spectral_ranges">スペクトル帯域：紫外線 • 可視光 • 赤外線</string>
     <string name="about_sensors">対応センサー: AS7331 UV • AS7343 マルチスペクトル</string>

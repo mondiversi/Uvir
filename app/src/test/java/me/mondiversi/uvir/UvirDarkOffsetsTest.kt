@@ -9,7 +9,64 @@ import org.junit.Test
 class UvirDarkOffsetsTest {
     private fun frame(command: String, group: CalibrationGroup = CalibrationGroup.UV, id: String = "A") =
         DarkOffsetFrame(command.substringAfterLast(' '), id, group.protocolName, "ready",
-            samples = 30, unit = "uW/cm2", values = group.indices.map { it.toFloat() + 1 })
+            samples = 30, unit = "uW/cm2", values = group.indices.map { it.toDouble() + 1 },
+            estimator = "mean")
+
+    @Test fun adaptiveUvMeanMeasurementRequiresTheNewFirmware() {
+        for (version in listOf("", "0.5.109")) {
+            assertFalse(firmwareSupportsDarkOffsetMeasurement(version, CalibrationGroup.UV))
+            assertFalse(firmwareSupportsDarkOffsetMeasurement(version, CalibrationGroup.VISIBLE))
+        }
+        for (version in listOf("0.5.110", "0.5.111", "0.5.112", "0.5.113")) {
+            assertFalse(firmwareSupportsDarkOffsetMeasurement(version, CalibrationGroup.UV))
+            assertTrue(firmwareSupportsDarkOffsetMeasurement(version, CalibrationGroup.VISIBLE))
+        }
+        for (group in CalibrationGroup.entries) {
+            assertTrue(firmwareSupportsDarkOffsetMeasurement("0.5.114", group))
+            assertTrue(firmwareSupportsDarkOffsetMeasurement("0.5.115", group))
+        }
+    }
+
+    @Test fun uvMaximumOrUnlabelledRepliesCannotBeAppliedAsMeanOffsets() = runBlocking {
+        for (estimator in listOf("", "maximum", "percentile")) {
+            val client = UvirDarkOffsetClient()
+            val commands = mutableListOf<String>()
+            val result = runCatching {
+                client.measure("A", CalibrationGroup.UV, { true }, { command ->
+                    commands += command
+                    if (command.startsWith("DARK_OFFSETS START"))
+                        client.receive(frame(command).copy(estimator = estimator))
+                    true
+                }, {})
+            }
+            assertEquals("dark_offsets_invalid_estimator", result.exceptionOrNull()?.message)
+            assertEquals(2, commands.size)
+            assertTrue(commands.last().startsWith("DARK_OFFSETS CANCEL "))
+        }
+    }
+
+    @Test fun visibleMeanMeasurementRemainsCompatibleWithLegacyReplies() = runBlocking {
+        for (estimator in listOf("", "mean")) {
+            val client = UvirDarkOffsetClient()
+            val result = client.measure("A", CalibrationGroup.VISIBLE, { true }, { command ->
+                client.receive(frame(command, CalibrationGroup.VISIBLE).copy(estimator = estimator))
+                true
+            }, {})
+            assertEquals(CalibrationGroup.VISIBLE, result.group)
+            assertEquals(8, result.values.size)
+        }
+    }
+
+    @Test fun meanOffsetsRoundTripTheLegacyWireUnitWithoutLosingCanonicalPrecision() = runBlocking {
+        val maxima = listOf(.00031234567f, .037284923f, .000008372615f)
+        val client = UvirDarkOffsetClient()
+        val result = client.measure("A", CalibrationGroup.UV, { true }, { command ->
+            client.receive(frame(command).copy(values = maxima.map { it.toDouble() * 100.0 }))
+            true
+        }, {})
+        assertEquals(maxima, result.values)
+        maxima.zip(result.values).forEach { (raw, offset) -> assertEquals(0f, (raw - offset).coerceAtLeast(0f), 0f) }
+    }
 
     @Test fun onlyTheRequestedGroupChangesAndWindowIsNeverReset() {
         val original = SensorCalibrationSettings(2f, 3f,

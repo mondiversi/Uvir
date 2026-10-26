@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="window_measure_calculate">倍率を計算</string>
+    <string name="window_measure_reference_instructions">窓やフィルターを外し、安定した照明の下でセンサーを動かさずに30秒間測定します。適切なオフセットを事前に設定してください。</string>
+    <string name="window_measure_filtered_instructions">センサーや光源を動かさずに窓またはフィルターを取り付けます。照明が安定してから、2回目の30秒間の測定を開始してください。</string>
+    <string name="window_measure_reference_progress">窓なし：%1$s / %2$s 秒</string>
+    <string name="window_measure_filtered_progress">窓あり：%1$s / %2$s 秒</string>
+    <string name="window_measure_results">提案された各チャンネルの係数を確認してください。使用できないチャンネルと全体倍率は変更されません。</string>
+    <string name="window_measure_valid_channels">使用可能なチャンネル：%1$s / %2$s</string>
+    <string name="window_measure_apply">倍率を設定</string>
+    <string name="window_measure_failed">測定できないか、条件が変化しました。光の安定性、接続、設定を確認し、窓を外して最初からやり直してください。</string>
+    <string name="window_measure_unavailable">チャンネルを利用できません</string>
+    <string name="window_measure_insufficient">データ不足</string>
+    <string name="window_measure_unstable">照明が不安定</string>
+    <string name="window_measure_saturated">信号が範囲外</string>
+    <string name="window_measure_brighter">フィルターありの値が高い</string>
+    <string name="window_measure_out_of_range">係数が許容範囲外</string>
+</resources>

@@ -16,5 +16,5 @@
     <string name="update_done">Sensor updated</string>
     <string name="update_failed">Update failed. See the error log. If the sensor no longer starts, recover the firmware by USB from a computer.</string>
     <string name="update_permission">Allow Uvir to install updates in Android settings.</string>
-    <string name="update_whats_new">Acquisition TXT and CSV exports include total/group percentages, with consistent PNG colors and five-second import confirmations.</string>
+    <string name="update_whats_new">Fresh-reading and Wi-Fi recovery checks improved in sensor firmware 0.5.119.</string>
 </resources>

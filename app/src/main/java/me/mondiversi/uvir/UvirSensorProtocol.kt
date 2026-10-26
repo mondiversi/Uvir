@@ -10,11 +10,23 @@ internal const val UVIR_SENSOR_UNIT = "uW/cm2"
  * here prevents one transport from silently exposing a different spectrum.
  */
 internal fun JSONObject.toUvirSensorSampleOrNull(): SensorSample? {
+    if (!liveSampleIsFresh()) return null
     val unit = optString("unit")
     if (unit !in setOf(UVIR_LEGACY_IRRADIANCE_UNIT, UVIR_CANONICAL_IRRADIANCE_UNIT)) return null
     val bands = optJSONObject("bands") ?: return null
     return bands.toUvirBandSample(unit).copy(qualityFlags = uvirQualityFlags(), opticalWindow = opticalWindowOrNull())
 }
+
+internal fun JSONObject.liveSampleIsFresh(): Boolean = uvirLiveFrameFresh(
+    optBoolean("sample_valid", true),
+    if (has("sample_age_ms")) optLong("sample_age_ms", -1) else null,
+    if (has("sample_max_age_ms")) optLong("sample_max_age_ms", -1) else null)
+
+internal fun uvirValidLiveProtocolFrame(line: String, expectedDeviceId: String): Boolean = runCatching {
+    val frame = JSONObject(line)
+    frame.optString("protocol") == UVIR_SENSOR_PROTOCOL && frame.optString("type").isNotBlank() &&
+        (frame.optString("device_id").isBlank() || frame.optString("device_id").equals(expectedDeviceId, true))
+}.getOrDefault(false)
 
 internal fun JSONObject.uvirQualityFlags(): Int {
     var flags = optInt("quality_flags", 0)

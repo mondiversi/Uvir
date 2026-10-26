@@ -134,110 +134,6 @@ internal fun MeasurementDataExportScreen(
                     color = secondaryText
                 )
                 UvirExportFilesHeading(primaryText)
-                ShareFormatOptionRow(
-                    format = MeasurementShareFormat.CSV,
-                    selected = csvSelected,
-                    label = stringResource(R.string.share_as_csv),
-                    primaryText = primaryText,
-                    secondaryText = secondaryText,
-                    onClick = {
-                        csvSelected = !csvSelected
-                    }
-                )
-                if (csvSelected) {
-                    UvirExportFileCountText(
-                        format = UvirExportFileFormat.CSV,
-                        count = 1,
-                        secondaryText = secondaryText,
-                        modifier =
-                            Modifier.padding(
-                                start = UvirExportOptionDetailInset,
-                                top = 2.dp,
-                                end = 10.dp
-                            )
-                    )
-                }
-
-                ShareFormatOptionRow(
-                    format = MeasurementShareFormat.READABLE_TABLE,
-                    selected = readableTableSelected,
-                    label =
-                        stringResource(
-                            R.string.share_as_readable_table
-                        ),
-                    primaryText = primaryText,
-                    secondaryText = secondaryText,
-                    onClick = {
-                        readableTableSelected =
-                            !readableTableSelected
-                    }
-                )
-
-                if (readableTableSelected && readableTableGroupingAvailable) {
-                    ChartExportModeRow(
-                        selected =
-                            readableTableGrouping ==
-                                UvirReadableTableGrouping.BY_ACQUISITION,
-                        label =
-                            stringResource(
-                                R.string.share_readable_table_by_acquisition
-                            ),
-                        primaryText = primaryText,
-                        secondaryText = secondaryText,
-                        onClick = {
-                            readableTableGrouping =
-                                UvirReadableTableGrouping.BY_ACQUISITION
-                        }
-                    )
-                    ChartExportModeRow(
-                        selected =
-                            readableTableGrouping ==
-                                UvirReadableTableGrouping.BY_SPECTRAL_AREA,
-                        label =
-                            stringResource(
-                                R.string.share_readable_table_by_spectral_area
-                            ),
-                        primaryText = primaryText,
-                        secondaryText = secondaryText,
-                        onClick = {
-                            readableTableGrouping =
-                                UvirReadableTableGrouping.BY_SPECTRAL_AREA
-                        }
-                    )
-                    if (showReadableTableGroupingScopeNote) {
-                        Text(
-                            text =
-                                stringResource(
-                                    R.string.share_readable_grouping_complete_sessions_only
-                                ),
-                            modifier =
-                                Modifier.padding(
-                                    start = UvirExportOptionDetailInset,
-                                    top = 1.dp,
-                                    end = 10.dp,
-                                    bottom = 1.dp
-                                ),
-                            color = secondaryText,
-                            fontSize = 11.sp,
-                            lineHeight = 14.sp
-                        )
-                    }
-                }
-
-                if (readableTableSelected && readableTableFileCount != null) {
-                    UvirExportFileCountText(
-                        format = UvirExportFileFormat.TXT,
-                        count = readableTableFileCount,
-                        secondaryText = secondaryText,
-                        modifier =
-                            Modifier.padding(
-                                start = UvirExportOptionDetailInset,
-                                top = 2.dp,
-                                end = 10.dp
-                            )
-                    )
-                }
-
                 ShareChartsOptionRow(
                     selected = chartsSelected,
                     primaryText = primaryText,
@@ -349,6 +245,110 @@ internal fun MeasurementDataExportScreen(
                                 )
                         )
                     }
+                }
+
+                ShareFormatOptionRow(
+                    format = MeasurementShareFormat.READABLE_TABLE,
+                    selected = readableTableSelected,
+                    label =
+                        stringResource(
+                            R.string.share_as_readable_table
+                        ),
+                    primaryText = primaryText,
+                    secondaryText = secondaryText,
+                    onClick = {
+                        readableTableSelected =
+                            !readableTableSelected
+                    }
+                )
+
+                if (readableTableSelected && readableTableGroupingAvailable) {
+                    ChartExportModeRow(
+                        selected =
+                            readableTableGrouping ==
+                                UvirReadableTableGrouping.BY_ACQUISITION,
+                        label =
+                            stringResource(
+                                R.string.share_readable_table_by_acquisition
+                            ),
+                        primaryText = primaryText,
+                        secondaryText = secondaryText,
+                        onClick = {
+                            readableTableGrouping =
+                                UvirReadableTableGrouping.BY_ACQUISITION
+                        }
+                    )
+                    ChartExportModeRow(
+                        selected =
+                            readableTableGrouping ==
+                                UvirReadableTableGrouping.BY_SPECTRAL_AREA,
+                        label =
+                            stringResource(
+                                R.string.share_readable_table_by_spectral_area
+                            ),
+                        primaryText = primaryText,
+                        secondaryText = secondaryText,
+                        onClick = {
+                            readableTableGrouping =
+                                UvirReadableTableGrouping.BY_SPECTRAL_AREA
+                        }
+                    )
+                    if (showReadableTableGroupingScopeNote) {
+                        Text(
+                            text =
+                                stringResource(
+                                    R.string.share_readable_grouping_complete_sessions_only
+                                ),
+                            modifier =
+                                Modifier.padding(
+                                    start = UvirExportOptionDetailInset,
+                                    top = 1.dp,
+                                    end = 10.dp,
+                                    bottom = 1.dp
+                                ),
+                            color = secondaryText,
+                            fontSize = 11.sp,
+                            lineHeight = 14.sp
+                        )
+                    }
+                }
+
+                if (readableTableSelected && readableTableFileCount != null) {
+                    UvirExportFileCountText(
+                        format = UvirExportFileFormat.TXT,
+                        count = readableTableFileCount,
+                        secondaryText = secondaryText,
+                        modifier =
+                            Modifier.padding(
+                                start = UvirExportOptionDetailInset,
+                                top = 2.dp,
+                                end = 10.dp
+                            )
+                    )
+                }
+
+                ShareFormatOptionRow(
+                    format = MeasurementShareFormat.CSV,
+                    selected = csvSelected,
+                    label = stringResource(R.string.share_as_csv),
+                    primaryText = primaryText,
+                    secondaryText = secondaryText,
+                    onClick = {
+                        csvSelected = !csvSelected
+                    }
+                )
+                if (csvSelected) {
+                    UvirExportFileCountText(
+                        format = UvirExportFileFormat.CSV,
+                        count = 1,
+                        secondaryText = secondaryText,
+                        modifier =
+                            Modifier.padding(
+                                start = UvirExportOptionDetailInset,
+                                top = 2.dp,
+                                end = 10.dp
+                            )
+                    )
                 }
 
                 if (

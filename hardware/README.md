@@ -3,6 +3,15 @@
 This directory contains the physical design and assembly documentation used
 by Uvir.
 
+> **Project on hold: optical validation and calibration remain unfinished.**
+> App/firmware acquisition and communications work, but current values are
+> provisional, not validated absolute irradiance measurements. The lid and
+> apertures are theoretical prototypes informed by manufacturer guidance;
+> their angular response and the final diffuser/filter/window arrangement
+> still need development and reference calibration. See the
+> [main status notice](../README.md#project-on-hold--optical-design-and-calibration-unfinished)
+> and [calibration plan](calibration/README.md).
+
 ## Build the complete instrument
 
 - [Bill of materials](BILL_OF_MATERIALS.md): every fitted module, indicators,
@@ -14,6 +23,8 @@ by Uvir.
 - [Standalone operation](../docs/STANDALONE_SENSOR.md): use USB serial, Wi-Fi,
   Bluetooth or MQTT without the official app, including autonomous recording.
 - [Calibration](calibration/README.md): the remaining final optical work.
+- [3D-printable hardware parts](printable/README.md): purchased-housing alternative,
+  independent printable body, replacement optical lid and internal visible/NIR LED shield.
 
 The system's acquisition, storage, RTC and communication logic is implemented;
 final calibration does not require inventing the missing wiring or protocol.
@@ -30,44 +41,102 @@ This identifies the selected housing, not a verified internal clearance or PCB
 fit. Check mounting, module/socket height, antenna clearance and openings during
 [final assembly](ASSEMBLY.md); calibrate with the final enclosure and optics.
 
+The UV and/or visible/NIR modules may require raised mounting or spacers to
+reach the intended optical-window plane and clear the other components.
+Internal PCB supports, lid fixing holes and any openings for LEDs, controls
+or the ESP32 USB connector (including USB-C on boards that use it) are left
+to the builder. Their positions and heights depend on the actual PCB,
+breakouts and sockets; no universal hole/standoff pattern is implied.
+
+The standard housing includes a **1 mm aluminium top panel**. The project's
+[printed replacement lid](printable/uvir-optical-lid-r1/README.md) takes the place
+of that panel and incorporates the two optical tubes. The separate
+[visible/NIR light shield](printable/uvir-visible-nir-shield-r1/README.md) isolates
+the AS7343 optical path from internal indicator LEDs: its clear opening is
+13 x 21 mm, height 14 mm and outward wall thickness 1.2 mm. Both models are
+available as portable STL files and editable sources in the
+[printable-parts index](printable/README.md); final fastening and fit remain to be checked.
+
+For a printed body instead of the purchased housing, see the
+[independent enclosure body R1](printable/uvir-enclosure-body-r1/README.md).
+It uses the main 125 x 70 x 35 mm COFFER-A/6 dimensions and is geometrically
+compatible with the existing lid. Reconstructed guide/support details and
+printing clearances are documented separately from the manufacturer's dimensions.
+
 ### Directional optical heads (prototype)
 
 The intended directional prototype uses **two straight hollow tubes**, one
-centered over each chip's optical window. The common geometry below is a design
-starting point, **not a manufacturer-specified accessory, a tested assembly, or
-a guarantee of matching angular response or absolute measurement accuracy**.
+centered over each chip's optical window. **Design for the intended light-entry
+angle:** tube diameter and height are ways to obtain that angle, not mandatory
+dimensions in themselves. The alternatives below are prototype starting points,
+not manufacturer-specified accessories or validated optical assemblies.
 
-| Dimension | AS7331 UV head | AS7343 visible/NIR head |
-|---|---|---|
-| Clear internal diameter | 6 mm | 6 mm |
-| Clear height above the chip's top optical window | 25 mm | 25 mm |
-| Wall thickness | Chosen for material and rigidity; optional 2 mm example | Chosen for material and rigidity; optional 2 mm example |
-| Outside diameter with the 2 mm wall example | 10 mm | 10 mm |
+For a centered point detector and non-reflecting straight walls, let `D` be the
+clear bore and `L` the distance from the **chip's top optical window to the tube
+entrance**. The ideal full entrance cone is `2 x atan(D / (2 x L))`; the half-angle
+from the tube axis is `atan(D / (2 x L))`. Keeping roughly `D / L = 0.24` preserves
+approximately the same ideal cone while changing the head's size.
 
-The **25 mm is measured from the top optical window of the chip to the tube's
-entrance**, not from the breakout PCB, socket, or enclosure lid. If the tube
-stands on the PCB, add the measured height of the chip's top window above that
-PCB to obtain the overall tube length. Center on the optical window, not the
-center of the breakout board; keep both axes parallel and secure the holders
-without pressing on the chips. Prevent lateral light leakage and isolate all
-indicator LEDs. Check the complete height stack and top-panel clearance: the
-enclosure's nominal 35 mm height does not establish that a socketed board plus
-the optical head fits internally. The heads may need to protrude through the lid.
+| Prototype option | Clear bore D | Optical height L | Ideal full entrance cone | Ideal half-angle |
+|---|---:|---:|---:|---:|
+| Original geometry | 6 mm | 25 mm | 13.7 degrees | 6.8 degrees |
+| Intermediate geometry | 4 mm | 16.7 mm | 13.7 degrees | 6.8 degrees |
+| Compact printed lid R1 | 3 mm | 12.4 mm | 13.8 degrees | 6.9 degrees |
 
-The **2 mm wall is optional as a dimension**, mainly to provide rigidity in a
-printed prototype. Another thickness can be used if the mount is stable and
-opaque over the actual UV/VIS/NIR bands while retaining the 6 mm clear bore and
-25 mm clear height. Outside diameter is `6 mm + 2 x wall thickness`. Neither
-black color nor a specified wall thickness proves UV/NIR opacity; check the
-material. Internal surfaces must have low reflectance in the measured bands.
+Exact proportional halving of the original geometry would give **3 mm / 12.5 mm**.
+The current compact lid uses **12.4 mm** to accommodate the agreed mounting gap
+and 0.2 mm printing layers. That small rounding accounts for its slightly wider
+ideal cone. Either head can use these nominal geometries, but the response of
+each fitted chip and channel must still be checked.
 
-The tubes select incoming directions; W/m2 or W/cm2 units do not themselves
-require a narrow field. In an ideal straight-ray, point-detector model, the
-6 mm bore and 25 mm distance give a full cone of about
-`2 x atan(3 / 25) = 13.7 degrees`. This is **not a measured field of view**:
-finite photodiode positions, the package apertures, alignment, reflections and
-any diffuser change the response and its cutoff. Equal tube dimensions do not
-prove that every UV and visible/NIR channel sees exactly the same field.
+These values are **geometrical estimates, not measured fields of view**. Real
+photodiodes occupy different positions over a finite area, which does not shrink
+when the tube does. Smaller heads are therefore more sensitive to centering and
+can shade channels differently even at equal `D / L`. Package openings, mounting
+tolerances, reflections and any diffuser also change the response and cutoff.
+The important final check is the **actual angular acceptance of all channels**;
+the table alone does not establish matching response or absolute accuracy.
+W/m2 or W/cm2 units do not themselves require a narrow field.
+
+Always measure `L` from the **top optical-window plane**, not from the breakout
+PCB, socket, bottom of the package opening, or lid surface. If a tube starts at
+the PCB or lid, include the intervening distances. Center on the optical window,
+keep the two axes parallel and secure the holders without pressing on the chips.
+Prevent lateral light leakage, including across any sensor-to-lid gap, and isolate
+the AS7343 optical path from all indicator LEDs. A separate UV LED shield is
+not specified for the normal visible indicators; see the
+[UV-response qualification](printable/uvir-visible-nir-shield-r1/README.md#why-this-shield-is-intended-for-the-as7343).
+Check the complete height stack and top-panel clearance:
+the enclosure's nominal 35 mm height does not establish that a socketed board
+plus the optical head fits internally.
+
+Wall thickness is a mechanical and material choice. The original **2 mm wall**
+example gives a **10 mm outside diameter** with a 6 mm bore. The compact R1 uses
+**4 mm walls**, giving an **11 mm outside diameter** with a 3 mm bore. In general,
+`outside diameter = D + 2 x wall thickness`. Neither black color nor a specified
+wall thickness proves UV/NIR opacity; check the material and keep internal
+surfaces low-reflectance in the measured bands.
+
+#### Compact printed lid R1
+
+The [STL, editable source and dimensions](printable/uvir-optical-lid-r1/README.md)
+describe a **65.4 mm wide x 120.3 mm high** rectangular lid viewed in portrait
+orientation from the tube side. Both 3 mm bores pass through the lid and cylinders.
+The height stack is:
+
+| Part of the height stack | Dimension |
+|---|---:|
+| Assumed air gap: sensor's top optical window to lid underside | 1 mm |
+| Printed lid thickness | 2.4 mm |
+| Tube projection above the lid | 9 mm |
+| Total optical height from sensor window to entrance | 12.4 mm |
+| Total printed-part height, excluding the air gap | 11.4 mm |
+
+These are dimensions for the current proposed assembly, not a universal enclosure
+or PCB fit. Re-measure the gap and actual chip centers before mounting; changing
+the gap changes the entrance angle. The included STL has passed mesh closure,
+connectivity, dimensions and through-bore checks, not physical fit or optical
+validation.
 
 #### Diffuser and final optical validation
 

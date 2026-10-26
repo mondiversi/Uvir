@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="dark_offsets_calculate">Ofsetleri hesapla</string>
-    <string name="dark_offsets_instructions">Kararlı referans koşullarında yaklaşık 30 saniye ölçüm yap. Karanlıkta sensör arka planı dengelenir; aydınlıkta mevcut ışık da çıkarılır ve göreli ölçümler elde edilir. Karanlık ölçüm için optik girişleri yakın kızılötesini de geçirmeyen bir malzemeyle kapat ve LED’leri normal çalışma durumunda tut. Ortalama, rastgele gürültüyü gidermez ve kazancı kalibre etmez.</string>
+    <string name="dark_offsets_instructions">Kararlı referans koşullarında yaklaşık 30 saniye ölçüm yapın. Karanlık referansı için optik girişleri yakın kızılötesini de geçirmeyen bir malzemeyle kapatın ve LED’leri normal çalışma durumunda bırakın. Aydınlıkta referans ışığı da çıkarılır ve ölçümler bağıl olur. Bu işlem kazancı kalibre etmez.</string>
+    <string name="dark_offsets_uv_method">UVC, UVB ve UVA için her kanalın okumalarının ortalaması önerilir. UV kazancı ışık düzeyine otomatik olarak uyarlanır.</string>
+    <string name="dark_offsets_visible_method">Her görünür/kızılötesi kanal için okumaların ortalaması önerilir.</string>
     <string name="dark_offsets_progress">Ölçülüyor: %1$s / 30 sn</string>
     <string name="dark_offsets_result">%1$s okumadan öneri. Hiçbir ayar değiştirilmedi.</string>
     <string name="dark_offsets_failed">Ölçüm kesildi veya kullanılamıyor. Bağlantıyı ve sensörü kontrol edip tekrar deneyin.</string>

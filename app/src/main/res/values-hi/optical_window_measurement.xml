@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="window_measure_calculate">गुणक की गणना करें</string>
+    <string name="window_measure_reference_instructions">सेंसर को खिड़की या फ़िल्टर के बिना स्थिर प्रकाश में बिना हिलाए रखें। 30 सेकंड तक मापें। पहले उपयुक्त ऑफ़सेट सेट करें।</string>
+    <string name="window_measure_filtered_instructions">सेंसर या प्रकाश स्रोत को हिलाए बिना खिड़की या फ़िल्टर लगाएँ। प्रकाश स्थिर होने दें, फिर 30 सेकंड का दूसरा मापन शुरू करें।</string>
+    <string name="window_measure_reference_progress">खिड़की के बिना: %1$s / %2$s सेकंड</string>
+    <string name="window_measure_filtered_progress">खिड़की के साथ: %1$s / %2$s सेकंड</string>
+    <string name="window_measure_results">प्रस्तावित चैनल गुणकों की जाँच करें। अनुपयोगी चैनल और सामान्य गुणक अपरिवर्तित रहते हैं।</string>
+    <string name="window_measure_valid_channels">उपयोगी चैनल: %1$s / %2$s</string>
+    <string name="window_measure_apply">गुणक लागू करें</string>
+    <string name="window_measure_failed">मापन उपलब्ध नहीं है या परिस्थितियाँ बदल गई हैं। प्रकाश की स्थिरता, कनेक्शन और सेटिंग जाँचें, फिर खिड़की के बिना दोबारा शुरू करें।</string>
+    <string name="window_measure_unavailable">चैनल उपलब्ध नहीं है</string>
+    <string name="window_measure_insufficient">अपर्याप्त डेटा</string>
+    <string name="window_measure_unstable">अस्थिर प्रकाश</string>
+    <string name="window_measure_saturated">सिग्नल सीमा से बाहर</string>
+    <string name="window_measure_brighter">फ़िल्टर वाला मान अधिक है</string>
+    <string name="window_measure_out_of_range">गुणक अनुमत सीमा से बाहर</string>
+</resources>

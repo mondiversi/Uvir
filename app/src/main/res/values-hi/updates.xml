@@ -16,5 +16,5 @@
     <string name="update_done">सेंसर अपडेट हुआ</string>
     <string name="update_failed">अपडेट विफल रहा। त्रुटि लॉग देखें। सेंसर चालू न हो तो कंप्यूटर से USB द्वारा फ़र्मवेयर पुनर्स्थापित करें।</string>
     <string name="update_permission">Android सेटिंग में Uvir को अपडेट स्थापित करने दें।</string>
-    <string name="update_whats_new">मापों के TXT और CSV निर्यात में कुल और समूह प्रतिशत हैं; PNG रंग एकसमान हैं और आयात की पुष्टि के लिए पाँच सेकंड दबाए रखना होता है।</string>
+    <string name="update_whats_new">फर्मवेयर 0.5.119 नई रीडिंग की जाँच और Wi-Fi पुनर्प्राप्ति बेहतर करता है।</string>
 </resources>

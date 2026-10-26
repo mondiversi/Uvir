@@ -45,7 +45,8 @@ class UvirVisibleSensor {
 
   bool capture(float calibrationFactor, float *bands, bool &saturated,
       const UvirCalibrationOffsets &offsets = UvirCalibrationOffsets{},
-      const UvirCalibrationChannelFactors &channels = UvirCalibrationChannelFactors{}) {
+      const UvirCalibrationChannelFactors &channels = UvirCalibrationChannelFactors{},
+      float *signedResiduals = nullptr) {
     offsets_ = offsets;
     if (!acquireWithAutomaticGain(saturated)) return false;
 
@@ -84,8 +85,10 @@ class UvirVisibleSensor {
     bands[10] = nir;
     for (int i = 3; i < 11; ++i) {
       if (offsets.signature == kUvirColorOffsetSignature)
-        bands[i] = uvirSubtractDarkOffset(bands[i], offsets.values[i]);
+        bands[i] -= offsets.values[i];
       bands[i] *= uvirChannelFactor(channels, i, calibrationFactor);
+      if (signedResiduals) signedResiduals[i] = bands[i];
+      bands[i] = std::fmax(0.f, bands[i]);
     }
     return true;
   }

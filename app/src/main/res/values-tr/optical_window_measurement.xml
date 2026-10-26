@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="window_measure_calculate">Çarpanları hesapla</string>
+    <string name="window_measure_reference_instructions">Sensörü pencere veya filtre olmadan sabit aydınlatma altında hareketsiz tutun. 30 saniye ölçüm yapın. Önce uygun ofsetleri ayarlayın.</string>
+    <string name="window_measure_filtered_instructions">Sensörü veya ışık kaynağını hareket ettirmeden pencereyi ya da filtreyi yerleştirin. Aydınlatmanın sabitlenmesini bekleyip ikinci 30 saniyelik ölçümü başlatın.</string>
+    <string name="window_measure_reference_progress">Penceresiz: %1$s / %2$s sn</string>
+    <string name="window_measure_filtered_progress">Pencereli: %1$s / %2$s sn</string>
+    <string name="window_measure_results">Önerilen kanal katsayılarını kontrol edin. Kullanılamayan kanallar ve genel çarpan değişmez.</string>
+    <string name="window_measure_valid_channels">Kullanılabilir kanallar: %1$s / %2$s</string>
+    <string name="window_measure_apply">Çarpanları uygula</string>
+    <string name="window_measure_failed">Ölçüm kullanılamıyor veya koşullar değişti. Işığın kararlılığını, bağlantıyı ve ayarları kontrol edip penceresiz yeniden başlayın.</string>
+    <string name="window_measure_unavailable">Kanal kullanılamıyor</string>
+    <string name="window_measure_insufficient">Yetersiz veri</string>
+    <string name="window_measure_unstable">Kararsız aydınlatma</string>
+    <string name="window_measure_saturated">Sinyal aralık dışında</string>
+    <string name="window_measure_brighter">Filtreli değer daha yüksek</string>
+    <string name="window_measure_out_of_range">Katsayı izin verilen aralığın dışında</string>
+</resources>

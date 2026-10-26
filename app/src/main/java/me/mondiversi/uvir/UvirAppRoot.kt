@@ -162,6 +162,7 @@ internal fun UvirAppContent(
 
     val context = LocalContext.current
     val resources = LocalResources.current
+    val savedPresentationStore = LocalUvirSavedPresentationStore.current
 
     val physicalUsbState by usbSensorManager.state.collectAsState()
     val intendedDeviceId = if (simulationActive) "" else UvirSensorCredentialStore.load(context).deviceId
@@ -3944,6 +3945,7 @@ internal fun UvirAppContent(
 
                             val deleted =
                                 database.resetAllCounters()
+                            savedPresentationStore?.clear()
                             autoSessionId = 0L
                             autoCompletedCount = 0
                             clearUnreadAcquisitions()
@@ -4478,6 +4480,17 @@ internal fun UvirAppContent(
                         manager.measureDarkOffsets(hardwareId, mode, group, progress)
                     }
                 },
+                onMeasureOpticalWindow = { hardwareId, mode, expected, progress ->
+                    check(!useFakeSensorData && hardwareId.equals(intendedDeviceId, true)) {
+                        "window_measurement_connection_changed"
+                    }
+                    if (mode == SensorConnectionMode.USB) {
+                        usbSensorManager.measureOpticalWindow(hardwareId, expected, progress)
+                    } else {
+                        val manager = multiSensorRuntime?.wirelessFor(hardwareId) ?: wirelessSensorManager
+                        manager.measureOpticalWindow(hardwareId, mode, expected, progress)
+                    }
+                },
                 onPowerOffSensor = {
                     withContext(Dispatchers.IO) {
                         sendSensorControlCommands(
@@ -4548,6 +4561,7 @@ internal fun UvirAppContent(
                     disassociated
                 },
                 onRestoreApplicationDefaults = {
+                    savedPresentationStore?.clear()
                     withContext(Dispatchers.IO) {
                         restoreUvirApplicationDefaults(
                             context = context,
@@ -5055,6 +5069,7 @@ internal fun UvirAppContent(
                     if (!autoEnabled && !thresholdAlertSettings.hasActiveMonitoring() &&
                         sensorIndicators.values.none { it.pulses && it.dot != UvirStatusDot.YELLOW }) {
                         database.resetAllCounters()
+                        savedPresentationStore?.clear()
                         clearUnreadAcquisitions()
                         clearUnreadAlerts()
                         autoSessionId = 0L

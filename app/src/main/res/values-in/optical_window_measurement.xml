@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="window_measure_calculate">Hitung pengali</string>
+    <string name="window_measure_reference_instructions">Jaga sensor tetap diam di bawah pencahayaan stabil, tanpa jendela optik atau filter. Ukur selama 30 detik. Atur offset yang sesuai terlebih dahulu.</string>
+    <string name="window_measure_filtered_instructions">Pasang jendela optik atau filter tanpa memindahkan sensor atau sumber cahaya. Tunggu pencahayaan stabil, lalu mulai pengukuran kedua selama 30 detik.</string>
+    <string name="window_measure_reference_progress">Tanpa jendela: %1$s / %2$s dtk</string>
+    <string name="window_measure_filtered_progress">Dengan jendela: %1$s / %2$s dtk</string>
+    <string name="window_measure_results">Periksa faktor kanal yang diusulkan. Kanal yang tidak dapat digunakan dan pengali umum tetap tidak berubah.</string>
+    <string name="window_measure_valid_channels">Kanal yang dapat digunakan: %1$s / %2$s</string>
+    <string name="window_measure_apply">Terapkan pengali</string>
+    <string name="window_measure_failed">Pengukuran tidak tersedia atau kondisi berubah. Periksa kestabilan cahaya, koneksi, dan pengaturan, lalu mulai ulang tanpa jendela.</string>
+    <string name="window_measure_unavailable">Kanal tidak tersedia</string>
+    <string name="window_measure_insufficient">Data tidak mencukupi</string>
+    <string name="window_measure_unstable">Pencahayaan tidak stabil</string>
+    <string name="window_measure_saturated">Sinyal di luar rentang</string>
+    <string name="window_measure_brighter">Nilai dengan filter lebih tinggi</string>
+    <string name="window_measure_out_of_range">Faktor di luar rentang yang diizinkan</string>
+</resources>

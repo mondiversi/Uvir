@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="window_measure_calculate">Calcular multiplicadores</string>
+    <string name="window_measure_reference_instructions">Mantenha o sensor imóvel sob iluminação estável, sem janela ou filtro. Meça durante 30 segundos. Configure antes os offsets adequados.</string>
+    <string name="window_measure_filtered_instructions">Coloque a janela ou o filtro sem mover o sensor ou a fonte de luz. Aguarde uma iluminação estável e inicie a segunda medição de 30 segundos.</string>
+    <string name="window_measure_reference_progress">Sem janela: %1$s / %2$s s</string>
+    <string name="window_measure_filtered_progress">Com janela: %1$s / %2$s s</string>
+    <string name="window_measure_results">Verifique os fatores propostos por canal. Os canais não utilizáveis e o multiplicador geral permanecem inalterados.</string>
+    <string name="window_measure_valid_channels">Canais utilizáveis: %1$s / %2$s</string>
+    <string name="window_measure_apply">Aplicar multiplicadores</string>
+    <string name="window_measure_failed">Medição indisponível ou condições alteradas. Verifique a estabilidade da luz, a conexão e as configurações e recomece sem janela.</string>
+    <string name="window_measure_unavailable">Canal indisponível</string>
+    <string name="window_measure_insufficient">Dados insuficientes</string>
+    <string name="window_measure_unstable">Iluminação instável</string>
+    <string name="window_measure_saturated">Sinal fora da escala</string>
+    <string name="window_measure_brighter">Valor filtrado maior</string>
+    <string name="window_measure_out_of_range">Fator fora dos limites permitidos</string>
+</resources>

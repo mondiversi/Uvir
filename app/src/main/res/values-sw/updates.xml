@@ -16,5 +16,5 @@
     <string name="update_done">Kihisi kimesasishwa</string>
     <string name="update_failed">Sasisho limeshindwa. Angalia kumbukumbu ya hitilafu. Kihisi kisipoanza, rejesha programu dhibiti kwa USB kutoka kompyuta.</string>
     <string name="update_permission">Ruhusu Uvir kusakinisha masasisho katika mipangilio ya Android.</string>
-    <string name="update_whats_new">Uhamishaji wa TXT na CSV wa vipimo una asilimia za jumla na kikundi, rangi za PNG zinazolingana na uthibitisho wa kuingiza kwa kushikilia sekunde tano.</string>
+    <string name="update_whats_new">Firmware 0.5.119 inaboresha ukaguzi wa usomaji mpya na urejeshaji wa Wi-Fi.</string>
 </resources>

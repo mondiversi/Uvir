@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="dark_offsets_calculate">Calcular offsets</string>
-    <string name="dark_offsets_instructions">Meça durante cerca de 30 segundos em condições de referência estáveis. No escuro, compensa o fundo do sensor; com iluminação, também subtrai a luz presente e obtém medições relativas. Para medir no escuro, cubra as entradas óticas com material opaco também ao infravermelho próximo e mantenha os LED no estado normal de utilização. A média não elimina o ruído aleatório nem calibra o ganho.</string>
+    <string name="dark_offsets_instructions">Meça durante cerca de 30 segundos em condições de referência estáveis. Para uma referência no escuro, cubra as entradas ópticas com um material também opaco ao infravermelho próximo e mantenha os LED no estado normal de funcionamento. Sob iluminação, a luz de referência também é subtraída, produzindo medições relativas. Este procedimento não calibra o ganho.</string>
+    <string name="dark_offsets_uv_method">Para UVC, UVB e UVA, é proposta a média das leituras de cada canal. O ganho UV adapta-se automaticamente ao nível de luz.</string>
+    <string name="dark_offsets_visible_method">Para cada canal visível/infravermelho, é proposta a média das leituras.</string>
     <string name="dark_offsets_progress">A medir: %1$s / 30 s</string>
     <string name="dark_offsets_result">Proposta de %1$s leituras. Nenhuma definição foi alterada.</string>
     <string name="dark_offsets_failed">Medição interrompida ou indisponível. Verifique a ligação e o sensor e tente novamente.</string>

@@ -37,7 +37,8 @@ internal fun UvirSensorCalibrationSettings(
     sensorDeviceId: String = "",
     darkMeasurementSupported: Boolean = false,
     onMeasureDarkOffsets: (suspend (CalibrationGroup, (Int) -> Unit) -> DarkOffsetReading)? = null,
-    onFirmwareUpdateRequired: (() -> Unit)? = null
+    onFirmwareUpdateRequired: (() -> Unit)? = null,
+    uvDarkMeasurementSupported: Boolean = darkMeasurementSupported
 ) {
     val numericFormat = LocalUvirNumericFormat.current
     val unit = LocalUvirIrradianceUnit.current
@@ -116,7 +117,7 @@ internal fun UvirSensorCalibrationSettings(
                 UvirDarkOffsetControls(calibrationGroup,
                     enabled = enabled && channelFactorsSupported && offsetsSupported && offsets != null &&
                         (group != 0 || uvSensorAvailable),
-                    supported = darkMeasurementSupported, names = names,
+                    supported = darkMeasurementSupported && (group != 0 || uvDarkMeasurementSupported), names = names,
                     cardColor = cardColor, primaryText = primaryText, secondaryText = secondaryText,
                     measure = onMeasureDarkOffsets,
                     firmwareUpdateRequired = enabled && (group != 0 || uvSensorAvailable) &&

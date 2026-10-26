@@ -6,11 +6,11 @@ This document describes the USB interface currently implemented by the Uvir
 ESP32 firmware. It is intended for computers, mobile devices and embedded
 controllers that need to power and control the sensor without running the Uvir
 Android application. The command documentation was checked against firmware
-source `0.5.112` on 2026-10-22. See the
+source `0.5.119` on 2026-10-26. See the
 [standalone transport/setup guide](STANDALONE_SENSOR.md) for concrete USB,
 Wi-Fi, Bluetooth and MQTT connection procedures and a runnable live reader.
 
-The protocol is usable now, but Uvir is still under active development. An
+The protocol is usable now; project development is on hold pending optical validation and calibration. An
 integrator should validate the `protocol` field and advertised capabilities
 instead of depending only on a firmware version string.
 
@@ -361,9 +361,11 @@ Color offset order is **UVC, UVB, UVA, violet, blue, green, green-yellow, orange
 red, far-red, NIR**, the same order as optical-window factors. Values are finite,
 nonnegative v1 wire **uW/cm2**, between 0 and 1000000. Supply all eleven values;
 zero means no subtraction. Physical channels are normalized and paired using
-the usual color means, then the color offset is subtracted and clamped once at
-zero, before the base and optical-window factors, conditions and saves. This is
-not equivalent to clamping each constituent physical channel separately.
+the usual color means, then the color offset is subtracted before the base and
+optical-window factors. Since 0.5.114, signed residuals survive the configured
+average and only its result is clamped at zero. Instantaneous conditions use the
+nonnegative one-sample result. This is not equivalent to clamping each
+constituent physical channel separately.
 
 HELLO/calibration status returns
 `"calibration_offsets":{"version":2,"unit":"uW/cm2","values":[0,0,0,0,0,0,0,0,0,0,0]}`.
@@ -481,12 +483,24 @@ real ambient light, giving relative rather than absolute readings. The historica
 normalized irradiance **before all user offsets, channel/module gains and window
 compensation**, without changing or temporarily resetting any saved settings.
 UV returns UVC/UVB/UVA; VIS returns violet/blue/green/green-yellow/orange/red/far-red/NIR.
-The result is a mean-background proposal, not random-noise removal or absolute calibration.
+Since **0.5.114**, both groups propose **arithmetic means per channel**. This
+supersedes the UV maximum estimator in 0.5.113. The updated app gates UV
+calculation on 0.5.114+ and requires `estimator: "mean"`; old VIS mean results
+remain supported. AS7331 gain adapts over 1x–2048x at fixed 64 ms integration.
+The first UV reference sample settles gain, then the run holds it constant;
+completion, cancellation and loss of the owning connection release the lock.
+
+The selected offset is subtracted once before gains/window compensation.
+Signed corrected color samples are averaged before the final zero clamp, also
+when discarding per-band extremes. One-sample results remain nonnegative. Legacy
+physical-channel offset semantics are preserved. No adaptive noise threshold is
+introduced and existing saved offsets are never changed by a firmware update.
 
 Replies use `type: "dark_offsets"`, `protocol: "uvir-sensor-v1"`, `device_id`,
 `request_id`, `group`, `state`, `elapsed_ms` and `samples`. State is `progress`,
 `ready`, `cancelled` or `error`. A ready frame additionally contains `unit:
-"uW/cm2"` and `values` (3 or 8 finite nonnegative offsets). An error contains a
+"uW/cm2"` and `values` (3 or 8 finite nonnegative offsets). Current firmware also
+contains `estimator: "mean"` for both UV and VIS. An error contains a
 machine-readable `error`; failed/saturated readings invalidate the proposal.
 
 Keep the original authenticated transport alive with PING at intervals shorter

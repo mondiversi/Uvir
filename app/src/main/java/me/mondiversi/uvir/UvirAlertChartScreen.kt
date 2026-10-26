@@ -84,18 +84,11 @@ internal fun AlertChartScreen(
                 }
             )
         }
-    var viewMode by remember(entry.id) {
-        mutableStateOf(initialViewMode)
-    }
-    var showChart by remember(entry.id) {
-        mutableStateOf(false)
-    }
-    var chartExpanded by remember(entry.id) {
-        mutableStateOf(true)
-    }
-    var dataExpanded by remember(entry.id) {
-        mutableStateOf(true)
-    }
+    val presentation = rememberUvirSavedScreenPresentation("alert:${entry.id}", initialViewMode)
+    var viewMode by presentation.viewMode
+    var showChart by presentation.showChart
+    var chartExpanded by presentation.chartExpanded
+    var dataExpanded by presentation.dataExpanded
     var showDeleteConfirmation by rememberSaveable(entry.id) {
         mutableStateOf(false)
     }

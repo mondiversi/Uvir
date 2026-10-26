@@ -436,11 +436,11 @@
     <string name="app_version">Versión de la aplicación: %1$s</string>
     <string name="package_name_value">Paquete: %1$s</string>
     <string name="about_whats_new_title">Novedades de la versión %1$s</string>
-    <string name="about_whats_new_connectivity">Exporta/importa adquisiciones y alertas en archivos .uvirrecords sin contraseña, incluidas sesiones, notas y variantes.</string>
-    <string name="about_whats_new_connections">La identificación por hardware, los nuevos ID locales y la detección de duplicados conservan el origen de los datos importados.</string>
-    <string name="about_whats_new_measurements">La vista principal recuerda el orden de las tarjetas y las bandas ocultas; las adquisiciones guardadas ofrecen controles temporales y porcentajes totales o por grupo.</string>
-    <string name="about_whats_new_interface">Colores espectrales uniformes, nombres neutros con puntos de color en los datos guardados, filas de sesión más claras y reordenación animada.</string>
-    <string name="about_whats_new_github">Diálogos, acciones de día/noche y avisos de datos simulados mejorados; comprobaciones actualizadas de preparación y recuperación de actualizaciones USB.</string>
+    <string name="about_whats_new_connectivity">La app y las conexiones funcionan; el desarrollo está suspendido hasta validar la óptica.</string>
+    <string name="about_whats_new_connections">La tapa y las aperturas son prototipos teóricos, no ópticas de medida validadas.</string>
+    <string name="about_whats_new_measurements">Las herramientas incluyen offsets medios, ganancia UV adaptativa y factores de ventana guiados.</string>
+    <string name="about_whats_new_interface">Apertura de tarjetas más fluida; las opciones de datos guardados duran durante la sesión de la app.</string>
+    <string name="about_whats_new_github">Las medidas absolutas fiables aún requieren la óptica definitiva y calibración de referencia.</string>
     <string name="about_description">Aplicación de adquisición espectral de radiación ultravioleta, visible e infrarroja.</string>
     <string name="about_spectral_ranges">Bandas espectrales: Ultravioleta • Luz visible • Infrarrojo</string>
     <string name="about_sensors">Sensores compatibles: AS7331 UV • AS7343 multiespectral</string>

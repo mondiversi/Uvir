@@ -262,7 +262,7 @@ class UvirMainIslandOrderUiTest {
         compose.runOnIdle { assertEquals(UvirDefaultMainIslandOrder, currentOrder) }
     }
 
-    @Test fun headersHaveNoCollapseActionAndTheMoveColumnStaysBetweenNameAndPercentInBothThemesAndRtl() {
+    @Test fun headersKeepTheirMoveColumnAndCompactWithVisibilityInBothThemesAndRtl() {
         fixture()
         for (dark in listOf(false, true)) for (rightToLeft in listOf(false, true)) {
             compose.runOnIdle { night.value = dark; rtl.value = rightToLeft }
@@ -277,13 +277,26 @@ class UvirMainIslandOrderUiTest {
                 assertEquals(up.bottom.value, down.top.value, .1f)
                 if (rightToLeft) assertTrue(basis.right <= up.left && up.right <= total.left)
                 else assertTrue(total.right <= up.left && up.right <= basis.left)
+                val percentage = compose.onNodeWithTag("live_percentage_base_${group.name}", useUnmergedTree = true)
+                percentage.performScrollTo().performTouchInput { click(center) }
+                val switchedUp = move(group, true).getUnclippedBoundsInRoot()
+                val switchedDown = move(group, false).getUnclippedBoundsInRoot()
+                assertEquals("Percentage captions must not shift the move column", up.left.value, switchedUp.left.value, .1f)
+                assertEquals(up.right.value, switchedUp.right.value, .1f)
+                assertEquals(down.left.value, switchedDown.left.value, .1f)
+                percentage.performTouchInput { click(center) }
             }
             val header = compose.onNodeWithTag("live_island_header_UV", useUnmergedTree = true).performScrollTo()
             header.performTouchInput { click(Offset(2f, 2f)) }
+            header.assertIsOff()
             compose.runOnIdle { assertEquals(0, collapseCalls) }
-            compose.onNodeWithTag("live_row_UVC", useUnmergedTree = true).assertExists()
+            compose.onNodeWithTag("live_row_UVC", useUnmergedTree = true).assertDoesNotExist()
+            compose.onNodeWithTag("live_group_bar_UV", useUnmergedTree = true).assertDoesNotExist()
             if (!rightToLeft) File(context.getExternalFilesDir(null), "main-island-order-${if (dark) "night" else "day"}.png")
                 .outputStream().use { assertTrue(header.captureToImage().asAndroidBitmap().compress(Bitmap.CompressFormat.PNG, 100, it)) }
+            header.performClick().assertIsOn()
+            compose.onNodeWithTag("live_row_UVC", useUnmergedTree = true).assertExists()
+            compose.onNodeWithTag("live_group_bar_UV", useUnmergedTree = true).assertExists()
         }
     }
 

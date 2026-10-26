@@ -428,11 +428,11 @@
     <string name="app_version">نسخه برنامه: %1$s</string>
     <string name="package_name_value">بسته بندی: %1$s</string>
     <string name="about_whats_new_title">موارد جدید در نسخه %1$s</string>
-    <string name="about_whats_new_connectivity">صدور/ورود اندازه‌گیری‌ها و هشدارها در فایل‌های .uvirrecords بدون گذرواژه، همراه با نشست‌ها، یادداشت‌ها و گونه‌ها.</string>
-    <string name="about_whats_new_connections">تطبیق شناسهٔ سخت‌افزاری، شناسه‌های محلی جدید و تشخیص موارد تکراری، منشأ داده‌های واردشده را حفظ می‌کنند.</string>
-    <string name="about_whats_new_measurements">نمای اصلی ترتیب کارت‌ها و باندهای پنهان را به یاد می‌سپارد؛ اندازه‌گیری‌های ذخیره‌شده کنترل‌های موقت و درصد کل یا گروه دارند.</string>
-    <string name="about_whats_new_interface">رنگ‌های طیفی یکسان، نام‌های خنثی با نقطه‌های رنگی در داده‌های ذخیره‌شده، ردیف‌های روشن‌تر نشست و جابه‌جایی پویانمایی‌شدهٔ کارت‌ها.</string>
-    <string name="about_whats_new_github">بهبود پنجره‌ها، کنش‌های روز/شب و اعلان‌های دادهٔ شبیه‌سازی‌شده، همراه با بررسی‌های به‌روز آمادگی و بازیابی به‌روزرسانی USB.</string>
+    <string name="about_whats_new_connectivity">برنامه و اتصال حسگر کار می‌کنند؛ توسعه تا اعتبارسنجی بخش نوری متوقف شده است.</string>
+    <string name="about_whats_new_connections">درپوش و روزنه‌ها نمونه‌های نظری هستند، نه اپتیک اندازه‌گیری اعتبارسنجی‌شده.</string>
+    <string name="about_whats_new_measurements">ابزارها شامل آفست میانگین، بهره تطبیقی UV و محاسبه هدایت‌شده ضرایب پنجره هستند.</string>
+    <string name="about_whats_new_interface">باز شدن کارت‌ها روان‌تر است؛ انتخاب‌های نمایش داده‌های ذخیره‌شده تا پایان نشست برنامه حفظ می‌شوند.</string>
+    <string name="about_whats_new_github">اندازه‌گیری مطلق قابل اعتماد هنوز به اپتیک نهایی و کالیبراسیون مرجع نیاز دارد.</string>
     <string name="about_description">برنامهٔ ثبت طیفی تابش فرابنفش، مرئی و فروسرخ.</string>
     <string name="about_spectral_ranges">باندهای طیفی: فرابنفش • نور مرئی • فروسرخ</string>
     <string name="about_sensors">سنسورهای پشتیبانی شده: AS7331 UV • AS7343 چند طیفی</string>

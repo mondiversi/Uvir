@@ -311,13 +311,11 @@ internal fun AcquisitionVerticalBarChart(
     cardColor: Color,
     primaryText: Color,
     secondaryText: Color,
-    mutedGroups: Set<SensorGroup> = emptySet()
+    expandedSections: MutableMap<AcquisitionChartSection, Boolean> = remember {
+        mutableStateMapOf<AcquisitionChartSection, Boolean>()
+    }
 ) {
     val irradianceUnit = LocalUvirIrradianceUnit.current
-    val expandedSections =
-        remember {
-            mutableStateMapOf<AcquisitionChartSection, Boolean>()
-        }
     val sections =
         AcquisitionChartSection.entries.mapNotNull { section ->
             bars.filter { it.section == section }
@@ -342,9 +340,7 @@ internal fun AcquisitionVerticalBarChart(
                 },
                 cardColor = cardColor,
                 primaryText = primaryText,
-                secondaryText = secondaryText,
-                titleColor = if (section.spectrumIconGroup() in mutedGroups)
-                    secondaryText.copy(alpha = .55f) else primaryText
+                secondaryText = secondaryText
             ) {
                 Column(
                     modifier =

@@ -5,8 +5,8 @@
 - Display name: `Uvir`
 - Application ID: `me.mondiversi.uvir`
 - Namespace: `me.mondiversi.uvir`
-- Current version: `1.4.1` (`versionCode` 6)
-- Sensor firmware: `0.5.112`
+- Current version: `1.4.2` (`versionCode` 7)
+- Sensor firmware: `0.5.119`
 
 ## Building the APK
 
@@ -15,10 +15,10 @@ Double-click `CREA_APK_RELEASE.bat`.
 When the build finishes, the signed APK ready for distribution is available at:
 
 ```text
-dist\Uvir-1.4.1-release.apk
+dist\Uvir-1.4.2-release.apk
 ```
 
-The same directory also contains `Uvir-1.4.1-release.apk.sha256`, which can be
+The same directory also contains `Uvir-1.4.2-release.apk.sha256`, which can be
 used to verify that a download has not been modified or corrupted.
 
 The APK can be attached to a GitHub release or distributed from a website.
@@ -28,8 +28,11 @@ Make the corresponding source available in accordance with the project's
 For a complete release (APK, USB firmware, signed index and checksums), follow
 [docs/UPDATES.md](docs/UPDATES.md). Publish the release only after all files have
 been uploaded. Both optical modules are installed and detected; final-assembly
-tests and traceable calibration remain pending until the PCB/optical assembly
-is ready. A development-source push is not a new signed APK/firmware release.
+tests and traceable calibration remain unfinished, and development is currently
+on hold on this work. App/firmware workflows function, but the theoretical lid,
+apertures and any diffuser/filter/window are not validated measuring optics.
+Current readings do not establish accurate absolute irradiance. A development-source
+push is not a new signed APK/firmware release.
 
 ## Signing and updates
 

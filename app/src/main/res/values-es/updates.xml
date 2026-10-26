@@ -16,5 +16,5 @@
     <string name="update_done">Sensor actualizado</string>
     <string name="update_failed">Actualización fallida. Consulta el registro de errores. Si el sensor no arranca, recupera el firmware por USB desde un ordenador.</string>
     <string name="update_permission">Permite que Uvir instale actualizaciones en los ajustes de Android.</string>
-    <string name="update_whats_new">Las exportaciones TXT y CSV de adquisiciones incluyen porcentajes totales y por grupo, con colores PNG coherentes y confirmación de importación manteniendo pulsado cinco segundos.</string>
+    <string name="update_whats_new">El firmware 0.5.119 mejora la comprobación de lecturas recientes y la recuperación Wi-Fi.</string>
 </resources>

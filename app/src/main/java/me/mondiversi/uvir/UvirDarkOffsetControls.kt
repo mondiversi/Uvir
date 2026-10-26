@@ -81,6 +81,8 @@ internal fun UvirDarkOffsetControls(
                         else stringResource(R.string.visible_light) + " / " + stringResource(R.string.far_red_nir), color = primaryText)
                     // Once started, keep space for progress/the proposed channel values.
                     if (!running && result == null) Text(stringResource(R.string.dark_offsets_instructions))
+                    if (!running) Text(stringResource(if (group == CalibrationGroup.UV)
+                        R.string.dark_offsets_uv_method else R.string.dark_offsets_visible_method))
                     when {
                         running -> {
                             Text(stringResource(R.string.dark_offsets_progress,

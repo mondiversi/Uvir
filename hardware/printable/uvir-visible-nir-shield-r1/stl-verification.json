@@ -1,0 +1,24 @@
+{
+  "part": "UVIR visible/NIR light shield R1",
+  "units": "mm",
+  "stl_sha256": "96cb467836f9300bebc6025ba7f79dc3b54fb88526e8839c5d8f33e043595cf5",
+  "triangles": 32,
+  "closed_manifold": true,
+  "consistent_winding": true,
+  "single_connected_solid": true,
+  "dimensions_mm": [
+    15.399999618530273,
+    23.399999618530273,
+    14.0
+  ],
+  "nominal_internal_opening_mm": [
+    13,
+    21
+  ],
+  "nominal_wall_thickness_mm": 1.2,
+  "floor": false,
+  "roof": false,
+  "volume_mm3": 1223.039732704167,
+  "physical_fit_validated": false,
+  "optical_opacity_validated": false
+}

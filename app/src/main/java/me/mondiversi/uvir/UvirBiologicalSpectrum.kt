@@ -218,7 +218,8 @@ private fun BiologicalEffectRow(
     primaryText: Color,
     secondaryText: Color
 ) {
-    val normalizedScore = score.coerceIn(0f, 1f)
+    val readingAvailable = LocalUvirLiveReadingAvailable.current
+    val normalizedScore = if (readingAvailable) score.coerceIn(0f, 1f) else 0f
     val highlightedColor =
         if (alerted) UvirAttentionColor else primaryText
 
@@ -242,7 +243,9 @@ private fun BiologicalEffectRow(
         ) {
             Text(
                 text =
-                    if (outOfRange) {
+                    if (!readingAvailable) {
+                        "—"
+                    } else if (outOfRange) {
                         stringResource(R.string.out_of_range_short)
                     } else {
                         "${mainViewIrradianceNumber(value)} ${LocalUvirIrradianceUnit.current.unitLabel(equivalent = true)}"
@@ -254,7 +257,7 @@ private fun BiologicalEffectRow(
 
             Text(
                 text =
-                    stringResource(
+                    if (!readingAvailable) "—" else stringResource(
                         R.string.biological_compact_relevance,
                         normalizedScore * 100f
                     ),

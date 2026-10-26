@@ -16,10 +16,10 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-/** Per-visit presentation only: no preferences or saved-instance restoration. */
+/** Shared with the screen's app-session state, without preferences or saved-instance storage. */
 @Composable
 internal fun rememberUvirSavedValueDisplay(key: String): MutableState<UvirSavedValueDisplay> =
-    remember(key) { mutableStateOf(UvirSavedValueDisplay()) }
+    rememberUvirSavedScreenPresentation(key).valueDisplay
 
 internal val UvirSavedValueHalfGap = 7.5.dp
 

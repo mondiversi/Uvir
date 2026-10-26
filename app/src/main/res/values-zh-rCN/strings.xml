@@ -406,11 +406,11 @@
     <string name="app_version">应用版本：%1$s</string>
     <string name="package_name_value">软件包：%1$s</string>
     <string name="about_whats_new_title">版本 %1$s 的新内容</string>
-    <string name="about_whats_new_connectivity">将采集和警报导出或导入为无密码的 .uvirrecords 文件，包括会话、备注及变体。</string>
-    <string name="about_whats_new_connections">通过硬件 ID 匹配、新的本地 ID 和重复检测，保留导入数据的来源。</string>
-    <string name="about_whats_new_measurements">主界面记住卡片顺序和隐藏波段；已保存采集提供临时显示控制，以及总量或分组百分比。</string>
-    <string name="about_whats_new_interface">统一光谱颜色，已保存数据使用常规文字颜色配合彩色圆点，改进会话行并为卡片排序添加动画。</string>
-    <string name="about_whats_new_github">改进对话框、日间/夜间操作和模拟数据通知，并更新 USB 升级就绪及恢复检查。</string>
+    <string name="about_whats_new_connectivity">应用和传感器连接正常工作；在完成光学验证之前，项目开发暂停。</string>
+    <string name="about_whats_new_connections">盖板和开口是理论原型，并非经过验证的测量光学系统。</string>
+    <string name="about_whats_new_measurements">校准工具包括平均偏移、自适应UV增益和窗口系数计算引导。</string>
+    <string name="about_whats_new_interface">卡片展开更流畅；已保存数据的显示选项在当前应用会话中保留。</string>
+    <string name="about_whats_new_github">可靠的绝对测量仍需要最终光学系统和参考校准。</string>
     <string name="about_description">用于紫外线、可见光和红外线辐射的光谱采集应用。</string>
     <string name="about_spectral_ranges">光谱波段：紫外线 • 可见光 • 红外线</string>
     <string name="about_sensors">支持的传感器：AS7331 UV • AS7343 多光谱</string>

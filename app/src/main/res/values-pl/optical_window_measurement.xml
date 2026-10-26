@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="window_measure_calculate">Oblicz mnożniki</string>
+    <string name="window_measure_reference_instructions">Trzymaj czujnik nieruchomo przy stabilnym oświetleniu, bez okienka ani filtra. Mierz przez 30 sekund. Wcześniej ustaw odpowiednie offsety.</string>
+    <string name="window_measure_filtered_instructions">Załóż okienko lub filtr bez poruszania czujnikiem ani źródłem światła. Poczekaj na stabilne oświetlenie, a następnie rozpocznij drugi pomiar trwający 30 sekund.</string>
+    <string name="window_measure_reference_progress">Bez okienka: %1$s / %2$s s</string>
+    <string name="window_measure_filtered_progress">Z okienkiem: %1$s / %2$s s</string>
+    <string name="window_measure_results">Sprawdź proponowane współczynniki kanałów. Nieprzydatne kanały i mnożnik ogólny pozostają bez zmian.</string>
+    <string name="window_measure_valid_channels">Użyteczne kanały: %1$s / %2$s</string>
+    <string name="window_measure_apply">Ustaw mnożniki</string>
+    <string name="window_measure_failed">Pomiar niedostępny lub warunki uległy zmianie. Sprawdź stabilność światła, połączenie i ustawienia, a następnie zacznij od nowa bez okienka.</string>
+    <string name="window_measure_unavailable">Kanał niedostępny</string>
+    <string name="window_measure_insufficient">Za mało danych</string>
+    <string name="window_measure_unstable">Niestabilne oświetlenie</string>
+    <string name="window_measure_saturated">Sygnał poza zakresem</string>
+    <string name="window_measure_brighter">Wartość z filtrem jest wyższa</string>
+    <string name="window_measure_out_of_range">Współczynnik poza dozwolonym zakresem</string>
+</resources>

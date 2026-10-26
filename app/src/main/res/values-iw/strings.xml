@@ -436,11 +436,11 @@
     <string name="app_version">גרסת האפליקציה: %1$s</string>
     <string name="package_name_value">חבילה: %1$s</string>
     <string name="about_whats_new_title">מה חדש בגרסה %1$s</string>
-    <string name="about_whats_new_connectivity">ייצוא/ייבוא מדידות והתראות כקובצי .uvirrecords ללא סיסמה, כולל הפעלות, הערות וגרסאות מדידה.</string>
-    <string name="about_whats_new_connections">התאמת מזהי חומרה, מזהים מקומיים חדשים וזיהוי כפילויות שומרים על מקור הנתונים המיובאים.</string>
-    <string name="about_whats_new_measurements">התצוגה הראשית זוכרת את סדר הכרטיסים ואת התחומים המוסתרים; במדידות שמורות יש פקדים זמניים ואחוזים מהסך הכול או מהקבוצה.</string>
-    <string name="about_whats_new_interface">צבעים ספקטרליים אחידים, שמות ניטרליים עם נקודות צבע בנתונים שמורים, שורות הפעלה ברורות יותר ושינוי סדר הכרטיסים בהנפשה.</string>
-    <string name="about_whats_new_github">שופרו תיבות דו-שיח, פעולות יום/לילה והתראות על נתונים מדומים, ועודכנו בדיקות המוכנות והשחזור של עדכוני USB.</string>
+    <string name="about_whats_new_connectivity">האפליקציה וחיבורי החיישן פועלים; הפיתוח מושהה עד לאימות המערכת האופטית.</string>
+    <string name="about_whats_new_connections">המכסה והפתחים הם אבות־טיפוס תאורטיים ולא אופטיקת מדידה מאומתת.</string>
+    <string name="about_whats_new_measurements">הכלים כוללים היסטים ממוצעים, הגבר UV מסתגל וחישוב מודרך של מקדמי החלון.</string>
+    <string name="about_whats_new_interface">פתיחת הכרטיסים חלקה יותר; בחירות התצוגה של נתונים שמורים נשמרות במהלך ההפעלה הנוכחית.</string>
+    <string name="about_whats_new_github">מדידות מוחלטות אמינות עדיין דורשות אופטיקה סופית וכיול מול מקורות ייחוס.</string>
     <string name="about_description">אפליקציה לאיסוף נתונים ספקטרליים של קרינה על־סגולה, נראית ותת־אדומה.</string>
     <string name="about_spectral_ranges">תחומים ספקטרליים: על־סגול • אור נראה • תת־אדום</string>
     <string name="about_sensors">חיישנים נתמכים: AS7331 UV • AS7343 multispectral</string>

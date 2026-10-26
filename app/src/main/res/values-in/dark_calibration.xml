@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="dark_offsets_calculate">Hitung offset</string>
-    <string name="dark_offsets_instructions">Ukur selama sekitar 30 detik dalam kondisi acuan yang stabil. Dalam gelap, latar belakang sensor dikompensasi; dengan pencahayaan, cahaya yang ada juga dikurangi sehingga menghasilkan pengukuran relatif. Untuk pengukuran gelap, tutupi masukan optik dengan bahan yang juga tidak tembus inframerah dekat dan biarkan LED beroperasi normal. Nilai rata-rata tidak menghilangkan derau acak atau mengalibrasi penguatan.</string>
+    <string name="dark_offsets_instructions">Ukur selama sekitar 30 detik dalam kondisi acuan yang stabil. Untuk acuan gelap, tutupi masukan optik dengan bahan yang juga tidak tembus inframerah dekat dan biarkan LED beroperasi normal. Dalam pencahayaan, cahaya acuan juga dikurangi sehingga pengukuran menjadi relatif. Prosedur ini tidak mengalibrasi penguatan.</string>
+    <string name="dark_offsets_uv_method">Untuk UVC, UVB, dan UVA, rata-rata pembacaan setiap kanal diusulkan. Penguatan UV menyesuaikan secara otomatis dengan tingkat cahaya.</string>
+    <string name="dark_offsets_visible_method">Untuk setiap kanal tampak/inframerah, rata-rata pembacaan diusulkan.</string>
     <string name="dark_offsets_progress">Mengukur: %1$s / 30 d</string>
     <string name="dark_offsets_result">Usulan dari %1$s pembacaan. Tidak ada pengaturan yang diubah.</string>
     <string name="dark_offsets_failed">Pengukuran terputus atau tidak tersedia. Periksa koneksi dan sensor, lalu coba lagi.</string>

@@ -16,5 +16,5 @@
     <string name="update_done">Sensor diperbarui</string>
     <string name="update_failed">Pembaruan gagal. Lihat log kesalahan. Jika sensor tidak lagi menyala, pulihkan firmware melalui USB dari komputer.</string>
     <string name="update_permission">Izinkan Uvir memasang pembaruan di pengaturan Android.</string>
-    <string name="update_whats_new">Ekspor TXT dan CSV akuisisi menyertakan persentase total dan kelompok, dengan warna PNG konsisten serta konfirmasi impor melalui tekan tahan lima detik.</string>
+    <string name="update_whats_new">Firmware 0.5.119 meningkatkan pemeriksaan pembacaan terbaru dan pemulihan Wi-Fi.</string>
 </resources>

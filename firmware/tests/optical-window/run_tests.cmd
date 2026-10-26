@@ -17,3 +17,11 @@ cl /nologo /EHsc /std:c++17 /W4 /Fe:"%~1\si_storage_test.exe" /Fo:"%~1\si_storag
 if errorlevel 1 exit /b 1
 "%~1\si_storage_test.exe"
 if errorlevel 1 exit /b 1
+cl /nologo /EHsc /std:c++17 /W4 /Fe:"%~1\live_sample_health_test.exe" /Fo:"%~1\live_sample_health_test.obj" "%~dp0live_sample_health_test.cpp"
+if errorlevel 1 exit /b 1
+"%~1\live_sample_health_test.exe"
+if errorlevel 1 exit /b 1
+cl /nologo /EHsc /std:c++17 /W4 /Fe:"%~1\wifi_recovery_test.exe" /Fo:"%~1\wifi_recovery_test.obj" "%~dp0wifi_recovery_test.cpp"
+if errorlevel 1 exit /b 1
+"%~1\wifi_recovery_test.exe"
+if errorlevel 1 exit /b 1

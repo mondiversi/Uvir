@@ -85,9 +85,9 @@ publishing so the repository and the GitHub release stay consistent.
 2. Run all tests, build the signed release APK and compile the ESP32 huge_app image.
 3. Run `tools/ReleaseTool.java` with Java 17 or newer:
 
-   `java tools/ReleaseTool.java ROOT OUTPUT FIRMWARE_BUILD 1.4.1 6 0.5.112`
+   `java tools/ReleaseTool.java ROOT OUTPUT FIRMWARE_BUILD 1.4.2 7 0.5.119`
 
-4. Create a draft GitHub release tagged `v1.4.1`. Upload every generated asset:
+4. Create a draft GitHub release tagged `v1.4.2`, titled `v1.4.2`. Upload every generated asset:
    APK, application BIN, USB archive, signed index and SHA256SUMS.
 5. Publish only after all uploads and validation succeed. The updater ignores
    drafts and prereleases through GitHub's latest-stable endpoint.
@@ -98,6 +98,8 @@ control. Future key rotation needs an explicitly trusted migration, not simply
 replacing the index certificate.
 
 The AS7331 and AS7343 modules have been detected and exercised on the prototype.
-Final tests and traceable calibration with the PCB, enclosure, optical tubes,
-diffuser and any protective windows remain pending. A signed firmware build is
-not evidence of absolute irradiance accuracy or PCB fabrication approval.
+Development is currently on hold pending optical design validation and reference
+calibration with the final PCB, enclosure, lid/apertures and any diffuser,
+filter or protective window. The aperture dimensions are theoretical, and
+current readings do not establish accurate absolute irradiance. A signed firmware
+build is not evidence of measurement accuracy or PCB fabrication approval.

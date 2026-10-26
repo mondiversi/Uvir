@@ -1,6 +1,7 @@
 package me.mondiversi.uvir
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.indication
@@ -26,6 +27,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+
+// Archived screens retain their normal rendering; only the live screen overrides this.
+internal val LocalUvirLiveReadingAvailable = compositionLocalOf { true }
 
 @Composable
 fun SpectrumCard(
@@ -67,6 +71,10 @@ fun SpectrumCard(
         )
     val headerInteraction = remember { MutableInteractionSource() }
     val groupMuted = onGroupVisibilityToggle != null && !groupVisible
+    val expansion = updateTransition(
+        targetState = if (onGroupVisibilityToggle != null) groupVisible else !collapsible || expanded,
+        label = "spectrum_${group.name}_visibility"
+    )
     val mutedColor = secondaryText.copy(alpha = .55f)
     val titleColor = when {
         groupMuted -> mutedColor
@@ -113,8 +121,7 @@ fun SpectrumCard(
                         else Modifier.indication(headerInteraction, ripple(color = primaryText)))
                     .testTag(if (onGroupVisibilityToggle == null) "live_island_header_${group.name}"
                         else "live_island_heading_${group.name}")
-                    .padding(UvirIslandContentPadding),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                    .padding(UvirIslandContentPadding)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -162,7 +169,7 @@ fun SpectrumCard(
                             }
 
                             Text(
-                                text = if (groupMuted) {
+                                text = if (groupMuted || !LocalUvirLiveReadingAvailable.current) {
                                     "—"
                                 } else if (outOfRange) {
                                     stringResource(R.string.out_of_range_short)
@@ -190,6 +197,9 @@ fun SpectrumCard(
                     reorderControls?.invoke(title)
 
                     Column(
+                        modifier = if (reorderControls != null) Modifier.widthIn(
+                            min = rememberUvirMainPercentageColumnWidth()
+                        ) else Modifier,
                         horizontalAlignment = Alignment.End,
                         verticalArrangement = Arrangement.spacedBy(3.dp)
                     ) {
@@ -208,7 +218,7 @@ fun SpectrumCard(
                             maxLines = 1
                         )
                         Text(
-                            text = relativePercent?.takeUnless { groupMuted }?.let {
+                            text = relativePercent?.takeUnless { groupMuted || !LocalUvirLiveReadingAvailable.current }?.let {
                                 "${formatUvirNumber(
                                     it.toDouble() * 100.0,
                                     1,
@@ -224,15 +234,22 @@ fun SpectrumCard(
                     }
                 }
 
-                SpectrumBar(
-                    percent = if (groupMuted) 0f else relativePercent ?: 0f,
-                    trackColor = trackColor,
-                    barColor = barColor,
-                    modifier = Modifier.testTag("live_group_bar_${group.name}")
-                )
+                val bar: @Composable ColumnScope.() -> Unit = {
+                    Spacer(Modifier.height(8.dp))
+                    SpectrumBar(
+                        percent = if (!LocalUvirLiveReadingAvailable.current) 0f else relativePercent ?: 0f,
+                        trackColor = trackColor,
+                        barColor = barColor,
+                        modifier = Modifier.testTag("live_group_bar_${group.name}")
+                    )
+                }
+                if (onGroupVisibilityToggle != null) UvirVerticalReveal(expansion, content = bar)
+                else bar()
             }
 
-            UvirVerticalReveal(onGroupVisibilityToggle != null || !collapsible || expanded) {
+            // Main View visibility also retracts the body; its heading remains
+            // available to restore the group, change percentages or reorder it.
+            UvirVerticalReveal(expansion) {
                 Column(
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -384,7 +401,7 @@ fun SpectrumRow(
 
             Text(
                 text =
-                    if (!visible) {
+                    if (!visible || !LocalUvirLiveReadingAvailable.current) {
                         "—"
                     } else if (LocalUvirDisplayedOutOfRange.current) {
                         stringResource(R.string.out_of_range_short)
@@ -405,7 +422,7 @@ fun SpectrumRow(
 
             Text(
                 text =
-                    percent?.takeIf { visible }?.let { "${formatUvirNumber(
+                    percent?.takeIf { visible && LocalUvirLiveReadingAvailable.current }?.let { "${formatUvirNumber(
                         it.toDouble() * 100.0,
                         1,
                         LocalUvirNumericFormat.current
@@ -419,7 +436,7 @@ fun SpectrumRow(
         }
 
         SpectrumBar(
-            percent = if (visible) percent ?: 0f else 0f,
+            percent = if (visible && LocalUvirLiveReadingAvailable.current) percent ?: 0f else 0f,
             trackColor = trackColor,
             barColor = barColor,
             modifier = Modifier.testTag("live_bar_${metric?.name ?: name}")

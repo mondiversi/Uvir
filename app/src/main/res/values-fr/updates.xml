@@ -16,5 +16,5 @@
     <string name="update_done">Capteur mis à jour</string>
     <string name="update_failed">Échec de la mise à jour. Consultez le journal des erreurs. Si le capteur ne démarre plus, restaurez le firmware par USB depuis un ordinateur.</string>
     <string name="update_permission">Autorisez Uvir à installer des mises à jour dans les paramètres Android.</string>
-    <string name="update_whats_new">Les exports TXT et CSV des acquisitions incluent les pourcentages totaux et par groupe, avec des couleurs PNG cohérentes et une confirmation d’importation par appui de cinq secondes.</string>
+    <string name="update_whats_new">Le firmware 0.5.119 améliore le contrôle des mesures récentes et la reprise Wi-Fi.</string>
 </resources>

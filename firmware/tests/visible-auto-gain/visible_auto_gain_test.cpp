@@ -93,6 +93,10 @@ int main() {
   colorOffsets.values[3] = baseline[3] * 2;
   assert(sensor.capture(7, correctedBands, saturated, colorOffsets, channels));
   assert(correctedBands[3] == 0); // A larger factor cannot resurrect a negative reading.
+  float signedResiduals[11] = {};
+  assert(sensor.capture(7, correctedBands, saturated, colorOffsets, channels, signedResiduals));
+  assert(correctedBands[3] == 0 && signedResiduals[3] < 0);
+  assert(std::fabs(signedResiduals[3] + baseline[3] * 3) < .0001f);
   VisibleGainTest::failRead = true;
   float bands[11] = {};
   assert(!sensor.capture(1.0f, bands, saturated));

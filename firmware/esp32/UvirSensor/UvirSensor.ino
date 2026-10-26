@@ -9,7 +9,9 @@
 #include <atomic>
 #include <esp_bt_main.h>
 #include <esp_gap_bt_api.h>
+#include <esp_netif.h>
 #include <esp_ota_ops.h>
+#include <esp_random.h>
 #include <esp_sleep.h>
 #include <esp_wifi.h>
 #include <mbedtls/md.h>
@@ -18,6 +20,9 @@
 #include "UvirBluetoothBondReset.h"
 #include "UvirCommandLineGuard.h"
 #include "UvirDarkOffsets.h"
+#include "UvirLiveSampleHealth.h"
+#include "UvirWifiRecovery.h"
+#include "UvirBandSample.h"
 #include "UvirHardwareConfig.h"
 #include "UvirIrradianceUnits.h"
 #include "UvirDebugPerformance.h"
@@ -38,7 +43,8 @@
 namespace {
 
 constexpr char kProtocol[] = "uvir-sensor-v1";
-constexpr char kFirmwareVersion[] = "0.5.112";
+constexpr char kFirmwareVersion[] = "0.5.119";
+char sensorBootId[17] = {};
 constexpr uint8_t kSensorSettingsSchemaVersion = 2;
 constexpr uint32_t kHostTimeoutMs = 12000;
 constexpr uint32_t kMinimumStreamIntervalMs = 150;
@@ -98,11 +104,6 @@ UvirDarkOffsets darkOffsets;
 Transport darkOffsetsTransport = Transport::None;
 String darkOffsetsRequestId;
 uint32_t darkOffsetsHostAtMs = 0;
-
-struct UvirBandSample {
-  float values[kUvirStoredBandCount] = {};
-  bool saturated = false;
-};
 
 struct OfflineJob {
   bool enabled = false;
@@ -248,6 +249,19 @@ uint32_t nextSampleAtMs = 0;
 uint32_t sequenceNumber = 0;
 uint32_t lastWifiConnectionAttemptMs = 0;
 uint32_t wifiClientConnectedAtMs = 0;
+// Written by the network event task; never print from that task because it
+// could interleave bytes with a protocol frame on the main loop.
+volatile uint16_t wifiLastDisconnectReason = 0;
+volatile uint32_t wifiDisconnectCount = 0;
+UvirWifiRecovery wifiRecovery;
+uint32_t wifiAddressClientRestartCount = 0;
+bool wifiAddressClientRestartSucceeded = false;
+
+bool wifiNetworkHasAddress() {
+  // Check the actual interface address rather than only the legacy event-
+  // driven WL_* status, which can lag behind interface events on a handover.
+  return WiFi.STA.connected() && static_cast<uint32_t>(WiFi.localIP()) != 0U;
+}
 uint32_t lastInternetConnectionAttemptMs = 0;
 uint32_t internetRelayReadyAtMs = 0;
 uint32_t wirelessModeStartedAtMs = 0;
@@ -391,6 +405,8 @@ uint8_t liveSampleWindowNext = 0;
 UvirBandSample latestContinuousSample;
 bool latestContinuousSampleAvailable = false;
 uint32_t latestContinuousSampleAtMs = 0;
+uint32_t continuousSampleSequence = 0;
+bool continuousReadFailed = false;
 uint32_t nextContinuousSampleAtMs = 0;
 bool pendingLiveAcquisition = false;
 UvirStoredRecord pendingLiveAcquisitionRecord;
@@ -1164,6 +1180,9 @@ void printHello(
   output.print(transportName(transport));
   output.print(F("\",\"uptime_ms\":"));
   output.print(millis());
+  output.print(F(",\"boot_id\":\""));
+  output.print(sensorBootId);
+  output.print('"');
   output.print(F(",\"streaming\":"));
   output.print(streamEnabled ? F("true") : F("false"));
   output.print(F(",\"app_connected\":"));
@@ -1364,8 +1383,30 @@ void printHello(
   output.print(F(",\"internet_relay_connected\":"));
   output.print(internetRelayReady ? F("true") : F("false"));
   output.print(F(",\"wifi_connected\":"));
-  const bool wifiConnected = WiFi.status() == WL_CONNECTED;
+  const bool wifiConnected = wifiNetworkHasAddress();
   output.print(wifiConnected ? F("true") : F("false"));
+  output.print(F(",\"wifi_associated\":"));
+  output.print(WiFi.STA.connected() ? F("true") : F("false"));
+  output.print(F(",\"wifi_status_code\":"));
+  output.print(static_cast<int>(WiFi.status()));
+  output.print(F(",\"wifi_disconnect_reason\":"));
+  output.print(wifiLastDisconnectReason);
+  output.print(F(",\"wifi_disconnect_count\":"));
+  output.print(wifiDisconnectCount);
+  output.print(F(",\"wifi_dhcp_status\":"));
+  esp_netif_dhcp_status_t dhcpStatus = ESP_NETIF_DHCP_INIT;
+  const esp_err_t dhcpResult = WiFi.STA.netif() == nullptr ? ESP_ERR_INVALID_STATE :
+      esp_netif_dhcpc_get_status(WiFi.STA.netif(), &dhcpStatus);
+  output.print(dhcpResult == ESP_OK ? static_cast<int>(dhcpStatus) : -1);
+  output.print(F(",\"wifi_dhcp_restart_count\":"));
+  output.print(wifiAddressClientRestartCount);
+  output.print(F(",\"wifi_dhcp_restart_ok\":"));
+  output.print(wifiAddressClientRestartSucceeded ? F("true") : F("false"));
+  output.print(F(",\"wifi_power_save\":"));
+  output.print(static_cast<int>(WiFi.getSleep()));
+  output.print(F(",\"wifi_bssid\":\""));
+  printJsonString(output, WiFi.BSSIDstr());
+  output.print('"');
   output.print(F(",\"wifi_network\":\""));
   printJsonString(output, wifiSsid);
   output.print(F("\",\"wifi_hostname\":\""));
@@ -1375,7 +1416,7 @@ void printHello(
     output.print(WiFi.localIP());
   }
   output.print(F("\",\"wifi_rssi_dbm\":"));
-  if (wifiConnected) {
+  if (WiFi.STA.connected()) {
     output.print(WiFi.RSSI());
   } else {
     output.print(F("null"));
@@ -1399,7 +1440,7 @@ void printHello(
     output.print(F("\",\"wifi_ssid\":\""));
     printJsonString(output, wifiSsid);
     output.print(F("\",\"wifi_host\":\""));
-    if (WiFi.status() == WL_CONNECTED) {
+    if (wifiNetworkHasAddress()) {
       output.print(WiFi.localIP());
     }
     output.print(F("\",\"wifi_port\":"));
@@ -1465,6 +1506,7 @@ void observeAutomaticConditionSample(const UvirBandSample &sample) {
 
 bool captureBandSample(UvirBandSample &sample) {
   if (!siConfigurationHealthy) return false;
+  sample = UvirBandSample{};
   // Start the UV one-shot first, then let its conversion overlap the AS7343
   // integration. This avoids stretching Uvir's configured sample cadence.
   if (!uvSensor.beginCapture()) {
@@ -1473,7 +1515,7 @@ bool captureBandSample(UvirBandSample &sample) {
   if (!visibleSensor.capture(
           visibleCalibrationFactor,
           sample.values,
-          sample.saturated, calibrationOffsets, calibrationChannelFactors)) {
+          sample.saturated, calibrationOffsets, calibrationChannelFactors, sample.residuals)) {
     uvSensor.cancelCapture();
     return false;
   }
@@ -1481,10 +1523,12 @@ bool captureBandSample(UvirBandSample &sample) {
           uvCalibrationFactor,
           sample.values[0],
           sample.values[1],
-          sample.values[2], calibrationOffsets, calibrationChannelFactors)) {
+          sample.values[2], calibrationOffsets, calibrationChannelFactors, sample.residuals)) {
     return false;
   }
   if (!uvirApplyOpticalWindow(sample.values, opticalWindow)) return false;
+  if (!uvirApplyOpticalWindow(sample.residuals, opticalWindow, true)) return false;
+  sample.hasResiduals = true;
   observeAutomaticConditionSample(sample);
   return true;
 }
@@ -1506,15 +1550,27 @@ void printDarkOffsets(Print &output, const char *state, const char *error = null
     output.print(F(",\"error\":\"")); output.print(error); output.print('"');
   }
   if (strcmp(state, "ready") == 0) {
+    output.print(F(",\"estimator\":\""));
+    output.print("mean");
+    output.print('"');
     output.print(F(",\"unit\":\"uW/cm2\",\"values\":["));
     const int first = darkOffsets.uv ? 0 : 3, end = darkOffsets.uv ? 3 : 11;
     for (int i = first; i < end; ++i) {
       if (i != first) output.print(',');
-      printIrradiance(output, darkOffsets.means[i]);
+      // Keep the proposal in double precision through the labelled legacy unit.
+      // Avoid introducing an offset error by rounding before unit conversion.
+      char value[48];
+      snprintf(value, sizeof(value), "%.17g", darkOffsets.values[i] * 100.0);
+      output.print(value);
     }
     output.print(']');
   }
   output.println('}');
+}
+
+void cancelDarkOffsets() {
+  darkOffsets.cancel();
+  uvSensor.lockReferenceGain(false);
 }
 
 void serviceDarkOffsets() {
@@ -1522,11 +1578,11 @@ void serviceDarkOffsets() {
   Print *output = outputForTransport(darkOffsetsTransport);
   if (output == nullptr || !isAuthenticated(darkOffsetsTransport) ||
       millis() - darkOffsetsHostAtMs >= kHostTimeoutMs) {
-    darkOffsets.cancel();
+    cancelDarkOffsets();
     return;
   }
   if (darkOffsets.finished(millis())) {
-    darkOffsets.cancel();
+    cancelDarkOffsets();
     printDarkOffsets(*output, darkOffsets.usable() ? "ready" : "error", darkOffsets.usable() ? nullptr : "too_few_samples");
     return;
   }
@@ -1538,10 +1594,11 @@ void serviceDarkOffsets() {
       : visibleSensor.capture(1.f, raw.values, raw.saturated);
   if (!captured || !darkOffsets.add(raw.values, raw.saturated, millis())) {
     uvSensor.cancelCapture();
-    darkOffsets.cancel();
+    cancelDarkOffsets();
     printDarkOffsets(*output, "error", raw.saturated ? "saturated" : "read_failed");
     return;
   }
+  if (darkOffsets.uv) uvSensor.lockReferenceGain(true);
   printDarkOffsets(*output, "progress");
 }
 
@@ -1631,43 +1688,6 @@ void resetLiveSampleWindow() {
   nextContinuousSampleAtMs = millis();
 }
 
-void combineBandSamples(
-    const UvirBandSample *samples,
-    uint8_t sampleCount,
-    bool discardExtremes,
-    UvirBandSample &result) {
-  float sums[kUvirStoredBandCount] = {};
-  float minimums[kUvirStoredBandCount] = {};
-  float maximums[kUvirStoredBandCount] = {};
-  bool anySaturated = false;
-
-  for (uint8_t sampleIndex = 0; sampleIndex < sampleCount; ++sampleIndex) {
-    anySaturated = anySaturated || samples[sampleIndex].saturated;
-    for (uint8_t band = 0; band < kUvirStoredBandCount; ++band) {
-      const float value = samples[sampleIndex].values[band];
-      sums[band] += value;
-      if (sampleIndex == 0) {
-        minimums[band] = value;
-        maximums[band] = value;
-      } else {
-        minimums[band] = min(minimums[band], value);
-        maximums[band] = max(maximums[band], value);
-      }
-    }
-  }
-
-  const bool removeExtremes = discardExtremes && sampleCount >= 3;
-  const uint8_t divisor = sampleCount - (removeExtremes ? 2 : 0);
-  for (uint8_t band = 0; band < kUvirStoredBandCount; ++band) {
-    float sum = sums[band];
-    if (removeExtremes) {
-      sum -= minimums[band] + maximums[band];
-    }
-    result.values[band] = sum / divisor;
-  }
-  result.saturated = anySaturated;
-}
-
 bool appendLiveSample(const UvirBandSample &sample, UvirBandSample &result) {
   liveSampleWindow[liveSampleWindowNext] = sample;
   liveSampleWindowNext =
@@ -1687,9 +1707,8 @@ bool appendLiveSample(const UvirBandSample &sample, UvirBandSample &result) {
 }
 
 bool continuousSampleIsFresh() {
-  if (!latestContinuousSampleAvailable) return false;
-  const uint32_t maximumAgeMs = max(500UL, samplingSpacingMs * 3UL);
-  return millis() - latestContinuousSampleAtMs <= maximumAgeMs;
+  return uvirLiveSampleFresh(latestContinuousSampleAvailable, millis(),
+      latestContinuousSampleAtMs, samplingSpacingMs);
 }
 
 // Keep one rolling, averaged result ready even while no app is connected.
@@ -1703,24 +1722,44 @@ void serviceContinuousSampling() {
   const uint32_t now = millis();
   if (static_cast<int32_t>(now - nextContinuousSampleAtMs) < 0) return;
 
+  if (latestContinuousSampleAvailable && !continuousSampleIsFresh()) {
+    // Also discard the window after a paused reference measurement.
+    liveSampleWindowCount = liveSampleWindowNext = 0;
+    latestContinuousSampleAvailable = false;
+  }
   UvirBandSample current;
   if (!captureBandSample(current)) {
+    continuousReadFailed = true;
+    if (!continuousSampleIsFresh()) {
+      // A later recovery must not mix a new sample with an old rolling window.
+      liveSampleWindowCount = liveSampleWindowNext = 0;
+      latestContinuousSampleAvailable = false;
+    }
     nextContinuousSampleAtMs = now + samplingSpacingMs;
     return;
   }
 
   UvirBandSample averaged;
+  continuousReadFailed = false;
   if (appendLiveSample(current, averaged)) {
     latestContinuousSample = averaged;
     latestContinuousSampleAvailable = true;
     latestContinuousSampleAtMs = millis();
+    ++continuousSampleSequence;
   }
   nextContinuousSampleAtMs = now + samplingSpacingMs;
 }
 
 void printSample(Print &output) {
-  if (darkOffsets.active) return;
-  if (!latestContinuousSampleAvailable) return;
+  if (darkOffsets.active || !continuousSampleIsFresh()) {
+    output.print(F("{\"type\":\"sample_status\",\"protocol\":\"uvir-sensor-v1\",\"boot_id\":\""));
+    output.print(sensorBootId);
+    output.print(F("\",\"sample_valid\":false,\"reason\":\""));
+    output.print(darkOffsets.active ? "reference_measurement" :
+        (continuousReadFailed ? "read_failed" : "warming_up"));
+    output.println(F("\"}"));
+    return;
+  }
   const UvirBandSample sample = latestContinuousSample;
 
   output.print(F("{\"type\":\"sample\",\"protocol\":\""));
@@ -1729,6 +1768,14 @@ void printSample(Print &output) {
   output.print(++sequenceNumber);
   output.print(F(",\"uptime_ms\":"));
   output.print(millis());
+  output.print(F(",\"boot_id\":\""));
+  output.print(sensorBootId);
+  output.print(F("\",\"sample_valid\":true,\"sample_seq\":"));
+  output.print(continuousSampleSequence);
+  output.print(F(",\"sample_age_ms\":"));
+  output.print(millis() - latestContinuousSampleAtMs);
+  output.print(F(",\"sample_max_age_ms\":"));
+  output.print(uvirLiveSampleMaximumAge(samplingSpacingMs));
   output.print(F(",\"unit\":\"uW/cm2\","));
   output.print(F("\"measurement_kind\":\"band_equivalent_irradiance\","));
   output.print(F("\"calibration\":\""));
@@ -3222,6 +3269,7 @@ void stopInternet() {
 }
 
 void stopWifi() {
+  wifiRecovery.reset();
   stopInternet();
   wifiOutput.reset();
   wifiAuthenticated = false;
@@ -3429,7 +3477,11 @@ void applyWirelessMode(WirelessMode newMode, bool persist) {
       return;
     }
     WiFi.mode(WIFI_STA);
-    WiFi.setSleep(true);
+    // Fast scan can stop at a weaker repeater with the same SSID before the
+    // router is seen. Compare all candidates before choosing an access point.
+    WiFi.setScanMethod(WIFI_ALL_CHANNEL_SCAN);
+    WiFi.setSortMethod(WIFI_CONNECT_AP_BY_SIGNAL);
+    WiFi.setSleep(false);
     WiFi.setAutoReconnect(true);
     WiFi.setHostname(wifiHostname.c_str());
     WiFi.begin(wifiSsid.c_str(), wifiPassword.c_str());
@@ -3460,7 +3512,9 @@ void applyWirelessMode(WirelessMode newMode, bool persist) {
       return;
     }
     WiFi.mode(WIFI_STA);
-    WiFi.setSleep(true);
+    WiFi.setScanMethod(WIFI_ALL_CHANNEL_SCAN);
+    WiFi.setSortMethod(WIFI_CONNECT_AP_BY_SIGNAL);
+    WiFi.setSleep(false);
     WiFi.setAutoReconnect(true);
     WiFi.setHostname(wifiHostname.c_str());
     const String &ssid = internetUsePrimaryWifi ? wifiSsid : internetWifiSsid;
@@ -3493,10 +3547,47 @@ void resumeWirelessFallbackAfterDisconnect() {
     return;
   }
   wirelessFallbackActive = true;
-  wirelessFallbackSwitchNow = true;
+  // A closed socket can be an app restart/update or a brief network loss.
+  // Keep the current radio available for one full reconnect window before
+  // trying a different source. Explicit WIRELESS commands still switch now.
+  wirelessFallbackSwitchNow = false;
+  wirelessModeStartedAtMs = millis();
+}
+
+bool deferWifiAddressRecovery() {
+  const uint32_t now = millis();
+  const bool hasAddress = wifiNetworkHasAddress();
+  // Keep DHCP responsive during setup; restore the original power saving
+  // policy as soon as IPv4 is ready.
+  const wifi_ps_type_t powerSaving = hasAddress ? WIFI_PS_MIN_MODEM : WIFI_PS_NONE;
+  if (WiFi.getSleep() != powerSaving) WiFi.setSleep(powerSaving);
+  const UvirWifiRecoveryDecision decision = wifiRecovery.observe(
+      WiFi.STA.connected(), hasAddress, now);
+  if (decision.restartAddressClient) {
+    // Restart only DHCP while keeping the radio association and credentials.
+    // No sensor settings, measurements, sessions or stored records are reset.
+    ++wifiAddressClientRestartCount;
+    wifiAddressClientRestartSucceeded = WiFi.STA.config();
+  }
+  if (decision.addressBecameReady && wirelessFallbackActive) {
+    // DHCP may have used most of the original radio window. Give discovery
+    // and authentication a complete window after the network is usable.
+    wirelessModeStartedAtMs = now;
+    wirelessFallbackSwitchNow = false;
+  }
+  return decision.deferRecovery;
 }
 
 void serviceWirelessFallback() {
+  if ((wirelessMode == WirelessMode::Wifi || wirelessMode == WirelessMode::Internet) &&
+      deferWifiAddressRecovery()) return;
+  // A replacement TCP client may arrive in the same loop that loses the old
+  // one. Give its bounded authentication handshake time to complete before
+  // changing radios; AUTH will stop fallback after it succeeds.
+  if (wirelessMode == WirelessMode::Wifi && wifiClient && wifiClient.connected() &&
+      !wifiAuthenticated && millis() - wifiClientConnectedAtMs < kWirelessAuthenticationTimeoutMs) {
+    return;
+  }
   if (!wirelessFallbackActive ||
       (!wirelessFallbackSwitchNow &&
        millis() - wirelessModeStartedAtMs < kWirelessFallbackIntervalMs)) {
@@ -3731,7 +3822,7 @@ void handleCommand(String command, Transport transport, Print &output) {
     }
     if (!start) {
       if (darkOffsets.active && darkOffsetsTransport == transport && id == darkOffsetsRequestId) {
-        darkOffsets.cancel();
+        cancelDarkOffsets();
         printDarkOffsets(output, "cancelled");
       }
       return;
@@ -3746,6 +3837,7 @@ void handleCommand(String command, Transport transport, Print &output) {
       return;
     }
     darkOffsets.start(group == "UV", millis());
+    uvSensor.lockReferenceGain(false);
     darkOffsetsRequestId = id;
     darkOffsetsTransport = transport;
     darkOffsetsHostAtMs = millis();
@@ -3758,7 +3850,7 @@ void handleCommand(String command, Transport transport, Print &output) {
     return;
   }
   if (command == "STOP" && transport == darkOffsetsTransport && darkOffsets.active) {
-    darkOffsets.cancel();
+    cancelDarkOffsets();
     printDarkOffsets(output, "cancelled");
   }
 
@@ -3854,7 +3946,7 @@ void handleCommand(String command, Transport transport, Print &output) {
         uvSensor.available() && visibleSensorReadOk && uvSensor.healthy();
     const bool externalInputActive =
         digitalRead(UvirHardware::kExternalCommandPin) == LOW;
-    const bool wifiConnected = WiFi.status() == WL_CONNECTED;
+    const bool wifiConnected = wifiNetworkHasAddress();
     const bool bluetoothConnected = bluetoothSerial.hasClient();
     const bool internetConnected = internetMqttClient.connected();
     output.print(F("{\"type\":\"diagnostic\",\"protocol\":\"uvir-sensor-v1\",\"request_id\":\""));
@@ -5324,6 +5416,7 @@ void handleCommand(String command, Transport transport, Print &output) {
     activeTransport = transport;
     appSessionActive = true;
     streamEnabled = true;
+    lastHostActivityMs = millis();
     statusLed.setBaseState(UvirLedBaseState::Connected);
     nextSampleAtMs = millis();
     output.print(F("{\"type\":\"status\",\"protocol\":\"uvir-sensor-v1\",\"app_connected\":true,\"streaming\":true,\"interval_ms\":"));
@@ -5365,8 +5458,10 @@ void serviceWifi() {
     return;
   }
 
-  if (WiFi.status() != WL_CONNECTED) {
+  const bool awaitingAddress = deferWifiAddressRecovery();
+  if (!wifiNetworkHasAddress()) {
     const bool lostAuthenticatedClient = wifiAuthenticated;
+    if (lostAuthenticatedClient && activeTransport == Transport::Wifi) stopStreaming();
     wifiAuthenticated = false;
     wifiOutput.reset();
     if (wifiClient) {
@@ -5382,7 +5477,7 @@ void serviceWifi() {
     }
 
     const uint32_t now = millis();
-    if (now - lastWifiConnectionAttemptMs >= kWifiReconnectIntervalMs) {
+    if (!awaitingAddress && now - lastWifiConnectionAttemptMs >= kWifiReconnectIntervalMs) {
       WiFi.reconnect();
       lastWifiConnectionAttemptMs = now;
     }
@@ -5441,6 +5536,8 @@ void serviceWifi() {
 
   if (!wifiClient || !wifiClient.connected()) {
     const bool lostAuthenticatedClient = wifiAuthenticated;
+    // End the old logical session before accepting a replacement client.
+    if (lostAuthenticatedClient && activeTransport == Transport::Wifi) stopStreaming();
     wifiAuthenticated = false;
     wifiOutput.reset();
     if (wifiClient) {
@@ -5471,7 +5568,8 @@ void serviceWifi() {
 void serviceInternet() {
   if (wirelessMode != WirelessMode::Internet) return;
 
-  if (WiFi.status() != WL_CONNECTED) {
+  const bool awaitingAddress = deferWifiAddressRecovery();
+  if (!wifiNetworkHasAddress()) {
     const bool lostAuthenticatedClient = internetAuthenticated;
     stopInternet();
     if (lostAuthenticatedClient && activeTransport == Transport::Internet) {
@@ -5484,7 +5582,7 @@ void serviceInternet() {
       resumeWirelessFallbackAfterDisconnect();
     }
     const uint32_t now = millis();
-    if (now - lastWifiConnectionAttemptMs >= kWifiReconnectIntervalMs) {
+    if (!awaitingAddress && now - lastWifiConnectionAttemptMs >= kWifiReconnectIntervalMs) {
       WiFi.reconnect();
       lastWifiConnectionAttemptMs = now;
     }
@@ -5586,9 +5684,15 @@ void serviceBluetooth() {
 }  // namespace
 
 void setup() {
+  snprintf(sensorBootId, sizeof(sensorBootId), "%08lX%08lX",
+      static_cast<unsigned long>(esp_random()), static_cast<unsigned long>(esp_random()));
   setCpuFrequencyMhz(80);
   Serial.begin(UvirHardware::kSerialBaud);
   Serial.setTimeout(50);
+  WiFi.onEvent([](WiFiEvent_t, WiFiEventInfo_t info) {
+    wifiLastDisconnectReason = info.wifi_sta_disconnected.reason;
+    ++wifiDisconnectCount;
+  }, ARDUINO_EVENT_WIFI_STA_DISCONNECTED);
   pinMode(UvirHardware::kExternalCommandPin, INPUT_PULLUP);
   externalCommandPressActive =
       digitalRead(UvirHardware::kExternalCommandPin) == LOW;

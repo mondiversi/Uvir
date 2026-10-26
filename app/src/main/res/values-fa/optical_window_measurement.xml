@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="window_measure_calculate">محاسبهٔ ضریب‌ها</string>
+    <string name="window_measure_reference_instructions">حسگر را بدون پنجره یا فیلتر زیر نور ثابت، بی‌حرکت نگه دارید. ۳۰ ثانیه اندازه‌گیری کنید. ابتدا آفست‌های مناسب را تنظیم کنید.</string>
+    <string name="window_measure_filtered_instructions">پنجره یا فیلتر را بدون جابه‌جایی حسگر یا منبع نور نصب کنید. منتظر پایداری نور بمانید، سپس اندازه‌گیری دوم ۳۰ ثانیه‌ای را آغاز کنید.</string>
+    <string name="window_measure_reference_progress">بدون پنجره: %1$s / %2$s ثانیه</string>
+    <string name="window_measure_filtered_progress">با پنجره: %1$s / %2$s ثانیه</string>
+    <string name="window_measure_results">ضریب‌های پیشنهادی کانال‌ها را بررسی کنید. کانال‌های نامعتبر و ضریب عمومی بدون تغییر می‌مانند.</string>
+    <string name="window_measure_valid_channels">کانال‌های معتبر: %1$s / %2$s</string>
+    <string name="window_measure_apply">اعمال ضریب‌ها</string>
+    <string name="window_measure_failed">اندازه‌گیری در دسترس نیست یا شرایط تغییر کرده است. پایداری نور، اتصال و تنظیمات را بررسی کنید و بدون پنجره دوباره شروع کنید.</string>
+    <string name="window_measure_unavailable">کانال در دسترس نیست</string>
+    <string name="window_measure_insufficient">دادهٔ ناکافی</string>
+    <string name="window_measure_unstable">نور ناپایدار</string>
+    <string name="window_measure_saturated">سیگنال خارج از محدوده</string>
+    <string name="window_measure_brighter">مقدار با فیلتر بیشتر است</string>
+    <string name="window_measure_out_of_range">ضریب خارج از محدودهٔ مجاز</string>
+</resources>

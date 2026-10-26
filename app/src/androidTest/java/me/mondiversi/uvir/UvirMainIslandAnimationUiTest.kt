@@ -46,6 +46,7 @@ class UvirMainIslandAnimationUiTest {
             CompositionLocalProvider(LocalContext provides isolated) {
                 MaterialTheme(colorScheme = if (landscape) darkColorScheme() else lightColorScheme()) {
                     val order = rememberUvirMainIslandOrder()
+                    val reordering = rememberUvirMainIslandReordering(order.value)
                     val draw: @Composable (SensorGroup) -> Unit = { group ->
                         val token = remember { Any() }
                         SideEffect { tokens[group] = token }
@@ -75,7 +76,7 @@ class UvirMainIslandAnimationUiTest {
                                 if (landscape) item("islands") {
                                     UvirLiveLandscapeIslands({ _, _ -> }, order.value, draw)
                                 } else items(order.value, key = { it.name }) { group ->
-                                    UvirAnimatedMainIsland { draw(group) }
+                                    UvirAnimatedMainIsland(reordering) { draw(group) }
                                 }
                             }
                         }

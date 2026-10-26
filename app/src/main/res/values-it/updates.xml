@@ -16,5 +16,5 @@
     <string name="update_done">Sensore aggiornato</string>
     <string name="update_failed">Aggiornamento non riuscito. Consulta il log errori. Se il sensore non si avvia più, recupera il firmware tramite USB da un computer.</string>
     <string name="update_permission">Consenti a Uvir di installare aggiornamenti nelle impostazioni Android.</string>
-    <string name="update_whats_new">Esportazioni TXT e CSV delle acquisizioni con percentuali sul totale e sul gruppo, colori PNG coerenti e conferma di importazione con pressione di cinque secondi.</string>
+    <string name="update_whats_new">Controlli di letture aggiornate e recupero Wi-Fi migliorati nel firmware sensore 0.5.119.</string>
 </resources>

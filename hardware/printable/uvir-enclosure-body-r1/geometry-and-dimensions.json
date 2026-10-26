@@ -1,0 +1,75 @@
+{
+  "part": "UVIR independent enclosure body R1",
+  "units": "mm",
+  "official_teko_cad": false,
+  "source_drawing_url": "https://www.teko.it/uploads/manuali/pdf/COFFER-A_6.pdf",
+  "published_dimensions": {
+    "outer_width": 70.0,
+    "outer_length": 125.0,
+    "body_height": 35.0,
+    "floor_thickness": 2.2,
+    "nominal_wall_thickness": 2.2,
+    "outer_plan_corner_radius": 5.0,
+    "outer_bottom_edge_radius": 2.0,
+    "top_opening": [
+      65.6,
+      120.6
+    ],
+    "lid_seat_depth": 2.5,
+    "screw_center_spacing": [
+      56,
+      111
+    ],
+    "screw_post_outside_diameter": 5.5,
+    "pilot_diameter": 3.0,
+    "floor_to_lid_underside": 30.3,
+    "floor_to_guide_top": 29.2
+  },
+  "print_design_details_not_fully_dimensioned_by_teko": {
+    "continuous_lid_support_width_and_thickness": 1.2,
+    "screw_post_web_thickness": 1.2,
+    "blind_pilot_depth": 12.0,
+    "guide_rib_width": 1.8,
+    "guide_gap": 1.8,
+    "guide_projection": 1.8,
+    "guide_pitch": 3.6,
+    "guide_end_clearance": 10.0,
+    "mould_draft_and_ejection_features_reproduced": false
+  },
+  "existing_lid_fit": {
+    "lid_dimensions": [
+      65.4,
+      120.3,
+      2.4
+    ],
+    "translation": [
+      2.299999999999997,
+      2.3500000000000014,
+      32.5
+    ],
+    "nominal_clearance_per_side_xy": [
+      0.1,
+      0.15
+    ],
+    "lid_top_below_body_rim": 0.1,
+    "intersection_volume_mm3": 0,
+    "printed_or_physical_fit_validated": false
+  },
+  "bounds_mm": [
+    0.0,
+    0.0,
+    0.0,
+    70.0,
+    125.0,
+    35.0
+  ],
+  "volume_mm3": 57642.271794242115,
+  "triangles": 12218,
+  "connected_components": 1,
+  "genus": 0,
+  "manifold_status": "Error.NoError",
+  "stl_sha256": "aa98e747b1d132163b63ba7cc113eb9fd4703f265cfe2e9b28c1a9cce97bf3e0",
+  "roof": false,
+  "floor": true,
+  "connector_cutouts": false
+}

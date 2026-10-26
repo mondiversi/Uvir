@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="window_measure_calculate">Calcola moltiplicatori</string>
+    <string name="window_measure_reference_instructions">Mantieni il sensore fermo sotto un’illuminazione stabile, senza finestra o filtro. Misura per 30 secondi. Configura prima gli offset appropriati.</string>
+    <string name="window_measure_filtered_instructions">Applica la finestra o il filtro senza spostare il sensore o la sorgente. Attendi che l’illuminazione sia stabile, poi avvia la seconda misura di 30 secondi.</string>
+    <string name="window_measure_reference_progress">Senza finestra: %1$s / %2$s s</string>
+    <string name="window_measure_filtered_progress">Con finestra: %1$s / %2$s s</string>
+    <string name="window_measure_results">Controlla i fattori proposti per canale. I canali non utilizzabili e il moltiplicatore generale rimangono invariati.</string>
+    <string name="window_measure_valid_channels">Canali utilizzabili: %1$s / %2$s</string>
+    <string name="window_measure_apply">Imposta moltiplicatori</string>
+    <string name="window_measure_failed">Misura non disponibile o condizioni cambiate. Controlla stabilità della luce, connessione e impostazioni, poi ricomincia senza finestra.</string>
+    <string name="window_measure_unavailable">Canale non disponibile</string>
+    <string name="window_measure_insufficient">Dati insufficienti</string>
+    <string name="window_measure_unstable">Illuminazione instabile</string>
+    <string name="window_measure_saturated">Segnale fuori scala</string>
+    <string name="window_measure_brighter">Valore filtrato maggiore</string>
+    <string name="window_measure_out_of_range">Fattore fuori dai limiti</string>
+</resources>

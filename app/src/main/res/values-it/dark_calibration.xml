@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="dark_offsets_calculate">Calcola offset</string>
-    <string name="dark_offsets_instructions">Misura per circa 30 secondi mantenendo stabile la condizione di riferimento. Al buio compensi il fondo del sensore; in un ambiente illuminato sottrai anche la luce presente e ottieni misure relative. Per la misura al buio copri gli ingressi con materiale opaco anche al vicino infrarosso e lascia i LED nelle normali condizioni d’uso. La media non elimina il rumore casuale né calibra il guadagno.</string>
+    <string name="dark_offsets_instructions">Misura per circa 30 secondi in condizioni di riferimento stabili. Per il riferimento al buio copri gli ingressi ottici con materiale opaco anche al vicino infrarosso e lascia i LED nelle normali condizioni d’uso. In un ambiente illuminato sottrai anche la luce di riferimento e ottieni misure relative. Questa procedura non calibra il guadagno.</string>
+    <string name="dark_offsets_uv_method">Per UVC, UVB e UVA viene proposta la media delle letture di ciascun canale. Il guadagno UV si adatta automaticamente alla luce.</string>
+    <string name="dark_offsets_visible_method">Per ogni canale visibile/infrarosso viene proposta la media delle letture.</string>
     <string name="dark_offsets_progress">Misura in corso: %1$s / 30 s</string>
     <string name="dark_offsets_result">Proposta da %1$s letture. Nessuna impostazione è stata modificata.</string>
     <string name="dark_offsets_failed">Misura interrotta o non disponibile. Controlla la connessione e il sensore, poi riprova.</string>

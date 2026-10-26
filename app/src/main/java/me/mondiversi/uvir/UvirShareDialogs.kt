@@ -95,28 +95,6 @@ internal fun MeasurementShareFormatDialog(
                     Arrangement.spacedBy(6.dp)
             ) {
                 ShareFormatOptionRow(
-                    format = MeasurementShareFormat.CSV,
-                    selected = csvSelected,
-                    label =
-                        stringResource(
-                            R.string.share_as_csv
-                        ),
-                    primaryText = primaryText,
-                    secondaryText = secondaryText,
-                    onClick = {
-                        csvSelected = !csvSelected
-                    }
-                )
-                if (csvSelected) {
-                    UvirExportFileCountText(
-                        format = UvirExportFileFormat.CSV,
-                        count = 1,
-                        secondaryText = secondaryText,
-                        modifier = Modifier.padding(start = UvirExportOptionDetailInset)
-                    )
-                }
-
-                ShareFormatOptionRow(
                     format =
                         MeasurementShareFormat.READABLE_TABLE,
                     selected = readableTableSelected,
@@ -134,6 +112,28 @@ internal fun MeasurementShareFormatDialog(
                 if (readableTableSelected) {
                     UvirExportFileCountText(
                         format = UvirExportFileFormat.TXT,
+                        count = 1,
+                        secondaryText = secondaryText,
+                        modifier = Modifier.padding(start = UvirExportOptionDetailInset)
+                    )
+                }
+
+                ShareFormatOptionRow(
+                    format = MeasurementShareFormat.CSV,
+                    selected = csvSelected,
+                    label =
+                        stringResource(
+                            R.string.share_as_csv
+                        ),
+                    primaryText = primaryText,
+                    secondaryText = secondaryText,
+                    onClick = {
+                        csvSelected = !csvSelected
+                    }
+                )
+                if (csvSelected) {
+                    UvirExportFileCountText(
+                        format = UvirExportFileFormat.CSV,
                         count = 1,
                         secondaryText = secondaryText,
                         modifier = Modifier.padding(start = UvirExportOptionDetailInset)

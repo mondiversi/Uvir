@@ -34,7 +34,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -88,17 +87,10 @@ internal fun AlertSessionChartScreen(
                 availableSeries.map { series -> series.metric }
             )
         }
-    val expandedValueSections =
-        remember(sessionId) {
-            mutableStateMapOf<ViewMode, Boolean>()
-        }
-    val expandedCombinedCharts =
-        remember(sessionId) {
-            mutableStateMapOf<ViewMode, Boolean>()
-        }
-    var viewMode by remember(sessionId) {
-        mutableStateOf(initialViewMode)
-    }
+    val presentation = rememberUvirSavedScreenPresentation("alert-session:$sessionId", initialViewMode)
+    val expandedValueSections = presentation.expandedDataViews
+    val expandedCombinedCharts = presentation.expandedChartViews
+    var viewMode by presentation.viewMode
     var showShareDialog by rememberSaveable {
         mutableStateOf(false)
     }
@@ -117,9 +109,7 @@ internal fun AlertSessionChartScreen(
     LaunchedEffect(noteEditingEnabled) {
         if (!noteEditingEnabled) showNoteEditor = false
     }
-    var showChart by remember(sessionId) {
-        mutableStateOf(false)
-    }
+    var showChart by presentation.showChart
     val visibleSeries =
         availableSeries.filter {
             it.metric.isBiologicalEffect() ==

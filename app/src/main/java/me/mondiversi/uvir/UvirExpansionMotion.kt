@@ -3,6 +3,7 @@ package me.mondiversi.uvir
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.core.Transition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.expandVertically
@@ -122,6 +123,22 @@ internal fun ColumnScope.UvirVerticalReveal(
     ) {
         Column(content = content)
     }
+}
+
+/** Multiple parts of a card can share one clock, including their spacing. */
+@Composable
+internal fun ColumnScope.UvirVerticalReveal(
+    transition: Transition<Boolean>,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    transition.AnimatedVisibility(
+        visible = { it },
+        modifier = Modifier.uvirRevealInteraction(transition.targetState),
+        enter = expandVertically(tween(UvirExpansionDurationMillis, easing = FastOutSlowInEasing),
+            expandFrom = Alignment.Top) + fadeIn(tween(UvirExpansionDurationMillis)),
+        exit = shrinkVertically(tween(UvirExpansionDurationMillis, easing = FastOutSlowInEasing),
+            shrinkTowards = Alignment.Top) + fadeOut(tween(UvirExpansionDurationMillis))
+    ) { Column(content = content) }
 }
 
 /** Selection checkboxes make room smoothly in either layout direction. */

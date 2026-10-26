@@ -16,5 +16,5 @@
     <string name="update_done">Ο αισθητήρας ενημερώθηκε</string>
     <string name="update_failed">Η ενημέρωση απέτυχε. Δείτε το αρχείο σφαλμάτων. Αν ο αισθητήρας δεν ξεκινά, ανακτήστε το firmware με USB από υπολογιστή.</string>
     <string name="update_permission">Επιτρέψτε στο Uvir να εγκαθιστά ενημερώσεις στις ρυθμίσεις Android.</string>
-    <string name="update_whats_new">Οι εξαγωγές TXT και CSV μετρήσεων περιλαμβάνουν ποσοστά συνόλου και ομάδας, με συνεπή χρώματα PNG και επιβεβαίωση εισαγωγής με παρατεταμένο πάτημα πέντε δευτερολέπτων.</string>
+    <string name="update_whats_new">Το υλικολογισμικό 0.5.119 βελτιώνει τον έλεγχο πρόσφατων μετρήσεων και την επαναφορά Wi-Fi.</string>
 </resources>

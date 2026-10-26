@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="dark_offsets_calculate">计算偏移</string>
-    <string name="dark_offsets_instructions">在稳定的参考条件下测量约30秒。在黑暗中可补偿传感器本底；在有光环境中也会减去现有光照，因此得到的是相对测量值。暗处测量时，请用也能阻挡近红外的材料遮住光学输入，并让LED保持正常工作状态。平均值不能消除随机噪声或校准增益。</string>
+    <string name="dark_offsets_instructions">在稳定的参考条件下测量约30秒。进行暗参考测量时，请用也能阻挡近红外线的材料遮住光学输入，并让LED保持正常工作状态。在有光环境下，参考光也会被扣除，因此测量结果为相对值。此过程不校准增益。</string>
+    <string name="dark_offsets_uv_method">对于UVC、UVB和UVA，建议使用各通道读数的平均值。紫外线增益会根据光照强度自动调整。</string>
+    <string name="dark_offsets_visible_method">对于每个可见光/红外通道，建议使用读数的平均值。</string>
     <string name="dark_offsets_progress">测量中：%1$s / 30秒</string>
     <string name="dark_offsets_result">根据%1$s次读数提出的建议。尚未更改任何设置。</string>
     <string name="dark_offsets_failed">测量中断或不可用。请检查连接和传感器后重试。</string>

@@ -478,11 +478,11 @@
     <string name="app_version">App-versie: %1$s</string>
     <string name="package_name_value">Pakket: %1$s</string>
     <string name="about_whats_new_title">Nieuw in versie %1$s</string>
-    <string name="about_whats_new_connectivity">Exporteer/importeer metingen en waarschuwingen als .uvirrecords-bestanden zonder wachtwoord, inclusief sessies, notities en varianten.</string>
-    <string name="about_whats_new_connections">Herkenning op hardware-ID, nieuwe lokale ID’s en duplicaatdetectie behouden de herkomst van geïmporteerde gegevens.</string>
-    <string name="about_whats_new_measurements">De hoofdweergave onthoudt de kaartvolgorde en verborgen banden; opgeslagen metingen bieden tijdelijke bediening en percentages van het totaal of de groep.</string>
-    <string name="about_whats_new_interface">Consistente spectrale kleuren, neutrale namen met kleurstippen in opgeslagen gegevens, duidelijkere sessierijen en geanimeerd verplaatsen van kaarten.</string>
-    <string name="about_whats_new_github">Verbeterde dialogen, dag-/nachtacties en meldingen voor gesimuleerde gegevens, met bijgewerkte controles voor USB-updates en herstel.</string>
+    <string name="about_whats_new_connectivity">App en sensorverbindingen werken; de ontwikkeling is gepauzeerd tot de optische validatie.</string>
+    <string name="about_whats_new_connections">Deksel en openingen zijn theoretische prototypes, geen gevalideerde meetoptiek.</string>
+    <string name="about_whats_new_measurements">Kalibratie biedt gemiddelde offsets, adaptieve UV-versterking en begeleide vensterfactoren.</string>
+    <string name="about_whats_new_interface">Vloeiender uitklappen; weergavekeuzes bij opgeslagen metingen gelden voor de huidige app-sessie.</string>
+    <string name="about_whats_new_github">Betrouwbare absolute metingen vereisen nog definitieve optiek en referentiekalibratie.</string>
     <string name="about_description">App voor spectrale metingen van ultraviolet, zichtbaar en infrarood licht.</string>
     <string name="about_spectral_ranges">Spectrale banden: Ultraviolet • Zichtbaar licht • Infrarood</string>
     <string name="about_sensors">Ondersteunde sensoren: AS7331 UV • AS7343 multispectraal</string>

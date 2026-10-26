@@ -11,8 +11,29 @@ The current prototype has both the GY-AS734X / AS7343 and MIKROE UV 5 Click /
 AS7331 boards installed and detected. The 2026-10-12 replacement visible-board
 check confirmed the same AS7343 chip through the driver's device-ID validation;
 no driver, GPIO assignment or calibration change is needed for the board label.
-Final-assembly tests and calibration will follow PCB assembly; see
+Development is currently on hold pending final optical design validation and
+reference calibration. The app and sensor communication/acquisition work, but
+the theoretical lid and apertures are not validated measuring optics and
+current readings do not establish accurate absolute irradiance; see
 [`hardware/calibration`](../../../hardware/calibration/README.md).
+
+The current release is firmware **0.5.119**, published with app **1.4.2**.
+It adds fresh-sample/boot fencing and Wi-Fi recovery refinements to the
+0.5.114 sampling changes below. These protect live state across interrupted
+connections; they do not calibrate the optical assembly.
+
+Firmware **0.5.114** adds automatic AS7331 gain (1x–2048x at fixed 64 ms)
+and returns **Calculate offsets** to arithmetic means for UV, like visible/NIR.
+The gain is chosen from the most occupied ADC, with hysteresis and at most three
+conversions per capture; analog/digital overload or stale data are never published.
+The first reference reading settles the gain, which is then held for that run.
+Ready replies identify `estimator: "mean"`; the app requires 0.5.114+ for UV
+calculation and rejects maximum-based previews from 0.5.113. Signed corrected
+color readings are averaged before the final zero clamp, including trimmed
+averages. Legacy physical-channel offset semantics are preserved. Existing
+offsets are not recalculated or changed until the user applies a new proposal.
+No database or stored-record layout changes are needed. See the
+[offset measurement protocol](../../../docs/USB_SERIAL_PROTOCOL.md#dark-offset-measurement-firmware-05110).
 
 Firmware **0.5.112** uses SI `W/m²` internally and for new offline records.
 Legacy calibration/runtime states and queued v1/v2 records are read using their
@@ -379,6 +400,45 @@ power-down between reads. The default/recommended
 interval is 150 ms; the safe range is 150–5000 ms. A capture that takes longer
 still finishes before another sample is taken. Existing saved intervals are
 preserved; the default applies to an unconfigured or factory-reset sensor.
+
+Firmware 0.5.115 adds a per-boot `boot_id` to `HELLO` and live sample frames.
+Live samples include `sample_seq` (advanced only for a new averaged result),
+`sample_age_ms`, `sample_max_age_ms` and `sample_valid`. A cached result expires
+after the greater of 500 ms and three configured sample intervals. If a fresh
+result is unavailable, `sample_status` reports `sample_valid:false` and a reason
+instead of retransmitting stale numbers. These fields do not change stored
+records, calibration or irradiance units. Android clears unavailable readings,
+reopens the app session after a new boot and detects silent Wi-Fi links after
+six seconds; a closed TCP socket is handled immediately. A replacement Wi-Fi
+client gets the existing bounded authentication timeout before radio fallback
+can change the connection method.
+
+Firmware 0.5.116 also reports `wifi_status_code`, `wifi_disconnect_reason` (the
+ESP-IDF reason code) and `wifi_disconnect_count` in `HELLO`. Network events only
+update these counters; the main loop serializes them without interleaving
+protocol frames. These diagnostics contain no Wi-Fi passwords or tokens.
+
+Firmware 0.5.117 distinguishes Wi-Fi association from IPv4 readiness
+(`wifi_associated` versus `wifi_connected`). An associated station receives up
+to 45 seconds to finish DHCP before reconnection or radio fallback interrupts
+it. Discovery/authentication then gets a fresh radio window after IPv4 is
+ready. This recovery policy applies to local Wi-Fi and Internet/MQTT.
+
+Firmware 0.5.118 checks association plus the actual nonzero IPv4 address for
+network readiness. While waiting for an address it disables modem power
+saving, renews DHCP once after 15 seconds without dropping association, and
+retains the bounded 45-second recovery window. Normal modem power saving is
+restored when IPv4 is ready. `HELLO` includes DHCP state/restart results, modem
+power saving, associated access-point BSSID and RSSI for diagnosis.
+After a wireless app connection closes, the sensor keeps the same radio for a
+full 20-second reconnect window before falling back. This lets Android app
+updates/restarts reconnect without chasing a radio that switched immediately.
+An explicit source-switch command still applies immediately.
+
+Firmware 0.5.119 scans all channels and ranks matching access points by signal
+strength before connecting, for both local Wi-Fi and Internet/MQTT. It avoids
+fast scan stopping at the first, weaker repeater when several access points
+share the configured SSID. Credentials and SSID remain unchanged.
 
 ## Wi-Fi and Bluetooth provisioning
 

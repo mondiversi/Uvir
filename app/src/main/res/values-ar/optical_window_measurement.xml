@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="window_measure_calculate">حساب المضاعفات</string>
+    <string name="window_measure_reference_instructions">أبقِ المستشعر ثابتًا تحت إضاءة مستقرة، دون نافذة أو مرشح. قِس لمدة 30 ثانية. اضبط قيم الإزاحة المناسبة مسبقًا.</string>
+    <string name="window_measure_filtered_instructions">ضع النافذة أو المرشح دون تحريك المستشعر أو مصدر الضوء. انتظر استقرار الإضاءة، ثم ابدأ القياس الثاني لمدة 30 ثانية.</string>
+    <string name="window_measure_reference_progress">دون نافذة: %1$s / %2$s ث</string>
+    <string name="window_measure_filtered_progress">مع النافذة: %1$s / %2$s ث</string>
+    <string name="window_measure_results">راجع معاملات القنوات المقترحة. تبقى القنوات غير الصالحة والمضاعف العام دون تغيير.</string>
+    <string name="window_measure_valid_channels">القنوات الصالحة: %1$s / %2$s</string>
+    <string name="window_measure_apply">تطبيق المضاعفات</string>
+    <string name="window_measure_failed">القياس غير متاح أو تغيرت الظروف. تحقق من استقرار الضوء والاتصال والإعدادات، ثم ابدأ من جديد دون النافذة.</string>
+    <string name="window_measure_unavailable">القناة غير متاحة</string>
+    <string name="window_measure_insufficient">بيانات غير كافية</string>
+    <string name="window_measure_unstable">إضاءة غير مستقرة</string>
+    <string name="window_measure_saturated">الإشارة خارج النطاق</string>
+    <string name="window_measure_brighter">القيمة مع المرشح أعلى</string>
+    <string name="window_measure_out_of_range">المعامل خارج النطاق المسموح</string>
+</resources>

@@ -61,7 +61,7 @@ class UvirReleaseHighlightsUiTest {
             "ru", "tr", "sw", "id", "hi", "ar", "fa", "he", "ja", "ko", "zh-CN").withIndex()) {
             compose.runOnIdle { language.value = tag; dark.value = index % 2 == 1 }
             val context = localized(tag)
-            compose.onNodeWithText(context.getString(R.string.about_whats_new_title, "1.4.1"))
+            compose.onNodeWithText(context.getString(R.string.about_whats_new_title, BuildConfig.VERSION_NAME))
                 .performScrollTo().assertIsDisplayed()
             for (resource in keys) {
                 val node = compose.onNodeWithText("• " + context.getString(resource))
@@ -71,6 +71,6 @@ class UvirReleaseHighlightsUiTest {
                 assertFalse("Clipped release text: $tag/$resource", layouts.single().hasVisualOverflow)
             }
         }
-        assertEquals("1.4.1", BuildConfig.VERSION_NAME)
+        assertEquals("1.4.2", BuildConfig.VERSION_NAME)
     }
 }

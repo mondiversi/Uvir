@@ -16,5 +16,5 @@
     <string name="update_done">Sensor bijgewerkt</string>
     <string name="update_failed">Update mislukt. Bekijk het foutenlogboek. Als de sensor niet meer opstart, herstel dan de firmware via USB vanaf een computer.</string>
     <string name="update_permission">Sta Uvir toe om updates te installeren in de Android-instellingen.</string>
-    <string name="update_whats_new">TXT- en CSV-export van metingen bevat totaal- en groepspercentages, met consistente PNG-kleuren en importbevestiging door vijf seconden ingedrukt te houden.</string>
+    <string name="update_whats_new">Firmware 0.5.119 verbetert de controle op actuele metingen en het wifiherstel.</string>
 </resources>

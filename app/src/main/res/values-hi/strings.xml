@@ -432,11 +432,11 @@
     <string name="app_version">ऐप संस्करण: %1$s</string>
     <string name="package_name_value">पैकेज: %1$s</string>
     <string name="about_whats_new_title">संस्करण %1$s में क्या नया है</string>
-    <string name="about_whats_new_connectivity">माप और अलर्ट को सत्रों, नोट और प्रकारों सहित बिना पासवर्ड वाली .uvirrecords फ़ाइलों में निर्यात/आयात करें।</string>
-    <string name="about_whats_new_connections">हार्डवेयर आईडी मिलान, नई स्थानीय आईडी और डुप्लिकेट पहचान से आयात किए गए डेटा का स्रोत सुरक्षित रहता है।</string>
-    <string name="about_whats_new_measurements">मुख्य दृश्य कार्ड का क्रम और छिपे बैंड याद रखता है; सहेजे गए मापों में अस्थायी नियंत्रण और कुल या समूह प्रतिशत मिलते हैं।</string>
-    <string name="about_whats_new_interface">एकसमान वर्णक्रमीय रंग, सहेजे गए डेटा में रंगीन बिंदुओं वाले सामान्य नाम, स्पष्ट सत्र पंक्तियाँ और कार्ड क्रम बदलने का एनीमेशन।</string>
-    <string name="about_whats_new_github">संवाद, दिन/रात की कार्रवाइयाँ और नकली डेटा सूचनाएँ बेहतर हुईं; USB अपडेट की तैयारी और पुनर्प्राप्ति जाँच अपडेट की गईं।</string>
+    <string name="about_whats_new_connectivity">ऐप और सेंसर कनेक्शन काम करते हैं; ऑप्टिकल सत्यापन तक विकास स्थगित है।</string>
+    <string name="about_whats_new_connections">ढक्कन और छिद्र सैद्धांतिक प्रोटोटाइप हैं, सत्यापित मापन ऑप्टिक्स नहीं।</string>
+    <string name="about_whats_new_measurements">टूल में औसत ऑफसेट, अनुकूली UV गेन और निर्देशित विंडो गुणांक शामिल हैं।</string>
+    <string name="about_whats_new_interface">कार्ड अधिक सुचारु रूप से खुलते हैं; सहेजे गए डेटा के दृश्य विकल्प वर्तमान ऐप सत्र तक रहते हैं।</string>
+    <string name="about_whats_new_github">विश्वसनीय निरपेक्ष माप के लिए अंतिम ऑप्टिक्स और संदर्भ अंशांकन अभी आवश्यक हैं।</string>
     <string name="about_description">पराबैंगनी, दृश्य और अवरक्त विकिरण के वर्णक्रमीय मापन का ऐप।</string>
     <string name="about_spectral_ranges">वर्णक्रमीय बैंड: पराबैंगनी • दृश्य प्रकाश • अवरक्त</string>
     <string name="about_sensors">समर्थित सेंसर: AS7331 यूवी • AS7343 मल्टीस्पेक्ट्रल</string>

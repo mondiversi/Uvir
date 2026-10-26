@@ -23,6 +23,7 @@ import java.net.DatagramSocket
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.Socket
+import java.net.SocketTimeoutException
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.security.SecureRandom
@@ -37,6 +38,7 @@ import java.util.concurrent.atomic.AtomicLong
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import org.json.JSONObject
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
@@ -101,6 +103,7 @@ class UvirWirelessSensorManager(
     private val generation = AtomicInteger(0)
     private val diagnosticClient = UvirSensorDiagnosticClient()
     private val darkOffsetClient = UvirDarkOffsetClient()
+    private val bootSession = UvirBootSession()
     private val mutableState = MutableStateFlow(UvirWirelessSensorState())
     private val outputWriteLock = Any()
     private val alertReceiptSequence = AtomicLong(0L)
@@ -584,8 +587,21 @@ class UvirWirelessSensorManager(
         )
     }
 
+    internal suspend fun measureOpticalWindow(hardwareId: String, mode: SensorConnectionMode,
+        expected: OpticalWindowMeasurementContext?, onProgress: (Int) -> Unit): OpticalWindowReading {
+        fun frame(value: UvirWirelessSensorState) = opticalWindowMeasurementFrame(value.deviceId,
+            mode, generation.get().toLong(), value.mode == mode &&
+                value.status == WirelessSensorConnectionStatus.CONNECTED && value.appConnectionConfirmed,
+            value.runtimeInfo, value.sampleSequence, value.sample, value.uvAvailable)
+        return measureOpticalWindowReading(hardwareId, expected, state.map(::frame),
+            { frame(state.value) }, onProgress)
+    }
+
     internal suspend fun measureDarkOffsets(hardwareId: String, mode: SensorConnectionMode,
         group: CalibrationGroup, onProgress: (Int) -> Unit): DarkOffsetReading {
+        check(firmwareSupportsDarkOffsetMeasurement(mutableState.value.runtimeInfo.firmwareVersion, group)) {
+            "dark_offsets_firmware_required"
+        }
         val output = activeProtocolOutput
         return darkOffsetClient.measure(hardwareId, group, connectionValid = {
             val current = mutableState.value
@@ -1200,7 +1216,7 @@ class UvirWirelessSensorManager(
         val lineBuffer = StringBuilder()
         val inputBuffer = ByteArray(INPUT_BUFFER_SIZE)
         var lastPingAt = SystemClock.elapsedRealtime()
-        var lastReceiveAt = lastPingAt
+        val liveness = UvirFrameLiveness(mode == SensorConnectionMode.WIFI, lastPingAt)
         var lastAuthenticationAt = lastPingAt
 
         while (
@@ -1209,28 +1225,26 @@ class UvirWirelessSensorManager(
             generation.get() == currentGeneration &&
             !Thread.currentThread().isInterrupted
         ) {
-            val available = input.available()
-            if (available > 0) {
-                val readCount =
-                    input.read(
-                        inputBuffer,
-                        0,
-                        minOf(available, inputBuffer.size)
-                    )
-                if (readCount == -1) {
-                    throw IllegalStateException("wireless_connection_closed")
-                }
-                lastReceiveAt = SystemClock.elapsedRealtime()
+            // available()==0 also occurs at TCP EOF. A bounded read detects a
+            // closed socket immediately instead of waiting for the stale timer.
+            val readCount = if (mode == SensorConnectionMode.WIFI) {
+                try { input.read(inputBuffer) } catch (_: SocketTimeoutException) { 0 }
+            } else {
+                val available = input.available()
+                if (available > 0) input.read(inputBuffer, 0, minOf(available, inputBuffer.size)) else 0
+            }
+            if (readCount < 0) throw IOException("wireless_connection_closed")
+            if (readCount > 0) {
                 repeat(readCount) { index ->
                     val character =
                         (inputBuffer[index].toInt() and 0xFF).toChar()
                     if (character == '\n' || character == '\r') {
                         if (lineBuffer.isNotEmpty()) {
-                            parseLine(
-                                line = lineBuffer.toString(),
-                                mode = mode,
-                                credentials = credentials
-                            )
+                            val line = lineBuffer.toString()
+                            if (uvirValidLiveProtocolFrame(line, credentials.deviceId)) {
+                                liveness.received(SystemClock.elapsedRealtime())
+                                parseLine(line, mode, credentials)
+                            }
                             lineBuffer.clear()
                         }
                     } else if (lineBuffer.length < MAXIMUM_LINE_LENGTH) {
@@ -1239,7 +1253,7 @@ class UvirWirelessSensorManager(
                         lineBuffer.clear()
                     }
                 }
-            } else {
+            } else if (mode != SensorConnectionMode.WIFI) {
                 Thread.sleep(INPUT_POLL_INTERVAL_MS)
             }
 
@@ -1252,7 +1266,7 @@ class UvirWirelessSensorManager(
                 writeLine(output, "AUTH ${credentials.authToken}")
                 lastAuthenticationAt = now
             }
-            if (now - lastPingAt >= PING_INTERVAL_MS) {
+            if (now - lastPingAt >= liveness.pingIntervalMs) {
                 writeLine(output, "PING")
                 lastPingAt = now
             }
@@ -1270,17 +1284,8 @@ class UvirWirelessSensorManager(
                 writeLine(output, "SYNC_BEGIN")
             }
 
-            val staleTimeoutMs =
-                if (
-                    mode == SensorConnectionMode.INTERNET &&
-                    mutableState.value.status !=
-                        WirelessSensorConnectionStatus.CONNECTED
-                ) {
-                    MQTT_SENSOR_DISCOVERY_TIMEOUT_MS
-                } else {
-                    CONNECTION_STALE_TIMEOUT_MS
-                }
-            if (now - lastReceiveAt >= staleTimeoutMs) {
+            if (liveness.expired(now, discovery = mode == SensorConnectionMode.INTERNET &&
+                    mutableState.value.status != WirelessSensorConnectionStatus.CONNECTED)) {
                 throw IllegalStateException("wireless_connection_timeout")
             }
         }
@@ -1299,6 +1304,7 @@ class UvirWirelessSensorManager(
         }
 
         val frameType = json.optString("type")
+        if (frameType != "hello" && !bootSession.accepts(json.optString("boot_id"))) return
         if (frameType == "dark_offsets") {
             darkOffsetClient.receive(json)
             return
@@ -1385,6 +1391,22 @@ class UvirWirelessSensorManager(
                     return
                 }
 
+                when (bootSession.observe(json.optString("boot_id"))) {
+                    UvirBootObservation.RETIRED -> return
+                    UvirBootObservation.RESTARTED -> {
+                        resetOfflineSyncState()
+                        mutableState.value = UvirWirelessSensorState(
+                            status = WirelessSensorConnectionStatus.CONNECTING, mode = mode,
+                            deviceId = credentials.deviceId)
+                    }
+                    else -> Unit
+                }
+                if (mutableState.value.appConnectionConfirmed && json.has("app_connected") &&
+                    !json.optBoolean("app_connected")) {
+                    resetOfflineSyncState()
+                    mutableState.value = mutableState.value.copy(appConnectionConfirmed = false,
+                        sample = null, sampleSequence = 0L)
+                }
                 val firmwareVersion =
                     json.optString("firmware").ifBlank {
                         credentials.firmwareVersion
@@ -1494,6 +1516,9 @@ class UvirWirelessSensorManager(
                     parseSample(json, mode)
                 }
             }
+            "sample_status" -> {
+                if (desiredSampling) mutableState.value = mutableState.value.copy(sample = null, sampleSequence = 0L)
+            }
             "alert_event" -> {
                 if (desiredSampling) {
                     parseAlertEvent(json)
@@ -1549,6 +1574,9 @@ class UvirWirelessSensorManager(
                     // on Android can remain alive across that event, so answer
                     // the request immediately instead of dropping the whole
                     // Internet connection and waiting for another retry cycle.
+                    resetOfflineSyncState()
+                    mutableState.value = mutableState.value.copy(appConnectionConfirmed = false,
+                        sample = null, sampleSequence = 0L)
                     activeProtocolOutput?.let { output ->
                         runCatching {
                             writeLine(output, "AUTH ${credentials.authToken}")
@@ -1723,6 +1751,10 @@ class UvirWirelessSensorManager(
     }
 
     private fun parseSample(json: JSONObject, mode: SensorConnectionMode) {
+        if (!json.liveSampleIsFresh()) {
+            mutableState.value = mutableState.value.copy(sample = null, sampleSequence = 0L)
+            return
+        }
         val sample = json.toUvirSensorSampleOrNull() ?: return
         val previous = mutableState.value
         UvirSensorConnectionHistory.recordIfStarted(applicationContext,
@@ -1756,6 +1788,7 @@ class UvirWirelessSensorManager(
 
     @Synchronized
     private fun closeTransport() {
+        bootSession.reset()
         wirelessModeAcknowledgement.get()?.reject()
         automaticStopConfirmed = false
         automaticStopAcknowledgement?.countDown()
@@ -1848,8 +1881,6 @@ class UvirWirelessSensorManager(
         private const val DISCOVERY_RESPONSE_SIZE = 512
         private const val DISCOVERY_NONCE_SIZE = 16
         private const val RETRY_DELAY_MS = 2500L
-        private const val PING_INTERVAL_MS = 4000L
-        private const val CONNECTION_STALE_TIMEOUT_MS = 10000L
         private const val INPUT_BUFFER_SIZE = 2048
         private const val INPUT_POLL_INTERVAL_MS = 20L
         private const val OFFLINE_SYNC_RETRY_TIMEOUT_MS = 12_000L
@@ -1861,7 +1892,6 @@ class UvirWirelessSensorManager(
         private const val MQTT_RELIABLE_QOS = 1
         private const val MQTT_INPUT_BUFFER_SIZE = 65_536
         private const val MQTT_AUTH_RETRY_INTERVAL_MS = 2500L
-        private const val MQTT_SENSOR_DISCOVERY_TIMEOUT_MS = 30_000L
         private const val MAXIMUM_LINE_LENGTH = 16384
         private val SPP_UUID: UUID =
             UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")

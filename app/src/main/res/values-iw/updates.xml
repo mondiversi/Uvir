@@ -16,5 +16,5 @@
     <string name="update_done">החיישן עודכן</string>
     <string name="update_failed">העדכון נכשל. יש לעיין ביומן השגיאות. אם החיישן אינו מתחיל, יש לשחזר קושחה דרך USB ממחשב.</string>
     <string name="update_permission">יש לאפשר ל־Uvir להתקין עדכונים בהגדרות Android.</string>
-    <string name="update_whats_new">ייצוא מדידות ל-TXT ול-CSV כולל אחוזים מהסך הכול ומהקבוצה, עם צבעי PNG אחידים ואישור ייבוא בלחיצה ממושכת של חמש שניות.</string>
+    <string name="update_whats_new">קושחה 0.5.119 משפרת את בדיקת עדכניות הקריאות ואת שחזור חיבור ה-Wi-Fi.</string>
 </resources>

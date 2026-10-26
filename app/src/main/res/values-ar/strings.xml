@@ -418,11 +418,11 @@
     <string name="app_version">إصدار التطبيق: %1$s</string>
     <string name="package_name_value">الحزمة: %1$s</string>
     <string name="about_whats_new_title">ما الجديد في الإصدار %1$s</string>
-    <string name="about_whats_new_connectivity">تصدير/استيراد القياسات والتنبيهات في ملفات .uvirrecords دون كلمة مرور، بما في ذلك الجلسات والملاحظات والنسخ المختلفة.</string>
-    <string name="about_whats_new_connections">تحتفظ مطابقة معرّف العتاد والمعرّفات المحلية الجديدة وكشف التكرار بمصدر البيانات المستوردة.</string>
-    <string name="about_whats_new_measurements">تتذكر الواجهة الرئيسية ترتيب البطاقات والنطاقات المخفية؛ وتوفر القياسات المحفوظة عناصر تحكم مؤقتة ونسبًا من الإجمالي أو المجموعة.</string>
-    <string name="about_whats_new_interface">ألوان طيفية موحّدة وأسماء محايدة مع نقاط ملوّنة في البيانات المحفوظة وصفوف جلسات أوضح وإعادة ترتيب البطاقات بحركة سلسة.</string>
-    <string name="about_whats_new_github">تحسين الحوارات وإجراءات الوضعين النهاري والليلي وإشعارات البيانات المحاكاة، مع تحديث فحوص جاهزية تحديث USB واستعادته.</string>
+    <string name="about_whats_new_connectivity">التطبيق واتصالات المستشعر تعمل؛ التطوير معلّق حتى التحقق من النظام البصري.</string>
+    <string name="about_whats_new_connections">الغطاء والفتحات نماذج نظرية وليست بصريات قياس معتمدة.</string>
+    <string name="about_whats_new_measurements">تشمل الأدوات متوسط الإزاحات وكسب UV التكيفي وحساب معاملات النافذة بإرشادات.</string>
+    <string name="about_whats_new_interface">فتح البطاقات أكثر سلاسة؛ تبقى خيارات عرض البيانات المحفوظة طوال جلسة التطبيق الحالية.</string>
+    <string name="about_whats_new_github">لا تزال القياسات المطلقة الموثوقة تتطلب البصريات النهائية ومعايرة مرجعية.</string>
     <string name="about_description">تطبيق لقياس الطيف للأشعة فوق البنفسجية والضوء المرئي والأشعة تحت الحمراء.</string>
     <string name="about_spectral_ranges">النطاقات الطيفية: الأشعة فوق البنفسجية • الضوء المرئي • الأشعة تحت الحمراء</string>
     <string name="about_sensors">المستشعرات المدعومة: AS7331 للأشعة فوق البنفسجية • AS7343 متعدد الأطياف</string>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="window_measure_calculate">Vermenigvuldigingsfactoren berekenen</string>
+    <string name="window_measure_reference_instructions">Houd de sensor stil onder stabiele verlichting, zonder venster of filter. Meet gedurende 30 seconden. Stel vooraf de juiste offsets in.</string>
+    <string name="window_measure_filtered_instructions">Plaats het venster of filter zonder de sensor of lichtbron te verplaatsen. Wacht op stabiele verlichting en start dan de tweede meting van 30 seconden.</string>
+    <string name="window_measure_reference_progress">Zonder venster: %1$s / %2$s s</string>
+    <string name="window_measure_filtered_progress">Met venster: %1$s / %2$s s</string>
+    <string name="window_measure_results">Controleer de voorgestelde kanaalfactoren. Onbruikbare kanalen en de algemene vermenigvuldigingsfactor blijven ongewijzigd.</string>
+    <string name="window_measure_valid_channels">Bruikbare kanalen: %1$s / %2$s</string>
+    <string name="window_measure_apply">Factoren instellen</string>
+    <string name="window_measure_failed">Meting niet beschikbaar of omstandigheden gewijzigd. Controleer verlichting, verbinding en instellingen en begin opnieuw zonder venster.</string>
+    <string name="window_measure_unavailable">Kanaal niet beschikbaar</string>
+    <string name="window_measure_insufficient">Onvoldoende gegevens</string>
+    <string name="window_measure_unstable">Instabiele verlichting</string>
+    <string name="window_measure_saturated">Signaal buiten meetbereik</string>
+    <string name="window_measure_brighter">Gefilterde waarde hoger</string>
+    <string name="window_measure_out_of_range">Factor buiten toegestaan bereik</string>
+</resources>

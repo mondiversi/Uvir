@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="dark_offsets_calculate">Offsets berekenen</string>
-    <string name="dark_offsets_instructions">Meet ongeveer 30 seconden onder stabiele referentieomstandigheden. In het donker compenseer je de sensorachtergrond; bij verlichting trek je ook het aanwezige licht af en krijg je relatieve metingen. Dek voor een donkermeting de optische ingangen af met materiaal dat ook ondoorzichtig is voor nabij-infrarood en laat de leds normaal werken. Het gemiddelde verwijdert geen willekeurige ruis en kalibreert de versterking niet.</string>
+    <string name="dark_offsets_instructions">Meet ongeveer 30 seconden onder stabiele referentieomstandigheden. Dek voor een donkerreferentie de optische ingangen af met materiaal dat ook nabij-infrarood blokkeert en laat de leds normaal werken. Bij verlichting wordt ook het referentielicht afgetrokken, waardoor de metingen relatief worden. Deze procedure kalibreert de versterking niet.</string>
+    <string name="dark_offsets_uv_method">Voor UVC, UVB en UVA wordt het gemiddelde van de metingen per kanaal voorgesteld. De UV-versterking past zich automatisch aan de lichtsterkte aan.</string>
+    <string name="dark_offsets_visible_method">Voor elk zichtbaar/infraroodkanaal wordt de gemiddelde meetwaarde voorgesteld.</string>
     <string name="dark_offsets_progress">Meten: %1$s / 30 s</string>
     <string name="dark_offsets_result">Voorstel uit %1$s metingen. Er zijn geen instellingen gewijzigd.</string>
     <string name="dark_offsets_failed">Meting onderbroken of niet beschikbaar. Controleer de verbinding en sensor en probeer opnieuw.</string>

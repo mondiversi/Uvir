@@ -1,0 +1,26 @@
+{
+  "stl_sha256": "f09100936249a27763916dc3efe3e26305c7b031437c63a477c3adbf8d7d22a7",
+  "triangles": 3092,
+  "vertices": 1544,
+  "edges": 4638,
+  "closed_manifold": true,
+  "consistent_winding": true,
+  "single_connected_solid": true,
+  "two_through_bores": true,
+  "zero_area_triangles": 0,
+  "bounds_min_mm": [
+    0.0,
+    0.0,
+    0.0
+  ],
+  "bounds_max_mm": [
+    65.4000015258789,
+    120.30000305175781,
+    11.399999618530273
+  ],
+  "volume_mm3": 20431.446444080706,
+  "expected_polygonal_volume_mm3": 20431.4449581792,
+  "euler_characteristic": -2,
+  "both_bore_centres_and_radii_checked": true,
+  "original_rectangle_footprint_preserved": true
+}

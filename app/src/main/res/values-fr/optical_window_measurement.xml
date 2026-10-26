@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="window_measure_calculate">Calculer les multiplicateurs</string>
+    <string name="window_measure_reference_instructions">Maintenez le capteur immobile sous un éclairage stable, sans fenêtre ni filtre. Mesurez pendant 30 secondes. Configurez au préalable les décalages appropriés.</string>
+    <string name="window_measure_filtered_instructions">Placez la fenêtre ou le filtre sans déplacer le capteur ni la source lumineuse. Attendez un éclairage stable, puis lancez la seconde mesure de 30 secondes.</string>
+    <string name="window_measure_reference_progress">Sans fenêtre : %1$s / %2$s s</string>
+    <string name="window_measure_filtered_progress">Avec fenêtre : %1$s / %2$s s</string>
+    <string name="window_measure_results">Vérifiez les facteurs proposés par canal. Les canaux inutilisables et le multiplicateur général restent inchangés.</string>
+    <string name="window_measure_valid_channels">Canaux utilisables : %1$s / %2$s</string>
+    <string name="window_measure_apply">Appliquer les multiplicateurs</string>
+    <string name="window_measure_failed">Mesure indisponible ou conditions modifiées. Vérifiez la stabilité de la lumière, la connexion et les réglages, puis recommencez sans fenêtre.</string>
+    <string name="window_measure_unavailable">Canal indisponible</string>
+    <string name="window_measure_insufficient">Données insuffisantes</string>
+    <string name="window_measure_unstable">Éclairage instable</string>
+    <string name="window_measure_saturated">Signal hors plage</string>
+    <string name="window_measure_brighter">Valeur filtrée supérieure</string>
+    <string name="window_measure_out_of_range">Facteur hors des limites autorisées</string>
+</resources>

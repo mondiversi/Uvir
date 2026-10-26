@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="dark_offsets_calculate">オフセットを計算</string>
-    <string name="dark_offsets_instructions">安定した基準条件で約30秒間測定します。暗所ではセンサーの背景値を補正し、照明下では存在する光も差し引くため、測定値は相対値になります。暗所で測定する場合は、近赤外線も透過しない素材で光学入力を覆い、LEDは通常の動作状態に保ってください。平均値はランダムノイズを除去したり、ゲインを校正したりするものではありません。</string>
+    <string name="dark_offsets_instructions">安定した基準条件で約30秒間測定します。暗所を基準にする場合は、近赤外線も遮断する素材で光学入力を覆い、LEDは通常の動作状態に保ってください。照明下では基準光も差し引くため、測定値は相対値になります。この手順ではゲインを校正しません。</string>
+    <string name="dark_offsets_uv_method">UVC、UVB、UVAでは、各チャンネルの測定値の平均を提案します。UVゲインは光の強さに応じて自動調整されます。</string>
+    <string name="dark_offsets_visible_method">可視光・赤外線の各チャンネルでは、測定値の平均を提案します。</string>
     <string name="dark_offsets_progress">測定中：%1$s / 30 秒</string>
     <string name="dark_offsets_result">%1$s 回の読み取りによる提案です。設定は変更されていません。</string>
     <string name="dark_offsets_failed">測定が中断されたか利用できません。接続とセンサーを確認して再試行してください。</string>

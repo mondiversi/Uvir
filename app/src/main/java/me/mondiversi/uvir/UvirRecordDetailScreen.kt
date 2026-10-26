@@ -205,16 +205,10 @@ fun RecordDetailScreen(
         if (!noteEditingEnabled) showNoteEditor = false
     }
 
-    var showChart
-            by remember(record.id) {
-                mutableStateOf(false)
-            }
-
-    var viewMode
-            by remember(record.id) {
-                mutableStateOf(ViewMode.IRRADIANCE)
-            }
-    var valueDisplay by rememberUvirSavedValueDisplay("acquisition:${record.id}")
+    val presentation = rememberUvirSavedScreenPresentation("acquisition:${record.id}")
+    var showChart by presentation.showChart
+    var viewMode by presentation.viewMode
+    var valueDisplay by presentation.valueDisplay
 
     val deleteDescription =
         stringResource(
@@ -231,14 +225,7 @@ fun RecordDetailScreen(
             R.string.share_error
         )
 
-    val expandedStates = remember(record.id) {
-        mutableStateMapOf(
-            SessionChartGroup.UV to true,
-            SessionChartGroup.VISIBLE to true,
-            SessionChartGroup.FAR_RED_NIR to true,
-            SessionChartGroup.BIOLOGICAL to true
-        )
-    }
+    val expandedStates = presentation.expandedGroups
 
     val currentRecord =
         remember(record, currentNote) {
@@ -583,9 +570,7 @@ fun RecordDetailScreen(
                         cardColor = cardColor,
                         primaryText = primaryText,
                         secondaryText = secondaryText,
-                        mutedGroups = UvirLiveSpectrumDisplay.irradianceGroups.filterNot {
-                            valueDisplay.spectrum.groupVisible(it)
-                        }.toSet()
+                        expandedSections = presentation.expandedAcquisitionCharts
                     )
                 }
 

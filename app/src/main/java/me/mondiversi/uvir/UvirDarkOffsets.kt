@@ -9,9 +9,14 @@ import kotlinx.coroutines.withTimeout
 import org.json.JSONObject
 
 internal const val DARK_OFFSETS_MINIMUM_FIRMWARE = "0.5.110"
+internal const val UV_MEAN_OFFSETS_MINIMUM_FIRMWARE = "0.5.114"
 internal enum class CalibrationGroup(val protocolName: String, val indices: IntRange) {
     UV("UV", 0..2), VISIBLE("VIS", 3..10)
 }
+
+internal fun firmwareSupportsDarkOffsetMeasurement(version: String, group: CalibrationGroup): Boolean =
+    version.isNotBlank() && compareFirmwareVersions(version,
+        if (group == CalibrationGroup.UV) UV_MEAN_OFFSETS_MINIMUM_FIRMWARE else DARK_OFFSETS_MINIMUM_FIRMWARE) >= 0
 
 internal data class DarkOffsetReading(val group: CalibrationGroup, val values: List<Float>, val samples: Int) {
     init {
@@ -23,7 +28,7 @@ internal data class DarkOffsetReading(val group: CalibrationGroup, val values: L
 internal data class DarkOffsetFrame(
     val requestId: String, val deviceId: String, val group: String, val state: String,
     val elapsedMs: Int = 0, val samples: Int = 0, val unit: String = "",
-    val values: List<Float> = emptyList(), val error: String = "cancelled"
+    val values: List<Double> = emptyList(), val error: String = "cancelled", val estimator: String = ""
 )
 
 /** Preserve the other group, including lossless legacy physical-channel offsets. */
@@ -70,6 +75,8 @@ internal class UvirDarkOffsetClient {
                     when (frame.state) {
                         "progress" -> onProgress(frame.elapsedMs.coerceIn(0, 30_000))
                         "ready" -> {
+                            check(if (group == CalibrationGroup.UV) frame.estimator == "mean"
+                                else frame.estimator in setOf("", "mean")) { "dark_offsets_invalid_estimator" }
                             check(frame.unit in setOf(UVIR_CANONICAL_IRRADIANCE_UNIT, UVIR_LEGACY_IRRADIANCE_UNIT)) { "dark_offsets_invalid_unit" }
                             val scale = irradianceUnitScaleToWm2(frame.unit)
                             val reading = DarkOffsetReading(group, frame.values.map { (it * scale).toFloat() }, frame.samples)
@@ -101,8 +108,8 @@ internal class UvirDarkOffsetClient {
             DarkOffsetFrame(frame.getString("request_id"), frame.getString("device_id"),
                 frame.getString("group"), frame.getString("state"), frame.optInt("elapsed_ms"),
                 frame.optInt("samples"), frame.optString("unit"),
-                if (values == null) emptyList() else List(values.length()) { values.getDouble(it).toFloat() },
-                frame.optString("error", "cancelled"))
+                if (values == null) emptyList() else List(values.length()) { values.getDouble(it) },
+                frame.optString("error", "cancelled"), frame.optString("estimator", ""))
         }.getOrNull() ?: return
         receive(parsed)
     }

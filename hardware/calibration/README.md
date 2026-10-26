@@ -1,5 +1,19 @@
 # Calibration
 
+> **Development is on hold until the optical assembly and calibration can be
+> completed.** App and sensor communication/acquisition are operational, but
+> current readings are provisional and do not establish accurate absolute
+> irradiance. The theoretical lid/aperture dimensions are not a completed
+> optical design or a calibration certificate.
+
+Resolve the intended measurement geometry first: a narrow directional tube
+can reject oblique and diffuse light rather than measure total ambient
+irradiance. Validate the final lid, apertures and any diffuser/filter/window
+for each channel before setting reference scale factors. Raising a module,
+changing its sensor-to-lid gap or modifying an opening changes this assembly
+and requires another optical check. A single multiplier cannot correct
+angle-dependent light rejection.
+
 The AS7343 visible/NIR and AS7331 UV drivers produce provisional irradiance
 estimates so the complete acquisition path can be tested before traceable
 calibration. Both chips are now installed and detected. The visible/NIR board
@@ -16,12 +30,24 @@ The planned final housing is **TEKO COFFER-A/6.5**; see the
 checks with the circuitry mounted in that housing, including the final sensor
 openings/windows, optical barriers and normal LED configuration.
 
+Include the [replacement lid and visible/NIR light shield](../printable/README.md)
+in this final configuration. The shield is intended to exclude internal LED
+light from the AS7343. A separate shield around the AS7331 is not specified for
+the normal visible indicators; still compare readings with those LEDs off and
+on before dismissing possible residual interference.
+
 Include the [proposed directional tubes and diffuser](../README.md#directional-optical-heads-prototype)
-in the final optical configuration. Record the bore, the height reference, wall
-material, diffuser identity and placement. Check angular response for all channels,
-relative alignment of the two heads, lateral leakage and saturation. Recheck
-calibration after changing these components; equal tube dimensions alone do not
-establish a common field of view or absolute irradiance accuracy.
+in the final optical configuration. The design reference is the **light-entry
+angle**, not a mandatory tube size: the 6 / 25 mm, 4 / 16.7 mm and compact
+3 / 12.4 mm bore/optical-height options have similar ideal cones. Check angular
+response and calibration when changing between variants. Record the bore,
+optical height from the chip's top window, sensor-to-lid gap, wall material, diffuser identity and
+placement. For the compact lid, verify the actual `1 + 2.4 + 9 = 12.4 mm` height
+stack rather than using the 9 mm projection as the optical height. Check angular
+response for all channels, relative alignment of the two heads, lateral leakage
+and saturation. Recheck calibration after changing these components; equal
+dimensions or ideal angles alone do not establish a common field of view or
+absolute irradiance accuracy.
 
 Before values are considered absolute measurements:
 
@@ -54,12 +80,21 @@ are stored internally in W/m2; only the explicitly labelled v1 compatibility
 interface exchanges uW/cm2. See the [SI migration notes](../../docs/SI_IRRADIANCE_MIGRATION.md).
 Firmware 0.5.110 adds **Calculate offsets**, independently for UV and
 visible/NIR. It samples for about 30 seconds before user corrections, previews
-the mean offsets and changes nothing until **Set offsets** is confirmed. It is
+the proposed offsets and changes nothing until **Set offsets** is confirmed. It is
 not necessary to reset the existing gains, offsets or window factors first.
+Since **0.5.114**, UV and visible/NIR both use **per-channel arithmetic means**.
+This supersedes the maximum-based UV proposal in 0.5.113. The updated app requires
+0.5.114+ for UV calculation and identifies the method in the preview. AS7331 gain
+adapts automatically from 1x to 2048x at fixed 64 ms integration, then stays fixed
+after settling the first reference sample. Existing offsets, gains, window
+factors and records are unchanged until a new proposal is applied.
 For sensor dark-bias calibration, use the final opaque barriers, normal LED operation and completely covered optical inputs. Collect
 a distribution rather than one sample, and verify at the operating temperature,
-gain and integration settings. An offset corrects mean dark bias, not random
-noise; choose appropriate measurement sensitivity before characterizing it.
+gain and integration settings. A mean offset corrects the average background;
+signed corrected color readings are averaged before the final zero clamp to
+avoid positive clipping bias. No new deadband is applied: small fluctuations can
+remain. A fixed offset does not adapt to later changes in noise, temperature or
+gain, so validate the correction over the intended operating range.
 
 A stable illuminated reference can instead be used for deliberate background
 subtraction. That also subtracts real light present during the reference interval,
@@ -72,12 +107,14 @@ the mean-based calculation and existing settings/protocol formats are unchanged.
 Offsets are subtracted once per displayed color, after physical-channel
 normalization and the usual paired-channel means, before the channel factor
 (or the original module factor if no channel factors have been configured).
-Any negative result after subtraction is floored at zero.
+Since 0.5.114, negative residuals remain signed through the configured average;
+only the final result is floored at zero. Instantaneous one-sample outputs and
+condition checks remain nonnegative.
 Violet, blue, green-yellow and far-red each have one offset, not one per peak.
 HEV and group totals receive no additional offset. Older physical-channel
 configurations retain their original semantics until explicitly edited.
 Do not also encode the same dark correction in `Calibration.h` and runtime
-offsets. See [implementation and limitations](../../docs/OPTICAL_WINDOW.md#color-dark-offsets).
+offsets. See [implementation and limitations](../../docs/OPTICAL_WINDOW.md#channel-dark-offsets).
 
 ## Protective windows
 

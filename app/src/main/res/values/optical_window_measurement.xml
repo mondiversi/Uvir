@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="window_measure_calculate">Calculate multipliers</string>
+    <string name="window_measure_reference_instructions">Keep the sensor still under stable illumination, without the window or filter. Measure for 30 seconds. Configure suitable offsets beforehand.</string>
+    <string name="window_measure_filtered_instructions">Fit the window or filter without moving the sensor or light source. Wait for stable illumination, then start the second 30-second measurement.</string>
+    <string name="window_measure_reference_progress">Without window: %1$s / %2$s s</string>
+    <string name="window_measure_filtered_progress">With window: %1$s / %2$s s</string>
+    <string name="window_measure_results">Review the proposed channel factors. Unusable channels and the common multiplier stay unchanged.</string>
+    <string name="window_measure_valid_channels">Usable channels: %1$s / %2$s</string>
+    <string name="window_measure_apply">Set multipliers</string>
+    <string name="window_measure_failed">Measurement unavailable or conditions changed. Check light stability, connection and settings, then restart without the window.</string>
+    <string name="window_measure_unavailable">Channel unavailable</string>
+    <string name="window_measure_insufficient">Insufficient data</string>
+    <string name="window_measure_unstable">Unstable illumination</string>
+    <string name="window_measure_saturated">Signal out of range</string>
+    <string name="window_measure_brighter">Filtered value higher</string>
+    <string name="window_measure_out_of_range">Factor outside allowed range</string>
+</resources>

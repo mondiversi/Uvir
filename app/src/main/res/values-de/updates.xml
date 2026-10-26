@@ -16,5 +16,5 @@
     <string name="update_done">Sensor aktualisiert</string>
     <string name="update_failed">Update fehlgeschlagen. Siehe Fehlerprotokoll. Startet der Sensor nicht mehr, Firmware per USB am Computer wiederherstellen.</string>
     <string name="update_permission">Uvir in den Android-Einstellungen die Installation von Updates erlauben.</string>
-    <string name="update_whats_new">TXT- und CSV-Erfassungsexporte enthalten Gesamt-/Gruppenanteile; einheitliche PNG-Farben und Importbestätigung durch fünf Sekunden langes Drücken.</string>
+    <string name="update_whats_new">Firmware 0.5.119 verbessert die Prüfung aktueller Messwerte und die WLAN-Wiederherstellung.</string>
 </resources>

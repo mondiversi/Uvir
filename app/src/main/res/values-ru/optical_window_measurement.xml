@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="window_measure_calculate">Рассчитать множители</string>
+    <string name="window_measure_reference_instructions">Держите датчик неподвижно при стабильном освещении, без окна или фильтра. Измеряйте 30 секунд. Заранее настройте подходящие смещения.</string>
+    <string name="window_measure_filtered_instructions">Установите окно или фильтр, не перемещая датчик и источник света. Дождитесь стабильного освещения и начните второе измерение длительностью 30 секунд.</string>
+    <string name="window_measure_reference_progress">Без окна: %1$s / %2$s с</string>
+    <string name="window_measure_filtered_progress">С окном: %1$s / %2$s с</string>
+    <string name="window_measure_results">Проверьте предложенные коэффициенты каналов. Непригодные каналы и общий множитель останутся без изменений.</string>
+    <string name="window_measure_valid_channels">Пригодные каналы: %1$s / %2$s</string>
+    <string name="window_measure_apply">Применить множители</string>
+    <string name="window_measure_failed">Измерение недоступно или условия изменились. Проверьте стабильность света, соединение и настройки, затем начните заново без окна.</string>
+    <string name="window_measure_unavailable">Канал недоступен</string>
+    <string name="window_measure_insufficient">Недостаточно данных</string>
+    <string name="window_measure_unstable">Нестабильное освещение</string>
+    <string name="window_measure_saturated">Сигнал вне диапазона</string>
+    <string name="window_measure_brighter">Значение с фильтром выше</string>
+    <string name="window_measure_out_of_range">Коэффициент вне допустимого диапазона</string>
+</resources>

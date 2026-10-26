@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="window_measure_calculate">Υπολογισμός πολλαπλασιαστών</string>
+    <string name="window_measure_reference_instructions">Κρατήστε τον αισθητήρα ακίνητο υπό σταθερό φωτισμό, χωρίς παράθυρο ή φίλτρο. Μετρήστε για 30 δευτερόλεπτα. Ρυθμίστε πρώτα τα κατάλληλα offset.</string>
+    <string name="window_measure_filtered_instructions">Τοποθετήστε το παράθυρο ή το φίλτρο χωρίς να μετακινήσετε τον αισθητήρα ή την πηγή φωτός. Περιμένετε σταθερό φωτισμό και ξεκινήστε τη δεύτερη μέτρηση 30 δευτερολέπτων.</string>
+    <string name="window_measure_reference_progress">Χωρίς παράθυρο: %1$s / %2$s δ.</string>
+    <string name="window_measure_filtered_progress">Με παράθυρο: %1$s / %2$s δ.</string>
+    <string name="window_measure_results">Ελέγξτε τους προτεινόμενους συντελεστές καναλιών. Τα μη αξιοποιήσιμα κανάλια και ο γενικός πολλαπλασιαστής παραμένουν αμετάβλητα.</string>
+    <string name="window_measure_valid_channels">Αξιοποιήσιμα κανάλια: %1$s / %2$s</string>
+    <string name="window_measure_apply">Εφαρμογή πολλαπλασιαστών</string>
+    <string name="window_measure_failed">Η μέτρηση δεν είναι διαθέσιμη ή οι συνθήκες άλλαξαν. Ελέγξτε τη σταθερότητα φωτός, τη σύνδεση και τις ρυθμίσεις και ξεκινήστε ξανά χωρίς παράθυρο.</string>
+    <string name="window_measure_unavailable">Μη διαθέσιμο κανάλι</string>
+    <string name="window_measure_insufficient">Ανεπαρκή δεδομένα</string>
+    <string name="window_measure_unstable">Ασταθής φωτισμός</string>
+    <string name="window_measure_saturated">Σήμα εκτός κλίμακας</string>
+    <string name="window_measure_brighter">Υψηλότερη τιμή με φίλτρο</string>
+    <string name="window_measure_out_of_range">Συντελεστής εκτός επιτρεπτών ορίων</string>
+</resources>

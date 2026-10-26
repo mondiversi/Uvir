@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="window_measure_calculate">חישוב מכפילים</string>
+    <string name="window_measure_reference_instructions">יש להחזיק את החיישן ללא תזוזה בתאורה יציבה, ללא חלון או מסנן. יש למדוד במשך 30 שניות ולהגדיר מראש היסטים מתאימים.</string>
+    <string name="window_measure_filtered_instructions">יש להתקין את החלון או המסנן בלי להזיז את החיישן או את מקור האור. יש להמתין לתאורה יציבה ואז להתחיל מדידה שנייה של 30 שניות.</string>
+    <string name="window_measure_reference_progress">ללא חלון: %1$s / %2$s שנ׳</string>
+    <string name="window_measure_filtered_progress">עם חלון: %1$s / %2$s שנ׳</string>
+    <string name="window_measure_results">יש לבדוק את מקדמי הערוצים המוצעים. ערוצים לא שמישים והמכפיל הכללי נשארים ללא שינוי.</string>
+    <string name="window_measure_valid_channels">ערוצים שמישים: %1$s / %2$s</string>
+    <string name="window_measure_apply">החלת מכפילים</string>
+    <string name="window_measure_failed">המדידה אינה זמינה או שהתנאים השתנו. יש לבדוק את יציבות האור, החיבור וההגדרות ולהתחיל מחדש ללא החלון.</string>
+    <string name="window_measure_unavailable">הערוץ אינו זמין</string>
+    <string name="window_measure_insufficient">אין מספיק נתונים</string>
+    <string name="window_measure_unstable">תאורה לא יציבה</string>
+    <string name="window_measure_saturated">האות מחוץ לטווח</string>
+    <string name="window_measure_brighter">הערך עם המסנן גבוה יותר</string>
+    <string name="window_measure_out_of_range">המקדם מחוץ לטווח המותר</string>
+</resources>

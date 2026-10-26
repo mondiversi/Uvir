@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="window_measure_calculate">计算倍率</string>
+    <string name="window_measure_reference_instructions">取下光学窗口或滤光片，将传感器静置于稳定光照下，测量30秒。请先设置适当的偏移量。</string>
+    <string name="window_measure_filtered_instructions">安装光学窗口或滤光片，不要移动传感器或光源。待光照稳定后，开始第二次30秒测量。</string>
+    <string name="window_measure_reference_progress">无窗口：%1$s / %2$s 秒</string>
+    <string name="window_measure_filtered_progress">有窗口：%1$s / %2$s 秒</string>
+    <string name="window_measure_results">检查各通道的建议系数。不可用的通道和总倍率保持不变。</string>
+    <string name="window_measure_valid_channels">可用通道：%1$s / %2$s</string>
+    <string name="window_measure_apply">设置倍率</string>
+    <string name="window_measure_failed">无法测量或条件已改变。请检查光照稳定性、连接和设置，然后取下窗口重新开始。</string>
+    <string name="window_measure_unavailable">通道不可用</string>
+    <string name="window_measure_insufficient">数据不足</string>
+    <string name="window_measure_unstable">光照不稳定</string>
+    <string name="window_measure_saturated">信号超出量程</string>
+    <string name="window_measure_brighter">加滤光片后的值更高</string>
+    <string name="window_measure_out_of_range">系数超出允许范围</string>
+</resources>

@@ -469,11 +469,11 @@
     <string name="app_version">Versi aplikasi: %1$s</string>
     <string name="package_name_value">Paket: %1$s</string>
     <string name="about_whats_new_title">Yang baru di versi %1$s</string>
-    <string name="about_whats_new_connectivity">Ekspor/impor akuisisi dan peringatan sebagai berkas .uvirrecords tanpa kata sandi, termasuk sesi, catatan, dan varian.</string>
-    <string name="about_whats_new_connections">Pencocokan ID perangkat keras, ID lokal baru, dan deteksi duplikat mempertahankan asal data yang diimpor.</string>
-    <string name="about_whats_new_measurements">Tampilan utama mengingat urutan kartu dan pita tersembunyi; akuisisi tersimpan menyediakan kontrol sementara dan persentase total atau kelompok.</string>
-    <string name="about_whats_new_interface">Warna spektral konsisten, nama netral dengan titik berwarna pada data tersimpan, baris sesi lebih jelas, dan animasi pemindahan kartu.</string>
-    <string name="about_whats_new_github">Dialog, tindakan siang/malam, dan notifikasi data simulasi diperbaiki, dengan pemeriksaan kesiapan dan pemulihan pembaruan USB yang diperbarui.</string>
+    <string name="about_whats_new_connectivity">Aplikasi dan koneksi sensor berfungsi; pengembangan ditunda hingga validasi optik.</string>
+    <string name="about_whats_new_connections">Tutup dan bukaan adalah prototipe teoretis, bukan optik pengukuran yang tervalidasi.</string>
+    <string name="about_whats_new_measurements">Alat mencakup offset rata-rata, penguatan UV adaptif dan perhitungan faktor jendela terpandu.</string>
+    <string name="about_whats_new_interface">Pembukaan kartu lebih halus; pilihan tampilan data tersimpan berlaku selama sesi aplikasi saat ini.</string>
+    <string name="about_whats_new_github">Pengukuran absolut yang andal masih memerlukan optik final dan kalibrasi acuan.</string>
     <string name="about_description">Aplikasi pengukuran spektral radiasi ultraviolet, tampak, dan inframerah.</string>
     <string name="about_spectral_ranges">Pita spektral: Ultraviolet • Cahaya tampak • Inframerah</string>
     <string name="about_sensors">Sensor didukung: AS7331 UV • AS7343 multispektral</string>

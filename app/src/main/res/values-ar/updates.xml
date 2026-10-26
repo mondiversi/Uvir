@@ -16,5 +16,5 @@
     <string name="update_done">تم تحديث المستشعر</string>
     <string name="update_failed">فشل التحديث. راجع سجل الأخطاء. إذا لم يبدأ المستشعر، استعد البرنامج عبر USB من حاسوب.</string>
     <string name="update_permission">اسمح لتطبيق Uvir بتثبيت التحديثات في إعدادات Android.</string>
-    <string name="update_whats_new">يتضمن تصدير القياسات بصيغتي TXT وCSV نسب الإجمالي والمجموعة، مع ألوان PNG متسقة وتأكيد الاستيراد بالضغط المستمر خمس ثوانٍ.</string>
+    <string name="update_whats_new">يحسّن البرنامج الثابت 0.5.119 التحقق من القراءات الحديثة واستعادة اتصال Wi-Fi.</string>
 </resources>

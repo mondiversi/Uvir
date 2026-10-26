@@ -87,6 +87,8 @@ class UvirDarkOffsetsUiTest {
             compose.onNodeWithText(context.getString(R.string.dark_offsets_calculate)).assertIsDisplayed()
             compose.onNodeWithText(context.getString(R.string.dark_offsets_instructions))
                 .performScrollTo().assertIsDisplayed()
+            compose.onNodeWithText(context.getString(R.string.dark_offsets_uv_method))
+                .performScrollTo().assertIsDisplayed()
             compose.onNodeWithTag("dark_offsets_start").assertIsDisplayed().assertIsEnabled()
             File(context.getExternalFilesDir(null), "offset-reference-${if (night) "night" else "day"}.png")
                 .outputStream().use {

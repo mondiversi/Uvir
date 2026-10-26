@@ -496,11 +496,11 @@
     <string name="app_version">Wersja aplikacji: %1$s</string>
     <string name="package_name_value">Pakiet: %1$s</string>
     <string name="about_whats_new_title">Nowości w wersji %1$s</string>
-    <string name="about_whats_new_connectivity">Eksportuj/importuj pomiary i alerty w plikach .uvirrecords bez hasła, wraz z sesjami, notatkami i wariantami.</string>
-    <string name="about_whats_new_connections">Dopasowanie identyfikatora sprzętowego, nowe lokalne identyfikatory i wykrywanie duplikatów zachowują pochodzenie importowanych danych.</string>
-    <string name="about_whats_new_measurements">Widok główny zapamiętuje kolejność kart i ukryte pasma; zapisane pomiary mają tymczasowe opcje widoku oraz procenty całości lub grupy.</string>
-    <string name="about_whats_new_interface">Spójne kolory widmowe, neutralne nazwy z kolorowymi kropkami w zapisanych danych, czytelniejsze wiersze sesji i animowane przesuwanie kart.</string>
-    <string name="about_whats_new_github">Ulepszone okna dialogowe, akcje dnia/nocy i powiadomienia o danych symulowanych oraz zaktualizowane kontrole aktualizacji USB i odzyskiwania.</string>
+    <string name="about_whats_new_connectivity">Aplikacja i połączenia działają; rozwój wstrzymano do czasu walidacji optyki.</string>
+    <string name="about_whats_new_connections">Pokrywa i otwory to prototypy teoretyczne, a nie zwalidowana optyka pomiarowa.</string>
+    <string name="about_whats_new_measurements">Narzędzia obejmują średnie offsety, adaptacyjne wzmocnienie UV i obliczanie współczynników okna.</string>
+    <string name="about_whats_new_interface">Płynniejsze rozwijanie kart; wybór widoku zapisanych danych obowiązuje w bieżącej sesji aplikacji.</string>
+    <string name="about_whats_new_github">Wiarygodne pomiary bezwzględne nadal wymagają finalnej optyki i kalibracji wzorcowej.</string>
     <string name="about_description">Aplikacja do pomiarów widmowych promieniowania ultrafioletowego, widzialnego i podczerwonego.</string>
     <string name="about_spectral_ranges">Pasma widmowe: Ultrafiolet • Światło widzialne • Podczerwień</string>
     <string name="about_sensors">Obsługiwane czujniki: AS7331 UV • AS7343 wielowidmowy</string>

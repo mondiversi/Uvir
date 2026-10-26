@@ -54,6 +54,7 @@ class UvirLiveSpectrumDisplayUiTest {
     private val unit = mutableStateOf(UvirIrradianceUnit.W_M2)
     private val sensorKey = mutableStateOf("synthetic-sensor")
     private val chart = mutableStateOf(false)
+    private val readingAvailable = mutableStateOf(true)
     private var toggles = 0
     private var primaryText = Color.Unspecified
     private var secondaryText = Color.Unspecified
@@ -75,6 +76,7 @@ class UvirLiveSpectrumDisplayUiTest {
                 LocalLayoutDirection provides direction.value,
                 LocalUvirNumericFormat provides UvirNumericFormat.EUROPEAN,
                 LocalUvirIrradianceUnit provides unit.value) {
+                CompositionLocalProvider(LocalUvirLiveReadingAvailable provides readingAvailable.value) {
                 MaterialTheme(colorScheme = if (night.value) darkColorScheme() else lightColorScheme()) {
                     val colors = MaterialTheme.colorScheme
                     primaryText = colors.onSurface
@@ -97,9 +99,28 @@ class UvirLiveSpectrumDisplayUiTest {
                     }
                     }
                 }
+                }
             }
         }
         if (restorer == null) compose.setContent(content) else restorer.setContent(content)
+    }
+
+    @Test fun unavailableLiveValuesShowDashesAndEmptyBarsThenRecoverInBothThemes() {
+        fixture()
+        for (dark in listOf(false, true)) for (current in UvirLiveSpectrumDisplay.irradianceGroups) {
+            compose.runOnIdle { night.value = dark; group.value = current; readingAvailable.value = false }
+            compose.onNodeWithTag("live_group_total_${current.name}", true).assertTextEquals("—")
+            compose.onNodeWithTag("live_group_percentage_${current.name}", true).assertTextEquals("—")
+            val first = UvirLiveSpectrumDisplay.channels(current).first()
+            compose.onNodeWithTag("live_value_${first.name}", true).assertTextEquals("—")
+            compose.onNodeWithTag("live_percentage_${first.name}", true).assertTextEquals("—")
+            compose.onNodeWithTag("live_bar_${first.name}", true).assert(SemanticsMatcher.expectValue(
+                SemanticsProperties.ProgressBarRangeInfo,
+                androidx.compose.ui.semantics.ProgressBarRangeInfo(0f, 0f..1f)))
+            compose.runOnIdle { readingAvailable.value = true }
+            assertNotEquals("—", compose.onNodeWithTag("live_group_total_${current.name}", true)
+                .fetchSemanticsNode().config[SemanticsProperties.Text].single().text)
+        }
     }
 
     @Test fun excludedIslandTitleTurnsGrayAndReturnsToNormalWithAnyVisibleChildInBothThemes() {
@@ -119,8 +140,7 @@ class UvirLiveSpectrumDisplayUiTest {
             total.assertTextEquals("—").assertUvirActionTextColor(secondaryText.copy(alpha = .55f))
             percentage.assertTextEquals("—").assertUvirActionTextColor(secondaryText.copy(alpha = .55f))
             compose.onNodeWithTag("live_group_bar_${current.name}", useUnmergedTree = true)
-                .assert(SemanticsMatcher.expectValue(SemanticsProperties.ProgressBarRangeInfo,
-                    androidx.compose.ui.semantics.ProgressBarRangeInfo(0f, 0f..1f)))
+                .assertDoesNotExist()
             compose.mainClock.advanceTimeBy(300)
             compose.waitForIdle()
             Thread.sleep(400)
@@ -132,8 +152,12 @@ class UvirLiveSpectrumDisplayUiTest {
                 abs(pixel.red - expectedIcon.red) + abs(pixel.green - expectedIcon.green) + abs(pixel.blue - expectedIcon.blue) < .04f
             } }
             assertTrue("Excluded icon is gray in $current / dark=$dark", matching > 4)
+            File(context.getExternalFilesDir(null), "main-compact-${current.name}-${if (dark) "night" else "day"}.png")
+                .outputStream().use { assertTrue(compose.onRoot().captureToImage().asAndroidBitmap()
+                    .compress(Bitmap.CompressFormat.PNG, 100, it)) }
+            header.performClick().assertIsOn()
             compose.onNodeWithTag("live_row_${UvirLiveSpectrumDisplay.channels(current).first().name}", useUnmergedTree = true)
-                .performClick().assertIsOn()
+                .performClick().assertIsOff()
             title.assertUvirActionTextColor(primaryText)
             header.performClick().assertIsOff()
             title.assertUvirActionTextColor(secondaryText.copy(alpha = .55f))
@@ -144,19 +168,22 @@ class UvirLiveSpectrumDisplayUiTest {
         }
     }
 
-    @Test fun groupMarkHidesAndRestoresEveryChildWithoutCollapsingOrChangingOtherGroups() {
+    @Test fun groupMarkCompactsTheIslandAndRestoresEveryChildWithoutChangingOtherGroups() {
         fixture()
         for (current in UvirLiveSpectrumDisplay.irradianceGroups) {
             compose.runOnIdle { group.value = current }
             val control = compose.onNodeWithTag("live_island_header_${current.name}", useUnmergedTree = true)
+            val card = compose.onNodeWithTag("live_spectrum_card_${current.name}", useUnmergedTree = true)
+            val expandedHeight = card.getUnclippedBoundsInRoot().let { it.bottom - it.top }
             control.assertIsOn().performTouchInput { click(center) }.assertIsOff()
             compose.onNodeWithTag("live_group_${current.name}_cross", useUnmergedTree = true).assertIsDisplayed()
             for (metric in UvirLiveSpectrumDisplay.channels(current)) {
-                compose.onNodeWithTag("live_row_${metric.name}", useUnmergedTree = true).assertIsOff()
-                compose.onNodeWithTag("live_value_${metric.name}", useUnmergedTree = true).assertTextEquals("—")
+                compose.onNodeWithTag("live_row_${metric.name}", useUnmergedTree = true).assertDoesNotExist()
             }
+            assertTrue(card.getUnclippedBoundsInRoot().let { it.bottom - it.top } < expandedHeight)
             compose.runOnIdle {
                 assertEquals(0, toggles)
+                UvirLiveSpectrumDisplay.channels(current).forEach { assertFalse(lastState.visible(it)) }
                 UvirLiveSpectrumDisplay.irradianceGroups.filter { it != current }.forEach { assertTrue(lastState.groupVisible(it)) }
             }
             control.performClick().assertIsOn()
@@ -166,19 +193,50 @@ class UvirLiveSpectrumDisplayUiTest {
         assertEquals(1.0, sample.uvc, 0.0)
     }
 
-    @Test fun groupExclusionUsesTheSameDurableMainBandFlagsAndCanBeReactivatedIndividually() {
+    @Test fun groupExclusionRetainsItsCompactStateAndCanBeReopenedFromTheHeading() {
         fixture()
         val control = compose.onNodeWithTag("live_island_header_UV", useUnmergedTree = true)
         control.performClick().assertIsOff()
         compose.runOnIdle { visitOpen.value = false }
         compose.runOnIdle { visitOpen.value = true; sensorKey.value = "mock-source" }
         control.assertIsOff()
-        compose.onNodeWithTag("live_row_UVC", useUnmergedTree = true).performClick().assertIsOn()
+        compose.onNodeWithTag("live_row_UVC", useUnmergedTree = true).assertDoesNotExist()
+        control.performClick().assertIsOn()
+        compose.onNodeWithTag("live_row_UVC", useUnmergedTree = true).assertIsOn()
         control.assertIsOn()
-        compose.onNodeWithTag("live_row_UVB", useUnmergedTree = true).assertIsOff()
+        compose.onNodeWithTag("live_row_UVB", useUnmergedTree = true).performClick().assertIsOff()
         control.performClick().assertIsOff()
         control.performClick().assertIsOn()
         compose.runOnIdle { assertTrue(lastState.excludedChannels.isEmpty()); assertEquals(0, toggles) }
+    }
+
+    @Test fun hidingOneBandKeepsTheIslandOpenUntilItsLastBandIsHidden() {
+        fixture()
+        for (metric in listOf("UVC", "UVB")) {
+            compose.onNodeWithTag("live_row_$metric", useUnmergedTree = true).performClick().assertIsOff()
+            compose.onNodeWithTag("live_row_UVA", useUnmergedTree = true).assertExists()
+            compose.onNodeWithTag("live_island_header_UV", useUnmergedTree = true).assertIsOn()
+        }
+        compose.onNodeWithTag("live_row_UVA", useUnmergedTree = true).performClick()
+        compose.onNodeWithTag("live_row_UVA", useUnmergedTree = true).assertDoesNotExist()
+        compose.onNodeWithTag("live_island_header_UV", useUnmergedTree = true).assertIsOff().performClick().assertIsOn()
+        compose.onNodeWithTag("live_row_UVA", useUnmergedTree = true).assertIsOn()
+    }
+
+    @Test fun compactIslandsAlsoHideTheChartAndKeepTheirPercentageControlAvailable() {
+        chart.value = true
+        fixture()
+        val card = compose.onNodeWithTag("live_spectrum_card_UV", useUnmergedTree = true)
+        val expandedHeight = card.getUnclippedBoundsInRoot().let { it.bottom - it.top }
+        compose.onNodeWithTag("live_island_header_UV", useUnmergedTree = true).performClick().assertIsOff()
+        val compactHeight = card.getUnclippedBoundsInRoot().let { it.bottom - it.top }
+        assertTrue(compactHeight < expandedHeight)
+        compose.onNodeWithTag("live_percentage_base_UV", useUnmergedTree = true)
+            .performClick().assertTextEquals("% gruppo")
+        compose.onNodeWithTag("live_island_header_UV", useUnmergedTree = true).assertIsOff()
+        assertEquals(compactHeight, card.getUnclippedBoundsInRoot().let { it.bottom - it.top })
+        compose.onNodeWithTag("live_island_header_UV", useUnmergedTree = true).performClick().assertIsOn()
+        assertEquals(expandedHeight, card.getUnclippedBoundsInRoot().let { it.bottom - it.top })
     }
 
     @Test fun groupMarkFollowsOnlyTheNameInBothThemesAndDirections() {

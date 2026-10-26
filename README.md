@@ -5,25 +5,64 @@ Android app for spectral irradiance acquisition and estimated biological effects
 Planet Compass has been extracted into an independent Android project. Celestial
 screens and the hidden logo-entry gesture are no longer included in UVIR.
 
-## Status
+## Project on hold — optical design and calibration unfinished
 
-Uvir is under active development. ESP32/AS7343 acquisition works over USB,
-local Wi-Fi, Bluetooth and Internet through a standard MQTT broker over TLS.
+> **The app, firmware, sensor connections, acquisition and storage workflows are
+> operational. Development is currently on hold because the optical assembly
+> and its calibration are unfinished. The current readings are provisional:
+> they do not establish accurate absolute irradiance, and must not be relied on
+> as calibrated measurements or exposure/safety assessments.**
+
+The software and communication implementation is complete for the current
+prototype. What remains is to develop and validate the light-entry apertures,
+lid, angular response and any diffuser, filter or protective window, then
+calibrate **both optical sensors with the final assembly and reference sources**.
+The existing offset and multiplier tools help apply corrections; they do not
+by themselves establish measurement accuracy.
+
+**The printable lid and optical openings are theoretical prototypes, not a
+validated measuring head.** Their geometry was calculated with reference to
+the manufacturers' optical guidance. This does not certify the resulting field
+of view or calibrate the instrument. The narrow tubes can reject real UV and
+visible/NIR light at oblique angles and exclude diffuse light. A fixed software
+multiplier cannot recover light blocked differently at different angles.
+The final lid/optics need optical testing and calibration, not just a print/fit
+check. See the [optical-head limitations and sources](hardware/README.md#directional-optical-heads-prototype)
+and [calibration work still required](hardware/calibration/README.md).
+
+**Mechanical fitting is user-specific.** Depending on the PCB, sockets and
+enclosure stack, the UV and/or visible/NIR modules may need spacers or raised
+mounting to align their optical windows with the lid. Board supports/standoffs
+inside the enclosure, lid fastening holes, openings for external LEDs and access
+to the ESP32 USB connector (USB-C where fitted) are left to the builder. Check
+clearances and alignment before drilling or printing; the supplied parts are
+not a universal finished assembly.
+
 The current visible/NIR breakout is marked **GY-AS734X** and contains an
 **AS7343** chip. The **MIKROE UV 5 Click / AS7331** board is also installed and
-detected; its UVA/UVB/UVC acquisition uses energy-saving one-shot mode.
-Final-assembly testing and traceable calibration of both optical sensors will
-follow PCB assembly. See [hardware identification](hardware/README.md) and the
-[calibration plan](hardware/calibration/README.md).
+detected. Acquisition works over USB, local Wi-Fi, Bluetooth and Internet via
+MQTT over TLS. These functional checks are separate from optical accuracy.
+See [hardware identification and assembly](hardware/README.md).
 
 The circuitry is intended to be housed in a **TEKO COFFER-A/6.5** enclosure.
 See the [enclosure and assembly notes](hardware/README.md#planned-enclosure).
+The [printable-parts index](hardware/printable/README.md) includes a replacement
+for its standard aluminium top panel and an internal visible/NIR LED shield,
+with portable STL models, editable sources and English build instructions.
+An [independent printable enclosure body](hardware/printable/uvir-enclosure-body-r1/README.md)
+based on the main COFFER-A/6 dimensions is available as an alternative to buying
+the housing; reconstructed details and fit limits are documented with the model.
 
 For the intended directional prototype, plan two hollow optical tubes: one
-above the AS7331 UV chip and one above the AS7343 visible/NIR chip, each with a
-**6 mm clear bore and 25 mm clear height above the chip's top optical window**.
-Wall thickness is a mechanical choice; **2 mm is an optional rigidity example**.
-See [tube mounting, diffuser requirements and validation limits](hardware/README.md#directional-optical-heads-prototype)
+above the AS7331 UV chip and one above the AS7343 visible/NIR chip. Choose their
+geometry for the **intended light-entry angle**, rather than a mandatory tube
+size: **6 mm bore / 25 mm optical height** and the compact **3 mm / 12.4 mm**
+variant give approximately the same ideal full entrance cone, **13.7-13.8 degrees**.
+The compact [printable lid](hardware/printable/uvir-optical-lid-r1/README.md)
+has a 2.4 mm plate, 9 mm tube projection and 4 mm walls; its 12.4 mm optical
+height includes an assumed 1 mm gap above the sensor window. Equal ideal angles
+do not establish equal measured channel response or calibration.
+See [all tube variants, mounting and diffuser requirements](hardware/README.md#directional-optical-heads-prototype)
 before making the enclosure openings or treating readings as calibrated irradiance.
 
 ## Start here
@@ -49,7 +88,10 @@ includes a signed update index for verified in-app downloads.
 ## Android app
 
 - Package: `me.mondiversi.uvir`
-- Current app version: **1.4.1**; sensor firmware: **0.5.112**.
+- Current app version: **1.4.2**; sensor firmware: **0.5.119**.
+- [Version 1.4.2 release notes](docs/RELEASE_NOTES_1.4.2.md): optical/calibration
+  status, guided window correction, UV sampling and connection recovery,
+  coordinated card transitions and temporary saved-view preferences.
 - [Version 1.4.1 release notes](docs/RELEASE_NOTES_1.4.1.md): portable record
   transfers, persistent home-display choices, consistent spectral colors and
   five-second import confirmations. The release includes both APK and firmware.

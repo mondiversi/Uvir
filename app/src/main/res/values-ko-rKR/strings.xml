@@ -444,11 +444,11 @@
     <string name="app_version">앱 버전: %1$s</string>
     <string name="package_name_value">패키지: %1$s</string>
     <string name="about_whats_new_title">%1$s 버전의 새로운 기능</string>
-    <string name="about_whats_new_connectivity">세션, 메모, 변형을 포함한 측정과 알림을 암호 없는 .uvirrecords 파일로 내보내거나 가져옵니다.</string>
-    <string name="about_whats_new_connections">하드웨어 ID 일치 확인, 새로운 로컬 ID 및 중복 감지로 가져온 데이터의 출처를 유지합니다.</string>
-    <string name="about_whats_new_measurements">메인 화면은 카드 순서와 숨긴 대역을 기억합니다. 저장된 측정에는 임시 표시 제어와 전체 또는 그룹 비율을 제공합니다.</string>
-    <string name="about_whats_new_interface">일관된 스펙트럼 색상, 저장된 데이터의 기본색 이름과 색상 점, 명확한 세션 행 및 카드 이동 애니메이션을 제공합니다.</string>
-    <string name="about_whats_new_github">대화상자, 주야간 동작 및 모의 데이터 알림을 개선하고 USB 업데이트 준비 상태와 복구 확인을 갱신했습니다.</string>
+    <string name="about_whats_new_connectivity">앱과 센서 연결은 작동하며, 광학 검증이 끝날 때까지 개발을 보류합니다.</string>
+    <string name="about_whats_new_connections">덮개와 개구부는 이론적 시제품이며 검증된 측정 광학계가 아닙니다.</string>
+    <string name="about_whats_new_measurements">도구에는 평균 오프셋, 적응형 UV 이득 및 창 계수 계산 안내가 포함됩니다.</string>
+    <string name="about_whats_new_interface">카드 펼침이 부드러워지고 저장 데이터의 표시 선택은 현재 앱 세션 동안 유지됩니다.</string>
+    <string name="about_whats_new_github">신뢰할 수 있는 절대 측정에는 최종 광학계와 기준 교정이 여전히 필요합니다.</string>
     <string name="about_description">자외선, 가시광선, 적외선의 스펙트럼 측정 앱.</string>
     <string name="about_spectral_ranges">스펙트럼 대역: 자외선 • 가시광선 • 적외선</string>
     <string name="about_sensors">지원되는 센서: AS7331 UV • AS7343 다중 스펙트럼</string>

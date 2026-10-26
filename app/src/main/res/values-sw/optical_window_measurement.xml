@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="window_measure_calculate">Hesabu vizidishi</string>
+    <string name="window_measure_reference_instructions">Weka kihisi bila kukisogeza chini ya mwanga thabiti, bila dirisha au kichujio. Pima kwa sekunde 30. Sanidi thamani zinazofaa za usawazishaji kwanza.</string>
+    <string name="window_measure_filtered_instructions">Weka dirisha au kichujio bila kusogeza kihisi au chanzo cha mwanga. Subiri mwanga utulie, kisha anza kipimo cha pili cha sekunde 30.</string>
+    <string name="window_measure_reference_progress">Bila dirisha: %1$s / %2$s sek</string>
+    <string name="window_measure_filtered_progress">Na dirisha: %1$s / %2$s sek</string>
+    <string name="window_measure_results">Kagua vizidishi vinavyopendekezwa vya kila chaneli. Chaneli zisizofaa na kizidishi cha jumla havibadiliki.</string>
+    <string name="window_measure_valid_channels">Chaneli zinazofaa: %1$s / %2$s</string>
+    <string name="window_measure_apply">Weka vizidishi</string>
+    <string name="window_measure_failed">Kipimo hakipatikani au hali zimebadilika. Kagua uthabiti wa mwanga, muunganisho na mipangilio, kisha anza upya bila dirisha.</string>
+    <string name="window_measure_unavailable">Chaneli haipatikani</string>
+    <string name="window_measure_insufficient">Data haitoshi</string>
+    <string name="window_measure_unstable">Mwanga usio thabiti</string>
+    <string name="window_measure_saturated">Ishara iko nje ya kiwango</string>
+    <string name="window_measure_brighter">Thamani yenye kichujio ni kubwa zaidi</string>
+    <string name="window_measure_out_of_range">Kizidishi kiko nje ya kiwango kinachoruhusiwa</string>
+</resources>

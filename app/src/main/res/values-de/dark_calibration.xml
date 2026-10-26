@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="dark_offsets_calculate">Offsets berechnen</string>
-    <string name="dark_offsets_instructions">Miss etwa 30 Sekunden unter stabilen Referenzbedingungen. Im Dunkeln wird der Sensoruntergrund kompensiert; bei Beleuchtung wird auch das vorhandene Licht abgezogen, sodass relative Messwerte entstehen. Decke für eine Dunkelmessung die optischen Eingänge auch gegen nahes Infrarot ab und betreibe die LEDs wie üblich. Der Mittelwert beseitigt kein zufälliges Rauschen und kalibriert nicht die Verstärkung.</string>
+    <string name="dark_offsets_instructions">Miss etwa 30 Sekunden lang unter stabilen Referenzbedingungen. Decke für eine Dunkelreferenz die optischen Eingänge mit einem auch für nahes Infrarot undurchlässigen Material ab und lasse die LEDs im normalen Betriebszustand. Bei Beleuchtung wird auch das Referenzlicht abgezogen; die Messungen sind dann relativ. Dieses Verfahren kalibriert die Verstärkung nicht.</string>
+    <string name="dark_offsets_uv_method">Für UVC, UVB und UVA wird der Mittelwert der Messungen jedes Kanals vorgeschlagen. Die UV-Verstärkung passt sich automatisch an die Lichtstärke an.</string>
+    <string name="dark_offsets_visible_method">Für jeden Kanal im sichtbaren und infraroten Bereich wird der Mittelwert vorgeschlagen.</string>
     <string name="dark_offsets_progress">Messung: %1$s / 30 s</string>
     <string name="dark_offsets_result">Vorschlag aus %1$s Messwerten. Keine Einstellungen wurden geändert.</string>
     <string name="dark_offsets_failed">Messung unterbrochen oder nicht verfügbar. Prüfe Verbindung und Sensor und versuche es erneut.</string>

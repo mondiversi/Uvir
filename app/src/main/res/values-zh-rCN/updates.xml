@@ -16,5 +16,5 @@
     <string name="update_done">传感器已更新</string>
     <string name="update_failed">更新失败。请查看错误日志。如果传感器无法启动，请通过计算机 USB 恢复固件。</string>
     <string name="update_permission">请在 Android 设置中允许 Uvir 安装更新。</string>
-    <string name="update_whats_new">采集的 TXT 和 CSV 导出包含总量和分组百分比，统一 PNG 颜色，导入需长按五秒确认。</string>
+    <string name="update_whats_new">固件0.5.119改进了最新读数检查和Wi-Fi连接恢复。</string>
 </resources>

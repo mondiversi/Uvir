@@ -61,8 +61,6 @@ internal fun SessionAcquisitionValuesCard(
         primaryText = primaryText,
         secondaryText = secondaryText,
         titleFontWeight = if (group.biological) FontWeight.SemiBold else FontWeight.Bold,
-        titleColor = if (!group.biological && !display.spectrum.groupVisible(group.spectrumIconGroup()))
-            secondaryText.copy(alpha = .55f) else primaryText,
         headerTrailing = if (!group.biological && showRelativeBreakdown) {
             { UvirSavedPercentageBase(group, display, onDisplayChange, secondaryText) }
         } else null

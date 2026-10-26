@@ -22,7 +22,8 @@ internal fun UvirOpticalWindowSettings(
     secondaryText: Color,
     sensorDeviceId: String = "",
     onFirmwareUpdateRequired: (() -> Unit)? = null,
-    masterSupported: Boolean = supported
+    masterSupported: Boolean = supported,
+    onMeasureWindow: (suspend (OpticalWindowMeasurementContext?, (Int) -> Unit) -> OpticalWindowReading)? = null
 ) {
     val context = LocalContext.current
     val commit = LocalSettingsCommit.current
@@ -85,6 +86,12 @@ internal fun UvirOpticalWindowSettings(
                     }
                 }
             }
+            Column(verticalArrangement = Arrangement.spacedBy(UvirActionButtonGap)) {
+            UvirFirmwareGate(enabled && !channelsSupported, stringResource(R.string.window_measure_calculate),
+                "optical_window_calculate", onFirmwareUpdateRequired) {
+                UvirOpticalWindowMeasurementControls(editorValue, editable, labels,
+                    cardColor, primaryText, secondaryText, onMeasureWindow, onChange)
+            }
             UvirFirmwareGate(enabled && !channelsSupported, stringResource(R.string.calibration_reset_values),
                 "optical_window_reset", onFirmwareUpdateRequired) {
                 UvirCalibrationResetButton(editable,
@@ -94,6 +101,7 @@ internal fun UvirOpticalWindowSettings(
                     onChange(editorValue.resetMultipliers())
                     commit?.commit()
                 }
+            }
             }
         }
     }

@@ -57,7 +57,8 @@ class UvirCalibrationFirmwareGateUiTest {
                             onOffsetsChange = { writes++ }, channelFactors = CalibrationChannelFactors(),
                             channelFactorsSupported = firmwareSupportsCalibrationChannels(version.value),
                             onChannelFactorsChange = { writes++ },
-                            darkMeasurementSupported = compareFirmwareVersions(version.value, DARK_OFFSETS_MINIMUM_FIRMWARE) >= 0,
+                            darkMeasurementSupported = firmwareSupportsDarkOffsetMeasurement(version.value, CalibrationGroup.VISIBLE),
+                            uvDarkMeasurementSupported = firmwareSupportsDarkOffsetMeasurement(version.value, CalibrationGroup.UV),
                             onMeasureDarkOffsets = { group, _ ->
                                 measurements++
                                 DarkOffsetReading(group, List(group.indices.count()) { 0f }, 30)
@@ -168,6 +169,11 @@ class UvirCalibrationFirmwareGateUiTest {
         assertEquals(0, measurements)
         compose.runOnIdle { version.value = "0.5.111" }
         compose.onNodeWithTag("optical_common_factor").performScrollTo().assertIsEnabled()
+        requestFrom("dark_offsets_uv")
+        closeUpdate()
+        compose.runOnIdle { version.value = "0.5.114" }
+        compose.onNodeWithTag("dark_offsets_uv").assertIsEnabled()
+        compose.onNodeWithTag("dark_offsets_uv_firmware").assertDoesNotExist()
     }
 
     @Test fun individualWindowChannelsAndResetOnlyOfferTheUpdate() {

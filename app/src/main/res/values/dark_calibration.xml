@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="dark_offsets_calculate">Calculate offsets</string>
-    <string name="dark_offsets_instructions">Measure for about 30 seconds under stable reference conditions. In darkness you compensate sensor background; under illumination you also subtract the light present, giving relative measurements. For a dark measurement, cover the optical inputs with material opaque to near-infrared too and keep the LEDs in their normal operating state. The mean does not eliminate random noise or calibrate gain.</string>
+    <string name="dark_offsets_instructions">Measure for about 30 seconds under stable reference conditions. For a dark reference, cover the optical inputs with material opaque to near-infrared too and keep the LEDs in their normal operating state. Under illumination, the reference light is also subtracted, giving relative measurements. This procedure does not calibrate gain.</string>
+    <string name="dark_offsets_uv_method">For UVC, UVB and UVA, the mean reading of each channel is proposed. UV gain adjusts automatically to the light level.</string>
+    <string name="dark_offsets_visible_method">For each visible/infrared channel, the mean reading is proposed.</string>
     <string name="dark_offsets_progress">Measuring: %1$s / 30 s</string>
     <string name="dark_offsets_result">Proposal from %1$s readings. No settings have been changed.</string>
     <string name="dark_offsets_failed">Measurement interrupted or unavailable. Check the connection and sensor, then try again.</string>

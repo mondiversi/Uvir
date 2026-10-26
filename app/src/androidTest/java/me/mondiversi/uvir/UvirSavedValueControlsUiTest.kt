@@ -40,6 +40,7 @@ class UvirSavedValueControlsUiTest {
     private val direction = mutableStateOf(LayoutDirection.Ltr)
     private val chart = mutableStateOf(false)
     private val visitOpen = mutableStateOf(true)
+    private val presentationStore = mutableStateOf(UvirSavedPresentationStore())
     private var headerClicks = 0
     private var titlePrimary = Color.Unspecified
     private var titleSecondary = Color.Unspecified
@@ -64,6 +65,7 @@ class UvirSavedValueControlsUiTest {
             val configuration = uvirThemeConfiguration(LocalConfiguration.current,
                 if (night.value) UvirAppTheme.DARK else UvirAppTheme.LIGHT).apply { setLocales(LocaleList(Locale.ITALY)) }
             CompositionLocalProvider(LocalConfiguration provides configuration,
+                LocalUvirSavedPresentationStore provides presentationStore.value,
                 LocalLayoutDirection provides direction.value,
                 LocalUvirNumericFormat provides UvirNumericFormat.EUROPEAN,
                 LocalUvirIrradianceUnit provides UvirIrradianceUnit.W_M2,
@@ -83,8 +85,7 @@ class UvirSavedValueControlsUiTest {
                                     AcquisitionVerticalBarChart(savedAcquisitionChartBars(sample,
                                         if (group.value.biological) AcquisitionChartGroup.BIOLOGICAL else AcquisitionChartGroup.IRRADIANCE, display),
                                         if (group.value.biological) AcquisitionChartGroup.BIOLOGICAL else AcquisitionChartGroup.IRRADIANCE,
-                                        colors.surfaceVariant, colors.onSurface, colors.onSurfaceVariant,
-                                        mutedGroups = UvirLiveSpectrumDisplay.irradianceGroups.filterNot { display.spectrum.groupVisible(it) }.toSet())
+                                        colors.surfaceVariant, colors.onSurface, colors.onSurfaceVariant)
                                 } else {
                                     SessionAcquisitionValuesCard(if (page.value == "session") records else records.take(1), group.value,
                                         showRecordHeader = page.value == "session", showRelativeBreakdown = true,
@@ -185,7 +186,7 @@ class UvirSavedValueControlsUiTest {
         }
     }
 
-    @Test fun mutedSavedIslandTitlesAreGrayInTablesAndChartsAndRestoreWithOneBandInBothThemes() {
+    @Test fun savedIslandTitlesStayNeutralWhenAllBandsAreExcludedInTablesAndChartsInBothThemes() {
         fixture()
         for (current in listOf("acquisition", "session")) for (dark in listOf(false, true)) {
             for (currentGroup in listOf(SessionChartGroup.UV, SessionChartGroup.VISIBLE, SessionChartGroup.FAR_RED_NIR)) {
@@ -196,9 +197,9 @@ class UvirSavedValueControlsUiTest {
                 val total = node("saved_row_${acquisitionKey(savedAcquisitionMetrics(currentGroup).first().name)}")
                 title.assertUvirActionTextColor(titlePrimary)
                 total.performClick().assertIsOff()
-                title.assertUvirActionTextColor(titleSecondary.copy(alpha = .55f))
+                title.assertUvirActionTextColor(titlePrimary)
                 compose.runOnIdle { chart.value = true }
-                title.assertUvirActionTextColor(titleSecondary.copy(alpha = .55f))
+                title.assertUvirActionTextColor(titlePrimary)
                 compose.runOnIdle { chart.value = false }
                 node("saved_row_${acquisitionKey(UvirLiveSpectrumDisplay.channels(sensorGroup).first().name)}").performClick()
                 title.assertUvirActionTextColor(titlePrimary)
@@ -247,8 +248,8 @@ class UvirSavedValueControlsUiTest {
             node("saved_row_${acquisitionKey("UV_TOTAL")}").performClick().assertIsOff()
             compose.runOnIdle { visitOpen.value = false }
             compose.runOnIdle { visitOpen.value = true; chart.value = false }
-            node("saved_row_${acquisitionKey("UV_TOTAL")}").assertIsOn()
-            value(acquisitionKey("UVC")).assertTextEquals("1,00")
+            node("saved_row_${acquisitionKey("UV_TOTAL")}").assertIsOff()
+            value(acquisitionKey("UVC")).assertTextEquals("—")
         }
         compose.runOnIdle { assertEquals(0, headerClicks) }
     }
@@ -378,23 +379,24 @@ class UvirSavedValueControlsUiTest {
         node("saved_row_$key").assertIsOff()
     }
 
-    @Test fun detailChoicesResetAfterRestorationAndCannotLeakIntoAnotherRecordOrTheMainView() {
+    @Test fun detailChoicesSurviveRecreationAndStayIndependentFromOtherRecordsAndTheMainView() {
         val restorer = StateRestorationTester(compose)
         fixture(restorer)
         node("saved_row_${acquisitionKey("UVC")}").performClick()
         node("saved_percentage_base_UV").performClick()
         restorer.emulateSavedInstanceStateRestore()
-        node("saved_row_${acquisitionKey("UVC")}").assertIsOn()
-        node("saved_percentage_base_UV").assertTextEquals("% totale")
-        node("saved_row_${acquisitionKey("UVC")}").performClick()
-        node("saved_percentage_base_UV").performClick()
+        node("saved_row_${acquisitionKey("UVC")}").assertIsOff()
+        node("saved_percentage_base_UV").assertTextEquals("% gruppo")
         compose.runOnIdle { detailKey.value = "another-detail" }
         node("saved_row_${acquisitionKey("UVC")}").assertIsOn()
         node("saved_percentage_base_UV").assertTextEquals("% totale")
+        compose.runOnIdle { detailKey.value = "fixture" }
+        node("saved_row_${acquisitionKey("UVC")}").assertIsOff()
+        node("saved_percentage_base_UV").assertTextEquals("% gruppo")
         assertTrue(UvirLiveSpectrumDisplay().excludedChannels.isEmpty())
     }
 
-    @Test fun reopeningTheSameSavedAcquisitionOrSessionAlwaysRestoresAllValuesAndTotalPercentages() {
+    @Test fun revisitsKeepChoicesUntilANewAppSessionRestoresAllValuesAndTotalPercentages() {
         fixture()
         for (current in listOf("acquisition", "session")) {
             compose.runOnIdle { page.value = current }
@@ -402,12 +404,35 @@ class UvirSavedValueControlsUiTest {
             node("saved_percentage_base_UV").performClick().assertTextEquals("% gruppo")
             compose.runOnIdle { visitOpen.value = false }
             compose.runOnIdle { visitOpen.value = true }
+            node("saved_row_${acquisitionKey("UVC")}").assertIsOff()
+            value(acquisitionKey("UVC")).assertTextEquals("—")
+            node("saved_percentage_base_UV").assertTextEquals("% gruppo")
+            if (current == "session") node("saved_row_${acquisitionKey("UVC", 2)}").assertIsOff()
+        }
+        compose.runOnIdle { presentationStore.value = UvirSavedPresentationStore() }
+        for (current in listOf("acquisition", "session")) {
+            compose.runOnIdle { page.value = current }
             node("saved_row_${acquisitionKey("UVC")}").assertIsOn()
             value(acquisitionKey("UVC")).assertTextEquals("1,00")
             node("saved_percentage_base_UV").assertTextEquals("% totale")
-            if (current == "session") node("saved_row_${acquisitionKey("UVC", 2)}").assertIsOn()
         }
         assertEquals(1.0, records[0].sample.uvc, 0.0)
+    }
+
+    @Test fun excludingAnEntireGroupKeepsSavedIslandHeadingsNeutralInBothThemes() {
+        fixture()
+        for (dark in listOf(false, true)) for (current in listOf("acquisition", "session")) {
+            for (currentGroup in SessionChartGroup.entries.filterNot { it.biological }) {
+                compose.runOnIdle { night.value = dark; page.value = current; group.value = currentGroup }
+                val total = savedAcquisitionMetrics(currentGroup).first()
+                node("saved_row_${acquisitionKey(total.name)}").performClick().assertIsOff()
+                node("chart_group_title_${currentGroup.spectrumIconGroup().name}")
+                    .performScrollTo().assertUvirActionTextColor(titlePrimary)
+                node("saved_name_${acquisitionKey(total.name)}")
+                    .performScrollTo().assertUvirActionTextColor(titleSecondary.copy(alpha = .55f))
+                node("saved_row_${acquisitionKey(total.name)}").performClick().assertIsOn()
+            }
+        }
     }
 
     @Test fun bothSideEdgesAndVerticalPaddingToggleOnlyTheTargetRow() {

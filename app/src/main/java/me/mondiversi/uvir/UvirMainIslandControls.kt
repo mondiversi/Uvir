@@ -5,18 +5,39 @@ import android.content.SharedPreferences
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+
+/** Reserve both captions before drawing, so switching percentage basis cannot move the chevrons. */
+@Composable
+internal fun rememberUvirMainPercentageColumnWidth(): Dp {
+    val captions = listOf(stringResource(R.string.live_percent_total), stringResource(R.string.live_percent_group))
+    val maximumPercentage = "${formatUvirNumber(100.0, 1, LocalUvirNumericFormat.current)}%"
+    val measurer = rememberTextMeasurer()
+    val style = LocalTextStyle.current.copy(fontSize = 12.sp, lineHeight = 19.sp, fontWeight = FontWeight.Normal)
+    val width = remember(measurer, captions, maximumPercentage, style) {
+        maxOf(captions.maxOf { measurer.measure(it, style, maxLines = 1, softWrap = false).size.width },
+            measurer.measure(maximumPercentage, style.copy(fontWeight = FontWeight.Bold),
+                maxLines = 1, softWrap = false).size.width)
+    }
+    return with(LocalDensity.current) { width.toDp() } + 4.dp
+}
 
 internal fun loadUvirMainIslandOrder(preferences: SharedPreferences): List<SensorGroup> =
     decodeUvirMainIslandOrder(runCatching { preferences.getString(KEY_MAIN_ISLAND_ORDER, null) }.getOrNull())

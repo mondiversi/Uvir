@@ -42,7 +42,7 @@ open class SessionNoteEditingFixture {
         }
         database = UvirDatabaseHelper(context)
         assertTrue(database.writableDatabase.path.startsWith(directory.absolutePath + File.separator))
-        assertEquals(20, database.writableDatabase.version)
+        assertEquals(26, database.writableDatabase.version)
         assertTrue(UvirSensorCredentialStore.save(context, UvirSensorCredentials(deviceId = a, authToken = "test-secret-a")))
         assertTrue(UvirSensorCredentialStore.restoreAssociatedSensor(context, UvirSensorCredentials(deviceId = b, authToken = "test-secret-b")))
     }

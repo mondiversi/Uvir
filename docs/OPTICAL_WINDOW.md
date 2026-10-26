@@ -1,5 +1,11 @@
 # Optical bands and protective windows
 
+> **Project on hold: the optical assembly and calibration are unfinished.**
+> App and connection workflows are operational, but current readings are not
+> validated absolute measurements. The theoretical lid/apertures and any
+> diffuser/filter/window need to be tested together and reference-calibrated.
+> Window factors cannot restore light rejected in an angle-dependent way.
+
 ## What the channels represent
 
 The AS7331 nominal bands are **UVC 240–280 nm, UVB 280–315 nm and UVA
@@ -45,6 +51,17 @@ imply continuous coverage of the entire visible or infrared spectrum.
 Primary references: [AS7331 datasheet](https://look.ams-osram.com/m/1856fd2c69c35605/original/AS7331-Spectral-UVA-B-C-Sensor.pdf)
 and [AS7343 datasheet](https://look.ams-osram.com/m/5f2d27fff9a874d2/original/AS7343-14-Channel-Multi-Spectral-Sensor.pdf).
 
+## Internal LED isolation and printable enclosure parts
+
+The [printable-parts index](../hardware/printable/README.md) provides a printed
+replacement for the TEKO COFFER-A/6.5's standard aluminium panel and a separate
+four-wall shield for the AS7343 visible/NIR optical path. The shield excludes
+light from internal indicators; neither it nor the hollow tubes are transparent
+protective windows. Keep the actual sensor inputs clear and include the final
+parts in calibration. Normal visible LEDs do not make the AS7331 an internal UV
+source; its [response limits and residual-interference check](../hardware/printable/uvir-visible-nir-shield-r1/README.md#why-this-shield-is-intended-for-the-as7343)
+explain why a second UV shield is not specified for those indicators.
+
 ## Color dark offsets
 
 ### Independent master and channel multipliers
@@ -88,9 +105,10 @@ rounds the stored value through a display string. Readback does not interrupt
 unfinished typing or trigger a command loop.
 
 The pipeline is physical count conversion / existing raw-dark normalization →
-paired-channel mean → subtract the color irradiance offset (floor at zero) →
-base calibration factor → optical-window multiplier → averages, conditions, alerts
-and storage. Offsets are not noise thresholds or a substitute for suitable
+paired-channel mean → subtract the color irradiance offset → base calibration
+factor → optical-window multiplier → configured average → floor at zero → output
+and storage. Instantaneous condition checks use a nonnegative one-sample result;
+signed residuals are never sent or stored. Offsets are not noise thresholds or a substitute for suitable
 gain/integration. No HEV or aggregate offset is applied again.
 
 For absolute-measurement calibration, determine offsets from repeated genuinely
@@ -100,11 +118,36 @@ Check temperature and all operating gains/integration times: a single stored
 irradiance offset is an approximation and does not model arbitrary temperature-
 or configuration-dependent drift. Do not use one nighttime observation as a
 calibration. The UI calls the action **Calculate offsets** and the configuration
-**Offsets**: a stable illuminated reference is also allowed for deliberate mean
+**Offsets**: a stable illuminated reference is also allowed for deliberate
 background subtraction, but this removes real ambient light and makes subsequent
 readings relative to that reference. It neither removes random fluctuations nor
 supplies absolute calibration. Recalculate with covered inputs to restore
 sensor dark-bias correction. The `DARK_OFFSETS` command name remains unchanged.
+
+### Automatic UV sensitivity and mean offsets — firmware 0.5.114
+
+Both UV and visible/NIR propose the **arithmetic mean of each channel** during
+the approximately 30-second reference interval. The temporary maximum estimator
+in 0.5.113 is superseded. The app requires 0.5.114+ for UV, checks `estimator:
+"mean"`, and keeps VIS compatible with 0.5.110+. Existing configured offsets and
+old records are preserved; values change only on explicit **Set offsets**.
+
+AS7331 gain adapts from 1x to 2048x at fixed 64 ms integration, using the most
+occupied channel ADC. Hysteresis avoids toggling at a boundary. A capture uses
+at most three conversions and rejects analog/digital overload, unfinished or
+stale data. The first reference sample settles the automatic gain; subsequent
+samples hold that gain until completion or cancellation. Offset drift with gain
+or temperature still needs physical validation; one offset is not a per-gain
+calibration table.
+
+Current color offsets are subtracted before channel gains and window factors.
+Their signed residuals stay in RAM through the configured arithmetic/trimmed
+average; **only the final result is clamped at zero**. A one-sample result is
+clamped immediately. This avoids the positive bias of averaging readings already
+clipped at zero. No deadband or new noise threshold is applied, so small residual
+fluctuations can remain. The legacy fifteen-physical-channel subtraction/clamping
+order is retained for compatibility. Wire/storage values remain nonnegative W/m²
+(with the explicitly labelled legacy wire-unit conversion).
 
 New sensor NVS state saves all factors and offsets in one versioned value;
 legacy calibration is retained when migrating. Android database schema 23 adds
@@ -177,6 +220,13 @@ the final layout. In either case:
   without rechecking spectral and angular response.
 - Keep the window clean and document its exact grade, thickness and mounting.
   A window alone does not make the enclosure waterproof or dustproof.
+
+For a directional assembly, use the [tube geometry alternatives](../hardware/README.md#directional-optical-heads-prototype)
+as entrance-angle starting points: the original 6 mm / 25 mm and compact
+3 mm / 12.4 mm bore/optical-height options have similar ideal cones. Include the
+actual sensor-to-lid gap, window mount and diffuser in the optical review; a
+matching diameter/height ratio alone does not establish the real field of view
+or transfer an existing calibration to another head.
 
 ### Calibration and publication reminder
 
@@ -260,9 +310,60 @@ an inability to persist new context prevents that queued save and follows the
 existing storage-error path. Keep the journal with the offline queue when
 inspecting/copying sensor storage manually.
 
+### Comparative multiplier calculation
+
+Development addition dated 2026-10-25, after the published 1.4.1 release. The
+existing sensor firmware 0.5.112 is sufficient; no firmware update or database
+migration is introduced for this observer-based procedure. Software and wizard
+checks use synthetic inputs; a physical window comparison remains to be performed.
+
+**Calculate multipliers**, before **Reset values** in the optical-window island,
+opens a two-interval comparison for the selected physical sensor:
+
+1. Keep the source, sensor position and orientation fixed; remove the window or
+   filter and measure for 30 seconds under stable illumination.
+2. Fit the window/filter, wait for stable illumination, then explicitly start a
+   second 30-second interval without moving the sensor or source.
+3. Review each proposed channel multiplier and use **Set multipliers** to apply
+   usable channels. Cancel, Stop, closing the popup and restarting do not apply
+   the proposal. Unusable channels retain their previous values.
+
+For each channel the proposal is `mean_without_window / mean_with_window`.
+The app observes fresh live samples, removes the already-applied optical-window
+master and channel factors from both intervals, and leaves existing calibration
+gains and offsets in the readings. New channel multipliers **replace**, rather
+than multiply, old channel factors; the independent common master remains
+unchanged. A non-neutral master remains an additional manual correction, so
+leave it at one when the measured channel factors are intended as the complete
+window compensation. No temporary sensor-configuration change or new firmware
+is required; the existing firmware must provide optical context in live samples.
+
+The observer uses canonical W/m2 values independently of display rounding or
+hidden home bands. Each channel requires at least 20 fresh samples and a mean
+of at least 0.0001 W/m2 before window correction. Relative standard deviation
+and the difference between first-half and second-half means must each be at
+most 5%. Missing channels, saturation, insufficient/unstable data, a higher
+filtered reading or a ratio outside 1-10 produce no factor for that channel.
+These are conservative software acceptance rules, not a quantified uncertainty
+or a substitute for a suitable source and correctly measured offsets.
+
+Both intervals must use the same hardware identity, connection generation,
+optical/calibration configuration and sampling settings. Disconnection, handover,
+sensor restart, an active recording/test or changed settings invalidates the
+comparison. No fresh live samples for six seconds aborts the interval. Failures
+and unusable result channels are recorded in the error log. Measurements do not
+create acquisitions or alerts, and stored records are not recalculated.
+
+The result applies to the tested source spectrum, alignment and optical geometry.
+A stable change of source level between intervals cannot be distinguished from
+window attenuation by this single-sensor method. In particular, a scalar factor
+cannot universally compensate a tube or screen that changes the accepted field
+of view, restore blocked wavelengths or establish absolute calibration.
+
 ## Validation status
 
-These changes are included in app 1.4.0 and firmware 0.5.112. Firmware compilation
+The earlier optical-window implementation is included in app 1.4.0 and firmware
+0.5.112. Firmware compilation
 and host tests do not validate window transmission or absolute accuracy. The
 sensor was unavailable during the initial implementation; the subsequent device
 update and checks are recorded below. Final dark/reference

@@ -436,11 +436,11 @@
     <string name="app_version">Version de l’application : %1$s</string>
     <string name="package_name_value">Package : %1$s</string>
     <string name="about_whats_new_title">Nouveautés de la version %1$s</string>
-    <string name="about_whats_new_connectivity">Exporte/importe les acquisitions et alertes dans des fichiers .uvirrecords sans mot de passe, avec sessions, notes et variantes.</string>
-    <string name="about_whats_new_connections">La correspondance des identifiants matériels, les nouveaux identifiants locaux et la détection des doublons préservent la provenance des données importées.</string>
-    <string name="about_whats_new_measurements">La vue principale mémorise l’ordre des cartes et les bandes masquées ; les acquisitions enregistrées proposent des contrôles temporaires et des pourcentages totaux ou par groupe.</string>
-    <string name="about_whats_new_interface">Couleurs spectrales uniformes, noms neutres avec pastilles colorées dans les données enregistrées, lignes de session plus claires et déplacement animé des cartes.</string>
-    <string name="about_whats_new_github">Dialogues, actions jour/nuit et notifications de données simulées améliorés ; vérifications actualisées pour les mises à jour USB et leur récupération.</string>
+    <string name="about_whats_new_connectivity">L’app et les connexions fonctionnent ; le développement est suspendu en attente de validation optique.</string>
+    <string name="about_whats_new_connections">Le couvercle et les ouvertures sont des prototypes théoriques, sans validation métrologique.</string>
+    <string name="about_whats_new_measurements">Les outils proposent des offsets moyens, un gain UV adaptatif et des facteurs de fenêtre guidés.</string>
+    <string name="about_whats_new_interface">Déploiement plus fluide des cartes ; les choix des vues enregistrées durent pendant la session de l’app.</string>
+    <string name="about_whats_new_github">Des mesures absolues fiables exigent encore les optiques définitives et un étalonnage de référence.</string>
     <string name="about_description">Application d’acquisition spectrale du rayonnement ultraviolet, visible et infrarouge.</string>
     <string name="about_spectral_ranges">Bandes spectrales : Ultraviolet • Lumière visible • Infrarouge</string>
     <string name="about_sensors">Capteurs pris en charge : AS7331 UV • AS7343 multispectral</string>

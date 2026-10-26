@@ -1,5 +1,11 @@
 # Getting started with UVIR
 
+> **Project currently on hold pending optical validation and calibration.**
+> The app and sensor links work; the theoretical lid/openings and final optics
+> are unfinished. Current readings do not establish reliable absolute
+> irradiance. Read the [prominent project status](../README.md#project-on-hold--optical-design-and-calibration-unfinished)
+> before building or interpreting measurements.
+
 UVIR combines an Android app with an ESP32-based optical instrument. This guide
 covers the current development prototype, not a certified measurement device or
 a production-ready PCB. Absolute irradiance and derived biological-effect values

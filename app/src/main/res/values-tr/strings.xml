@@ -428,11 +428,11 @@
     <string name="app_version">Uygulama sürümü: %1$s</string>
     <string name="package_name_value">Paket: %1$s</string>
     <string name="about_whats_new_title">%1$s sürümündeki yenilikler</string>
-    <string name="about_whats_new_connectivity">Ölçümleri ve uyarıları oturumlar, notlar ve varyantlarla birlikte parolasız .uvirrecords dosyaları olarak dışa/içe aktarın.</string>
-    <string name="about_whats_new_connections">Donanım kimliği eşleştirmesi, yeni yerel kimlikler ve yinelenen kayıt algılama, içe aktarılan verilerin kaynağını korur.</string>
-    <string name="about_whats_new_measurements">Ana görünüm kart sırasını ve gizlenen bantları hatırlar; kayıtlı ölçümlerde geçici denetimler ve toplam/grup yüzdeleri bulunur.</string>
-    <string name="about_whats_new_interface">Tutarlı spektral renkler, kayıtlı verilerde renkli noktalarla nötr adlar, daha açık oturum satırları ve animasyonlu kart sıralama.</string>
-    <string name="about_whats_new_github">İletişim kutuları, gündüz/gece eylemleri ve benzetim verisi bildirimleri iyileştirildi; USB güncelleme hazırlığı ve kurtarma denetimleri güncellendi.</string>
+    <string name="about_whats_new_connectivity">Uygulama ve sensör bağlantıları çalışır; geliştirme optik doğrulama tamamlanana kadar askıdadır.</string>
+    <string name="about_whats_new_connections">Kapak ve açıklıklar teorik prototiplerdir, doğrulanmış ölçüm optikleri değildir.</string>
+    <string name="about_whats_new_measurements">Araçlar ortalama ofsetler, uyarlanabilir UV kazancı ve yönlendirmeli pencere katsayıları içerir.</string>
+    <string name="about_whats_new_interface">Kart açılışı daha akıcıdır; kayıtlı görünüm seçimleri geçerli uygulama oturumu boyunca korunur.</string>
+    <string name="about_whats_new_github">Güvenilir mutlak ölçümler için nihai optik ve referans kalibrasyonu hâlâ gereklidir.</string>
     <string name="about_description">Ultraviyole, görünür ve kızılötesi ışınımın spektral ölçümü için uygulama.</string>
     <string name="about_spectral_ranges">Spektral bantlar: Ultraviyole • Görünür ışık • Kızılötesi</string>
     <string name="about_sensors">Desteklenen sensörler: AS7331 UV • AS7343 multispektral</string>

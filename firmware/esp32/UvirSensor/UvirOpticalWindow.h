@@ -79,12 +79,13 @@ inline bool uvirSameOpticalWindow(const UvirOpticalWindow &a, const UvirOpticalW
   return true;
 }
 
-inline bool uvirApplyOpticalWindow(float *bands, const UvirOpticalWindow &window) {
+// allowSigned is only for transient residuals, never stored or transmitted data.
+inline bool uvirApplyOpticalWindow(float *bands, const UvirOpticalWindow &window, bool allowSigned = false) {
   if (!uvirValidOpticalWindow(window)) return false;
   const float master = uvirOpticalMaster(window);
   for (int i = 0; i < 11; ++i) {
     const float value = bands[i] * (window.enabled ? window.factors[i] * master : 1.0f);
-    if (!std::isfinite(value) || value < 0) return false;
+    if (!std::isfinite(value) || (!allowSigned && value < 0)) return false;
   }
   if (window.enabled) for (int i = 0; i < 11; ++i) bands[i] *= window.factors[i] * master;
   return true;

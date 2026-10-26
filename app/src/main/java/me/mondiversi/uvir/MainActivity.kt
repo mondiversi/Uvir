@@ -426,6 +426,10 @@ class MainActivity : ComponentActivity(), UvirExportSaveHost, UvirSettingsImport
     private val wirelessSensorManager: UvirWirelessSensorManager
         get() = retainedRuntime.wirelessSensorManager
 
+    private val savedPresentationStore by lazy {
+        androidx.lifecycle.ViewModelProvider(this)[UvirSavedPresentationStore::class.java]
+    }
+
     private val remoteNetworkEnabledState =
         mutableStateOf(false)
 
@@ -539,6 +543,7 @@ class MainActivity : ComponentActivity(), UvirExportSaveHost, UvirSettingsImport
                         password
                     )
                 }
+                savedPresentationStore.clear()
                 pendingDatabaseImportUriState.value = null
                 showUvirBottomMessage(
                     this@MainActivity,
@@ -740,7 +745,8 @@ class MainActivity : ComponentActivity(), UvirExportSaveHost, UvirSettingsImport
             UvirActionTheme {
             UvirAdaptiveDisplay {
             CompositionLocalProvider(
-                LocalLayoutDirection provides appLayoutDirection
+                LocalLayoutDirection provides appLayoutDirection,
+                LocalUvirSavedPresentationStore provides savedPresentationStore
             ) {
                 UvirLaunchGate(
                     showLaunchScreen = savedInstanceState == null

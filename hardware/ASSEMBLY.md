@@ -57,6 +57,17 @@ RTC battery, SD signal direction, LED polarity and the external contact.
 
 ## 4. Mechanical and optical arrangement
 
+**Optical design is unfinished and the project is on hold pending validation
+and calibration.** Treat the supplied lid/apertures as theoretical prototypes,
+not as a validated instrument head. Current readings do not establish accurate
+absolute irradiance.
+
+Adapt the mechanical assembly to the actual components: UV and/or visible/NIR
+modules may need spacers or raised mounting for clearance and optical alignment.
+The builder chooses internal PCB supports/standoffs, lid fixing holes, LED
+openings and access to the ESP32 USB connector (USB-C where fitted). Check the
+full height stack and optical-window plane before making these features.
+
 The selected housing for the complete circuitry is **TEKO COFFER-A/6.5**:
 an ABS enclosure with a 1 mm aluminium top panel, according to the
 [manufacturer](https://www.teko.it/en/products/family/TC/series/coffer-a).
@@ -64,13 +75,34 @@ Dry-fit the PCB, removable modules and sockets inside it before final fastening.
 Check the required USB, microSD, button, LED, buzzer and optical openings; this
 housing selection does not establish that a published PCB revision already fits.
 
+The [printed optical lid R1](printable/uvir-optical-lid-r1/README.md) is a
+replacement for that aluminium panel, not an extra cover on top of it. Verify
+the edge fit, fastening and optical alignment; this prototype has no screw holes
+or snap features. The [printable-parts index](printable/README.md) contains the
+printable parts and editable sources.
+
+An [independent printable body](printable/uvir-enclosure-body-r1/README.md) is
+also provided as an alternative to buying the housing. It follows the main
+COFFER-A/6 dimensions but is not official TEKO CAD; its guide profiles, ledge,
+webs and hole depths include documented print-oriented reconstruction choices.
+Check the narrow lid clearance and the actual PCB/module fit on the first print.
+The blank body has no connector or control cutouts.
+
 For the directional prototype, allow one hollow tube per optical chip with a
-6 mm clear bore and 25 mm clear height above its top optical window. Wall
-thickness is selected for rigidity and opacity; 2 mm is an optional example,
-giving a 10 mm outside diameter. Check mounts, lid clearance and LED isolation
-using the [optical-head dimensions and diffuser notes](README.md#directional-optical-heads-prototype).
-These are proposed prototype dimensions; verify angular response and calibrate
-the final assembly before interpreting the results as absolute irradiance.
+geometry chosen for the intended **light-entry angle**. The original 6 mm bore /
+25 mm optical-height design and compact 3 mm / 12.4 mm design give roughly the
+same ideal full cone of 13.7-13.8 degrees; a 4 mm / 16.7 mm intermediate option
+is also documented. Equal ideal angles do not guarantee equal channel response.
+See the [variant table, height reference and diffuser notes](README.md#directional-optical-heads-prototype).
+
+The [compact printable lid](printable/uvir-optical-lid-r1/README.md) has a 2.4 mm
+plate, two tubes projecting 9 mm, 3 mm through-bores and 4 mm radial walls
+(11 mm outside diameter). Its assumed 1 mm sensor-window-to-lid gap gives
+`1 + 2.4 + 9 = 12.4 mm` optical height; the printed part itself is 11.4 mm high.
+Check actual chip centers, this gap, lid clearance, lateral leakage and LED
+isolation. Wall thickness is selected for rigidity and opacity, independently
+of the nominal bore/height ratio. Verify angular response and calibrate the
+final assembly before interpreting the results as absolute irradiance.
 
 The original placement intent has ESP32 at the front bottom with USB facing
 down; horizontal visible/NIR then UV boards above it; buzzer and indicators
@@ -84,8 +116,19 @@ as required by the exact ESP32 module design. Do not place the RTC under the
 antenna merely to follow the rough arrangement. Ensure sockets on opposite
 sides cannot touch through leads or spacers.
 
-Do not put indicator LEDs in the sensors' optical field. Include the UV board's
-own power LED in the isolation plan. Optical apertures/windows must suit the
+Fit the [internal visible/NIR shield](printable/uvir-visible-nir-shield-r1/README.md)
+around the AS7343 optical path. Its internal opening is 13 x 21 mm, its height
+is 14 mm and its walls extend 1.2 mm outward. It has no floor or roof. Keep all
+indicator LEDs, including the UV board's green power LED, outside this visible/NIR
+light path. Check attachment and gaps without pressing on the chip or contacts.
+
+The AS7331 is a detector, not a UV emitter. Ordinary visible indicator LEDs do
+not call for a separate UV-source shield, although rejection of light outside
+the intended band is not absolute; see the [UV-response notes](printable/uvir-visible-nir-shield-r1/README.md#why-this-shield-is-intended-for-the-as7343).
+Check covered-input readings with the actual LEDs off and on before final
+calibration. Keep the UV optical input unobstructed.
+
+Optical apertures/windows must suit the
 bands being measured; ordinary plastic or glass is not a neutral UV window.
 Changing enclosure, window, distance or LED shielding after calibration can
 change the result. Maintain the normal operating LED configuration during the

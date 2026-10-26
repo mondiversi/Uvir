@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="window_measure_calculate">배율 계산</string>
+    <string name="window_measure_reference_instructions">창이나 필터를 제거하고 안정적인 조명 아래에서 센서를 움직이지 않은 채 30초 동안 측정하세요. 먼저 적절한 오프셋을 설정하세요.</string>
+    <string name="window_measure_filtered_instructions">센서나 광원을 움직이지 않고 창이나 필터를 설치하세요. 조명이 안정되면 두 번째 30초 측정을 시작하세요.</string>
+    <string name="window_measure_reference_progress">창 없음: %1$s / %2$s초</string>
+    <string name="window_measure_filtered_progress">창 있음: %1$s / %2$s초</string>
+    <string name="window_measure_results">제안된 채널 계수를 확인하세요. 사용할 수 없는 채널과 공통 배율은 변경되지 않습니다.</string>
+    <string name="window_measure_valid_channels">사용 가능한 채널: %1$s / %2$s</string>
+    <string name="window_measure_apply">배율 적용</string>
+    <string name="window_measure_failed">측정할 수 없거나 조건이 변경되었습니다. 빛의 안정성, 연결 및 설정을 확인한 후 창을 제거하고 다시 시작하세요.</string>
+    <string name="window_measure_unavailable">채널 사용 불가</string>
+    <string name="window_measure_insufficient">데이터 부족</string>
+    <string name="window_measure_unstable">불안정한 조명</string>
+    <string name="window_measure_saturated">신호가 범위를 벗어남</string>
+    <string name="window_measure_brighter">필터를 사용한 값이 더 높음</string>
+    <string name="window_measure_out_of_range">계수가 허용 범위를 벗어남</string>
+</resources>

@@ -70,6 +70,16 @@ internal class UvirSettingsSaveQueue(
 
     fun finishEditing() { editor?.let(::finishEditing) }
 
+    /** Finish legitimate editor commits before taking a comparative-measurement snapshot. */
+    suspend fun awaitIdle() {
+        finishEditing()
+        while (true) {
+            val current = worker ?: return
+            current.join()
+            if (worker === current && pending.isEmpty()) return
+        }
+    }
+
     fun cancel() {
         pending.clear()
         editor = null

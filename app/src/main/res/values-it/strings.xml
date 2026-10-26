@@ -483,11 +483,11 @@
     <string name="app_version">Versione app: %1$s</string>
     <string name="package_name_value">Package: %1$s</string>
     <string name="about_whats_new_title">Novità della versione %1$s</string>
-    <string name="about_whats_new_connectivity">Esporta/importa acquisizioni e allerte in file .uvirrecords senza password, comprese sessioni, note e varianti.</string>
-    <string name="about_whats_new_connections">Riconoscimento tramite ID hardware, nuovi ID locali e controllo dei duplicati per conservare la provenienza dei dati importati.</string>
-    <string name="about_whats_new_measurements">Ordine delle isole e bande escluse salvati nella Main View; controlli temporanei nelle acquisizioni salvate e percentuali sul totale o sul gruppo.</string>
-    <string name="about_whats_new_interface">Colori spettrali uniformi, nomi neutri con pallini colorati nei dati salvati, righe delle sessioni più chiare e spostamento animato delle isole.</string>
-    <string name="about_whats_new_github">Pop-up, azioni giorno/notte e notifiche dei dati fittizi più uniformi; controlli aggiornati per il ripristino e l’aggiornamento USB.</string>
+    <string name="about_whats_new_connectivity">App e collegamenti sensore funzionano; il progetto è sospeso in attesa della validazione ottica.</string>
+    <string name="about_whats_new_connections">Coperchio e aperture sono prototipi teorici, non ottiche di misura validate.</string>
+    <string name="about_whats_new_measurements">Strumenti di calibrazione con offset medi, guadagno UV adattivo e calcolo guidato dei fattori finestra.</string>
+    <string name="about_whats_new_interface">Apertura delle isole più fluida; le scelte nei dati salvati durano per la sessione corrente dell’app.</string>
+    <string name="about_whats_new_github">Misure assolute affidabili richiedono ancora ottiche definitive e calibrazione con riferimenti.</string>
     <string name="about_description">App per l’acquisizione spettrale della radiazione ultravioletta, visibile e infrarossa.</string>
     <string name="about_spectral_ranges">Bande spettrali: Ultravioletti • Luce visibile • Infrarosso</string>
     <string name="about_sensors">Sensori supportati: AS7331 UV • AS7343 multispettrale</string>

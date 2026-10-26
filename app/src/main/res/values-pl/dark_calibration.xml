@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="dark_offsets_calculate">Oblicz offsety</string>
-    <string name="dark_offsets_instructions">Mierz przez około 30 sekund w stabilnych warunkach odniesienia. W ciemności kompensujesz tło czujnika; przy oświetleniu odejmujesz również obecne światło i otrzymujesz pomiary względne. Podczas pomiaru w ciemności zasłoń wejścia optyczne materiałem nieprzezroczystym także dla bliskiej podczerwieni i pozostaw diody LED w normalnym stanie pracy. Średnia nie usuwa losowego szumu ani nie kalibruje wzmocnienia.</string>
+    <string name="dark_offsets_instructions">Mierz przez około 30 sekund w stabilnych warunkach odniesienia. Dla pomiaru odniesienia w ciemności zasłoń wejścia optyczne materiałem nieprzepuszczającym również bliskiej podczerwieni i pozostaw diody LED w normalnym trybie pracy. Przy oświetleniu odejmowane jest także światło odniesienia, więc pomiary stają się względne. Ta procedura nie kalibruje wzmocnienia.</string>
+    <string name="dark_offsets_uv_method">Dla UVC, UVB i UVA proponowana jest średnia odczytów z każdego kanału. Wzmocnienie UV automatycznie dostosowuje się do poziomu światła.</string>
+    <string name="dark_offsets_visible_method">Dla każdego kanału światła widzialnego/podczerwieni proponowana jest średnia odczytów.</string>
     <string name="dark_offsets_progress">Pomiar: %1$s / 30 s</string>
     <string name="dark_offsets_result">Propozycja z %1$s odczytów. Nie zmieniono ustawień.</string>
     <string name="dark_offsets_failed">Pomiar przerwany lub niedostępny. Sprawdź połączenie i czujnik, a następnie spróbuj ponownie.</string>

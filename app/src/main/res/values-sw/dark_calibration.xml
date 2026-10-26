@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="dark_offsets_calculate">Kokotoa ofseti</string>
-    <string name="dark_offsets_instructions">Pima kwa takriban sekunde 30 katika hali thabiti za marejeo. Gizani unafidia mandharinyuma ya kihisi; katika mwanga unaondoa pia mwanga uliopo na kupata vipimo vya kulinganisha. Kwa kipimo cha gizani, funika ingizo la macho kwa nyenzo isiyopitisha pia infraredi ya karibu na acha LED katika hali ya kawaida ya kazi. Wastani hauondoi kelele nasibu wala kurekebisha ukuzaji.</string>
+    <string name="dark_offsets_instructions">Pima kwa takriban sekunde 30 katika hali thabiti za marejeo. Kwa marejeo ya gizani, funika ingizo la macho kwa nyenzo inayozuia pia infraredi ya karibu na acha LED katika hali ya kawaida ya kazi. Kukiwa na mwanga, mwanga wa marejeo pia huondolewa, hivyo vipimo huwa vya kulinganisha. Utaratibu huu haukalibishi ukuzaji.</string>
+    <string name="dark_offsets_uv_method">Kwa UVC, UVB na UVA, wastani wa usomaji wa kila chaneli unapendekezwa. Ukuzaji wa UV hujirekebisha kiotomatiki kulingana na kiwango cha mwanga.</string>
+    <string name="dark_offsets_visible_method">Kwa kila chaneli ya mwanga unaoonekana/infraredi, wastani wa usomaji unapendekezwa.</string>
     <string name="dark_offsets_progress">Kupima: %1$s / sek 30</string>
     <string name="dark_offsets_result">Pendekezo kutoka usomaji %1$s. Hakuna mipangilio iliyobadilishwa.</string>
     <string name="dark_offsets_failed">Kipimo kimekatizwa au hakipatikani. Angalia muunganisho na kihisi, kisha ujaribu tena.</string>

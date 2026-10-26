@@ -1,0 +1,22 @@
+{
+  "units": "mm",
+  "dimensions_mm": [
+    70.0,
+    125.0,
+    35.0
+  ],
+  "closed_manifold": true,
+  "single_connected_solid": true,
+  "consistent_winding": true,
+  "zero_area_triangles": 0,
+  "triangles": 12218,
+  "vertices": 6111,
+  "edges": 18327,
+  "euler_characteristic": 2,
+  "volume_mm3": 57642.26131255027,
+  "kernel_volume_mm3": 57642.271794242115,
+  "float32_volume_relative_difference": 1.818403668044641e-07,
+  "stl_sha256": "aa98e747b1d132163b63ba7cc113eb9fd4703f265cfe2e9b28c1a9cce97bf3e0",
+  "roof": false,
+  "floor": true
+}
