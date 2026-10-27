@@ -1,6 +1,8 @@
 @echo off
 setlocal
 
+rem ESP32 version 1.4.2 is preserved in legacy-esp32. This builds an unpublished USB development APK.
+
 set "PROJECT_DIR=%~dp0"
 if not defined JAVA_HOME set "JAVA_HOME=C:\Program Files\Android\Android Studio\jbr"
 set "GRADLE_USER_HOME=%USERPROFILE%\.gradle"
@@ -27,13 +29,13 @@ if errorlevel 1 (
 )
 
 if not exist "%PROJECT_DIR%dist" mkdir "%PROJECT_DIR%dist"
-copy /Y "%PROJECT_DIR%app\build\outputs\apk\release\app-release.apk" "%PROJECT_DIR%dist\Uvir-1.4.2-release.apk" >nul
-powershell -NoProfile -Command "$h=(Get-FileHash -LiteralPath '%PROJECT_DIR%dist\Uvir-1.4.2-release.apk' -Algorithm SHA256).Hash; Set-Content -LiteralPath '%PROJECT_DIR%dist\Uvir-1.4.2-release.apk.sha256' -Value ($h + '  Uvir-1.4.2-release.apk') -Encoding ascii"
+copy /Y "%PROJECT_DIR%app\build\outputs\apk\release\app-release.apk" "%PROJECT_DIR%dist\Uvir-2.0.0-dev.apk" >nul
+powershell -NoProfile -Command "$h=(Get-FileHash -LiteralPath '%PROJECT_DIR%dist\Uvir-2.0.0-dev.apk' -Algorithm SHA256).Hash; Set-Content -LiteralPath '%PROJECT_DIR%dist\Uvir-2.0.0-dev.apk.sha256' -Value ($h + '  Uvir-2.0.0-dev.apk') -Encoding ascii"
 popd
 
 echo.
 echo Release APK created at:
-echo %PROJECT_DIR%dist\Uvir-1.4.2-release.apk
+echo %PROJECT_DIR%dist\Uvir-2.0.0-dev.apk
 echo SHA-256 checksum at:
-echo %PROJECT_DIR%dist\Uvir-1.4.2-release.apk.sha256
+echo %PROJECT_DIR%dist\Uvir-2.0.0-dev.apk.sha256
 pause

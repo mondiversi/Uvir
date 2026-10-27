@@ -838,7 +838,8 @@ internal fun UvirSettingsGeneralSections(
                 primaryText = primaryText
             )
             SettingsPageDescription(
-                text = stringResource(R.string.data_management_reset_description),
+                text = if (BuildConfig.USB_ONLY) stringResource(R.string.reset_all_records_action) + " · " + stringResource(R.string.restore_app_settings_action)
+                    else stringResource(R.string.data_management_reset_description),
                 color = secondaryText
             )
             UvirDataAndRestoreContent(

@@ -1,5 +1,10 @@
 # Uvir updates
 
+> The text below describes the preserved ESP32 stable channel. The USB development
+> edition reserves a separate signed `usb-channel` feed and does not query or
+> replace `releases/latest`. Its channel is disabled until a USB release is
+> published and validated. See [the release boundary](usb/ARCHITECTURE.md#release-boundary).
+
 Uvir checks the latest stable GitHub release once per process launch. In Info,
 **Check for updates** runs the same check manually. A successful empty result is
 silent automatically and shows a short message manually. Network, signature,

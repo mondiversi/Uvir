@@ -45,6 +45,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -76,6 +77,7 @@ internal fun UvirLaunchGate(
 
         AnimatedVisibility(
             visible = splashVisible,
+            modifier = Modifier.testTag("uvir_launch_overlay"),
             exit = fadeOut(tween(320))
         ) {
             UvirLaunchScreen()

@@ -1,5 +1,11 @@
 # Uvir Internet relay
 
+> **Legacy ESP32 architecture.** This guide is preserved for the
+> [legacy-esp32 branch](https://github.com/mondiversi/Uvir/tree/legacy-esp32).
+> The active USB edition uses the [FT232H wiring guide](https://github.com/mondiversi/Uvir/blob/main/docs/usb/WIRING.md)
+> and does not run this firmware, relay or autonomous storage system.
+
+
 The relay lets the Android app and an ESP32 sensor meet through the Internet
 without exposing the sensor or opening a port on the home router. Both sides
 create an outbound TLS connection and are paired using the sensor identity and

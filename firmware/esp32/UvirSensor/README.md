@@ -1,5 +1,11 @@
 # Uvir ESP32 sensor firmware
 
+> **Legacy ESP32 architecture.** This guide is preserved for the
+> [legacy-esp32 branch](https://github.com/mondiversi/Uvir/tree/legacy-esp32).
+> The active USB edition uses the [FT232H wiring guide](https://github.com/mondiversi/Uvir/blob/main/docs/usb/WIRING.md)
+> and does not run this firmware, relay or autonomous storage system.
+
+
 This sketch is the first hardware bridge between Uvir for Android and an
 ESP32 Dev Module fitted with a GY-AS734X breakout containing an AS7343 and,
 optionally, an AS7331 UV sensor. It streams visible, far-red, NIR, UVA, UVB and UVC bands over

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="usb_updates_pending">The USB edition update channel is not published yet.</string>
+    <string name="usb_data">Data</string>
+    <string name="usb_chart">Chart</string>
+    <string name="usb_sensor_name">USB sensor</string>
+    <string name="usb_phone_recording">Recording on this phone · USB connection required</string>
+    <string name="usb_hardware_pending">USB hardware support is in preparation. Real measurements must be verified with the FT232H board. Optical response and absolute calibration remain unvalidated.</string>
+    <string name="usb_connect">Connect the FT232H and both sensors using a USB OTG data adapter.</string>
+    <string name="usb_permission">Allow USB access</string>
+    <string name="usb_initializing">Initializing sensors…</string>
+    <string name="usb_ready">USB connected</string>
+    <string name="usb_error">USB unavailable</string>
+    <string name="usb_retry">Reconnect USB</string>
+    <string name="usb_identity_temporary">This adapter has no usable serial number. Calibration applies to this connection only.</string>
+    <string name="usb_phone_processing">The app samples both sensors and processes their readings on the phone.</string>
+    <string name="usb_sampling_count">Samples per measurement</string>
+    <string name="usb_sampling_spacing">Spacing between samples (ms)</string>
+    <string name="usb_sampling_trim">Discard the lowest and highest sample</string>
+    <string name="usb_diagnostics">USB diagnostics</string>
+    <string name="usb_simulation">Simulated readings</string>
+    <string name="usb_interval">Acquisition interval (seconds)</string>
+    <string name="usb_phone_note">Disconnecting USB or closing the app interrupts recording. Reconnecting never restarts a session automatically.</string>
+    <string name="usb_probe_required">Connect both supported sensors to use calibration and reference measurements.</string>
+    <string name="usb_about_architecture">USB-only edition: FT232H + AS7331 + AS7343. The phone owns processing, time, alerts and storage. ESP32 support is preserved in the legacy-esp32 branch.</string>
+    <string name="usb_stop_recording">Stop recording before changing the data source.</string>
+    <string name="usb_legacy_settings_imported">Legacy sensor settings remain archived. They are not applied automatically to the USB hardware.</string>
+</resources>

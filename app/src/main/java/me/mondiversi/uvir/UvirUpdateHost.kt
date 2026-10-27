@@ -17,10 +17,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 
 @Composable
-internal fun UvirUpdateHost(manager: UvirUsbSensorManager) {
+internal fun UvirUpdateHost(manager: UvirUsbSensorManager? = null) {
     val context = LocalContext.current
     val state by UvirUpdates.state.collectAsState()
-    val usb by manager.state.collectAsState()
+    val usb by (manager?.state ?: remember { kotlinx.coroutines.flow.MutableStateFlow(UvirUsbSensorState()) }).collectAsState()
     val installer = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         UvirUpdates.installerReturned(context, it.resultCode)
     }
@@ -49,7 +49,7 @@ internal fun UvirUpdateHost(manager: UvirUsbSensorManager) {
                 else permission.launch(UvirUpdates.permissionIntent(context))
             }
         },
-        onSensorUpdate = { UvirUpdates.firmware(context.applicationContext, manager, it) }
+        onSensorUpdate = { target -> manager?.let { UvirUpdates.firmware(context.applicationContext, it, target) } }
     )
 }
 

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="usb_updates_pending">USB संस्करण का अपडेट चैनल अभी प्रकाशित नहीं हुआ है।</string>
+    <string name="usb_data">डेटा</string>
+    <string name="usb_chart">ग्राफ़</string>
+    <string name="usb_sensor_name">USB सेंसर</string>
+    <string name="usb_phone_recording">फ़ोन पर रिकॉर्डिंग · USB कनेक्शन आवश्यक</string>
+    <string name="usb_hardware_pending">USB समर्थन तैयार किया जा रहा है। वास्तविक माप FT232H बोर्ड से जाँचना आवश्यक है। प्रकाशीय प्रतिक्रिया और निरपेक्ष अंशांकन अभी सत्यापित नहीं हैं।</string>
+    <string name="usb_connect">डेटा वाले USB OTG अडैप्टर से FT232H और दोनों सेंसर जोड़ें।</string>
+    <string name="usb_permission">USB पहुँच की अनुमति दें</string>
+    <string name="usb_initializing">सेंसर शुरू हो रहे हैं…</string>
+    <string name="usb_ready">USB जुड़ा है</string>
+    <string name="usb_error">USB उपलब्ध नहीं</string>
+    <string name="usb_retry">USB फिर जोड़ें</string>
+    <string name="usb_identity_temporary">इस अडैप्टर में उपयोगी सीरियल नंबर नहीं है। अंशांकन केवल इस कनेक्शन पर लागू होता है।</string>
+    <string name="usb_phone_processing">ऐप दोनों सेंसर के नमूने लेता है और रीडिंग फ़ोन पर संसाधित करता है।</string>
+    <string name="usb_sampling_count">प्रति माप नमूने</string>
+    <string name="usb_sampling_spacing">नमूनों के बीच अंतराल (ms)</string>
+    <string name="usb_sampling_trim">सबसे छोटा और सबसे बड़ा नमूना हटाएँ</string>
+    <string name="usb_diagnostics">USB जाँच</string>
+    <string name="usb_simulation">सिम्युलेटेड डेटा</string>
+    <string name="usb_interval">माप अंतराल (सेकंड)</string>
+    <string name="usb_phone_note">USB हटाने या ऐप बंद करने से रिकॉर्डिंग रुकती है। फिर जोड़ने से सत्र अपने आप शुरू नहीं होता।</string>
+    <string name="usb_probe_required">अंशांकन और संदर्भ माप के लिए दोनों समर्थित सेंसर जोड़ें।</string>
+    <string name="usb_about_architecture">केवल USB संस्करण: FT232H + AS7331 + AS7343। फ़ोन प्रोसेसिंग, समय, अलर्ट और भंडारण सँभालता है। ESP32 समर्थन legacy-esp32 शाखा में सुरक्षित है।</string>
+    <string name="usb_stop_recording">डेटा स्रोत बदलने से पहले रिकॉर्डिंग रोकें।</string>
+    <string name="usb_legacy_settings_imported">पुरानी सेंसर सेटिंग संग्रह में रहती हैं और USB हार्डवेयर पर अपने आप लागू नहीं होतीं।</string>
+</resources>

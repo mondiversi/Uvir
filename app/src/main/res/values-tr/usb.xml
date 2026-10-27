@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="usb_updates_pending">USB sürümünün güncelleme kanalı henüz yayımlanmadı.</string>
+    <string name="usb_data">Veriler</string>
+    <string name="usb_chart">Grafik</string>
+    <string name="usb_sensor_name">USB sensörü</string>
+    <string name="usb_phone_recording">Telefonda kayıt · USB bağlantısı gerekli</string>
+    <string name="usb_hardware_pending">USB desteği hazırlanıyor. Gerçek ölçümler FT232H kartıyla doğrulanmalıdır. Optik tepki ve mutlak kalibrasyon henüz doğrulanmadı.</string>
+    <string name="usb_connect">FT232H ve her iki sensörü bir USB OTG veri adaptörüyle bağlayın.</string>
+    <string name="usb_permission">USB erişimine izin verin</string>
+    <string name="usb_initializing">Sensörler başlatılıyor…</string>
+    <string name="usb_ready">USB bağlı</string>
+    <string name="usb_error">USB kullanılamıyor</string>
+    <string name="usb_retry">USB bağlantısını yenile</string>
+    <string name="usb_identity_temporary">Bu adaptörde kullanılabilir seri numarası yok. Kalibrasyon yalnızca bu bağlantı için geçerlidir.</string>
+    <string name="usb_phone_processing">Uygulama her iki sensörü örnekler ve okumaları telefonda işler.</string>
+    <string name="usb_sampling_count">Ölçüm başına örnek</string>
+    <string name="usb_sampling_spacing">Örnekler arası süre (ms)</string>
+    <string name="usb_sampling_trim">En düşük ve en yüksek örneği çıkar</string>
+    <string name="usb_diagnostics">USB tanılama</string>
+    <string name="usb_simulation">Simüle veriler</string>
+    <string name="usb_interval">Ölçüm aralığı (saniye)</string>
+    <string name="usb_phone_note">USB bağlantısını kesmek veya uygulamayı kapatmak kaydı durdurur. Yeniden bağlanmak bir oturumu otomatik olarak yeniden başlatmaz.</string>
+    <string name="usb_probe_required">Kalibrasyon ve referans ölçümleri için desteklenen iki sensörü de bağlayın.</string>
+    <string name="usb_about_architecture">Yalnızca USB sürümü: FT232H + AS7331 + AS7343. İşleme, zaman, uyarılar ve depolama telefon tarafından yönetilir. ESP32 desteği legacy-esp32 dalında korunur.</string>
+    <string name="usb_stop_recording">Veri kaynağını değiştirmeden önce kaydı durdurun.</string>
+    <string name="usb_legacy_settings_imported">Eski sensör ayarları arşivde kalır ve USB donanımına otomatik olarak uygulanmaz.</string>
+</resources>

@@ -19,7 +19,7 @@ class UvirForegroundScreenAwakeTest {
         val request = "window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)"
         assertTrue(resume.contains(request))
         assertTrue(resume.indexOf(request) > resume.indexOf("super.onResume()"))
-        assertTrue(resume.indexOf(request) < resume.indexOf("if (hasWifiNamePermission())"))
+        assertTrue(resume.indexOf(request) < resume.indexOf("UsbPhoneRuntimeStore.get(applicationContext).onForeground()"))
         assertEquals(1, Regex(Regex.escape(request)).findAll(activity).count())
     }
 

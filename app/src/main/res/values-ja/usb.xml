@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="usb_updates_pending">USB版の更新チャンネルはまだ公開されていません。</string>
+    <string name="usb_data">データ</string>
+    <string name="usb_chart">グラフ</string>
+    <string name="usb_sensor_name">USBセンサー</string>
+    <string name="usb_phone_recording">スマートフォンで記録中 · USB接続が必要</string>
+    <string name="usb_hardware_pending">USB対応を準備中です。実測値はFT232H基板で検証する必要があります。光学応答と絶対校正は未検証です。</string>
+    <string name="usb_connect">USB OTGデータアダプターでFT232Hと両センサーを接続してください。</string>
+    <string name="usb_permission">USBアクセスを許可</string>
+    <string name="usb_initializing">センサーを初期化中…</string>
+    <string name="usb_ready">USB接続済み</string>
+    <string name="usb_error">USBを利用できません</string>
+    <string name="usb_retry">USBを再接続</string>
+    <string name="usb_identity_temporary">このアダプターには使用可能なシリアル番号がありません。校正は今回の接続にのみ適用されます。</string>
+    <string name="usb_phone_processing">アプリが両センサーをサンプリングし、スマートフォンで測定値を処理します。</string>
+    <string name="usb_sampling_count">測定ごとのサンプル数</string>
+    <string name="usb_sampling_spacing">サンプル間隔（ms）</string>
+    <string name="usb_sampling_trim">最小・最大のサンプルを除外</string>
+    <string name="usb_diagnostics">USB診断</string>
+    <string name="usb_simulation">模擬データ</string>
+    <string name="usb_interval">取得間隔（秒）</string>
+    <string name="usb_phone_note">USBを外すかアプリを終了すると記録が中断されます。再接続してもセッションは自動で再開されません。</string>
+    <string name="usb_probe_required">校正と基準測定には、対応する両センサーを接続してください。</string>
+    <string name="usb_about_architecture">USB専用版：FT232H + AS7331 + AS7343。処理、時刻、アラート、保存はスマートフォンが管理します。ESP32対応はlegacy-esp32ブランチに保存されています。</string>
+    <string name="usb_stop_recording">データソースを変更する前に記録を停止してください。</string>
+    <string name="usb_legacy_settings_imported">旧センサー設定は保存され、USBハードウェアには自動適用されません。</string>
+</resources>

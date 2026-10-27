@@ -466,7 +466,7 @@ internal fun UvirSamplingAndAlertSettings(
         }
 
         }
-        CompositionLocalProvider(LocalSettingsCommit provides null) {
+        if (!BuildConfig.USB_ONLY) CompositionLocalProvider(LocalSettingsCommit provides null) {
             SettingsIsland(containerColor = cardColor, contentColor = primaryText) {
                 SettingsIslandHeader(
                     title = stringResource(R.string.notifications_misc_title),

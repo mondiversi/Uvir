@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Silicon Labs CP210x bridge detected on the current ESP32 Dev Module. -->
+    <!-- FT232H MPSSE USB-to-I2C only. FT232R/CP210x serial bridges are not compatible. -->
     <usb-device
-        vendor-id="4292"
-        product-id="60000" />
+        vendor-id="1027"
+        product-id="24596" />
 </resources>

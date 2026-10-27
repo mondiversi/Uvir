@@ -549,6 +549,7 @@ class MainActivity : ComponentActivity(), UvirExportSaveHost, UvirSettingsImport
                     this@MainActivity,
                     getString(R.string.import_database_success)
                 )
+                UsbPhoneRuntimeStore.get(applicationContext).reloadPhoneSettings()
                 recreate()
             } catch (error: Exception) {
                 UvirErrorLog.record(this@MainActivity, "import_database", error)
@@ -583,17 +584,9 @@ class MainActivity : ComponentActivity(), UvirExportSaveHost, UvirSettingsImport
                 }
                 val sensorStatuses = withContext(Dispatchers.IO) {
                     result.importedSensors.map { imported ->
-                        val restoreStatus =
-                            restoreImportedSensorSettingsToConnectedSensor(
-                                imported = imported,
-                                usbSensorManager = usbSensorManager,
-                                wirelessSensorManager = retainedRuntime.multiSensorRuntime.wirelessFor(imported.hardwareUid)
-                            )
-                        if (!persistImportedSensorAssociation(this@MainActivity, imported)) {
-                            UvirImportedSensorRestoreStatus.FAILED
-                        } else {
-                            restoreStatus
-                        }
+                        // Legacy settings remain archived. Never send ESP32 commands to an FT232H,
+                        // associate a wireless sensor or silently transplant its calibration.
+                        UvirImportedSensorRestoreStatus.NOT_CONNECTED
                     }
                 }
                 pendingSettingsImportUrisState.value = emptyList()
@@ -611,7 +604,7 @@ class MainActivity : ComponentActivity(), UvirExportSaveHost, UvirSettingsImport
                     } ->
                         showUvirBottomMessage(
                             this@MainActivity,
-                            getString(R.string.sensor_settings_restore_requires_connection)
+                            getString(R.string.usb_legacy_settings_imported)
                         )
                     else ->
                         showUvirBottomMessage(
@@ -623,6 +616,7 @@ class MainActivity : ComponentActivity(), UvirExportSaveHost, UvirSettingsImport
                             )
                         )
                 }
+                UsbPhoneRuntimeStore.get(applicationContext).reloadPhoneSettings()
                 recreate()
             } catch (error: Exception) {
                 if (
@@ -652,10 +646,18 @@ class MainActivity : ComponentActivity(), UvirExportSaveHost, UvirSettingsImport
     }
 
     override fun selectUvirSettingsFiles() {
+        val state = UsbPhoneRuntimeStore.get(applicationContext).state.value
+        if (state.automaticSession != null || state.alertSession != null) {
+            showUvirBottomMessage(this, getString(R.string.usb_stop_recording)); return
+        }
         settingsImportLauncher.launch(arrayOf("application/json", "application/octet-stream"))
     }
 
     override fun selectUvirDatabaseArchive() {
+        val state = UsbPhoneRuntimeStore.get(applicationContext).state.value
+        if (state.automaticSession != null || state.alertSession != null) {
+            showUvirBottomMessage(this, getString(R.string.usb_stop_recording)); return
+        }
         databaseImportLauncher.launch(
             arrayOf("application/zip", "application/x-zip-compressed", "application/octet-stream")
         )
@@ -718,24 +720,7 @@ class MainActivity : ComponentActivity(), UvirExportSaveHost, UvirSettingsImport
             applicationContext
         )
 
-        retainedRuntime =
-            UvirRetainedRuntimeStore.acquire(
-                applicationContext
-            )
-
-        remoteServer = retainedRuntime.remoteServer
-        usbSensorManager = retainedRuntime.usbSensorManager
-
-        val directAccessAllowed =
-            hasLocalNetworkPermission()
-
-        remoteNetworkEnabledState.value =
-            directAccessAllowed
-
-        retainedRuntime.startIfNeeded(
-            initialIntent = intent,
-            directNetwork = directAccessAllowed
-        )
+        val phoneRuntime = UsbPhoneRuntimeStore.get(applicationContext)
 
         val appLayoutDirection =
             configuredAppLayoutDirection(this)
@@ -751,24 +736,8 @@ class MainActivity : ComponentActivity(), UvirExportSaveHost, UvirSettingsImport
                 UvirLaunchGate(
                     showLaunchScreen = savedInstanceState == null
                 ) {
-                    UvirApp(
-                        remoteNetworkEnabled =
-                            remoteNetworkEnabledState.value,
-                        usbSensorManager =
-                            usbSensorManager,
-                        wirelessSensorManager =
-                            wirelessSensorManager,
-                        multiSensorRuntime = retainedRuntime.multiSensorRuntime,
-                        onRequestBluetoothPermission =
-                            ::requestBluetoothSensorPermission,
-                        currentWifiSsid =
-                            currentWifiSsidState.value,
-                        onRequestCurrentWifiSsid =
-                            ::requestCurrentWifiSsid,
-                        openHomeRequestId =
-                            openHomeRequestState.longValue
-                    )
-                    UvirUpdateHost(usbSensorManager)
+                    UvirUsbPhoneApp(phoneRuntime)
+                    UvirUpdateHost()
                 }
                 val pendingSettingsImportUris =
                     pendingSettingsImportUrisState.value
@@ -842,15 +811,10 @@ class MainActivity : ComponentActivity(), UvirExportSaveHost, UvirSettingsImport
             }
         }
 
-        if (!directAccessAllowed) {
-            localNetworkPermissionLauncher.launch(
-                Manifest.permission
-                    .ACCESS_LOCAL_NETWORK
-            )
-        }
     }
 
     override fun onDestroy() {
+        if (isFinishing && !UvirUpdates.state.value.busy) UsbPhoneRuntimeStore.close()
         if (!isChangingConfigurations && !UvirUpdates.state.value.busy) {
             UvirConnectionForegroundService.update(
                 context = this,
@@ -877,9 +841,7 @@ class MainActivity : ComponentActivity(), UvirExportSaveHost, UvirSettingsImport
         // Keep every UVIR screen awake without changing the phone's display timeout.
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
-        if (hasWifiNamePermission()) {
-            refreshCurrentWifiSsid()
-        }
+        UsbPhoneRuntimeStore.get(applicationContext).onForeground()
 
         if (::retainedRuntime.isInitialized) {
             retainedRuntime.multiSensorRuntime.retryAll()
@@ -893,6 +855,7 @@ class MainActivity : ComponentActivity(), UvirExportSaveHost, UvirSettingsImport
     }
 
     override fun onPause() {
+        UsbPhoneRuntimeStore.get(applicationContext).onBackground()
         // Release the foreground-only request when another app takes over or the user locks the phone.
         window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         super.onPause()

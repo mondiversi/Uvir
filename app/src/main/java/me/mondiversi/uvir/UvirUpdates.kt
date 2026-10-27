@@ -43,6 +43,10 @@ internal object UvirUpdates {
     fun start(context: Context) { if (!started) { started = true; check(context, manual = false) } }
     fun dismiss() { if (!mutableState.value.busy) mutableState.value = mutableState.value.copy(dialog = false, message = null) }
     fun check(context: Context, manual: Boolean) {
+        if (BuildConfig.USB_ONLY && !BuildConfig.USB_UPDATE_CHANNEL_READY) {
+            if (manual) showUvirBottomMessage(context, context.getString(R.string.usb_updates_pending))
+            return
+        }
         if (mutableState.value.checking || mutableState.value.busy) return
         val app = context.applicationContext
         mutableState.value = mutableState.value.copy(checking = true, message = null)
@@ -59,7 +63,7 @@ internal object UvirUpdates {
                     }
                     val database = UvirDatabaseHelper(app)
                     val profiles = try { database.readSensorProfiles() } finally { database.close() }
-                    val targets = UvirSensorCredentialStore.associatedDeviceIds(app).mapNotNull { uid ->
+                    val targets = (if (BuildConfig.USB_ONLY) emptySet() else UvirSensorCredentialStore.associatedDeviceIds(app)).mapNotNull { uid ->
                         val credential = UvirSensorCredentialStore.loadForDevice(app, uid) ?: return@mapNotNull null
                         if (credential.firmwareVersion.isBlank() || compareFirmwareVersions(catalog.first.sensor.version, credential.firmwareVersion) <= 0) null
                         else UvirSensorUpdate(uid, profiles.firstOrNull { it.hardwareUid.equals(uid, true) }?.displayName?.ifBlank { uid } ?: uid, credential.firmwareVersion)

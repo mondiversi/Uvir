@@ -147,7 +147,7 @@ internal fun UvirDataAndRestoreContent(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(UvirActionButtonGap)
         ) {
-            OutlinedButton(
+            if (!BuildConfig.USB_ONLY) OutlinedButton(
                 onClick = onSensorRestoreRequested,
                 enabled = sensorRestoreEnabled,
                 modifier = Modifier.weight(1f).semantics {

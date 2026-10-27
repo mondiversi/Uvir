@@ -1,5 +1,9 @@
 # Uvir architecture
 
+> The active `main` branch uses the [phone-owned USB architecture](docs/usb/ARCHITECTURE.md).
+> The description below is retained for ESP32 compatibility/reference code;
+> the complete operational ESP32 project is in the `legacy-esp32` branch.
+
 ## Signed updates
 
 `UvirUpdateClient` owns signed-catalog verification and bounded HTTPS downloads.

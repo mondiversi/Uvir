@@ -71,7 +71,8 @@ internal fun UvirHomeSettingsDropdown(
     containerColor: Color,
     onOpenPage: (UvirSettingsPage) -> Unit,
     onOpenInfo: () -> Unit,
-    onOpened: () -> Unit = {}
+    onOpened: () -> Unit = {},
+    groups: List<UvirHomeSettingsMenuGroup> = uvirHomeSettingsMenuGroups
 ) {
     var expanded by rememberSaveable { mutableStateOf(false) }
     val maxHeight = (LocalConfiguration.current.screenHeightDp.dp * .75f).coerceAtMost(480.dp)
@@ -94,7 +95,7 @@ internal fun UvirHomeSettingsDropdown(
             modifier = Modifier.widthIn(max = 320.dp)
                 .heightIn(max = maxHeight).testTag("home_settings_menu")
         ) {
-            uvirHomeSettingsMenuGroups.forEachIndexed { index, group ->
+            groups.forEachIndexed { index, group ->
                 if (index > 0) HorizontalDivider(
                     Modifier.padding(vertical = 4.dp), color = primaryText.copy(alpha = .10f))
                 group.titleRes?.let { titleRes ->

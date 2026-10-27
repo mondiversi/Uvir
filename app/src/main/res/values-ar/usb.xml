@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="usb_updates_pending">لم تُنشر قناة تحديث إصدار USB بعد.</string>
+    <string name="usb_data">البيانات</string>
+    <string name="usb_chart">الرسم البياني</string>
+    <string name="usb_sensor_name">مستشعر USB</string>
+    <string name="usb_phone_recording">التسجيل على الهاتف · اتصال USB مطلوب</string>
+    <string name="usb_hardware_pending">دعم USB قيد الإعداد. يجب التحقق من القياسات الفعلية باستخدام لوحة FT232H. لم يتم التحقق بعد من الاستجابة البصرية والمعايرة المطلقة.</string>
+    <string name="usb_connect">وصّل FT232H والمستشعرين باستخدام محول بيانات USB OTG.</string>
+    <string name="usb_permission">اسمح بالوصول إلى USB</string>
+    <string name="usb_initializing">جارٍ تهيئة المستشعرات…</string>
+    <string name="usb_ready">USB متصل</string>
+    <string name="usb_error">USB غير متاح</string>
+    <string name="usb_retry">إعادة توصيل USB</string>
+    <string name="usb_identity_temporary">لا يحتوي هذا المحول على رقم تسلسلي صالح للاستخدام. تنطبق المعايرة على هذا الاتصال فقط.</string>
+    <string name="usb_phone_processing">يأخذ التطبيق عينات من المستشعرين ويعالج القراءات على الهاتف.</string>
+    <string name="usb_sampling_count">العينات لكل قياس</string>
+    <string name="usb_sampling_spacing">الفاصل بين العينات (مللي ثانية)</string>
+    <string name="usb_sampling_trim">استبعاد أدنى عينة وأعلاها</string>
+    <string name="usb_diagnostics">تشخيص USB</string>
+    <string name="usb_simulation">بيانات محاكاة</string>
+    <string name="usb_interval">الفاصل بين القياسات (ثوانٍ)</string>
+    <string name="usb_phone_note">يؤدي فصل USB أو إغلاق التطبيق إلى إيقاف التسجيل. لا تؤدي إعادة التوصيل إلى إعادة تشغيل الجلسة تلقائيًا.</string>
+    <string name="usb_probe_required">وصّل كلا المستشعرين المدعومين لاستخدام المعايرة والقياسات المرجعية.</string>
+    <string name="usb_about_architecture">إصدار USB فقط: FT232H + AS7331 + AS7343. يتولى الهاتف المعالجة والوقت والتنبيهات والتخزين. دعم ESP32 محفوظ في الفرع legacy-esp32.</string>
+    <string name="usb_stop_recording">أوقف التسجيل قبل تغيير مصدر البيانات.</string>
+    <string name="usb_legacy_settings_imported">تبقى إعدادات المستشعرات القديمة محفوظة ولا تُطبق تلقائيًا على أجهزة USB.</string>
+</resources>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="usb_updates_pending">Το κανάλι ενημερώσεων της έκδοσης USB δεν έχει δημοσιευτεί ακόμη.</string>
+    <string name="usb_data">Δεδομένα</string>
+    <string name="usb_chart">Γράφημα</string>
+    <string name="usb_sensor_name">Αισθητήρας USB</string>
+    <string name="usb_phone_recording">Καταγραφή στο τηλέφωνο · Απαιτείται σύνδεση USB</string>
+    <string name="usb_hardware_pending">Η υποστήριξη USB προετοιμάζεται. Οι πραγματικές μετρήσεις πρέπει να ελεγχθούν με την πλακέτα FT232H. Η οπτική απόκριση και η απόλυτη βαθμονόμηση δεν έχουν επικυρωθεί.</string>
+    <string name="usb_connect">Σύνδεσε το FT232H και τους δύο αισθητήρες με προσαρμογέα δεδομένων USB OTG.</string>
+    <string name="usb_permission">Επίτρεψε την πρόσβαση USB</string>
+    <string name="usb_initializing">Αρχικοποίηση αισθητήρων…</string>
+    <string name="usb_ready">USB συνδεδεμένο</string>
+    <string name="usb_error">Το USB δεν είναι διαθέσιμο</string>
+    <string name="usb_retry">Επανασύνδεση USB</string>
+    <string name="usb_identity_temporary">Αυτός ο προσαρμογέας δεν έχει κατάλληλο σειριακό αριθμό. Η βαθμονόμηση ισχύει μόνο για αυτήν τη σύνδεση.</string>
+    <string name="usb_phone_processing">Η εφαρμογή δειγματοληπτεί τους δύο αισθητήρες και επεξεργάζεται τις ενδείξεις στο τηλέφωνο.</string>
+    <string name="usb_sampling_count">Δείγματα ανά μέτρηση</string>
+    <string name="usb_sampling_spacing">Διάστημα μεταξύ δειγμάτων (ms)</string>
+    <string name="usb_sampling_trim">Απόρριψη ελάχιστου και μέγιστου δείγματος</string>
+    <string name="usb_diagnostics">Διαγνωστικά USB</string>
+    <string name="usb_simulation">Προσομοιωμένα δεδομένα</string>
+    <string name="usb_interval">Διάστημα λήψεων (δευτερόλεπτα)</string>
+    <string name="usb_phone_note">Η αποσύνδεση USB ή το κλείσιμο της εφαρμογής διακόπτει την καταγραφή. Η επανασύνδεση δεν επανεκκινεί ποτέ αυτόματα μια συνεδρία.</string>
+    <string name="usb_probe_required">Σύνδεσε και τους δύο υποστηριζόμενους αισθητήρες για βαθμονόμηση και μετρήσεις αναφοράς.</string>
+    <string name="usb_about_architecture">Έκδοση μόνο USB: FT232H + AS7331 + AS7343. Το τηλέφωνο διαχειρίζεται επεξεργασία, ώρα, ειδοποιήσεις και αποθήκευση. Η υποστήριξη ESP32 διατηρείται στον κλάδο legacy-esp32.</string>
+    <string name="usb_stop_recording">Σταμάτησε την καταγραφή πριν αλλάξεις πηγή δεδομένων.</string>
+    <string name="usb_legacy_settings_imported">Οι παλιές ρυθμίσεις αισθητήρων παραμένουν αρχειοθετημένες και δεν εφαρμόζονται αυτόματα στο υλικό USB.</string>
+</resources>

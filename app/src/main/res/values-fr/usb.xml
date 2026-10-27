@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="usb_updates_pending">Le canal de mise à jour de l’édition USB n’est pas encore publié.</string>
+    <string name="usb_data">Données</string>
+    <string name="usb_chart">Graphique</string>
+    <string name="usb_sensor_name">Capteur USB</string>
+    <string name="usb_phone_recording">Enregistrement sur le téléphone · Connexion USB requise</string>
+    <string name="usb_hardware_pending">La prise en charge USB est en préparation. Les mesures réelles doivent être vérifiées avec la carte FT232H. La réponse optique et l’étalonnage absolu restent à valider.</string>
+    <string name="usb_connect">Connectez le FT232H et les deux capteurs avec un adaptateur de données USB OTG.</string>
+    <string name="usb_permission">Autorisez l’accès USB</string>
+    <string name="usb_initializing">Initialisation des capteurs…</string>
+    <string name="usb_ready">USB connecté</string>
+    <string name="usb_error">USB indisponible</string>
+    <string name="usb_retry">Reconnecter USB</string>
+    <string name="usb_identity_temporary">Cet adaptateur ne possède pas de numéro de série utilisable. L’étalonnage vaut uniquement pour cette connexion.</string>
+    <string name="usb_phone_processing">L’application échantillonne les deux capteurs et traite leurs mesures sur le téléphone.</string>
+    <string name="usb_sampling_count">Échantillons par mesure</string>
+    <string name="usb_sampling_spacing">Intervalle entre échantillons (ms)</string>
+    <string name="usb_sampling_trim">Écarter les échantillons minimal et maximal</string>
+    <string name="usb_diagnostics">Diagnostic USB</string>
+    <string name="usb_simulation">Données simulées</string>
+    <string name="usb_interval">Intervalle d’acquisition (secondes)</string>
+    <string name="usb_phone_note">Débrancher USB ou fermer l’application interrompt l’enregistrement. La reconnexion ne redémarre jamais automatiquement une session.</string>
+    <string name="usb_probe_required">Connectez les deux capteurs pris en charge pour utiliser l’étalonnage et les mesures de référence.</string>
+    <string name="usb_about_architecture">Édition USB uniquement : FT232H + AS7331 + AS7343. Le téléphone gère le traitement, l’heure, les alertes et le stockage. La prise en charge ESP32 est conservée dans la branche legacy-esp32.</string>
+    <string name="usb_stop_recording">Arrêtez l’enregistrement avant de changer la source des données.</string>
+    <string name="usb_legacy_settings_imported">Les anciens réglages des capteurs restent archivés et ne sont pas appliqués automatiquement au matériel USB.</string>
+</resources>

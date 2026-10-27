@@ -1,5 +1,11 @@
 # Complete UVIR wiring
 
+> **Legacy ESP32 architecture.** This guide is preserved for the
+> [legacy-esp32 branch](https://github.com/mondiversi/Uvir/tree/legacy-esp32).
+> The active USB edition uses the [FT232H wiring guide](https://github.com/mondiversi/Uvir/blob/main/docs/usb/WIRING.md)
+> and does not run this firmware, relay or autonomous storage system.
+
+
 This is the wiring index for the complete instrument, not just the visible-light
 sensor. The functional build includes both optical boards, RTC, FRAM, microSD,
 indicators, buzzer and external input. Final optical calibration is still required.

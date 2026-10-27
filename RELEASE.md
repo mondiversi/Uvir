@@ -1,5 +1,10 @@
 # Uvir distribution
 
+> `main` is now **2.0.0-dev (versionCode 8), USB only**. It is not a stable release.
+> Do not replace or overwrite the 1.4.2 release, its installers or its update feed.
+> The USB edition requires a separate signed update channel after hardware validation.
+> The ESP32 release procedure below is historical; use `legacy-esp32` for it.
+
 ## Application identity
 
 - Display name: `Uvir`

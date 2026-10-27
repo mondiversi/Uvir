@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="usb_updates_pending">Kanal pembaruan edisi USB belum diterbitkan.</string>
+    <string name="usb_data">Data</string>
+    <string name="usb_chart">Grafik</string>
+    <string name="usb_sensor_name">Sensor USB</string>
+    <string name="usb_phone_recording">Merekam di ponsel · Memerlukan koneksi USB</string>
+    <string name="usb_hardware_pending">Dukungan USB sedang disiapkan. Pengukuran nyata harus diverifikasi dengan papan FT232H. Respons optik dan kalibrasi absolut belum divalidasi.</string>
+    <string name="usb_connect">Hubungkan FT232H dan kedua sensor dengan adaptor data USB OTG.</string>
+    <string name="usb_permission">Izinkan akses USB</string>
+    <string name="usb_initializing">Menginisialisasi sensor…</string>
+    <string name="usb_ready">USB terhubung</string>
+    <string name="usb_error">USB tidak tersedia</string>
+    <string name="usb_retry">Hubungkan ulang USB</string>
+    <string name="usb_identity_temporary">Adaptor ini tidak memiliki nomor seri yang dapat digunakan. Kalibrasi hanya berlaku untuk koneksi ini.</string>
+    <string name="usb_phone_processing">Aplikasi mengambil sampel kedua sensor dan memproses pembacaan di ponsel.</string>
+    <string name="usb_sampling_count">Sampel per pengukuran</string>
+    <string name="usb_sampling_spacing">Jeda antarsampel (ms)</string>
+    <string name="usb_sampling_trim">Buang sampel terendah dan tertinggi</string>
+    <string name="usb_diagnostics">Diagnostik USB</string>
+    <string name="usb_simulation">Data simulasi</string>
+    <string name="usb_interval">Interval akuisisi (detik)</string>
+    <string name="usb_phone_note">Melepas USB atau menutup aplikasi menghentikan perekaman. Menghubungkan ulang tidak pernah memulai ulang sesi secara otomatis.</string>
+    <string name="usb_probe_required">Hubungkan kedua sensor yang didukung untuk menggunakan kalibrasi dan pengukuran referensi.</string>
+    <string name="usb_about_architecture">Edisi khusus USB: FT232H + AS7331 + AS7343. Ponsel menangani pemrosesan, waktu, peringatan, dan penyimpanan. Dukungan ESP32 disimpan di cabang legacy-esp32.</string>
+    <string name="usb_stop_recording">Hentikan perekaman sebelum mengganti sumber data.</string>
+    <string name="usb_legacy_settings_imported">Pengaturan sensor lama tetap diarsipkan dan tidak otomatis diterapkan ke perangkat USB.</string>
+</resources>

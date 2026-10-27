@@ -1,5 +1,10 @@
 # Hardware
 
+> **USB redesign:** the active branch now targets FT232H + AS7331 + AS7343.
+> See the [preliminary wiring guide](../docs/usb/WIRING.md).
+> The ESP32 carrier PCB, autonomous hardware and enclosure layout below belong
+> to the preserved `legacy-esp32` project; they are not a validated USB-head PCB.
+
 This directory contains the physical design and assembly documentation used
 by Uvir.
 

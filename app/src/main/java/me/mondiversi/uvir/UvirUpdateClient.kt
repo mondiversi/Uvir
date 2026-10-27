@@ -17,6 +17,7 @@ internal data class UvirUpdateCatalog(val app: UvirAppRelease, val sensor: UvirF
 
 internal object UvirUpdatePolicy {
     const val INDEX = "https://github.com/mondiversi/Uvir/releases/latest/download/uvir-update.json"
+    const val USB_INDEX = "https://github.com/mondiversi/Uvir/releases/download/usb-channel/uvir-update.json"
     const val APP_OFFSET = 0x10000
     const val APP_CAPACITY = 0x300000
     fun allowedUrl(url: String, redirect: Boolean = false): Boolean = runCatching {
@@ -47,7 +48,7 @@ internal fun ByteArray.toHex(): String = joinToString("") { "%02x".format(it.toI
 
 internal class UvirUpdateClient(private val context: Context) {
     fun catalog(): Pair<UvirUpdateCatalog, String> {
-        val encoded = request(UvirUpdatePolicy.INDEX, 256 * 1024).toString(Charsets.UTF_8)
+        val encoded = request(if (BuildConfig.USB_ONLY) UvirUpdatePolicy.USB_INDEX else UvirUpdatePolicy.INDEX, 256 * 1024).toString(Charsets.UTF_8)
         return verifyCatalog(encoded) to encoded
     }
 

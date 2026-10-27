@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="usb_updates_pending">Kanał aktualizacji edycji USB nie został jeszcze opublikowany.</string>
+    <string name="usb_data">Dane</string>
+    <string name="usb_chart">Wykres</string>
+    <string name="usb_sensor_name">Czujnik USB</string>
+    <string name="usb_phone_recording">Rejestracja w telefonie · Wymagane połączenie USB</string>
+    <string name="usb_hardware_pending">Obsługa USB jest przygotowywana. Rzeczywiste pomiary wymagają sprawdzenia z płytką FT232H. Odpowiedź optyczna i kalibracja bezwzględna pozostają niezweryfikowane.</string>
+    <string name="usb_connect">Połącz FT232H i oba czujniki przez adapter danych USB OTG.</string>
+    <string name="usb_permission">Zezwól na dostęp USB</string>
+    <string name="usb_initializing">Inicjalizacja czujników…</string>
+    <string name="usb_ready">USB połączone</string>
+    <string name="usb_error">USB niedostępne</string>
+    <string name="usb_retry">Połącz USB ponownie</string>
+    <string name="usb_identity_temporary">Ten adapter nie ma użytecznego numeru seryjnego. Kalibracja dotyczy tylko tego połączenia.</string>
+    <string name="usb_phone_processing">Aplikacja próbkuje oba czujniki i przetwarza odczyty w telefonie.</string>
+    <string name="usb_sampling_count">Próbki na pomiar</string>
+    <string name="usb_sampling_spacing">Odstęp między próbkami (ms)</string>
+    <string name="usb_sampling_trim">Odrzuć najmniejszą i największą próbkę</string>
+    <string name="usb_diagnostics">Diagnostyka USB</string>
+    <string name="usb_simulation">Dane symulowane</string>
+    <string name="usb_interval">Interwał pomiarów (sekundy)</string>
+    <string name="usb_phone_note">Odłączenie USB lub zamknięcie aplikacji przerywa rejestrację. Ponowne połączenie nigdy nie uruchamia sesji automatycznie.</string>
+    <string name="usb_probe_required">Połącz oba obsługiwane czujniki, aby korzystać z kalibracji i pomiarów odniesienia.</string>
+    <string name="usb_about_architecture">Edycja tylko USB: FT232H + AS7331 + AS7343. Telefon obsługuje przetwarzanie, czas, alarmy i zapis. Obsługa ESP32 pozostaje w gałęzi legacy-esp32.</string>
+    <string name="usb_stop_recording">Zatrzymaj rejestrację przed zmianą źródła danych.</string>
+    <string name="usb_legacy_settings_imported">Dawne ustawienia czujników pozostają w archiwum i nie są automatycznie stosowane do sprzętu USB.</string>
+</resources>

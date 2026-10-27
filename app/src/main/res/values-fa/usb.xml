@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="usb_updates_pending">کانال به‌روزرسانی نسخه USB هنوز منتشر نشده است.</string>
+    <string name="usb_data">داده‌ها</string>
+    <string name="usb_chart">نمودار</string>
+    <string name="usb_sensor_name">حسگر USB</string>
+    <string name="usb_phone_recording">ثبت روی تلفن · اتصال USB لازم است</string>
+    <string name="usb_hardware_pending">پشتیبانی USB در حال آماده‌سازی است. اندازه‌گیری واقعی باید با برد FT232H بررسی شود. پاسخ نوری و کالیبراسیون مطلق هنوز تأیید نشده‌اند.</string>
+    <string name="usb_connect">FT232H و هر دو حسگر را با مبدل داده USB OTG متصل کنید.</string>
+    <string name="usb_permission">اجازه دسترسی USB بدهید</string>
+    <string name="usb_initializing">در حال راه‌اندازی حسگرها…</string>
+    <string name="usb_ready">USB متصل است</string>
+    <string name="usb_error">USB در دسترس نیست</string>
+    <string name="usb_retry">اتصال دوباره USB</string>
+    <string name="usb_identity_temporary">این مبدل شماره سریال قابل استفاده ندارد. کالیبراسیون فقط برای همین اتصال معتبر است.</string>
+    <string name="usb_phone_processing">برنامه از هر دو حسگر نمونه می‌گیرد و خوانش‌ها را روی تلفن پردازش می‌کند.</string>
+    <string name="usb_sampling_count">نمونه در هر اندازه‌گیری</string>
+    <string name="usb_sampling_spacing">فاصله میان نمونه‌ها (میلی‌ثانیه)</string>
+    <string name="usb_sampling_trim">حذف کمترین و بیشترین نمونه</string>
+    <string name="usb_diagnostics">عیب‌یابی USB</string>
+    <string name="usb_simulation">داده‌های شبیه‌سازی‌شده</string>
+    <string name="usb_interval">فاصله اندازه‌گیری‌ها (ثانیه)</string>
+    <string name="usb_phone_note">جدا کردن USB یا بستن برنامه ثبت را متوقف می‌کند. اتصال دوباره هرگز جلسه را خودکار از سر نمی‌گیرد.</string>
+    <string name="usb_probe_required">برای کالیبراسیون و اندازه‌گیری مرجع هر دو حسگر پشتیبانی‌شده را متصل کنید.</string>
+    <string name="usb_about_architecture">نسخه فقط USB: FT232H + AS7331 + AS7343. تلفن پردازش، زمان، هشدارها و ذخیره‌سازی را انجام می‌دهد. پشتیبانی ESP32 در شاخه legacy-esp32 حفظ شده است.</string>
+    <string name="usb_stop_recording">پیش از تغییر منبع داده، ثبت را متوقف کنید.</string>
+    <string name="usb_legacy_settings_imported">تنظیمات قدیمی حسگرها بایگانی می‌مانند و خودکار روی سخت‌افزار USB اعمال نمی‌شوند.</string>
+</resources>

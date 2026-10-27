@@ -41,14 +41,14 @@ class UvirRelease142ResourcesTest {
     @Test fun releaseIdentityAndPublicDocumentationAgree() {
         val root = listOf(File("."), File("..")).first { File(it, "app/build.gradle.kts").isFile }
         val gradle = File(root, "app/build.gradle.kts").readText()
-        assertTrue(gradle.contains("versionCode = 7"))
-        assertTrue(gradle.contains("versionName = \"1.4.2\""))
+        assertTrue(gradle.contains("versionCode = 8"))
+        assertTrue(gradle.contains("versionName = \"2.0.0-dev\""))
         for (file in listOf("RELEASE.md", "docs/UPDATES.md", "CREA_APK_RELEASE.bat",
             "docs/RELEASE_NOTES_1.4.2.md")) assertTrue(file, File(root, file).readText().contains("1.4.2"))
         val sourceVersion = Regex("kFirmwareVersion\\[\\] = \"([^\"]+)\"")
             .find(File(root, "firmware/esp32/UvirSensor/UvirSensor.ino").readText())!!.groupValues[1]
         assertEquals("0.5.119", sourceVersion)
-        val readme = File(root, "README.md").readText()
+        val readme = File(root, "docs/LEGACY_ESP32_README.md").readText()
         assertTrue(readme.contains("## Project on hold"))
         assertTrue(readme.contains("theoretical prototypes"))
         assertTrue(readme.contains("**1.4.2**"))

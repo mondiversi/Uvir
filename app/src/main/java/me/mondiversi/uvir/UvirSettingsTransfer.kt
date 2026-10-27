@@ -36,6 +36,7 @@ internal fun createUvirAppSettingsBackup(
     // Include the default explicitly, even before the checkbox has been touched.
     payload.putPreferenceValue(KEY_SHOW_RTC_BATTERY_WARNING, showUvirRtcBatteryWarning(preferences))
     payload.putPreferenceValue(KEY_APP_THEME, readUvirAppTheme(preferences).storedValue)
+    addUsbPhoneSettingsBackup(context, payload)
     return writeUvirSettingsFile(
         context = context,
         scope = "app",
@@ -393,6 +394,7 @@ private fun decodeUvirSettingsRoot(
 }
 
 private fun importAppSettings(context: Context, payload: JSONObject) {
+    restoreUsbPhoneSettingsBackup(context, payload)
     val preferences =
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     val editor = preferences.edit()
@@ -400,7 +402,7 @@ private fun importAppSettings(context: Context, payload: JSONObject) {
         .filter(::isTransferableAppPreference)
         .forEach(editor::remove)
     payload.keys().forEach { key ->
-        if (!isTransferableAppPreference(key)) {
+        if (!isTransferableAppPreference(key) || isUsbPhoneBackupPreference(key)) {
             return@forEach
         }
         editor.putJsonPreferenceValue(key, payload.get(key))

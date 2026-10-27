@@ -120,14 +120,18 @@ internal fun UvirVersionInfoScreen(
                             WhatsNewIcon(tint = tint)
                         }
                     ) {
-                        listOf(
+                        (if (BuildConfig.USB_ONLY) listOf(
+                            stringResource(R.string.usb_about_architecture),
+                            stringResource(R.string.usb_phone_note),
+                            stringResource(R.string.usb_hardware_pending)
+                        ) else listOf(
                             stringResource(R.string.about_whats_new_connectivity),
                             stringResource(R.string.about_whats_new_connections),
                             stringResource(R.string.about_whats_new_measurements),
                             stringResource(R.string.about_whats_new_interface),
                             stringResource(R.string.update_whats_new),
                             stringResource(R.string.about_whats_new_github)
-                        ).forEach { change ->
+                        )).forEach { change ->
                             Text(
                                 text = "• $change",
                                 color = secondaryText,

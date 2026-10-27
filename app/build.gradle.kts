@@ -54,8 +54,11 @@ android {
         applicationId = "me.mondiversi.uvir"
         minSdk = 26
         targetSdk = 37
-        versionCode = 7
-        versionName = "1.4.2"
+        versionCode = 8
+        versionName = "2.0.0-dev"
+        buildConfigField("boolean", "USB_ONLY", "true")
+        // Enable only after publishing and validating a separate signed USB update channel.
+        buildConfigField("boolean", "USB_UPDATE_CHANNEL_READY", "false")
         buildConfigField(
             "String",
             "GITHUB_REPOSITORY_URL",

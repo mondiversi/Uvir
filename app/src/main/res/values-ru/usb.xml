@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="usb_updates_pending">Канал обновлений USB-редакции ещё не опубликован.</string>
+    <string name="usb_data">Данные</string>
+    <string name="usb_chart">График</string>
+    <string name="usb_sensor_name">USB-датчик</string>
+    <string name="usb_phone_recording">Запись на телефоне · Требуется USB-подключение</string>
+    <string name="usb_hardware_pending">Поддержка USB готовится. Реальные измерения необходимо проверить с платой FT232H. Оптическая характеристика и абсолютная калибровка ещё не подтверждены.</string>
+    <string name="usb_connect">Подключите FT232H и оба датчика через USB OTG адаптер для передачи данных.</string>
+    <string name="usb_permission">Разрешите доступ к USB</string>
+    <string name="usb_initializing">Инициализация датчиков…</string>
+    <string name="usb_ready">USB подключён</string>
+    <string name="usb_error">USB недоступен</string>
+    <string name="usb_retry">Подключить USB заново</string>
+    <string name="usb_identity_temporary">У адаптера нет подходящего серийного номера. Калибровка действует только для этого подключения.</string>
+    <string name="usb_phone_processing">Приложение опрашивает оба датчика и обрабатывает показания на телефоне.</string>
+    <string name="usb_sampling_count">Отсчётов на измерение</string>
+    <string name="usb_sampling_spacing">Интервал между отсчётами (мс)</string>
+    <string name="usb_sampling_trim">Отбросить минимальный и максимальный отсчёты</string>
+    <string name="usb_diagnostics">Диагностика USB</string>
+    <string name="usb_simulation">Искусственные данные</string>
+    <string name="usb_interval">Интервал измерений (секунды)</string>
+    <string name="usb_phone_note">Отключение USB или закрытие приложения прерывает запись. Повторное подключение никогда не возобновляет сеанс автоматически.</string>
+    <string name="usb_probe_required">Подключите оба поддерживаемых датчика для калибровки и опорных измерений.</string>
+    <string name="usb_about_architecture">Редакция только USB: FT232H + AS7331 + AS7343. Телефон управляет обработкой, временем, оповещениями и хранением. Поддержка ESP32 сохранена в ветке legacy-esp32.</string>
+    <string name="usb_stop_recording">Остановите запись перед сменой источника данных.</string>
+    <string name="usb_legacy_settings_imported">Старые настройки датчиков остаются в архиве и не применяются автоматически к USB-оборудованию.</string>
+</resources>
