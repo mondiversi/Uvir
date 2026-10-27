@@ -156,7 +156,7 @@
     <string name="sensor_settings_connection_required">Подключите датчик, чтобы изменить эти настройки.</string>
     <string name="sensor_parameters_description">Настройте общие параметры датчика.</string>
     <string name="home_sensor_disconnected_title">Датчик не подключён</string>
-    <string name="home_sensor_disconnected_description">Подключите датчик для сбора данных, записи предупреждений или изменения его настроек.</string>
+    <string name="home_sensor_disconnected_description">Подключите датчик для получения данных и регистрации оповещений.</string>
     <string name="home_sensor_disconnected_hint">Откройте «Настройки» › «Датчик» › «Подключение», выберите USB, Wi-Fi, Bluetooth или Интернет и просмотрите инструкции.</string>
     <string name="sensor_connection_provisioning_reminder">Чтобы использовать Wi-Fi или Bluetooth, подключите датчик по USB хотя бы один раз. Приложение безопасно получит уникальный идентификатор и учётные данные доступа датчика.</string>
     <string name="sensor_connection_usb">USB</string>

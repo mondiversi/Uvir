@@ -28,7 +28,8 @@ internal fun UsbPhoneSettings(runtime: UvirUsbPhoneRuntime, state: UsbPhoneState
     val context = LocalContext.current
     val preferences = remember { context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE) }
     val scope = rememberCoroutineScope()
-    val editing = state.status == UsbPhoneStatus.READY && !state.simulation && !state.measuringReference
+    val editing = !state.measuringReference
+    val canMeasure = state.status == UsbPhoneStatus.READY && state.ready && !state.simulation && !state.measuringReference
     val title = stringResource(usbSettingsTitle(page))
     val scroll = rememberScrollState()
     var showSettingsExport by remember { mutableStateOf(false) }
@@ -92,21 +93,19 @@ internal fun UsbPhoneSettings(runtime: UvirUsbPhoneRuntime, state: UsbPhoneState
                                     Text(stringResource(R.string.usb_sampling_trim), fontSize = 13.sp)
                                 }
                             }
-                            UvirSensorCalibrationSettings(context, editing, state.uvAvailable, "1.0", {}, "1.0", {},
+                            UvirSensorCalibrationSettings(context, editing, true, "1.0", {}, "1.0", {},
                                 card, text, secondary,
                                 offsets = CalibrationOffsets(state.calibration.offsets.map(Double::toFloat)), offsetsSupported = true,
-                                onOffsetsChange = { runtime.setCalibration(state.calibration.copy(offsets = it.values.map(Float::toDouble))) },
+                                onOffsetsChange = { offsets -> runtime.updateCalibration { it.copy(offsets = offsets.values.map(Float::toDouble)) } },
                                 channelFactors = CalibrationChannelFactors(state.calibration.factors.map(Double::toFloat)), channelFactorsSupported = true,
-                                onChannelFactorsChange = { runtime.setCalibration(state.calibration.copy(factors = it.values.map(Float::toDouble))) },
-                                sensorDeviceId = state.identity, darkMeasurementSupported = editing,
-                                onMeasureDarkOffsets = runtime::measureOffsets)
+                                onChannelFactorsChange = { factors -> runtime.updateCalibration { it.copy(factors = factors.values.map(Float::toDouble)) } },
+                                sensorDeviceId = "phone-usb", darkMeasurementSupported = true,
+                                onMeasureDarkOffsets = if (canMeasure) runtime::measureOffsets else null)
                             UvirOpticalWindowSettings(
                                 OpticalWindowSettings(true, state.calibration.window.map(Double::toFloat), state.calibration.windowMaster.toFloat()),
-                                onChange = { runtime.setCalibration(state.calibration.copy(windowMaster = it.masterMultiplier.toDouble(), window = it.factors.map(Float::toDouble))) },
+                                onChange = { window -> runtime.updateCalibration { it.copy(windowMaster = window.masterMultiplier.toDouble(), window = window.factors.map(Float::toDouble)) } },
                                 enabled = editing, supported = true, cardColor = card, primaryText = text, secondaryText = secondary,
-                                sensorDeviceId = state.identity, onMeasureWindow = runtime::measureWindow)
-                            if (!editing) Text(stringResource(R.string.usb_probe_required), color = secondary, fontSize = 12.sp)
-                            if (editing && !state.persistentIdentity) Text(stringResource(R.string.usb_identity_temporary), color = secondary, fontSize = 12.sp)
+                                sensorDeviceId = "phone-usb", onMeasureWindow = if (canMeasure) runtime::measureWindow else null)
                         }
                         UvirSettingsPage.DEBUG -> {
                             SettingsStaticIsland(title = stringResource(R.string.usb_diagnostics), titleIcon = ConnectivityIconType.DEBUG, containerColor = card, titleColor = text) {
@@ -172,7 +171,8 @@ internal fun UsbPhoneIntField(label: Int, stored: String, range: LongRange, onVa
     var draft by remember(stored) { mutableStateOf(stored) }
     OutlinedTextField(value = draft, onValueChange = { value ->
         if (value.length <= 10 && value.all(Char::isDigit)) { draft = value; value.toLongOrNull()?.takeIf { it in range }?.let(onValue) }
-    }, label = { Text(stringResource(label)) }, modifier = Modifier.fillMaxWidth(), singleLine = true,
+    }, label = { Text(stringResource(label)) }, modifier = Modifier.fillMaxWidth().testTag("usb_setting_$label"), singleLine = true,
+        colors = UvirOutlinedTextFieldColors(),
         keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number))
 }
 

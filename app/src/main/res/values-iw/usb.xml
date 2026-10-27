@@ -12,7 +12,6 @@
     <string name="usb_ready">USB מחובר</string>
     <string name="usb_error">USB אינו זמין</string>
     <string name="usb_retry">חיבור USB מחדש</string>
-    <string name="usb_identity_temporary">למתאם זה אין מספר סידורי שימושי. הכיול תקף לחיבור זה בלבד.</string>
     <string name="usb_phone_processing">האפליקציה דוגמת את שני החיישנים ומעבדת את הקריאות בטלפון.</string>
     <string name="usb_sampling_count">דגימות לכל מדידה</string>
     <string name="usb_sampling_spacing">מרווח בין דגימות (מילישניות)</string>
@@ -21,7 +20,6 @@
     <string name="usb_simulation">נתונים מדומים</string>
     <string name="usb_interval">מרווח מדידות (שניות)</string>
     <string name="usb_phone_note">ניתוק USB או סגירת האפליקציה מפסיקים את ההקלטה. חיבור מחדש לעולם אינו מפעיל מחדש הפעלה באופן אוטומטי.</string>
-    <string name="usb_probe_required">חברו את שני החיישנים הנתמכים כדי להשתמש בכיול ובמדידות ייחוס.</string>
     <string name="usb_about_architecture">מהדורת USB בלבד: FT232H + AS7331 + AS7343. הטלפון מנהל עיבוד, זמן, התראות ואחסון. התמיכה ב־ESP32 נשמרת בענף legacy-esp32.</string>
     <string name="usb_stop_recording">עצרו את ההקלטה לפני שינוי מקור הנתונים.</string>
     <string name="usb_legacy_settings_imported">הגדרות החיישנים הישנות נשמרות בארכיון ואינן מוחלות אוטומטית על חומרת USB.</string>

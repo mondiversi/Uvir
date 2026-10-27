@@ -142,7 +142,7 @@
     <string name="sensor_settings_connection_required">이 설정을 변경하려면 센서를 연결하세요.</string>
     <string name="sensor_parameters_description">센서의 일반 설정을 구성합니다.</string>
     <string name="home_sensor_disconnected_title">센서가 연결되지 않음</string>
-    <string name="home_sensor_disconnected_description">센서를 연결하여 데이터를 수집하고, 경고를 기록하고, 설정을 변경하세요.</string>
+    <string name="home_sensor_disconnected_description">데이터를 수집하고 경고를 기록하려면 센서를 연결하세요.</string>
     <string name="home_sensor_disconnected_hint">설정 › 센서 › 연결을 열어 USB, Wi-Fi, Bluetooth 또는 인터넷을 선택하고 안내를 확인하세요.</string>
     <string name="sensor_connection_provisioning_reminder">Wi-Fi 또는 Bluetooth를 사용하려면 USB로 센서를 한 번 이상 연결하세요. 앱이 센서의 고유 ID와 액세스 자격 증명을 안전하게 획득합니다.</string>
     <string name="sensor_connection_usb">USB</string>

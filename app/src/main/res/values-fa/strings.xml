@@ -146,7 +146,7 @@
     <string name="sensor_settings_connection_required">برای تغییر این تنظیمات، سنسور را وصل کنید.</string>
     <string name="sensor_parameters_description">تنظیمات عمومی حسگر را پیکربندی کنید.</string>
     <string name="home_sensor_disconnected_title">حسگر متصل نیست</string>
-    <string name="home_sensor_disconnected_description">برای دریافت داده، ضبط هشدارها یا تغییر تنظیمات، یک حسگر را وصل کنید.</string>
+    <string name="home_sensor_disconnected_description">برای دریافت داده‌ها و ثبت هشدارها، یک حسگر متصل کنید.</string>
     <string name="home_sensor_disconnected_hint">تنظیمات › حسگر › اتصال را باز کنید تا USB، Wi-Fi، Bluetooth یا اینترنت را انتخاب کرده و راهنما را ببینید.</string>
     <string name="sensor_connection_provisioning_reminder">برای استفاده از Wi-Fi یا Bluetooth، حداقل یک بار حسگر را از طریق USB متصل کنید. برنامه هویت منحصربه‌فرد و اطلاعات دسترسی حسگر را به‌طور ایمن دریافت می‌کند.</string>
     <string name="sensor_connection_usb">USB</string>

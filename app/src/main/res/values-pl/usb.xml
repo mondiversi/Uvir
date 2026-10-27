@@ -12,7 +12,6 @@
     <string name="usb_ready">USB połączone</string>
     <string name="usb_error">USB niedostępne</string>
     <string name="usb_retry">Połącz USB ponownie</string>
-    <string name="usb_identity_temporary">Ten adapter nie ma użytecznego numeru seryjnego. Kalibracja dotyczy tylko tego połączenia.</string>
     <string name="usb_phone_processing">Aplikacja próbkuje oba czujniki i przetwarza odczyty w telefonie.</string>
     <string name="usb_sampling_count">Próbki na pomiar</string>
     <string name="usb_sampling_spacing">Odstęp między próbkami (ms)</string>
@@ -21,7 +20,6 @@
     <string name="usb_simulation">Dane symulowane</string>
     <string name="usb_interval">Interwał pomiarów (sekundy)</string>
     <string name="usb_phone_note">Odłączenie USB lub zamknięcie aplikacji przerywa rejestrację. Ponowne połączenie nigdy nie uruchamia sesji automatycznie.</string>
-    <string name="usb_probe_required">Połącz oba obsługiwane czujniki, aby korzystać z kalibracji i pomiarów odniesienia.</string>
     <string name="usb_about_architecture">Edycja tylko USB: FT232H + AS7331 + AS7343. Telefon obsługuje przetwarzanie, czas, alarmy i zapis. Obsługa ESP32 pozostaje w gałęzi legacy-esp32.</string>
     <string name="usb_stop_recording">Zatrzymaj rejestrację przed zmianą źródła danych.</string>
     <string name="usb_legacy_settings_imported">Dawne ustawienia czujników pozostają w archiwum i nie są automatycznie stosowane do sprzętu USB.</string>

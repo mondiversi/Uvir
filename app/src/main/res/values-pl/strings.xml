@@ -171,7 +171,7 @@
     <string name="sensor_settings_connection_required">Połącz czujnik, aby zmienić te ustawienia.</string>
     <string name="sensor_parameters_description">Skonfiguruj ogólne ustawienia czujnika.</string>
     <string name="home_sensor_disconnected_title">Czujnik niepołączony</string>
-    <string name="home_sensor_disconnected_description">Połącz czujnik, aby wykonywać pomiary, rejestrować alerty lub zmieniać jego ustawienia.</string>
+    <string name="home_sensor_disconnected_description">Podłącz czujnik, aby zbierać dane i rejestrować alarmy.</string>
     <string name="home_sensor_disconnected_hint">Otwórz Ustawienia › Czujnik › Połączenie, aby wybrać USB, Wi-Fi, Bluetooth lub Internet i przeczytać instrukcje.</string>
     <string name="sensor_connection_provisioning_reminder">Aby używać Wi-Fi lub Bluetooth, podłącz czujnik przez USB przynajmniej raz. Aplikacja bezpiecznie pobierze unikalny identyfikator czujnika i dane dostępu.</string>
     <string name="sensor_connection_usb">USB</string>

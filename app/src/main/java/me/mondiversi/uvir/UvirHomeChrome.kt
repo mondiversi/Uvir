@@ -535,7 +535,8 @@ internal fun UvirDisconnectedSensorIsland(
     cardColor: Color,
     primaryText: Color,
     secondaryText: Color,
-    onAddSensor: () -> Unit
+    onAddSensor: () -> Unit,
+    showAddSensor: Boolean = true
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -584,7 +585,7 @@ internal fun UvirDisconnectedSensorIsland(
                     lineHeight = 18.sp,
                     textAlign = TextAlign.Center
                 )
-                UvirAddSensorAction(
+                if (showAddSensor) UvirAddSensorAction(
                     onClick = onAddSensor,
                     primaryText = primaryText,
                     secondaryText = secondaryText,

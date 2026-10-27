@@ -12,7 +12,6 @@
     <string name="usb_ready">USB verbonden</string>
     <string name="usb_error">USB niet beschikbaar</string>
     <string name="usb_retry">USB opnieuw verbinden</string>
-    <string name="usb_identity_temporary">Deze adapter heeft geen bruikbaar serienummer. De kalibratie geldt alleen voor deze verbinding.</string>
     <string name="usb_phone_processing">De app bemonstert beide sensoren en verwerkt de meetwaarden op de telefoon.</string>
     <string name="usb_sampling_count">Monsters per meting</string>
     <string name="usb_sampling_spacing">Tijd tussen monsters (ms)</string>
@@ -21,7 +20,6 @@
     <string name="usb_simulation">Gesimuleerde gegevens</string>
     <string name="usb_interval">Meetinterval (seconden)</string>
     <string name="usb_phone_note">USB loskoppelen of de app sluiten onderbreekt de opname. Opnieuw verbinden herstart nooit automatisch een sessie.</string>
-    <string name="usb_probe_required">Verbind beide ondersteunde sensoren voor kalibratie en referentiemetingen.</string>
     <string name="usb_about_architecture">USB-editie: FT232H + AS7331 + AS7343. De telefoon beheert verwerking, tijd, waarschuwingen en opslag. ESP32-ondersteuning blijft bewaard in de tak legacy-esp32.</string>
     <string name="usb_stop_recording">Stop de opname voordat je de gegevensbron wijzigt.</string>
     <string name="usb_legacy_settings_imported">Oude sensorinstellingen blijven gearchiveerd en worden niet automatisch toegepast op de USB-hardware.</string>

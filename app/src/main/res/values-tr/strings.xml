@@ -146,7 +146,7 @@
     <string name="sensor_settings_connection_required">Bu ayarları değiştirmek için sensörü bağlayın.</string>
     <string name="sensor_parameters_description">Sensörün genel ayarlarını yapılandırın.</string>
     <string name="home_sensor_disconnected_title">Sensör bağlı değil</string>
-    <string name="home_sensor_disconnected_description">Veri almak, uyarıları kaydetmek veya ayarlarını değiştirmek için bir sensör bağlayın.</string>
+    <string name="home_sensor_disconnected_description">Veri almak ve uyarıları kaydetmek için bir sensör bağlayın.</string>
     <string name="home_sensor_disconnected_hint">USB, Wi-Fi, Bluetooth veya İnternet seçmek ve yönergeleri görmek için Ayarlar › Sensör › Bağlantı bölümünü açın.</string>
     <string name="sensor_connection_provisioning_reminder">Wi-Fi veya Bluetooth\'yi kullanmak için sensörü USB ile en az bir kez bağlayın. Uygulama, sensörün benzersiz kimliğini ve erişim bilgilerini güvenli bir şekilde alır.</string>
     <string name="sensor_connection_usb">USB</string>

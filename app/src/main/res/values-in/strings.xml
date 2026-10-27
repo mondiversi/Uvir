@@ -153,7 +153,7 @@
     <string name="sensor_settings_connection_required">Hubungkan sensor untuk mengubah pengaturan ini.</string>
     <string name="sensor_parameters_description">Atur aspek umum sensor.</string>
     <string name="home_sensor_disconnected_title">Sensor tidak terhubung</string>
-    <string name="home_sensor_disconnected_description">Hubungkan sensor untuk mengukur data, mencatat peringatan, atau mengubah pengaturannya.</string>
+    <string name="home_sensor_disconnected_description">Hubungkan sensor untuk mengambil data dan merekam peringatan.</string>
     <string name="home_sensor_disconnected_hint">Buka Pengaturan › Sensor › Koneksi untuk memilih USB, Wi-Fi, Bluetooth, atau Internet dan melihat petunjuk.</string>
     <string name="sensor_connection_provisioning_reminder">Untuk menggunakan Wi-Fi atau Bluetooth, hubungkan sensor melalui USB setidaknya sekali. Aplikasi akan memperoleh identitas unik sensor dan kredensial akses secara aman.</string>
     <string name="sensor_connection_usb">USB</string>

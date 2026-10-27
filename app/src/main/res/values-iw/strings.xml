@@ -151,7 +151,7 @@
     <string name="sensor_settings_connection_required">חבר את החיישן כדי לשנות הגדרות אלה.</string>
     <string name="sensor_parameters_description">הגדר את ההיבטים הכלליים של החיישן.</string>
     <string name="home_sensor_disconnected_title">חיישן לא מחובר</string>
-    <string name="home_sensor_disconnected_description">חבר חיישן כדי לבצע מדידות, לרשום התראות או לשנות את הגדרותיו.</string>
+    <string name="home_sensor_disconnected_description">חבר חיישן כדי לאסוף נתונים ולהקליט התראות.</string>
     <string name="home_sensor_disconnected_hint">פתח את הגדרות › חיישן › חיבור כדי לבחור USB, Wi-Fi, Bluetooth או אינטרנט ולעיין בהוראות.</string>
     <string name="sensor_connection_provisioning_reminder">כדי להשתמש ב-Wi-Fi או Bluetooth, חבר את החיישן באמצעות USB לפחות פעם אחת. היישום יקבל באופן מאובטח את הזהות הייחודית ואת פרטי הגישה של החיישן.</string>
     <string name="sensor_connection_usb">USB</string>

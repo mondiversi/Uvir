@@ -12,7 +12,6 @@
     <string name="usb_ready">USB connesso</string>
     <string name="usb_error">USB non disponibile</string>
     <string name="usb_retry">Ricollega USB</string>
-    <string name="usb_identity_temporary">Questo adattatore non ha un numero seriale utilizzabile. La calibrazione vale soltanto per questo collegamento.</string>
     <string name="usb_phone_processing">L’app campiona i due sensori ed elabora le letture sul telefono.</string>
     <string name="usb_sampling_count">Campioni per misura</string>
     <string name="usb_sampling_spacing">Intervallo tra i campioni (ms)</string>
@@ -21,7 +20,6 @@
     <string name="usb_simulation">Dati fittizi</string>
     <string name="usb_interval">Intervallo acquisizioni (secondi)</string>
     <string name="usb_phone_note">Scollegare USB o chiudere l’app interrompe la registrazione. Ricollegare il sensore non riavvia automaticamente una sessione.</string>
-    <string name="usb_probe_required">Collega entrambi i sensori supportati per usare calibrazione e misure di riferimento.</string>
     <string name="usb_about_architecture">Edizione solo USB: FT232H + AS7331 + AS7343. Il telefono gestisce elaborazione, orario, allerte e salvataggio. Il supporto ESP32 è conservato nel ramo legacy-esp32.</string>
     <string name="usb_stop_recording">Ferma la registrazione prima di cambiare la sorgente dei dati.</string>
     <string name="usb_legacy_settings_imported">Le impostazioni dei vecchi sensori rimangono archiviate e non vengono applicate automaticamente al nuovo hardware USB.</string>

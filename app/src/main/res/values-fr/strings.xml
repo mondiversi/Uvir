@@ -151,7 +151,7 @@
     <string name="sensor_settings_connection_required">Connectez le capteur pour modifier ces paramètres.</string>
     <string name="sensor_parameters_description">Configurez les paramètres généraux du capteur.</string>
     <string name="home_sensor_disconnected_title">Capteur non connecté</string>
-    <string name="home_sensor_disconnected_description">Connectez un capteur pour acquérir des données, enregistrer des alertes ou modifier ses paramètres.</string>
+    <string name="home_sensor_disconnected_description">Connectez un capteur pour acquérir des données et enregistrer des alertes.</string>
     <string name="home_sensor_disconnected_hint">Ouvrez Paramètres › Capteur › Connexion pour choisir USB, Wi-Fi, Bluetooth ou Internet et consulter les instructions.</string>
     <string name="sensor_connection_provisioning_reminder">Pour utiliser le Wi-Fi ou le Bluetooth, connectez le capteur par USB au moins une fois. L’application récupérera en toute sécurité l’identité unique et les identifiants d’accès du capteur.</string>
     <string name="sensor_connection_usb">USB</string>

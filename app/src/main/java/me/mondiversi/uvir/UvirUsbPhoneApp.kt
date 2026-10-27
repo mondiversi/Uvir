@@ -26,7 +26,7 @@ import kotlinx.coroutines.withContext
 import me.mondiversi.uvir.usb.*
 
 private val usbSettingsGroups = listOf(
-    UvirHomeSettingsMenuGroup(R.string.usb_sensor_name, listOf(
+    UvirHomeSettingsMenuGroup(R.string.settings_category_sensor, listOf(
         UvirHomeSettingsMenuEntry(UvirSettingsPage.SENSOR_MEASUREMENT, R.string.sensor_info_measurement, ConnectivityIconType.MEASUREMENT),
         UvirHomeSettingsMenuEntry(UvirSettingsPage.DEBUG, R.string.settings_section_debug, ConnectivityIconType.DEBUG))),
     uvirHomeSettingsMenuGroups[1], uvirHomeSettingsMenuGroups[2])
@@ -114,7 +114,6 @@ private fun UsbPhoneHome(runtime: UvirUsbPhoneRuntime, state: UsbPhoneState, bac
     onAutomatic: () -> Unit, onInfo: () -> Unit, onSettings: (UvirSettingsPage) -> Unit) {
     var biological by rememberSaveable { mutableStateOf(false) }
     var chart by rememberSaveable { mutableStateOf(false) }
-    var showInfo by remember { mutableStateOf(false) }
     var display by rememberUvirLiveSpectrumDisplay("usb-phone")
     var order by rememberUvirMainIslandOrder()
     val reordering = rememberUvirMainIslandReordering(order)
@@ -133,25 +132,16 @@ private fun UsbPhoneHome(runtime: UvirUsbPhoneRuntime, state: UsbPhoneState, bac
     if (manualDialog) UvirManualAcquisitionDialog(note, manualMode, state.manualSession, state.manualCount, text, secondary, card,
         onNoteChanged = { note = it }, onModeSelected = { manualMode = it },
         onSave = { runtime.acquire(note, manualMode); manualDialog = false }, onCancel = { manualDialog = false }, onDismissRequest = { manualDialog = false })
-    if (showInfo) UvirAlertDialog(onDismissRequest = { showInfo = false },
-        title = { Text(stringResource(R.string.usb_sensor_name)) },
-        text = { Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Text("FT232H · AS7331 · AS7343")
-            Text(state.identity.ifBlank { "—" })
-            if (!state.persistentIdentity && state.identity.isNotBlank()) Text(stringResource(R.string.usb_identity_temporary))
-            Text(stringResource(R.string.usb_hardware_pending))
-            Text(stringResource(R.string.usb_phone_note))
-        } }, confirmButton = null, dismissButton = { UvirDialogCloseButton(onClick = { showInfo = false }) }, containerColor = card, textContentColor = text)
     CompositionLocalProvider(LocalUvirLiveReadingAvailable provides state.ready) {
         Column(Modifier.fillMaxSize().padding(horizontal = UvirIslandSpacing)) {
             Row(Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
                 UvirHomeInfoLogo(stringResource(R.string.version_info), onInfo)
                 Column(Modifier.weight(1f).padding(horizontal = 10.dp).clickable(indication = null,
-                    interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }) { showInfo = true }) {
-                    Text(stringResource(R.string.usb_sensor_name), fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                    interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }) { onInfo() }) {
+                    Text(stringResource(R.string.app_name), fontWeight = FontWeight.Bold, fontSize = 20.sp, modifier = Modifier.testTag("home_app_title"))
                     val status = if (state.simulation) stringResource(R.string.sensor_status_simulated)
                         else stringResource(when (state.status) {
-                            UsbPhoneStatus.DETACHED -> R.string.usb_connect
+                            UsbPhoneStatus.DETACHED -> R.string.sensor_status_no_sensor
                             UsbPhoneStatus.PERMISSION -> R.string.usb_permission
                             UsbPhoneStatus.INITIALIZING -> R.string.usb_initializing
                             UsbPhoneStatus.READY -> if (state.ready) R.string.usb_ready else R.string.live_chart_waiting
@@ -170,11 +160,15 @@ private fun UsbPhoneHome(runtime: UvirUsbPhoneRuntime, state: UsbPhoneState, bac
             LazyColumn(Modifier.weight(1f), contentPadding = PaddingValues(bottom = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(UvirIslandSpacing)) {
                 if (!state.ready) item {
+                    if (state.status == UsbPhoneStatus.DETACHED) {
+                        UvirDisconnectedSensorIsland(card, text, secondary, onAddSensor = {}, showAddSensor = false)
+                    } else {
                     SettingsStaticIsland(title = stringResource(R.string.usb_sensor_name), titleIcon = ConnectivityIconType.SENSOR, containerColor = card, titleColor = text) {
                         Text(stringResource(if (state.status == UsbPhoneStatus.READY) R.string.live_chart_waiting else R.string.usb_connect), color = secondary)
                         Text(stringResource(R.string.usb_hardware_pending), color = secondary, fontSize = 12.sp)
                         if (state.error != null) Text(state.error, color = secondary, fontSize = 12.sp)
                         UsbPhoneAction(R.string.usb_retry, onClick = runtime::retry)
+                    }
                     }
                 }
                 else if (biological) item { BiologicalEffectsContent(sample, true, {}, chart, history.toList(),
@@ -213,7 +207,7 @@ private fun UsbPhoneHome(runtime: UvirUsbPhoneRuntime, state: UsbPhoneState, bac
                     }
                 }
                 UvirAutomaticAcquisitionFloatingAction(state.automaticSession != null, state.automaticCount,
-                    state.ready || state.automaticSession != null, false) {
+                    true, false) {
                     if (state.automaticSession != null) runtime.stopAutomatic() else onAutomatic()
                 }
             }
@@ -242,16 +236,26 @@ internal fun UsbPhoneAction(label: Int, enabled: Boolean = true, modifier: Modif
 @Composable
 private fun UsbPhoneAutomaticPage(state: UsbPhoneState, background: Color, card: Color, text: Color, secondary: Color,
     onBack: () -> Unit, onStart: (AutomaticAcquisitionRequest) -> Unit) {
-    var interval by rememberSaveable { mutableStateOf("10") }
-    var delayText by rememberSaveable { mutableStateOf("0") }
-    var duration by rememberSaveable { mutableStateOf("0") }
-    var limit by rememberSaveable { mutableStateOf("0") }
-    var note by rememberSaveable { mutableStateOf("") }
-    var conditional by rememberSaveable { mutableStateOf(false) }
-    var match by rememberSaveable { mutableStateOf(AcquisitionConditionMatch.ANY) }
-    var action by rememberSaveable { mutableStateOf(AcquisitionConditionAction.ACQUIRE) }
     val context = LocalContext.current
     val preferences = remember { context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE) }
+    var interval by rememberSaveable { mutableStateOf(preferences.getString("usb_auto_interval", "10").orEmpty()) }
+    var delayText by rememberSaveable { mutableStateOf(preferences.getString("usb_auto_delay", "0").orEmpty()) }
+    var duration by rememberSaveable { mutableStateOf(preferences.getString("usb_auto_duration", "0").orEmpty()) }
+    var limit by rememberSaveable { mutableStateOf(preferences.getString("usb_auto_limit", "0").orEmpty()) }
+    var note by rememberSaveable { mutableStateOf(preferences.getString("usb_auto_note", "").orEmpty()) }
+    var conditional by rememberSaveable { mutableStateOf(preferences.getBoolean("usb_auto_conditional", false)) }
+    var match by rememberSaveable { mutableStateOf(runCatching {
+        AcquisitionConditionMatch.valueOf(preferences.getString("usb_auto_match", AcquisitionConditionMatch.ANY.name)!!)
+    }.getOrDefault(AcquisitionConditionMatch.ANY)) }
+    var action by rememberSaveable { mutableStateOf(runCatching {
+        AcquisitionConditionAction.valueOf(preferences.getString("usb_auto_action", AcquisitionConditionAction.ACQUIRE.name)!!)
+    }.getOrDefault(AcquisitionConditionAction.ACQUIRE)) }
+    LaunchedEffect(interval, delayText, duration, limit, note, conditional, match, action) {
+        preferences.edit().putString("usb_auto_interval", interval).putString("usb_auto_delay", delayText)
+            .putString("usb_auto_duration", duration).putString("usb_auto_limit", limit).putString("usb_auto_note", note)
+            .putBoolean("usb_auto_conditional", conditional).putString("usb_auto_match", match.name)
+            .putString("usb_auto_action", action.name).apply()
+    }
     var rules by remember { mutableStateOf(loadAcquisitionConditions(preferences)) }
     var showRules by remember { mutableStateOf(false) }
     if (showRules) UvirAcquisitionConditionsDialog(rules, card, text, secondary, state.sample,
@@ -267,7 +271,8 @@ private fun UsbPhoneAutomaticPage(state: UsbPhoneState, background: Color, card:
                         Triple(R.string.scheduled_start, delayText, { s: String -> delayText = s }),
                         Triple(R.string.scheduled_end, duration, { s: String -> duration = s }),
                         Triple(R.string.number_of_acquisitions, limit, { s: String -> limit = s }))) {
-                        OutlinedTextField(value, setter, Modifier.fillMaxWidth(), label = { Text(stringResource(label)) }, singleLine = true,
+                        OutlinedTextField(value, setter, Modifier.fillMaxWidth().testTag("usb_auto_field_$label"), label = { Text(stringResource(label)) }, singleLine = true,
+                            colors = UvirOutlinedTextFieldColors(),
                             keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number))
                     }
                     UvirLimitedNoteField(value = note, onValueChange = { note = it }, label = stringResource(R.string.optional_note), secondaryText = secondary)

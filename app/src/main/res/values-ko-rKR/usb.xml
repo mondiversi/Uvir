@@ -12,7 +12,6 @@
     <string name="usb_ready">USB 연결됨</string>
     <string name="usb_error">USB 사용 불가</string>
     <string name="usb_retry">USB 다시 연결</string>
-    <string name="usb_identity_temporary">이 어댑터에는 사용 가능한 일련번호가 없습니다. 교정은 이번 연결에만 적용됩니다.</string>
     <string name="usb_phone_processing">앱이 두 센서를 샘플링하고 휴대전화에서 측정값을 처리합니다.</string>
     <string name="usb_sampling_count">측정당 샘플 수</string>
     <string name="usb_sampling_spacing">샘플 간격(ms)</string>
@@ -21,7 +20,6 @@
     <string name="usb_simulation">모의 데이터</string>
     <string name="usb_interval">측정 간격(초)</string>
     <string name="usb_phone_note">USB를 분리하거나 앱을 닫으면 기록이 중단됩니다. 다시 연결해도 세션이 자동으로 재시작되지 않습니다.</string>
-    <string name="usb_probe_required">교정과 기준 측정을 사용하려면 지원되는 두 센서를 연결하세요.</string>
     <string name="usb_about_architecture">USB 전용 버전: FT232H + AS7331 + AS7343. 휴대전화가 처리, 시간, 경고 및 저장을 담당합니다. ESP32 지원은 legacy-esp32 브랜치에 보존됩니다.</string>
     <string name="usb_stop_recording">데이터 소스를 바꾸기 전에 기록을 중지하세요.</string>
     <string name="usb_legacy_settings_imported">이전 센서 설정은 보관되며 USB 하드웨어에 자동으로 적용되지 않습니다.</string>

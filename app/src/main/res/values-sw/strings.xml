@@ -147,7 +147,7 @@
     <string name="sensor_settings_connection_required">Unganisha kihisi ili kubadilisha mipangilio hii.</string>
     <string name="sensor_parameters_description">Sanidi mipangilio ya jumla ya kihisi.</string>
     <string name="home_sensor_disconnected_title">Kihisi hakijaunganishwa</string>
-    <string name="home_sensor_disconnected_description">Unganisha kitambuzi ili kupata data, kurekodi arifa au kubadilisha mipangilio yake.</string>
+    <string name="home_sensor_disconnected_description">Unganisha kihisi ili kukusanya data na kurekodi tahadhari.</string>
     <string name="home_sensor_disconnected_hint">Fungua Mipangilio › Kihisi › Muunganisho ili kuchagua USB, Wi-Fi, Bluetooth au Intaneti na kusoma maelekezo.</string>
     <string name="sensor_connection_provisioning_reminder">Ili kutumia Wi-Fi au Bluetooth, unganisha kitambuzi kwa USB angalau mara moja. Programu itapata kwa usalama utambulisho wa kipekee na taarifa za ufikiaji za kitambuzi.</string>
     <string name="sensor_connection_usb">USB</string>

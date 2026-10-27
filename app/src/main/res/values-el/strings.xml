@@ -146,7 +146,7 @@
     <string name="sensor_settings_connection_required">Συνδέστε τον αισθητήρα για να αλλάξετε αυτές τις ρυθμίσεις.</string>
     <string name="sensor_parameters_description">Ρυθμίστε τις γενικές επιλογές του αισθητήρα.</string>
     <string name="home_sensor_disconnected_title">Αισθητήρας μη συνδεδεμένος</string>
-    <string name="home_sensor_disconnected_description">Συνδέστε έναν αισθητήρα για λήψη δεδομένων, εγγραφή ειδοποιήσεων ή αλλαγή των ρυθμίσεών του.</string>
+    <string name="home_sensor_disconnected_description">Σύνδεσε έναν αισθητήρα για λήψη δεδομένων και καταγραφή ειδοποιήσεων.</string>
     <string name="home_sensor_disconnected_hint">Ανοίξτε Ρυθμίσεις › Αισθητήρας › Σύνδεση για να επιλέξετε USB, Wi-Fi, Bluetooth ή Internet και να δείτε τις οδηγίες.</string>
     <string name="sensor_connection_provisioning_reminder">Για να χρησιμοποιήσετε το Wi-Fi ή το Bluetooth, συνδέστε τον αισθητήρα με USB τουλάχιστον μία φορά. Η εφαρμογή θα αποκτήσει με ασφάλεια τη μοναδική ταυτότητα και τα διαπιστευτήρια πρόσβασης του αισθητήρα.</string>
     <string name="sensor_connection_usb">USB</string>

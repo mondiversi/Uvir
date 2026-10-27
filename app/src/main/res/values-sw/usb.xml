@@ -12,7 +12,6 @@
     <string name="usb_ready">USB imeunganishwa</string>
     <string name="usb_error">USB haipatikani</string>
     <string name="usb_retry">Unganisha USB tena</string>
-    <string name="usb_identity_temporary">Adapta hii haina nambari ya mfululizo inayofaa. Urekebishaji unatumika kwa muunganisho huu pekee.</string>
     <string name="usb_phone_processing">Programu huchukua sampuli za vihisi vyote viwili na kuchakata usomaji kwenye simu.</string>
     <string name="usb_sampling_count">Sampuli kwa kila kipimo</string>
     <string name="usb_sampling_spacing">Muda kati ya sampuli (ms)</string>
@@ -21,7 +20,6 @@
     <string name="usb_simulation">Data ya kuigiza</string>
     <string name="usb_interval">Muda kati ya vipimo (sekunde)</string>
     <string name="usb_phone_note">Kutoa USB au kufunga programu hukatiza kurekodi. Kuunganisha tena hakuanzi kipindi upya kiotomatiki.</string>
-    <string name="usb_probe_required">Unganisha vihisi vyote viwili vinavyotumika ili kutumia urekebishaji na vipimo vya marejeo.</string>
     <string name="usb_about_architecture">Toleo la USB pekee: FT232H + AS7331 + AS7343. Simu hushughulikia uchakataji, saa, tahadhari na uhifadhi. Usaidizi wa ESP32 umehifadhiwa kwenye tawi legacy-esp32.</string>
     <string name="usb_stop_recording">Simamisha kurekodi kabla ya kubadilisha chanzo cha data.</string>
     <string name="usb_legacy_settings_imported">Mipangilio ya zamani ya vihisi hubaki kwenye kumbukumbu na haitumiki kiotomatiki kwenye vifaa vya USB.</string>

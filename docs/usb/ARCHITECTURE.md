@@ -69,12 +69,16 @@ metadata stay readable. Existing scientific/custom exports and portable imports
 continue using their original SI and source-identity rules. No bulk conversion
 or destructive database reset is part of this redesign.
 
-New USB calibration is in a separate preferences namespace and is keyed by a
-usable FT232H serial. Without one it is connection-scoped. The old ESP32 settings
-are not silently promoted to a new head. Imported legacy sensor settings stay
+USB sampling and calibration are phone-owned settings, editable and persistent
+even without an attached adapter. The UI retains Sensor/App categories to group
+their purpose; both categories are stored on the phone. Only automatic reference
+measurements require real live readings. FT232H identity remains record provenance,
+not the owner of these settings. Old ESP32 settings are not silently promoted.
+Imported legacy sensor settings stay
 archived and are never sent as ESP32 commands to an FT232H.
 The encrypted app-settings backup includes durable USB sampling/calibration
-profiles, excluding temporary identities, open jobs and simulation state.
+settings, excluding open jobs and simulation state. Earlier preview per-adapter
+profiles remain archived without replacing the phone configuration.
 
 ## Release boundary
 

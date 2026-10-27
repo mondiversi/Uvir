@@ -8,7 +8,6 @@ import androidx.core.content.ContextCompat
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import me.mondiversi.uvir.usb.*
-import org.json.JSONObject
 import java.util.UUID
 import java.util.concurrent.Executors
 
@@ -52,6 +51,7 @@ internal class UvirUsbPhoneRuntime(private val context: Context) {
         handleFailure(error)
     })
     private val mutable = MutableStateFlow(UsbPhoneState(
+        calibration = loadCalibration(),
         samples = preferences.getInt("samples", 5).coerceIn(1, 100),
         spacingMs = preferences.getLong("spacing", 100).coerceIn(0, 60000),
         trim = preferences.getBoolean("trim", false)))
@@ -159,9 +159,8 @@ internal class UvirUsbPhoneRuntime(private val context: Context) {
                 if (epoch != generation) return@launch
                 val identity = usbHardwareIdentity(runCatching { found.serialNumber }.getOrNull(), UUID.randomUUID().toString())
                 val persistent = !identity.startsWith("FT232H-TEMP:")
-                val calibration = if (persistent) loadCalibration(identity) else PhoneCalibration()
                 mutable.update { it.copy(identity = identity, persistentIdentity = persistent,
-                    uvAvailable = uvResult.isSuccess, visibleAvailable = visibleResult.isSuccess, calibration = calibration) }
+                    uvAvailable = uvResult.isSuccess, visibleAvailable = visibleResult.isSuccess) }
                 if (uvResult.isFailure || visibleResult.isFailure) throw InvalidSensorReading(
                     listOfNotNull(uvResult.exceptionOrNull()?.message, visibleResult.exceptionOrNull()?.message).joinToString("; "))
                 database.ensureSensorProfile(identity)
@@ -218,7 +217,7 @@ internal class UvirUsbPhoneRuntime(private val context: Context) {
         bus?.close(); bus = null; device = null
         scope.launch { finishActivities() }
         mutable.update { it.copy(status = UsbPhoneStatus.DETACHED, sample = null, identity = "", uvGain = null,
-            visibleGain = null, uvAvailable = false, visibleAvailable = false, calibration = PhoneCalibration(), manualSession = null, manualCount = 0) }
+            visibleGain = null, uvAvailable = false, visibleAvailable = false, manualSession = null, manualCount = 0) }
     }
     fun retry() { permissionRequestedFor = null; disconnect(); scope.launch { delay(150); withContext(Dispatchers.Main) { scan() } } }
 
@@ -227,13 +226,14 @@ internal class UvirUsbPhoneRuntime(private val context: Context) {
         disconnect()
         scope.launch {
             finishActivities()
-            mutable.update { it.copy(simulation = enabled, calibration = PhoneCalibration()) }
+            mutable.update { it.copy(simulation = enabled) }
             if (enabled) {
                 val epoch = generationCounter.incrementAndGet()
                 loop = scope.launch {
                     while (isActive && epoch == generation) {
                         val t = SystemClock.elapsedRealtime() / 3000.0
-                        publish(DoubleArray(11) { i -> (1 + kotlin.math.sin(t + i)) * (if (i < 3) .002 else .3) }.toSensorSample()
+                        publish(processPhoneMeasurement(listOf(DoubleArray(11) { i ->
+                            (1 + kotlin.math.sin(t + i)) * (if (i < 3) .002 else .3) }), mutable.value.calibration)
                             .copy(qualityFlags = if (mutable.value.outOfRangeSimulation && (t.toLong() % 5L == 0L)) 3 else 0), "")
                         delay(350)
                     }
@@ -399,17 +399,17 @@ internal class UvirUsbPhoneRuntime(private val context: Context) {
         preferences.edit().putInt("samples", samples).putLong("spacing", spacing).putBoolean("trim", trim).apply()
         mutable.update { it.copy(samples = samples, spacingMs = spacing, trim = trim) }
     }
-    fun setCalibration(value: PhoneCalibration) {
+    @Synchronized fun setCalibration(value: PhoneCalibration) {
         if (mutable.value.measuringReference) return
         revisionCounter.incrementAndGet()
-        val current = mutable.value
-        if (current.persistentIdentity) preferences.edit().putString("calibration:${current.identity}", JSONObject()
-            .put("factors", org.json.JSONArray(value.factors)).put("offsets", org.json.JSONArray(value.offsets))
-            .put("master", value.windowMaster).put("window", org.json.JSONArray(value.window)).toString()).apply()
+        preferences.edit().putString(USB_PHONE_CALIBRATION, encodeUsbPhoneCalibration(value)).apply()
         mutable.update { it.copy(calibration = value) }
     }
-    private fun loadCalibration(id: String): PhoneCalibration = runCatching {
-        decodeUsbPhoneCalibration(preferences.getString("calibration:$id", null) ?: return PhoneCalibration())
+    @Synchronized fun updateCalibration(transform: (PhoneCalibration) -> PhoneCalibration) {
+        setCalibration(transform(mutable.value.calibration))
+    }
+    private fun loadCalibration(): PhoneCalibration = runCatching {
+        decodeUsbPhoneCalibration(preferences.getString(USB_PHONE_CALIBRATION, null) ?: return PhoneCalibration())
     }.getOrElse { PhoneCalibration() }
 
     suspend fun measureOffsets(group: CalibrationGroup, progress: (Int) -> Unit): DarkOffsetReading {
@@ -464,7 +464,7 @@ internal class UvirUsbPhoneRuntime(private val context: Context) {
     fun reloadPhoneSettings() {
         revisionCounter.incrementAndGet()
         mutable.update { current -> current.copy(
-            calibration = if (current.persistentIdentity) loadCalibration(current.identity) else PhoneCalibration(),
+            calibration = loadCalibration(),
             samples = preferences.getInt("samples", 5).coerceIn(1, 100),
             spacingMs = preferences.getLong("spacing", 100).coerceIn(0, 60000), trim = preferences.getBoolean("trim", false), sample = null) }
     }

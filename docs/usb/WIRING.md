@@ -42,9 +42,10 @@ by this initial driver; verify both modules work with the chosen timing.
 
 FT232H USB serial numbers depend on its optional programmed EEPROM. An adapter
 without a usable serial number does not acquire a globally unique identity from
-its model or I²C addresses. The app uses a temporary attachment identity and
-does not reuse another attachment's calibration. A valid serial permits a
-stable calibration profile. No ESP32 hardware ID is fabricated.
+its model or I²C addresses. The app uses a temporary attachment identity for
+record provenance when no serial is available. Sampling and calibration settings
+belong to the phone and survive disconnect/reconnect independently of that
+identity. No ESP32 hardware ID is fabricated.
 
 ## Primary references
 

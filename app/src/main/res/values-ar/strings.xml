@@ -138,7 +138,7 @@
     <string name="sensor_settings_connection_required">صِل المستشعر لتغيير هذه الإعدادات.</string>
     <string name="sensor_parameters_description">اضبط الجوانب العامة للمستشعر.</string>
     <string name="home_sensor_disconnected_title">المستشعر غير متصل</string>
-    <string name="home_sensor_disconnected_description">صِل مستشعرًا لالتقاط البيانات أو تسجيل التنبيهات أو تغيير إعداداته.</string>
+    <string name="home_sensor_disconnected_description">وصّل مستشعرًا للحصول على البيانات وتسجيل التنبيهات.</string>
     <string name="home_sensor_disconnected_hint">افتح الإعدادات › المستشعر › الاتصال لاختيار USB أو Wi-Fi أو Bluetooth أو الإنترنت وعرض التعليمات.</string>
     <string name="sensor_connection_provisioning_reminder">لاستخدام Wi-Fi أو Bluetooth، صِل المستشعر عبر USB مرة واحدة على الأقل. سيحصل التطبيق بأمان على الهوية الفريدة وبيانات الوصول الخاصة بالمستشعر.</string>
     <string name="sensor_connection_usb">USB</string>

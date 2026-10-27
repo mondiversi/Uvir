@@ -151,7 +151,7 @@
     <string name="sensor_settings_connection_required">Conecte o sensor para alterar essas configurações.</string>
     <string name="sensor_parameters_description">Configure os aspectos gerais do sensor.</string>
     <string name="home_sensor_disconnected_title">Sensor não conectado</string>
-    <string name="home_sensor_disconnected_description">Conecte um sensor para adquirir dados, registrar alertas ou alterar suas configurações.</string>
+    <string name="home_sensor_disconnected_description">Liga um sensor para efetuar aquisições e registar alertas.</string>
     <string name="home_sensor_disconnected_hint">Abra Configurações › Sensor › Conexão para escolher USB, Wi-Fi, Bluetooth ou Internet e consultar as instruções.</string>
     <string name="sensor_connection_provisioning_reminder">Para usar Wi-Fi ou Bluetooth, ligue o sensor por USB pelo menos uma vez. A aplicação obterá com segurança a identidade única e as credenciais de acesso do sensor.</string>
     <string name="sensor_connection_usb">USB</string>

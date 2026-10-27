@@ -159,7 +159,7 @@
     <string name="sensor_settings_connection_required">Verbind de sensor om deze instellingen te wijzigen.</string>
     <string name="sensor_parameters_description">Stel de algemene aspecten van de sensor in.</string>
     <string name="home_sensor_disconnected_title">Sensor niet verbonden</string>
-    <string name="home_sensor_disconnected_description">Verbind een sensor om gegevens te meten, waarschuwingen te registreren of zijn instellingen te wijzigen.</string>
+    <string name="home_sensor_disconnected_description">Sluit een sensor aan om metingen uit te voeren en waarschuwingen vast te leggen.</string>
     <string name="home_sensor_disconnected_hint">Open Instellingen › Sensor › Verbinding om USB, Wi-Fi, Bluetooth of Internet te kiezen en de instructies te bekijken.</string>
     <string name="sensor_connection_provisioning_reminder">Sluit de sensor minstens eenmaal via USB aan om Wi-Fi of Bluetooth te gebruiken. De app haalt veilig de unieke sensoridentiteit en toegangsgegevens op.</string>
     <string name="sensor_connection_usb">USB</string>

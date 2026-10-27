@@ -74,6 +74,52 @@ class UvirUsbPhoneUiTest {
         assertFalse(runtime.state.value.ready)
     }
 
+    @Test fun headerAndOfflineMeasurementControlsUsePhoneSettings() {
+        compose.onNodeWithTag("home_app_title", useUnmergedTree = true).assertTextEquals(compose.activity.getString(R.string.app_name))
+        compose.onNodeWithText(compose.activity.getString(R.string.home_sensor_disconnected_description)).assertIsDisplayed()
+        compose.onNodeWithTag("disconnected_add_sensor").assertDoesNotExist()
+        val preferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val previousInterval = preferences.getString("usb_auto_interval", null)
+        val calibration = runtime.state.value.calibration
+        try {
+            compose.onNodeWithContentDescription(compose.activity.getString(R.string.start)).performClick()
+            compose.onNodeWithTag("usb_auto_field_${R.string.usb_interval}").performTextReplacement("17")
+            compose.onNodeWithText(compose.activity.getString(R.string.start).uppercase(java.util.Locale.getDefault())).performScrollTo().assertIsNotEnabled()
+            Espresso.closeSoftKeyboard()
+            Espresso.pressBack()
+            awaitHome()
+            compose.onNodeWithContentDescription(compose.activity.getString(R.string.start)).performClick()
+            compose.onNodeWithTag("usb_auto_field_${R.string.usb_interval}").assertTextContains("17")
+            Espresso.pressBack()
+            awaitHome()
+            compose.onNodeWithTag("home_settings_menu_button").performClick()
+            compose.onNodeWithTag("home_settings_item_SENSOR_MEASUREMENT").performScrollTo().performClick()
+            for (index in 0..10) {
+                compose.onNodeWithTag("calibration_channel_factor_$index").performScrollTo().assertIsEnabled()
+                compose.onNodeWithTag("calibration_offset_$index").performScrollTo().assertIsEnabled()
+            }
+            for (tag in listOf("dark_offsets_uv", "dark_offsets_vis"))
+                compose.onNodeWithTag(tag).performScrollTo().assertIsNotEnabled()
+            compose.onNodeWithTag("optical_common_factor").performScrollTo().assertIsEnabled().performTextReplacement("1,25")
+            compose.onNodeWithTag("optical_channel_0").performScrollTo().performClick()
+            compose.waitUntil(5000) { runtime.state.value.calibration.windowMaster == 1.25 }
+            for (index in 0..10) compose.onNodeWithTag("optical_channel_$index").performScrollTo().assertIsEnabled()
+            compose.onNodeWithTag("optical_window_calculate").performScrollTo().assertIsNotEnabled()
+            Espresso.closeSoftKeyboard()
+            Espresso.pressBack()
+            awaitHome()
+            compose.onNodeWithTag("home_settings_menu_button").performClick()
+            compose.onNodeWithTag("home_settings_item_SENSOR_MEASUREMENT").performScrollTo().performClick()
+            compose.onNodeWithTag("optical_common_factor").performScrollTo().assertIsEnabled()
+            assertEquals(1.25, runtime.state.value.calibration.windowMaster, 0.0)
+        } finally { compose.runOnIdle {
+            runtime.setCalibration(calibration)
+            preferences.edit().apply {
+                if (previousInterval == null) remove("usb_auto_interval") else putString("usb_auto_interval", previousInterval)
+            }.commit()
+        } }
+    }
+
     @Test fun phoneRecordsSiDataAndDisconnectNeverBackfills() {
         compose.runOnIdle { runtime.setSimulation(true) }
         compose.waitUntil(10000) { runtime.state.value.ready }

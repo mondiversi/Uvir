@@ -141,7 +141,7 @@
     <string name="sensor_settings_connection_required">これらの設定を変更するにはセンサーを接続してください。</string>
     <string name="sensor_parameters_description">センサーの一般設定を行います。</string>
     <string name="home_sensor_disconnected_title">センサー未接続</string>
-    <string name="home_sensor_disconnected_description">データ取得、アラート記録、設定の変更を行うにはセンサーを接続してください。</string>
+    <string name="home_sensor_disconnected_description">データの取得やアラートの記録を行うには、センサーを接続してください。</string>
     <string name="home_sensor_disconnected_hint">設定 › センサー › 接続を開き、USB、Wi-Fi、Bluetooth、またはインターネットを選択して手順を確認してください。</string>
     <string name="sensor_connection_provisioning_reminder">Wi-Fi または Bluetooth を使用するには、センサーを一度 USB で接続してください。アプリがセンサーの固有 ID とアクセス資格情報を安全に取得します。</string>
     <string name="sensor_connection_usb">USB</string>

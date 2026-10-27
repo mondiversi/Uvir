@@ -6,12 +6,17 @@
   or ESP32 firmware replacement has been published.
 - 769 JVM tests pass, including the new driver/pipeline tests and all existing
   unit regression tests. Resource catalogs are complete in all 20 languages.
-- 14 instrumented tests pass on a Samsung Galaxy S10e / Android 12 in the
+- 16 instrumented tests pass on a Samsung Galaxy S10e / Android 12 in the
   disposable `me.mondiversi.uvir.verification` package: USB-only menu, day/night,
   portrait/landscape, mock acquisition/alerts, disconnect interruption, isolated
-  USB-settings backup and legacy SI database migration.
-- No acquisitions, settings or associations in the installed real app were
-  changed. It remains on the stable ESP32 edition 1.4.2.
+  USB-settings backup and legacy SI database migration. Offline configuration
+  tests cover editable sampling/calibration, independent factor/offset updates,
+  optical-master persistence, automatic-acquisition drafts and disabled reference
+  collection without an adapter.
+- At the owner's request, the installed real app was upgraded from 1.4.2 to the
+  signed USB development build `2.0.0-dev`, without uninstalling it. Encrypted
+  snapshots were verified before and after the upgrade; all existing database
+  tables were unchanged. This is a local preview, not a stable release.
 - Real FT232H transfers, electrical compatibility, optical response and
   screen-off USB recording remain pending. Other Android versions/tablets have
   not been bench-tested in this redesign.

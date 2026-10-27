@@ -249,11 +249,11 @@ class UvirLocalizedResourcesTest {
     @Test fun disconnectedHintRefersToASensorRatherThanTheOnlySensor() {
         val key = "string:home_sensor_disconnected_description"
         assertEquals(
-            "Connetti un sensore per effettuare acquisizioni, registrare allerte o modificarne le impostazioni.",
+            "Connetti un sensore per effettuare acquisizioni e registrare allerte.",
             catalogs.getValue("values-it").getValue(key).text
         )
         assertEquals(
-            "Connect a sensor to acquire data, record alerts, or change its settings.",
+            "Connect a sensor to acquire data and record alerts.",
             catalogs.getValue("values").getValue(key).text
         )
         assertEquals(1, Regex("\\bsensore\\b").findAll(catalogs.getValue("values-it").getValue(key).text).count())

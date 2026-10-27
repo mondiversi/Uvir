@@ -39,7 +39,7 @@ internal fun DoubleArray.toSensorSample(): SensorSample {
 internal fun SensorSample.channelValues(): DoubleArray =
     doubleArrayOf(uvc, uvb, uva, violetto, blu, verde, giallo, arancione, rosso, f8, nir)
 
-/** No hardware serial means a fresh, connection-scoped identity: never reuse another unit's calibration. */
+/** No hardware serial means a fresh record-source identity; calibration remains owned by the phone. */
 internal fun usbHardwareIdentity(serial: String?, connectionId: String): String {
     val valid = serial?.trim()?.takeIf { it.matches(Regex("[A-Za-z0-9_-]{4,64}")) && it.any { c -> c != '0' } }
     return if (valid != null) "FT232H:$valid" else "FT232H-TEMP:$connectionId"

@@ -133,7 +133,7 @@
     <string name="sensor_settings_connection_required">连接传感器后才能更改这些设置。</string>
     <string name="sensor_parameters_description">配置传感器的常规设置。</string>
     <string name="home_sensor_disconnected_title">传感器未连接</string>
-    <string name="home_sensor_disconnected_description">连接传感器以采集数据、记录警报或更改其设置。</string>
+    <string name="home_sensor_disconnected_description">连接传感器以采集数据和记录警报。</string>
     <string name="home_sensor_disconnected_hint">打开“设置 › 传感器 › 连接”，选择 USB、Wi-Fi、Bluetooth 或互联网并查看说明。</string>
     <string name="sensor_connection_provisioning_reminder">要使用 Wi-Fi 或 Bluetooth，请至少通过 USB 连接一次传感器。应用将安全获取传感器的唯一身份和访问凭据。</string>
     <string name="sensor_connection_usb">USB</string>

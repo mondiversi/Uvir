@@ -12,7 +12,6 @@
     <string name="usb_ready">USB متصل</string>
     <string name="usb_error">USB غير متاح</string>
     <string name="usb_retry">إعادة توصيل USB</string>
-    <string name="usb_identity_temporary">لا يحتوي هذا المحول على رقم تسلسلي صالح للاستخدام. تنطبق المعايرة على هذا الاتصال فقط.</string>
     <string name="usb_phone_processing">يأخذ التطبيق عينات من المستشعرين ويعالج القراءات على الهاتف.</string>
     <string name="usb_sampling_count">العينات لكل قياس</string>
     <string name="usb_sampling_spacing">الفاصل بين العينات (مللي ثانية)</string>
@@ -21,7 +20,6 @@
     <string name="usb_simulation">بيانات محاكاة</string>
     <string name="usb_interval">الفاصل بين القياسات (ثوانٍ)</string>
     <string name="usb_phone_note">يؤدي فصل USB أو إغلاق التطبيق إلى إيقاف التسجيل. لا تؤدي إعادة التوصيل إلى إعادة تشغيل الجلسة تلقائيًا.</string>
-    <string name="usb_probe_required">وصّل كلا المستشعرين المدعومين لاستخدام المعايرة والقياسات المرجعية.</string>
     <string name="usb_about_architecture">إصدار USB فقط: FT232H + AS7331 + AS7343. يتولى الهاتف المعالجة والوقت والتنبيهات والتخزين. دعم ESP32 محفوظ في الفرع legacy-esp32.</string>
     <string name="usb_stop_recording">أوقف التسجيل قبل تغيير مصدر البيانات.</string>
     <string name="usb_legacy_settings_imported">تبقى إعدادات المستشعرات القديمة محفوظة ولا تُطبق تلقائيًا على أجهزة USB.</string>
