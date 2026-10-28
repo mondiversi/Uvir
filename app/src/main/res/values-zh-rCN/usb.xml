@@ -23,4 +23,9 @@
     <string name="usb_about_architecture">仅 USB 版本：FT232H + AS7331 + AS7343。手机负责处理、时间、警报和存储。ESP32 支持保留在 legacy-esp32 分支中。</string>
     <string name="usb_stop_recording">更换数据源前请停止记录。</string>
     <string name="usb_legacy_settings_imported">旧传感器设置会保留存档，不会自动应用于 USB 硬件。</string>
+    <string name="usb_settings_transfer_description">导出/导入应用的所有设置。</string>
+    <string name="usb_settings_export_description">导出应用的所有设置。</string>
+    <string name="usb_database_transfer_description">导出/导入应用数据库。</string>
+    <string name="usb_database_import_description">用所选文件中的数据库替换应用数据库。</string>
+    <string name="usb_reset_description">重置计数器或恢复应用。</string>
 </resources>

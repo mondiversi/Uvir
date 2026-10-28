@@ -54,8 +54,9 @@ android {
         applicationId = "me.mondiversi.uvir"
         minSdk = 26
         targetSdk = 37
-        versionCode = 8
-        versionName = "2.0.0-dev"
+        // Android's install sequence stays monotonic while the USB edition starts its own 0.x line.
+        versionCode = 9
+        versionName = "0.1.0"
         buildConfigField("boolean", "USB_ONLY", "true")
         // Enable only after publishing and validating a separate signed USB update channel.
         buildConfigField("boolean", "USB_UPDATE_CHANNEL_READY", "false")

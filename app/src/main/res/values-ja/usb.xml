@@ -23,4 +23,9 @@
     <string name="usb_about_architecture">USB専用版：FT232H + AS7331 + AS7343。処理、時刻、アラート、保存はスマートフォンが管理します。ESP32対応はlegacy-esp32ブランチに保存されています。</string>
     <string name="usb_stop_recording">データソースを変更する前に記録を停止してください。</string>
     <string name="usb_legacy_settings_imported">旧センサー設定は保存され、USBハードウェアには自動適用されません。</string>
+    <string name="usb_settings_transfer_description">アプリのすべての設定をエクスポート／インポートします。</string>
+    <string name="usb_settings_export_description">アプリのすべての設定をエクスポートします。</string>
+    <string name="usb_database_transfer_description">アプリのデータベースをエクスポート／インポートします。</string>
+    <string name="usb_database_import_description">アプリのデータベースを選択したファイル内のデータベースに置き換えます。</string>
+    <string name="usb_reset_description">カウンターまたはアプリをリセットします。</string>
 </resources>

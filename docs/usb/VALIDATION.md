@@ -1,5 +1,47 @@
 # Validation status
 
+## USB 0.1.0 prerelease verification — 2026-10-28
+
+- 774 JVM tests and 28 device tests pass. Driver/measurement tests cover MPSSE
+  synchronization, FTDI status stripping, ACK/NACK, I2C release on failure,
+  sensor register/channel order, readiness, saturation, gain normalization and
+  the SI correction pipeline. These use simulated transports, not the new board.
+- The owner-signed APK is `me.mondiversi.uvir`, version `0.1.0`, Android version
+  code 9. It is a prerelease, not the legacy stable update.
+- General replaces separate Appearance/Notifications menu entries and combines
+  Theme, Acquisitions and Alerts. Device checks cover both themes and orientations,
+  two-column island placement, preserved typography, reference controls and
+  session navigation. Existing settings/data-backup round trips also pass.
+- The GitHub prerelease contains the signed APK and its SHA-256 checksum. There
+  is no FT232H firmware upload or new ESP32 firmware asset. The automatic USB
+  update channel stays disabled and the ESP32 branch remains at 1.4.2/0.5.119.
+
+## Development version line — 2026-10-28
+
+The current USB preview is named `0.1.0`, starting its own development sequence.
+Android's internal version code advances to 9 so the signed preview can replace
+the already installed build without uninstalling it or clearing data. Earlier
+`2.0.0-dev` entries below document historical local builds, not a stable release.
+
+## Interface restoration — 2026-10-28
+
+The USB home now reuses the original toolbar and expandable capture menu:
+equally sized selectors, saved acquisitions/alerts in the center, USB/debug
+status glyph and one floating capture control. Alert thresholds and scheduling
+are in the bell's registration page; notifications retain sound/feedback options.
+The Info page/menu label matches Space Compass's localized Info and credits.
+
+774 JVM tests pass. Phone checks cover toolbar geometry, offline editing,
+registration navigation, running-session controls, archive compatibility, and
+the original capture menu's hold/drag/animation behavior in both themes.
+Tests use the isolated verification package. Real FT232H validation is pending.
+
+The spacing audit also restores the original 22 sp title/36 dp name row,
+12 dp logo gap and header padding, with a small version label beside Uvir.
+USB-only controls reuse the compact checkbox, description and numeric-field
+components; existing shared settings retain their original spacing. Checks cover
+day/night, both orientations, RTL and enlarged fonts, without changing archives.
+
 ## Software verification — 2026-10-27
 
 - Signed development APK `2.0.0-dev` builds successfully; no stable USB release
@@ -28,6 +70,21 @@ ACK/NACK and release on failure, UV register/channel ordering, gain changes,
 visible normalization, SI correction order, signed averaging, trimming,
 temporary identities and interval behavior. Existing archive/format tests remain
 part of the regression suite. These are simulated transport tests, not bench tests.
+
+## Phone-owned backup regression (2026-10-28)
+
+- Settings export is one plain JSON file containing durable phone preferences,
+  USB sampling and calibration. Round-trip tests verify SI values and exclude
+  running jobs, simulation state and retired connection secrets.
+- Database export is one plain SQLite DB file. Tests compare every archive table
+  after import, preserve the original backup, reject incompatible schemas without
+  replacing existing records, and retain earlier encrypted archive support.
+- Settings/database export dialogs have no password fields or source selector.
+  Light/dark portrait and dark landscape checks cover the file count, available
+  actions, equal-width Counters/App reset buttons and complete button labels.
+- Reset confirmation remains explicit about deleting saved records and restarting
+  IDs. UI verification only opens and cancels the confirmation in the disposable
+  verification package; it does not reset the installed user's archive.
 
 ## Pending when the board arrives
 

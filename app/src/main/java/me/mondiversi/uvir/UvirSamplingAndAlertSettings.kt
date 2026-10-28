@@ -43,7 +43,9 @@ internal fun UvirSamplingAndAlertSettings(
     onPreviewAcquisitionFeedback: (ThresholdAlertSound, Int) -> Unit,
     cardColor: Color,
     primaryText: Color,
-    secondaryText: Color
+    secondaryText: Color,
+    alertsPage: UvirSettingsPage = UvirSettingsPage.ALERTS,
+    alertsLeadingContent: (@Composable () -> Unit)? = null
 ) {
     val commit = LocalSettingsCommit.current
     var acquisitionVolumeDraft by
@@ -212,7 +214,7 @@ internal fun UvirSamplingAndAlertSettings(
     }
     val showClockBatteryWarning by rememberUvirRtcBatteryWarning(warningPreferences)
     SettingsSection(
-        settingsPage = UvirSettingsPage.ALERTS,
+        settingsPage = alertsPage,
         title =
             stringResource(
                 R.string.settings_section_notifications
@@ -239,6 +241,7 @@ internal fun UvirSamplingAndAlertSettings(
         contentSpacing = UvirIslandSpacing,
         wrapDetailContent = false
     ) {
+        alertsLeadingContent?.invoke()
         CompositionLocalProvider(LocalSettingsCommit provides null) {
             SettingsIsland(
                 containerColor = cardColor,

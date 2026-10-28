@@ -3,6 +3,7 @@ package me.mondiversi.uvir
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
@@ -104,6 +105,20 @@ internal fun UvirDataAndRestoreContent(
         stringResource(R.string.settings_category_sensor).uppercase(locale),
         stringResource(R.string.data_management_app_button).uppercase(locale)
     )
+    if (BuildConfig.USB_ONLY) {
+        val labels = listOf(
+            stringResource(R.string.data_management_counters_button).uppercase(locale),
+            stringResource(R.string.data_management_app_button).uppercase(locale)
+        )
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(UvirActionButtonGap)) {
+            UvirPhoneResetButton(labels[0], labels, countersResetDescription, ConnectivityIconType.TALLY,
+                !autoEnabled, secondaryText, Modifier.weight(1f), onResetRequested)
+            UvirPhoneResetButton(labels[1], labels, appResetDescription, ConnectivityIconType.PHONE,
+                true, secondaryText, Modifier.weight(1f), onRestoreDefaultsRequested)
+        }
+        if (autoEnabled) Text(stringResource(R.string.reset_counters_stop_auto), color = secondaryText, fontSize = 11.sp)
+        return
+    }
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement =
@@ -191,6 +206,34 @@ internal fun UvirDataAndRestoreContent(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun UvirPhoneResetButton(
+    label: String,
+    sizingLabels: List<String>,
+    description: String,
+    icon: ConnectivityIconType,
+    enabled: Boolean,
+    secondaryText: Color,
+    modifier: Modifier,
+    onClick: () -> Unit
+) {
+    OutlinedButton(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = modifier.semantics { contentDescription = description },
+        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+        colors = uvirDestructiveOutlinedButtonColors(),
+        border = uvirDestructiveOutlinedButtonBorder(enabled, secondaryText)
+    ) {
+        UvirLabeledButtonContent(label, sizingTexts = sizingLabels, fontWeight = FontWeight.Bold) {
+            ConnectivitySectionIcon(
+                icon, Modifier.size(20.dp), androidx.compose.material3.LocalContentColor.current,
+                strokeScale = UvirDestructiveOutlinedIconStrokeScale
+            )
         }
     }
 }

@@ -274,7 +274,15 @@ internal fun UvirSettingsGeneralSections(
         }
 
     standaloneExport?.let { export ->
-        if (export == UvirStandaloneExport.DATABASE) {
+        if (export == UvirStandaloneExport.DATABASE && BuildConfig.USB_ONLY) {
+            UvirPhoneBackupExportDialog(R.string.export_database_dialog_title,
+                R.string.export_database_dialog_description, UvirExportFileFormat.DATABASE,
+                cardColor, primaryText, secondaryText, onDismiss = { standaloneExport = null },
+                onExport = { destination ->
+                    shareDatabase(context, database, null, destination)
+                    standaloneExport = null
+                })
+        } else if (export == UvirStandaloneExport.DATABASE) {
             UvirEncryptedDatabaseExportDialog(
                 cardColor = cardColor,
                 primaryText = primaryText,
@@ -719,7 +727,7 @@ internal fun UvirSettingsGeneralSections(
                 primaryText = primaryText
             )
             SettingsPageDescription(
-                text = stringResource(R.string.settings_transfer_description),
+                text = stringResource(if (BuildConfig.USB_ONLY) R.string.usb_settings_transfer_description else R.string.settings_transfer_description),
                 color = secondaryText
             )
             Row(horizontalArrangement = Arrangement.spacedBy(UvirActionButtonGap)) {
@@ -776,7 +784,7 @@ internal fun UvirSettingsGeneralSections(
                 primaryText = primaryText
             )
             SettingsPageDescription(
-                text = stringResource(R.string.database_transfer_description),
+                text = stringResource(if (BuildConfig.USB_ONLY) R.string.usb_database_transfer_description else R.string.database_transfer_description),
                 color = secondaryText
             )
             Row(horizontalArrangement = Arrangement.spacedBy(UvirActionButtonGap)) {
@@ -838,7 +846,7 @@ internal fun UvirSettingsGeneralSections(
                 primaryText = primaryText
             )
             SettingsPageDescription(
-                text = if (BuildConfig.USB_ONLY) stringResource(R.string.reset_all_records_action) + " · " + stringResource(R.string.restore_app_settings_action)
+                text = if (BuildConfig.USB_ONLY) stringResource(R.string.usb_reset_description)
                     else stringResource(R.string.data_management_reset_description),
                 color = secondaryText
             )

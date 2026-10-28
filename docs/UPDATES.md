@@ -1,9 +1,24 @@
 # Uvir updates
 
-> The text below describes the preserved ESP32 stable channel. The USB development
-> edition reserves a separate signed `usb-channel` feed and does not query or
-> replace `releases/latest`. Its channel is disabled until a USB release is
-> published and validated. See [the release boundary](usb/ARCHITECTURE.md#release-boundary).
+## USB edition — 0.1.0 prerelease
+
+The USB edition is distributed from the
+[v0.1.0 prerelease](https://github.com/mondiversi/Uvir/releases/tag/v0.1.0).
+Install the owner-signed APK over an existing compatible installation, without
+uninstalling or clearing its data. Stop active sessions first. There is no
+firmware to install on an FT232H head.
+
+The reserved `usb-channel` feed remains disabled until its signed metadata and
+hardware/update flow are validated. Publishing a prerelease does not activate it.
+The USB app never queries `releases/latest` for an ESP32 update. See
+[the release procedure](../RELEASE.md) and
+[the architecture boundary](usb/ARCHITECTURE.md#release-boundary).
+
+## Preserved ESP32 stable channel — 1.4.2
+
+The rest of this document is historical compatibility documentation for
+`legacy-esp32`, not instructions for the FT232H head. Its stable release and
+update assets remain available unchanged.
 
 Uvir checks the latest stable GitHub release once per process launch. In Info,
 **Check for updates** runs the same check manually. A successful empty result is

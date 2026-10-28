@@ -23,4 +23,9 @@
     <string name="usb_about_architecture">Edisi khusus USB: FT232H + AS7331 + AS7343. Ponsel menangani pemrosesan, waktu, peringatan, dan penyimpanan. Dukungan ESP32 disimpan di cabang legacy-esp32.</string>
     <string name="usb_stop_recording">Hentikan perekaman sebelum mengganti sumber data.</string>
     <string name="usb_legacy_settings_imported">Pengaturan sensor lama tetap diarsipkan dan tidak otomatis diterapkan ke perangkat USB.</string>
+    <string name="usb_settings_transfer_description">Ekspor/impor semua pengaturan aplikasi.</string>
+    <string name="usb_settings_export_description">Ekspor semua pengaturan aplikasi.</string>
+    <string name="usb_database_transfer_description">Ekspor/impor database aplikasi.</string>
+    <string name="usb_database_import_description">Ganti database aplikasi dengan database dalam file yang dipilih.</string>
+    <string name="usb_reset_description">Reset penghitung atau pulihkan aplikasi.</string>
 </resources>

@@ -23,4 +23,9 @@
     <string name="usb_about_architecture">מהדורת USB בלבד: FT232H + AS7331 + AS7343. הטלפון מנהל עיבוד, זמן, התראות ואחסון. התמיכה ב־ESP32 נשמרת בענף legacy-esp32.</string>
     <string name="usb_stop_recording">עצרו את ההקלטה לפני שינוי מקור הנתונים.</string>
     <string name="usb_legacy_settings_imported">הגדרות החיישנים הישנות נשמרות בארכיון ואינן מוחלות אוטומטית על חומרת USB.</string>
+    <string name="usb_settings_transfer_description">ייצא/ייבא את כל הגדרות האפליקציה.</string>
+    <string name="usb_settings_export_description">ייצא את כל הגדרות האפליקציה.</string>
+    <string name="usb_database_transfer_description">ייצא/ייבא את מסד הנתונים של האפליקציה.</string>
+    <string name="usb_database_import_description">החלף את מסד הנתונים של האפליקציה במסד הנתונים שבקובץ שנבחר.</string>
+    <string name="usb_reset_description">אפס את המונים או שחזר את האפליקציה.</string>
 </resources>

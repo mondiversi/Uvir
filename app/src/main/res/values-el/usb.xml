@@ -23,4 +23,9 @@
     <string name="usb_about_architecture">Έκδοση μόνο USB: FT232H + AS7331 + AS7343. Το τηλέφωνο διαχειρίζεται επεξεργασία, ώρα, ειδοποιήσεις και αποθήκευση. Η υποστήριξη ESP32 διατηρείται στον κλάδο legacy-esp32.</string>
     <string name="usb_stop_recording">Σταμάτησε την καταγραφή πριν αλλάξεις πηγή δεδομένων.</string>
     <string name="usb_legacy_settings_imported">Οι παλιές ρυθμίσεις αισθητήρων παραμένουν αρχειοθετημένες και δεν εφαρμόζονται αυτόματα στο υλικό USB.</string>
+    <string name="usb_settings_transfer_description">Εξάγετε/εισαγάγετε όλες τις ρυθμίσεις της εφαρμογής.</string>
+    <string name="usb_settings_export_description">Εξάγετε όλες τις ρυθμίσεις της εφαρμογής.</string>
+    <string name="usb_database_transfer_description">Εξάγετε/εισαγάγετε τη βάση δεδομένων της εφαρμογής.</string>
+    <string name="usb_database_import_description">Αντικαταστήστε τη βάση δεδομένων της εφαρμογής με εκείνη του επιλεγμένου αρχείου.</string>
+    <string name="usb_reset_description">Μηδενίστε τους μετρητές ή επαναφέρετε την εφαρμογή.</string>
 </resources>

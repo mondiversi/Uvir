@@ -113,7 +113,8 @@ internal fun UvirHomeCaptureMenu(
     syncInProgress: Boolean = false,
     automaticIndicatorColor: Color = Color.Unspecified,
     alertIndicatorColor: Color = Color.Unspecified,
-    automaticContainerColor: Color = Color.Unspecified
+    automaticContainerColor: Color = Color.Unspecified,
+    manualEnabled: Boolean = true
 ) {
     val primarySize = 56.dp
     val secondarySize = UvirSecondaryFloatingControlSize
@@ -179,7 +180,7 @@ internal fun UvirHomeCaptureMenu(
         when {
             alertActive -> onAlert
             automaticActive -> onAutomatic
-            else -> onManual
+            else -> ({ if (manualEnabled) onManual() })
         }
     )
     val latestOnAutomatic by rememberUpdatedState(onAutomatic)
@@ -188,8 +189,8 @@ internal fun UvirHomeCaptureMenu(
     val pressedScale = uvirFloatingPressedScale(interactionSource)
     val showPressedHint = uvirFloatingActionHintVisible(interactionSource)
     val darkTheme = isSystemInDarkTheme()
-    val idleBreathing = !sessionActive && !holding && !menuOpen
-    val primaryContainerColor = if (idleBreathing) {
+    val idleBreathing = manualEnabled && !sessionActive && !holding && !menuOpen
+    val primaryContainerColor = if (!manualEnabled) uvirDisabledActionContainerColor() else if (idleBreathing) {
         uvirIdleCaptureColor(MaterialTheme.colorScheme.primary, idleScale)
     } else MaterialTheme.colorScheme.primary
     val shortcutIconTint = if (darkTheme) Color.Black else Color.White

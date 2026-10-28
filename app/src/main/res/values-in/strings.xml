@@ -4,7 +4,7 @@
     <string name="app_name">Uvir</string>
     <string name="data_management_import_button">Impor</string>
     <string name="data_management_app_button">Aplikasi</string>
-    <string name="data_management_counters_button">Semua penghitung</string>
+    <string name="data_management_counters_button">Penghitung</string>
     <string name="launch_spectral_subtitle">PENGINDERAAN SPEKTRAL</string>
     <string name="save_measurement">Pengukuran manual</string>
     <string name="add_note_or_leave_empty">Tambahkan catatan opsional.</string>
@@ -464,7 +464,7 @@
     <string name="orange">Jingga</string>
     <string name="red">Merah</string>
     <string name="percent_of_visible">%1$s%% cahaya tampak</string>
-    <string name="version_info">Versi dan informasi</string>
+    <string name="version_info">Info dan kredit</string>
     <string name="version_info_title">Uvir %1$s</string>
     <string name="app_version">Versi aplikasi: %1$s</string>
     <string name="package_name_value">Paket: %1$s</string>

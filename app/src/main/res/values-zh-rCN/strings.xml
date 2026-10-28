@@ -3,7 +3,7 @@
     <string name="app_name">Uvir</string>
     <string name="data_management_import_button">导入</string>
     <string name="data_management_app_button">应用</string>
-    <string name="data_management_counters_button">所有计数器</string>
+    <string name="data_management_counters_button">计数器</string>
     <string name="launch_spectral_subtitle">光谱感测</string>
     <string name="save_measurement">手动采集</string>
     <string name="add_note_or_leave_empty">添加可选备注。</string>
@@ -401,7 +401,7 @@
     <string name="orange">橙色</string>
     <string name="red">红色</string>
     <string name="percent_of_visible">可见光的 %1$s%%</string>
-    <string name="version_info">版本与信息</string>
+    <string name="version_info">信息与致谢</string>
     <string name="version_info_title">Uvir %1$s</string>
     <string name="app_version">应用版本：%1$s</string>
     <string name="package_name_value">软件包：%1$s</string>

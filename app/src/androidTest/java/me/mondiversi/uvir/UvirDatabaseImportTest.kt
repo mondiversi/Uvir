@@ -13,6 +13,7 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
+import org.junit.Assert.assertFalse
 import org.junit.Before
 import org.junit.Test
 
@@ -60,6 +61,7 @@ class UvirDatabaseImportTest {
             File(root, "backup.zip"),
             "correct-password".toCharArray()
         )
+        assertTrue(uvirDatabaseImportRequiresPassword(context, Uri.fromFile(archive)))
 
         val failed = runCatching {
             importEncryptedUvirDatabaseArchive(
@@ -73,6 +75,39 @@ class UvirDatabaseImportTest {
             context, target, Uri.fromFile(archive), "correct-password".toCharArray()
         )
         assertEquals("restored record", target.readSavedRecords().single().note)
+    }
+
+    @Test fun plainDatabaseRoundTripPreservesAllTablesAndSiValuesWithoutPassword() = runBlocking {
+        source.saveAcquisition(SensorSample(uvc = .0123456789), "plain record", false,
+            sensorDeviceId = "FT232H:TEST", timestamp = 123_000L)
+        target.saveAcquisition(SensorSample(), "replaced record", false,
+            sensorDeviceId = "FT232H:OTHER", timestamp = 124_000L)
+        val archive = createUvirDatabaseBackup(context, source, null)
+        try {
+            assertEquals("db", archive.extension)
+            assertFalse(uvirDatabaseImportRequiresPassword(context, Uri.fromFile(archive)))
+            val originalBytes = archive.readBytes()
+            importUvirDatabaseArchive(context, target, Uri.fromFile(archive))
+            org.junit.Assert.assertArrayEquals(originalBytes, archive.readBytes())
+            val tables = listOf("sensors", "uvir_counters", "acquisition_sessions", "alert_sessions",
+                "sensor_settings", "sensor_alert_rules", "acquisitions", "alerts", "camera_estimates", "record_transfer_ids")
+            fun rows(helper: UvirDatabaseHelper, table: String): List<List<String?>> =
+                helper.readableDatabase.rawQuery("SELECT * FROM $table", null).use { cursor ->
+                    buildList { while (cursor.moveToNext()) add((0 until cursor.columnCount).map { cursor.getString(it) }) }
+                }
+            tables.forEach { assertEquals(it, rows(source, it), rows(target, it)) }
+            assertEquals("plain record", target.readSavedRecords().single().note)
+        } finally { archive.delete() }
+    }
+
+    @Test fun invalidPlainDatabaseNeverReplacesExistingRecords() = runBlocking {
+        target.saveAcquisition(SensorSample(), "keep existing", false, sensorDeviceId = "fixture", timestamp = 1_000L)
+        source.writableDatabase.version = target.writableDatabase.version + 1
+        val archive = createUvirDatabaseBackup(context, source, null)
+        try {
+            assertTrue(runCatching { importUvirDatabaseArchive(context, target, Uri.fromFile(archive)) }.isFailure)
+            assertEquals("keep existing", target.readSavedRecords().single().note)
+        } finally { archive.delete() }
     }
 
     @Test

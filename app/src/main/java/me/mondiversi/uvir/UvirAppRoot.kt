@@ -4992,10 +4992,6 @@ internal fun UvirAppContent(
                     if (settings != acquisitionFeedbackSettings) {
                         acquisitionFeedbackSettings = settings
                         saveAcquisitionFeedbackSettings(preferences, settings)
-                        showUvirBottomMessage(
-                            context,
-                            resources.getString(R.string.parameters_saved)
-                        )
                     }
                 },
                 onPreviewAcquisitionFeedback = { sound, volume ->

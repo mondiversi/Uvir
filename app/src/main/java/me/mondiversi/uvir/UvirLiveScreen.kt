@@ -741,6 +741,8 @@ internal fun LiveScreen(
 
     var showParametersDialog by settingsRouteState.isOpen
     var selectedSettingsPage by settingsRouteState.page
+    val settingsConfirmation = rememberUvirSettingsExitNotice(
+        if (showParametersDialog) selectedSettingsPage?.name ?: "INDEX" else null)
     LaunchedEffect(selectedSettingsPage) {
         // A page restored from an older app version must return to the settings list.
         if (selectedSettingsPage == UvirSettingsPage.DISPLAY) selectedSettingsPage = null
@@ -3584,6 +3586,7 @@ if (showParametersDialog) {
                 valueCorrectedText =
                     valueOutOfLimitsCorrectedText,
                 parametersSavedText = parametersSavedText,
+                onSettingsSaved = settingsConfirmation::saved,
                 onParametersErrorChange = {
                     parametersError = it
                 },
@@ -3634,7 +3637,7 @@ if (showParametersDialog) {
                     when (selectedSettingsPage) {
                         UvirSettingsPage.SENSOR_CONNECTION ->
                             R.string.settings_section_sensor_connection
-                        UvirSettingsPage.SENSOR_PARAMETERS ->
+                        UvirSettingsPage.GENERAL, UvirSettingsPage.SENSOR_PARAMETERS ->
                             R.string.settings_section_sensor_parameters
                         UvirSettingsPage.SENSOR_MEASUREMENT ->
                             R.string.sensor_info_measurement
@@ -3916,7 +3919,12 @@ if (showParametersDialog) {
                     onAlertVolumeChange = { alertVolume = it },
                     onPreviewThresholdAlertSound = onPreviewThresholdAlertSound,
                     acquisitionFeedbackSettings = acquisitionFeedbackSettings,
-                    onAcquisitionFeedbackSettingsChange = onAcquisitionFeedbackSettingsChange,
+                    onAcquisitionFeedbackSettingsChange = { value ->
+                        if (value != acquisitionFeedbackSettings) {
+                            onAcquisitionFeedbackSettingsChange(value)
+                            settingsConfirmation.saved()
+                        }
+                    },
                     onPreviewAcquisitionFeedback = onPreviewAcquisitionFeedback,
                     cardColor = cardColor,
                     primaryText = primaryText,
@@ -4021,7 +4029,7 @@ if (showParametersDialog) {
                         settingsFocusManager.clearFocus(force = true)
                         if (changed) {
                             onApplyDateFormat(target)
-                            showUvirBottomMessage(context, parametersSavedText)
+                            settingsConfirmation.saved()
                         }
                     },
                     timeFormatValue = timeFormatValue,
@@ -4033,7 +4041,7 @@ if (showParametersDialog) {
                         settingsFocusManager.clearFocus(force = true)
                         if (changed) {
                             onApplyTimeFormat(target)
-                            showUvirBottomMessage(context, parametersSavedText)
+                            settingsConfirmation.saved()
                         }
                     },
                     exportModeValue = exportModeValue,
@@ -4045,7 +4053,7 @@ if (showParametersDialog) {
                         settingsFocusManager.clearFocus(force = true)
                         if (changed) {
                             onApplyExportMode(target)
-                            showUvirBottomMessage(context, parametersSavedText)
+                            settingsConfirmation.saved()
                         }
                     },
                     irradianceUnitValue = irradianceUnitValue,
@@ -4056,7 +4064,7 @@ if (showParametersDialog) {
                             settingsSaveQueue.finishEditing()
                             settingsFocusManager.clearFocus(force = true)
                             saveUvirLiveIrradianceDecimals(context, unit, digits)
-                            showUvirBottomMessage(context, parametersSavedText)
+                            settingsConfirmation.saved()
                         }
                     },
                     onIrradianceUnitValueChange = {
@@ -4067,7 +4075,7 @@ if (showParametersDialog) {
                         settingsFocusManager.clearFocus(force = true)
                         if (changed) {
                             onApplyIrradianceUnit(target)
-                            showUvirBottomMessage(context, parametersSavedText)
+                            settingsConfirmation.saved()
                         }
                     },
                     numericFormatSectionExpanded =
@@ -4126,7 +4134,7 @@ if (showParametersDialog) {
                         { enabled ->
                             if (enabled != fakeSensorOutOfRangeEnabled) {
                                 onFakeSensorOutOfRangeChanged(enabled)
-                                showUvirBottomMessage(context, parametersSavedText)
+                                settingsConfirmation.saved()
                             }
                         },
                     debugPerformanceEnabled = debugPerformanceEnabled,

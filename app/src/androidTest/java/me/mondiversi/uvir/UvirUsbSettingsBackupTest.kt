@@ -3,6 +3,7 @@ package me.mondiversi.uvir
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.SharedPreferences
+import android.net.Uri
 import androidx.test.platform.app.InstrumentationRegistry
 import org.json.JSONArray
 import org.json.JSONObject
@@ -18,6 +19,52 @@ class UvirUsbSettingsBackupTest {
         return object : ContextWrapper(base) {
             override fun getSharedPreferences(name: String, mode: Int): SharedPreferences = base.getSharedPreferences(prefix + name, mode)
         }
+    }
+    @Test fun plainPhoneSettingsRoundTripWithoutPasswordsOrSensorSelection() {
+        val source = isolated(); val target = isolated()
+        source.getSharedPreferences(PREFS_NAME, 0).edit()
+            .putString(KEY_APP_THEME, UvirAppTheme.DARK.storedValue)
+            .putString("old_wifi_password", "never-export-this")
+            .putString("old_auth_token", "never-export-this-either").commit()
+        source.getSharedPreferences(USB_PHONE_PREFS, 0).edit()
+            .putInt("samples", 11).putLong("spacing", 400)
+            .putString(USB_PHONE_CALIBRATION, JSONObject().put("factors", JSONArray(List(11) { 1.5 }))
+                .put("offsets", JSONArray(List(11) { .00035 })).put("master", 1.2)
+                .put("window", JSONArray(List(11) { 1.1 })).toString())
+            .putLong("open_acquisition", 99).putBoolean("simulation", true).commit()
+        val file = createUvirAppSettingsBackup(source, null)
+        try {
+            val root = JSONObject(file.readText())
+            assertEquals(UVIR_SETTINGS_TRANSFER_SCHEMA, root.getString("schema"))
+            assertEquals("app", root.getString("scope"))
+            assertEquals(UVIR_CANONICAL_IRRADIANCE_UNIT, root.getString("irradiance_unit"))
+            assertFalse(root.has("ciphertext"))
+            assertFalse(file.readText().contains("never-export"))
+            assertFalse(uvirSettingsFilesRequirePassword(target, listOf(Uri.fromFile(file))))
+            UvirDatabaseHelper(target).use { database ->
+                val result = importUvirSettingsFiles(target, database, listOf(Uri.fromFile(file)))
+                assertEquals(1, result.importedAppFiles)
+                assertTrue(result.importedSensors.isEmpty())
+            }
+            assertEquals(UvirAppTheme.DARK.storedValue, target.getSharedPreferences(PREFS_NAME, 0).getString(KEY_APP_THEME, null))
+            val prefs = target.getSharedPreferences(USB_PHONE_PREFS, 0)
+            assertEquals(11, prefs.getInt("samples", 0))
+            assertEquals(400L, prefs.getLong("spacing", 0))
+            assertEquals(.00035, decodeUsbPhoneCalibration(prefs.getString(USB_PHONE_CALIBRATION, null)!!).offsets[0], 0.0)
+            assertFalse(prefs.contains("open_acquisition")); assertFalse(prefs.contains("simulation"))
+        } finally { file.delete() }
+    }
+    @Test fun previouslyEncryptedPhoneSettingsStillImport() {
+        val source = isolated(); val target = isolated()
+        source.getSharedPreferences(USB_PHONE_PREFS, 0).edit().putInt("samples", 17).commit()
+        val file = createUvirAppSettingsBackup(source, "legacy-password".toCharArray())
+        try {
+            assertTrue(uvirSettingsFilesRequirePassword(target, listOf(Uri.fromFile(file))))
+            UvirDatabaseHelper(target).use { database ->
+                importUvirSettingsFiles(target, database, listOf(Uri.fromFile(file)), "legacy-password".toCharArray())
+            }
+            assertEquals(17, target.getSharedPreferences(USB_PHONE_PREFS, 0).getInt("samples", 0))
+        } finally { file.delete() }
     }
     @Test fun backupKeepsSiCalibrationButNeverRestoresRunningJobsOrTemporaryHardware() {
         val source = isolated(); val target = isolated()

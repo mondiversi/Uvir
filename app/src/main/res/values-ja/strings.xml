@@ -3,7 +3,7 @@
     <string name="app_name">Uvir</string>
     <string name="data_management_import_button">インポート</string>
     <string name="data_management_app_button">アプリ</string>
-    <string name="data_management_counters_button">すべてのカウンター</string>
+    <string name="data_management_counters_button">カウンター</string>
     <string name="launch_spectral_subtitle">スペクトルセンシング</string>
     <string name="save_measurement">手動取得</string>
     <string name="add_note_or_leave_empty">任意のメモを追加します。</string>
@@ -415,7 +415,7 @@
     <string name="orange">オレンジ</string>
     <string name="red">赤</string>
     <string name="percent_of_visible">可視光の %1$s%%</string>
-    <string name="version_info">バージョンと情報</string>
+    <string name="version_info">情報とクレジット</string>
     <string name="version_info_title">Uvir %1$s</string>
     <string name="app_version">アプリバージョン: %1$s</string>
     <string name="package_name_value">パッケージ: %1$s</string>

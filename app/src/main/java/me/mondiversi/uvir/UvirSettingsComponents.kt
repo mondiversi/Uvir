@@ -174,6 +174,7 @@ internal fun SettingsRadioChoiceRow(
 enum class UvirSettingsHeaderControl { CHEVRON, CHECKBOX }
 
 enum class UvirSettingsPage {
+    GENERAL,
     SENSOR_CONNECTION,
     SENSOR_PARAMETERS,
     SENSOR_MEASUREMENT,

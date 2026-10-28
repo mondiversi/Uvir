@@ -3,7 +3,7 @@
     <string name="app_name">Uvir</string>
     <string name="data_management_import_button">Leta</string>
     <string name="data_management_app_button">Programu</string>
-    <string name="data_management_counters_button">Kaunti zote</string>
+    <string name="data_management_counters_button">Vihesabu</string>
     <string name="launch_spectral_subtitle">Upimaji wa spektra</string>
     <string name="save_measurement">Upataji wa mikono</string>
     <string name="add_note_or_leave_empty">Ongeza dokezo la hiari.</string>
@@ -447,7 +447,7 @@
     <string name="orange">Chungwa</string>
     <string name="red">Nyekundu</string>
     <string name="percent_of_visible">%1$s%% inayoonekana</string>
-    <string name="version_info">Toleo na maelezo</string>
+    <string name="version_info">Taarifa na shukrani</string>
     <string name="version_info_title">Uvir %1$s</string>
     <string name="app_version">Toleo la programu: %1$s</string>
     <string name="package_name_value">Kifurushi: %1$s</string>

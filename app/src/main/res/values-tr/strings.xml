@@ -3,7 +3,7 @@
     <string name="app_name">Uvir</string>
     <string name="data_management_import_button">İçe aktar</string>
     <string name="data_management_app_button">Uygulama</string>
-    <string name="data_management_counters_button">Tüm sayaçlar</string>
+    <string name="data_management_counters_button">Sayaçlar</string>
     <string name="launch_spectral_subtitle">SPEKTRAL ALGILAMA</string>
     <string name="save_measurement">Manuel ölçüm</string>
     <string name="add_note_or_leave_empty">İsteğe bağlı bir not ekleyin.</string>
@@ -423,7 +423,7 @@
     <string name="orange">Turuncu</string>
     <string name="red">Kırmızı</string>
     <string name="percent_of_visible">%1$s%% / görünür</string>
-    <string name="version_info">Sürüm ve bilgi</string>
+    <string name="version_info">Bilgi ve katkılar</string>
     <string name="version_info_title">Uvir %1$s</string>
     <string name="app_version">Uygulama sürümü: %1$s</string>
     <string name="package_name_value">Paket: %1$s</string>

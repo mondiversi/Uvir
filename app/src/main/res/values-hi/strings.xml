@@ -4,7 +4,7 @@
     <string name="app_name">Uvir</string>
     <string name="data_management_import_button">आयात</string>
     <string name="data_management_app_button">ऐप</string>
-    <string name="data_management_counters_button">सभी काउंटर</string>
+    <string name="data_management_counters_button">काउंटर</string>
     <string name="launch_spectral_subtitle">स्पेक्ट्रल सेंसिंग</string>
     <string name="save_measurement">मैनुअल अधिग्रहण</string>
     <string name="add_note_or_leave_empty">एक वैकल्पिक नोट जोड़ें।</string>
@@ -427,7 +427,7 @@
     <string name="orange">संतरी</string>
     <string name="red">लाल</string>
     <string name="percent_of_visible">%1$s%% दिखाई देने वाला</string>
-    <string name="version_info">संस्करण और जानकारी</string>
+    <string name="version_info">जानकारी और श्रेय</string>
     <string name="version_info_title">Uvir %1$s</string>
     <string name="app_version">ऐप संस्करण: %1$s</string>
     <string name="package_name_value">पैकेज: %1$s</string>

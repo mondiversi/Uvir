@@ -49,6 +49,34 @@ private val UVIR_DATABASE_TABLES = listOf(
     "record_transfer_ids"
 )
 
+private val sqliteBackupHeader = "SQLite format 3\u0000".toByteArray(Charsets.US_ASCII)
+
+internal fun uvirDatabaseImportRequiresPassword(context: Context, uri: Uri): Boolean =
+    checkNotNull(context.contentResolver.openInputStream(uri)).use { input ->
+        val header = ByteArray(sqliteBackupHeader.size)
+        var read = 0
+        while (read < header.size) {
+            val count = input.read(header, read, header.size - read)
+            if (count < 0) break
+            read += count
+        }
+        !header.contentEquals(sqliteBackupHeader) && read >= 2 && header[0] == 0x50.toByte() && header[1] == 0x4b.toByte()
+    }
+
+internal fun createPlainUvirDatabaseBackup(source: File, destination: File): File {
+    require(source.isFile && !destination.exists())
+    try {
+        source.copyTo(destination)
+        SQLiteDatabase.openDatabase(destination.path, null, SQLiteDatabase.OPEN_READONLY).use { db ->
+            db.rawQuery("PRAGMA quick_check", null).use { check(it.moveToFirst() && it.getString(0) == "ok") }
+        }
+        return destination
+    } catch (error: Exception) {
+        destination.delete()
+        throw error
+    }
+}
+
 internal fun extractEncryptedUvirDatabaseArchive(
     archive: File,
     destination: File,
@@ -110,8 +138,17 @@ internal suspend fun importEncryptedUvirDatabaseArchive(
     database: UvirDatabaseHelper,
     archiveUri: Uri,
     password: CharArray
-) = withContext(Dispatchers.IO) {
+) {
     require(password.size >= UVIR_SETTINGS_MINIMUM_PASSWORD_LENGTH)
+    importUvirDatabaseArchive(context, database, archiveUri, password)
+}
+
+internal suspend fun importUvirDatabaseArchive(
+    context: Context,
+    database: UvirDatabaseHelper,
+    archiveUri: Uri,
+    password: CharArray? = null
+) = withContext(Dispatchers.IO) {
     val temporaryDirectory = File(context.cacheDir, "uvir-db-import-${System.nanoTime()}")
     check(temporaryDirectory.mkdir()) { "Unable to create database import directory" }
     try {
@@ -119,11 +156,10 @@ internal suspend fun importEncryptedUvirDatabaseArchive(
         checkNotNull(context.contentResolver.openInputStream(archiveUri)) {
             "Unable to open database archive"
         }.use { input -> archive.outputStream().use { output -> input.copyTo(output) } }
-        val importedFile = extractEncryptedUvirDatabaseArchive(
-            archive,
-            File(temporaryDirectory, "uvir.db"),
-            password
-        )
+        val header = archive.inputStream().use { input -> ByteArray(sqliteBackupHeader.size).also { input.read(it) } }
+        val importedFile = if (header.contentEquals(sqliteBackupHeader)) archive
+            else extractEncryptedUvirDatabaseArchive(archive, File(temporaryDirectory, "uvir.db"),
+                requireNotNull(password) { "Encrypted database backup requires a password" })
         val target = database.writableDatabase
         SQLiteDatabase.openDatabase(
             importedFile.absolutePath,
@@ -208,13 +244,11 @@ internal suspend fun importEncryptedUvirDatabaseArchive(
     }
 }
 
-internal suspend fun shareDatabase(
+internal suspend fun createUvirDatabaseBackup(
     context: Context,
     database: UvirDatabaseHelper,
-    password: CharArray,
-    destination: UvirExportDestination = UvirExportDestination.SHARE
-) {
-    val exportedFile = withContext(Dispatchers.IO) {
+    password: CharArray?
+): File = withContext(Dispatchers.IO) {
         val sqliteDatabase = database.writableDatabase
         sqliteDatabase.rawQuery("PRAGMA wal_checkpoint(FULL)", null).use {
             check(it.moveToFirst()) { "Database checkpoint did not return a result" }
@@ -227,17 +261,25 @@ internal suspend fun shareDatabase(
         }
         val archive = File(
             uvirSharedExportDirectory(context),
-            UvirExportFileFormat.ZIP.fileName(
+            (if (password == null) UvirExportFileFormat.DATABASE else UvirExportFileFormat.ZIP).fileName(
                 "${uvirExportBaseName(UvirExportContent.DATABASE)}_${System.nanoTime().toString(36)}"
             )
         )
-        createEncryptedUvirDatabaseArchive(
+        if (password == null) createPlainUvirDatabaseBackup(File(sqliteDatabase.path), archive)
+        else createEncryptedUvirDatabaseArchive(
             source = File(sqliteDatabase.path),
             destination = archive,
             password = password
         )
-    }
+}
 
+internal suspend fun shareDatabase(
+    context: Context,
+    database: UvirDatabaseHelper,
+    password: CharArray?,
+    destination: UvirExportDestination = UvirExportDestination.SHARE
+) {
+    val exportedFile = createUvirDatabaseBackup(context, database, password)
     deliverUvirExportFiles(
         context = context,
         files = listOf(exportedFile),

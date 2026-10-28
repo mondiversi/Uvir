@@ -83,13 +83,14 @@ internal class UvirSettingsSaveInput(
     val onConfigureSensorWifi: suspend (String, String) -> Boolean,
     val opticalWindowDraft: OpticalWindowSettings = sensorCalibrationSettings.opticalWindow,
     val calibrationOffsetsDraft: CalibrationOffsets? = sensorCalibrationSettings.offsets,
-    val calibrationChannelFactorsDraft: CalibrationChannelFactors? = sensorCalibrationSettings.channelFactors
+    val calibrationChannelFactorsDraft: CalibrationChannelFactors? = sensorCalibrationSettings.channelFactors,
+    val onSettingsSaved: () -> Unit = { showUvirBottomMessage(context, parametersSavedText) }
 )
 
 internal suspend fun applyUvirSettingsGroup(input: UvirSettingsSaveInput) {
     with(input) {
         fun failed() = showUvirBottomMessage(context, sensorRadioConnectionRequiredText)
-        fun saved() = showUvirBottomMessage(context, parametersSavedText)
+        fun saved() = onSettingsSaved()
         fun corrected() = showUvirBottomMessage(context, valueCorrectedText)
         fun firmwareAllowed(): Boolean {
             if (sensorFirmwareCurrent) return true

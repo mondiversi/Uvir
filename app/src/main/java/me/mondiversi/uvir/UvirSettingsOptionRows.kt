@@ -201,9 +201,11 @@ internal fun SettingsCheckboxWithDescription(
     primaryText: Color,
     secondaryText: Color,
     descriptionColor: Color = secondaryText,
+    modifier: Modifier = Modifier,
     trailingContent: (@Composable () -> Unit)? = null
 ) {
     Column(
+        modifier = modifier,
         verticalArrangement =
             Arrangement.spacedBy(UvirSettingsRelatedGap)
     ) {

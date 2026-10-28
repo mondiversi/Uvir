@@ -4,6 +4,10 @@ This is the logical connection plan for the ordered CJMCU FT232H board, not a
 verified photograph of its header. Confirm the actual board markings and its
 power circuit when it arrives. Leave the old ESP32 disconnected from the bus.
 
+![Logical FT232H wiring for both optical modules](wiring.svg)
+
+The diagram shows **signal names, not the physical order of header pins**.
+
 | FT232H signal | UV 5 Click | GY-AS734X / AS7343 breakout |
 |---|---|---|
 | AD0 / D0 (SCL) | SCL | SCL |
@@ -37,6 +41,38 @@ chosen FT232H board has a USB-A plug. A charging-only cable will not work.
 The driver uses FT232H drive-only-zero mode; SDA/SCL are released high through
 pull-ups, not driven high by push-pull outputs. Clock stretching is not supported
 by this initial driver; verify both modules work with the chosen timing.
+
+## First connection and live readings
+
+1. Install the signed [0.1.0 USB preview](https://github.com/mondiversi/Uvir/releases/tag/v0.1.0)
+   on an Android 8.0+ phone with USB host/OTG support. An existing installation
+   can be updated with the same signing identity; do not uninstall it to test.
+2. With USB disconnected, wire the modules as above and inspect the supply,
+   grounds, pull-ups and the **AD1–AD2 bridge**. Do not connect the old ESP32.
+3. Attach the head to the phone through the OTG data adapter. Open Uvir and
+   accept Android's permission to use the FT232H. No COM-port terminal, FTDI
+   Android package or sensor firmware upload is required by this app.
+4. The app initializes MPSSE and checks AS7331 at `0x74` and AS7343 at `0x39`.
+   Both optical chips must initialize before the main view displays real values.
+   Ensure simulated data is off when checking the physical hardware.
+5. Open **Diagnostics** from the menu to inspect adapter status, each detected
+   chip, current gains and any error. If USB permission was denied, use **Retry**
+   or reconnect the head; the app does not repeatedly reopen Android's prompt.
+6. Compare covered/uncovered readings without applying new calibration first.
+   Live readings should update before starting manual acquisition, an automatic
+   session or alert recording. Stop a session before unplugging the head.
+
+| Symptom | Check first |
+|---|---|
+| No adapter detected | OTG/data cable, phone USB-host support, FT232H `0403:6014` identity |
+| I2C lines held low / NACK | Power, grounds, AD1–AD2 bridge, SCL/SDA, pull-ups and address jumpers |
+| AS7331 identity mismatch | UV 5 Click power/address; A0/A1 must match the default `0x74` |
+| AS7343 identity mismatch | Exact GY chip model (`AS7343`, not AS7341), breakout power and `0x39` |
+| Not ready / saturation | Light level and gain settling; failed readings are not saved as zeros |
+
+The app uses Android's USB host API to drive MPSSE directly. There is **no
+firmware to flash onto the FT232H**. Real transfers, startup pin behavior and
+absolute irradiance still require validation with the arriving board.
 
 ## Identity
 

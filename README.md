@@ -13,6 +13,15 @@ The measuring head has no ESP32, firmware, battery-backed clock or local archive
 > Optical response and absolute calibration remain unvalidated.
 > Do not use these provisional readings for exposure or safety decisions.
 
+## Try the 0.1.0 preview
+
+[Download the signed USB APK](https://github.com/mondiversi/Uvir/releases/download/v0.1.0/Uvir-0.1.0.apk) ·
+[Release notes and checksums](https://github.com/mondiversi/Uvir/releases/tag/v0.1.0) ·
+[Wiring and first connection](docs/usb/WIRING.md)
+
+This is a prerelease. Keep the original signing identity when updating, stop any
+active session, and do not uninstall the app or clear its archive for testing.
+
 ## Preserved ESP32 project
 
 The complete previous project is preserved on the
@@ -48,6 +57,9 @@ flowchart LR
 ## App behavior
 
 - One attached USB measuring head, with a fixed localized name.
+- General settings combine Theme with acquisition and alert notification options.
+- One phone-settings JSON and one SQLite database export, without new passwords;
+  older encrypted backups remain importable.
 - Separate detection of the adapter and both optical chips.
 - Missing, incomplete, timed-out or saturated readings do not become valid zeros.
 - W/m² calculations and database values; display units and decimals remain presentation choices.
@@ -79,7 +91,8 @@ The old ESP32 PCB/enclosure design is not a finished PCB for the new USB head.
 ## Build
 
 Open in Android Studio and use JDK 21 (the bundled JBR is suitable).
-Build `2.0.0-dev` is a development identity, not a published stable release.
+The USB edition starts at `0.1.0` and is published as a development prerelease.
+See [release building and signing](RELEASE.md).
 
 ```text
 gradlew :app:testDebugUnitTest :app:assembleDebug -PuvirIsolatedVerification=true

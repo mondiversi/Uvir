@@ -3,7 +3,7 @@
     <string name="app_name">Uvir</string>
     <string name="data_management_import_button">ייבוא</string>
     <string name="data_management_app_button">יישום</string>
-    <string name="data_management_counters_button">כל המונים</string>
+    <string name="data_management_counters_button">מונים</string>
     <string name="launch_spectral_subtitle">חישה ספקטרלית</string>
     <string name="save_measurement">רכישה ידנית</string>
     <string name="add_note_or_leave_empty">הוסף הערה אופציונלית.</string>
@@ -431,7 +431,7 @@
     <string name="orange">כתום</string>
     <string name="red">אדום</string>
     <string name="percent_of_visible">%1$s%% של גלוי</string>
-    <string name="version_info">גרסה ומידע</string>
+    <string name="version_info">מידע וקרדיטים</string>
     <string name="version_info_title">Uvir %1$s</string>
     <string name="app_version">גרסת האפליקציה: %1$s</string>
     <string name="package_name_value">חבילה: %1$s</string>

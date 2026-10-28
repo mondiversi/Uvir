@@ -1,43 +1,40 @@
-# Uvir distribution
+# Uvir USB distribution
 
-> `main` is now **2.0.0-dev (versionCode 8), USB only**. It is not a stable release.
-> Do not replace or overwrite the 1.4.2 release, its installers or its update feed.
-> The USB edition requires a separate signed update channel after hardware validation.
-> The ESP32 release procedure below is historical; use `legacy-esp32` for it.
+`main` starts the USB edition at **0.1.0** (`versionCode` 9).
+This is a public **prerelease**, with real FT232H hardware validation pending.
+The preserved ESP32 edition is **1.4.2 / firmware 0.5.119** on `legacy-esp32`.
+Do not replace its installers, firmware or stable update feed with this APK.
 
 ## Application identity
 
 - Display name: `Uvir`
-- Application ID: `me.mondiversi.uvir`
-- Namespace: `me.mondiversi.uvir`
-- Current version: `1.4.2` (`versionCode` 7)
-- Sensor firmware: `0.5.119`
+- Application ID / namespace: `me.mondiversi.uvir`
+- Version: `0.1.0` (`versionCode` 9)
+- Minimum Android: 8.0 / API 26
+- Measuring head: FT232H + AS7331 + AS7343; no sensor firmware asset
 
-## Building the APK
+## Build and publish the USB preview
 
-Double-click `CREA_APK_RELEASE.bat`.
+1. Run the unit and isolated device tests. Read the
+   [validation status](docs/usb/VALIDATION.md); software tests do not certify
+   physical transfers or calibrated irradiance.
+2. Build the signed APK with `CREA_APK_RELEASE.bat`, or use
+   `gradlew.bat :app:assembleRelease` with the private signing configuration below.
+3. The script copies the APK to `dist/Uvir-0.1.0.apk` and creates
+   `dist/Uvir-0.1.0.apk.sha256`. `dist/` is ignored; binaries are release assets,
+   not source commits.
+4. Create a draft release tagged and titled `v0.1.0` at the reviewed `main` commit.
+   Use [the English release notes](docs/RELEASE_NOTES_0.1.0.md), attach
+   `Uvir-0.1.0.apk` and `SHA256SUMS`, and mark it **prerelease**.
+5. Validate the package, version, existing signing certificate and downloaded
+   checksums before publishing. Keep `make_latest` false so ESP32 users continue
+   to receive their stable release.
 
-When the build finishes, the signed APK ready for distribution is available at:
-
-```text
-dist\Uvir-1.4.2-release.apk
-```
-
-The same directory also contains `Uvir-1.4.2-release.apk.sha256`, which can be
-used to verify that a download has not been modified or corrupted.
-
-The APK can be attached to a GitHub release or distributed from a website.
-Make the corresponding source available in accordance with the project's
-[GPL-3.0 license](LICENSE).
-
-For a complete release (APK, USB firmware, signed index and checksums), follow
-[docs/UPDATES.md](docs/UPDATES.md). Publish the release only after all files have
-been uploaded. Both optical modules are installed and detected; final-assembly
-tests and traceable calibration remain unfinished, and development is currently
-on hold on this work. App/firmware workflows function, but the theoretical lid,
-apertures and any diffuser/filter/window are not validated measuring optics.
-Current readings do not establish accurate absolute irradiance. A development-source
-push is not a new signed APK/firmware release.
+GitHub provides the tagged source ZIP/tarball automatically. Make corresponding
+source available under the [GPL-3.0 license](LICENSE). Do not attach an ESP32 BIN,
+USB firmware uploader or the legacy `uvir-update.json` to this USB-only preview.
+The new USB automatic update channel remains disabled until separately validated.
+The historical `tools/ReleaseTool.java` procedure belongs to `legacy-esp32`.
 
 ## Signing and updates
 

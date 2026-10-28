@@ -297,8 +297,11 @@ internal class UvirUsbPhoneRuntime(private val context: Context) {
             if (now < alertFirstAt) return
             val violations = thresholdAlertViolations(sample, alerts.copy(enabled = true))
             if (violations.isNotEmpty() && (lastAlertAt == Long.MIN_VALUE || now - lastAlertAt >= alerts.repeatSeconds * 1000)) {
-                if (alerts.recordEvents) database.insertThresholdAlertLog(violations, sessionId = id, sensorDeviceId = origin,
-                    qualityFlags = sample.qualityFlags, opticalWindow = sample.opticalWindow)
+                if (alerts.recordEvents) {
+                    database.insertThresholdAlertLog(violations, sessionId = id, sensorDeviceId = origin,
+                        qualityFlags = sample.qualityFlags, opticalWindow = sample.opticalWindow)
+                    UvirUnreadCounters.increment(context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE), KEY_UNREAD_ALERT_COUNT)
+                }
                 lastAlertAt = now
                 mutable.update { it.copy(alertCount = it.alertCount + 1) }
                 scope.launch { playThresholdAlertTone(context, alerts.sound, alerts.volume) }
@@ -343,11 +346,11 @@ internal class UvirUsbPhoneRuntime(private val context: Context) {
         mutable.update { it.copy(automaticSession = null) }
         keepAlive(mutable.value.alertSession != null)
     }
-    fun startAlerts(settings: ThresholdAlertSettings) = scope.launch {
+    fun startAlerts(settings: ThresholdAlertSettings, note: String = "") = scope.launch {
         if (!mutable.value.ready || mutable.value.alertSession != null || settings.rules.none { it.enabled }) return@launch
         alerts = settings.copy(enabled = true)
         val id = database.nextSessionId()
-        database.startAlertSession(id, "", sensorDeviceId = recordIdentity())
+        database.startAlertSession(id, note, sensorDeviceId = recordIdentity())
         preferences.edit().putLong("open_alert", id).commit()
         lastAlertAt = Long.MIN_VALUE
         alertFirstAt = SystemClock.elapsedRealtime() + alerts.startDelaySeconds * 1000

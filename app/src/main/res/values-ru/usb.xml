@@ -23,4 +23,9 @@
     <string name="usb_about_architecture">Редакция только USB: FT232H + AS7331 + AS7343. Телефон управляет обработкой, временем, оповещениями и хранением. Поддержка ESP32 сохранена в ветке legacy-esp32.</string>
     <string name="usb_stop_recording">Остановите запись перед сменой источника данных.</string>
     <string name="usb_legacy_settings_imported">Старые настройки датчиков остаются в архиве и не применяются автоматически к USB-оборудованию.</string>
+    <string name="usb_settings_transfer_description">Экспортируйте/импортируйте все настройки приложения.</string>
+    <string name="usb_settings_export_description">Экспортируйте все настройки приложения.</string>
+    <string name="usb_database_transfer_description">Экспортируйте/импортируйте базу данных приложения.</string>
+    <string name="usb_database_import_description">Замените базу данных приложения базой из выбранного файла.</string>
+    <string name="usb_reset_description">Сбросьте счётчики или восстановите приложение.</string>
 </resources>

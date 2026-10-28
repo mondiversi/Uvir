@@ -23,4 +23,9 @@
     <string name="usb_about_architecture">USB-editie: FT232H + AS7331 + AS7343. De telefoon beheert verwerking, tijd, waarschuwingen en opslag. ESP32-ondersteuning blijft bewaard in de tak legacy-esp32.</string>
     <string name="usb_stop_recording">Stop de opname voordat je de gegevensbron wijzigt.</string>
     <string name="usb_legacy_settings_imported">Oude sensorinstellingen blijven gearchiveerd en worden niet automatisch toegepast op de USB-hardware.</string>
+    <string name="usb_settings_transfer_description">Exporteer/importeer alle appinstellingen.</string>
+    <string name="usb_settings_export_description">Exporteer alle appinstellingen.</string>
+    <string name="usb_database_transfer_description">Exporteer/importeer de appdatabase.</string>
+    <string name="usb_database_import_description">Vervang de appdatabase door de database in het geselecteerde bestand.</string>
+    <string name="usb_reset_description">Reset de tellers of herstel de app.</string>
 </resources>

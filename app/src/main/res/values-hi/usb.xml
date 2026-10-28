@@ -23,4 +23,9 @@
     <string name="usb_about_architecture">केवल USB संस्करण: FT232H + AS7331 + AS7343। फ़ोन प्रोसेसिंग, समय, अलर्ट और भंडारण सँभालता है। ESP32 समर्थन legacy-esp32 शाखा में सुरक्षित है।</string>
     <string name="usb_stop_recording">डेटा स्रोत बदलने से पहले रिकॉर्डिंग रोकें।</string>
     <string name="usb_legacy_settings_imported">पुरानी सेंसर सेटिंग संग्रह में रहती हैं और USB हार्डवेयर पर अपने आप लागू नहीं होतीं।</string>
+    <string name="usb_settings_transfer_description">ऐप की सभी सेटिंग निर्यात/आयात करें।</string>
+    <string name="usb_settings_export_description">ऐप की सभी सेटिंग निर्यात करें।</string>
+    <string name="usb_database_transfer_description">ऐप का डेटाबेस निर्यात/आयात करें।</string>
+    <string name="usb_database_import_description">ऐप का डेटाबेस चुनी गई फ़ाइल के डेटाबेस से बदलें।</string>
+    <string name="usb_reset_description">काउंटर या ऐप रीसेट करें।</string>
 </resources>

@@ -3,7 +3,7 @@
     <string name="app_name">Uvir</string>
     <string name="data_management_import_button">استيراد</string>
     <string name="data_management_app_button">التطبيق</string>
-    <string name="data_management_counters_button">جميع العدادات</string>
+    <string name="data_management_counters_button">العدادات</string>
     <string name="launch_spectral_subtitle">الاستشعار الطيفي</string>
     <string name="save_measurement">التقاط يدوي</string>
     <string name="add_note_or_leave_empty">أضف ملاحظة اختيارية.</string>
@@ -413,7 +413,7 @@
     <string name="orange">برتقالي</string>
     <string name="red">أحمر</string>
     <string name="percent_of_visible">%1$s%% من المرئي</string>
-    <string name="version_info">الإصدار والمعلومات</string>
+    <string name="version_info">معلومات وإسنادات</string>
     <string name="version_info_title">Uvir %1$s</string>
     <string name="app_version">إصدار التطبيق: %1$s</string>
     <string name="package_name_value">الحزمة: %1$s</string>

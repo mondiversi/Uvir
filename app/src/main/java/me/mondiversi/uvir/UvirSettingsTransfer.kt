@@ -23,13 +23,13 @@ private val transientSettingsKeys =
 
 internal fun createUvirAppSettingsBackup(
     context: Context,
-    encryptionPassword: CharArray
+    encryptionPassword: CharArray?
 ): File {
     val preferences =
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     val payload = JSONObject()
     preferences.all
-        .filterKeys(::isTransferableAppPreference)
+        .filterKeys { isTransferableAppPreference(it) && (encryptionPassword != null || isSafePlainAppPreference(it)) }
         .forEach { (key, value) ->
             payload.putPreferenceValue(key, value)
         }
@@ -218,7 +218,7 @@ private fun writeUvirSettingsFile(
     scope: String,
     sensorHardwareUid: String?,
     payload: JSONObject,
-    encryptionPassword: CharArray
+    encryptionPassword: CharArray?
 ): File {
     val root =
         JSONObject()
@@ -229,8 +229,11 @@ private fun writeUvirSettingsFile(
             .put("exported_at", System.currentTimeMillis())
             .put("payload", payload)
     val directory = File(context.cacheDir, "shared").apply { mkdirs() }
-    val encrypted = encryptUvirSettingsText(root.toString(), encryptionPassword)
-    val encoded =
+    val encoded = if (encryptionPassword == null) {
+        require(BuildConfig.USB_ONLY && scope == "app")
+        root.toString(2)
+    } else {
+        val encrypted = encryptUvirSettingsText(root.toString(), encryptionPassword)
         JSONObject()
             .put("schema", UVIR_ENCRYPTED_SETTINGS_SCHEMA)
             .put("version", UVIR_ENCRYPTED_SETTINGS_VERSION)
@@ -241,15 +244,22 @@ private fun writeUvirSettingsFile(
             .put("iv", encrypted.iv)
             .put("ciphertext", encrypted.ciphertext)
             .toString(2)
+    }
     return File(
         directory,
         uvirSettingsExportFileName(
             sensorHardwareUid = sensorHardwareUid,
-            encrypted = true
+            encrypted = encryptionPassword != null
         )
     ).apply {
         writeText(encoded, Charsets.UTF_8)
     }
+}
+
+/** Retired connection secrets must never leak from an older installation into a USB JSON backup. */
+private fun isSafePlainAppPreference(key: String): Boolean {
+    val canonical = key.lowercase(java.util.Locale.ROOT).filter(Char::isLetterOrDigit)
+    return listOf("password", "authtoken", "pairingpin", "bluetoothpin").none(canonical::contains)
 }
 
 internal fun uvirSettingsFilesRequirePassword(

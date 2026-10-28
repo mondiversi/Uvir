@@ -23,4 +23,9 @@
     <string name="usb_about_architecture">Yalnızca USB sürümü: FT232H + AS7331 + AS7343. İşleme, zaman, uyarılar ve depolama telefon tarafından yönetilir. ESP32 desteği legacy-esp32 dalında korunur.</string>
     <string name="usb_stop_recording">Veri kaynağını değiştirmeden önce kaydı durdurun.</string>
     <string name="usb_legacy_settings_imported">Eski sensör ayarları arşivde kalır ve USB donanımına otomatik olarak uygulanmaz.</string>
+    <string name="usb_settings_transfer_description">Tüm uygulama ayarlarını dışa/içe aktarın.</string>
+    <string name="usb_settings_export_description">Tüm uygulama ayarlarını dışa aktarın.</string>
+    <string name="usb_database_transfer_description">Uygulama veritabanını dışa/içe aktarın.</string>
+    <string name="usb_database_import_description">Uygulama veritabanını seçilen dosyadaki veritabanıyla değiştirin.</string>
+    <string name="usb_reset_description">Sayaçları veya uygulamayı sıfırlayın.</string>
 </resources>

@@ -3,7 +3,7 @@
     <string name="app_name">Uvir</string>
     <string name="data_management_import_button">Импорт</string>
     <string name="data_management_app_button">Приложение</string>
-    <string name="data_management_counters_button">Все счётчики</string>
+    <string name="data_management_counters_button">Счётчики</string>
     <string name="launch_spectral_subtitle">СПЕКТРАЛЬНОЕ ЗОНДИРОВАНИЕ</string>
     <string name="save_measurement">Ручное измерение</string>
     <string name="add_note_or_leave_empty">Добавьте необязательную заметку.</string>
@@ -439,7 +439,7 @@
     <string name="orange">Оранжевый</string>
     <string name="red">Красный</string>
     <string name="percent_of_visible">%1$s%% видимых</string>
-    <string name="version_info">Версия и информация</string>
+    <string name="version_info">Информация и авторы</string>
     <string name="version_info_title">Uvir %1$s</string>
     <string name="app_version">Версия приложения: %1$s.</string>
     <string name="package_name_value">Пакет: %1$s</string>

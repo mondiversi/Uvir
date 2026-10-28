@@ -3,7 +3,7 @@
     <string name="app_name">Uvir</string>
     <string name="data_management_import_button">가져오기</string>
     <string name="data_management_app_button">앱</string>
-    <string name="data_management_counters_button">모든 카운터</string>
+    <string name="data_management_counters_button">카운터</string>
     <string name="launch_spectral_subtitle">스펙트럼 감지</string>
     <string name="save_measurement">수동 획득</string>
     <string name="add_note_or_leave_empty">선택적 메모를 추가합니다.</string>
@@ -439,7 +439,7 @@
     <string name="orange">주황색</string>
     <string name="red">빨간색</string>
     <string name="percent_of_visible">보이는 %1$s%%</string>
-    <string name="version_info">버전 및 정보</string>
+    <string name="version_info">정보 및 크레딧</string>
     <string name="version_info_title">Uvir %1$s</string>
     <string name="app_version">앱 버전: %1$s</string>
     <string name="package_name_value">패키지: %1$s</string>

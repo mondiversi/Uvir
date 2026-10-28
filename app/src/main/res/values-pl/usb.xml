@@ -23,4 +23,9 @@
     <string name="usb_about_architecture">Edycja tylko USB: FT232H + AS7331 + AS7343. Telefon obsługuje przetwarzanie, czas, alarmy i zapis. Obsługa ESP32 pozostaje w gałęzi legacy-esp32.</string>
     <string name="usb_stop_recording">Zatrzymaj rejestrację przed zmianą źródła danych.</string>
     <string name="usb_legacy_settings_imported">Dawne ustawienia czujników pozostają w archiwum i nie są automatycznie stosowane do sprzętu USB.</string>
+    <string name="usb_settings_transfer_description">Eksportuj/importuj wszystkie ustawienia aplikacji.</string>
+    <string name="usb_settings_export_description">Eksportuj wszystkie ustawienia aplikacji.</string>
+    <string name="usb_database_transfer_description">Eksportuj/importuj bazę danych aplikacji.</string>
+    <string name="usb_database_import_description">Zastąp bazę danych aplikacji bazą z wybranego pliku.</string>
+    <string name="usb_reset_description">Wyzeruj liczniki lub zresetuj aplikację.</string>
 </resources>

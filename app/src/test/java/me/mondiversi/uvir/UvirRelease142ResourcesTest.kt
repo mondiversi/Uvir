@@ -41,8 +41,9 @@ class UvirRelease142ResourcesTest {
     @Test fun releaseIdentityAndPublicDocumentationAgree() {
         val root = listOf(File("."), File("..")).first { File(it, "app/build.gradle.kts").isFile }
         val gradle = File(root, "app/build.gradle.kts").readText()
-        assertTrue(gradle.contains("versionCode = 8"))
-        assertTrue(gradle.contains("versionName = \"2.0.0-dev\""))
+        assertTrue(gradle.contains("versionCode = 9"))
+        assertTrue(gradle.contains("versionName = \"0.1.0\""))
+        assertTrue(File(root, "README.md").readText().contains("`0.1.0`"))
         for (file in listOf("RELEASE.md", "docs/UPDATES.md", "CREA_APK_RELEASE.bat",
             "docs/RELEASE_NOTES_1.4.2.md")) assertTrue(file, File(root, file).readText().contains("1.4.2"))
         val sourceVersion = Regex("kFirmwareVersion\\[\\] = \"([^\"]+)\"")

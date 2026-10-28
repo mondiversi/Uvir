@@ -3,7 +3,7 @@
     <string name="app_name">Uvir</string>
     <string name="data_management_import_button">Importer</string>
     <string name="data_management_app_button">App</string>
-    <string name="data_management_counters_button">Tous les compteurs</string>
+    <string name="data_management_counters_button">Compteurs</string>
     <string name="launch_spectral_subtitle">DÉTECTION SPECTRALE</string>
     <string name="save_measurement">Acquisition manuelle</string>
     <string name="add_note_or_leave_empty">Ajoutez une note facultative.</string>
@@ -431,7 +431,7 @@
     <string name="orange">Orange</string>
     <string name="red">Rouge</string>
     <string name="percent_of_visible">%1$s%% du visible</string>
-    <string name="version_info">Version et informations</string>
+    <string name="version_info">Infos et crédits</string>
     <string name="version_info_title">Uvir %1$s</string>
     <string name="app_version">Version de l’application : %1$s</string>
     <string name="package_name_value">Package : %1$s</string>

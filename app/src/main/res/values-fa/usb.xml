@@ -23,4 +23,9 @@
     <string name="usb_about_architecture">نسخه فقط USB: FT232H + AS7331 + AS7343. تلفن پردازش، زمان، هشدارها و ذخیره‌سازی را انجام می‌دهد. پشتیبانی ESP32 در شاخه legacy-esp32 حفظ شده است.</string>
     <string name="usb_stop_recording">پیش از تغییر منبع داده، ثبت را متوقف کنید.</string>
     <string name="usb_legacy_settings_imported">تنظیمات قدیمی حسگرها بایگانی می‌مانند و خودکار روی سخت‌افزار USB اعمال نمی‌شوند.</string>
+    <string name="usb_settings_transfer_description">همهٔ تنظیمات برنامه را صادر/وارد کنید.</string>
+    <string name="usb_settings_export_description">همهٔ تنظیمات برنامه را صادر کنید.</string>
+    <string name="usb_database_transfer_description">پایگاه دادهٔ برنامه را صادر/وارد کنید.</string>
+    <string name="usb_database_import_description">پایگاه دادهٔ برنامه را با پایگاه دادهٔ فایل انتخاب‌شده جایگزین کنید.</string>
+    <string name="usb_reset_description">شمارنده‌ها یا برنامه را بازنشانی کنید.</string>
 </resources>

@@ -127,11 +127,13 @@ class UvirActionTypographyTest {
                 val content: @Composable () -> Unit = {
                     Column(Modifier.width(300.dp).background(Color.Black)) {
                         Box(Modifier.testTag("header")) {
-                            UvirHomeHeader(SensorConnectionMode.USB, true,
+                            UvirHomeHeader(SensorConnectionMode.USB, false,
                                 UsbSensorConnectionStatus.DISCONNECTED, false,
                                 WirelessSensorConnectionStatus.DISCONNECTED, null, false, false,
                                 "Info", Color.White, Color.Gray, {}, {},
-                                sensorSelectionExpanded = false, onSensorSelectionExpandedChange = {})
+                                sensorSelectionExpanded = false, onSensorSelectionExpandedChange = {},
+                                sensorDisplayName = "Probe", selectedSensorDeviceId = "TYPOGRAPHY-TEST",
+                                sensorProfiles = listOf(UvirSensorProfile(1L, "TYPOGRAPHY-TEST", "Probe", 0L, 0L)))
                         }
                         Box(Modifier.testTag("closed")) {
                             SettingsSection("Closed settings", Color.Black, Color.White, Color.Gray,
@@ -165,7 +167,8 @@ class UvirActionTypographyTest {
             }
         }
         val tags = listOf("header", "closed", "open", "context", "identity")
-        val labels = listOf("Uvir", BuildConfig.VERSION_NAME, "Closed settings", "Open settings",
+        // The legacy header contains a sensor name. The USB title/version are covered by UvirUsbPhoneUiTest.
+        val labels = listOf("Probe", "Closed settings", "Open settings",
             "Settings description", "Sample note", "Demo sensor")
         for (dark in listOf(false, true)) for (rightToLeft in listOf(false, true)) for (font in listOf(1f, 1.5f)) {
             compose.runOnIdle { night.value = dark; rtl.value = rightToLeft; scale.floatValue = font; themed.value = false }

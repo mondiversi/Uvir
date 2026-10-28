@@ -70,20 +70,25 @@ continue using their original SI and source-identity rules. No bulk conversion
 or destructive database reset is part of this redesign.
 
 USB sampling and calibration are phone-owned settings, editable and persistent
-even without an attached adapter. The UI retains Sensor/App categories to group
-their purpose; both categories are stored on the phone. Only automatic reference
+even without an attached adapter. All configuration belongs to the phone. The menu has no Sensor/App separators;
+General combines Theme with acquisition/alert notification islands. Only automatic reference
 measurements require real live readings. FT232H identity remains record provenance,
 not the owner of these settings. Old ESP32 settings are not silently promoted.
 Imported legacy sensor settings stay
 archived and are never sent as ESP32 commands to an FT232H.
-The encrypted app-settings backup includes durable USB sampling/calibration
+The app-settings JSON backup includes durable USB sampling/calibration
 settings, excluding open jobs and simulation state. Earlier preview per-adapter
 profiles remain archived without replacing the phone configuration.
+USB-edition settings and SQLite database exports no longer require encryption
+or a password. Settings export is a single phone-owned document; there is no
+App/Sensor export choice. Imports still recognize earlier encrypted settings
+and database archives and request a password only for those legacy files.
+Database replacement retains integrity/schema validation and a single transaction.
 
 ## Release boundary
 
-`2.0.0-dev` is not a stable release. Keep the 1.4.2 installers and firmware
+`0.1.0` starts the USB edition's development version line. Keep the 1.4.2 installers and firmware
 available. The legacy `releases/latest` update feed must not point ESP32 users
 to the incompatible USB edition. A separate signed USB channel is required
-before distributing the USB release; signature/hash/installer checks remain in
+before enabling automatic USB updates; signature/hash/installer checks remain in
 use. There is no firmware to upload to the FT232H head through this app.

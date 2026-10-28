@@ -4,7 +4,7 @@
     <string name="app_name">Uvir</string>
     <string name="data_management_import_button">Importeren</string>
     <string name="data_management_app_button">App</string>
-    <string name="data_management_counters_button">Alle tellers</string>
+    <string name="data_management_counters_button">Tellers</string>
     <string name="launch_spectral_subtitle">SPECTRALE METINGEN</string>
     <string name="save_measurement">Handmatige meting</string>
     <string name="add_note_or_leave_empty">Voeg een optionele notitie toe.</string>
@@ -473,7 +473,7 @@
     <string name="orange">Oranje</string>
     <string name="red">Rood</string>
     <string name="percent_of_visible">%1$s%% van zichtbaar licht</string>
-    <string name="version_info">Versie en informatie</string>
+    <string name="version_info">Info en credits</string>
     <string name="version_info_title">Uvir %1$s</string>
     <string name="app_version">App-versie: %1$s</string>
     <string name="package_name_value">Pakket: %1$s</string>

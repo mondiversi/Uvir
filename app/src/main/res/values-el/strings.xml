@@ -3,7 +3,7 @@
     <string name="app_name">Uvir</string>
     <string name="data_management_import_button">Εισαγωγή</string>
     <string name="data_management_app_button">Εφαρμογή</string>
-    <string name="data_management_counters_button">Όλοι οι μετρητές</string>
+    <string name="data_management_counters_button">Μετρητές</string>
     <string name="launch_spectral_subtitle">ΦΑΣΜΑΤΙΚΗ ΑΙΤΗΣΗ</string>
     <string name="save_measurement">Χειροκίνητη μέτρηση</string>
     <string name="add_note_or_leave_empty">Προσθέστε μια προαιρετική σημείωση.</string>
@@ -423,7 +423,7 @@
     <string name="orange">Πορτοκαλί</string>
     <string name="red">Κόκκινο</string>
     <string name="percent_of_visible">%1$s%% του ορατού</string>
-    <string name="version_info">Έκδοση και πληροφορίες</string>
+    <string name="version_info">Πληροφορίες και συντελεστές</string>
     <string name="version_info_title">Uvir %1$s</string>
     <string name="app_version">Έκδοση εφαρμογής: %1$s</string>
     <string name="package_name_value">Συσκευασία: %1$s</string>

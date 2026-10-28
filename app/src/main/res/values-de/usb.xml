@@ -23,4 +23,9 @@
     <string name="usb_about_architecture">Reine USB-Ausgabe: FT232H + AS7331 + AS7343. Das Telefon übernimmt Verarbeitung, Uhrzeit, Alarme und Speicherung. Die ESP32-Unterstützung bleibt im Zweig legacy-esp32 erhalten.</string>
     <string name="usb_stop_recording">Beende die Aufzeichnung vor dem Wechsel der Datenquelle.</string>
     <string name="usb_legacy_settings_imported">Alte Sensoreinstellungen bleiben archiviert und werden nicht automatisch auf die USB-Hardware angewendet.</string>
+    <string name="usb_settings_transfer_description">Exportiere/importiere alle App-Einstellungen.</string>
+    <string name="usb_settings_export_description">Exportiere alle App-Einstellungen.</string>
+    <string name="usb_database_transfer_description">Exportiere/importiere die App-Datenbank.</string>
+    <string name="usb_database_import_description">Ersetze die App-Datenbank durch die Datenbank in der ausgewählten Datei.</string>
+    <string name="usb_reset_description">Setze die Zähler oder die App zurück.</string>
 </resources>

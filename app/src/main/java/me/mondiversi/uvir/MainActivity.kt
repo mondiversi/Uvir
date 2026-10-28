@@ -453,6 +453,7 @@ class MainActivity : ComponentActivity(), UvirExportSaveHost, UvirSettingsImport
     private val databaseImportInProgressState = mutableStateOf(false)
 
     private val databaseImportErrorState = mutableStateOf(false)
+    private val databaseImportPasswordRequiredState = mutableStateOf(true)
 
     private var pendingExportFiles: List<File> = emptyList()
 
@@ -521,6 +522,9 @@ class MainActivity : ComponentActivity(), UvirExportSaveHost, UvirSettingsImport
             ActivityResultContracts.OpenDocument()
         ) { uri ->
             if (uri != null) {
+                databaseImportPasswordRequiredState.value = runCatching {
+                    uvirDatabaseImportRequiresPassword(this, uri)
+                }.getOrDefault(false)
                 databaseImportErrorState.value = false
                 pendingDatabaseImportUriState.value = uri
             }
@@ -536,11 +540,11 @@ class MainActivity : ComponentActivity(), UvirExportSaveHost, UvirSettingsImport
         lifecycleScope.launch {
             try {
                 UvirDatabaseHelper(this@MainActivity).use { database ->
-                    importEncryptedUvirDatabaseArchive(
+                    importUvirDatabaseArchive(
                         this@MainActivity,
                         database,
                         uri,
-                        password
+                        password.takeIf { databaseImportPasswordRequiredState.value }
                     )
                 }
                 savedPresentationStore.clear()
@@ -659,7 +663,7 @@ class MainActivity : ComponentActivity(), UvirExportSaveHost, UvirSettingsImport
             showUvirBottomMessage(this, getString(R.string.usb_stop_recording)); return
         }
         databaseImportLauncher.launch(
-            arrayOf("application/zip", "application/x-zip-compressed", "application/octet-stream")
+            arrayOf("application/vnd.sqlite3", "application/x-sqlite3", "application/zip", "application/x-zip-compressed", "application/octet-stream")
         )
     }
 
@@ -787,9 +791,11 @@ class MainActivity : ComponentActivity(), UvirExportSaveHost, UvirSettingsImport
                 pendingDatabaseImportUriState.value?.let { uri ->
                     UvirSettingsPasswordDialog(
                         title = stringResource(R.string.import_database_dialog_title),
-                        description = stringResource(R.string.import_database_dialog_description),
+                        description = stringResource(if (databaseImportPasswordRequiredState.value)
+                            R.string.import_database_dialog_description else R.string.usb_database_import_description),
                         confirmationRequired = false,
                         confirmLabel = stringResource(R.string.import_database_confirm),
+                        passwordRequired = databaseImportPasswordRequiredState.value,
                         cardColor = MaterialTheme.colorScheme.surface,
                         primaryText = MaterialTheme.colorScheme.onSurface,
                         secondaryText = MaterialTheme.colorScheme.onSurfaceVariant,

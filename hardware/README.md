@@ -1,5 +1,8 @@
 # Hardware
 
+> **Preserved ESP32 hardware documentation.** For the active USB edition, use the
+> [FT232H wiring and first-connection guide](../docs/usb/WIRING.md).
+
 > **USB redesign:** the active branch now targets FT232H + AS7331 + AS7343.
 > See the [preliminary wiring guide](../docs/usb/WIRING.md).
 > The ESP32 carrier PCB, autonomous hardware and enclosure layout below belong
