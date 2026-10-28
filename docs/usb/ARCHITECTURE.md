@@ -87,8 +87,10 @@ Database replacement retains integrity/schema validation and a single transactio
 
 ## Release boundary
 
-`0.1.0` starts the USB edition's development version line. Keep the 1.4.2 installers and firmware
-available. The legacy `releases/latest` update feed must not point ESP32 users
-to the incompatible USB edition. A separate signed USB channel is required
+`0.1.0` starts the USB edition's development version line and is the only remaining
+GitHub release. The former ESP32 binary releases have been retired; `legacy-esp32`,
+its source history and Git tags are unchanged. The old stable update feed no longer
+has a published release and must not deliver the incompatible USB edition.
+A separate signed USB channel is required
 before enabling automatic USB updates; signature/hash/installer checks remain in
 use. There is no firmware to upload to the FT232H head through this app.

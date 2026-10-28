@@ -38,6 +38,8 @@ reconnection does not silently restart them.
 ## Preserved ESP32 edition
 
 ESP32 users should keep **v1.4.2 / firmware 0.5.119** from `legacy-esp32`.
-Its source, installers and stable update feed remain separate and unchanged.
-This prerelease is not delivered through the legacy stable update feed.
+Its branch, complete source history and Git tags remain unchanged. The old
+GitHub release pages and downloadable installers have been retired, leaving
+only this USB prerelease. The legacy stable update feed no longer has a published
+release; the USB APK is not delivered to ESP32 users through that feed.
 Automatic USB updates remain disabled until a separate signed channel is validated.

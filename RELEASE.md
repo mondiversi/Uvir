@@ -3,7 +3,8 @@
 `main` starts the USB edition at **0.1.0** (`versionCode` 9).
 This is a public **prerelease**, with real FT232H hardware validation pending.
 The preserved ESP32 edition is **1.4.2 / firmware 0.5.119** on `legacy-esp32`.
-Do not replace its installers, firmware or stable update feed with this APK.
+Its old public release assets have been retired; source and Git tags remain
+available for rebuilding. This USB APK is not an ESP32 firmware/app update.
 
 ## Application identity
 

@@ -14,11 +14,13 @@ The USB app never queries `releases/latest` for an ESP32 update. See
 [the release procedure](../RELEASE.md) and
 [the architecture boundary](usb/ARCHITECTURE.md#release-boundary).
 
-## Preserved ESP32 stable channel — 1.4.2
+## Historical ESP32 stable channel — 1.4.2
 
 The rest of this document is historical compatibility documentation for
-`legacy-esp32`, not instructions for the FT232H head. Its stable release and
-update assets remain available unchanged.
+`legacy-esp32`, not instructions for the FT232H head. Its old release pages and
+download/update assets have been retired. The branch, complete source history
+and Git tags remain available unchanged; the old stable feed no longer has a
+published release. The descriptions below document its former behavior.
 
 Uvir checks the latest stable GitHub release once per process launch. In Info,
 **Check for updates** runs the same check manually. A successful empty result is

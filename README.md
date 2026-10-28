@@ -27,14 +27,15 @@ active session, and do not uninstall the app or clear its archive for testing.
 The complete previous project is preserved on the
 [legacy-esp32 branch](https://github.com/mondiversi/Uvir/tree/legacy-esp32),
 at commit `7161a31711f249de2bc346199c269da7aaea88c5`.
-Its stable release is [**1.4.2**](https://github.com/mondiversi/Uvir/releases/tag/v1.4.2),
-with firmware **0.5.119**. Its source, firmware, PCB, printable parts, wireless
+Its preserved version is **1.4.2**, with firmware **0.5.119**.
+Its source, firmware, PCB, printable parts, wireless
 protocols and documentation remain recoverable.
 The [archived README](docs/LEGACY_ESP32_README.md) describes that architecture.
 
-**The 1.4.2 APK and ESP32 firmware belong together.** This development branch
-does not replace those public installers and must not be shipped to ESP32
-users through the legacy automatic update channel.
+The old GitHub release pages and downloadable installers have been retired;
+**only the USB 0.1.0 release remains**. The ESP32 branch, source history and Git
+tags remain intact, so that edition can still be rebuilt. The old ESP32 stable
+update feed no longer has a published release. The USB APK is not an ESP32 update.
 
 ## New hardware
 
