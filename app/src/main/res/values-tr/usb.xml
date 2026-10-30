@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="usb_updates_pending">USB sürümünün güncelleme kanalı henüz yayımlanmadı.</string>
+    <string name="usb_updates_pending">Uvir güncelleme kanalı henüz yayımlanmadı.</string>
     <string name="usb_data">Veriler</string>
     <string name="usb_chart">Grafik</string>
     <string name="usb_sensor_name">USB sensörü</string>
@@ -20,7 +20,7 @@
     <string name="usb_simulation">Simüle veriler</string>
     <string name="usb_interval">Ölçüm aralığı (saniye)</string>
     <string name="usb_phone_note">USB bağlantısını kesmek veya uygulamayı kapatmak kaydı durdurur. Yeniden bağlanmak bir oturumu otomatik olarak yeniden başlatmaz.</string>
-    <string name="usb_about_architecture">Yalnızca USB sürümü: FT232H + AS7331 + AS7343. İşleme, zaman, uyarılar ve depolama telefon tarafından yönetilir. ESP32 desteği legacy-esp32 dalında korunur.</string>
+    <string name="usb_about_architecture">Uvir: FT232H + AS7331 + AS7343. İşleme, zaman, uyarılar ve depolama telefon tarafından yönetilir. ESP32 desteği legacy-esp32 dalında korunur.</string>
     <string name="usb_stop_recording">Veri kaynağını değiştirmeden önce kaydı durdurun.</string>
     <string name="usb_legacy_settings_imported">Eski sensör ayarları arşivde kalır ve USB donanımına otomatik olarak uygulanmaz.</string>
     <string name="usb_settings_transfer_description">Tüm uygulama ayarlarını dışa/içe aktarın.</string>

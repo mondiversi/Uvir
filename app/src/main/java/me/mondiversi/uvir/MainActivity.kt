@@ -15,6 +15,7 @@ import android.content.pm.PackageManager
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.graphics.BitmapFactory
+import android.hardware.usb.UsbManager
 import android.media.AudioManager
 import android.media.ToneGenerator
 import android.net.ConnectivityManager
@@ -869,6 +870,10 @@ class MainActivity : ComponentActivity(), UvirExportSaveHost, UvirSettingsImport
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
+
+        if (intent.action == UsbManager.ACTION_USB_DEVICE_ATTACHED) {
+            UsbPhoneRuntimeStore.get(applicationContext).scan(mayRequestPermission = false)
+        }
 
         if (::usbSensorManager.isInitialized) {
             usbSensorManager.handleIntent(intent)

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="usb_updates_pending">The USB edition update channel is not published yet.</string>
+    <string name="usb_updates_pending">The Uvir update channel is not published yet.</string>
     <string name="usb_data">Data</string>
     <string name="usb_chart">Chart</string>
     <string name="usb_sensor_name">USB sensor</string>
@@ -20,7 +20,7 @@
     <string name="usb_simulation">Simulated readings</string>
     <string name="usb_interval">Acquisition interval (seconds)</string>
     <string name="usb_phone_note">Disconnecting USB or closing the app interrupts recording. Reconnecting never restarts a session automatically.</string>
-    <string name="usb_about_architecture">USB-only edition: FT232H + AS7331 + AS7343. The phone owns processing, time, alerts and storage. ESP32 support is preserved in the legacy-esp32 branch.</string>
+    <string name="usb_about_architecture">Uvir: FT232H + AS7331 + AS7343. The phone owns processing, time, alerts and storage. ESP32 support is preserved in the legacy-esp32 branch.</string>
     <string name="usb_stop_recording">Stop recording before changing the data source.</string>
     <string name="usb_legacy_settings_imported">Legacy sensor settings remain archived. They are not applied automatically to the USB hardware.</string>
     <string name="usb_settings_transfer_description">Export/import all app settings.</string>

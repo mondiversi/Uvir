@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="usb_updates_pending">Der Updatekanal der USB-Ausgabe ist noch nicht veröffentlicht.</string>
+    <string name="usb_updates_pending">Der Updatekanal von Uvir ist noch nicht veröffentlicht.</string>
     <string name="usb_data">Daten</string>
     <string name="usb_chart">Diagramm</string>
     <string name="usb_sensor_name">USB-Sensor</string>
@@ -20,7 +20,7 @@
     <string name="usb_simulation">Simulierte Daten</string>
     <string name="usb_interval">Erfassungsintervall (Sekunden)</string>
     <string name="usb_phone_note">USB-Trennung oder Schließen der App unterbricht die Aufzeichnung. Eine erneute Verbindung startet keine Sitzung automatisch.</string>
-    <string name="usb_about_architecture">Reine USB-Ausgabe: FT232H + AS7331 + AS7343. Das Telefon übernimmt Verarbeitung, Uhrzeit, Alarme und Speicherung. Die ESP32-Unterstützung bleibt im Zweig legacy-esp32 erhalten.</string>
+    <string name="usb_about_architecture">Uvir: FT232H + AS7331 + AS7343. Das Telefon übernimmt Verarbeitung, Uhrzeit, Alarme und Speicherung. Die ESP32-Unterstützung bleibt im Zweig legacy-esp32 erhalten.</string>
     <string name="usb_stop_recording">Beende die Aufzeichnung vor dem Wechsel der Datenquelle.</string>
     <string name="usb_legacy_settings_imported">Alte Sensoreinstellungen bleiben archiviert und werden nicht automatisch auf die USB-Hardware angewendet.</string>
     <string name="usb_settings_transfer_description">Exportiere/importiere alle App-Einstellungen.</string>

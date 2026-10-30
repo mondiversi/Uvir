@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="usb_updates_pending">Kanał aktualizacji edycji USB nie został jeszcze opublikowany.</string>
+    <string name="usb_updates_pending">Kanał aktualizacji Uvir nie został jeszcze opublikowany.</string>
     <string name="usb_data">Dane</string>
     <string name="usb_chart">Wykres</string>
     <string name="usb_sensor_name">Czujnik USB</string>
@@ -20,7 +20,7 @@
     <string name="usb_simulation">Dane symulowane</string>
     <string name="usb_interval">Interwał pomiarów (sekundy)</string>
     <string name="usb_phone_note">Odłączenie USB lub zamknięcie aplikacji przerywa rejestrację. Ponowne połączenie nigdy nie uruchamia sesji automatycznie.</string>
-    <string name="usb_about_architecture">Edycja tylko USB: FT232H + AS7331 + AS7343. Telefon obsługuje przetwarzanie, czas, alarmy i zapis. Obsługa ESP32 pozostaje w gałęzi legacy-esp32.</string>
+    <string name="usb_about_architecture">Uvir: FT232H + AS7331 + AS7343. Telefon obsługuje przetwarzanie, czas, alarmy i zapis. Obsługa ESP32 pozostaje w gałęzi legacy-esp32.</string>
     <string name="usb_stop_recording">Zatrzymaj rejestrację przed zmianą źródła danych.</string>
     <string name="usb_legacy_settings_imported">Dawne ustawienia czujników pozostają w archiwum i nie są automatycznie stosowane do sprzętu USB.</string>
     <string name="usb_settings_transfer_description">Eksportuj/importuj wszystkie ustawienia aplikacji.</string>

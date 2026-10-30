@@ -1,13 +1,13 @@
-# Uvir — USB edition (in development)
+# Uvir
 
 Android app for spectral irradiance acquisition and estimated biological effects.
 
-**The `main` branch is being redesigned for a USB-only measuring head:
+**The `main` branch develops Uvir for a measuring head connected through USB:
 FT232H + UV 5 Click / AS7331 + GY-AS734X / AS7343.** The phone owns
 sampling, processing, acquisition schedules, alerts, time and storage.
 The measuring head has no ESP32, firmware, battery-backed clock or local archive.
 
-> **Hardware validation is pending.** The FT232H board has not arrived yet.
+> **Hardware validation is pending.** The FT232H hardware has not completed validation.
 > Driver tests and an Android build do not prove electrical compatibility,
 > sensor timing, screen-off reliability or measurement accuracy.
 > Optical response and absolute calibration remain unvalidated.
@@ -15,7 +15,7 @@ The measuring head has no ESP32, firmware, battery-backed clock or local archive
 
 ## Try the 0.1.0 preview
 
-[Download the signed USB APK](https://github.com/mondiversi/Uvir/releases/download/v0.1.0/Uvir-0.1.0.apk) ·
+[Download the signed Uvir APK](https://github.com/mondiversi/Uvir/releases/download/v0.1.0/Uvir-0.1.0.apk) ·
 [Release notes and checksums](https://github.com/mondiversi/Uvir/releases/tag/v0.1.0) ·
 [Wiring and first connection](docs/usb/WIRING.md)
 
@@ -33,9 +33,9 @@ protocols and documentation remain recoverable.
 The [archived README](docs/LEGACY_ESP32_README.md) describes that architecture.
 
 The old GitHub release pages and downloadable installers have been retired;
-**only the USB 0.1.0 release remains**. The ESP32 branch, source history and Git
+**only the Uvir 0.1.0 release remains**. The ESP32 branch, source history and Git
 tags remain intact, so that edition can still be rebuilt. The old ESP32 stable
-update feed no longer has a published release. The USB APK is not an ESP32 update.
+update feed no longer has a published release. The Uvir APK is not an ESP32 update.
 
 ## New hardware
 
@@ -92,7 +92,7 @@ The old ESP32 PCB/enclosure design is not a finished PCB for the new USB head.
 ## Build
 
 Open in Android Studio and use JDK 21 (the bundled JBR is suitable).
-The USB edition starts at `0.1.0` and is published as a development prerelease.
+Uvir starts at `0.1.0` and is published as a development prerelease.
 See [release building and signing](RELEASE.md).
 
 ```text

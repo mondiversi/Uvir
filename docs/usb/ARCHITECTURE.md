@@ -87,10 +87,10 @@ Database replacement retains integrity/schema validation and a single transactio
 
 ## Release boundary
 
-`0.1.0` starts the USB edition's development version line and is the only remaining
+`0.1.0` starts Uvir's new development version line and is the only remaining
 GitHub release. The former ESP32 binary releases have been retired; `legacy-esp32`,
 its source history and Git tags are unchanged. The old stable update feed no longer
-has a published release and must not deliver the incompatible USB edition.
+has a published release and must not deliver the incompatible current Uvir app.
 A separate signed USB channel is required
 before enabling automatic USB updates; signature/hash/installer checks remain in
 use. There is no firmware to upload to the FT232H head through this app.

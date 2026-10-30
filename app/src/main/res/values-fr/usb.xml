@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="usb_updates_pending">Le canal de mise à jour de l’édition USB n’est pas encore publié.</string>
+    <string name="usb_updates_pending">Le canal de mise à jour d’Uvir n’est pas encore publié.</string>
     <string name="usb_data">Données</string>
     <string name="usb_chart">Graphique</string>
     <string name="usb_sensor_name">Capteur USB</string>
@@ -20,7 +20,7 @@
     <string name="usb_simulation">Données simulées</string>
     <string name="usb_interval">Intervalle d’acquisition (secondes)</string>
     <string name="usb_phone_note">Débrancher USB ou fermer l’application interrompt l’enregistrement. La reconnexion ne redémarre jamais automatiquement une session.</string>
-    <string name="usb_about_architecture">Édition USB uniquement : FT232H + AS7331 + AS7343. Le téléphone gère le traitement, l’heure, les alertes et le stockage. La prise en charge ESP32 est conservée dans la branche legacy-esp32.</string>
+    <string name="usb_about_architecture">Uvir: FT232H + AS7331 + AS7343. Le téléphone gère le traitement, l’heure, les alertes et le stockage. La prise en charge ESP32 est conservée dans la branche legacy-esp32.</string>
     <string name="usb_stop_recording">Arrêtez l’enregistrement avant de changer la source des données.</string>
     <string name="usb_legacy_settings_imported">Les anciens réglages des capteurs restent archivés et ne sont pas appliqués automatiquement au matériel USB.</string>
     <string name="usb_settings_transfer_description">Exportez/importez tous les paramètres de l’application.</string>

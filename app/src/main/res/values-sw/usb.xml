@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="usb_updates_pending">Njia ya masasisho ya toleo la USB bado haijachapishwa.</string>
+    <string name="usb_updates_pending">Njia ya masasisho ya Uvir bado haijachapishwa.</string>
     <string name="usb_data">Data</string>
     <string name="usb_chart">Grafu</string>
     <string name="usb_sensor_name">Kihisi cha USB</string>
@@ -20,7 +20,7 @@
     <string name="usb_simulation">Data ya kuigiza</string>
     <string name="usb_interval">Muda kati ya vipimo (sekunde)</string>
     <string name="usb_phone_note">Kutoa USB au kufunga programu hukatiza kurekodi. Kuunganisha tena hakuanzi kipindi upya kiotomatiki.</string>
-    <string name="usb_about_architecture">Toleo la USB pekee: FT232H + AS7331 + AS7343. Simu hushughulikia uchakataji, saa, tahadhari na uhifadhi. Usaidizi wa ESP32 umehifadhiwa kwenye tawi legacy-esp32.</string>
+    <string name="usb_about_architecture">Uvir: FT232H + AS7331 + AS7343. Simu hushughulikia uchakataji, saa, tahadhari na uhifadhi. Usaidizi wa ESP32 umehifadhiwa kwenye tawi legacy-esp32.</string>
     <string name="usb_stop_recording">Simamisha kurekodi kabla ya kubadilisha chanzo cha data.</string>
     <string name="usb_legacy_settings_imported">Mipangilio ya zamani ya vihisi hubaki kwenye kumbukumbu na haitumiki kiotomatiki kwenye vifaa vya USB.</string>
     <string name="usb_settings_transfer_description">Hamisha/ingiza mipangilio yote ya programu.</string>

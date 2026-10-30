@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="usb_updates_pending">ערוץ העדכונים של מהדורת USB טרם פורסם.</string>
+    <string name="usb_updates_pending">ערוץ העדכונים של Uvir טרם פורסם.</string>
     <string name="usb_data">נתונים</string>
     <string name="usb_chart">גרף</string>
     <string name="usb_sensor_name">חיישן USB</string>
@@ -20,7 +20,7 @@
     <string name="usb_simulation">נתונים מדומים</string>
     <string name="usb_interval">מרווח מדידות (שניות)</string>
     <string name="usb_phone_note">ניתוק USB או סגירת האפליקציה מפסיקים את ההקלטה. חיבור מחדש לעולם אינו מפעיל מחדש הפעלה באופן אוטומטי.</string>
-    <string name="usb_about_architecture">מהדורת USB בלבד: FT232H + AS7331 + AS7343. הטלפון מנהל עיבוד, זמן, התראות ואחסון. התמיכה ב־ESP32 נשמרת בענף legacy-esp32.</string>
+    <string name="usb_about_architecture">Uvir: FT232H + AS7331 + AS7343. הטלפון מנהל עיבוד, זמן, התראות ואחסון. התמיכה ב־ESP32 נשמרת בענף legacy-esp32.</string>
     <string name="usb_stop_recording">עצרו את ההקלטה לפני שינוי מקור הנתונים.</string>
     <string name="usb_legacy_settings_imported">הגדרות החיישנים הישנות נשמרות בארכיון ואינן מוחלות אוטומטית על חומרת USB.</string>
     <string name="usb_settings_transfer_description">ייצא/ייבא את כל הגדרות האפליקציה.</string>

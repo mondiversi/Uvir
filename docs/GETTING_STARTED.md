@@ -1,6 +1,6 @@
 # Getting started with UVIR
 
-> **Preserved ESP32 hardware documentation.** For the active USB edition, use the
+> **Preserved ESP32 hardware documentation.** For the current Uvir architecture, use the
 > [FT232H wiring and first-connection guide](usb/WIRING.md).
 
 > **Project currently on hold pending optical validation and calibration.**

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="usb_updates_pending">USB 版更新渠道尚未发布。</string>
+    <string name="usb_updates_pending">Uvir 更新渠道尚未发布。</string>
     <string name="usb_data">数据</string>
     <string name="usb_chart">图表</string>
     <string name="usb_sensor_name">USB 传感器</string>
@@ -20,7 +20,7 @@
     <string name="usb_simulation">模拟数据</string>
     <string name="usb_interval">采集间隔（秒）</string>
     <string name="usb_phone_note">断开 USB 或关闭应用会中断记录。重新连接不会自动重新启动会话。</string>
-    <string name="usb_about_architecture">仅 USB 版本：FT232H + AS7331 + AS7343。手机负责处理、时间、警报和存储。ESP32 支持保留在 legacy-esp32 分支中。</string>
+    <string name="usb_about_architecture">Uvir: FT232H + AS7331 + AS7343。手机负责处理、时间、警报和存储。ESP32 支持保留在 legacy-esp32 分支中。</string>
     <string name="usb_stop_recording">更换数据源前请停止记录。</string>
     <string name="usb_legacy_settings_imported">旧传感器设置会保留存档，不会自动应用于 USB 硬件。</string>
     <string name="usb_settings_transfer_description">导出/导入应用的所有设置。</string>

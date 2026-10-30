@@ -1,6 +1,6 @@
 # Validation status
 
-## USB 0.1.0 prerelease verification — 2026-10-28
+## Uvir 0.1.0 prerelease verification — 2026-10-28
 
 - 774 JVM tests and 28 device tests pass. Driver/measurement tests cover MPSSE
   synchronization, FTDI status stripping, ACK/NACK, I2C release on failure,
@@ -18,7 +18,7 @@
 
 ## Development version line — 2026-10-28
 
-The current USB preview is named `0.1.0`, starting its own development sequence.
+The current Uvir preview is named `0.1.0`, starting its own development sequence.
 Android's internal version code advances to 9 so the signed preview can replace
 the already installed build without uninstalling it or clearing data. Earlier
 `2.0.0-dev` entries below document historical local builds, not a stable release.
@@ -56,7 +56,7 @@ day/night, both orientations, RTL and enlarged fonts, without changing archives.
   optical-master persistence, automatic-acquisition drafts and disabled reference
   collection without an adapter.
 - At the owner's request, the installed real app was upgraded from 1.4.2 to the
-  signed USB development build `2.0.0-dev`, without uninstalling it. Encrypted
+  signed Uvir development build `2.0.0-dev`, without uninstalling it. Encrypted
   snapshots were verified before and after the upgrade; all existing database
   tables were unchanged. This is a local preview, not a stable release.
 - Real FT232H transfers, electrical compatibility, optical response and

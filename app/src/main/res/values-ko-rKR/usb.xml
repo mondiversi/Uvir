@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="usb_updates_pending">USB 버전의 업데이트 채널은 아직 게시되지 않았습니다.</string>
+    <string name="usb_updates_pending">Uvir 업데이트 채널은 아직 게시되지 않았습니다.</string>
     <string name="usb_data">데이터</string>
     <string name="usb_chart">그래프</string>
     <string name="usb_sensor_name">USB 센서</string>
@@ -20,7 +20,7 @@
     <string name="usb_simulation">모의 데이터</string>
     <string name="usb_interval">측정 간격(초)</string>
     <string name="usb_phone_note">USB를 분리하거나 앱을 닫으면 기록이 중단됩니다. 다시 연결해도 세션이 자동으로 재시작되지 않습니다.</string>
-    <string name="usb_about_architecture">USB 전용 버전: FT232H + AS7331 + AS7343. 휴대전화가 처리, 시간, 경고 및 저장을 담당합니다. ESP32 지원은 legacy-esp32 브랜치에 보존됩니다.</string>
+    <string name="usb_about_architecture">Uvir: FT232H + AS7331 + AS7343. 휴대전화가 처리, 시간, 경고 및 저장을 담당합니다. ESP32 지원은 legacy-esp32 브랜치에 보존됩니다.</string>
     <string name="usb_stop_recording">데이터 소스를 바꾸기 전에 기록을 중지하세요.</string>
     <string name="usb_legacy_settings_imported">이전 센서 설정은 보관되며 USB 하드웨어에 자동으로 적용되지 않습니다.</string>
     <string name="usb_settings_transfer_description">앱의 모든 설정을 내보내거나 가져옵니다.</string>

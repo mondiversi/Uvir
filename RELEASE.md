@@ -1,10 +1,10 @@
-# Uvir USB distribution
+# Uvir distribution
 
-`main` starts the USB edition at **0.1.0** (`versionCode` 9).
+`main` develops Uvir starting at **0.1.0** (`versionCode` 9).
 This is a public **prerelease**, with real FT232H hardware validation pending.
 The preserved ESP32 edition is **1.4.2 / firmware 0.5.119** on `legacy-esp32`.
 Its old public release assets have been retired; source and Git tags remain
-available for rebuilding. This USB APK is not an ESP32 firmware/app update.
+available for rebuilding. This Uvir APK is not an ESP32 firmware/app update.
 
 ## Application identity
 
@@ -14,7 +14,7 @@ available for rebuilding. This USB APK is not an ESP32 firmware/app update.
 - Minimum Android: 8.0 / API 26
 - Measuring head: FT232H + AS7331 + AS7343; no sensor firmware asset
 
-## Build and publish the USB preview
+## Build and publish Uvir
 
 1. Run the unit and isolated device tests. Read the
    [validation status](docs/usb/VALIDATION.md); software tests do not certify
@@ -33,7 +33,7 @@ available for rebuilding. This USB APK is not an ESP32 firmware/app update.
 
 GitHub provides the tagged source ZIP/tarball automatically. Make corresponding
 source available under the [GPL-3.0 license](LICENSE). Do not attach an ESP32 BIN,
-USB firmware uploader or the legacy `uvir-update.json` to this USB-only preview.
+USB firmware uploader or the legacy `uvir-update.json` to this Uvir preview.
 The new USB automatic update channel remains disabled until separately validated.
 The historical `tools/ReleaseTool.java` procedure belongs to `legacy-esp32`.
 

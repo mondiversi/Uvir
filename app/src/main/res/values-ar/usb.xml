@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="usb_updates_pending">لم تُنشر قناة تحديث إصدار USB بعد.</string>
+    <string name="usb_updates_pending">لم تُنشر قناة تحديث Uvir بعد.</string>
     <string name="usb_data">البيانات</string>
     <string name="usb_chart">الرسم البياني</string>
     <string name="usb_sensor_name">مستشعر USB</string>
@@ -20,7 +20,7 @@
     <string name="usb_simulation">بيانات محاكاة</string>
     <string name="usb_interval">الفاصل بين القياسات (ثوانٍ)</string>
     <string name="usb_phone_note">يؤدي فصل USB أو إغلاق التطبيق إلى إيقاف التسجيل. لا تؤدي إعادة التوصيل إلى إعادة تشغيل الجلسة تلقائيًا.</string>
-    <string name="usb_about_architecture">إصدار USB فقط: FT232H + AS7331 + AS7343. يتولى الهاتف المعالجة والوقت والتنبيهات والتخزين. دعم ESP32 محفوظ في الفرع legacy-esp32.</string>
+    <string name="usb_about_architecture">Uvir: FT232H + AS7331 + AS7343. يتولى الهاتف المعالجة والوقت والتنبيهات والتخزين. دعم ESP32 محفوظ في الفرع legacy-esp32.</string>
     <string name="usb_stop_recording">أوقف التسجيل قبل تغيير مصدر البيانات.</string>
     <string name="usb_legacy_settings_imported">تبقى إعدادات المستشعرات القديمة محفوظة ولا تُطبق تلقائيًا على أجهزة USB.</string>
     <string name="usb_settings_transfer_description">صدّر/استورد جميع إعدادات التطبيق.</string>

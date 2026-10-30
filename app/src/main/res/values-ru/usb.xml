@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="usb_updates_pending">Канал обновлений USB-редакции ещё не опубликован.</string>
+    <string name="usb_updates_pending">Канал обновлений Uvir ещё не опубликован.</string>
     <string name="usb_data">Данные</string>
     <string name="usb_chart">График</string>
     <string name="usb_sensor_name">USB-датчик</string>
@@ -20,7 +20,7 @@
     <string name="usb_simulation">Искусственные данные</string>
     <string name="usb_interval">Интервал измерений (секунды)</string>
     <string name="usb_phone_note">Отключение USB или закрытие приложения прерывает запись. Повторное подключение никогда не возобновляет сеанс автоматически.</string>
-    <string name="usb_about_architecture">Редакция только USB: FT232H + AS7331 + AS7343. Телефон управляет обработкой, временем, оповещениями и хранением. Поддержка ESP32 сохранена в ветке legacy-esp32.</string>
+    <string name="usb_about_architecture">Uvir: FT232H + AS7331 + AS7343. Телефон управляет обработкой, временем, оповещениями и хранением. Поддержка ESP32 сохранена в ветке legacy-esp32.</string>
     <string name="usb_stop_recording">Остановите запись перед сменой источника данных.</string>
     <string name="usb_legacy_settings_imported">Старые настройки датчиков остаются в архиве и не применяются автоматически к USB-оборудованию.</string>
     <string name="usb_settings_transfer_description">Экспортируйте/импортируйте все настройки приложения.</string>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="usb_updates_pending">Kanal pembaruan edisi USB belum diterbitkan.</string>
+    <string name="usb_updates_pending">Kanal pembaruan Uvir belum diterbitkan.</string>
     <string name="usb_data">Data</string>
     <string name="usb_chart">Grafik</string>
     <string name="usb_sensor_name">Sensor USB</string>
@@ -20,7 +20,7 @@
     <string name="usb_simulation">Data simulasi</string>
     <string name="usb_interval">Interval akuisisi (detik)</string>
     <string name="usb_phone_note">Melepas USB atau menutup aplikasi menghentikan perekaman. Menghubungkan ulang tidak pernah memulai ulang sesi secara otomatis.</string>
-    <string name="usb_about_architecture">Edisi khusus USB: FT232H + AS7331 + AS7343. Ponsel menangani pemrosesan, waktu, peringatan, dan penyimpanan. Dukungan ESP32 disimpan di cabang legacy-esp32.</string>
+    <string name="usb_about_architecture">Uvir: FT232H + AS7331 + AS7343. Ponsel menangani pemrosesan, waktu, peringatan, dan penyimpanan. Dukungan ESP32 disimpan di cabang legacy-esp32.</string>
     <string name="usb_stop_recording">Hentikan perekaman sebelum mengganti sumber data.</string>
     <string name="usb_legacy_settings_imported">Pengaturan sensor lama tetap diarsipkan dan tidak otomatis diterapkan ke perangkat USB.</string>
     <string name="usb_settings_transfer_description">Ekspor/impor semua pengaturan aplikasi.</string>

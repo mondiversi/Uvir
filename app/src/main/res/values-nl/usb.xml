@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="usb_updates_pending">Het updatekanaal voor de USB-editie is nog niet gepubliceerd.</string>
+    <string name="usb_updates_pending">Het updatekanaal voor Uvir is nog niet gepubliceerd.</string>
     <string name="usb_data">Gegevens</string>
     <string name="usb_chart">Grafiek</string>
     <string name="usb_sensor_name">USB-sensor</string>
@@ -20,7 +20,7 @@
     <string name="usb_simulation">Gesimuleerde gegevens</string>
     <string name="usb_interval">Meetinterval (seconden)</string>
     <string name="usb_phone_note">USB loskoppelen of de app sluiten onderbreekt de opname. Opnieuw verbinden herstart nooit automatisch een sessie.</string>
-    <string name="usb_about_architecture">USB-editie: FT232H + AS7331 + AS7343. De telefoon beheert verwerking, tijd, waarschuwingen en opslag. ESP32-ondersteuning blijft bewaard in de tak legacy-esp32.</string>
+    <string name="usb_about_architecture">Uvir: FT232H + AS7331 + AS7343. De telefoon beheert verwerking, tijd, waarschuwingen en opslag. ESP32-ondersteuning blijft bewaard in de tak legacy-esp32.</string>
     <string name="usb_stop_recording">Stop de opname voordat je de gegevensbron wijzigt.</string>
     <string name="usb_legacy_settings_imported">Oude sensorinstellingen blijven gearchiveerd en worden niet automatisch toegepast op de USB-hardware.</string>
     <string name="usb_settings_transfer_description">Exporteer/importeer alle appinstellingen.</string>

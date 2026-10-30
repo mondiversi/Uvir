@@ -12,7 +12,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 
-/** Uses the original registration form; the USB edition only changes who executes the job. */
+/** Uses the original registration form; Uvir executes the job on the phone. */
 @Composable
 internal fun UsbPhoneAlertRegistrationPage(
     state: UsbPhoneState, background: Color, card: Color, text: Color, secondary: Color,

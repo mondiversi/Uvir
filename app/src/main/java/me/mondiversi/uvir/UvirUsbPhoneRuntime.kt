@@ -76,7 +76,7 @@ internal class UvirUsbPhoneRuntime(private val context: Context) {
     private var lastAlertAt = Long.MIN_VALUE
     private var alerts = loadThresholdAlertSettings(context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)).withMonitoringStopped()
     private var running = false
-    @Volatile private var permissionRequestedFor: String? = null
+    private val permissionRequests = UsbPermissionRequests()
     private var activityTimer: Job? = null
     private var manualRequestedAt = 0L
     @Volatile private var referenceJob: Job? = null
@@ -87,16 +87,23 @@ internal class UvirUsbPhoneRuntime(private val context: Context) {
             when (intent.action) {
                 UsbManager.ACTION_USB_DEVICE_DETACHED -> {
                     @Suppress("DEPRECATION") val detached = intent.getParcelableExtra<UsbDevice>(UsbManager.EXTRA_DEVICE)
-                    if (detached != null && (detached.deviceName == device?.deviceName || detached.deviceName == permissionRequestedFor)) {
-                        permissionRequestedFor = null
+                    if (detached != null && (detached.deviceName == device?.deviceName || detached.deviceName == permissionRequests.requestedDeviceName)) {
+                        permissionRequests.clear()
                         disconnect()
                     }
                 }
-                UsbManager.ACTION_USB_DEVICE_ATTACHED -> { permissionRequestedFor = null; scan() }
+                UsbManager.ACTION_USB_DEVICE_ATTACHED -> {
+                    @Suppress("DEPRECATION") val attached = intent.getParcelableExtra<UsbDevice>(UsbManager.EXTRA_DEVICE)
+                    if (attached == null || !isFt232h(attached)) return
+                    // Android is already resolving/opening the matching application.
+                    scan(mayRequestPermission = false)
+                }
                 permissionAction -> {
                     @Suppress("DEPRECATION") val granted = intent.getParcelableExtra<UsbDevice>(UsbManager.EXTRA_DEVICE)
-                    if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false) && granted != null &&
-                        usb.deviceList.values.any { it.deviceName == granted.deviceName } && isFt232h(granted)) connect(granted)
+                    if (!permissionRequests.acceptsReply(granted?.deviceName,
+                            granted != null && usb.deviceList.containsKey(granted.deviceName)) || granted == null || !isFt232h(granted)) return
+                    // An earlier denial cannot replace access granted by the system chooser.
+                    if (usb.hasPermission(granted)) connect(granted)
                     else mutable.update { it.copy(status = UsbPhoneStatus.ERROR, sample = null, error = "USB permission denied") }
                 }
             }
@@ -121,7 +128,7 @@ internal class UvirUsbPhoneRuntime(private val context: Context) {
         scan()
     }
 
-    fun scan() {
+    @Synchronized fun scan(mayRequestPermission: Boolean = true) {
         if (mutable.value.simulation || device != null) return
         val candidates = usb.deviceList.values.filter(::isFt232h)
         if (candidates.size > 1) {
@@ -130,9 +137,9 @@ internal class UvirUsbPhoneRuntime(private val context: Context) {
         val found = candidates.singleOrNull() ?: return
         if (usb.hasPermission(found)) connect(found) else {
             // Returning from Android's denied permission dialog must not open it again.
-            if (permissionRequestedFor == found.deviceName) return
-            permissionRequestedFor = found.deviceName
+            if (permissionRequests.requestedDeviceName == found.deviceName) return
             mutable.update { it.copy(status = UsbPhoneStatus.PERMISSION) }
+            if (!permissionRequests.shouldRequest(found.deviceName, alreadyGranted = false, mayPrompt = mayRequestPermission)) return
             usb.requestPermission(found, PendingIntent.getBroadcast(context, 0,
                 Intent(permissionAction).setPackage(context.packageName), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT))
         }
@@ -219,7 +226,7 @@ internal class UvirUsbPhoneRuntime(private val context: Context) {
         mutable.update { it.copy(status = UsbPhoneStatus.DETACHED, sample = null, identity = "", uvGain = null,
             visibleGain = null, uvAvailable = false, visibleAvailable = false, manualSession = null, manualCount = 0) }
     }
-    fun retry() { permissionRequestedFor = null; disconnect(); scope.launch { delay(150); withContext(Dispatchers.Main) { scan() } } }
+    fun retry() { permissionRequests.clear(); disconnect(); scope.launch { delay(150); withContext(Dispatchers.Main) { scan() } } }
 
     fun setSimulation(enabled: Boolean) {
         if (mutable.value.automaticSession != null || mutable.value.alertSession != null || mutable.value.busy) return

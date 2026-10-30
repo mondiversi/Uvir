@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="usb_updates_pending">USB संस्करण का अपडेट चैनल अभी प्रकाशित नहीं हुआ है।</string>
+    <string name="usb_updates_pending">Uvir का अपडेट चैनल अभी प्रकाशित नहीं हुआ है।</string>
     <string name="usb_data">डेटा</string>
     <string name="usb_chart">ग्राफ़</string>
     <string name="usb_sensor_name">USB सेंसर</string>
@@ -20,7 +20,7 @@
     <string name="usb_simulation">सिम्युलेटेड डेटा</string>
     <string name="usb_interval">माप अंतराल (सेकंड)</string>
     <string name="usb_phone_note">USB हटाने या ऐप बंद करने से रिकॉर्डिंग रुकती है। फिर जोड़ने से सत्र अपने आप शुरू नहीं होता।</string>
-    <string name="usb_about_architecture">केवल USB संस्करण: FT232H + AS7331 + AS7343। फ़ोन प्रोसेसिंग, समय, अलर्ट और भंडारण सँभालता है। ESP32 समर्थन legacy-esp32 शाखा में सुरक्षित है।</string>
+    <string name="usb_about_architecture">Uvir: FT232H + AS7331 + AS7343। फ़ोन प्रोसेसिंग, समय, अलर्ट और भंडारण सँभालता है। ESP32 समर्थन legacy-esp32 शाखा में सुरक्षित है।</string>
     <string name="usb_stop_recording">डेटा स्रोत बदलने से पहले रिकॉर्डिंग रोकें।</string>
     <string name="usb_legacy_settings_imported">पुरानी सेंसर सेटिंग संग्रह में रहती हैं और USB हार्डवेयर पर अपने आप लागू नहीं होतीं।</string>
     <string name="usb_settings_transfer_description">ऐप की सभी सेटिंग निर्यात/आयात करें।</string>

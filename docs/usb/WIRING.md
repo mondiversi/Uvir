@@ -44,7 +44,7 @@ by this initial driver; verify both modules work with the chosen timing.
 
 ## First connection and live readings
 
-1. Install the signed [0.1.0 USB preview](https://github.com/mondiversi/Uvir/releases/tag/v0.1.0)
+1. Install the signed [Uvir 0.1.0](https://github.com/mondiversi/Uvir/releases/tag/v0.1.0)
    on an Android 8.0+ phone with USB host/OTG support. An existing installation
    can be updated with the same signing identity; do not uninstall it to test.
 2. With USB disconnected, wire the modules as above and inspect the supply,

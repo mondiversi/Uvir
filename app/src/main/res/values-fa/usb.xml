@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="usb_updates_pending">کانال به‌روزرسانی نسخه USB هنوز منتشر نشده است.</string>
+    <string name="usb_updates_pending">کانال به‌روزرسانی Uvir هنوز منتشر نشده است.</string>
     <string name="usb_data">داده‌ها</string>
     <string name="usb_chart">نمودار</string>
     <string name="usb_sensor_name">حسگر USB</string>
@@ -20,7 +20,7 @@
     <string name="usb_simulation">داده‌های شبیه‌سازی‌شده</string>
     <string name="usb_interval">فاصله اندازه‌گیری‌ها (ثانیه)</string>
     <string name="usb_phone_note">جدا کردن USB یا بستن برنامه ثبت را متوقف می‌کند. اتصال دوباره هرگز جلسه را خودکار از سر نمی‌گیرد.</string>
-    <string name="usb_about_architecture">نسخه فقط USB: FT232H + AS7331 + AS7343. تلفن پردازش، زمان، هشدارها و ذخیره‌سازی را انجام می‌دهد. پشتیبانی ESP32 در شاخه legacy-esp32 حفظ شده است.</string>
+    <string name="usb_about_architecture">Uvir: FT232H + AS7331 + AS7343. تلفن پردازش، زمان، هشدارها و ذخیره‌سازی را انجام می‌دهد. پشتیبانی ESP32 در شاخه legacy-esp32 حفظ شده است.</string>
     <string name="usb_stop_recording">پیش از تغییر منبع داده، ثبت را متوقف کنید.</string>
     <string name="usb_legacy_settings_imported">تنظیمات قدیمی حسگرها بایگانی می‌مانند و خودکار روی سخت‌افزار USB اعمال نمی‌شوند.</string>
     <string name="usb_settings_transfer_description">همهٔ تنظیمات برنامه را صادر/وارد کنید.</string>

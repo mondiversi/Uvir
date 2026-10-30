@@ -54,7 +54,7 @@ android {
         applicationId = "me.mondiversi.uvir"
         minSdk = 26
         targetSdk = 37
-        // Android's install sequence stays monotonic while the USB edition starts its own 0.x line.
+        // Android's install sequence stays monotonic as Uvir starts its new 0.x line.
         versionCode = 9
         versionName = "0.1.0"
         buildConfigField("boolean", "USB_ONLY", "true")
