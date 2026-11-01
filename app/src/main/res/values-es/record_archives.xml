@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="record_archive_title">Adquisiciones y alertas</string>
-    <string name="record_archive_description">Exporta/importa adquisiciones o alertas en un único archivo, incluidas sus sesiones.</string>
-    <string name="record_archive_export_description">Exporta todos los registros de este tipo, incluidas las sesiones, en un único archivo.</string>
-    <string name="record_archive_import_description">Los datos se añaden al archivo. Se omiten los registros existentes. Los sensores desconocidos se muestran con su ID de hardware hasta que se asocien.</string>
+    <string name="record_archive_description">Exporta/importa adquisiciones y alertas en un único archivo, incluidas sus sesiones.</string>
+    <string name="record_archive_export_description">Exporta todas las adquisiciones y alertas, incluidas las sesiones, en un único archivo.</string>
+    <string name="record_archive_import_description">Importa adquisiciones, alertas y sesiones. Los registros existentes se omiten.</string>
     <string name="record_archive_import_summary">Registros: %1$d · Sesiones: %2$d</string>
     <string name="record_archive_import_success">Importados: %1$d · Ya existentes: %2$d</string>
     <string name="record_archive_failed">No se pueden transferir los registros. Comprueba el archivo y el tipo de datos.</string>

@@ -51,6 +51,6 @@ class UvirExportPrecisionTest {
         assertEquals(UvirExportHardwareModels("UV-X", "VIS-Y"),
             exportHardwareModels(UvirSensorRuntimeInfo(uvSensorModel = "UV-X", visibleSensorModel = "VIS-Y")))
         assertEquals(UvirExportHardwareModels(), exportHardwareModels(UvirSensorRuntimeInfo(protocol = "other")))
-        assertEquals(UvirExportHardwareModels(), emptyMap<Long, UvirExportHardwareModels>().models(99))
+        assertEquals(UvirExportHardwareModels("AS7331", "AS7343"), emptyMap<Long, UvirExportHardwareModels>().models(99))
     }
 }

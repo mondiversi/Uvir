@@ -16,7 +16,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
@@ -61,6 +64,7 @@ internal fun readRecordListFilters(preferences: SharedPreferences?, key: String)
         val serialized = preferences?.getString(key, null) ?: return@runCatching UvirRecordListFilters()
         val values = JSONArray(serialized)
         UvirRecordListFilters.fromSavedValues(List(values.length()) { values.getString(it) })
+            ?.let { if (key == KEY_ALERT_LIST_FILTERS) it.copy(variantCounts = emptySet(), modes = emptySet()) else it }
             ?: UvirRecordListFilters()
     }.getOrDefault(UvirRecordListFilters())
 
@@ -104,15 +108,17 @@ internal fun UvirRecordListFilterButton(
             ) {
                 val tint = glyphTint.copy(alpha = 1f)
                 val strokeWidth = UvirTitleActionIconStrokeWidth.toPx()
-                listOf(0.28f to 0.86f, 0.50f to 0.66f, 0.72f to 0.46f).forEach { (y, endX) ->
-                    drawLine(
-                        color = tint,
-                        start = Offset(size.width * 0.14f, size.height * y),
-                        end = Offset(size.width * endX, size.height * y),
-                        strokeWidth = strokeWidth,
-                        cap = StrokeCap.Round
-                    )
+                val funnel = Path().apply {
+                    moveTo(size.width * 3.5f / 24f, size.height * 4.5f / 24f)
+                    lineTo(size.width * 20.5f / 24f, size.height * 4.5f / 24f)
+                    lineTo(size.width * 14f / 24f, size.height * 12.5f / 24f)
+                    lineTo(size.width * 14f / 24f, size.height * 18.5f / 24f)
+                    lineTo(size.width * 10f / 24f, size.height * 20.5f / 24f)
+                    lineTo(size.width * 10f / 24f, size.height * 12.5f / 24f)
+                    close()
                 }
+                drawPath(funnel, tint,
+                    style = Stroke(width = strokeWidth, cap = StrokeCap.Round, join = StrokeJoin.Round))
             }
         }
     }
@@ -122,10 +128,7 @@ internal fun UvirRecordListFilterButton(
 @Composable
 internal fun UvirRecordListFilterPanel(
     filters: UvirRecordListFilters,
-    sensorNames: Map<String, String>,
-    modes: Set<Boolean>,
     onChange: (UvirRecordListFilters) -> Unit,
-    externalModeAvailable: Boolean = false,
     modifier: Modifier = Modifier,
     backgroundColor: Color = MaterialTheme.colorScheme.background,
     recordIds: List<Long> = emptyList(),
@@ -134,6 +137,7 @@ internal fun UvirRecordListFilterPanel(
     dates: List<Long> = emptyList(),
     variantCounts: List<Int> = emptyList(),
     variantFilterEnabled: Boolean = true,
+    modeFilterEnabled: Boolean = true,
     visibleCount: Int? = null
 ) {
     val fieldColors = UvirOutlinedTextFieldColors()
@@ -141,8 +145,8 @@ internal fun UvirRecordListFilterPanel(
     val resultCount = visibleCount?.let {
         formatUvirNumber(it.toDouble(), 0, LocalUvirNumericFormat.current, grouping = false)
     }
-    val allModes = stringResource(R.string.list_filter_all_modes)
     val allNotes = stringResource(R.string.list_filter_all_notes)
+    val allModes = stringResource(R.string.list_filter_all_modes)
     val noVariants = stringResource(R.string.list_filter_no_variants)
     val onlyVariants = stringResource(R.string.list_filter_only_variants)
     val allDates = stringResource(R.string.list_filter_all_dates)
@@ -189,34 +193,22 @@ internal fun UvirRecordListFilterPanel(
                         else filters.withUntilDay(selected.toLong()))
                 }
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                val modeNames = buildList {
-                    if (false in modes || UvirRecordFilterMode.MANUAL in filters.modes)
-                        add(UvirRecordFilterMode.MANUAL.name to stringResource(R.string.share_manual))
-                    if (true in modes || UvirRecordFilterMode.AUTOMATIC in filters.modes)
-                        add(UvirRecordFilterMode.AUTOMATIC.name to stringResource(R.string.share_automatic))
-                    if (externalModeAvailable || UvirRecordFilterMode.EXTERNAL in filters.modes) {
-                        add(UvirRecordFilterMode.EXTERNAL.name to stringResource(R.string.external_measurement))
+
+            if (modeFilterEnabled || variantFilterEnabled) Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                if (modeFilterEnabled) {
+                    FilterMultiChoice(
+                        label = stringResource(R.string.acquisition_mode_label),
+                        selectedKeys = filters.modes.map { it.name }.toSet(),
+                        choices = listOf("" to allModes,
+                            UvirRecordFilterMode.MANUAL.name to stringResource(R.string.share_manual),
+                            UvirRecordFilterMode.AUTOMATIC.name to stringResource(R.string.share_automatic)),
+                        modifier = Modifier.weight(1f).testTag("filter-mode"),
+                        icon = FilterLabelIcon.MODE, resultCount = resultCount
+                    ) { selected ->
+                        onChange(filters.copy(modes = selected.map { UvirRecordFilterMode.valueOf(it) }.toSet()))
                     }
                 }
-                FilterMultiChoice(stringResource(R.string.acquisition_mode_label),
-                    filters.modes.map { it.name }.toSet(),
-                    listOf("" to allModes) + modeNames,
-                    Modifier.weight(1f).testTag("filter-mode"), icon = FilterLabelIcon.MODE, resultCount = resultCount) {
-                    onChange(filters.copy(modes = it.map { mode -> UvirRecordFilterMode.valueOf(mode) }.toSet()))
-                }
-                FilterMultiChoice(stringResource(R.string.sensor_selector_label),
-                    filters.sensorKeys,
-                    listOf("" to all) + sensorNames.toList(),
-                    Modifier.weight(1f).testTag("filter-sensor"), icon = FilterLabelIcon.SENSOR, resultCount = resultCount) { onChange(filters.copy(sensorKeys = it)) }
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FilterMultiChoice(stringResource(R.string.share_note_label),
-                    filters.notes,
-                    listOf("" to allNotes) + notes.map { it to it },
-                    Modifier.weight(1f).testTag("filter-note"), icon = FilterLabelIcon.NOTE, resultCount = resultCount) {
-                    onChange(filters.copy(notes = it))
-                }
+                if (variantFilterEnabled) {
                 val variantChoices = buildList {
                     add("" to "—")
                     add("0" to noVariants)
@@ -235,6 +227,13 @@ internal fun UvirRecordListFilterPanel(
                 ) { selected ->
                     onChange(filters.copy(variantCounts = selected.map { it.toInt() }.toSet()))
                 }
+                }
+            }
+            FilterMultiChoice(stringResource(R.string.share_note_label),
+                filters.notes,
+                listOf("" to allNotes) + notes.map { it to it },
+                Modifier.fillMaxWidth().testTag("filter-note"), icon = FilterLabelIcon.NOTE, resultCount = resultCount) {
+                onChange(filters.copy(notes = it))
             }
             TextButton(onClick = { onChange(UvirRecordListFilters()) },
                 enabled = filters.isActive,
@@ -329,19 +328,20 @@ private fun FilterChoice(
             color = Color.Transparent, modifier = Modifier.fillMaxWidth()) {
             Row(Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically) {
-                Column(Modifier.weight(1f)) {
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     val labelTint = if (enabled) fieldColors.unfocusedLabelColor else fieldColors.disabledTextColor
                     Row(verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                         FilterLabelIcon(icon, labelTint)
-                        Text(label, modifier = Modifier.weight(1f), fontSize = 11.sp, color = labelTint)
+                        Text(label, modifier = Modifier.weight(1f).testTag("filter-label-${icon.name.lowercase(java.util.Locale.ROOT)}"),
+                            fontSize = 11.sp, lineHeight = 14.sp, color = labelTint)
                     }
                     // Keep the count visible when selected names use the available width.
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                        Text(selected, modifier = Modifier.weight(1f, fill = false), fontSize = 13.sp,
+                        Text(selected, modifier = Modifier.weight(1f, fill = false), fontSize = 13.sp, lineHeight = 16.sp,
                             color = if (enabled) fieldColors.unfocusedTextColor else fieldColors.disabledTextColor,
                             maxLines = 1, overflow = TextOverflow.Ellipsis)
-                        count?.let { Text("($it)", modifier = Modifier.padding(start = 4.dp), fontSize = 13.sp,
+                        count?.let { Text("($it)", modifier = Modifier.padding(start = 4.dp), fontSize = 13.sp, lineHeight = 16.sp,
                             color = fieldColors.unfocusedTextColor, maxLines = 1) }
                     }
                 }

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="record_archive_title">Acquisitions et alertes</string>
-    <string name="record_archive_description">Exporte/importe les acquisitions ou les alertes dans un seul fichier, y compris leurs sessions.</string>
-    <string name="record_archive_export_description">Exportez tous les enregistrements de ce type, sessions comprises, dans un seul fichier.</string>
-    <string name="record_archive_import_description">Les données sont ajoutées aux archives. Les enregistrements existants sont ignorés. Les capteurs inconnus sont affichés avec leur identifiant matériel jusqu’à leur association.</string>
+    <string name="record_archive_description">Exporte/importe les acquisitions et les alertes dans un seul fichier, avec leurs sessions.</string>
+    <string name="record_archive_export_description">Exporte toutes les acquisitions et les alertes, avec leurs sessions, dans un seul fichier.</string>
+    <string name="record_archive_import_description">Importe les acquisitions, les alertes et les sessions. Les données déjà présentes sont ignorées.</string>
     <string name="record_archive_import_summary">Enregistrements : %1$d · Sessions : %2$d</string>
     <string name="record_archive_import_success">Importés : %1$d · Déjà présents : %2$d</string>
     <string name="record_archive_failed">Impossible de transférer les enregistrements. Vérifiez le fichier et le type de données.</string>

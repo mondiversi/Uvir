@@ -398,7 +398,7 @@ private fun UvirSettingsPasswordField(
 ) {
     val visibilityDescription =
         stringResource(if (visible) R.string.hide_password else R.string.show_password)
-    OutlinedTextField(
+    UvirCompactTextField(
         value = value,
         onValueChange = onValueChange,
         modifier = Modifier.fillMaxWidth(),
@@ -412,7 +412,7 @@ private fun UvirSettingsPasswordField(
             UvirAccessibleIconButton(
                 contentDescription = visibilityDescription,
                 onClick = onVisibilityChange,
-                modifier = Modifier.size(48.dp)
+                modifier = Modifier.size(UvirCompactFieldIconSize)
             ) {
                 UvirPasswordVisibilityIcon(
                     visible = visible,

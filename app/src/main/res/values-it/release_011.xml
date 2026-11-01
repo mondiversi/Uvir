@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="release_011_status">Il progetto è sospeso: il prototipo funziona, ma la calibrazione ottica resta irrisolta.</string>
+    <string name="release_011_case">Pubblicati la scatola di riferimento con apertura USB corretta e il coperchio piatto con due fori da 5 mm.</string>
+    <string name="release_011_improvements">Migliorati campionamento USB, gestione della saturazione, diagnostica, archivi e documentazione.</string>
+</resources>

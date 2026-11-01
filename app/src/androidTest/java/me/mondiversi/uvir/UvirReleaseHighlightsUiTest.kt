@@ -54,7 +54,8 @@ class UvirReleaseHighlightsUiTest {
                 }
             }
         }
-        val keys = listOf(R.string.about_whats_new_connectivity, R.string.about_whats_new_connections,
+        val keys = if (BuildConfig.USB_ONLY) listOf(R.string.release_011_status, R.string.release_011_case,
+            R.string.release_011_improvements) else listOf(R.string.about_whats_new_connectivity, R.string.about_whats_new_connections,
             R.string.about_whats_new_measurements, R.string.about_whats_new_interface,
             R.string.update_whats_new, R.string.about_whats_new_github)
         for ((index, tag) in listOf("en", "it", "de", "fr", "es", "pt", "nl", "pl", "el",
@@ -71,6 +72,6 @@ class UvirReleaseHighlightsUiTest {
                 assertFalse("Clipped release text: $tag/$resource", layouts.single().hasVisualOverflow)
             }
         }
-        assertEquals("1.4.2", BuildConfig.VERSION_NAME)
+        assertEquals("0.1.1", BuildConfig.VERSION_NAME)
     }
 }

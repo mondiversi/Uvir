@@ -8,7 +8,9 @@
     <string name="usb_hardware_pending">USB desteği hazırlanıyor. Gerçek ölçümler FT232H kartıyla doğrulanmalıdır. Optik tepki ve mutlak kalibrasyon henüz doğrulanmadı.</string>
     <string name="usb_connect">FT232H ve her iki sensörü bir USB OTG veri adaptörüyle bağlayın.</string>
     <string name="usb_permission">USB erişimine izin verin</string>
-    <string name="usb_initializing">Sensörler başlatılıyor…</string>
+    <string name="usb_initializing">Başlatılıyor…</string>
+    <string name="usb_waiting">Veriler bekleniyor…</string>
+    <string name="sensor_saturation">Doygunluk</string>
     <string name="usb_ready">USB bağlı</string>
     <string name="usb_error">USB kullanılamıyor</string>
     <string name="usb_retry">USB bağlantısını yenile</string>

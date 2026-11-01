@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="usb_diagnostic_progress">بررسی اجزا: %1$d/%2$d</string>
+    <string name="usb_diagnostic_recognition">شناسایی</string>
+    <string name="usb_diagnostic_initialization">راه‌اندازی</string>
+    <string name="usb_diagnostic_reading">خواندن</string>
+    <string name="usb_diagnostic_not_tested">بررسی نشده</string>
+    <string name="usb_diagnostic_readings">خوانش‌های جدید: %1$d/%2$d</string>
+    <string name="usb_diagnostic_notes">شناسایی و خوانش اجزا را بررسی می‌کند. کالیبراسیون به آزمایش جداگانه نیاز دارد.</string>
+    <string name="usb_diagnostic_wiring">تغذیه، GND، SDA/SCL و اتصال D1–D2 را بررسی کنید.</string>
+    <string name="usb_diagnostic_technical">جزئیات فنی</string>
+</resources>

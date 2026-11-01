@@ -8,7 +8,9 @@
     <string name="usb_hardware_pending">Η υποστήριξη USB προετοιμάζεται. Οι πραγματικές μετρήσεις πρέπει να ελεγχθούν με την πλακέτα FT232H. Η οπτική απόκριση και η απόλυτη βαθμονόμηση δεν έχουν επικυρωθεί.</string>
     <string name="usb_connect">Σύνδεσε το FT232H και τους δύο αισθητήρες με προσαρμογέα δεδομένων USB OTG.</string>
     <string name="usb_permission">Επίτρεψε την πρόσβαση USB</string>
-    <string name="usb_initializing">Αρχικοποίηση αισθητήρων…</string>
+    <string name="usb_initializing">Αρχικοποίηση…</string>
+    <string name="usb_waiting">Αναμονή δεδομένων…</string>
+    <string name="sensor_saturation">Κορεσμός</string>
     <string name="usb_ready">USB συνδεδεμένο</string>
     <string name="usb_error">Το USB δεν είναι διαθέσιμο</string>
     <string name="usb_retry">Επανασύνδεση USB</string>

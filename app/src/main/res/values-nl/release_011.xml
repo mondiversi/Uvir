@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="release_011_status">De ontwikkeling is opgeschort: het prototype werkt, maar de optische kalibratie is nog niet opgelost.</string>
+    <string name="release_011_case">Referentiebehuizing met gecorrigeerde USB-opening en een vlak deksel met twee openingen van 5 mm gepubliceerd.</string>
+    <string name="release_011_improvements">USB-bemonstering, verzadigingsafhandeling, diagnostiek, archieven en documentatie verbeterd.</string>
+</resources>

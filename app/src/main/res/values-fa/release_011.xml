@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="release_011_status">توسعه متوقف شده است: نمونهٔ اولیه کار می‌کند، اما کالیبراسیون نوری هنوز حل نشده است.</string>
+    <string name="release_011_case">محفظهٔ مرجع با دهانهٔ اصلاح‌شدهٔ USB و درپوش تخت با دو سوراخ ۵ میلی‌متری منتشر شد.</string>
+    <string name="release_011_improvements">نمونه‌برداری USB، مدیریت اشباع، عیب‌یابی، بایگانی‌ها و مستندات بهبود یافت.</string>
+</resources>

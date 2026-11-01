@@ -146,7 +146,7 @@
     <string name="sensor_settings_connection_required">Συνδέστε τον αισθητήρα για να αλλάξετε αυτές τις ρυθμίσεις.</string>
     <string name="sensor_parameters_description">Ρυθμίστε τις γενικές επιλογές του αισθητήρα.</string>
     <string name="home_sensor_disconnected_title">Αισθητήρας μη συνδεδεμένος</string>
-    <string name="home_sensor_disconnected_description">Σύνδεσε έναν αισθητήρα για λήψη δεδομένων και καταγραφή ειδοποιήσεων.</string>
+    <string name="home_sensor_disconnected_description">Σύνδεσε τον αισθητήρα για λήψη δεδομένων και καταγραφή ειδοποιήσεων.</string>
     <string name="home_sensor_disconnected_hint">Ανοίξτε Ρυθμίσεις › Αισθητήρας › Σύνδεση για να επιλέξετε USB, Wi-Fi, Bluetooth ή Internet και να δείτε τις οδηγίες.</string>
     <string name="sensor_connection_provisioning_reminder">Για να χρησιμοποιήσετε το Wi-Fi ή το Bluetooth, συνδέστε τον αισθητήρα με USB τουλάχιστον μία φορά. Η εφαρμογή θα αποκτήσει με ασφάλεια τη μοναδική ταυτότητα και τα διαπιστευτήρια πρόσβασης του αισθητήρα.</string>
     <string name="sensor_connection_usb">USB</string>
@@ -745,14 +745,12 @@
     <string name="language_formats_description">Επιλέξτε πώς εμφανίζονται και μορφοποιούνται τα δεδομένα στην εφαρμογή.</string>
     <string name="irradiance_measurement_heading">Μέτρηση ακτινοβολίας</string>
     <string name="irradiance_measurement_description">Επιλέξτε τη μονάδα εμφάνισης της ακτινοβολίας. Οι αποθηκευμένες τιμές διατηρούν την αρχική ακρίβεια του αισθητήρα.</string>
-    <string name="out_of_range_short">OL - Εκτός κλίμακας</string>
-    <string name="out_of_range_csv_header">Τιμή_εκτός_κλίμακας</string>
     <string name="language_english_localized">Αγγλικά</string>
     <string name="settings_section_notifications">Ειδοποιήσεις</string>
-    <string name="acquisition_feedback_description">Επιλέξτε το σήμα που αναπαράγει η εφαρμογή όταν αποθηκεύεται μια χειροκίνητη ή αυτόματη μέτρηση.</string>
+    <string name="acquisition_feedback_description">Διαχειριστείτε τις προτιμήσεις της εφαρμογής για τις μετρήσεις.</string>
     <string name="acquisition_feedback_preview_hint">Η τελική ένταση εξαρτάται επίσης από την ένταση του συναγερμού του τηλεφώνου.</string>
     <string name="confirmation_question_suffix">?</string>
-    <string name="threshold_alerts_sound_description_v2">Επιλέξτε το σήμα που αναπαράγει η εφαρμογή όταν καταγράφεται μια ειδοποίηση.</string>
+    <string name="threshold_alerts_sound_description_v2">Διαχειριστείτε τις προτιμήσεις της εφαρμογής για τις ειδοποιήσεις.</string>
     <string name="list_filter_export_question">Εξαγωγή όλων των εμφανιζόμενων αποτελεσμάτων;</string>
     <string name="list_filter_export_warning">Δεν έχουν επιλεγεί εγγραφές. Εξάγονται όλες οι εγγραφές που αντιστοιχούν στα τρέχοντα φίλτρα.</string>
     <string name="settings_include_sensitive_information">Συμπερίληψη ευαίσθητων δεδομένων</string>

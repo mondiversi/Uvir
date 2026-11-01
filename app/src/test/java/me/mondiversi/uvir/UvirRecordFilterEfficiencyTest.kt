@@ -51,8 +51,8 @@ class UvirRecordFilterEfficiencyTest {
                 fromInclusive = if (random.nextBoolean()) null else 3_000,
                 untilInclusive = if (random.nextBoolean()) null else 17_000,
                 notes = choices(listOf(" GARD ", "UV", "🌙", "")),
-                sensorKeys = choices(listOf("0", "1", "unknown")),
                 modes = choices(UvirRecordFilterMode.entries),
+
                 recordIds = choices(listOf("1", "8", "21", "99", "invalid", "99999999999999999999")),
                 sessionIds = choices(listOf("1", "8", "11", "invalid")),
                 variantCounts = choices(listOf(-1, 0, 2, 4))
@@ -62,12 +62,8 @@ class UvirRecordFilterEfficiencyTest {
                 (filters.fromInclusive == null || record.timestamp >= filters.fromInclusive) &&
                     (filters.untilInclusive == null || record.timestamp <= filters.untilInclusive) &&
                     (filters.notes.isEmpty() || filters.notes.any { record.note.contains(it.trim(), true) }) &&
-                    (filters.sensorKeys.isEmpty() || record.sensorId.filterSensorKey() in filters.sensorKeys) &&
-                    (filters.modes.isEmpty() || when {
-                        record.externalCommand -> UvirRecordFilterMode.EXTERNAL
-                        record.automatic -> UvirRecordFilterMode.AUTOMATIC
-                        else -> UvirRecordFilterMode.MANUAL
-                    } in filters.modes) &&
+                    (filters.modes.isEmpty() ||
+                        (if(record.automatic) UvirRecordFilterMode.AUTOMATIC else UvirRecordFilterMode.MANUAL) in filters.modes) &&
                     (filters.recordIds.isEmpty() || filters.recordIds.any { it.toLongOrNull() == record.id }) &&
                     (filters.sessionIds.isEmpty() || record.sessionId != null &&
                         filters.sessionIds.any { it.toLongOrNull() == record.sessionId }) &&

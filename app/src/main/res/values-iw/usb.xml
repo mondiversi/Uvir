@@ -8,7 +8,9 @@
     <string name="usb_hardware_pending">התמיכה ב־USB בהכנה. יש לאמת מדידות אמיתיות עם לוח FT232H. התגובה האופטית והכיול המוחלט טרם אומתו.</string>
     <string name="usb_connect">חברו את FT232H ושני החיישנים באמצעות מתאם נתונים USB OTG.</string>
     <string name="usb_permission">אפשרו גישה ל־USB</string>
-    <string name="usb_initializing">אתחול חיישנים…</string>
+    <string name="usb_initializing">אתחול…</string>
+    <string name="usb_waiting">ממתין לנתונים…</string>
+    <string name="sensor_saturation">רוויה</string>
     <string name="usb_ready">USB מחובר</string>
     <string name="usb_error">USB אינו זמין</string>
     <string name="usb_retry">חיבור USB מחדש</string>

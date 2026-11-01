@@ -37,15 +37,11 @@ internal fun createEncryptedUvirDatabaseArchive(
 }
 
 private val UVIR_DATABASE_TABLES = listOf(
-    "sensors",
     "uvir_counters",
     "acquisition_sessions",
     "alert_sessions",
-    "sensor_settings",
-    "sensor_alert_rules",
     "acquisitions",
     "alerts",
-    "camera_estimates",
     "record_transfer_ids"
 )
 
@@ -201,6 +197,14 @@ internal suspend fun importUvirDatabaseArchive(
             if (source.version == 25 && target.version >= 26) {
                 createUvirRecordArchiveSchema(source)
                 source.version = 26
+            }
+            if (source.version == 26 && target.version >= 27) {
+                source.beginTransaction()
+                try {
+                    migrateUvirDatabaseToPhoneArchive(source)
+                    source.version = 27
+                    source.setTransactionSuccessful()
+                } finally { source.endTransaction() }
             }
             validateImportedDatabase(source, target)
         }

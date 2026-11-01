@@ -12,7 +12,7 @@
     <string name="window_measure_unavailable">Kanal kullanılamıyor</string>
     <string name="window_measure_insufficient">Yetersiz veri</string>
     <string name="window_measure_unstable">Kararsız aydınlatma</string>
-    <string name="window_measure_saturated">Sinyal aralık dışında</string>
+    <string name="window_measure_saturated">@string/sensor_saturation</string>
     <string name="window_measure_brighter">Filtreli değer daha yüksek</string>
     <string name="window_measure_out_of_range">Katsayı izin verilen aralığın dışında</string>
 </resources>

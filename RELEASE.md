@@ -1,7 +1,7 @@
 # Uvir distribution
 
-`main` develops Uvir starting at **0.1.0** (`versionCode` 9).
-This is a public **prerelease**, with real FT232H hardware validation pending.
+`main` develops Uvir on its new 0.x line; the current release is **0.1.1** (`versionCode` 10).
+This is a public **prerelease**, with optical calibration unresolved and development suspended.
 The preserved ESP32 edition is **1.4.2 / firmware 0.5.119** on `legacy-esp32`.
 Its old public release assets have been retired; source and Git tags remain
 available for rebuilding. This Uvir APK is not an ESP32 firmware/app update.
@@ -10,7 +10,7 @@ available for rebuilding. This Uvir APK is not an ESP32 firmware/app update.
 
 - Display name: `Uvir`
 - Application ID / namespace: `me.mondiversi.uvir`
-- Version: `0.1.0` (`versionCode` 9)
+- Version: `0.1.1` (`versionCode` 10)
 - Minimum Android: 8.0 / API 26
 - Measuring head: FT232H + AS7331 + AS7343; no sensor firmware asset
 
@@ -21,20 +21,20 @@ available for rebuilding. This Uvir APK is not an ESP32 firmware/app update.
    physical transfers or calibrated irradiance.
 2. Build the signed APK with `CREA_APK_RELEASE.bat`, or use
    `gradlew.bat :app:assembleRelease` with the private signing configuration below.
-3. The script copies the APK to `dist/Uvir-0.1.0.apk` and creates
-   `dist/Uvir-0.1.0.apk.sha256`. `dist/` is ignored; binaries are release assets,
+3. The script copies the APK to `dist/Uvir-0.1.1.apk` and creates
+   `dist/Uvir-0.1.1.apk.sha256`. `dist/` is ignored; binaries are release assets,
    not source commits.
-4. Create a draft release tagged and titled `v0.1.0` at the reviewed `main` commit.
-   Use [the English release notes](docs/RELEASE_NOTES_0.1.0.md), attach
-   `Uvir-0.1.0.apk` and `SHA256SUMS`, and mark it **prerelease**.
+4. Create a draft release tagged and titled `v0.1.1` at the reviewed `main` commit.
+   Use [the English release notes](docs/RELEASE_NOTES_0.1.1.md), attach
+   `Uvir-0.1.1.apk`, the two current STLs, `Uvir-Printables-0.1.1.zip`
+   and `SHA256SUMS`, and mark it **prerelease**.
 5. Validate the package, version, existing signing certificate and downloaded
-   checksums before publishing. Keep `make_latest` false so ESP32 users continue
-   to receive their stable release.
+   checksums before publishing. Keep `make_latest` false; the preserved ESP32 update feed is not reactivated.
 
 GitHub provides the tagged source ZIP/tarball automatically. Make corresponding
 source available under the [GPL-3.0 license](LICENSE). Do not attach an ESP32 BIN,
 USB firmware uploader or the legacy `uvir-update.json` to this Uvir preview.
-The new USB automatic update channel remains disabled until separately validated.
+The current automatic update channel remains disabled until separately validated.
 The historical `tools/ReleaseTool.java` procedure belongs to `legacy-esp32`.
 
 ## Signing and updates

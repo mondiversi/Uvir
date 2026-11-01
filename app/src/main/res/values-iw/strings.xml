@@ -151,7 +151,7 @@
     <string name="sensor_settings_connection_required">חבר את החיישן כדי לשנות הגדרות אלה.</string>
     <string name="sensor_parameters_description">הגדר את ההיבטים הכלליים של החיישן.</string>
     <string name="home_sensor_disconnected_title">חיישן לא מחובר</string>
-    <string name="home_sensor_disconnected_description">חבר חיישן כדי לאסוף נתונים ולהקליט התראות.</string>
+    <string name="home_sensor_disconnected_description">חבר את החיישן כדי לאסוף נתונים ולהקליט התראות.</string>
     <string name="home_sensor_disconnected_hint">פתח את הגדרות › חיישן › חיבור כדי לבחור USB, Wi-Fi, Bluetooth או אינטרנט ולעיין בהוראות.</string>
     <string name="sensor_connection_provisioning_reminder">כדי להשתמש ב-Wi-Fi או Bluetooth, חבר את החיישן באמצעות USB לפחות פעם אחת. היישום יקבל באופן מאובטח את הזהות הייחודית ואת פרטי הגישה של החיישן.</string>
     <string name="sensor_connection_usb">USB</string>
@@ -755,14 +755,12 @@
     <string name="language_formats_description">בחר כיצד הנתונים יוצגו ויעוצבו באפליקציה.</string>
     <string name="irradiance_measurement_heading">מדידת עוצמת קרינה</string>
     <string name="irradiance_measurement_description">בחר את היחידה להצגת עוצמת הקרינה. הערכים השמורים שומרים על הדיוק המקורי של החיישן.</string>
-    <string name="out_of_range_short">OL - מחוץ לטווח</string>
-    <string name="out_of_range_csv_header">ערך_מחוץ_לטווח</string>
     <string name="language_english_localized">אנגלית</string>
     <string name="settings_section_notifications">התראות</string>
-    <string name="acquisition_feedback_description">בחר את המשוב שהיישום משמיע כאשר מדידה ידנית או אוטומטית נשמרת.</string>
+    <string name="acquisition_feedback_description">נהל את העדפות האפליקציה עבור מדידות.</string>
     <string name="acquisition_feedback_preview_hint">העוצמה הסופית תלויה גם בעוצמת השעון המעורר בטלפון.</string>
     <string name="confirmation_question_suffix">?</string>
-    <string name="threshold_alerts_sound_description_v2">בחר את המשוב שהיישום משמיע כאשר התראה נרשמת.</string>
+    <string name="threshold_alerts_sound_description_v2">נהל את העדפות האפליקציה עבור התראות.</string>
     <string name="list_filter_export_question">לייצא את כל התוצאות המוצגות?</string>
     <string name="list_filter_export_warning">לא נבחרו רשומות. כל הרשומות המתאימות למסננים הנוכחיים מיוצאים.</string>
     <string name="settings_include_sensitive_information">כלול נתונים רגישים</string>

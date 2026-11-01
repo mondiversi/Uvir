@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_log_open">Открыть журнал ошибок</string>
+    <string name="error_log_view_description">Просмотр и экспорт ошибок, записанных приложением.</string>
+    <string name="error_log_read_failed">Не удалось прочитать журнал ошибок.</string>
+    <string name="debug_fake_saturation">Насыщение</string>
+    <string name="debug_fake_saturation_description">Периодически имитирует насыщение датчика.</string>
+    <string name="record_archive_export_title">Экспортировать измерения и оповещения</string>
+    <string name="error_log_clear_title">Очистить журнал ошибок?</string>
+    <string name="error_log_clear_description">Безвозвратно удалить все записанные ошибки.</string>
+    <string name="error_log_clear_complete">Журнал ошибок очищен.</string>
+    <string name="error_log_clear_failed">Не удалось очистить журнал ошибок.</string>
+    <string name="error_log_size">Размер журнала: %1$s</string>
+</resources>

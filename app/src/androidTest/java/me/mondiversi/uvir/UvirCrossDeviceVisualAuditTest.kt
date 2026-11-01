@@ -57,8 +57,7 @@ class UvirCrossDeviceVisualAuditTest {
                         val density = LocalDensity.current
                         SideEffect { hostDensity = density.density }
                         MaterialTheme(colorScheme = if (dark.value) darkColorScheme() else lightColorScheme()) {
-                            UvirRecordListFilterPanel(UvirRecordListFilters(), mapOf("A" to "Audit sensor"),
-                                setOf(true, false), {}, notes = listOf("Audit note"))
+                            UvirRecordListFilterPanel(UvirRecordListFilters(), {}, notes = listOf("Audit note"))
                         }
                     }
                 }

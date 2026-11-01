@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="usb_diagnostic_progress">Проверка компонентов: %1$d/%2$d</string>
+    <string name="usb_diagnostic_recognition">Распознавание</string>
+    <string name="usb_diagnostic_initialization">Инициализация</string>
+    <string name="usb_diagnostic_reading">Считывание</string>
+    <string name="usb_diagnostic_not_tested">Не проверено</string>
+    <string name="usb_diagnostic_readings">Новые показания: %1$d/%2$d</string>
+    <string name="usb_diagnostic_notes">Проверяет распознавание и показания компонентов. Для калибровки нужна отдельная проверка.</string>
+    <string name="usb_diagnostic_wiring">Проверьте питание, GND, SDA/SCL и перемычку D1–D2.</string>
+    <string name="usb_diagnostic_technical">Технические сведения</string>
+</resources>

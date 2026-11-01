@@ -18,7 +18,7 @@
     <string name="debug_performance_indiana_jones">Indiana Jones</string>
     <string name="debug_performance_jurassic_park">Jurassic Park</string>
     <string name="debug_performance_star_wars">Star Wars</string>
-    <string name="debug_diagnostic">TEST DE DIAGNOSTIC</string>
+    <string name="debug_diagnostic">LANCER LE DIAGNOSTIC</string>
     <string name="diagnostic_description">Exécute un test de diagnostic complet du capteur.</string>
     <string name="diagnostic_title">Diagnostic du capteur</string>
     <string name="diagnostic_progress">%1$d/%2$d requêtes terminées</string>
@@ -41,8 +41,6 @@
     <string name="diagnostic_share_error">Impossible de partager le rapport de diagnostic.</string>
     <string name="diagnostic_failed">Impossible de terminer le test de diagnostic.</string>
     <string name="debug_secret_melody_found">Vous avez trouvé la mélodie secrète</string>
-    <string name="debug_fake_out_of_range">Valeurs hors plage</string>
-    <string name="debug_fake_out_of_range_description">Simule occasionnellement des valeurs hors plage.</string>
     <string name="debug_simulate_events">SIMULER DES ÉVÉNEMENTS</string>
     <string name="debug_simulate_events_description">Ajoute des mesures et des alertes simulées.</string>
     <string name="debug_simulate_events_question">Simuler des événements de test ?</string>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="release_011_status">Le développement est suspendu : le prototype fonctionne, mais l’étalonnage optique reste à résoudre.</string>
+    <string name="release_011_case">Boîtier de référence avec ouverture USB corrigée et couvercle plat à deux ouvertures de 5 mm publiés.</string>
+    <string name="release_011_improvements">Échantillonnage USB, gestion de la saturation, diagnostic, archives et documentation améliorés.</string>
+</resources>

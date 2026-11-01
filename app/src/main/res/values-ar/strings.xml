@@ -138,7 +138,7 @@
     <string name="sensor_settings_connection_required">صِل المستشعر لتغيير هذه الإعدادات.</string>
     <string name="sensor_parameters_description">اضبط الجوانب العامة للمستشعر.</string>
     <string name="home_sensor_disconnected_title">المستشعر غير متصل</string>
-    <string name="home_sensor_disconnected_description">وصّل مستشعرًا للحصول على البيانات وتسجيل التنبيهات.</string>
+    <string name="home_sensor_disconnected_description">وصّل المستشعر للحصول على البيانات وتسجيل التنبيهات.</string>
     <string name="home_sensor_disconnected_hint">افتح الإعدادات › المستشعر › الاتصال لاختيار USB أو Wi-Fi أو Bluetooth أو الإنترنت وعرض التعليمات.</string>
     <string name="sensor_connection_provisioning_reminder">لاستخدام Wi-Fi أو Bluetooth، صِل المستشعر عبر USB مرة واحدة على الأقل. سيحصل التطبيق بأمان على الهوية الفريدة وبيانات الوصول الخاصة بالمستشعر.</string>
     <string name="sensor_connection_usb">USB</string>
@@ -743,14 +743,12 @@
     <string name="language_formats_description">اختر كيفية عرض البيانات وتنسيقها في التطبيق.</string>
     <string name="irradiance_measurement_heading">قياس شدة الإشعاع</string>
     <string name="irradiance_measurement_description">اختر الوحدة المستخدمة لعرض شدة الإشعاع. تحتفظ القيم المحفوظة بالدقة الأصلية للمستشعر.</string>
-    <string name="out_of_range_short">OL - خارج النطاق</string>
-    <string name="out_of_range_csv_header">قيمة_خارج_النطاق</string>
     <string name="language_english_localized">الإنجليزية</string>
     <string name="settings_section_notifications">الإشعارات</string>
-    <string name="acquisition_feedback_description">اختر الإشارة التي يصدرها التطبيق عند حفظ قياس يدوي أو تلقائي.</string>
+    <string name="acquisition_feedback_description">أدر تفضيلات التطبيق الخاصة بالقياسات.</string>
     <string name="acquisition_feedback_preview_hint">يعتمد مستوى الصوت النهائي أيضًا على مستوى صوت منبّه الهاتف.</string>
     <string name="confirmation_question_suffix">؟</string>
-    <string name="threshold_alerts_sound_description_v2">اختر الإشارة التي يصدرها التطبيق عند تسجيل تنبيه.</string>
+    <string name="threshold_alerts_sound_description_v2">أدر تفضيلات التطبيق الخاصة بالتنبيهات.</string>
     <string name="list_filter_export_question">تصدير جميع النتائج المعروضة؟</string>
     <string name="list_filter_export_warning">لم يتم تحديد أي سجلات. يتم تصدير جميع السجلات المطابقة لعوامل التصفية الحالية.</string>
     <string name="settings_include_sensitive_information">تضمين البيانات الحساسة</string>

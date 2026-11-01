@@ -30,7 +30,6 @@ import androidx.compose.ui.unit.sp
 
 // Archived screens retain their normal rendering; only the live screen overrides this.
 internal val LocalUvirLiveReadingAvailable = compositionLocalOf { true }
-
 @Composable
 fun SpectrumCard(
     group: SensorGroup,
@@ -172,7 +171,7 @@ fun SpectrumCard(
                                 text = if (groupMuted || !LocalUvirLiveReadingAvailable.current) {
                                     "—"
                                 } else if (outOfRange) {
-                                    stringResource(R.string.out_of_range_short)
+                                    stringResource(R.string.sensor_saturation)
                                 } else {
                                     "${mainViewIrradianceNumber(total)} ${LocalUvirIrradianceUnit.current.symbol}"
                                 },
@@ -404,7 +403,7 @@ fun SpectrumRow(
                     if (!visible || !LocalUvirLiveReadingAvailable.current) {
                         "—"
                     } else if (LocalUvirDisplayedOutOfRange.current) {
-                        stringResource(R.string.out_of_range_short)
+                        stringResource(R.string.sensor_saturation)
                     } else {
                         "${mainViewIrradianceNumber(value)} ${LocalUvirIrradianceUnit.current.symbol}"
                     },
@@ -530,7 +529,7 @@ fun DerivedSpectrumRow(
             Text(
                 text =
                     if (LocalUvirDisplayedOutOfRange.current) {
-                        stringResource(R.string.out_of_range_short)
+                        stringResource(R.string.sensor_saturation)
                     } else {
                         "${mainViewIrradianceNumber(value)} ${LocalUvirIrradianceUnit.current.symbol}"
                     },

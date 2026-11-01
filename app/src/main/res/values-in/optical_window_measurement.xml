@@ -12,7 +12,7 @@
     <string name="window_measure_unavailable">Kanal tidak tersedia</string>
     <string name="window_measure_insufficient">Data tidak mencukupi</string>
     <string name="window_measure_unstable">Pencahayaan tidak stabil</string>
-    <string name="window_measure_saturated">Sinyal di luar rentang</string>
+    <string name="window_measure_saturated">@string/sensor_saturation</string>
     <string name="window_measure_brighter">Nilai dengan filter lebih tinggi</string>
     <string name="window_measure_out_of_range">Faktor di luar rentang yang diizinkan</string>
 </resources>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_log_open">Foutenlogboek openen</string>
+    <string name="error_log_view_description">Bekijk en exporteer fouten die de app heeft vastgelegd.</string>
+    <string name="error_log_read_failed">Het foutenlogboek kan niet worden gelezen.</string>
+    <string name="debug_fake_saturation">Verzadiging</string>
+    <string name="debug_fake_saturation_description">Simuleer periodiek verzadiging van de sensor.</string>
+    <string name="record_archive_export_title">Metingen en waarschuwingen exporteren</string>
+    <string name="error_log_clear_title">Foutenlogboek wissen?</string>
+    <string name="error_log_clear_description">Verwijder alle vastgelegde fouten definitief.</string>
+    <string name="error_log_clear_complete">Foutenlogboek gewist.</string>
+    <string name="error_log_clear_failed">Het foutenlogboek kan niet worden gewist.</string>
+    <string name="error_log_size">Loggrootte: %1$s</string>
+</resources>

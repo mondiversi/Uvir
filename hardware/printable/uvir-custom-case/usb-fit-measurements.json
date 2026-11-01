@@ -1,0 +1,10 @@
+{
+  "units": "mm",
+  "previous_base": "uvir-custom-case-base-r02.stl",
+  "previous_opening_bottom_from_outside_floor": 5.0,
+  "filed_opening_total_height": 13.0,
+  "unused_bottom_height_to_close": 6.0,
+  "interpretation": "Only the upper edge was filed; the original lower edge remained at Z=5 mm. Close the lowest 6 mm of the 13 mm filed opening. Target opening: Z=11 to 18 mm, height 7 mm. No extra height allowance is added.",
+  "opening_width_unchanged": 14.1,
+  "corner_radius_unchanged": 1.0
+}

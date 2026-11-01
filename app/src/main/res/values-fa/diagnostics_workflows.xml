@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_log_open">باز کردن گزارش خطاها</string>
+    <string name="error_log_view_description">خطاهای ثبت‌شده توسط برنامه را مشاهده و صادر کنید.</string>
+    <string name="error_log_read_failed">خواندن گزارش خطاها ممکن نیست.</string>
+    <string name="debug_fake_saturation">اشباع</string>
+    <string name="debug_fake_saturation_description">اشباع حسگر را به‌صورت دوره‌ای شبیه‌سازی می‌کند.</string>
+    <string name="record_archive_export_title">صدور اندازه‌گیری‌ها و هشدارها</string>
+    <string name="error_log_clear_title">گزارش خطاها پاک شود؟</string>
+    <string name="error_log_clear_description">همه خطاهای ثبت‌شده را برای همیشه حذف کنید.</string>
+    <string name="error_log_clear_complete">گزارش خطاها پاک شد.</string>
+    <string name="error_log_clear_failed">پاک کردن گزارش خطاها ممکن نیست.</string>
+    <string name="error_log_size">اندازهٔ گزارش: %1$s</string>
+</resources>

@@ -12,7 +12,7 @@
     <string name="window_measure_unavailable">القناة غير متاحة</string>
     <string name="window_measure_insufficient">بيانات غير كافية</string>
     <string name="window_measure_unstable">إضاءة غير مستقرة</string>
-    <string name="window_measure_saturated">الإشارة خارج النطاق</string>
+    <string name="window_measure_saturated">@string/sensor_saturation</string>
     <string name="window_measure_brighter">القيمة مع المرشح أعلى</string>
     <string name="window_measure_out_of_range">المعامل خارج النطاق المسموح</string>
 </resources>

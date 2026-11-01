@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="usb_diagnostic_progress">部品を確認中: %1$d/%2$d</string>
+    <string name="usb_diagnostic_recognition">認識</string>
+    <string name="usb_diagnostic_initialization">初期化</string>
+    <string name="usb_diagnostic_reading">読み取り</string>
+    <string name="usb_diagnostic_not_tested">未確認</string>
+    <string name="usb_diagnostic_readings">新しい読み取り: %1$d/%2$d</string>
+    <string name="usb_diagnostic_notes">部品の認識と読み取りを確認します。校正には別途テストが必要です。</string>
+    <string name="usb_diagnostic_wiring">電源、GND、SDA/SCL、D1–D2の接続を確認してください。</string>
+    <string name="usb_diagnostic_technical">技術情報</string>
+</resources>

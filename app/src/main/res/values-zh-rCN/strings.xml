@@ -717,14 +717,12 @@
     <string name="language_formats_description">选择数据在应用中的显示和格式化方式。</string>
     <string name="irradiance_measurement_heading">辐照度测量</string>
     <string name="irradiance_measurement_description">选择辐照度的显示单位。已保存数值会保留传感器的原始精度。</string>
-    <string name="out_of_range_short">OL - 超出量程</string>
-    <string name="out_of_range_csv_header">数值超出量程</string>
     <string name="language_english_localized">英语</string>
     <string name="settings_section_notifications">通知</string>
-    <string name="acquisition_feedback_description">选择应用在保存手动或自动测量时播放的提示。</string>
+    <string name="acquisition_feedback_description">管理应用的测量偏好设置。</string>
     <string name="acquisition_feedback_preview_hint">最终音量也取决于手机的闹钟音量。</string>
     <string name="confirmation_question_suffix">?</string>
-    <string name="threshold_alerts_sound_description_v2">选择应用在记录警报时播放的提示。</string>
+    <string name="threshold_alerts_sound_description_v2">管理应用的警报偏好设置。</string>
     <string name="list_filter_export_question">导出所有显示的结果？</string>
     <string name="list_filter_export_warning">未选择任何记录。导出符合当前筛选条件的所有记录。</string>
     <string name="settings_include_sensitive_information">包含敏感数据</string>

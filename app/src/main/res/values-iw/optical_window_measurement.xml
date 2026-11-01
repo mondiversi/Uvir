@@ -12,7 +12,7 @@
     <string name="window_measure_unavailable">הערוץ אינו זמין</string>
     <string name="window_measure_insufficient">אין מספיק נתונים</string>
     <string name="window_measure_unstable">תאורה לא יציבה</string>
-    <string name="window_measure_saturated">האות מחוץ לטווח</string>
+    <string name="window_measure_saturated">@string/sensor_saturation</string>
     <string name="window_measure_brighter">הערך עם המסנן גבוה יותר</string>
     <string name="window_measure_out_of_range">המקדם מחוץ לטווח המותר</string>
 </resources>

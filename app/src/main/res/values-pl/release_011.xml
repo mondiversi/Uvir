@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="release_011_status">Prace są wstrzymane: prototyp działa, ale kalibracja optyczna pozostaje nierozwiązana.</string>
+    <string name="release_011_case">Opublikowano obudowę referencyjną z poprawionym otworem USB i płaską pokrywę z dwoma otworami 5 mm.</string>
+    <string name="release_011_improvements">Ulepszono próbkowanie USB, obsługę nasycenia, diagnostykę, archiwa i dokumentację.</string>
+</resources>

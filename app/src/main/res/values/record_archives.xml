@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="record_archive_title">Acquisitions and alerts</string>
-    <string name="record_archive_description">Export/import acquisitions or alerts in a single file, including their sessions.</string>
-    <string name="record_archive_export_description">Export all records of this type, including sessions, in a single file.</string>
-    <string name="record_archive_import_description">Add records to the archive. Existing records are skipped. Unknown sensors are shown by their hardware ID until paired.</string>
+    <string name="record_archive_description">Export/import acquisitions and alerts in one file, including their sessions.</string>
+    <string name="record_archive_export_description">Export all acquisitions and alerts, including sessions, in one file.</string>
+    <string name="record_archive_import_description">Import acquisitions, alerts and sessions. Existing records are skipped.</string>
     <string name="record_archive_import_summary">Records: %1$d · Sessions: %2$d</string>
     <string name="record_archive_import_success">Imported: %1$d · Already present: %2$d</string>
     <string name="record_archive_failed">Unable to transfer records. Check the file and its data type.</string>

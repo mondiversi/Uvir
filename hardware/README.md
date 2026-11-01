@@ -1,5 +1,24 @@
 # Hardware
 
+## Current FT232H prototype
+
+**The current reference is the FT232H head with removable AS7331 and AS7343
+modules on a perfboard carrier. Development is suspended at optical calibration.**
+
+- [Components, functional wiring and removable-module mounting](usb/README.md).
+- [Reference case with corrected USB opening and 5 mm lid](printable/uvir-custom-case/README.md),
+  including carrier dimensions, mounting points and latest sensor centres.
+- [USB initialization, diagnostics and first connection](../docs/usb/WIRING.md).
+- [Read values without Android](../docs/usb/STANDALONE.md).
+- [Current calibration limitations](../docs/usb/CALIBRATION.md) and
+  [project suspension/continuation status](../docs/PROJECT_STATUS.md).
+
+The connection plan does not prescribe the individual wire layout of the owner's
+carrier. Sensor boards are removable on raised plug-in supports/sockets. The
+legacy carrier PCB and enclosure below are not the PCB or case of this assembly.
+
+## Preserved ESP32 hardware reference
+
 > **Preserved ESP32 hardware documentation.** For the current Uvir architecture, use the
 > [FT232H wiring and first-connection guide](../docs/usb/WIRING.md).
 

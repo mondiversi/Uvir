@@ -167,7 +167,7 @@ private fun createAcquisitionChartFile(
     val sections = listOf(section to bars)
     val legend = UvirChartExportLegend(bars.map { bar ->
         UvirChartLegendEntry(chartExportChannelLabel(exportContext, bar.displayLabelResource, bar.exportLabel),
-            bar.color.toArgb(), if (bar.outOfRange) exportContext.getString(R.string.out_of_range_short)
+            bar.color.toArgb(), if (bar.outOfRange) exportContext.getString(R.string.sensor_saturation)
             else exportFormatting.irradiance(bar.value))
     }, columns = 3, width = 1380f, paint = smallPaint)
     val sectionHeights =

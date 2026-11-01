@@ -12,7 +12,7 @@
     <string name="window_measure_unavailable">通道不可用</string>
     <string name="window_measure_insufficient">数据不足</string>
     <string name="window_measure_unstable">光照不稳定</string>
-    <string name="window_measure_saturated">信号超出量程</string>
+    <string name="window_measure_saturated">@string/sensor_saturation</string>
     <string name="window_measure_brighter">加滤光片后的值更高</string>
     <string name="window_measure_out_of_range">系数超出允许范围</string>
 </resources>

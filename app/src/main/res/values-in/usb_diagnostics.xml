@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="usb_diagnostic_progress">Memeriksa komponen: %1$d/%2$d</string>
+    <string name="usb_diagnostic_recognition">Pengenalan</string>
+    <string name="usb_diagnostic_initialization">Inisialisasi</string>
+    <string name="usb_diagnostic_reading">Pembacaan</string>
+    <string name="usb_diagnostic_not_tested">Belum diuji</string>
+    <string name="usb_diagnostic_readings">Pembacaan baru: %1$d/%2$d</string>
+    <string name="usb_diagnostic_notes">Memeriksa pengenalan dan pembacaan komponen. Kalibrasi memerlukan pengujian terpisah.</string>
+    <string name="usb_diagnostic_wiring">Periksa daya, GND, SDA/SCL, dan jumper D1–D2.</string>
+    <string name="usb_diagnostic_technical">Detail teknis</string>
+</resources>

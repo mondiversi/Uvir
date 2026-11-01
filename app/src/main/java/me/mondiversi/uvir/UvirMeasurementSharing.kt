@@ -98,7 +98,6 @@ internal val MEASUREMENT_EXPORT_COLUMNS_IT =
         "Indice_spettrale_fotoinvecchiamento_UVA_0_100",
         "Irradianza_pesata_stimata_stress_ossidativo_HEV_uW_cm2_eq",
         "Indice_spettrale_stress_ossidativo_HEV_0_100",
-        "Nome_sensore"
     )
 
 internal val MEASUREMENT_EXPORT_COLUMNS_EN =
@@ -164,7 +163,6 @@ internal val MEASUREMENT_EXPORT_COLUMNS_EN =
         "Spectral_index_UVA_photoaging_0_100",
         "Estimated_weighted_irradiance_HEV_oxidative_stress_uW_cm2_eq",
         "Spectral_index_HEV_oxidative_stress_0_100",
-        "Sensor_name"
     )
 
 internal fun measurementExportColumns(
@@ -178,15 +176,15 @@ internal fun measurementExportColumns(
     }).map { column ->
         column.replace("uW_cm2", irradianceUnit.csvSymbol)
     } + (if (language == "it") {
-        "Valore_fuori_scala"
+        "Saturazione"
     } else {
-        "Out_of_range"
+        "Saturation"
     }) + "Optical_window" + hardwareCsvColumns(language)
 
 private fun csvHeaderPart(value: String): String =
     value.trim()
         .replace(Regex("[\\s/]+"), "_")
-        .replace(Regex("[^\\p{L}\\p{N}_-]"), "")
+        .replace(Regex("[^\\p{L}\\p{M}\\p{N}_-]"), "")
 
 internal fun measurementExportColumns(
     context: Context,
@@ -263,8 +261,8 @@ internal fun measurementExportColumns(
         "${spectralIndex}_${label(R.string.uva_photoaging_proxy)}_0_100",
         "${estimatedWeighted}_${label(R.string.hev_oxidative_proxy)}_${irradianceUnit.csvSymbol}_eq",
         "${spectralIndex}_${label(R.string.hev_oxidative_proxy)}_0_100",
-        label(R.string.sensor_name_label),
-        label(R.string.out_of_range_csv_header),
+
+        label(R.string.sensor_saturation),
         "Optical_window"
     ) + hardwareCsvColumns(language)
 }
@@ -374,10 +372,7 @@ internal fun measurementCsv(
                     timeFormat
                 ),
                 record.timestamp.toString(),
-                if (record.externalCommand) {
-                    labelContext?.getString(R.string.external_measurement)
-                        ?: if (language == "it") "Esterna" else "External"
-                } else if (record.automatic) {
+                if (record.automatic) {
                     labelContext?.getString(R.string.share_automatic)
                         ?: if (language == "it") "Automatica" else "Automatic"
                 } else {
@@ -450,7 +445,7 @@ internal fun measurementCsv(
                 formatUvirExportPercentage(effects.uvaPhotoagingScore.toDouble() * 100.0, numericFormat, irradianceDecimals),
                 irradiance(effects.hevOxidativeProxy, SensorGroup.VISIBLE),
                 formatUvirExportPercentage(effects.hevOxidativeScore.toDouble() * 100.0, numericFormat, irradianceDecimals),
-                exportSensorName(record.sensorDisplayName),
+
                 if (sample.hasAnyOutOfRangeValue()) "1" else "0",
                 sample.opticalWindow?.toJson()?.toString().orEmpty(),
                 hardware.models(record.sensorId).ultraviolet,
@@ -531,10 +526,6 @@ internal fun readableMeasurementTable(
             appendLine()
             previousVariant = record.variantIndex
         }
-        appendLine(
-            "${context.getString(R.string.sensor_selector_label)}: " +
-                exportSensorName(record.sensorDisplayName)
-        )
         appendLine(hardware.models(record.sensorId).caption())
         appendLine(
             "${context.getString(R.string.share_measurement_id_label)}: " +
@@ -567,9 +558,7 @@ internal fun readableMeasurementTable(
         appendLine(
             "${context.getString(R.string.share_acquisition_label)}: " +
                 context.getString(
-                    if (record.externalCommand) {
-                        R.string.external_measurement
-                    } else if (record.automatic) {
+                    if (record.automatic) {
                         R.string.share_automatic
                     } else {
                         R.string.share_manual
@@ -681,7 +670,7 @@ internal fun readableMeasurementTable(
                 )
             ) {
                 appendLine(
-                    "${context.getString(R.string.out_of_range_short)} · $scoreText/100"
+                    "${context.getString(R.string.sensor_saturation)} · $scoreText/100"
                 )
             } else {
                 appendLine(

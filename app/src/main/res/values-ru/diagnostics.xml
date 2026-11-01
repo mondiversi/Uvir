@@ -18,7 +18,7 @@
     <string name="debug_performance_indiana_jones">Indiana Jones</string>
     <string name="debug_performance_jurassic_park">Jurassic Park</string>
     <string name="debug_performance_star_wars">Star Wars</string>
-    <string name="debug_diagnostic">ДИАГНОСТИЧЕСКИЙ ТЕСТ</string>
+    <string name="debug_diagnostic">ВЫПОЛНИТЬ ДИАГНОСТИКУ</string>
     <string name="diagnostic_description">Выполняет полный диагностический тест датчика.</string>
     <string name="diagnostic_title">Диагностика датчика</string>
     <string name="diagnostic_progress">Выполнено запросов: %1$d/%2$d</string>
@@ -41,8 +41,6 @@
     <string name="diagnostic_share_error">Не удалось поделиться диагностическим отчётом.</string>
     <string name="diagnostic_failed">Не удалось завершить диагностический тест.</string>
     <string name="debug_secret_melody_found">Вы нашли секретную мелодию</string>
-    <string name="debug_fake_out_of_range">Значения вне диапазона</string>
-    <string name="debug_fake_out_of_range_description">Иногда имитирует значения вне диапазона.</string>
     <string name="debug_simulate_events">ИМИТИРОВАТЬ СОБЫТИЯ</string>
     <string name="debug_simulate_events_description">Добавьте имитированные измерения и оповещения.</string>
     <string name="debug_simulate_events_question">Имитировать тестовые события?</string>

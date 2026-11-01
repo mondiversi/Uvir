@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="release_011_status">Development is suspended: the prototype works, but optical calibration remains unresolved.</string>
+    <string name="release_011_case">Reference case with corrected USB opening and a flat lid with two 5 mm apertures published.</string>
+    <string name="release_011_improvements">Improved USB sampling, saturation handling, diagnostics, archives and documentation.</string>
+</resources>

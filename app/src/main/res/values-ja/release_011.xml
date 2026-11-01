@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="release_011_status">開発は中断されています。試作機は動作しますが、光学校正は未解決です。</string>
+    <string name="release_011_case">USB開口部を修正した基準ケースと、直径5 mmの穴が2つある平らな蓋を公開しました。</string>
+    <string name="release_011_improvements">USBサンプリング、飽和処理、診断、アーカイブ、ドキュメントを改善しました。</string>
+</resources>

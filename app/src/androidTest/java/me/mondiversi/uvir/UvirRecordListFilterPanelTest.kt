@@ -38,8 +38,7 @@ class UvirRecordListFilterPanelTest {
             MaterialTheme {
                 Column(Modifier.fillMaxSize()) {
                     UvirRecordListFilterButton(filters.isActive, true) { open = !open }
-                    if (open) UvirRecordListFilterPanel(filters, mapOf("1" to "Sensor A"),
-                        setOf(true, false), { filters = it }, notes = listOf("Garden"))
+                    if (open) UvirRecordListFilterPanel(filters, { filters = it }, notes = listOf("Garden"))
                 }
             }
         }
@@ -54,19 +53,20 @@ class UvirRecordListFilterPanelTest {
             .assertContentDescriptionContains("Garden", substring = true)
     }
 
-    @Test fun onlyModesPresentInTheSourceAreOffered() {
+    @Test fun acquisitionModeOffersManualAndAutomaticAndUpdatesTheFilter() {
+        var filters by mutableStateOf(UvirRecordListFilters())
         compose.setContent {
-            MaterialTheme { UvirRecordListFilterPanel(UvirRecordListFilters(),
-                mapOf("1" to "Sensor A"), setOf(true), {}) }
+            MaterialTheme { UvirRecordListFilterPanel(filters, { filters=it }) }
         }
         compose.onNodeWithTag("filter-mode").performTouchInput { click(center) }
         compose.onNodeWithText(label(R.string.share_automatic)).assertExists()
-        compose.onNodeWithText(label(R.string.share_manual)).assertDoesNotExist()
+        compose.onNodeWithTag("filter-choice-option-MANUAL").performClick()
+        compose.runOnIdle { assertEquals(setOf(UvirRecordFilterMode.MANUAL),filters.modes) }
     }
 
     @Test fun resetClearsAllCriteriaAndWorksWithNightRtlAndLargeText() {
-        var filters by mutableStateOf(UvirRecordListFilters(1000, 2000, setOf("לילה 🌙"), setOf("1"),
-            setOf(UvirRecordFilterMode.AUTOMATIC), setOf("2"), setOf("10")))
+        var filters by mutableStateOf(UvirRecordListFilters(1000, 2000, setOf("לילה 🌙"),
+            setOf("2"), setOf("10")))
         compose.setContent {
             val density = LocalDensity.current
             val nightConfiguration = Configuration(LocalConfiguration.current).apply {
@@ -76,8 +76,7 @@ class UvirRecordListFilterPanelTest {
                 LocalLayoutDirection provides LayoutDirection.Rtl,
                 LocalDensity provides Density(density.density, 1.3f)) {
                 MaterialTheme(colorScheme = darkColorScheme()) {
-                    UvirRecordListFilterPanel(filters, mapOf("1" to "Sensor A"),
-                        setOf(true), { filters = it })
+                    UvirRecordListFilterPanel(filters, { filters = it })
                 }
             }
         }
@@ -88,8 +87,8 @@ class UvirRecordListFilterPanelTest {
     @Test fun filterStateSurvivesActivityStateRestoration() {
         val restoration = StateRestorationTester(compose)
         var state: MutableState<UvirRecordListFilters>? = null
-        val expected = UvirRecordListFilters(1000, 2000, setOf("مرحبا 🌙", "Garden"), setOf("1", "2"),
-            setOf(UvirRecordFilterMode.MANUAL, UvirRecordFilterMode.EXTERNAL), setOf("7", "8"),
+        val expected = UvirRecordListFilters(1000, 2000, setOf("مرحبا 🌙", "Garden"),
+            setOf("7", "8"),
             setOf("10", "20"), setOf(2, 5))
         restoration.setContent { state = rememberRecordListFilters() }
         compose.runOnIdle { state!!.value = expected }
@@ -100,8 +99,7 @@ class UvirRecordListFilterPanelTest {
     @Test fun idChoiceUsesAnExistingIdentifierWithoutModifyingOtherCriteria() {
         var filters by mutableStateOf(UvirRecordListFilters(notes = setOf("Garden")))
         compose.setContent {
-            MaterialTheme { UvirRecordListFilterPanel(filters, mapOf("1" to "Sensor A"),
-                setOf(true, false), { filters = it }, recordIds = listOf(123)) }
+            MaterialTheme { UvirRecordListFilterPanel(filters, { filters = it }, recordIds = listOf(123)) }
         }
         compose.onNodeWithTag("filter-id").performScrollTo().performTouchInput { click(center) }
         compose.onNodeWithTag("filter-choice-option-123").performClick()
@@ -110,19 +108,23 @@ class UvirRecordListFilterPanelTest {
             assertEquals(setOf("Garden"), filters.notes)
         }
     }
-    @Test fun controlsFollowIdDateModeSensorNoteOrder() {
+    @Test fun controlsFollowIdDateModeVariantThenFullWidthNoteOrder() {
         compose.setContent {
-            MaterialTheme { UvirRecordListFilterPanel(UvirRecordListFilters(),
-                mapOf("1" to "Sensor A"), setOf(true, false), {},
+            MaterialTheme { UvirRecordListFilterPanel(UvirRecordListFilters(), {},
                 recordIds = listOf(1), sessionIds = listOf(10), notes = listOf("Garden"),
                 dates = listOf(0L)) }
         }
         fun top(tag: String) = compose.onNodeWithTag(tag).fetchSemanticsNode().boundsInRoot.top
         assertTrue(top("filter-id") < top("filter-from"))
+        compose.onNodeWithTag("filter-sensor").assertDoesNotExist()
         assertTrue(top("filter-from") < top("filter-mode"))
-        assertEquals(top("filter-mode"), top("filter-sensor"), 0.5f)
-        assertTrue(top("filter-mode") < top("filter-note"))
-        assertEquals(top("filter-note"), top("filter-variant"), 0.5f)
+        assertEquals(top("filter-mode"), top("filter-variant"), 0.5f)
+        assertTrue(top("filter-variant") < top("filter-note"))
+        val note=compose.onNodeWithTag("filter-note").fetchSemanticsNode().boundsInRoot
+        val from=compose.onNodeWithTag("filter-from").fetchSemanticsNode().boundsInRoot
+        val until=compose.onNodeWithTag("filter-until").fetchSemanticsNode().boundsInRoot
+        assertEquals(from.left,note.left,0.5f)
+        assertEquals(until.right,note.right,0.5f)
     }
     @Test fun variantChoicesComeFromSavedSessionsAndCanBeDisabledForAlerts() {
         var filters by mutableStateOf(UvirRecordListFilters())
@@ -130,7 +132,7 @@ class UvirRecordListFilterPanelTest {
         compose.setContent {
             MaterialTheme {
                 UvirRecordListFilterPanel(
-                    filters, mapOf("1" to "Sensor A"), setOf(true), { filters = it },
+                    filters, { filters = it },
                     variantCounts = listOf(2, 5, 4), variantFilterEnabled = enabled
                 )
             }
@@ -140,7 +142,7 @@ class UvirRecordListFilterPanelTest {
         compose.onNodeWithTag("filter-choice-option-4").assertExists()
         compose.onNodeWithTag("filter-choice-option-5").performClick()
         compose.runOnIdle { assertEquals(setOf(5), filters.variantCounts); enabled = false }
-        compose.onNodeWithTag("filter-variant").assertIsNotEnabled()
+        compose.onNodeWithTag("filter-variant").assertDoesNotExist()
     }
     @Test fun panelMatchesTheListBackgroundAndFieldsStayReadableInBothThemes() {
         val night = mutableStateOf(false)
@@ -151,8 +153,7 @@ class UvirRecordListFilterPanelTest {
             }
             CompositionLocalProvider(LocalConfiguration provides configuration) {
                 MaterialTheme(colorScheme = if (night.value) darkColorScheme() else lightColorScheme()) {
-                    UvirRecordListFilterPanel(UvirRecordListFilters(notes = setOf("Garden")),
-                        mapOf("1" to "Sensor A"), setOf(true, false), {},
+                    UvirRecordListFilterPanel(UvirRecordListFilters(notes = setOf("Garden")), {},
                         backgroundColor = if (night.value) Color(0xFF101418) else Color(0xFFF4F7F9))
                 }
             }
@@ -166,14 +167,14 @@ class UvirRecordListFilterPanelTest {
             assertEquals(expected.red, actual.red, 0.01f)
             assertEquals(expected.green, actual.green, 0.01f)
             assertEquals(expected.blue, actual.blue, 0.01f)
-            if (dark) for (tag in listOf("filter-from", "filter-note", "filter-sensor", "filter-mode")) {
+            if (dark) for (tag in listOf("filter-from", "filter-note")) {
                 val pixels = compose.onNodeWithTag(tag).performScrollTo().captureToImage().toPixelMap()
                 var readable = 0
                 for (y in 0 until pixels.height) for (x in 0 until pixels.width)
                     if (pixels[x, y].luminance() > 0.55f) readable++
                 assertTrue("Night text/borders must remain readable: " + tag, readable > 25)
             }
-            compose.onNodeWithTag("filter-sensor").performScrollTo().performTouchInput { click(center) }
+            compose.onNodeWithTag("filter-note").performScrollTo().performTouchInput { click(center) }
             val menu = compose.onNodeWithTag("filter-choice-menu").captureToImage().toPixelMap()
             if (dark) {
                 val menuColor = menu[menu.width - 16, menu.height / 2]
@@ -181,7 +182,7 @@ class UvirRecordListFilterPanelTest {
                 assertEquals(Color(0xFF27323B).green, menuColor.green, 0.01f)
                 assertEquals(Color(0xFF27323B).blue, menuColor.blue, 0.01f)
             }
-            compose.onNodeWithText("Sensor A").performClick()
+            compose.onNodeWithTag("filter-choice-option-Garden").performClick()
             pressBack()
         }
     }
@@ -223,8 +224,8 @@ class UvirRecordListFilterPanelTest {
                         disabledTint = colors.disabledTextColor
                         panelBackground = background
                     }
-                    UvirRecordListFilterPanel(UvirRecordListFilters(), mapOf("1" to "Sensor A"),
-                        setOf(true, false), {}, variantFilterEnabled = variantsEnabled.value)
+                    UvirRecordListFilterPanel(UvirRecordListFilters(), {}, variantFilterEnabled = variantsEnabled.value,
+                        modeFilterEnabled = variantsEnabled.value)
                 }
             }
         }
@@ -234,7 +235,6 @@ class UvirRecordListFilterPanelTest {
             Triple("from", "filter-from", R.string.list_filter_from),
             Triple("until", "filter-until", R.string.list_filter_until),
             Triple("mode", "filter-mode", R.string.acquisition_mode_label),
-            Triple("sensor", "filter-sensor", R.string.sensor_selector_label),
             Triple("note", "filter-note", R.string.share_note_label),
             Triple("variant", "filter-variant", R.string.list_filter_variant)
         )
@@ -253,12 +253,8 @@ class UvirRecordListFilterPanelTest {
                 assertIconTint(image.captureToImage().toPixelMap(), enabledTint)
             }
             compose.runOnIdle { variantsEnabled.value = false }
-            compose.onNodeWithTag("filter-variant").performScrollTo().assertIsNotEnabled()
-            val disabled = compose.onNodeWithTag("filter-label-icon-variant", useUnmergedTree = true)
-                .assertHasNoClickAction().captureToImage().toPixelMap()
-            // Disabled alpha is applied once to the whole drawing, not once per overlapping path.
-            assertIconTint(disabled, disabledTint.compositeOver(panelBackground))
-            assertTrue("Disabled icon is less prominent than enabled labels", disabledTint.alpha < enabledTint.alpha)
+            compose.onNodeWithTag("filter-variant").assertDoesNotExist()
+            compose.onNodeWithTag("filter-mode").assertDoesNotExist()
         }
     }
 
@@ -273,48 +269,14 @@ class UvirRecordListFilterPanelTest {
         assertTrue("The decorative icon uses the label color", matching > 3)
     }
 
-    @Test fun severalSensorsCanBeCheckedWithoutReopeningAndAllClearsTheSelection() {
-        var filters by mutableStateOf(UvirRecordListFilters())
-        compose.setContent {
-            val view = LocalView.current
-            DisposableEffect(view) {
-                val previous = view.keepScreenOn
-                view.keepScreenOn = true
-                onDispose { view.keepScreenOn = previous }
-            }
-            UvirAdaptiveDisplay { MaterialTheme(colorScheme =
-                if (androidx.compose.foundation.isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()) {
-                UvirRecordListFilterPanel(filters, mapOf("1" to "Sensor A", "2" to "Sensor B", "3" to "Sensor C"),
-                    setOf(true, false), { filters = it })
-            } }
-        }
-        compose.onNodeWithTag("filter-sensor").performScrollTo().performTouchInput { click(center) }
-        compose.onNodeWithTag("filter-choice-option-all").assertIsOn()
-        compose.onNodeWithTag("filter-choice-option-1").assertIsOff().performClick().assertIsOn()
-        compose.onNodeWithTag("filter-choice-option-2").performClick().assertIsOn()
-        compose.onNodeWithTag("filter-choice-option-1").assertIsOn()
-        compose.onNodeWithTag("filter-choice-option-3").assertIsOff()
-        compose.onNodeWithTag("filter-choice-option-all").assertIsOff()
-        compose.runOnIdle { assertEquals(setOf("1", "2"), filters.sensorKeys) }
-        val instrumentation = InstrumentationRegistry.getInstrumentation()
-        java.io.File(instrumentation.targetContext.cacheDir, "multi-filter-audit.png").outputStream().use {
-            instrumentation.uiAutomation.takeScreenshot().compress(android.graphics.Bitmap.CompressFormat.PNG, 100, it)
-        }
-        pressBack()
-        compose.onNodeWithTag("filter-sensor").assertContentDescriptionContains("Sensor A, Sensor B", substring = true)
-        compose.onNodeWithTag("filter-sensor").performTouchInput { click(center) }
-        compose.onNodeWithTag("filter-choice-option-1").assertIsOn().performClick().assertIsOff()
-        compose.runOnIdle { assertEquals(setOf("2"), filters.sensorKeys) }
-        compose.onNodeWithTag("filter-choice-option-all").performClick().assertIsOn()
-        compose.runOnIdle { assertFalse(filters.isActive) }
-    }
+
 
     @Test fun preferencesReloadAllChoicesAndKeepAcquisitionsSeparateFromAlerts() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val name = "isolated-list-filter-test-" + java.util.UUID.randomUUID()
         val preferences = context.getSharedPreferences(name, android.content.Context.MODE_PRIVATE)
         try {
-            val expected = UvirRecordListFilters(sensorKeys = setOf("1", "2"),
+            val expected = UvirRecordListFilters(
                 notes = setOf("مرحبا 🌙,\nGarden"), variantCounts = setOf(2, 5))
             saveRecordListFilters(preferences, KEY_ACQUISITION_LIST_FILTERS, expected)
             assertEquals(expected, readRecordListFilters(preferences, KEY_ACQUISITION_LIST_FILTERS))
@@ -334,25 +296,21 @@ class UvirRecordListFilterPanelTest {
         }
     }
 
-    @Test fun longSensorMenusScrollWithoutLosingPreviouslyCheckedChoices() {
-        var filters by mutableStateOf(UvirRecordListFilters())
-        compose.setContent {
-            UvirAdaptiveDisplay {
-                MaterialTheme(colorScheme = if (androidx.compose.foundation.isSystemInDarkTheme())
-                    darkColorScheme() else lightColorScheme()) {
-                    UvirRecordListFilterPanel(filters,
-                        (1..40).associate { it.toString() to "Sensor $it" },
-                        setOf(true, false), { filters = it })
-                }
-            }
+
+    @Test fun compactLabelsStayInsideTheirFieldOutlines() {
+        compose.setContent { MaterialTheme {
+            UvirRecordListFilterPanel(UvirRecordListFilters(), {},
+                recordIds = listOf(1), sessionIds = listOf(2), notes = listOf("Garden"))
+        } }
+        for ((field, icon) in listOf("id" to "id", "session-id" to "session", "from" to "from",
+            "until" to "until", "mode" to "mode", "variant" to "variant", "note" to "note")) {
+            val outline = compose.onNodeWithTag("filter-$field").performScrollTo().fetchSemanticsNode().boundsInRoot
+            val label = compose.onNodeWithTag("filter-label-$icon", useUnmergedTree = true)
+                .fetchSemanticsNode().boundsInRoot
+            assertTrue(label.top > outline.top)
+            assertTrue(label.bottom < outline.bottom)
+            assertTrue(label.left >= outline.left && label.right <= outline.right)
         }
-        compose.onNodeWithTag("filter-sensor").performScrollTo().performTouchInput { click(center) }
-        val range = compose.onNodeWithTag("filter-choice-menu").fetchSemanticsNode()
-            .config[androidx.compose.ui.semantics.SemanticsProperties.VerticalScrollAxisRange]
-        assertTrue(range.maxValue() > 0f)
-        compose.onNodeWithTag("filter-choice-option-1").performScrollTo().performClick()
-        compose.onNodeWithTag("filter-choice-option-40").performScrollTo().performClick().assertIsOn()
-        compose.onNodeWithTag("filter-choice-option-1").performScrollTo().assertIsOn()
-        compose.runOnIdle { assertEquals(setOf("1", "40"), filters.sensorKeys) }
     }
+
 }

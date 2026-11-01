@@ -12,7 +12,7 @@
     <string name="window_measure_unavailable">Kanaal niet beschikbaar</string>
     <string name="window_measure_insufficient">Onvoldoende gegevens</string>
     <string name="window_measure_unstable">Instabiele verlichting</string>
-    <string name="window_measure_saturated">Signaal buiten meetbereik</string>
+    <string name="window_measure_saturated">@string/sensor_saturation</string>
     <string name="window_measure_brighter">Gefilterde waarde hoger</string>
     <string name="window_measure_out_of_range">Factor buiten toegestaan bereik</string>
 </resources>

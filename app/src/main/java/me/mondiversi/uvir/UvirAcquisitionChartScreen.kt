@@ -377,7 +377,7 @@ private fun AcquisitionBarSection(
     val numericFormat = LocalUvirNumericFormat.current
     val irradianceUnit = LocalUvirIrradianceUnit.current
     val displayDigits = currentUvirLiveIrradianceDecimals()
-    val outOfRangeText = stringResource(R.string.out_of_range_short)
+    val outOfRangeText = stringResource(R.string.sensor_saturation)
     val inspectionPoints = bars.mapIndexedNotNull { index, bar ->
         if (bar.outOfRange) return@mapIndexedNotNull null
         val displayValue = valueScale(bar.value)

@@ -132,10 +132,6 @@ internal fun readableAlertExportTable(
                     "${context.getString(R.string.share_session_id_label)}: ${item.sessionId}"
                 )
                 appendLine(
-                    "${context.getString(R.string.sensor_selector_label)}: " +
-                        exportSensorNames(item.entries.map { it.sensorDisplayName })
-                )
-                appendLine(
                     "${context.getString(R.string.session_chart_note)}: " +
                         item.entries.firstOrNull()?.note.orEmpty().ifBlank {
                             context.getString(R.string.no_note)

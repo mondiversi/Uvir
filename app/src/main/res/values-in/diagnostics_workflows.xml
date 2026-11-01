@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_log_open">Buka log kesalahan</string>
+    <string name="error_log_view_description">Lihat dan ekspor kesalahan yang dicatat aplikasi.</string>
+    <string name="error_log_read_failed">Tidak dapat membaca log kesalahan.</string>
+    <string name="debug_fake_saturation">Saturasi</string>
+    <string name="debug_fake_saturation_description">Simulasikan saturasi sensor secara berkala.</string>
+    <string name="record_archive_export_title">Ekspor pengukuran dan peringatan</string>
+    <string name="error_log_clear_title">Hapus log kesalahan?</string>
+    <string name="error_log_clear_description">Hapus semua kesalahan yang dicatat secara permanen.</string>
+    <string name="error_log_clear_complete">Log kesalahan dihapus.</string>
+    <string name="error_log_clear_failed">Tidak dapat menghapus log kesalahan.</string>
+    <string name="error_log_size">Ukuran log: %1$s</string>
+</resources>

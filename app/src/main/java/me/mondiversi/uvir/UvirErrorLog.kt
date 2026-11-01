@@ -8,6 +8,9 @@ import java.io.StringWriter
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 
 object UvirErrorLog {
     private const val LOG_FILE_NAME = "uvir_error_log.txt"
@@ -16,6 +19,17 @@ object UvirErrorLog {
     private const val ROTATION_NOTICE =
         "[Older diagnostic entries were removed automatically.]\n"
     private val lock = Any()
+    private val changes = MutableStateFlow(0L)
+    internal val revision = changes.asStateFlow()
+
+    internal fun read(context: Context): String = synchronized(lock) {
+        logFile(context).takeIf { it.isFile }?.readText(Charsets.UTF_8).orEmpty()
+    }
+
+    /** Stored UTF-8 log only; does not load its contents or generate an export. */
+    internal fun sizeBytes(context: Context): Long = synchronized(lock) {
+        logFile(context).takeIf { it.isFile }?.length() ?: 0L
+    }
 
     @Volatile
     private var installed = false
@@ -102,6 +116,7 @@ object UvirErrorLog {
                     },
                     Charsets.UTF_8
                 )
+                changes.update { it + 1 }
             }
         }
     }
@@ -112,38 +127,21 @@ object UvirErrorLog {
         subject: String,
         destination: UvirExportDestination = UvirExportDestination.SHARE
     ): Boolean {
-        val sourceFile =
-            synchronized(lock) {
-                logFile(context)
-                    .takeIf {
-                        it.isFile && it.length() > 0L
-                    }
-            } ?: return false
+        val sharedFile = createExport(context) ?: return false
+        deliverUvirExportFiles(context, listOf(sharedFile), destination, chooserTitle, subject)
+        return true
+    }
 
-        val diagnosticHeader =
-            buildUvirDiagnosticReportHeader(context)
-        val exportText =
-            synchronized(lock) {
-                diagnosticHeader + sourceFile.readText(Charsets.UTF_8)
-            }
-        val sharedFile =
-            prepareUvirTextExport(
+    internal fun createExport(context: Context): File? {
+        val log = read(context).takeIf { it.isNotBlank() } ?: return null
+        return prepareUvirTextExport(
                 context = context,
                 fileName =
                     UvirExportFileFormat.TXT.fileName(
                         uvirExportBaseName(UvirExportContent.ERRORS)
                     ),
-                text = exportText
+                text = buildUvirDiagnosticReportHeader(context) + log
             )
-
-        deliverUvirExportFiles(
-            context = context,
-            files = listOf(sharedFile),
-            destination = destination,
-            chooserTitle = chooserTitle,
-            subject = subject
-        )
-        return true
     }
 
     fun clear(context: Context): Boolean =
@@ -152,7 +150,7 @@ object UvirErrorLog {
                 val file = logFile(context)
                 !file.exists() || file.delete()
             }
-        }.getOrDefault(false)
+        }.getOrDefault(false).also { cleared -> if (cleared) changes.update { it + 1 } }
 
     private fun logFile(context: Context): File =
         File(

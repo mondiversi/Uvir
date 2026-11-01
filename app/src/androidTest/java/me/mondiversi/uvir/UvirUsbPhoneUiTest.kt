@@ -77,12 +77,13 @@ class UvirUsbPhoneUiTest {
 
     @Test fun menuContainsOnlyApplicableUsbAndAppPages() {
         compose.waitUntil(10000) { compose.onAllNodesWithTag("home_settings_menu_button").fetchSemanticsNodes().isNotEmpty() }
-        for (page in listOf("SENSOR_MEASUREMENT", "DEBUG", "GENERAL", "LANGUAGE", "LANGUAGE_AND_FORMATS", "DATA_RESTORE", "INFO")) {
+        for (page in listOf("GENERAL", "SENSOR_MEASUREMENT", "DEBUG", "LANGUAGE", "LANGUAGE_AND_FORMATS", "DATA_RESTORE", "INFO")) {
             compose.onNodeWithTag("home_settings_menu_button").performClick()
             compose.onNodeWithTag("home_settings_item_SENSOR_CONNECTION").assertDoesNotExist()
             compose.onNodeWithTag("home_settings_item_SENSOR_PARAMETERS").assertDoesNotExist()
             compose.onNodeWithTag("home_settings_item_APPEARANCE").assertDoesNotExist()
             compose.onNodeWithTag("home_settings_item_ALERTS").assertDoesNotExist()
+            if (page == "GENERAL") captureUi("usb_settings_menu_order.png")
             compose.onNodeWithTag("home_settings_item_$page").performScrollTo().performClick()
             compose.waitForIdle()
             captureUi("usb_settings_$page.png")
@@ -152,6 +153,45 @@ class UvirUsbPhoneUiTest {
 
     private fun uvirTestActionLabel(id: Int) = compose.activity.getString(id).uppercase(compose.activity.resources.configuration.locales[0])
 
+    @Test fun diagnosticsRestoreDescriptionsAndDisableTheRealTestWhenDisconnected() {
+        for ((orientation, expected, theme) in listOf(
+            Triple(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT, Configuration.ORIENTATION_PORTRAIT, UvirAppTheme.LIGHT),
+            Triple(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT, Configuration.ORIENTATION_PORTRAIT, UvirAppTheme.DARK),
+            Triple(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE, Configuration.ORIENTATION_LANDSCAPE, UvirAppTheme.DARK))) {
+            compose.runOnIdle {
+                compose.activity.requestedOrientation = orientation
+                context.getSharedPreferences(PREFS_NAME, 0).edit().putString(KEY_APP_THEME, theme.storedValue).commit()
+            }
+            compose.waitUntil(8000) { compose.activity.resources.configuration.orientation == expected }
+            awaitHome()
+            compose.onNodeWithTag("home_settings_menu_button").performClick()
+            compose.onNodeWithTag("home_settings_item_DEBUG").performScrollTo().performClick()
+            compose.onNodeWithText(compose.activity.getString(R.string.diagnostic_title)).assertIsDisplayed()
+            compose.onNodeWithText(compose.activity.getString(R.string.debug_diagnostic)).assertIsNotEnabled()
+            for ((description, size, lineHeight) in listOf(
+                Triple(R.string.diagnostic_description, 13f, 18f),
+                Triple(R.string.diagnostics_simulation_description, 13f, 18f),
+                Triple(R.string.debug_simulate_events_description, 11f, 14f))) {
+                compose.onNodeWithText(compose.activity.getString(description)).performScrollTo()
+                    .performSemanticsAction(SemanticsActions.GetTextLayoutResult) { action ->
+                        val layouts = mutableListOf<androidx.compose.ui.text.TextLayoutResult>()
+                        assertTrue(action(layouts)); val style = layouts.single().layoutInput.style
+                        assertEquals(size, style.fontSize.value, 0f)
+                        assertEquals(lineHeight, style.lineHeight.value, 0f)
+                    }
+            }
+            compose.onNodeWithText("FT232H:", substring = true).assertDoesNotExist()
+            compose.onNodeWithText("DETACHED", substring = true).assertDoesNotExist()
+            compose.onNodeWithText(compose.activity.getString(R.string.usb_hardware_pending)).assertDoesNotExist()
+            compose.onNodeWithTag("simulate_events_button").assertIsEnabled().performScrollTo().performClick()
+            compose.onNodeWithText(compose.activity.getString(R.string.debug_simulate_events_confirmation)).assertIsDisplayed()
+            compose.onNodeWithText(compose.activity.getString(R.string.cancel), ignoreCase = true).performClick()
+            compose.onNodeWithText(compose.activity.getString(R.string.diagnostic_title)).performScrollTo()
+            captureUi("usb_diagnostics_${expected}_${theme.name}.png")
+            Espresso.pressBack()
+        }
+    }
+
     @Test fun generalCombinesThemeAndNotificationIslandsInBothOrientations() {
         for ((orientation, expected) in listOf(
             ActivityInfo.SCREEN_ORIENTATION_PORTRAIT to Configuration.ORIENTATION_PORTRAIT,
@@ -193,13 +233,13 @@ class UvirUsbPhoneUiTest {
         val calibration = runtime.state.value.calibration
         try {
             openCaptureAction(R.string.automatic_acquisition)
-            compose.onNodeWithTag("usb_auto_field_${R.string.usb_interval}").performTextReplacement("17")
+            compose.onNodeWithTag("automatic_interval_seconds").performTextReplacement("17")
             compose.onNodeWithContentDescription(compose.activity.getString(R.string.start)).assertIsNotEnabled()
             Espresso.closeSoftKeyboard()
             Espresso.pressBack()
             awaitHome()
             openCaptureAction(R.string.automatic_acquisition)
-            compose.onNodeWithTag("usb_auto_field_${R.string.usb_interval}").assertTextContains("17")
+            compose.onNodeWithTag("automatic_interval_seconds").assertTextContains("17")
             Espresso.pressBack()
             awaitHome()
             compose.onNodeWithTag("home_settings_menu_button").performClick()

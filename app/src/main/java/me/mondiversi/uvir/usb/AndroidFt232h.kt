@@ -22,9 +22,10 @@ internal class AndroidFt232h(manager: UsbManager, device: UsbDevice) : MpsseIo {
         try {
             if (!connection.claimInterface(intf, true)) throw IOException("Cannot claim FT232H")
             control(0, 0) // Reset.
-            control(0, 1); control(0, 2) // Purge RX and TX.
-            control(9, 2) // Latency timer, ms.
             control(11, 0) // Reset bit mode before enabling MPSSE.
+            control(0, 1); control(0, 2) // Purge after mode reset, including stale UART bytes.
+            control(6, 0); control(7, 0) // Disable event/error-character substitution.
+            control(9, 2) // Latency timer, ms.
             control(11, 0x0203) // MPSSE; AD0/AD1 outputs, AD2 input.
             SystemClock.sleep(50)
         } catch (error: Exception) { close(); throw error }

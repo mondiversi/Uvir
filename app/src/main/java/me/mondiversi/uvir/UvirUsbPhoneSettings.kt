@@ -30,7 +30,7 @@ internal fun UsbPhoneSettings(runtime: UvirUsbPhoneRuntime, state: UsbPhoneState
     val preferences = remember { context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE) }
     val scope = rememberCoroutineScope()
     val editing = !state.measuringReference
-    val canMeasure = state.status == UsbPhoneStatus.READY && state.ready && !state.simulation && !state.measuringReference
+    val canMeasure = state.status == UsbPhoneStatus.READY && state.ready && !state.simulation && !state.measuringReference && !state.diagnosticRunning
     // Earlier preview page IDs can survive Activity restoration; both now open General.
     val generalPage = page in setOf(UvirSettingsPage.GENERAL, UvirSettingsPage.APPEARANCE, UvirSettingsPage.ALERTS)
     val title = stringResource(usbSettingsTitle(page))
@@ -38,6 +38,11 @@ internal fun UsbPhoneSettings(runtime: UvirUsbPhoneRuntime, state: UsbPhoneState
     var showSettingsExport by remember { mutableStateOf(false) }
     var showCounterReset by remember { mutableStateOf(false) }
     var showAppReset by remember { mutableStateOf(false) }
+    var showErrorLog by rememberSaveable { mutableStateOf(false) }
+    if (showErrorLog) {
+        UvirErrorLogScreen(background, card, text, secondary) { showErrorLog = false }
+        return
+    }
     var appLanguage by remember { mutableStateOf(AppLanguage.fromStoredValue(preferences.getString(KEY_APP_LANGUAGE, "system"))) }
     var showSimulationConfirmation by remember { mutableStateOf(false) }
     var simulatingEvents by remember { mutableStateOf(false) }
@@ -114,16 +119,25 @@ internal fun UsbPhoneSettings(runtime: UvirUsbPhoneRuntime, state: UsbPhoneState
                                 sensorDeviceId = "phone-usb", onMeasureWindow = if (canMeasure) runtime::measureWindow else null)
                         }
                         UvirSettingsPage.DEBUG -> {
-                            SettingsStaticIsland(title = stringResource(R.string.usb_diagnostics), titleIcon = ConnectivityIconType.DEBUG, containerColor = card, titleColor = text) {
-                                SettingsPageDescription("FT232H: ${state.status}", secondary)
-                                SettingsPageDescription("AS7331 · 0x74: ${if (state.uvAvailable) "✓" else "—"} · ${state.uvGain ?: "—"}×", secondary)
-                                SettingsPageDescription("AS7343 · 0x39: ${if (state.visibleAvailable) "✓" else "—"} · ${state.visibleGain ?: "—"}×", secondary)
-                                state.error?.let { Text(it, color = secondary, fontSize = 12.sp) }
-                                SettingsPageDescription(stringResource(R.string.usb_hardware_pending), secondary)
-                                UsbPhoneAction(R.string.usb_retry, !state.simulation, onClick = runtime::retry)
+                            SettingsStaticIsland(title = stringResource(R.string.diagnostic_title), titleIcon = ConnectivityIconType.DEBUG, containerColor = card, titleColor = text) {
+                                SettingsPageDescription(stringResource(R.string.diagnostic_description), secondary)
+                                UvirSensorDiagnosticsContent(
+                                    sensorConnected = usbHeadDiagnosticAvailable(state),
+                                    sensorInfo = usbPhoneDiagnosticInfo(state),
+                                    connectionMode = SensorConnectionMode.USB, sensorName = stringResource(R.string.app_name),
+                                    cardColor = card, primaryText = text, secondaryText = secondary,
+                                    onProbe = runtime::diagnosticProbe, showDescription = false,
+                                    onRun = runtime::runHardwareDiagnostics, progressSteps = 3,
+                                    progressTextResource = R.string.usb_diagnostic_progress)
                             }
-                            SettingsStaticIsland(title = stringResource(R.string.usb_simulation), titleIcon = ConnectivityIconType.DEBUG, containerColor = card, titleColor = text) {
-                                UvirSimulateEventsButton(simulatingEvents, { showSimulationConfirmation = true }, text, secondary)
+                            UvirErrorLogSettingsIsland(card, text, secondary, onOpen = { showErrorLog = true })
+                            SettingsStaticIsland(title = stringResource(R.string.diagnostics_simulation_group), titleIcon = ConnectivityIconType.SIMULATION, containerColor = card, titleColor = text) {
+                                SettingsPageDescription(stringResource(R.string.diagnostics_simulation_description), secondary)
+                                Column(verticalArrangement = Arrangement.spacedBy(UvirSettingsRelatedGap)) {
+                                    UvirSimulateEventsButton(simulatingEvents, { showSimulationConfirmation = true }, text, secondary)
+                                    Text(stringResource(R.string.debug_simulate_events_description), color = secondary,
+                                        fontSize = 11.sp, lineHeight = 14.sp)
+                                }
                                 SettingsCheckboxWithDescription(state.simulation,
                                     { runtime.setSimulation(it); onSettingsSaved() },
                                     title = stringResource(R.string.debug_fake_data),
@@ -131,11 +145,12 @@ internal fun UsbPhoneSettings(runtime: UvirUsbPhoneRuntime, state: UsbPhoneState
                                     enabled = state.automaticSession == null && state.alertSession == null && !state.busy,
                                     primaryText = text, secondaryText = secondary,
                                     modifier = Modifier.testTag("usb_simulation_toggle"))
-                                SettingsCheckboxWithDescription(state.outOfRangeSimulation,
-                                    { runtime.setOutOfRangeSimulation(it); onSettingsSaved() },
-                                    title = stringResource(R.string.debug_fake_out_of_range),
-                                    description = stringResource(R.string.debug_fake_out_of_range_description),
-                                    enabled = state.simulation, primaryText = text, secondaryText = secondary)
+                                SettingsCheckboxWithDescription(state.saturationSimulation,
+                                    { runtime.setSaturationSimulation(it); onSettingsSaved() },
+                                    title = stringResource(R.string.debug_fake_saturation),
+                                    description = stringResource(R.string.debug_fake_saturation_description),
+                                    enabled = state.simulation, primaryText = text, secondaryText = secondary,
+                                    modifier = Modifier.testTag("usb_saturation_toggle"))
                             }
                         }
                         UvirSettingsPage.GENERAL, UvirSettingsPage.APPEARANCE, UvirSettingsPage.ALERTS ->

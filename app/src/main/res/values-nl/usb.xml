@@ -8,7 +8,9 @@
     <string name="usb_hardware_pending">USB-ondersteuning wordt voorbereid. Echte metingen moeten met de FT232H-print worden gecontroleerd. Optische respons en absolute kalibratie zijn nog niet gevalideerd.</string>
     <string name="usb_connect">Verbind de FT232H en beide sensoren met een USB-OTG-data-adapter.</string>
     <string name="usb_permission">USB-toegang toestaan</string>
-    <string name="usb_initializing">Sensoren initialiseren…</string>
+    <string name="usb_initializing">Initialiseren…</string>
+    <string name="usb_waiting">Wachten op gegevens…</string>
+    <string name="sensor_saturation">Verzadiging</string>
     <string name="usb_ready">USB verbonden</string>
     <string name="usb_error">USB niet beschikbaar</string>
     <string name="usb_retry">USB opnieuw verbinden</string>

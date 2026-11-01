@@ -12,7 +12,7 @@
     <string name="window_measure_unavailable">チャンネルを利用できません</string>
     <string name="window_measure_insufficient">データ不足</string>
     <string name="window_measure_unstable">照明が不安定</string>
-    <string name="window_measure_saturated">信号が範囲外</string>
+    <string name="window_measure_saturated">@string/sensor_saturation</string>
     <string name="window_measure_brighter">フィルターありの値が高い</string>
     <string name="window_measure_out_of_range">係数が許容範囲外</string>
 </resources>

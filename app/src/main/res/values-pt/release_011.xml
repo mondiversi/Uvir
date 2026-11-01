@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="release_011_status">O desenvolvimento está suspenso: o protótipo funciona, mas a calibração ótica continua por resolver.</string>
+    <string name="release_011_case">Publicados a caixa de referência com abertura USB corrigida e a tampa plana com dois orifícios de 5 mm.</string>
+    <string name="release_011_improvements">Melhorados a amostragem USB, o tratamento da saturação, o diagnóstico, os arquivos e a documentação.</string>
+</resources>

@@ -18,7 +18,7 @@
     <string name="debug_performance_indiana_jones">Indiana Jones</string>
     <string name="debug_performance_jurassic_park">Jurassic Park</string>
     <string name="debug_performance_star_wars">Star Wars</string>
-    <string name="debug_diagnostic">בדיקת אבחון</string>
+    <string name="debug_diagnostic">הפעל אבחון</string>
     <string name="diagnostic_description">מבצע בדיקה אבחונית מלאה של החיישן.</string>
     <string name="diagnostic_title">אבחון חיישן</string>
     <string name="diagnostic_progress">%1$d/%2$d בקשות הושלמו</string>
@@ -41,8 +41,6 @@
     <string name="diagnostic_share_error">לא ניתן לשתף את דוח האבחון.</string>
     <string name="diagnostic_failed">לא ניתן להשלים את בדיקת האבחון.</string>
     <string name="debug_secret_melody_found">מצאת את המנגינה הסודית</string>
-    <string name="debug_fake_out_of_range">ערכים מחוץ לטווח</string>
-    <string name="debug_fake_out_of_range_description">מדמה מדי פעם ערכים מחוץ לטווח.</string>
     <string name="debug_simulate_events">הדמיית אירועים</string>
     <string name="debug_simulate_events_description">הוסף מדידות והתראות מדומות.</string>
     <string name="debug_simulate_events_question">להדמות אירועי בדיקה?</string>

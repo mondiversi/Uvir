@@ -146,7 +146,7 @@
     <string name="sensor_settings_connection_required">برای تغییر این تنظیمات، سنسور را وصل کنید.</string>
     <string name="sensor_parameters_description">تنظیمات عمومی حسگر را پیکربندی کنید.</string>
     <string name="home_sensor_disconnected_title">حسگر متصل نیست</string>
-    <string name="home_sensor_disconnected_description">برای دریافت داده‌ها و ثبت هشدارها، یک حسگر متصل کنید.</string>
+    <string name="home_sensor_disconnected_description">برای دریافت داده‌ها و ثبت هشدارها، حسگر را متصل کنید.</string>
     <string name="home_sensor_disconnected_hint">تنظیمات › حسگر › اتصال را باز کنید تا USB، Wi-Fi، Bluetooth یا اینترنت را انتخاب کرده و راهنما را ببینید.</string>
     <string name="sensor_connection_provisioning_reminder">برای استفاده از Wi-Fi یا Bluetooth، حداقل یک بار حسگر را از طریق USB متصل کنید. برنامه هویت منحصربه‌فرد و اطلاعات دسترسی حسگر را به‌طور ایمن دریافت می‌کند.</string>
     <string name="sensor_connection_usb">USB</string>
@@ -745,14 +745,12 @@
     <string name="language_formats_description">نحوه نمایش و قالب‌بندی داده‌ها در برنامه را انتخاب کنید.</string>
     <string name="irradiance_measurement_heading">اندازه‌گیری تابندگی</string>
     <string name="irradiance_measurement_description">واحد نمایش تابندگی را انتخاب کنید. مقادیر ذخیره‌شده دقت اصلی حسگر را حفظ می‌کنند.</string>
-    <string name="out_of_range_short">OL - خارج از محدوده</string>
-    <string name="out_of_range_csv_header">مقدار_خارج_از_محدوده</string>
     <string name="language_english_localized">انگلیسی</string>
     <string name="settings_section_notifications">اعلان‌ها</string>
-    <string name="acquisition_feedback_description">بازخوردی را انتخاب کنید که برنامه هنگام ذخیره اندازه‌گیری دستی یا خودکار پخش می‌کند.</string>
+    <string name="acquisition_feedback_description">تنظیمات برنامه برای اندازه‌گیری‌ها را مدیریت کنید.</string>
     <string name="acquisition_feedback_preview_hint">بلندی صدای نهایی به میزان صدای زنگ ساعت گوشی نیز بستگی دارد.</string>
     <string name="confirmation_question_suffix">؟</string>
-    <string name="threshold_alerts_sound_description_v2">بازخوردی را انتخاب کنید که برنامه هنگام ثبت هشدار پخش می‌کند.</string>
+    <string name="threshold_alerts_sound_description_v2">تنظیمات برنامه برای هشدارها را مدیریت کنید.</string>
     <string name="list_filter_export_question">همه نتایج نمایش‌داده‌شده صادر شوند؟</string>
     <string name="list_filter_export_warning">هیچ رکوردی انتخاب نشده است. همه رکوردهای مطابق با فیلترهای فعلی صادر می‌شوند.</string>
     <string name="settings_include_sensitive_information">گنجاندن داده‌های حساس</string>

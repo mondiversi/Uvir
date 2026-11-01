@@ -124,7 +124,7 @@ private fun createAlertChartPanelFile(
     val headerOffset = (contextLines.size - 1) * 30f
     val legend = UvirChartExportLegend(bars.map { bar ->
         val label = chartExportChannelLabel(exportContext, thresholdAlertMetricLabelResource(bar.metric), "")
-        val value = if (bar.outOfRange) exportContext.getString(R.string.out_of_range_short) else
+        val value = if (bar.outOfRange) exportContext.getString(R.string.sensor_saturation) else
             "${exportFormatting.irradiance(bar.value)} / ${exportFormatting.irradiance(bar.threshold)} " +
                 exportFormatting.irradianceUnit.unitLabel(bar.metric.isBiologicalEffect()) +
                 " · Δ ${if (bar.thresholdDeltaPercent < 0) "−" else "+"}${exportFormatting.displayValue(abs(bar.thresholdDeltaPercent))}%"

@@ -25,7 +25,10 @@ internal fun UvirSensorDiagnosticsContent(
     primaryText: Color,
     secondaryText: Color,
     onProbe: suspend (String, SensorConnectionMode) -> UvirDiagnosticProbe,
-    showDescription: Boolean = true
+    showDescription: Boolean = true,
+    onRun: (suspend ((Int) -> Unit) -> UvirSensorDiagnosticReport)? = null,
+    progressSteps: Int = UVIR_DIAGNOSTIC_REQUESTS,
+    progressTextResource: Int = R.string.diagnostic_progress
 ) {
     val context = LocalContext.current
     val resources = LocalResources.current
@@ -45,7 +48,8 @@ internal fun UvirSensorDiagnosticsContent(
             colors = uvirOutlinedActionColors(primaryText),
             border = uvirOutlinedActionBorder(sensorConnected && !inProgress, primaryText),
             onClick = {
-                if (compareFirmwareVersions(sensorInfo.firmwareVersion, UVIR_DIAGNOSTIC_MINIMUM_FIRMWARE) < 0) {
+                if (sensorInfo.protocol != UVIR_USB_DIAGNOSTIC_PROTOCOL &&
+                    compareFirmwareVersions(sensorInfo.firmwareVersion, UVIR_DIAGNOSTIC_MINIMUM_FIRMWARE) < 0) {
                     showFirmwareDialog = true
                 } else {
                     val initialInfo = sensorInfo
@@ -57,7 +61,7 @@ internal fun UvirSensorDiagnosticsContent(
                     showDialog = true
                     job = scope.launch {
                         try {
-                            report = runUvirSensorDiagnostics(
+                            report = onRun?.invoke { progress = it } ?: runUvirSensorDiagnostics(
                                 initialName, initialMode, initialInfo,
                                 onProgress = { progress = it },
                                 probe = { onProbe(initialInfo.deviceId, initialMode) }
@@ -151,16 +155,16 @@ internal fun UvirSensorDiagnosticsContent(
                     ) {
                         if (inProgress) {
                             Text(
-                                stringResource(R.string.diagnostic_progress, progress, UVIR_DIAGNOSTIC_REQUESTS),
+                                stringResource(progressTextResource, progress, progressSteps),
                                 color = primaryText
                             )
                             LinearProgressIndicator(
-                                progress = { progress.toFloat() / UVIR_DIAGNOSTIC_REQUESTS },
+                                progress = { progress.toFloat() / progressSteps },
                                 modifier = Modifier.fillMaxWidth()
                             )
                             Text(stringResource(R.string.diagnostic_description), color = secondaryText, fontSize = 12.sp)
                         } else if (formatted != null) {
-                            Text(formatted, color = primaryText, fontSize = 13.sp, lineHeight = 18.sp)
+                            Text(formatted, modifier = Modifier.testTag("diagnostic_report"), color = primaryText, fontSize = 13.sp, lineHeight = 18.sp)
                             UvirExportFileCountText(
                                 format = UvirExportFileFormat.TXT,
                                 count = 1,

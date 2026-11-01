@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="usb_diagnostic_progress">בדיקת רכיבים: %1$d/%2$d</string>
+    <string name="usb_diagnostic_recognition">זיהוי</string>
+    <string name="usb_diagnostic_initialization">אתחול</string>
+    <string name="usb_diagnostic_reading">קריאה</string>
+    <string name="usb_diagnostic_not_tested">לא נבדק</string>
+    <string name="usb_diagnostic_readings">קריאות חדשות: %1$d/%2$d</string>
+    <string name="usb_diagnostic_notes">בודק זיהוי וקריאות של הרכיבים. כיול דורש בדיקה נפרדת.</string>
+    <string name="usb_diagnostic_wiring">בדוק את אספקת החשמל, GND, SDA/SCL ואת גשר D1–D2.</string>
+    <string name="usb_diagnostic_technical">פרטים טכניים</string>
+</resources>

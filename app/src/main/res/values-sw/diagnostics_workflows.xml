@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_log_open">Fungua kumbukumbu ya makosa</string>
+    <string name="error_log_view_description">Tazama na hamisha makosa yaliyorekodiwa na programu.</string>
+    <string name="error_log_read_failed">Imeshindwa kusoma kumbukumbu ya makosa.</string>
+    <string name="debug_fake_saturation">Kujaa kwa ishara</string>
+    <string name="debug_fake_saturation_description">Iga mara kwa mara kujaa kwa ishara ya kihisi.</string>
+    <string name="record_archive_export_title">Hamisha vipimo na tahadhari</string>
+    <string name="error_log_clear_title">Futa kumbukumbu ya makosa?</string>
+    <string name="error_log_clear_description">Futa kabisa makosa yote yaliyorekodiwa.</string>
+    <string name="error_log_clear_complete">Kumbukumbu ya makosa imefutwa.</string>
+    <string name="error_log_clear_failed">Imeshindwa kufuta kumbukumbu ya makosa.</string>
+    <string name="error_log_size">Ukubwa wa kumbukumbu: %1$s</string>
+</resources>

@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -77,7 +76,7 @@ internal fun UvirLimitedNoteField(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        OutlinedTextField(
+        UvirCompactTextField(
             value = value,
             onValueChange = { onValueChange(limitUvirNote(it)) },
             modifier = Modifier.fillMaxWidth(),

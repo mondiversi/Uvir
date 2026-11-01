@@ -1,0 +1,16 @@
+{
+  "watertight": true,
+  "connected_components": 1,
+  "genus": 6,
+  "triangles": 6180,
+  "dimensions_mm": [
+    56.79999923706055,
+    88.80000305175781,
+    2.4000000953674316
+  ],
+  "material_volume_cm3": 11.967553398695449,
+  "independent_stl_readback": true,
+  "optical_holes_verified": true,
+  "base_intersection_mm3": 0.0,
+  "sha256": "bff98846c71a075e354e0a2413421549c55f44143d4abc308e4590abeda26ef1"
+}

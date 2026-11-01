@@ -1,4 +1,7 @@
-# Use the complete UVIR sensor without the Android app
+# Use the complete UVIR sensor without the Android app — legacy ESP32
+
+> **Legacy ESP32 only.** For the current FT232H + AS7331 + AS7343 head,
+> use [Read Uvir without the Android app](usb/STANDALONE.md).
 
 This guide is for a PC, another controller or a custom application. It describes
 the implemented firmware `0.5.119`, protocol `uvir-sensor-v1`. It does not require

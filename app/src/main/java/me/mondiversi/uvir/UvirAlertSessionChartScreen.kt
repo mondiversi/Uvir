@@ -75,8 +75,6 @@ internal fun AlertSessionChartScreen(
     val context = LocalContext.current
     val resources = androidx.compose.ui.platform.LocalResources.current
     val sortedEntries = remember(entries) { entries.sortedBy { it.timestamp } }
-    val detailSensorName =
-        rememberDetailSensorName(sortedEntries.firstOrNull()?.sensorId, database)
     val availableSeries =
         remember(sortedEntries) {
             alertSessionChartSeries(sortedEntries)
@@ -366,8 +364,8 @@ internal fun AlertSessionChartScreen(
             ) }
 
             item { UvirDetailContextCard(
-                automatic = true,
-                sensorName = detailSensorName,
+                automatic = null,
+
                 note = currentNote.ifBlank { stringResource(R.string.no_note) },
                 cardColor = cardColor,
                 primaryText = primaryText,

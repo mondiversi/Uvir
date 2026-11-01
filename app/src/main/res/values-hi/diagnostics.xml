@@ -18,7 +18,7 @@
     <string name="debug_performance_indiana_jones">Indiana Jones</string>
     <string name="debug_performance_jurassic_park">Jurassic Park</string>
     <string name="debug_performance_star_wars">Star Wars</string>
-    <string name="debug_diagnostic">नैदानिक परीक्षण</string>
+    <string name="debug_diagnostic">निदान चलाएँ</string>
     <string name="diagnostic_description">सेंसर का पूरा नैदानिक परीक्षण चलाता है।</string>
     <string name="diagnostic_title">सेंसर निदान</string>
     <string name="diagnostic_progress">%1$d/%2$d अनुरोध पूरे हुए</string>
@@ -41,8 +41,6 @@
     <string name="diagnostic_share_error">नैदानिक रिपोर्ट साझा नहीं की जा सकी।</string>
     <string name="diagnostic_failed">नैदानिक परीक्षण पूरा नहीं हो सका।</string>
     <string name="debug_secret_melody_found">आपको गुप्त धुन मिल गई</string>
-    <string name="debug_fake_out_of_range">सीमा से बाहर मान</string>
-    <string name="debug_fake_out_of_range_description">कभी-कभी सीमा से बाहर मानों का अनुकरण करता है।</string>
     <string name="debug_simulate_events">ईवेंट का अनुकरण करें</string>
     <string name="debug_simulate_events_description">अनुकरण माप और अलर्ट जोड़ें।</string>
     <string name="debug_simulate_events_question">परीक्षण ईवेंट का अनुकरण करें?</string>

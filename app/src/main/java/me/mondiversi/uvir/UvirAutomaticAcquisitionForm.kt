@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -68,12 +69,13 @@ internal fun UvirAutomaticAcquisitionForm(
     onLimitEnabledChanged: (Boolean) -> Unit,
     onMaxCountChanged: (String) -> Unit,
     onMaxCountEditingComplete: () -> Unit,
-    onNoteChanged: (String) -> Unit
+    onNoteChanged: (String) -> Unit,
+    showExternalCommand: Boolean = true
 ) {
     val scheduleControlsEnabled = !externalCommand && !conditionalLocked
     LazyColumn(
         state = listState,
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().testTag("automatic_form_list"),
         contentPadding = PaddingValues(bottom = 72.dp),
         verticalArrangement = Arrangement.spacedBy(UvirIslandSpacing)
     ) {
@@ -107,7 +109,7 @@ internal fun UvirAutomaticAcquisitionForm(
                         value = timerHours,
                         onValueChange = onTimerHoursChanged,
                         label = stringResource(R.string.hours),
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.weight(1f).testTag("automatic_interval_hours"),
                         maxChars = 5,
                         enabled = scheduleControlsEnabled,
                         onEditingComplete = onIntervalEditingComplete
@@ -116,7 +118,7 @@ internal fun UvirAutomaticAcquisitionForm(
                         value = timerMinutes,
                         onValueChange = onTimerMinutesChanged,
                         label = stringResource(R.string.minutes),
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.weight(1f).testTag("automatic_interval_minutes"),
                         maxChars = 5,
                         enabled = scheduleControlsEnabled,
                         onEditingComplete = onIntervalEditingComplete
@@ -125,7 +127,7 @@ internal fun UvirAutomaticAcquisitionForm(
                         value = timerSeconds,
                         onValueChange = onTimerSecondsChanged,
                         label = stringResource(R.string.seconds),
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.weight(1f).testTag("automatic_interval_seconds"),
                         maxChars = 5,
                         enabled = scheduleControlsEnabled,
                         onEditingComplete = onIntervalEditingComplete
@@ -211,7 +213,7 @@ internal fun UvirAutomaticAcquisitionForm(
                 onConfigure = onConfigureConditions)
         }
 
-        item {
+        if (showExternalCommand) item {
             UvirExternalCommandCard(
                 enabled = externalCommand,
                 locked = conditionalLocked,
@@ -230,7 +232,8 @@ internal fun UvirAutomaticAcquisitionForm(
                 UvirLimitedNoteField(
                     value = note,
                     onValueChange = onNoteChanged,
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().testTag("automatic_note"),
+                    enabled = !conditionalLocked,
                     label = stringResource(R.string.default_note),
                     supportingText =
                         stringResource(R.string.add_note_or_leave_empty),

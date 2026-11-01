@@ -12,7 +12,7 @@
     <string name="window_measure_unavailable">चैनल उपलब्ध नहीं है</string>
     <string name="window_measure_insufficient">अपर्याप्त डेटा</string>
     <string name="window_measure_unstable">अस्थिर प्रकाश</string>
-    <string name="window_measure_saturated">सिग्नल सीमा से बाहर</string>
+    <string name="window_measure_saturated">@string/sensor_saturation</string>
     <string name="window_measure_brighter">फ़िल्टर वाला मान अधिक है</string>
     <string name="window_measure_out_of_range">गुणक अनुमत सीमा से बाहर</string>
 </resources>

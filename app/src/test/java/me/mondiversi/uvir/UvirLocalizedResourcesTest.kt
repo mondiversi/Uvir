@@ -246,14 +246,14 @@ class UvirLocalizedResourcesTest {
         }
     }
 
-    @Test fun disconnectedHintRefersToASensorRatherThanTheOnlySensor() {
+    @Test fun disconnectedHintRefersToTheUsbSensor() {
         val key = "string:home_sensor_disconnected_description"
         assertEquals(
-            "Connetti un sensore per effettuare acquisizioni e registrare allerte.",
+            "Connetti il sensore per effettuare acquisizioni e registrare allerte.",
             catalogs.getValue("values-it").getValue(key).text
         )
         assertEquals(
-            "Connect a sensor to acquire data and record alerts.",
+            "Connect the sensor to acquire data and record alerts.",
             catalogs.getValue("values").getValue(key).text
         )
         assertEquals(1, Regex("\\bsensore\\b").findAll(catalogs.getValue("values-it").getValue(key).text).count())
@@ -262,14 +262,14 @@ class UvirLocalizedResourcesTest {
         assertEquals("Non connesso", catalogs.getValue("values-it")
             .getValue("string:sensor_status_no_sensor").text)
         for ((locale, fragment) in mapOf(
-            "values-de" to "einen Sensor", "values-el" to "έναν αισθητήρα",
-            "values-pt" to "um sensor", "values-fa" to "یک حسگر",
-            "values-es" to "un sensor", "values-ar" to "مستشعرًا",
-            "values-hi" to "एक सेंसर", "values-fr" to "un capteur",
-            "values-tr" to "bir sensör", "values-iw" to "חבר חיישן",
-            "values-nl" to "een sensor"
+            "values-de" to "den Sensor", "values-el" to "τον αισθητήρα",
+            "values-pt" to "o sensor", "values-fa" to "حسگر را",
+            "values-es" to "el sensor", "values-ar" to "المستشعر",
+            "values-hi" to "लिए सेंसर", "values-fr" to "le capteur",
+            "values-tr" to "sensörü", "values-iw" to "את החיישן",
+            "values-nl" to "de sensor"
         )) {
-            assertTrue("Indefinite sensor wording: $locale", catalogs.getValue(locale).getValue(key).text.contains(fragment))
+            assertTrue("Definite sensor wording: $locale", catalogs.getValue(locale).getValue(key).text.contains(fragment))
         }
     }
 

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_log_open">त्रुटि लॉग खोलें</string>
+    <string name="error_log_view_description">ऐप द्वारा दर्ज त्रुटियाँ देखें और निर्यात करें।</string>
+    <string name="error_log_read_failed">त्रुटि लॉग पढ़ा नहीं जा सका।</string>
+    <string name="debug_fake_saturation">संतृप्ति</string>
+    <string name="debug_fake_saturation_description">समय-समय पर सेंसर की संतृप्ति का अनुकरण करें।</string>
+    <string name="record_archive_export_title">मापन और अलर्ट निर्यात करें</string>
+    <string name="error_log_clear_title">त्रुटि लॉग साफ़ करें?</string>
+    <string name="error_log_clear_description">सभी दर्ज त्रुटियाँ स्थायी रूप से मिटाएँ।</string>
+    <string name="error_log_clear_complete">त्रुटि लॉग साफ़ किया गया।</string>
+    <string name="error_log_clear_failed">त्रुटि लॉग साफ़ नहीं किया जा सका।</string>
+    <string name="error_log_size">लॉग का आकार: %1$s</string>
+</resources>

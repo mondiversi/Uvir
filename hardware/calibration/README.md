@@ -1,4 +1,8 @@
-# Calibration
+# Calibration — historical ESP32 procedures
+
+> For the current phone-owned FT232H pipeline and suspension status, use the
+> [current calibration guide](../../docs/usb/CALIBRATION.md). The firmware commands,
+> TEKO housing and calibration code paths below describe the preserved ESP32 project.
 
 > **Development is on hold until the optical assembly and calibration can be
 > completed.** App and sensor communication/acquisition are operational, but

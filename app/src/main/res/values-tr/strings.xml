@@ -146,7 +146,7 @@
     <string name="sensor_settings_connection_required">Bu ayarları değiştirmek için sensörü bağlayın.</string>
     <string name="sensor_parameters_description">Sensörün genel ayarlarını yapılandırın.</string>
     <string name="home_sensor_disconnected_title">Sensör bağlı değil</string>
-    <string name="home_sensor_disconnected_description">Veri almak ve uyarıları kaydetmek için bir sensör bağlayın.</string>
+    <string name="home_sensor_disconnected_description">Veri almak ve uyarıları kaydetmek için sensörü bağlayın.</string>
     <string name="home_sensor_disconnected_hint">USB, Wi-Fi, Bluetooth veya İnternet seçmek ve yönergeleri görmek için Ayarlar › Sensör › Bağlantı bölümünü açın.</string>
     <string name="sensor_connection_provisioning_reminder">Wi-Fi veya Bluetooth\'yi kullanmak için sensörü USB ile en az bir kez bağlayın. Uygulama, sensörün benzersiz kimliğini ve erişim bilgilerini güvenli bir şekilde alır.</string>
     <string name="sensor_connection_usb">USB</string>
@@ -745,14 +745,12 @@
     <string name="language_formats_description">Verilerin uygulamada nasıl görüntüleneceğini ve biçimlendirileceğini seçin.</string>
     <string name="irradiance_measurement_heading">Işınım ölçümü</string>
     <string name="irradiance_measurement_description">Işınımı göstermek için kullanılan birimi seçin. Kaydedilen değerler sensörün özgün hassasiyetini korur.</string>
-    <string name="out_of_range_short">OL - Ölçek dışı</string>
-    <string name="out_of_range_csv_header">Ölçek_dışı_değer</string>
     <string name="language_english_localized">İngilizce</string>
     <string name="settings_section_notifications">Bildirimler</string>
-    <string name="acquisition_feedback_description">Manuel veya otomatik bir ölçüm kaydedildiğinde uygulamanın çalacağı bildirimi seçin.</string>
+    <string name="acquisition_feedback_description">Ölçümler için uygulama tercihlerini yönetin.</string>
     <string name="acquisition_feedback_preview_hint">Son ses düzeyi telefonun alarm ses düzeyine de bağlıdır.</string>
     <string name="confirmation_question_suffix">?</string>
-    <string name="threshold_alerts_sound_description_v2">Bir uyarı kaydedildiğinde uygulamanın çalacağı bildirimi seçin.</string>
+    <string name="threshold_alerts_sound_description_v2">Uyarılar için uygulama tercihlerini yönetin.</string>
     <string name="list_filter_export_question">Gösterilen tüm sonuçlar dışa aktarılsın mı?</string>
     <string name="list_filter_export_warning">Hiçbir kayıt seçilmedi. Geçerli filtrelerle eşleşen tüm kayıtlar dışa aktarılır.</string>
     <string name="settings_include_sensitive_information">Hassas verileri dahil et</string>

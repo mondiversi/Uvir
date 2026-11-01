@@ -12,22 +12,21 @@ internal enum class UvirArchiveKind(val recordsTable: String, val sessionsTable:
 internal val archiveSpectralColumns = listOf("uvc", "uvb", "uva", "violetto", "blu", "verde",
     "giallo", "arancione", "rosso", "f8", "nir")
 internal fun archiveRecordColumns(kind: UvirArchiveKind): List<String> = listOf("timestamp", "session_sequence",
-    "sensor_record_id", "quality_flags", "optical_window") + when (kind) {
-    UvirArchiveKind.ACQUISITIONS -> listOf("note", "automatic", "external_command", "position_index", "variant_index") + archiveSpectralColumns
+    "quality_flags", "optical_window") + when (kind) {
+    UvirArchiveKind.ACQUISITIONS -> listOf("note", "automatic", "position_index", "variant_index") + archiveSpectralColumns
     UvirArchiveKind.ALERTS -> listOf("details")
 }
 internal fun archiveSessionColumns(kind: UvirArchiveKind): List<String> = listOf("note", "started_at", "ended_at") +
-    if (kind == UvirArchiveKind.ACQUISITIONS) listOf("external_command", "variants_per_position", "sensor_origin_session_id") else emptyList()
+    if (kind == UvirArchiveKind.ACQUISITIONS) listOf("variants_per_position") else emptyList()
 
 internal data class UvirRecordArchive(
     val kind: UvirArchiveKind,
-    val sensors: List<JSONObject>,
     val sessions: List<JSONObject>,
     val records: List<JSONObject>
 ) {
-    fun toJson(): JSONObject = JSONObject().put("format", "uvir-records").put("version", 1)
+    fun toJson(): JSONObject = JSONObject().put("format", "uvir-records").put("version", 2)
         .put("unit", "W/m2").put("kind", kind.recordsTable)
-        .put("sensors", JSONArray(sensors)).put("sessions", JSONArray(sessions)).put("records", JSONArray(records))
+        .put("sessions", JSONArray(sessions)).put("records", JSONArray(records))
 }
 
 private fun JSONObject.objects(key: String, maximum: Int): List<JSONObject> {
@@ -49,59 +48,42 @@ internal fun JSONObject.archiveLong(key: String, nullable: Boolean = false): Lon
     return (value as Number).toLong().also { require(it >= 0L) { "Negative $key" } }
 }
 
-internal fun JSONObject.archiveSensor(): String? = if (isNull("sensor")) null else archiveString("sensor", 128)
 internal fun JSONObject.archiveSession(): String? = if (isNull("session")) null else archiveString("session", 36)
 
 /** Parse and validate the entire file before opening a write transaction. No SQL identifiers come from JSON. */
 internal fun parseUvirRecordArchive(text: String, expectedKind: UvirArchiveKind): UvirRecordArchive {
     val root = JSONObject(text)
-    require(root.archiveString("format") == "uvir-records" && root.archiveLong("version") == 1L)
+    require(root.archiveString("format") == "uvir-records" && root.archiveLong("version") in 1L..2L)
     require(root.archiveString("unit") == "W/m2" && root.archiveString("kind") == expectedKind.recordsTable)
-    val sensors = root.objects("sensors", 10_000)
-    val sensorIds = sensors.map { sensor ->
-        sensor.archiveString("hardware_id", 128).also { require(it.isNotBlank() && it == it.trim() && it.none(Char::isISOControl)) }
-            .lowercase(java.util.Locale.ROOT)
-    }
-    require(sensorIds.distinct().size == sensorIds.size)
-    val knownSensors = sensorIds.toSet()
-    sensors.forEach { it.archiveString("name", 128) }
     val sessions = root.objects("sessions", 100_000)
     val records = root.objects("records", 100_000)
     val allIds = (sessions + records).map { row -> row.archiveString("id", 36).also {
         require(UUID.fromString(it).toString() == it) { "Invalid transfer identity" }
     } }
     require(allIds.distinct().size == allIds.size)
-    fun checkSensor(row: JSONObject) {
-        row.archiveSensor()?.let { require(it.lowercase(java.util.Locale.ROOT) in knownSensors) }
-    }
     val sessionsById = sessions.associateBy { it.archiveString("id") }
     sessions.forEach { row ->
-        checkSensor(row)
         row.archiveString("note")
         val start = row.archiveLong("started_at")!!
         row.archiveLong("ended_at", true)?.let { require(it >= start) }
         if (expectedKind == UvirArchiveKind.ACQUISITIONS) {
-            require(row.archiveLong("external_command") in 0L..1L)
             require(row.archiveLong("variants_per_position") in 1L..Int.MAX_VALUE.toLong())
-            row.archiveLong("sensor_origin_session_id", true)
         }
     }
     records.forEach { row ->
-        checkSensor(row)
         row.archiveLong("timestamp")
-        listOf("session_sequence", "sensor_record_id").forEach { row.archiveLong(it, true)?.let { n -> require(n > 0) } }
+        row.archiveLong("session_sequence", true)?.let { require(it in 1..Int.MAX_VALUE.toLong()) }
         require(row.archiveLong("quality_flags") in 0L..Int.MAX_VALUE.toLong())
         if (!row.isNull("optical_window")) {
             val optics = row.archiveString("optical_window")
             require(OpticalWindowSettings.fromStoredOrNull(optics) != null) { "Invalid optical provenance" }
         }
         row.archiveSession()?.let { id ->
-            val session = requireNotNull(sessionsById[id]) { "Missing session" }
-            require(row.archiveSensor().equals(session.archiveSensor(), true)) { "Session has another sensor" }
+            requireNotNull(sessionsById[id]) { "Missing session" }
         }
         if (expectedKind == UvirArchiveKind.ACQUISITIONS) {
             row.archiveString("note")
-            listOf("automatic", "external_command").forEach { require(row.archiveLong(it) in 0L..1L) }
+            require(row.archiveLong("automatic") in 0L..1L)
             listOf("position_index", "variant_index").forEach { row.archiveLong(it, true)?.let { n -> require(n in 1..Int.MAX_VALUE.toLong()) } }
             archiveSpectralColumns.forEach { key ->
                 val number = row.get(key)
@@ -122,5 +104,12 @@ internal fun parseUvirRecordArchive(text: String, expectedKind: UvirArchiveKind)
     }
     val usedSessions = records.mapNotNull { it.archiveSession() }.toSet()
     require(sessions.all { it.archiveString("id") in usedSessions }) { "Empty session" }
-    return UvirRecordArchive(expectedKind, sensors, sessions, records)
+    // Whitelist fields, including when importing version 1: retired hardware identities and
+    // external-command metadata must never leak into a new export or the phone database.
+    fun clean(rows: List<JSONObject>, columns: List<String>) = rows.map { source ->
+        JSONObject().also { target -> columns.forEach { target.put(it, source.get(it)) } }
+    }
+    return UvirRecordArchive(expectedKind,
+        clean(sessions, listOf("id") + archiveSessionColumns(expectedKind)),
+        clean(records, listOf("id", "session") + archiveRecordColumns(expectedKind)))
 }

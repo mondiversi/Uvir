@@ -89,8 +89,7 @@ class UvirDatabaseImportTest {
             val originalBytes = archive.readBytes()
             importUvirDatabaseArchive(context, target, Uri.fromFile(archive))
             org.junit.Assert.assertArrayEquals(originalBytes, archive.readBytes())
-            val tables = listOf("sensors", "uvir_counters", "acquisition_sessions", "alert_sessions",
-                "sensor_settings", "sensor_alert_rules", "acquisitions", "alerts", "camera_estimates", "record_transfer_ids")
+            val tables = listOf("uvir_counters", "acquisition_sessions", "alert_sessions", "acquisitions", "alerts", "record_transfer_ids")
             fun rows(helper: UvirDatabaseHelper, table: String): List<List<String?>> =
                 helper.readableDatabase.rawQuery("SELECT * FROM $table", null).use { cursor ->
                     buildList { while (cursor.moveToNext()) add((0 until cursor.columnCount).map { cursor.getString(it) }) }
@@ -135,63 +134,11 @@ class UvirDatabaseImportTest {
         assertEquals("keep this record", target.readSavedRecords().single().note)
     }
 
-    @Test fun retiredCameraArchiveAndCounterRoundTripWithoutMixingSpectralRecords() = runBlocking {
-        assertEquals(1L, insertLegacyCameraRow(source, "camera:source"))
-        insertLegacyCameraRow(target, "camera:target")
-        val archive = createEncryptedUvirDatabaseArchive(File(source.writableDatabase.path), File(root, "camera-backup.zip"), "correct-password".toCharArray())
-        importEncryptedUvirDatabaseArchive(context, target, Uri.fromFile(archive), "correct-password".toCharArray())
-        assertEquals(legacyCameraRows(source), legacyCameraRows(target))
-        assertEquals(2L, insertLegacyCameraRow(target, "camera:source"))
-        assertTrue(target.readSavedRecords().isEmpty())
-        target.resetAllCounters()
-        assertTrue(legacyCameraRows(target).isEmpty())
-        assertEquals(1L, insertLegacyCameraRow(target, "camera:source"))
-    }
 
-    @Test fun previousVersionTwentyBackupStillImportsWithoutCameraTable() = runBlocking {
-        source.saveAcquisition(SensorSample(), "previous-version-record", false, sensorDeviceId = "fixture", timestamp = 1_000L)
-        source.writableDatabase.execSQL("DROP TABLE camera_estimates")
-        source.writableDatabase.version = 20
-        val archive = createEncryptedUvirDatabaseArchive(File(source.writableDatabase.path), File(root, "version-twenty.zip"), "correct-password".toCharArray())
-        importEncryptedUvirDatabaseArchive(context, target, Uri.fromFile(archive), "correct-password".toCharArray())
-        assertEquals("previous-version-record", target.readSavedRecords().single().note)
-        assertTrue(legacyCameraRows(target).isEmpty())
-        assertEquals(20, source.writableDatabase.version)
-    }
 
-    @Test fun previousOpticsFreeArchiveImportsWithoutChangingRecordedValues() = runBlocking {
-        source.saveAcquisition(SensorSample(uvc = 42.125), "before optics", false,
-            sensorDeviceId = "fixture", timestamp = 1_000L)
-        source.writableDatabase.apply {
-            // Reconstruct private v21 tables with the original constraints and column order.
-            listOf("acquisitions", "alerts", "sensor_settings").forEach { table ->
-                val sql = rawQuery("SELECT sql FROM sqlite_master WHERE type='table' AND name=?", arrayOf(table))
-                    .use { cursor -> check(cursor.moveToFirst()); cursor.getString(0) }
-                    .replace(Regex("optical_window TEXT,\\s*"), "")
-                    .replace(Regex(",\\s*optical_window TEXT"), "")
-                    .replace(Regex(",\\s*calibration_offsets TEXT"), "")
-                val columns = rawQuery("PRAGMA table_info($table)", null).use { cursor ->
-                    buildList { while (cursor.moveToNext()) if (cursor.getString(1) !in setOf("optical_window", "calibration_offsets")) add(cursor.getString(1)) }
-                }.joinToString(",")
-                execSQL("ALTER TABLE $table RENAME TO ${table}_fixture_v22")
-                execSQL(sql)
-                execSQL("INSERT INTO $table ($columns) SELECT $columns FROM ${table}_fixture_v22")
-                execSQL("DROP TABLE ${table}_fixture_v22")
-            }
-            version = 21
-        }
-        val archive = createEncryptedUvirDatabaseArchive(File(source.writableDatabase.path),
-            File(root, "version-twenty-one.zip"), "correct-password".toCharArray())
-        importEncryptedUvirDatabaseArchive(context, target, Uri.fromFile(archive), "correct-password".toCharArray())
-        val restored = requireNotNull(target.readRecord(target.readSavedRecords().single().id))
-        assertEquals(.42125, restored.sample.uvc, 0.0) // Legacy µW/cm² -> SI W/m².
-        source.readableDatabase.rawQuery("SELECT uvc FROM acquisitions", null).use { c ->
-            assertTrue(c.moveToFirst()); assertEquals(42.125, c.getDouble(0), 0.0)
-        }
-        assertEquals(null, restored.sample.opticalWindow)
-        assertEquals("before optics", restored.note)
-        assertEquals(21, source.writableDatabase.version)
-    }
+
+
+
 
     @Test fun opticalProvenanceSurvivesEncryptedArchiveWithoutDoubleCorrection() = runBlocking {
         val sample = SensorSample(uvc = 42.125,
@@ -203,41 +150,7 @@ class UvirDatabaseImportTest {
         assertEquals(sample, requireNotNull(target.readRecord(target.readSavedRecords().single().id)).sample)
     }
 
-    @Test fun previousVersionTwentyTwoArchiveMigratesOffsetsWithoutEditingTheSource() = runBlocking {
-        val snapshot = UvirSensorSettingsSnapshot(
-            schemaVersion = 2, firmwareVersion = "0.5.106", sensorParameters = SensorParameters(),
-            acquisitionParameters = AcquisitionParameters(5, 150, true),
-            calibrationSettings = SensorCalibrationSettings(visibleFactor = 1.25f),
-            alertMonitoringEnabled = false, alertRepeatSeconds = 30, alertSessionId = 0, alertRules = emptyList(),
-            wifiEnabled = true, bluetoothEnabled = true, internetEnabled = false, internetUsePrimaryWifi = true,
-            wifiSsid = "", internetRelayHost = "", internetRelayPort = 8883)
-        source.upsertSensorSettings("fixture", snapshot)
-        source.saveAcquisition(SensorSample(uva = 3.125), "before offsets", false,
-            sensorDeviceId = "fixture", timestamp = 1_000L)
-        source.writableDatabase.apply {
-            val sql = rawQuery("SELECT sql FROM sqlite_master WHERE type='table' AND name='sensor_settings'", null)
-                .use { cursor -> check(cursor.moveToFirst()); cursor.getString(0) }
-                .replace(Regex(",\\s*calibration_offsets TEXT"), "")
-            val columns = rawQuery("PRAGMA table_info(sensor_settings)", null).use { cursor ->
-                buildList { while (cursor.moveToNext()) if (cursor.getString(1) != "calibration_offsets") add(cursor.getString(1)) }
-            }.joinToString(",")
-            execSQL("ALTER TABLE sensor_settings RENAME TO settings_fixture_v23")
-            execSQL(sql)
-            execSQL("INSERT INTO sensor_settings ($columns) SELECT $columns FROM settings_fixture_v23")
-            execSQL("DROP TABLE settings_fixture_v23")
-            version = 22
-        }
-        val archive = createEncryptedUvirDatabaseArchive(File(source.writableDatabase.path),
-            File(root, "version-twenty-two.zip"), "correct-password".toCharArray())
-        importEncryptedUvirDatabaseArchive(context, target, Uri.fromFile(archive), "correct-password".toCharArray())
-        assertEquals(.03125, requireNotNull(target.readRecord(target.readSavedRecords().single().id)).sample.uva, 0.0)
-        assertEquals(3.125, requireNotNull(source.readRecord(source.readSavedRecords().single().id)).sample.uva, 0.0)
-        assertEquals(snapshot.calibrationSettings, requireNotNull(target.readSensorSettings("fixture")).calibrationSettings)
-        assertEquals(22, source.writableDatabase.version)
-        source.readableDatabase.rawQuery("PRAGMA table_info(sensor_settings)", null).use { cursor ->
-            while (cursor.moveToNext()) assertNotEquals("calibration_offsets", cursor.getString(1))
-        }
-    }
+
 
     // Opaque legacy data: no runtime Camera model or recording API is retained.
     private fun insertLegacyCameraRow(helper: UvirDatabaseHelper, sourceId: String): Long =

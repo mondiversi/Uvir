@@ -12,7 +12,7 @@
     <string name="window_measure_unavailable">Канал недоступен</string>
     <string name="window_measure_insufficient">Недостаточно данных</string>
     <string name="window_measure_unstable">Нестабильное освещение</string>
-    <string name="window_measure_saturated">Сигнал вне диапазона</string>
+    <string name="window_measure_saturated">@string/sensor_saturation</string>
     <string name="window_measure_brighter">Значение с фильтром выше</string>
     <string name="window_measure_out_of_range">Коэффициент вне допустимого диапазона</string>
 </resources>

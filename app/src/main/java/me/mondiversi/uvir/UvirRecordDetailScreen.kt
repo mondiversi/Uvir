@@ -147,7 +147,6 @@ fun RecordDetailScreen(
     val context =
         LocalContext.current
     val resources = LocalResources.current
-    val detailSensorName = rememberDetailSensorName(record.sensorId, database)
     val detailVariantCount =
         remember(record.sessionId) {
             record.sessionId
@@ -497,8 +496,8 @@ fun RecordDetailScreen(
             item {
                 UvirDetailContextCard(
                     automatic = record.automatic,
-                    externalCommand = record.externalCommand,
-                    sensorName = detailSensorName,
+
+
                     note =
                         acquisitionDisplayNote(
                             note = currentNote,

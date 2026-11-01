@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun UvirLiveIrradianceDecimalsSetting(
     digits: Int,
@@ -33,21 +34,23 @@ internal fun UvirLiveIrradianceDecimalsSetting(
     Column(modifier = Modifier.testTag("live_irradiance_decimals_section").padding(top = UvirSettingsControlGap),
         verticalArrangement = Arrangement.spacedBy(UvirSettingsRelatedGap)) {
         Box {
-            Surface(
-                onClick = { expanded = true },
-                modifier = Modifier.fillMaxWidth().testTag("live_irradiance_decimals")
-                    .semantics { contentDescription = label },
-                color = Color.Transparent,
-                shape = RoundedCornerShape(12.dp),
-                border = BorderStroke(1.dp, secondaryText.copy(alpha = 0.5f))
-            ) {
-                Row(Modifier.heightIn(min = 48.dp).padding(horizontal = 12.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text(label, Modifier.weight(1f), color = primaryText, fontSize = 14.sp)
-                    Text(formatUvirNumber(digits.toDouble(), 0, numericFormat, grouping = false),
-                        color = primaryText, fontSize = 14.sp)
-                    ExpansionChevron(expanded, secondaryText, iconSize = 18.dp)
+            CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides UvirCompactFieldIconSize) {
+                Surface(
+                    onClick = { expanded = true },
+                    modifier = Modifier.fillMaxWidth().testTag("live_irradiance_decimals")
+                        .semantics { contentDescription = label },
+                    color = Color.Transparent,
+                    shape = RoundedCornerShape(12.dp),
+                    border = BorderStroke(1.dp, secondaryText.copy(alpha = 0.5f))
+                ) {
+                    Row(Modifier.heightIn(min = UvirCompactFieldMinHeight).padding(UvirCompactFieldContentPadding),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Text(label, Modifier.weight(1f), color = primaryText, fontSize = 14.sp)
+                        Text(formatUvirNumber(digits.toDouble(), 0, numericFormat, grouping = false),
+                            color = primaryText, fontSize = 14.sp)
+                        ExpansionChevron(expanded, secondaryText, iconSize = 18.dp)
+                    }
                 }
             }
             UvirAdaptiveDropdownMenu(

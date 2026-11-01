@@ -18,7 +18,7 @@
     <string name="debug_performance_indiana_jones">Indiana Jones</string>
     <string name="debug_performance_jurassic_park">Jurassic Park</string>
     <string name="debug_performance_star_wars">Star Wars</string>
-    <string name="debug_diagnostic">진단 테스트</string>
+    <string name="debug_diagnostic">진단 실행</string>
     <string name="diagnostic_description">센서의 전체 진단 테스트를 실행합니다.</string>
     <string name="diagnostic_title">센서 진단</string>
     <string name="diagnostic_progress">요청 %1$d/%2$d개 완료</string>
@@ -41,8 +41,6 @@
     <string name="diagnostic_share_error">진단 보고서를 공유하지 못했습니다.</string>
     <string name="diagnostic_failed">진단 테스트를 완료하지 못했습니다.</string>
     <string name="debug_secret_melody_found">숨겨진 멜로디를 찾았어요</string>
-    <string name="debug_fake_out_of_range">측정 범위 초과 값</string>
-    <string name="debug_fake_out_of_range_description">간헐적으로 측정 범위 초과 값을 모의합니다.</string>
     <string name="debug_simulate_events">이벤트 시뮬레이션</string>
     <string name="debug_simulate_events_description">모의 측정값과 알림을 추가합니다.</string>
     <string name="debug_simulate_events_question">테스트 이벤트를 시뮬레이션할까요?</string>

@@ -18,7 +18,7 @@
     <string name="debug_performance_indiana_jones">Indiana Jones</string>
     <string name="debug_performance_jurassic_park">Jurassic Park</string>
     <string name="debug_performance_star_wars">Star Wars</string>
-    <string name="debug_diagnostic">DIAGNOSETEST</string>
+    <string name="debug_diagnostic">DIAGNOSE UITVOEREN</string>
     <string name="diagnostic_description">Voert een volledige diagnosetest van de sensor uit.</string>
     <string name="diagnostic_title">Sensordiagnostiek</string>
     <string name="diagnostic_progress">%1$d/%2$d aanvragen voltooid</string>
@@ -41,8 +41,6 @@
     <string name="diagnostic_share_error">Het diagnoserapport kan niet worden gedeeld.</string>
     <string name="diagnostic_failed">De diagnosetest kan niet worden voltooid.</string>
     <string name="debug_secret_melody_found">Je hebt de geheime melodie gevonden</string>
-    <string name="debug_fake_out_of_range">Waarden buiten bereik</string>
-    <string name="debug_fake_out_of_range_description">Simuleert af en toe waarden buiten het bereik.</string>
     <string name="debug_simulate_events">GEBEURTENISSEN SIMULEREN</string>
     <string name="debug_simulate_events_description">Voeg gesimuleerde metingen en waarschuwingen toe.</string>
     <string name="debug_simulate_events_question">Testgebeurtenissen simuleren?</string>

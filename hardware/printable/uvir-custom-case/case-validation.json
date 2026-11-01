@@ -1,0 +1,29 @@
+{
+  "watertight_edges": true,
+  "connected_components": 1,
+  "euler_characteristic": 0,
+  "triangles": 10960,
+  "external_dimensions_mm": [
+    62.0,
+    94.0,
+    28.799999237060547
+  ],
+  "material_volume_cm3": 36.217288379122145,
+  "clearance_intersection_mm3": {
+    "pcb": 0.0,
+    "hardware_envelope": 0.0,
+    "future_blank_lid": 0.0
+  },
+  "stl_sha256": "b301ef94e4dd4cddd8ef606b2dbe349e97264c456fee196ce77d09745d8b0e67",
+  "independent_stl_readback": {
+    "finite_unit_normals": true,
+    "manifold": true,
+    "connected_components": 1,
+    "genus": 1,
+    "support_heights_and_blind_pilots_checked": true,
+    "usb_opening_Z11_to_Z18_verified": true,
+    "existing_lid_intersections_mm3": {
+      "uvir-custom-case-lid-r06-5mm.stl": 0.0
+    }
+  }
+}

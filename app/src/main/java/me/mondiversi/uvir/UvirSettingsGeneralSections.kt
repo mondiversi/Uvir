@@ -5,11 +5,13 @@ import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
@@ -832,13 +834,6 @@ internal fun UvirSettingsGeneralSections(
             }
         }
 
-        UvirErrorLogSettingsIsland(
-            cardColor = cardColor,
-            primaryText = primaryText,
-            secondaryText = secondaryText,
-            onExport = { standaloneExport = UvirStandaloneExport.ERROR_LOG }
-        )
-
         SettingsIsland(containerColor = cardColor, contentColor = primaryText) {
             UvirFormatGroupHeader(
                 title = stringResource(R.string.data_management_reset_group),
@@ -1047,8 +1042,8 @@ internal fun UvirSensorSimulationSettingsContent(
             checked = outOfRange,
             onCheckedChange = onOutOfRangeChange,
             enabled = enabled,
-            title = stringResource(R.string.debug_fake_out_of_range),
-            description = stringResource(R.string.debug_fake_out_of_range_description),
+            title = stringResource(R.string.debug_fake_saturation),
+            description = stringResource(R.string.debug_fake_saturation_description),
             primaryText = primaryText,
             secondaryText = secondaryText
         )
@@ -1060,10 +1055,20 @@ internal fun UvirErrorLogSettingsIsland(
     cardColor: Color,
     primaryText: Color,
     secondaryText: Color,
-    onExport: () -> Unit
+    onOpen: () -> Unit
 ) {
+    val context = LocalContext.current
     val resources = LocalResources.current
-    val exportDescription = stringResource(R.string.debug_error_log)
+    val revision by UvirErrorLog.revision.collectAsState()
+    val logBytes by produceState<Long?>(null, context, revision) {
+        value = withContext(Dispatchers.IO) { UvirErrorLog.sizeBytes(context) }
+    }
+    val numericFormat = LocalUvirNumericFormat.current
+    val size = logBytes?.let { bytes ->
+        stringResource(R.string.sensor_info_kilobytes,
+            formatUvirNumber(bytes / 1024.0, 1, numericFormat, grouping = false, minimumDigits = 0))
+    } ?: "—"
+    val exportDescription = stringResource(R.string.error_log_open)
     SettingsIsland(containerColor = cardColor, contentColor = primaryText) {
         UvirFormatGroupHeader(
             title = stringResource(R.string.data_management_error_log_group),
@@ -1071,27 +1076,36 @@ internal fun UvirErrorLogSettingsIsland(
             primaryText = primaryText
         )
         SettingsPageDescription(
-            text = stringResource(R.string.data_management_error_log_description),
+            text = stringResource(R.string.error_log_view_description),
             color = secondaryText
         )
-        OutlinedButton(
-            onClick = onExport,
-            modifier = Modifier.fillMaxWidth().semantics {
-                contentDescription = exportDescription
-            },
-            colors = uvirOutlinedActionColors(primaryText),
-            border = uvirOutlinedActionBorder(true, primaryText)
-        ) {
-            UvirLabeledButtonContent(
-                text = stringResource(R.string.export)
-                    .uppercase(resources.configuration.locales[0])
+        Column(verticalArrangement = Arrangement.spacedBy(UvirSettingsRelatedGap)) {
+            OutlinedButton(
+                onClick = onOpen,
+                modifier = Modifier.fillMaxWidth().semantics {
+                    contentDescription = exportDescription
+                },
+                colors = uvirOutlinedActionColors(primaryText),
+                border = uvirOutlinedActionBorder(true, primaryText)
             ) {
-                UvirMenuIcon(
-                    type = MenuIconType.EXPORT,
-                    modifier = Modifier.size(20.dp),
-                    tint = LocalContentColor.current
-                )
+                UvirLabeledButtonContent(
+                    text = stringResource(R.string.error_log_open)
+                        .uppercase(resources.configuration.locales[0])
+                ) {
+                    UvirMenuIcon(
+                        type = MenuIconType.SAVED_MEASUREMENTS,
+                        modifier = Modifier.size(20.dp),
+                        tint = LocalContentColor.current
+                    )
+                }
             }
+            Text(
+                text = stringResource(R.string.error_log_size, size),
+                color = secondaryText,
+                fontSize = 11.sp,
+                lineHeight = 14.sp,
+                modifier = Modifier.testTag("error_log_size")
+            )
         }
     }
 }

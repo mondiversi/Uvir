@@ -50,7 +50,7 @@ class UvirSessionVariantCountTypographyTest : SessionNoteEditingFixture() {
                     Box(Modifier.fillMaxSize()) {
                     val colors = MaterialTheme.colorScheme
                     UvirDetailContextCard(
-                        automatic = true, sensorName = "Portatile", note = "Test",
+                        automatic = true, note = "Test",
                         cardColor = colors.surface, primaryText = colors.onSurface,
                         secondaryText = colors.onSurfaceVariant,
                         detailIcon = UvirDetailMetadataIconKind.ACQUISITION,

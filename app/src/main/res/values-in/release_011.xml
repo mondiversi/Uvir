@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="release_011_status">Pengembangan ditangguhkan: prototipe berfungsi, tetapi kalibrasi optik belum terselesaikan.</string>
+    <string name="release_011_case">Casing acuan dengan bukaan USB yang diperbaiki dan penutup datar dengan dua lubang 5 mm telah diterbitkan.</string>
+    <string name="release_011_improvements">Pengambilan sampel USB, penanganan saturasi, diagnostik, arsip, dan dokumentasi ditingkatkan.</string>
+</resources>

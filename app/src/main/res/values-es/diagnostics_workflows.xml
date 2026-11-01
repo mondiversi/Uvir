@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_log_open">Abrir registro de errores</string>
+    <string name="error_log_view_description">Visualiza y exporta los errores registrados por la aplicación.</string>
+    <string name="error_log_read_failed">No se puede leer el registro de errores.</string>
+    <string name="debug_fake_saturation">Saturación</string>
+    <string name="debug_fake_saturation_description">Simula periódicamente la saturación del sensor.</string>
+    <string name="record_archive_export_title">Exportar adquisiciones y alertas</string>
+    <string name="error_log_clear_title">¿Vaciar el registro de errores?</string>
+    <string name="error_log_clear_description">Elimina definitivamente todos los errores registrados.</string>
+    <string name="error_log_clear_complete">Registro de errores vaciado.</string>
+    <string name="error_log_clear_failed">No se puede vaciar el registro de errores.</string>
+    <string name="error_log_size">Tamaño del registro: %1$s</string>
+</resources>

@@ -8,7 +8,9 @@
     <string name="usb_hardware_pending">پشتیبانی USB در حال آماده‌سازی است. اندازه‌گیری واقعی باید با برد FT232H بررسی شود. پاسخ نوری و کالیبراسیون مطلق هنوز تأیید نشده‌اند.</string>
     <string name="usb_connect">FT232H و هر دو حسگر را با مبدل داده USB OTG متصل کنید.</string>
     <string name="usb_permission">اجازه دسترسی USB بدهید</string>
-    <string name="usb_initializing">در حال راه‌اندازی حسگرها…</string>
+    <string name="usb_initializing">در حال راه‌اندازی…</string>
+    <string name="usb_waiting">در انتظار داده‌ها…</string>
+    <string name="sensor_saturation">اشباع</string>
     <string name="usb_ready">USB متصل است</string>
     <string name="usb_error">USB در دسترس نیست</string>
     <string name="usb_retry">اتصال دوباره USB</string>

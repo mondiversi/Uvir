@@ -8,7 +8,9 @@
     <string name="usb_hardware_pending">USB समर्थन तैयार किया जा रहा है। वास्तविक माप FT232H बोर्ड से जाँचना आवश्यक है। प्रकाशीय प्रतिक्रिया और निरपेक्ष अंशांकन अभी सत्यापित नहीं हैं।</string>
     <string name="usb_connect">डेटा वाले USB OTG अडैप्टर से FT232H और दोनों सेंसर जोड़ें।</string>
     <string name="usb_permission">USB पहुँच की अनुमति दें</string>
-    <string name="usb_initializing">सेंसर शुरू हो रहे हैं…</string>
+    <string name="usb_initializing">शुरू हो रहा है…</string>
+    <string name="usb_waiting">डेटा का इंतजार है…</string>
+    <string name="sensor_saturation">संतृप्ति</string>
     <string name="usb_ready">USB जुड़ा है</string>
     <string name="usb_error">USB उपलब्ध नहीं</string>
     <string name="usb_retry">USB फिर जोड़ें</string>

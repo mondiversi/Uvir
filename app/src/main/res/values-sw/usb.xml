@@ -8,7 +8,9 @@
     <string name="usb_hardware_pending">Usaidizi wa USB unaandaliwa. Vipimo halisi lazima vithibitishwe kwa bodi ya FT232H. Mwitikio wa macho na urekebishaji kamili bado havijathibitishwa.</string>
     <string name="usb_connect">Unganisha FT232H na vihisi vyote viwili kwa adapta ya data ya USB OTG.</string>
     <string name="usb_permission">Ruhusu ufikiaji wa USB</string>
-    <string name="usb_initializing">Kuanzisha vihisi…</string>
+    <string name="usb_initializing">Inaanzisha…</string>
+    <string name="usb_waiting">Inasubiri data…</string>
+    <string name="sensor_saturation">Kujaa kwa ishara</string>
     <string name="usb_ready">USB imeunganishwa</string>
     <string name="usb_error">USB haipatikani</string>
     <string name="usb_retry">Unganisha USB tena</string>

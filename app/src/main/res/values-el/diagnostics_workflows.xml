@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_log_open">Άνοιγμα αρχείου σφαλμάτων</string>
+    <string name="error_log_view_description">Προβολή και εξαγωγή σφαλμάτων που καταγράφει η εφαρμογή.</string>
+    <string name="error_log_read_failed">Δεν είναι δυνατή η ανάγνωση του αρχείου σφαλμάτων.</string>
+    <string name="debug_fake_saturation">Κορεσμός</string>
+    <string name="debug_fake_saturation_description">Περιοδική προσομοίωση κορεσμού του αισθητήρα.</string>
+    <string name="record_archive_export_title">Εξαγωγή μετρήσεων και ειδοποιήσεων</string>
+    <string name="error_log_clear_title">Διαγραφή αρχείου σφαλμάτων;</string>
+    <string name="error_log_clear_description">Οριστική διαγραφή όλων των καταγεγραμμένων σφαλμάτων.</string>
+    <string name="error_log_clear_complete">Το αρχείο σφαλμάτων διαγράφηκε.</string>
+    <string name="error_log_clear_failed">Δεν είναι δυνατή η διαγραφή του αρχείου σφαλμάτων.</string>
+    <string name="error_log_size">Μέγεθος αρχείου καταγραφής: %1$s</string>
+</resources>

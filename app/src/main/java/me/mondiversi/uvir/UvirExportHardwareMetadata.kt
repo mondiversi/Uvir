@@ -19,17 +19,11 @@ internal fun exportHardwareModels(info: UvirSensorRuntimeInfo?): UvirExportHardw
 
 /** Resolve once per exported file, by its records' IDs, never by UI selection. */
 internal fun loadExportHardwareModels(context: Context?, sensorIds: Collection<Long?>): Map<Long, UvirExportHardwareModels> {
-    val ids = sensorIds.filterNotNull().filter { it > 0 }.toSet()
-    if (context == null || ids.isEmpty()) return emptyMap()
-    return UvirDatabaseHelper(context).use { database ->
-        database.readSensorProfiles().filter { it.id in ids }.associate { profile ->
-            profile.id to exportHardwareModels(UvirSensorRuntimeInfoStore.loadForDevice(context, profile.hardwareUid))
-        }
-    }
+    return emptyMap()
 }
 
 internal fun Map<Long, UvirExportHardwareModels>.models(sensorId: Long?): UvirExportHardwareModels =
-    get(sensorId) ?: UvirExportHardwareModels()
+    get(sensorId) ?: UvirExportHardwareModels("AS7331", "AS7343")
 
 internal fun exportHardwareCaption(context: Context, sensorIds: Collection<Long?>): String {
     val models = loadExportHardwareModels(context, sensorIds)

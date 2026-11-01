@@ -136,9 +136,6 @@ internal fun SessionChartScreen(
         remember(records) {
             records.sortedBy { it.timestamp }
         }
-    val externalOnlySession = remember(sessionId, database, records) {
-        database.acquisitionSessionUsesExternalCommand(sessionId)
-    }
     val presentation = rememberUvirSavedScreenPresentation("acquisition-session:$sessionId")
     val expandedChartGroups = presentation.expandedGroups
     var showShareDialog by rememberSaveable {
@@ -174,8 +171,6 @@ internal fun SessionChartScreen(
         stringResource(
             R.string.session_chart_share
         )
-    val detailSensorName =
-        rememberDetailSensorName(sortedRecords.firstOrNull()?.sensorId, database)
     val availableSequenceCycleSizes = remember(sortedRecords.size) {
         sessionSequenceCycleSizes(sortedRecords.size)
     }
@@ -526,8 +521,8 @@ internal fun SessionChartScreen(
             item {
                 UvirDetailContextCard(
                     automatic = sortedRecords.firstOrNull()?.automatic,
-                    externalCommand = externalOnlySession,
-                    sensorName = detailSensorName,
+
+
                     note = currentNote.ifBlank { stringResource(R.string.no_note) },
                     cardColor = cardColor,
                     primaryText = primaryText,

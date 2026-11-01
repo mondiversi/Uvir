@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="usb_diagnostic_progress">正在检查组件：%1$d/%2$d</string>
+    <string name="usb_diagnostic_recognition">识别</string>
+    <string name="usb_diagnostic_initialization">初始化</string>
+    <string name="usb_diagnostic_reading">读取</string>
+    <string name="usb_diagnostic_not_tested">未检查</string>
+    <string name="usb_diagnostic_readings">新读取：%1$d/%2$d</string>
+    <string name="usb_diagnostic_notes">检查组件识别及读取情况。校准需要单独测试。</string>
+    <string name="usb_diagnostic_wiring">请检查电源、GND、SDA/SCL 和 D1–D2 跳线。</string>
+    <string name="usb_diagnostic_technical">技术详情</string>
+</resources>

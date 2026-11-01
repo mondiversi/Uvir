@@ -1,0 +1,129 @@
+{
+  "units": "mm",
+  "revision": "R0.3 - USB opening 7 mm high, bottom raised to Z11 mm",
+  "external_width_length_height": [
+    62.0,
+    94.0,
+    28.8
+  ],
+  "outer_corner_radius": 2.4,
+  "wall_and_floor": [
+    2.4,
+    2.4
+  ],
+  "pcb_width_length_thickness": [
+    43.5,
+    85.8,
+    1.5
+  ],
+  "pcb_bottom_left_front_xyz": [
+    8.75,
+    3.0,
+    7.4
+  ],
+  "max_hardware_height_including_pcb": 18.0,
+  "highest_hardware_z": 25.4,
+  "estimated_sensor_plane_z": 24.4,
+  "pcb_standoff_height_diameter": [
+    5.0,
+    7.2
+  ],
+  "pcb_screw_centres_xy": [
+    [
+      12.95,
+      10.3
+    ],
+    [
+      48.75,
+      10.3
+    ],
+    [
+      12.95,
+      82.3
+    ],
+    [
+      48.75,
+      82.3
+    ]
+  ],
+  "lid_screw_centres_xy": [
+    [
+      5.2,
+      5.2
+    ],
+    [
+      56.8,
+      5.2
+    ],
+    [
+      5.2,
+      88.8
+    ],
+    [
+      56.8,
+      88.8
+    ]
+  ],
+  "draft_screw_nominal_diameter": 2.0,
+  "draft_pilot_diameter": 1.6,
+  "pcb_pilot_depth": 4.0,
+  "lid_pilot_depth": 6.0,
+  "lid_seat_z": 26.400000000000002,
+  "lid_ledge_width": 1.2,
+  "future_lid_nominal_thickness": 2.4,
+  "lid_recess_corner_radius": 0.0,
+  "future_square_lid_width_length": [
+    56.8,
+    88.8
+  ],
+  "future_lid_clearance_per_side": 0.2,
+  "lid_clearance_above_highest_hardware": 1.0000000000000036,
+  "lid_clearance_above_estimated_sensor_plane": 2.0000000000000036,
+  "sensor_centres_from_board_top_left": {
+    "visible_ir": [
+      23.8,
+      6.4
+    ],
+    "uv": [
+      24.3,
+      19.890737563232044
+    ]
+  },
+  "sensor_centres_case_xyz": {
+    "visible_ir": [
+      32.55,
+      82.39999999999999,
+      24.4
+    ],
+    "uv": [
+      33.05,
+      68.90926243676796,
+      24.4
+    ]
+  },
+  "usb_width_derived_from_side_measurements": 13.100000000000001,
+  "usb_offset_from_pcb_centre_to_right": 0.5,
+  "usb_case_centre_x": 31.0,
+  "usb_covered_protrusion": 3.0,
+  "usb_exposed_protrusion": 12.0,
+  "draft_usb_opening_width_height_bottom_z": [
+    14.1,
+    7.0,
+    11.0
+  ],
+  "usb_opening_width_height_bottom_z": [
+    14.1,
+    7.0,
+    11.0
+  ],
+  "usb_opening_top_from_outside_floor": 18.0,
+  "usb_fit_measurement_source": "usb-fit-measurements.json",
+  "sensor_measurement_source": "sensor-measurements.json",
+  "draft_assumptions": [
+    "USB opening follows the user-reported filed opening; final fit still needs confirmation.",
+    "Pilot holes assume approximately 2 mm self-tapping screws.",
+    "Independent lid screws add side clearance outside the PCB.",
+    "Sensor centres are approximate user measurements; no optical apertures are modeled.",
+    "The future lid is a square-cornered rectangle. No lid is exported."
+  ]
+}

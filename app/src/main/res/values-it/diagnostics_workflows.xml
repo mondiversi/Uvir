@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_log_open">Apri log errori</string>
+    <string name="error_log_view_description">Visualizza ed esporta gli errori registrati dall’app.</string>
+    <string name="error_log_read_failed">Impossibile leggere il log errori.</string>
+    <string name="debug_fake_saturation">Saturazione</string>
+    <string name="debug_fake_saturation_description">Simula periodicamente la saturazione del sensore.</string>
+    <string name="record_archive_export_title">Esporta le acquisizioni e le allerte</string>
+    <string name="error_log_clear_title">Elimina il log errori?</string>
+    <string name="error_log_clear_description">Elimina definitivamente tutti gli errori registrati.</string>
+    <string name="error_log_clear_complete">Log errori svuotato.</string>
+    <string name="error_log_clear_failed">Impossibile svuotare il log errori.</string>
+    <string name="error_log_size">Dimensione log: %1$s</string>
+</resources>

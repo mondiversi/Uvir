@@ -200,7 +200,7 @@ internal fun SessionAcquisitionValuesCard(
                                         if (!included) {
                                             "—"
                                         } else if (valueOutOfRange) {
-                                            stringResource(R.string.out_of_range_short)
+                                            stringResource(R.string.sensor_saturation)
                                         } else {
                                             displayedUvirIrradianceNumber(value)
                                         },

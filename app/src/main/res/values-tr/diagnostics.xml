@@ -18,7 +18,7 @@
     <string name="debug_performance_indiana_jones">Indiana Jones</string>
     <string name="debug_performance_jurassic_park">Jurassic Park</string>
     <string name="debug_performance_star_wars">Star Wars</string>
-    <string name="debug_diagnostic">TANI TESTİ</string>
+    <string name="debug_diagnostic">TANILAMAYI ÇALIŞTIR</string>
     <string name="diagnostic_description">Sensörün kapsamlı tanı testini çalıştırır.</string>
     <string name="diagnostic_title">Sensör tanısı</string>
     <string name="diagnostic_progress">%1$d/%2$d istek tamamlandı</string>
@@ -41,8 +41,6 @@
     <string name="diagnostic_share_error">Tanı raporu paylaşılamadı.</string>
     <string name="diagnostic_failed">Tanı testi tamamlanamadı.</string>
     <string name="debug_secret_melody_found">Gizli melodiyi buldun</string>
-    <string name="debug_fake_out_of_range">Ölçek dışı değerler</string>
-    <string name="debug_fake_out_of_range_description">Ara sıra ölçek dışı değerleri simüle eder.</string>
     <string name="debug_simulate_events">OLAYLARI SİMÜLE ET</string>
     <string name="debug_simulate_events_description">Simüle edilmiş ölçümler ve uyarılar ekleyin.</string>
     <string name="debug_simulate_events_question">Test olayları simüle edilsin mi?</string>

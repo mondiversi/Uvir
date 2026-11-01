@@ -13,7 +13,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -153,7 +152,7 @@ internal fun UvirSensorParametersSettings(
                 Column(
                     verticalArrangement = Arrangement.spacedBy(UvirSettingsRelatedGap)
                 ) {
-                    OutlinedTextField(
+                    UvirCompactTextField(
                         value = sensorName,
                         onValueChange = {
                             onSensorNameChange(

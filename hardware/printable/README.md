@@ -1,5 +1,24 @@
 # Printable hardware parts
 
+## Current reference: custom case and flat 5 mm lid
+
+Use [the Uvir custom-case package](uvir-custom-case/README.md):
+
+| Part | Current published file |
+|---|---|
+| Lower case R0.3, USB opening corrected to 14.1 × 7 mm at Z=11–18 mm | [Case STL](uvir-custom-case/uvir-custom-case-base-r03.stl) |
+| Flat lid R0.6, two straight 5 mm apertures, no tubes | [Lid STL](uvir-custom-case/uvir-custom-case-lid-r06-5mm.stl) |
+
+Measured carrier/sensor positions, editable generators, lid OpenSCAD, dependency
+versions and geometry checks are included. The base is the user-selected reference;
+the lid remains experimental. Aperture size alone does not validate irradiance.
+See [project status](../../docs/PROJECT_STATUS.md).
+
+## Historical ESP32 / TEKO parts
+
+The remaining parts below are preserved historical designs. They do not replace
+the current custom-case package and are not a validated optical solution for it.
+
 This directory groups the project's printable body, optical lid and internal
 light shield. Each component has its own model, editable source, preview,
 dimensions and mounting instructions.
@@ -10,12 +29,12 @@ dimensions and mounting instructions.
 > [project status](../../README.md#project-on-hold--optical-design-and-calibration-unfinished)
 > before using or printing the optical parts.
 
-The selected enclosure is **TEKO COFFER-A/6.5**, nominally 125 x 70 x 35 mm.
+The former ESP32 enclosure is **TEKO COFFER-A/6.5**, nominally 125 x 70 x 35 mm.
 The [manufacturer's product page](https://www.teko.it/en/products/family/TC/series/coffer-a)
 provides the purchase reference and drawings. Its standard top panel is
 **1 mm aluminium**. Nominal external dimensions are not internal clearances.
 
-The project provides three separate printable parts for the current prototype:
+The preserved ESP32 prototype has three separate printable parts:
 
 | Part | Purpose | Model and instructions |
 |---|---|---|

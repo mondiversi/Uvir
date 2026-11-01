@@ -765,14 +765,12 @@
     <string name="language_formats_description">Выберите, как данные отображаются и форматируются в приложении.</string>
     <string name="irradiance_measurement_heading">Измерение облучённости</string>
     <string name="irradiance_measurement_description">Выберите единицу отображения облучённости. Сохранённые значения сохраняют исходную точность датчика.</string>
-    <string name="out_of_range_short">OL - Вне диапазона</string>
-    <string name="out_of_range_csv_header">Значение_вне_диапазона</string>
     <string name="language_english_localized">Английский</string>
     <string name="settings_section_notifications">Уведомления</string>
-    <string name="acquisition_feedback_description">Выберите сигнал приложения при сохранении ручного или автоматического измерения.</string>
+    <string name="acquisition_feedback_description">Настройте параметры приложения для измерений.</string>
     <string name="acquisition_feedback_preview_hint">Итоговая громкость также зависит от громкости будильника телефона.</string>
     <string name="confirmation_question_suffix">?</string>
-    <string name="threshold_alerts_sound_description_v2">Выберите сигнал приложения при регистрации оповещения.</string>
+    <string name="threshold_alerts_sound_description_v2">Настройте параметры приложения для оповещений.</string>
     <string name="list_filter_export_question">Экспортировать все показанные результаты?</string>
     <string name="list_filter_export_warning">Записи не выбраны. Экспортируются все записи, соответствующие текущим фильтрам.</string>
     <string name="settings_include_sensitive_information">Включить конфиденциальные данные</string>

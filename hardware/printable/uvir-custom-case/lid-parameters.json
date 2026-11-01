@@ -1,0 +1,73 @@
+{
+  "units": "mm",
+  "revision": "R0.6 - 5 mm hole variant; same centres as R0.5",
+  "compatible_base": "uvir-custom-case-base-r03.stl",
+  "sensor_centres_from_board_top_left": {
+    "visible_ir": [
+      23.8,
+      6.4
+    ],
+    "uv": [
+      24.3,
+      19.890737563232044
+    ]
+  },
+  "source_measurements": "sensor-measurements.json",
+  "sensor_centre_to_centre_distance": 13.499999999999975,
+  "sensor_horizontal_offset": 0.5,
+  "sensor_vertical_separation": 13.490737563232042,
+  "width_length_thickness": [
+    56.8,
+    88.8,
+    2.4
+  ],
+  "optical_hole_diameter": 5.0,
+  "external_projection": 0,
+  "optical_hole_centres_from_bottom_left": {
+    "visible_ir": [
+      29.949999999999996,
+      79.79999999999998
+    ],
+    "uv": [
+      30.449999999999996,
+      66.30926243676797
+    ]
+  },
+  "optical_hole_centres_from_top_left": {
+    "visible_ir": [
+      29.949999999999996,
+      9.000000000000014
+    ],
+    "uv": [
+      30.449999999999996,
+      22.49073756323203
+    ]
+  },
+  "screw_clearance_diameter": 2.4,
+  "screw_centres_from_bottom_left": [
+    [
+      2.5999999999999988,
+      2.5999999999999988
+    ],
+    [
+      54.199999999999996,
+      2.5999999999999988
+    ],
+    [
+      2.5999999999999988,
+      86.19999999999999
+    ],
+    [
+      54.199999999999996,
+      86.19999999999999
+    ]
+  ],
+  "assembled_translation": [
+    2.6000000000000014,
+    2.6000000000000014,
+    26.400000000000002
+  ],
+  "aperture_edge_to_edge_distance": 8.499999999999975,
+  "visible_aperture_to_top_edge": 6.500000000000014,
+  "sensor_to_inner_lid_gap": 2.0000000000000036
+}

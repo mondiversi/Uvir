@@ -47,8 +47,6 @@ internal fun rememberDetailSensorName(sensorId: Long?, database: UvirDatabaseHel
 @Composable
 internal fun UvirDetailContextCard(
     automatic: Boolean?,
-    externalCommand: Boolean = false,
-    sensorName: String,
     note: String,
     cardColor: Color,
     primaryText: Color,
@@ -109,29 +107,17 @@ internal fun UvirDetailContextCard(
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
-                    text = stringResource(R.string.note_and_sensor),
+                    text = stringResource(if (automatic != null) R.string.record_context_mode_details else R.string.record_context_details),
                     color = secondaryText,
                     fontSize = 11.sp,
                     lineHeight = 14.sp,
                     fontWeight = FontWeight.Bold
                 )
-                UvirDetailAcquisitionModeRow(
-                    automatic = automatic,
-                    externalCommand = externalCommand,
-                    text = when {
-                        externalCommand -> stringResource(R.string.external_measurement)
-                        automatic == true -> stringResource(R.string.automatic_measurement)
-                        automatic == false -> stringResource(R.string.manual_measurement)
-                        else -> "—"
-                    },
-                    primaryText = primaryText,
-                )
-                UvirDetailContextRow(
-                    icon = UvirDetailMetadataIconKind.SENSOR,
-                    text = sensorName,
-                    primaryText = primaryText,
-                    maxLines = 1
-                )
+                if (automatic != null) {
+                    UvirDetailAcquisitionModeRow(automatic = automatic,
+                        text = stringResource(if (automatic) R.string.automatic_measurement else R.string.manual_measurement),
+                        primaryText = primaryText)
+                }
                 if (detailIcon != null && detailText != null) {
                     UvirDetailContextRow(
                         icon = detailIcon,
@@ -149,7 +135,6 @@ internal fun UvirDetailContextCard(
 @Composable
 private fun UvirDetailAcquisitionModeRow(
     automatic: Boolean?,
-    externalCommand: Boolean,
     text: String,
     primaryText: Color
 ) {
@@ -158,10 +143,9 @@ private fun UvirDetailAcquisitionModeRow(
         horizontalArrangement = Arrangement.spacedBy(5.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        if (automatic != null || externalCommand) {
+        if (automatic != null) {
             AcquisitionTypeGlyph(
                 automatic = automatic == true,
-                externalCommand = externalCommand,
                 modifier = Modifier.size(UvirDetailMetadataIconSize),
                 tint = primaryText,
                 strokeWidthOverride = UvirDetailMetadataIconStrokeWidth

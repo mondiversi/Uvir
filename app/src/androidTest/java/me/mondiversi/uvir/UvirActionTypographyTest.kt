@@ -148,7 +148,6 @@ class UvirActionTypographyTest {
                         Box(Modifier.testTag("context")) {
                             UvirDetailContextCard(
                                 automatic = true,
-                                sensorName = "Demo sensor",
                                 note = "Sample note",
                                 cardColor = Color.Black,
                                 primaryText = Color.White,

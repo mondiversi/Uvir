@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="release_011_status">הפיתוח הושהה: אב הטיפוס פועל, אך הכיול האופטי טרם נפתר.</string>
+    <string name="release_011_case">פורסמו מארז הייחוס עם פתח USB מתוקן ומכסה שטוח עם שני פתחים בקוטר 5 מ״מ.</string>
+    <string name="release_011_improvements">שופרו דגימת USB, טיפול ברוויה, אבחון, ארכיונים ותיעוד.</string>
+</resources>

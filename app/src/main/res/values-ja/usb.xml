@@ -8,7 +8,9 @@
     <string name="usb_hardware_pending">USB対応を準備中です。実測値はFT232H基板で検証する必要があります。光学応答と絶対校正は未検証です。</string>
     <string name="usb_connect">USB OTGデータアダプターでFT232Hと両センサーを接続してください。</string>
     <string name="usb_permission">USBアクセスを許可</string>
-    <string name="usb_initializing">センサーを初期化中…</string>
+    <string name="usb_initializing">初期化中…</string>
+    <string name="usb_waiting">データを待機中…</string>
+    <string name="sensor_saturation">飽和</string>
     <string name="usb_ready">USB接続済み</string>
     <string name="usb_error">USBを利用できません</string>
     <string name="usb_retry">USBを再接続</string>

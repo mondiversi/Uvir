@@ -8,7 +8,9 @@
     <string name="usb_hardware_pending">Поддержка USB готовится. Реальные измерения необходимо проверить с платой FT232H. Оптическая характеристика и абсолютная калибровка ещё не подтверждены.</string>
     <string name="usb_connect">Подключите FT232H и оба датчика через USB OTG адаптер для передачи данных.</string>
     <string name="usb_permission">Разрешите доступ к USB</string>
-    <string name="usb_initializing">Инициализация датчиков…</string>
+    <string name="usb_initializing">Инициализация…</string>
+    <string name="usb_waiting">Ожидание данных…</string>
+    <string name="sensor_saturation">Насыщение</string>
     <string name="usb_ready">USB подключён</string>
     <string name="usb_error">USB недоступен</string>
     <string name="usb_retry">Подключить USB заново</string>

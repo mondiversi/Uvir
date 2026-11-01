@@ -8,7 +8,9 @@
     <string name="usb_hardware_pending">USB hardware support is in preparation. Real measurements must be verified with the FT232H board. Optical response and absolute calibration remain unvalidated.</string>
     <string name="usb_connect">Connect the FT232H and both sensors using a USB OTG data adapter.</string>
     <string name="usb_permission">Allow USB access</string>
-    <string name="usb_initializing">Initializing sensors…</string>
+    <string name="usb_initializing">Initializing…</string>
+    <string name="usb_waiting">Waiting for data…</string>
+    <string name="sensor_saturation">Saturation</string>
     <string name="usb_ready">USB connected</string>
     <string name="usb_error">USB unavailable</string>
     <string name="usb_retry">Reconnect USB</string>

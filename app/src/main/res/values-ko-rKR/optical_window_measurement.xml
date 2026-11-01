@@ -12,7 +12,7 @@
     <string name="window_measure_unavailable">채널 사용 불가</string>
     <string name="window_measure_insufficient">데이터 부족</string>
     <string name="window_measure_unstable">불안정한 조명</string>
-    <string name="window_measure_saturated">신호가 범위를 벗어남</string>
+    <string name="window_measure_saturated">@string/sensor_saturation</string>
     <string name="window_measure_brighter">필터를 사용한 값이 더 높음</string>
     <string name="window_measure_out_of_range">계수가 허용 범위를 벗어남</string>
 </resources>

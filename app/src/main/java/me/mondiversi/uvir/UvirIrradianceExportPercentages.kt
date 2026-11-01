@@ -37,7 +37,7 @@ internal fun readableIrradianceExportTable(
     val rows = (listOf(totalLabel to sample.spectralTotals().total(group)) + components).map { (name, value) ->
         val percentages = sample.exportSpectralPercentages(value, group)
         listOf(name,
-            if (sample.isOutOfRange(group)) context.getString(R.string.out_of_range_short)
+            if (sample.isOutOfRange(group)) context.getString(R.string.sensor_saturation)
             else formatUvirIrradianceExportNumber(value, numericFormat, irradianceUnit, irradianceDecimals) + " " + irradianceUnit.symbol,
             percent(percentages.total), percent(percentages.group))
     }

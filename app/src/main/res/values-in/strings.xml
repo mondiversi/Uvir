@@ -735,14 +735,12 @@
     <string name="language_formats_description">Pilih cara data ditampilkan dan diformat dalam aplikasi.</string>
     <string name="irradiance_measurement_heading">Pengukuran irradiansi</string>
     <string name="irradiance_measurement_description">Pilih satuan untuk menampilkan irradiansi. Nilai sensor yang disimpan tetap mempertahankan presisi aslinya.</string>
-    <string name="out_of_range_short">OL - Di luar rentang</string>
-    <string name="out_of_range_csv_header">Out_of_range</string>
     <string name="language_english_localized">English</string>
     <string name="settings_section_notifications">Notifikasi</string>
-    <string name="acquisition_feedback_description">Pilih umpan balik yang diputar aplikasi saat pengukuran manual atau otomatis disimpan.</string>
+    <string name="acquisition_feedback_description">Kelola preferensi aplikasi untuk pengukuran.</string>
     <string name="acquisition_feedback_preview_hint">Volume akhir juga bergantung pada volume alarm ponsel.</string>
     <string name="confirmation_question_suffix">?</string>
-    <string name="threshold_alerts_sound_description_v2">Pilih umpan balik yang diputar aplikasi saat peringatan dicatat.</string>
+    <string name="threshold_alerts_sound_description_v2">Kelola preferensi aplikasi untuk peringatan.</string>
     <string name="list_filter_export_question">Ekspor semua hasil yang ditampilkan?</string>
     <string name="list_filter_export_warning">Tidak ada rekaman yang dipilih. Semua rekaman yang sesuai dengan filter saat ini diekspor.</string>
     <string name="settings_include_sensitive_information">Sertakan data sensitif</string>

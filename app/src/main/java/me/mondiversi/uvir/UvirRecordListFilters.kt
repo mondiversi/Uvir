@@ -3,24 +3,22 @@ package me.mondiversi.uvir
 import java.time.Instant
 import java.time.ZoneId
 
-internal enum class UvirRecordFilterMode { MANUAL, AUTOMATIC, EXTERNAL }
+internal enum class UvirRecordFilterMode { MANUAL, AUTOMATIC }
 
 /** Alternatives within a field, conjunction between fields. Empty sets mean "all". */
 internal data class UvirRecordListFilters(
     val fromInclusive: Long? = null,
     val untilInclusive: Long? = null,
     val notes: Set<String> = emptySet(),
-    val sensorKeys: Set<String> = emptySet(),
-    val modes: Set<UvirRecordFilterMode> = emptySet(),
     val recordIds: Set<String> = emptySet(),
     val sessionIds: Set<String> = emptySet(),
     /** 0 = no variants, -1 = any variant count, > 1 = exact count. */
-    val variantCounts: Set<Int> = emptySet()
+    val variantCounts: Set<Int> = emptySet(),
+    val modes: Set<UvirRecordFilterMode> = emptySet()
 ) {
     val isActive: Boolean get() =
         fromInclusive != null || untilInclusive != null || notes.isNotEmpty() ||
-            sensorKeys.isNotEmpty() || modes.isNotEmpty() ||
-            recordIds.isNotEmpty() || sessionIds.isNotEmpty() || variantCounts.isNotEmpty()
+            recordIds.isNotEmpty() || sessionIds.isNotEmpty() || variantCounts.isNotEmpty() || modes.isNotEmpty()
 
     fun matches(
         id: Long, timestamp: Long, recordNote: String,
@@ -33,36 +31,25 @@ internal data class UvirRecordListFilters(
 
     /** Length-prefixed lists preserve arbitrary Unicode, commas and newlines in notes. */
     fun savedValues(): List<String> = buildList {
-        add("multi-v1")
+        add("multi-v4")
         add(fromInclusive?.toString().orEmpty())
         add(untilInclusive?.toString().orEmpty())
         fun group(values: Collection<String>) { add(values.size.toString()); addAll(values) }
         group(notes)
-        group(sensorKeys)
-        group(modes.map { it.name })
         group(recordIds)
         group(sessionIds)
         group(variantCounts.map { it.toString() })
+        group(modes.map { it.name })
     }
 
     companion object {
         fun fromSavedValues(values: List<String>): UvirRecordListFilters? = runCatching {
-            if (values.firstOrNull() != "multi-v1") {
+            if (values.firstOrNull() !in setOf("multi-v1", "multi-v2", "multi-v3", "multi-v4")) {
                 // Upgrade the former single-choice activity state without discarding its filters.
                 require(values.size in 7..9)
-                val automatic = values[4].toBooleanStrictOrNull()
-                val external = values.getOrNull(7)?.toBooleanStrictOrNull()
                 UvirRecordListFilters(
                     fromInclusive = values[0].toLongOrNull(), untilInclusive = values[1].toLongOrNull(),
                     notes = values[2].takeIf(String::isNotBlank)?.let(::setOf).orEmpty(),
-                    sensorKeys = values[3].takeIf(String::isNotEmpty)?.let(::setOf).orEmpty(),
-                    modes = when {
-                        external == true -> setOf(UvirRecordFilterMode.EXTERNAL)
-                        automatic == true -> setOf(UvirRecordFilterMode.AUTOMATIC)
-                        automatic == false -> setOf(UvirRecordFilterMode.MANUAL)
-                        external == false -> setOf(UvirRecordFilterMode.MANUAL, UvirRecordFilterMode.AUTOMATIC)
-                        else -> emptySet()
-                    },
                     recordIds = values[5].takeIf(String::isNotEmpty)?.let(::setOf).orEmpty(),
                     sessionIds = values[6].takeIf(String::isNotEmpty)?.let(::setOf).orEmpty(),
                     variantCounts = values.getOrNull(8)?.toIntOrNull()?.let(::setOf).orEmpty()
@@ -74,9 +61,17 @@ internal data class UvirRecordListFilters(
                     require(count >= 0 && count <= values.size - index)
                     return values.subList(index, index + count).toSet().also { index += count }
                 }
+                val notes = group()
+                if (values[0] == "multi-v1") group() // Discard retired sensor filters.
+                if (values[0] in setOf("multi-v1", "multi-v2")) group() // Retain the reset made during the Uvir redesign.
+                val recordIds = group()
+                val sessionIds = group()
+                val variants = group().map { it.toInt() }.toSet()
+                val modes = if (values[0] == "multi-v4") group().mapNotNull { saved ->
+                    UvirRecordFilterMode.entries.find { it.name == saved }
+                }.toSet() else emptySet()
                 UvirRecordListFilters(values[1].toLongOrNull(), values[2].toLongOrNull(),
-                    group(), group(), group().map { UvirRecordFilterMode.valueOf(it) }.toSet(),
-                    group(), group(), group().map { it.toInt() }.toSet())
+                    notes, recordIds, sessionIds, variants, modes)
                     .also { require(index == values.size) }
             }
         }.getOrNull()
@@ -154,7 +149,7 @@ internal fun filterAlertEntries(
     entries: List<ThresholdAlertLogEntry>, filters: UvirRecordListFilters
 ): List<ThresholdAlertLogEntry> {
     if (!filters.isActive) return entries
-    val matcher = UvirRecordFilterMatcher(filters)
+    val matcher = UvirRecordFilterMatcher(filters.copy(variantCounts = emptySet(), modes = emptySet()))
     return entries.filter {
         matcher.matches(it.id, it.timestamp, it.note, it.sensorId, true, it.sessionId)
     }

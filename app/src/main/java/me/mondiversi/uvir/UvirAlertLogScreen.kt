@@ -150,15 +150,10 @@ internal fun ThresholdAlertLogScreen(
     val resources = LocalResources.current
 
     var allEntries by rememberLiveAlertEntries(database)
-    val sensorProfiles by rememberLiveSensorProfiles(database)
     var filters by rememberRecordListFilters(filterPreferences, KEY_ALERT_LIST_FILTERS)
     var showFilters by rememberSaveable { mutableStateOf(false) }
     val entries = remember(allEntries, filters) { filterAlertEntries(allEntries, filters) }
-    val filterSensorNames = remember(allEntries, sensorProfiles) {
-        allEntries.map { it.sensorId }.distinct().associate { id ->
-            id.filterSensorKey() to detailSensorDisplayName(sensorProfiles[id])
-        }
-    }
+
     val filterRecordIds = remember(allEntries) { allEntries.map { it.id }.distinct() }
     val filterSessionIds = remember(allEntries) { allEntries.mapNotNull { it.sessionId }.distinct() }
     val filterNotes = remember(allEntries) {
@@ -713,8 +708,8 @@ internal fun ThresholdAlertLogScreen(
                         notes = filterNotes,
                         dates = filterDays,
                         variantFilterEnabled = false,
-                        sensorNames = filterSensorNames,
-                        modes = setOf(true),
+                        modeFilterEnabled = false,
+
                         backgroundColor = backgroundColor,
                         onChange = {
                             filters = it
@@ -1198,7 +1193,7 @@ internal fun AlertViolationSummary(
     val numericFormat = LocalUvirNumericFormat.current
     val detailText =
         if (qualityFlags.isOutOfRange(violation.rule.metric)) {
-            stringResource(R.string.out_of_range_short)
+            stringResource(R.string.sensor_saturation)
         } else if (showThresholdDeltaOnly) {
             alertThresholdDeltaPercent(
                 value = violation.value,

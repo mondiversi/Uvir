@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="usb_diagnostic_progress">Bileşenler denetleniyor: %1$d/%2$d</string>
+    <string name="usb_diagnostic_recognition">Tanıma</string>
+    <string name="usb_diagnostic_initialization">Başlatma</string>
+    <string name="usb_diagnostic_reading">Okuma</string>
+    <string name="usb_diagnostic_not_tested">Test edilmedi</string>
+    <string name="usb_diagnostic_readings">Yeni okumalar: %1$d/%2$d</string>
+    <string name="usb_diagnostic_notes">Bileşenlerin tanınmasını ve okumalarını denetler. Kalibrasyon ayrı bir test gerektirir.</string>
+    <string name="usb_diagnostic_wiring">Gücü, GND, SDA/SCL bağlantılarını ve D1–D2 köprüsünü kontrol edin.</string>
+    <string name="usb_diagnostic_technical">Teknik ayrıntılar</string>
+</resources>

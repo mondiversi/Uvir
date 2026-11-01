@@ -12,7 +12,7 @@
     <string name="window_measure_unavailable">Canale non disponibile</string>
     <string name="window_measure_insufficient">Dati insufficienti</string>
     <string name="window_measure_unstable">Illuminazione instabile</string>
-    <string name="window_measure_saturated">Segnale fuori scala</string>
+    <string name="window_measure_saturated">@string/sensor_saturation</string>
     <string name="window_measure_brighter">Valore filtrato maggiore</string>
     <string name="window_measure_out_of_range">Fattore fuori dai limiti</string>
 </resources>

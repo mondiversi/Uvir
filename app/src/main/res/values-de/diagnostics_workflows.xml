@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_log_open">Fehlerprotokoll öffnen</string>
+    <string name="error_log_view_description">Von der App aufgezeichnete Fehler anzeigen und exportieren.</string>
+    <string name="error_log_read_failed">Das Fehlerprotokoll kann nicht gelesen werden.</string>
+    <string name="debug_fake_saturation">Sättigung</string>
+    <string name="debug_fake_saturation_description">Sensorsättigung regelmäßig simulieren.</string>
+    <string name="record_archive_export_title">Erfassungen und Alarme exportieren</string>
+    <string name="error_log_clear_title">Fehlerprotokoll löschen?</string>
+    <string name="error_log_clear_description">Alle aufgezeichneten Fehler endgültig löschen.</string>
+    <string name="error_log_clear_complete">Fehlerprotokoll gelöscht.</string>
+    <string name="error_log_clear_failed">Das Fehlerprotokoll kann nicht gelöscht werden.</string>
+    <string name="error_log_size">Loggröße: %1$s</string>
+</resources>

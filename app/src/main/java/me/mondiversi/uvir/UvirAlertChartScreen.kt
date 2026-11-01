@@ -70,7 +70,6 @@ internal fun AlertChartScreen(
 ) {
     val context = LocalContext.current
     val resources = androidx.compose.ui.platform.LocalResources.current
-    val detailSensorName = rememberDetailSensorName(entry.sensorId, database)
     val allBars = remember(entry) { alertChartBars(entry) }
     val allViolations =
         remember(entry.details) {
@@ -331,8 +330,8 @@ internal fun AlertChartScreen(
             ) }
 
             item { UvirDetailContextCard(
-                automatic = true,
-                sensorName = detailSensorName,
+                automatic = null,
+
                 note =
                     alertDisplayNote(
                         note = currentNote,
@@ -568,7 +567,7 @@ private fun AlertVerticalBarChart(
                     val delta = bar.thresholdDeltaPercent
                     val deltaText =
                         if (bar.outOfRange) {
-                            stringResource(R.string.out_of_range_short)
+                            stringResource(R.string.sensor_saturation)
                         } else {
                             (if (delta < 0.0) "−" else "+") +
                                 formatUvirNumber(abs(delta), 1, numericFormat) + "%"

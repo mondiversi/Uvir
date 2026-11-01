@@ -8,7 +8,9 @@
     <string name="usb_hardware_pending">USB 지원을 준비 중입니다. 실제 측정은 FT232H 보드로 검증해야 합니다. 광학 응답과 절대 교정은 아직 검증되지 않았습니다.</string>
     <string name="usb_connect">USB OTG 데이터 어댑터로 FT232H와 두 센서를 연결하세요.</string>
     <string name="usb_permission">USB 접근 허용</string>
-    <string name="usb_initializing">센서 초기화 중…</string>
+    <string name="usb_initializing">초기화 중…</string>
+    <string name="usb_waiting">데이터 대기 중…</string>
+    <string name="sensor_saturation">포화</string>
     <string name="usb_ready">USB 연결됨</string>
     <string name="usb_error">USB 사용 불가</string>
     <string name="usb_retry">USB 다시 연결</string>

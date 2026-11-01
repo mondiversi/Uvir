@@ -3,10 +3,12 @@ package me.mondiversi.uvir
 import android.graphics.Paint
 import android.graphics.Rect
 import android.graphics.Typeface
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -52,7 +54,8 @@ internal fun UvirConnectionLabel(
     maxLines: Int = 1,
     softWrap: Boolean = true,
     scrollOverflow: Boolean = false,
-    textMaxWidth: Dp? = null
+    textMaxWidth: Dp? = null,
+    statusDot: Boolean = false
 ) {
     val resolvedStyle = LocalTextStyle.current.merge(style)
     val density = LocalDensity.current
@@ -90,7 +93,12 @@ internal fun UvirConnectionLabel(
         inkCenterOffset = if (top.isFinite()) (top + bottom) / 2f - layout.size.height / 2f else 0f
     }
     Row(modifier, verticalAlignment = Alignment.CenterVertically) {
-        UvirHomeSensorSourceIcon(
+        if (statusDot) Canvas(iconModifier.size(iconSize).graphicsLayer {
+            alpha = iconAlpha
+            translationY = inkCenterOffset
+        }) {
+            drawCircle(iconColor, radius = minOf(4.5.dp.toPx(), size.minDimension / 2))
+        } else UvirHomeSensorSourceIcon(
             type = type, tint = iconColor, iconSize = iconSize, strokeScale = strokeScale,
             modifier = iconModifier.graphicsLayer {
                 alpha = iconAlpha

@@ -158,7 +158,7 @@
     <string name="sensor_settings_connection_required">Connect the sensor to change these settings.</string>
     <string name="sensor_parameters_description">Configure the general aspects of the sensor.</string>
     <string name="home_sensor_disconnected_title">Sensor not connected</string>
-    <string name="home_sensor_disconnected_description">Connect a sensor to acquire data and record alerts.</string>
+    <string name="home_sensor_disconnected_description">Connect the sensor to acquire data and record alerts.</string>
     <string name="home_sensor_disconnected_hint">Open Settings › Sensor › Connection to choose USB, Wi-Fi, Bluetooth or Internet and view the instructions.</string>
     <string name="sensor_connection_provisioning_reminder">To use Wi-Fi or Bluetooth, connect the sensor by USB at least once. The app will securely acquire the sensor’s unique identity and access credentials.</string>
     <string name="sensor_connection_usb">USB</string>
@@ -748,14 +748,12 @@
     <string name="language_formats_description">Choose how data is displayed and formatted in the app.</string>
     <string name="irradiance_measurement_heading">Irradiance measurement</string>
     <string name="irradiance_measurement_description">Choose the unit used to display irradiance. Stored sensor values keep their original precision.</string>
-    <string name="out_of_range_short">OL - Out of range</string>
-    <string name="out_of_range_csv_header">Out_of_range</string>
     <string name="language_english_localized">English</string>
     <string name="settings_section_notifications">Notifications</string>
-    <string name="acquisition_feedback_description">Choose the feedback played by the app when a manual or automatic acquisition is saved.</string>
+    <string name="acquisition_feedback_description">Manage the app’s acquisition preferences.</string>
     <string name="acquisition_feedback_preview_hint">Final loudness also depends on the phone’s alarm volume.</string>
     <string name="confirmation_question_suffix">?</string>
-    <string name="threshold_alerts_sound_description_v2">Choose the feedback played by the app when a alert is recorded.</string>
+    <string name="threshold_alerts_sound_description_v2">Manage the app’s alert preferences.</string>
     <string name="list_filter_export_question">Export all displayed results?</string>
     <string name="list_filter_export_warning">No records are selected. Export all records matching the current filters.</string>
     <string name="settings_include_sensitive_information">Include sensitive data</string>

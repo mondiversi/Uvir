@@ -18,7 +18,7 @@
     <string name="debug_performance_indiana_jones">Indiana Jones</string>
     <string name="debug_performance_jurassic_park">Jurassic Park</string>
     <string name="debug_performance_star_wars">Star Wars</string>
-    <string name="debug_diagnostic">診断テスト</string>
+    <string name="debug_diagnostic">診断を実行</string>
     <string name="diagnostic_description">センサーの完全な診断テストを実行します。</string>
     <string name="diagnostic_title">センサー診断</string>
     <string name="diagnostic_progress">%1$d/%2$d 件の要求が完了</string>
@@ -41,8 +41,6 @@
     <string name="diagnostic_share_error">診断レポートを共有できませんでした。</string>
     <string name="diagnostic_failed">診断テストを完了できませんでした。</string>
     <string name="debug_secret_melody_found">秘密のメロディーを見つけました</string>
-    <string name="debug_fake_out_of_range">測定範囲外の値</string>
-    <string name="debug_fake_out_of_range_description">測定範囲外の値をときどき模擬します。</string>
     <string name="debug_simulate_events">イベントをシミュレート</string>
     <string name="debug_simulate_events_description">模擬測定とアラートを追加します。</string>
     <string name="debug_simulate_events_question">テストイベントをシミュレートしますか？</string>

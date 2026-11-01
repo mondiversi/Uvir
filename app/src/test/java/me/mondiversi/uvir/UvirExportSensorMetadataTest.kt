@@ -6,13 +6,13 @@ import org.junit.Test
 
 class UvirExportSensorMetadataTest {
     @Test
-    fun chartContextIncludesNoteAndItsOwnSensorName() {
+    fun chartContextIncludesOnlyTheNoteAndNoSensorProvenance() {
         assertEquals(
-            "Note: #3 Morning\nSensor: Balcony – חיישן",
+            "Note: #3 Morning",
             chartExportContextText("#3 Morning", "Balcony – חיישן")
         )
         assertEquals(
-            "Session note: No note\nSensor: Garden",
+            "Session note: No note",
             chartExportContextText("", "Garden", "Session note")
         )
     }
@@ -20,7 +20,7 @@ class UvirExportSensorMetadataTest {
     @Test
     fun unavailableSensorIsNotReplacedWithAnotherAssociation() {
         assertEquals("—", exportSensorName(""))
-        assertEquals("Note: Reading\nSensor: —", chartExportContextText("Reading", ""))
+        assertEquals("Note: Reading", chartExportContextText("Reading", ""))
     }
 
     @Test
@@ -30,7 +30,7 @@ class UvirExportSensorMetadataTest {
     }
 
     @Test
-    fun acquisitionCsvCarriesTheCorrectSensorForEachRecord() {
+    fun acquisitionCsvOmitsRetiredSensorNamesAndKeepsReferenceModels() {
         val csv = measurementCsv(
             listOf(
                 SavedRecordDetail(1L, 1L, "Morning", false, SensorSample(), sensorId = 7L, sensorDisplayName = "Garden"),
@@ -39,9 +39,10 @@ class UvirExportSensorMetadataTest {
             UvirNumericFormat.INTERNATIONAL
         )
         val lines = csv.trim().lines()
-        assertTrue(lines[0].endsWith("Sensor_name;Out_of_range;Optical_window;UV_sensor_model;VIS_IR_sensor_model"))
-        assertTrue(lines[1].endsWith(";Garden;0;;—;—"))
-        assertTrue(lines[2].endsWith(";Balcony;0;;—;—"))
+        assertTrue(lines[0].endsWith("Saturation;Optical_window;UV_sensor_model;VIS_IR_sensor_model"))
+        assertTrue(lines[1].endsWith(";0;;AS7331;AS7343"))
+        assertTrue(lines[2].endsWith(";0;;AS7331;AS7343"))
+        assertTrue(!csv.contains("Garden") && !csv.contains("Balcony"))
         lines.forEach {
             assertEquals(
                 measurementExportColumns(DATA_EXPORT_LANGUAGE).size,
@@ -51,13 +52,14 @@ class UvirExportSensorMetadataTest {
     }
 
     @Test
-    fun acquisitionCsvPreservesUnicodeAndEscapesSensorName() {
+    fun acquisitionCsvPreservesUnicodeInNotesAndDiscardsOldAliases() {
         val sensorName = "Balcony; \"חיישן\""
         val csv = measurementCsv(
-            listOf(SavedRecordDetail(1L, 1L, "", false, SensorSample(), sensorDisplayName = sensorName)),
+            listOf(SavedRecordDetail(1L, 1L, "Note; \"🌙\"", false, SensorSample(), sensorDisplayName = sensorName)),
             UvirNumericFormat.INTERNATIONAL
         )
-        assertTrue(csv.trim().endsWith(";" + csvCell(sensorName) + ";0;;—;—"))
-        assertTrue(csv.contains("חיישן"))
+        assertTrue(csv.trim().endsWith(";0;;AS7331;AS7343"))
+        assertTrue(!csv.contains("חיישן"))
+        assertTrue(csv.contains(csvCell("Note; \"🌙\"")))
     }
 }

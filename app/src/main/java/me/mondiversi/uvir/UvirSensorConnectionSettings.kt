@@ -6,7 +6,6 @@ import android.provider.Settings
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -146,7 +145,7 @@ internal fun UvirSensorConnectionSettings(
                 color = secondaryText,
                 fontSize = 12.sp
             )
-            OutlinedTextField(
+            UvirCompactTextField(
                 value = sensorWifiSsid,
                 onValueChange = onSensorWifiSsidChange,
                 modifier = Modifier

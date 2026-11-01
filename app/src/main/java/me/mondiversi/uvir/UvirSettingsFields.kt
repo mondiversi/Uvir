@@ -40,7 +40,7 @@ internal fun DecimalField(
 ) {
     val numericFormat = LocalUvirNumericFormat.current
     val localizedInput = uvirNumericInputTransformation(numericFormat)
-    OutlinedTextField(
+    UvirCompactTextField(
         value = value,
         onValueChange = { newValue ->
             onValueChange(filterUvirNumericInput(newValue, numericFormat, decimal = true).take(maxChars))
@@ -80,7 +80,7 @@ fun NumberField(
     onEditingComplete: () -> Unit = {}
 ) {
     val numericFormat = LocalUvirNumericFormat.current
-    OutlinedTextField(
+    UvirCompactTextField(
         value = value,
 
         onValueChange = { newValue ->

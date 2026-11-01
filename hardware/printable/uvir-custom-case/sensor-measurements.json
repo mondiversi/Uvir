@@ -1,0 +1,12 @@
+{
+  "units": "mm",
+  "view": "Components viewed from above, USB at the bottom",
+  "reference": "PCB top-left corner; x rightward, y downward",
+  "uv_centre_x_from_board_left": 24.3,
+  "uv_right_of_visible_ir": 0.5,
+  "visible_ir_centre_from_board_top": 6.4,
+  "centre_to_centre_distance": 13.5,
+  "uv_is_below_visible_ir": true,
+  "distance_interpretation": "13.5 mm remains the straight-line centre distance. The latest explicit horizontal offset is 0.5 mm, superseding the previous 1.8 mm difference. UV x=24.3 mm is retained, so VIS/IR x is derived as 23.8 mm, superseding 22.5 mm.",
+  "measurement_status": "Approximate user measurements; this is the latest reference for lid placement. The R0.2 base geometry and all other lid dimensions are unchanged."
+}

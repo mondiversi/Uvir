@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="release_011_status">التطوير معلّق: النموذج الأولي يعمل، لكن المعايرة البصرية لم تُحل بعد.</string>
+    <string name="release_011_case">نُشر الغلاف المرجعي بفتحة USB المصححة والغطاء المسطح بفتحتين بقطر 5 مم.</string>
+    <string name="release_011_improvements">تحسين أخذ العينات عبر USB ومعالجة التشبع والتشخيص والأرشيفات والوثائق.</string>
+</resources>

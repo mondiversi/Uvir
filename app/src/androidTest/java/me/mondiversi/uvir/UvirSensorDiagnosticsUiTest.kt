@@ -33,6 +33,42 @@ class UvirSensorDiagnosticsUiTest {
         internetBrokerHost = "PRIVATE_BROKER", bluetoothName = "PRIVATE_PAIRING"
     )
 
+    @Test fun usbDiagnosticWorksWithoutFirmwareAndReportsOnlySupportedComponents() {
+        val calls = AtomicInteger()
+        val usbInfo = usbPhoneDiagnosticInfo(UsbPhoneState(status = UsbPhoneStatus.READY,
+            identity = "FT232H:DIAGNOSTIC", uvAvailable = true, visibleAvailable = true), freshReading = true)
+        compose.setContent {
+            MaterialTheme {
+                val colors = MaterialTheme.colorScheme
+                UvirSensorDiagnosticsContent(true, usbInfo, SensorConnectionMode.USB, "Uvir",
+                    colors.surface, colors.onSurface, colors.onSurfaceVariant,
+                    onProbe = { id, mode ->
+                        assertEquals(usbInfo.deviceId, id); assertEquals(SensorConnectionMode.USB, mode)
+                        calls.incrementAndGet()
+                        UvirDiagnosticProbe(UvirDiagnosticOutcome.SUCCESS, 2.0, usbInfo)
+                    })
+            }
+        }
+        compose.onNodeWithText(resources.getString(R.string.debug_diagnostic)).assertIsEnabled().performClick()
+        compose.onNodeWithTag("diagnostic_dialog").assertIsDisplayed()
+        compose.waitUntil(8_000L) {
+            calls.get() == UVIR_DIAGNOSTIC_REQUESTS &&
+                compose.onAllNodesWithText(resources.getString(R.string.share)).fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithText(resources.getString(R.string.sensor_firmware_update_required_title)).assertDoesNotExist()
+        compose.onNodeWithText(resources.getString(R.string.share)).assertIsEnabled()
+        val report = UvirSensorDiagnosticReport(1_000L, 80L, "Uvir", SensorConnectionMode.USB, usbInfo,
+            List(UVIR_DIAGNOSTIC_REQUESTS) { UvirDiagnosticProbe(UvirDiagnosticOutcome.SUCCESS, 2.0, usbInfo) })
+        for (technical in listOf(false, true)) {
+            val formatted = formatUvirSensorDiagnosticReport(resources, report, technical)
+            for (supported in listOf("FT232H", "AS7331", "AS7343", "0x74", "0x39")) assertTrue(formatted.contains(supported))
+            for (retired in listOf("ESP32", "GPIO", "DS3231", "FRAM", "Wi-Fi", "Bluetooth",
+                resources.getString(R.string.sensor_info_firmware), resources.getString(R.string.sensor_info_micro_sd_status)))
+                assertFalse("Retired field: $retired", formatted.contains(retired))
+        }
+        compose.onNodeWithTag("diagnostic_cancel").performClick()
+    }
+
     @Test fun disconnectedButtonIsDisabledAndCannotSend() {
         val calls = AtomicInteger()
         compose.setContent {

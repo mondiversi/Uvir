@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_log_open">فتح سجل الأخطاء</string>
+    <string name="error_log_view_description">عرض الأخطاء التي سجلها التطبيق وتصديرها.</string>
+    <string name="error_log_read_failed">تعذرت قراءة سجل الأخطاء.</string>
+    <string name="debug_fake_saturation">تشبع</string>
+    <string name="debug_fake_saturation_description">محاكاة تشبع المستشعر بشكل دوري.</string>
+    <string name="record_archive_export_title">تصدير القياسات والتنبيهات</string>
+    <string name="error_log_clear_title">مسح سجل الأخطاء؟</string>
+    <string name="error_log_clear_description">حذف جميع الأخطاء المسجلة نهائيًا.</string>
+    <string name="error_log_clear_complete">تم مسح سجل الأخطاء.</string>
+    <string name="error_log_clear_failed">تعذر مسح سجل الأخطاء.</string>
+    <string name="error_log_size">حجم السجل: %1$s</string>
+</resources>

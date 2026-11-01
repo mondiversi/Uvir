@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="record_archive_title">采集和警报</string>
-    <string name="record_archive_description">通过单个文件导出或导入采集或警报及其会话。</string>
-    <string name="record_archive_export_description">将此类型的所有记录（包括会话）导出为单个文件。</string>
-    <string name="record_archive_import_description">数据添加到存档中。已有记录被跳过。未知传感器在关联前以硬件 ID 显示。</string>
+    <string name="record_archive_description">在一个文件中导出/导入测量和警报，包括其会话。</string>
+    <string name="record_archive_export_description">将所有测量和警报（包括会话）导出到一个文件中。</string>
+    <string name="record_archive_import_description">导入测量、警报和会话。已有记录会被跳过。</string>
     <string name="record_archive_import_summary">记录：%1$d · 会话：%2$d</string>
     <string name="record_archive_import_success">已导入：%1$d · 已存在：%2$d</string>
     <string name="record_archive_failed">无法传输记录。请检查文件和数据类型。</string>

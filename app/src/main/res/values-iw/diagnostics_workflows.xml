@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_log_open">פתיחת יומן שגיאות</string>
+    <string name="error_log_view_description">הצגה וייצוא של שגיאות שנרשמו באפליקציה.</string>
+    <string name="error_log_read_failed">לא ניתן לקרוא את יומן השגיאות.</string>
+    <string name="debug_fake_saturation">רוויה</string>
+    <string name="debug_fake_saturation_description">הדמיה מחזורית של רוויית החיישן.</string>
+    <string name="record_archive_export_title">ייצוא מדידות והתראות</string>
+    <string name="error_log_clear_title">לנקות את יומן השגיאות?</string>
+    <string name="error_log_clear_description">מחיקה לצמיתות של כל השגיאות שנרשמו.</string>
+    <string name="error_log_clear_complete">יומן השגיאות נוקה.</string>
+    <string name="error_log_clear_failed">לא ניתן לנקות את יומן השגיאות.</string>
+    <string name="error_log_size">גודל היומן: %1$s</string>
+</resources>

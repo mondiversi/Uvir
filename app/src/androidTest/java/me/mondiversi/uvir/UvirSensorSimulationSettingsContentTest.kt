@@ -38,7 +38,7 @@ class UvirSensorSimulationSettingsContentTest {
     fun diagnosticSwitchesRemainUsableWithRunningActivitiesWithoutLeavingTheirPage() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val fakeTitle = context.getString(R.string.debug_fake_data)
-        val olTitle = context.getString(R.string.debug_fake_out_of_range)
+        val olTitle = context.getString(R.string.debug_fake_saturation)
         val dark = mutableStateOf(false)
         val rtl = mutableStateOf(false)
         compose.setContent {

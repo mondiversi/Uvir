@@ -12,7 +12,7 @@
     <string name="window_measure_unavailable">کانال در دسترس نیست</string>
     <string name="window_measure_insufficient">دادهٔ ناکافی</string>
     <string name="window_measure_unstable">نور ناپایدار</string>
-    <string name="window_measure_saturated">سیگنال خارج از محدوده</string>
+    <string name="window_measure_saturated">@string/sensor_saturation</string>
     <string name="window_measure_brighter">مقدار با فیلتر بیشتر است</string>
     <string name="window_measure_out_of_range">ضریب خارج از محدودهٔ مجاز</string>
 </resources>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_log_open">Ouvrir le journal des erreurs</string>
+    <string name="error_log_view_description">Consulte et exporte les erreurs enregistrées par l’application.</string>
+    <string name="error_log_read_failed">Impossible de lire le journal des erreurs.</string>
+    <string name="debug_fake_saturation">Saturation</string>
+    <string name="debug_fake_saturation_description">Simule périodiquement la saturation du capteur.</string>
+    <string name="record_archive_export_title">Exporter les acquisitions et les alertes</string>
+    <string name="error_log_clear_title">Effacer le journal des erreurs ?</string>
+    <string name="error_log_clear_description">Supprime définitivement toutes les erreurs enregistrées.</string>
+    <string name="error_log_clear_complete">Journal des erreurs effacé.</string>
+    <string name="error_log_clear_failed">Impossible d’effacer le journal des erreurs.</string>
+    <string name="error_log_size">Taille du journal : %1$s</string>
+</resources>

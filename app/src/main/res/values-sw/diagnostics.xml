@@ -18,7 +18,7 @@
     <string name="debug_performance_indiana_jones">Indiana Jones</string>
     <string name="debug_performance_jurassic_park">Jurassic Park</string>
     <string name="debug_performance_star_wars">Star Wars</string>
-    <string name="debug_diagnostic">JARIBIO LA UCHUNGUZI</string>
+    <string name="debug_diagnostic">ENDESHA UCHUNGUZI</string>
     <string name="diagnostic_description">Hufanya jaribio kamili la uchunguzi wa kihisi.</string>
     <string name="diagnostic_title">Uchunguzi wa kihisi</string>
     <string name="diagnostic_progress">Maombi %1$d/%2$d yamekamilika</string>
@@ -41,8 +41,6 @@
     <string name="diagnostic_share_error">Imeshindwa kushiriki ripoti ya uchunguzi.</string>
     <string name="diagnostic_failed">Imeshindwa kukamilisha jaribio la uchunguzi.</string>
     <string name="debug_secret_melody_found">Umepata wimbo wa siri</string>
-    <string name="debug_fake_out_of_range">Thamani nje ya kiwango</string>
-    <string name="debug_fake_out_of_range_description">Mara kwa mara huiga thamani zilizo nje ya kiwango.</string>
     <string name="debug_simulate_events">IGA MATUKIO</string>
     <string name="debug_simulate_events_description">Ongeza vipimo na tahadhari za kuiga.</string>
     <string name="debug_simulate_events_question">Uige matukio ya majaribio?</string>

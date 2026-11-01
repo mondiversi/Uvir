@@ -8,7 +8,9 @@
     <string name="usb_hardware_pending">Dukungan USB sedang disiapkan. Pengukuran nyata harus diverifikasi dengan papan FT232H. Respons optik dan kalibrasi absolut belum divalidasi.</string>
     <string name="usb_connect">Hubungkan FT232H dan kedua sensor dengan adaptor data USB OTG.</string>
     <string name="usb_permission">Izinkan akses USB</string>
-    <string name="usb_initializing">Menginisialisasi sensor…</string>
+    <string name="usb_initializing">Menginisialisasi…</string>
+    <string name="usb_waiting">Menunggu data…</string>
+    <string name="sensor_saturation">Saturasi</string>
     <string name="usb_ready">USB terhubung</string>
     <string name="usb_error">USB tidak tersedia</string>
     <string name="usb_retry">Hubungkan ulang USB</string>

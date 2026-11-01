@@ -12,6 +12,8 @@ internal fun formatUvirSensorDiagnosticReport(
     report: UvirSensorDiagnosticReport,
     technicalFormat: Boolean = false
 ): String {
+    if (report.initialInfo.protocol == UVIR_USB_DIAGNOSTIC_PROTOCOL)
+        return formatUsbPhoneDiagnosticReport(resources, report, technicalFormat)
     val locale = resources.configuration.locales[0]
     val unavailable = resources.getString(R.string.sensor_info_unavailable)
     fun millis(value: Double?) = value?.let {

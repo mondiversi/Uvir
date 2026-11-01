@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="usb_diagnostic_progress">Komponenten prüfen: %1$d/%2$d</string>
+    <string name="usb_diagnostic_recognition">Erkennung</string>
+    <string name="usb_diagnostic_initialization">Initialisierung</string>
+    <string name="usb_diagnostic_reading">Messung</string>
+    <string name="usb_diagnostic_not_tested">Nicht geprüft</string>
+    <string name="usb_diagnostic_readings">Neue Messungen: %1$d/%2$d</string>
+    <string name="usb_diagnostic_notes">Prüft die Erkennung und Messwerte der Komponenten. Die Kalibrierung erfordert einen separaten Test.</string>
+    <string name="usb_diagnostic_wiring">Stromversorgung, GND, SDA/SCL und die D1–D2-Brücke prüfen.</string>
+    <string name="usb_diagnostic_technical">Technische Details</string>
+</resources>

@@ -18,7 +18,7 @@
     <string name="debug_performance_indiana_jones">Indiana Jones</string>
     <string name="debug_performance_jurassic_park">Jurassic Park</string>
     <string name="debug_performance_star_wars">Star Wars</string>
-    <string name="debug_diagnostic">آزمون عیب‌یابی</string>
+    <string name="debug_diagnostic">اجرای عیب‌یابی</string>
     <string name="diagnostic_description">یک آزمون تشخیصی کامل برای حسگر اجرا می‌کند.</string>
     <string name="diagnostic_title">عیب‌یابی حسگر</string>
     <string name="diagnostic_progress">%1$d/%2$d درخواست تکمیل شد</string>
@@ -41,8 +41,6 @@
     <string name="diagnostic_share_error">اشتراک‌گذاری گزارش عیب‌یابی ممکن نشد.</string>
     <string name="diagnostic_failed">تکمیل آزمون عیب‌یابی ممکن نشد.</string>
     <string name="debug_secret_melody_found">ملودی مخفی را پیدا کردی</string>
-    <string name="debug_fake_out_of_range">مقادیر خارج از محدوده</string>
-    <string name="debug_fake_out_of_range_description">گاهی مقادیر خارج از محدوده را شبیه‌سازی می‌کند.</string>
     <string name="debug_simulate_events">شبیه‌سازی رویدادها</string>
     <string name="debug_simulate_events_description">اندازه‌گیری‌ها و هشدارهای شبیه‌سازی‌شده را اضافه کنید.</string>
     <string name="debug_simulate_events_question">رویدادهای آزمایشی شبیه‌سازی شوند؟</string>

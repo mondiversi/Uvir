@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="release_011_status">Geliştirme askıya alındı: prototip çalışıyor ancak optik kalibrasyon henüz çözülemedi.</string>
+    <string name="release_011_case">USB açıklığı düzeltilmiş referans kutu ve iki adet 5 mm açıklığı olan düz kapak yayımlandı.</string>
+    <string name="release_011_improvements">USB örnekleme, doygunluk yönetimi, tanılama, arşivler ve belgeler iyileştirildi.</string>
+</resources>

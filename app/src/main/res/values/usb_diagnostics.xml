@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="usb_diagnostic_progress">Checking components: %1$d/%2$d</string>
+    <string name="usb_diagnostic_recognition">Recognition</string>
+    <string name="usb_diagnostic_initialization">Initialization</string>
+    <string name="usb_diagnostic_reading">Reading</string>
+    <string name="usb_diagnostic_not_tested">Not tested</string>
+    <string name="usb_diagnostic_readings">Fresh readings: %1$d/%2$d</string>
+    <string name="usb_diagnostic_notes">Checks component recognition and readings. Calibration requires a separate test.</string>
+    <string name="usb_diagnostic_wiring">Check power, GND, SDA/SCL and the D1–D2 jumper.</string>
+    <string name="usb_diagnostic_technical">Technical details</string>
+</resources>

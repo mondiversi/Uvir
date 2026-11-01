@@ -17,7 +17,9 @@ internal interface I2cBus : Closeable {
 }
 
 internal class I2cNack(val address: Int) : IOException("I2C device 0x${address.toString(16)} did not acknowledge")
-internal class InvalidSensorReading(message: String, val retryable: Boolean = false) : IOException(message)
+internal class I2cLinesHeldLow : IOException("I2C lines held low: check pull-ups, power and AD1/AD2 jumper")
+internal class InvalidSensorReading(message: String, val retryable: Boolean = false,
+    val saturated: Boolean = false, val rangeExhausted: Boolean = false) : IOException(message)
 internal fun littleEndianWord(data: ByteArray, index: Int = 0): Int =
     (data[index].toInt() and 255) or ((data[index + 1].toInt() and 255) shl 8)
 
@@ -29,8 +31,10 @@ internal fun stripFtdiStatus(bytes: ByteArray, count: Int, packetSize: Int): Byt
     while (offset < count) {
         val end = minOf(offset + packetSize, count)
         if (end - offset < 2) throw InvalidSensorReading("Truncated FTDI status packet")
-        // OE, PE, FE and BI are transport errors, not spectral readings.
-        if (bytes[offset + 1].toInt() and 0x1e != 0) throw InvalidSensorReading("FTDI line error")
+        // Keep OE, PE, FE and receive-FIFO errors fatal. UART BREAK is not an
+        // MPSSE transfer error (the same 0x8e error mask is used by PyFtdi).
+        val lineStatus = bytes[offset + 1].toInt() and 255
+        if (lineStatus and 0x8e != 0) throw InvalidSensorReading("FTDI line error: 0x${lineStatus.toString(16)}")
         for (i in offset + 2 until end) result.add(bytes[i])
         offset = end
     }

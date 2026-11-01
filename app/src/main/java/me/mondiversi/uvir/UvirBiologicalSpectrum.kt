@@ -246,7 +246,7 @@ private fun BiologicalEffectRow(
                     if (!readingAvailable) {
                         "—"
                     } else if (outOfRange) {
-                        stringResource(R.string.out_of_range_short)
+                        stringResource(R.string.sensor_saturation)
                     } else {
                         "${mainViewIrradianceNumber(value)} ${LocalUvirIrradianceUnit.current.unitLabel(equivalent = true)}"
                     },

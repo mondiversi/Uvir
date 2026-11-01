@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_log_open">Open error log</string>
+    <string name="error_log_view_description">View and export errors recorded by the app.</string>
+    <string name="error_log_read_failed">Unable to read the error log.</string>
+    <string name="debug_fake_saturation">Saturation</string>
+    <string name="debug_fake_saturation_description">Periodically simulate sensor saturation.</string>
+    <string name="record_archive_export_title">Export acquisitions and alerts</string>
+    <string name="error_log_clear_title">Clear the error log?</string>
+    <string name="error_log_clear_description">Permanently delete all recorded errors.</string>
+    <string name="error_log_clear_complete">Error log cleared.</string>
+    <string name="error_log_clear_failed">Unable to clear the error log.</string>
+    <string name="error_log_size">Log size: %1$s</string>
+</resources>

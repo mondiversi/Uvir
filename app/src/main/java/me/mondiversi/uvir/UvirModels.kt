@@ -178,6 +178,9 @@ internal fun SensorSample.scaledIrradiance(scale: Double): SensorSample = copy(
     f8 = f8 * scale, nir = nir * scale
 )
 
+// Keep the historical bit values/names for database, JSON and legacy protocol
+// compatibility. All existing and future flagged groups are presented as saturation.
+// Labels are localized at read/export time; no measured value or row ID is rewritten.
 internal const val UVIR_QUALITY_UV_OUT_OF_RANGE = 1
 internal const val UVIR_QUALITY_VISIBLE_NIR_OUT_OF_RANGE = 1 shl 1
 

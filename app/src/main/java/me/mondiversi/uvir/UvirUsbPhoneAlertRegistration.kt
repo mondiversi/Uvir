@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -21,9 +20,9 @@ internal fun UsbPhoneAlertRegistrationPage(
     val context = LocalContext.current
     val preferences = remember { context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE) }
     var settings by remember { mutableStateOf(loadThresholdAlertSettings(preferences).withMonitoringStopped()) }
-    val repeat = rememberUsbAlertDuration(settings.repeatSeconds.toLong())
-    val delay = rememberUsbAlertDuration(settings.startDelaySeconds)
-    val duration = rememberUsbAlertDuration(settings.durationSeconds)
+    val repeat = rememberUsbPhoneDuration(settings.repeatSeconds.toLong())
+    val delay = rememberUsbPhoneDuration(settings.startDelaySeconds)
+    val duration = rememberUsbPhoneDuration(settings.durationSeconds)
     var useDelay by rememberSaveable { mutableStateOf(settings.startDelaySeconds > 0) }
     var useDuration by rememberSaveable { mutableStateOf(settings.durationSeconds > 0) }
     var useLimit by rememberSaveable { mutableStateOf(settings.maxRegistrations > 0) }
@@ -85,21 +84,3 @@ internal fun UsbPhoneAlertRegistrationPage(
             showRules = false
         }, onBack = { showRules = false })
 }
-
-private class UsbAlertDuration(initial: List<String>) {
-    var hours by mutableStateOf(initial[0])
-    var minutes by mutableStateOf(initial[1])
-    var seconds by mutableStateOf(initial[2])
-    fun values() = listOf(hours, minutes, seconds)
-    fun seconds(): Long? {
-        val h = hours.toLongOrNull()?.takeIf { it in 0..999999 } ?: return null
-        val m = minutes.toLongOrNull()?.takeIf { it in 0..59 } ?: return null
-        val s = seconds.toLongOrNull()?.takeIf { it in 0..59 } ?: return null
-        return h * 3600 + m * 60 + s
-    }
-}
-
-@Composable
-private fun rememberUsbAlertDuration(seconds: Long): UsbAlertDuration = rememberSaveable(
-    saver = listSaver(save = { it.values() }, restore = { UsbAlertDuration(it) })
-) { UsbAlertDuration(listOf((seconds / 3600).toString(), (seconds / 60 % 60).toString(), (seconds % 60).toString())) }

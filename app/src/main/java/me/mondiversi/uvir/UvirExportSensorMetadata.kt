@@ -16,5 +16,5 @@ internal fun chartExportContextText(
     sensorLabel: String = "Sensor",
     emptyNote: String = "No note",
     hardwareCaption: String = ""
-): String = "$noteLabel: ${note.ifBlank { emptyNote }}\n$sensorLabel: ${exportSensorName(sensorName)}" +
+): String = "$noteLabel: ${note.ifBlank { emptyNote }}" +
     hardwareCaption.takeIf { it.isNotBlank() }?.let { "\n$it" }.orEmpty()

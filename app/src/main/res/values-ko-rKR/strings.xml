@@ -735,14 +735,12 @@
     <string name="language_formats_description">앱에서 데이터가 표시되고 형식화되는 방식을 선택하세요.</string>
     <string name="irradiance_measurement_heading">복사조도 측정</string>
     <string name="irradiance_measurement_description">복사조도 표시 단위를 선택합니다. 저장된 값은 센서의 원래 정밀도를 유지합니다.</string>
-    <string name="out_of_range_short">OL - 측정 범위 초과</string>
-    <string name="out_of_range_csv_header">측정_범위_초과</string>
     <string name="language_english_localized">영어</string>
     <string name="settings_section_notifications">알림</string>
-    <string name="acquisition_feedback_description">수동 또는 자동 측정이 저장될 때 앱에서 재생할 알림을 선택합니다.</string>
+    <string name="acquisition_feedback_description">측정에 대한 앱 설정을 관리합니다.</string>
     <string name="acquisition_feedback_preview_hint">최종 음량은 휴대전화의 알람 음량에도 따라 달라집니다.</string>
     <string name="confirmation_question_suffix">?</string>
-    <string name="threshold_alerts_sound_description_v2">알림이 기록될 때 앱에서 재생할 알림을 선택합니다.</string>
+    <string name="threshold_alerts_sound_description_v2">알림에 대한 앱 설정을 관리합니다.</string>
     <string name="list_filter_export_question">표시된 모든 결과를 내보내시겠습니까?</string>
     <string name="list_filter_export_warning">선택한 기록이 없습니다. 현재 필터와 일치하는 모든 기록을 내보냅니다.</string>
     <string name="settings_include_sensitive_information">민감한 데이터 포함</string>

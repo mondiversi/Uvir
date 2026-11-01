@@ -27,8 +27,8 @@ internal fun thresholdAlertLogCsv(
                 context.getString(R.string.threshold_value_label)
                     .withUvirIrradianceUnit(irradianceUnit),
                 context.getString(R.string.sensor_info_unit),
-                context.getString(R.string.sensor_name_label),
-                context.getString(R.string.out_of_range_csv_header),
+
+                context.getString(R.string.sensor_saturation),
                 "Optical_window"
             ).plus(hardwareCsvColumns(context.resources.configuration.locales[0].language)).joinToString(";")
         )
@@ -79,7 +79,7 @@ internal fun thresholdAlertLogCsv(
                         irradianceUnit.unitLabel(
                             equivalent = violation.rule.metric.isBiologicalEffect()
                         ),
-                        exportSensorName(entry.sensorDisplayName),
+
                         if (entry.qualityFlags.isOutOfRange(violation.rule.metric)) "1" else "0",
                         entry.opticalWindow?.toJson()?.toString().orEmpty(),
                         hardware.models(entry.sensorId).ultraviolet,
@@ -109,10 +109,6 @@ internal fun readableThresholdAlertLog(
     entries
         .sortedBy { it.id }
         .forEachIndexed { index, entry ->
-            appendLine(
-                "${context.getString(R.string.sensor_selector_label)}: " +
-                    exportSensorName(entry.sensorDisplayName)
-            )
             appendLine(hardware.models(entry.sensorId).caption())
             appendLine("${context.getString(R.string.optical_window_title)}: ${opticalWindowSummary(entry.opticalWindow, numericFormat)}")
             appendLine("${context.getString(R.string.alert_chart_id_label)}: ${entry.id}")
@@ -154,7 +150,7 @@ internal fun readableThresholdAlertLog(
 
                 appendLine(metric)
                 if (entry.qualityFlags.isOutOfRange(violation.rule.metric)) {
-                    appendLine(context.getString(R.string.out_of_range_short))
+                    appendLine(context.getString(R.string.sensor_saturation))
                 } else {
                     appendLine(
                         "${formatUvirIrradianceExportNumber(violation.value, numericFormat, irradianceUnit, irradianceDecimals)} $symbol " +

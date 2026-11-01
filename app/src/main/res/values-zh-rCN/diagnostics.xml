@@ -18,7 +18,7 @@
     <string name="debug_performance_indiana_jones">Indiana Jones</string>
     <string name="debug_performance_jurassic_park">Jurassic Park</string>
     <string name="debug_performance_star_wars">Star Wars</string>
-    <string name="debug_diagnostic">诊断测试</string>
+    <string name="debug_diagnostic">运行诊断</string>
     <string name="diagnostic_description">执行传感器的完整诊断测试。</string>
     <string name="diagnostic_title">传感器诊断</string>
     <string name="diagnostic_progress">已完成 %1$d/%2$d 个请求</string>
@@ -41,8 +41,6 @@
     <string name="diagnostic_share_error">无法分享诊断报告。</string>
     <string name="diagnostic_failed">无法完成诊断测试。</string>
     <string name="debug_secret_melody_found">你找到了隐藏的旋律</string>
-    <string name="debug_fake_out_of_range">超量程数值</string>
-    <string name="debug_fake_out_of_range_description">偶尔模拟超出量程的数值。</string>
     <string name="debug_simulate_events">模拟事件</string>
     <string name="debug_simulate_events_description">添加模拟采集和警报。</string>
     <string name="debug_simulate_events_question">模拟测试事件？</string>

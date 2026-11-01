@@ -28,19 +28,27 @@ internal data class UvirSensorDiagnosticReport(
     val sensorName: String,
     val connectionMode: SensorConnectionMode,
     val initialInfo: UvirSensorRuntimeInfo,
-    val probes: List<UvirDiagnosticProbe>
+    val probes: List<UvirDiagnosticProbe>,
+    val usbChecks: me.mondiversi.uvir.usb.UsbHeadChecks? = null
 ) {
     val responseTimes: List<Double> get() = probes.mapNotNull { it.responseMs }
     val responses: Int get() = probes.count { it.outcome == UvirDiagnosticOutcome.SUCCESS }
     val latestInfo: UvirSensorRuntimeInfo? get() = probes.lastOrNull { it.info != null }?.info
     val successful: Boolean
-        get() =
+        get() = if (usbChecks != null) usbChecks.passed &&
+            (probes.isEmpty() || probes.size == UVIR_DIAGNOSTIC_REQUESTS && responses == probes.size &&
+                probes.all { it.info?.diagnosticHardwareHealthy() == true })
+        else
             probes.size == UVIR_DIAGNOSTIC_REQUESTS &&
                 responses == probes.size &&
                 probes.all { it.info?.diagnosticHardwareHealthy() == true }
 }
 
 internal fun UvirSensorRuntimeInfo.diagnosticHardwareHealthy(): Boolean {
+    if (protocol == UVIR_USB_DIAGNOSTIC_PROTOCOL) return appConnected == true &&
+        sensorAvailable == true && uvAvailable == true &&
+        visibleSensorBusOk == true && visibleSensorDriverOk == true && visibleSensorReadOk == true &&
+        uvSensorBusOk == true && uvSensorDriverOk == true && uvSensorReadOk == true
     val uvHealthy =
         uvAvailable != true ||
             (uvSensorBusOk == true &&

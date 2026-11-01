@@ -121,9 +121,9 @@ internal fun UvirVersionInfoScreen(
                         }
                     ) {
                         (if (BuildConfig.USB_ONLY) listOf(
-                            stringResource(R.string.usb_about_architecture),
-                            stringResource(R.string.usb_phone_note),
-                            stringResource(R.string.usb_hardware_pending)
+                            stringResource(R.string.release_011_status),
+                            stringResource(R.string.release_011_case),
+                            stringResource(R.string.release_011_improvements)
                         ) else listOf(
                             stringResource(R.string.about_whats_new_connectivity),
                             stringResource(R.string.about_whats_new_connections),

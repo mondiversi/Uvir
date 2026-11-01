@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_log_open">오류 로그 열기</string>
+    <string name="error_log_view_description">앱이 기록한 오류를 확인하고 내보냅니다.</string>
+    <string name="error_log_read_failed">오류 로그를 읽을 수 없습니다.</string>
+    <string name="debug_fake_saturation">포화</string>
+    <string name="debug_fake_saturation_description">센서 포화를 주기적으로 시뮬레이션합니다.</string>
+    <string name="record_archive_export_title">측정 및 알림 내보내기</string>
+    <string name="error_log_clear_title">오류 로그를 지울까요?</string>
+    <string name="error_log_clear_description">기록된 모든 오류를 영구적으로 삭제합니다.</string>
+    <string name="error_log_clear_complete">오류 로그를 지웠습니다.</string>
+    <string name="error_log_clear_failed">오류 로그를 지울 수 없습니다.</string>
+    <string name="error_log_size">로그 크기: %1$s</string>
+</resources>

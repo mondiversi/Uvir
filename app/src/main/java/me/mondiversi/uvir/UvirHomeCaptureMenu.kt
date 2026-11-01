@@ -301,6 +301,7 @@ internal fun UvirHomeCaptureMenu(
             shape = CircleShape,
             color = if (sessionActive) countContainerColor else primaryContainerColor,
             contentColor = if (sessionActive) MaterialTheme.colorScheme.onSurface
+                else if (!manualEnabled) uvirDisabledActionContentColor()
                 else MaterialTheme.colorScheme.onPrimary,
             shadowElevation = UvirFloatingActionShadowElevation + 4.dp * visibleReveal
         ) {

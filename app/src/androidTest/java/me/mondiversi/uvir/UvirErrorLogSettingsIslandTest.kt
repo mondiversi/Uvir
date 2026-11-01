@@ -13,14 +13,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.sp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import java.util.Locale
+import java.io.File
 import org.junit.Assert.*
 import org.junit.Rule
 import org.junit.Test
@@ -30,10 +35,56 @@ import org.junit.runner.RunWith
 class UvirErrorLogSettingsIslandTest {
     @get:Rule val compose = createComposeRule()
 
+    @Test fun sizeSummaryTracksUtf8BytesAndClearingInBothThemesAndNumberFormats() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        assertTrue(context.packageName.endsWith(".verification"))
+        assertTrue(UvirErrorLog.clear(context))
+        var night by mutableStateOf(false)
+        var format by mutableStateOf(UvirNumericFormat.EUROPEAN)
+        var secondary = Color.Unspecified
+        compose.setContent {
+            KeepUvirVerificationScreenOn()
+            CompositionLocalProvider(LocalUvirNumericFormat provides format) {
+                MaterialTheme(colorScheme = if (night) darkColorScheme() else lightColorScheme()) {
+                    secondary = MaterialTheme.colorScheme.onSurfaceVariant
+                    UvirErrorLogSettingsIsland(MaterialTheme.colorScheme.surface,
+                        MaterialTheme.colorScheme.onSurface, secondary, onOpen = {})
+                }
+            }
+        }
+        fun expected(bytes: Long) = context.getString(R.string.error_log_size,
+            context.getString(R.string.sensor_info_kilobytes,
+                formatUvirNumber(bytes / 1024.0, 1, format, grouping = false, minimumDigits = 0)))
+        fun awaitSize(bytes: Long) {
+            val label = expected(bytes)
+            compose.waitUntil { compose.onAllNodesWithText(label).fetchSemanticsNodes().isNotEmpty() }
+        }
+        try {
+            for (dark in listOf(false, true)) for (numberFormat in listOf(UvirNumericFormat.EUROPEAN, UvirNumericFormat.INTERNATIONAL)) {
+                compose.runOnIdle { night = dark; format = numberFormat }
+                awaitSize(0)
+                compose.runOnIdle { UvirErrorLog.record(context, "size-fixture", "é漢☀".repeat(800)) }
+                val bytes = File(context.filesDir, "uvir_error_log.txt").length()
+                assertTrue("Measure UTF-8 bytes, not character count", bytes > UvirErrorLog.read(context).length)
+                awaitSize(bytes)
+                val layouts = mutableListOf<TextLayoutResult>()
+                compose.onNodeWithTag("error_log_size").performSemanticsAction(SemanticsActions.GetTextLayoutResult) { it(layouts) }
+                assertEquals(11.sp, layouts.single().layoutInput.style.fontSize)
+                assertEquals(14.sp, layouts.single().layoutInput.style.lineHeight)
+                assertEquals(secondary, layouts.single().layoutInput.style.color)
+                val button = compose.onNodeWithContentDescription(context.getString(R.string.error_log_open)).fetchSemanticsNode().boundsInRoot
+                val summary = compose.onNodeWithTag("error_log_size").fetchSemanticsNode().boundsInRoot
+                assertTrue(button.bottom <= summary.top)
+                assertTrue(UvirErrorLog.clear(context))
+                awaitSize(0)
+            }
+        } finally { UvirErrorLog.clear(context) }
+    }
+
     @Test
     fun islandKeepsSaveAndShareFlowInBothThemesAndLayoutDirections() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
-        val export = context.getString(R.string.debug_error_log)
+        val export = context.getString(R.string.error_log_open)
         val title = context.getString(R.string.export_error_log_dialog_title)
         val count = context.getString(R.string.export_file_count, "TXT", 1)
         val destinations = mutableListOf<UvirExportDestination>()
@@ -55,7 +106,7 @@ class UvirErrorLogSettingsIslandTest {
                         Text("Database marker")
                         UvirErrorLogSettingsIsland(
                             colors.surface, colors.onSurface, colors.onSurfaceVariant,
-                            onExport = { dialog = true }
+                            onOpen = { dialog = true }
                         )
                         Text("Reset marker")
                     }

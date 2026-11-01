@@ -1,0 +1,10 @@
+{
+  "release": "0.1.1",
+  "units": "mm",
+  "base_status": "User-selected reference enclosure R0.3; USB aperture corrected from fit measurements.",
+  "lid_status": "Published experimental R0.6 lid with 5 mm apertures; optical response is not validated.",
+  "sha256": {
+    "uvir-custom-case-base-r03.stl": "b301ef94e4dd4cddd8ef606b2dbe349e97264c456fee196ce77d09745d8b0e67",
+    "uvir-custom-case-lid-r06-5mm.stl": "bff98846c71a075e354e0a2413421549c55f44143d4abc308e4590abeda26ef1"
+  }
+}

@@ -151,7 +151,7 @@
     <string name="sensor_settings_connection_required">Connectez le capteur pour modifier ces paramètres.</string>
     <string name="sensor_parameters_description">Configurez les paramètres généraux du capteur.</string>
     <string name="home_sensor_disconnected_title">Capteur non connecté</string>
-    <string name="home_sensor_disconnected_description">Connectez un capteur pour acquérir des données et enregistrer des alertes.</string>
+    <string name="home_sensor_disconnected_description">Connectez le capteur pour acquérir des données et enregistrer des alertes.</string>
     <string name="home_sensor_disconnected_hint">Ouvrez Paramètres › Capteur › Connexion pour choisir USB, Wi-Fi, Bluetooth ou Internet et consulter les instructions.</string>
     <string name="sensor_connection_provisioning_reminder">Pour utiliser le Wi-Fi ou le Bluetooth, connectez le capteur par USB au moins une fois. L’application récupérera en toute sécurité l’identité unique et les identifiants d’accès du capteur.</string>
     <string name="sensor_connection_usb">USB</string>
@@ -755,14 +755,12 @@
     <string name="language_formats_description">Choisissez comment afficher et formater les données dans l’application.</string>
     <string name="irradiance_measurement_heading">Mesure de l’irradiance</string>
     <string name="irradiance_measurement_description">Choisissez l’unité d’affichage de l’irradiance. Les valeurs enregistrées conservent la précision d’origine du capteur.</string>
-    <string name="out_of_range_short">OL - Hors plage</string>
-    <string name="out_of_range_csv_header">Valeur_hors_plage</string>
     <string name="language_english_localized">Anglais</string>
     <string name="settings_section_notifications">Notifications</string>
-    <string name="acquisition_feedback_description">Choisissez le signal émis par l’application lorsqu’une acquisition manuelle ou automatique est enregistrée.</string>
+    <string name="acquisition_feedback_description">Gérez les préférences de l’application pour les acquisitions.</string>
     <string name="acquisition_feedback_preview_hint">Le volume final dépend aussi du volume d’alarme du téléphone.</string>
     <string name="confirmation_question_suffix">?</string>
-    <string name="threshold_alerts_sound_description_v2">Choisissez le signal émis par l’application lorsqu’une alerte est enregistrée.</string>
+    <string name="threshold_alerts_sound_description_v2">Gérez les préférences de l’application pour les alertes.</string>
     <string name="list_filter_export_question">Exporter tous les résultats affichés ?</string>
     <string name="list_filter_export_warning">Aucun enregistrement n’est sélectionné. Tous ceux correspondant aux filtres actuels sont exportés.</string>
     <string name="settings_include_sensitive_information">Inclure les données sensibles</string>

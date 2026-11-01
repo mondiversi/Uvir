@@ -18,7 +18,7 @@
     <string name="debug_performance_indiana_jones">Indiana Jones</string>
     <string name="debug_performance_jurassic_park">Jurassic Park</string>
     <string name="debug_performance_star_wars">Star Wars</string>
-    <string name="debug_diagnostic">UJI DIAGNOSTIK</string>
+    <string name="debug_diagnostic">JALANKAN DIAGNOSTIK</string>
     <string name="diagnostic_description">Menjalankan uji diagnostik sensor lengkap.</string>
     <string name="diagnostic_title">Diagnostik sensor</string>
     <string name="diagnostic_progress">%1$d/%2$d permintaan selesai</string>
@@ -41,8 +41,6 @@
     <string name="diagnostic_share_error">Laporan diagnostik tidak dapat dibagikan.</string>
     <string name="diagnostic_failed">Uji diagnostik tidak dapat diselesaikan.</string>
     <string name="debug_secret_melody_found">Anda menemukan melodi rahasia</string>
-    <string name="debug_fake_out_of_range">Nilai di luar rentang</string>
-    <string name="debug_fake_out_of_range_description">Sesekali mensimulasikan nilai di luar rentang.</string>
     <string name="debug_simulate_events">SIMULASIKAN KEJADIAN</string>
     <string name="debug_simulate_events_description">Tambahkan pengukuran dan peringatan simulasi.</string>
     <string name="debug_simulate_events_question">Simulasikan kejadian pengujian?</string>

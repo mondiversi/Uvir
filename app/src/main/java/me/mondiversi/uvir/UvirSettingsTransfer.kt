@@ -298,6 +298,9 @@ internal fun importUvirSettingsFiles(
                 UVIR_SETTINGS_TRANSFER_MINIMUM_VERSION..UVIR_SETTINGS_TRANSFER_VERSION
         )
         require(root.getString("scope") in setOf("app", "sensor"))
+        require(!BuildConfig.USB_ONLY || root.getString("scope") == "app") {
+            "ESP32 sensor settings are not supported by Uvir"
+        }
         root.getJSONObject("payload")
     }
     val importedSensors = mutableListOf<UvirImportedSensorSettings>()

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="release_011_status">विकास स्थगित है: प्रोटोटाइप काम करता है, लेकिन ऑप्टिकल अंशांकन अभी अनसुलझा है।</string>
+    <string name="release_011_case">सुधारे गए USB छिद्र वाला संदर्भ केस और दो 5 mm छिद्रों वाला सपाट ढक्कन प्रकाशित किया गया।</string>
+    <string name="release_011_improvements">USB सैंपलिंग, संतृप्ति प्रबंधन, निदान, अभिलेख और दस्तावेज़ीकरण में सुधार किया गया।</string>
+</resources>

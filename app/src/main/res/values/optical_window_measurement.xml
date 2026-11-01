@@ -12,7 +12,7 @@
     <string name="window_measure_unavailable">Channel unavailable</string>
     <string name="window_measure_insufficient">Insufficient data</string>
     <string name="window_measure_unstable">Unstable illumination</string>
-    <string name="window_measure_saturated">Signal out of range</string>
+    <string name="window_measure_saturated">@string/sensor_saturation</string>
     <string name="window_measure_brighter">Filtered value higher</string>
     <string name="window_measure_out_of_range">Factor outside allowed range</string>
 </resources>

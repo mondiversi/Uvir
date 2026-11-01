@@ -8,7 +8,9 @@
     <string name="usb_hardware_pending">Obsługa USB jest przygotowywana. Rzeczywiste pomiary wymagają sprawdzenia z płytką FT232H. Odpowiedź optyczna i kalibracja bezwzględna pozostają niezweryfikowane.</string>
     <string name="usb_connect">Połącz FT232H i oba czujniki przez adapter danych USB OTG.</string>
     <string name="usb_permission">Zezwól na dostęp USB</string>
-    <string name="usb_initializing">Inicjalizacja czujników…</string>
+    <string name="usb_initializing">Inicjalizacja…</string>
+    <string name="usb_waiting">Oczekiwanie na dane…</string>
+    <string name="sensor_saturation">Nasycenie</string>
     <string name="usb_ready">USB połączone</string>
     <string name="usb_error">USB niedostępne</string>
     <string name="usb_retry">Połącz USB ponownie</string>

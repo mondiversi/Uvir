@@ -151,7 +151,7 @@
     <string name="sensor_settings_connection_required">Conecte o sensor para alterar essas configurações.</string>
     <string name="sensor_parameters_description">Configure os aspectos gerais do sensor.</string>
     <string name="home_sensor_disconnected_title">Sensor não conectado</string>
-    <string name="home_sensor_disconnected_description">Liga um sensor para efetuar aquisições e registar alertas.</string>
+    <string name="home_sensor_disconnected_description">Liga o sensor para efetuar aquisições e registar alertas.</string>
     <string name="home_sensor_disconnected_hint">Abra Configurações › Sensor › Conexão para escolher USB, Wi-Fi, Bluetooth ou Internet e consultar as instruções.</string>
     <string name="sensor_connection_provisioning_reminder">Para usar Wi-Fi ou Bluetooth, ligue o sensor por USB pelo menos uma vez. A aplicação obterá com segurança a identidade única e as credenciais de acesso do sensor.</string>
     <string name="sensor_connection_usb">USB</string>
@@ -755,14 +755,12 @@
     <string name="language_formats_description">Escolha como os dados são apresentados e formatados na aplicação.</string>
     <string name="irradiance_measurement_heading">Medição de irradiância</string>
     <string name="irradiance_measurement_description">Escolha a unidade usada para apresentar a irradiância. Os valores guardados mantêm a precisão original do sensor.</string>
-    <string name="out_of_range_short">OL - Fora da escala</string>
-    <string name="out_of_range_csv_header">Valor_fora_da_escala</string>
     <string name="language_english_localized">Inglês</string>
     <string name="settings_section_notifications">Notificações</string>
-    <string name="acquisition_feedback_description">Escolha o sinal reproduzido pela aplicação quando uma aquisição manual ou automática é guardada.</string>
+    <string name="acquisition_feedback_description">Gere as preferências da aplicação para as aquisições.</string>
     <string name="acquisition_feedback_preview_hint">O volume final também depende do volume de alarme do telefone.</string>
     <string name="confirmation_question_suffix">?</string>
-    <string name="threshold_alerts_sound_description_v2">Escolha o sinal reproduzido pela aplicação quando um alerta é registado.</string>
+    <string name="threshold_alerts_sound_description_v2">Gere as preferências da aplicação para os alertas.</string>
     <string name="list_filter_export_question">Exportar todos os resultados apresentados?</string>
     <string name="list_filter_export_warning">Nenhum registo está selecionado. São exportados todos os registos correspondentes aos filtros atuais.</string>
     <string name="settings_include_sensitive_information">Incluir dados sensíveis</string>

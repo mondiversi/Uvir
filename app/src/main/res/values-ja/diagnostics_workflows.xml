@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_log_open">エラーログを開く</string>
+    <string name="error_log_view_description">アプリが記録したエラーを表示・エクスポートします。</string>
+    <string name="error_log_read_failed">エラーログを読み取れません。</string>
+    <string name="debug_fake_saturation">飽和</string>
+    <string name="debug_fake_saturation_description">センサーの飽和を定期的にシミュレートします。</string>
+    <string name="record_archive_export_title">測定とアラートをエクスポート</string>
+    <string name="error_log_clear_title">エラーログを消去しますか？</string>
+    <string name="error_log_clear_description">記録されたすべてのエラーを完全に削除します。</string>
+    <string name="error_log_clear_complete">エラーログを消去しました。</string>
+    <string name="error_log_clear_failed">エラーログを消去できません。</string>
+    <string name="error_log_size">ログサイズ：%1$s</string>
+</resources>

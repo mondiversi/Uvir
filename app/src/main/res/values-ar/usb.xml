@@ -8,7 +8,9 @@
     <string name="usb_hardware_pending">دعم USB قيد الإعداد. يجب التحقق من القياسات الفعلية باستخدام لوحة FT232H. لم يتم التحقق بعد من الاستجابة البصرية والمعايرة المطلقة.</string>
     <string name="usb_connect">وصّل FT232H والمستشعرين باستخدام محول بيانات USB OTG.</string>
     <string name="usb_permission">اسمح بالوصول إلى USB</string>
-    <string name="usb_initializing">جارٍ تهيئة المستشعرات…</string>
+    <string name="usb_initializing">جارٍ التهيئة…</string>
+    <string name="usb_waiting">بانتظار البيانات…</string>
+    <string name="sensor_saturation">تشبع</string>
     <string name="usb_ready">USB متصل</string>
     <string name="usb_error">USB غير متاح</string>
     <string name="usb_retry">إعادة توصيل USB</string>

@@ -12,7 +12,7 @@
     <string name="window_measure_unavailable">Μη διαθέσιμο κανάλι</string>
     <string name="window_measure_insufficient">Ανεπαρκή δεδομένα</string>
     <string name="window_measure_unstable">Ασταθής φωτισμός</string>
-    <string name="window_measure_saturated">Σήμα εκτός κλίμακας</string>
+    <string name="window_measure_saturated">@string/sensor_saturation</string>
     <string name="window_measure_brighter">Υψηλότερη τιμή με φίλτρο</string>
     <string name="window_measure_out_of_range">Συντελεστής εκτός επιτρεπτών ορίων</string>
 </resources>

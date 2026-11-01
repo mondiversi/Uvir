@@ -1,8 +1,10 @@
-# USB measuring-head wiring — preliminary
+# Uvir functional wiring and first connection
 
-This is the logical connection plan for the ordered CJMCU FT232H board, not a
-verified photograph of its header. Confirm the actual board markings and its
-power circuit when it arrives. Leave the old ESP32 disconnected from the bus.
+The assembled prototype uses this shared-bus connection plan. The diagram is
+not a physical header photograph or an individual perfboard wire-routing plan.
+Check the actual breakout markings and power circuitry when replicating it.
+Leave the old ESP32 disconnected from the bus. See the
+[hardware and removable-module guide](../../hardware/usb/README.md).
 
 ![Logical FT232H wiring for both optical modules](wiring.svg)
 
@@ -44,7 +46,7 @@ by this initial driver; verify both modules work with the chosen timing.
 
 ## First connection and live readings
 
-1. Install the signed [Uvir 0.1.0](https://github.com/mondiversi/Uvir/releases/tag/v0.1.0)
+1. Install the signed [Uvir 0.1.1](https://github.com/mondiversi/Uvir/releases/tag/v0.1.1)
    on an Android 8.0+ phone with USB host/OTG support. An existing installation
    can be updated with the same signing identity; do not uninstall it to test.
 2. With USB disconnected, wire the modules as above and inspect the supply,
@@ -55,9 +57,17 @@ by this initial driver; verify both modules work with the chosen timing.
 4. The app initializes MPSSE and checks AS7331 at `0x74` and AS7343 at `0x39`.
    Both optical chips must initialize before the main view displays real values.
    Ensure simulated data is off when checking the physical hardware.
-5. Open **Diagnostics** from the menu to inspect adapter status, each detected
-   chip, current gains and any error. If USB permission was denied, use **Retry**
-   or reconnect the head; the app does not repeatedly reopen Android's prompt.
+5. Open **Diagnostics > Sensor diagnostics** and use **Run diagnostics** after
+   granting USB permission. The button also works when one or both optical
+   modules failed to initialize. Its report lists FT232H USB/MPSSE/I²C checks,
+   then AS7331 (`0x74`) and AS7343 (`0x39`) recognition, chip ID, initialization
+   and reading results separately. A missing module cannot hide the other one.
+   A failed idle connection gets one fresh initialization attempt. A healthy
+   connection supplies six new reading pairs without reconnecting or interrupting
+   sessions. Calibration and saved records are unchanged; failures enter the
+   error log, and the report can be saved or shared. No RTC, FRAM, SD or ESP32
+   firmware fields appear. The button is disabled without an authorized real
+   FT232H, during initialization/reference collection and with simulated data.
 6. Compare covered/uncovered readings without applying new calibration first.
    Live readings should update before starting manual acquisition, an automatic
    session or alert recording. Stop a session before unplugging the head.
@@ -71,15 +81,23 @@ by this initial driver; verify both modules work with the chosen timing.
 | Not ready / saturation | Light level and gain settling; failed readings are not saved as zeros |
 
 The app uses Android's USB host API to drive MPSSE directly. There is **no
-firmware to flash onto the FT232H**. Real transfers, startup pin behavior and
-absolute irradiance still require validation with the arriving board.
+firmware to flash onto the FT232H**. The prototype has supplied real readings; compatibility of other boards and
+startup pin behavior must still be checked. Absolute irradiance and optical
+calibration remain unresolved. See [project status](../PROJECT_STATUS.md).
+
+## Use a computer instead of Android
+
+See [Read Uvir without the Android app](STANDALONE.md) for the terminal reader,
+register send/receive sequences and the division between raw readings and
+host-side calculations. No ESP32 serial commands or firmware are involved.
 
 ## Identity
 
 FT232H USB serial numbers depend on its optional programmed EEPROM. An adapter
 without a usable serial number does not acquire a globally unique identity from
 its model or I²C addresses. The app uses a temporary attachment identity for
-record provenance when no serial is available. Sampling and calibration settings
+connection/reference/diagnostic tracking in memory when no serial is available.
+It is not saved as record provenance. Sampling and calibration settings
 belong to the phone and survive disconnect/reconnect independently of that
 identity. No ESP32 hardware ID is fabricated.
 

@@ -175,10 +175,6 @@ internal fun readableAcquisitionExportTable(
                     "${context.getString(R.string.share_session_id_label)}: ${item.sessionId}"
                 )
                 appendLine(
-                    "${context.getString(R.string.sensor_selector_label)}: " +
-                        exportSensorNames(item.records.map { it.sensorDisplayName })
-                )
-                appendLine(
                     context.getString(
                         R.string.session_chart_start,
                         csvDateTime(

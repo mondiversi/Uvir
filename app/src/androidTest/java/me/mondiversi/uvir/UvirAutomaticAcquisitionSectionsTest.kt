@@ -56,7 +56,7 @@ class UvirAutomaticAcquisitionSectionsTest {
         val header = compose.onNodeWithText("Option", useUnmergedTree = true)
         val before = header.fetchSemanticsNode().boundsInRoot.top
         if (useCheckbox) compose.onNode(isToggleable()).performClick()
-        else compose.onNodeWithText("Option").performClick()
+        else compose.onNodeWithContentDescription("Option").performClick()
         compose.waitForIdle()
         val after = header.fetchSemanticsNode().boundsInRoot.top
         val listTop = compose.onNodeWithTag("list").fetchSemanticsNode().boundsInRoot.top
@@ -101,7 +101,7 @@ class UvirAutomaticAcquisitionSectionsTest {
             for (open in listOf(false, true)) {
                 compose.runOnIdle { dark.value = night; expanded.value = open }
                 compose.waitForIdle()
-                val header = compose.onNodeWithText("Option")
+                val header = compose.onNodeWithContentDescription("Option")
                 val card = compose.onNodeWithTag("card")
                 assertEquals("Whole header remains the tap target", card.fetchSemanticsNode().boundsInRoot.width,
                     header.fetchSemanticsNode().boundsInRoot.width, 1f)
@@ -143,7 +143,7 @@ class UvirAutomaticAcquisitionSectionsTest {
         }
         assertEquals(14.sp, layout().layoutInput.style.fontSize)
         assertEquals(FontWeight.Normal, layout().layoutInput.style.fontWeight)
-        compose.onNodeWithText("Option").performClick()
+        compose.onNodeWithContentDescription("Option").performClick()
         assertEquals(14.sp, layout().layoutInput.style.fontSize)
         assertEquals(FontWeight.Bold, layout().layoutInput.style.fontWeight)
     }

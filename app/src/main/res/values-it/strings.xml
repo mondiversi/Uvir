@@ -163,7 +163,7 @@
     <string name="sensor_settings_connection_required">Connetti il sensore per modificare queste impostazioni.</string>
     <string name="sensor_parameters_description">Configura gli aspetti generali del sensore.</string>
     <string name="home_sensor_disconnected_title">Sensore non connesso</string>
-    <string name="home_sensor_disconnected_description">Connetti un sensore per effettuare acquisizioni e registrare allerte.</string>
+    <string name="home_sensor_disconnected_description">Connetti il sensore per effettuare acquisizioni e registrare allerte.</string>
     <string name="home_sensor_disconnected_hint">Apri Impostazioni › Sensore › Connessione per scegliere USB, Wi-Fi, Bluetooth o Internet e consultare le istruzioni.</string>
     <string name="sensor_connection_provisioning_reminder">Per usare Wi-Fi o Bluetooth, collega il sensore via USB almeno una volta. L’app acquisirà in sicurezza l’identità e le credenziali di accesso univoche del sensore.</string>
     <string name="sensor_connection_usb">USB</string>
@@ -759,14 +759,12 @@
     <string name="language_formats_description">Scegli come visualizzare e formattare i dati nell’app.</string>
     <string name="irradiance_measurement_heading">Misura irradianza</string>
     <string name="irradiance_measurement_description">Scegli l’unità usata per visualizzare l’irradianza. I valori salvati dal sensore mantengono la precisione originale.</string>
-    <string name="out_of_range_short">OL - Fuori scala</string>
-    <string name="out_of_range_csv_header">Valore_fuori_scala</string>
     <string name="language_english_localized">Inglese</string>
     <string name="settings_section_notifications">Notifiche</string>
-    <string name="acquisition_feedback_description">Scegli il segnale riprodotto dall’app quando viene salvata un’acquisizione manuale o automatica.</string>
+    <string name="acquisition_feedback_description">Gestisci le preferenze dell’app per le acquisizioni.</string>
     <string name="acquisition_feedback_preview_hint">Il volume finale dipende anche dal volume allarmi del telefono.</string>
     <string name="confirmation_question_suffix">?</string>
-    <string name="threshold_alerts_sound_description_v2">Scegli il segnale riprodotto dall’app quando viene registrata un’allerta.</string>
+    <string name="threshold_alerts_sound_description_v2">Gestisci le preferenze dell’app per le allerte.</string>
     <string name="list_filter_export_question">Esportare tutti i risultati visualizzati?</string>
     <string name="list_filter_export_warning">Nessun record selezionato. Esporta tutti i record che corrispondono ai filtri attuali.</string>
     <string name="settings_include_sensitive_information">Includi dati sensibili</string>

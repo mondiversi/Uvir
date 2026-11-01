@@ -81,13 +81,13 @@ class ExampleUnitTest {
             DATA_EXPORT_LANGUAGE
         )
         assertEquals(
-            MEASUREMENT_EXPORT_COLUMNS_EN + listOf("Out_of_range", "Optical_window") + hardwareCsvColumns("en"),
+            MEASUREMENT_EXPORT_COLUMNS_EN + listOf("Saturation", "Optical_window") + hardwareCsvColumns("en"),
             measurementExportColumns(
                 DATA_EXPORT_LANGUAGE
             )
         )
         assertEquals(
-            62,
+            61,
             MEASUREMENT_EXPORT_COLUMNS_IT.size
         )
         assertEquals(

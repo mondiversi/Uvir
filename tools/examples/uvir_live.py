@@ -1,4 +1,7 @@
-"""Minimal live-only UVIR reader. No provisioning, persistent edits or record ACKs.
+"""Legacy ESP32 live-only UVIR reader; NOT for the current FT232H head.
+
+For FT232H use uvir_ft232h.py and docs/usb/STANDALONE.md.
+No provisioning, persistent edits or record ACKs.
 
 USB needs pyserial; local Wi-Fi TCP uses the Python standard library.
 Use an idle sensor, disconnected from Android. See docs/STANDALONE_SENSOR.md.

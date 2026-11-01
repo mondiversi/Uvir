@@ -768,14 +768,12 @@
     <string name="language_formats_description">Wybierz sposób wyświetlania i formatowania danych w aplikacji.</string>
     <string name="irradiance_measurement_heading">Pomiar natężenia napromienienia</string>
     <string name="irradiance_measurement_description">Wybierz jednostkę wyświetlania natężenia napromienienia. Zapisane wartości czujnika zachowują pierwotną precyzję.</string>
-    <string name="out_of_range_short">OL - Poza zakresem</string>
-    <string name="out_of_range_csv_header">Out_of_range</string>
     <string name="language_english_localized">English</string>
     <string name="settings_section_notifications">Powiadomienia</string>
-    <string name="acquisition_feedback_description">Wybierz sygnał odtwarzany przez aplikację po zapisaniu pomiaru ręcznego lub automatycznego.</string>
+    <string name="acquisition_feedback_description">Zarządzaj preferencjami aplikacji dotyczącymi pomiarów.</string>
     <string name="acquisition_feedback_preview_hint">Ostateczna głośność zależy również od głośności alarmów telefonu.</string>
     <string name="confirmation_question_suffix">?</string>
-    <string name="threshold_alerts_sound_description_v2">Wybierz sygnał odtwarzany przez aplikację po zapisaniu alertu.</string>
+    <string name="threshold_alerts_sound_description_v2">Zarządzaj preferencjami aplikacji dotyczącymi alertów.</string>
     <string name="list_filter_export_question">Wyeksportować wszystkie wyświetlone wyniki?</string>
     <string name="list_filter_export_warning">Nie wybrano żadnych rekordów. Wszystkie rekordy pasujące do bieżących filtrów są eksportowane.</string>
     <string name="settings_include_sensitive_information">Uwzględnij dane wrażliwe</string>

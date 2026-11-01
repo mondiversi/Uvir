@@ -1,9 +1,9 @@
 # Uvir updates
 
-## Uvir — 0.1.0 prerelease
+## Uvir — 0.1.1 prerelease
 
 Uvir is distributed from the
-[v0.1.0 prerelease](https://github.com/mondiversi/Uvir/releases/tag/v0.1.0).
+[v0.1.1 prerelease](https://github.com/mondiversi/Uvir/releases/tag/v0.1.1).
 Install the owner-signed APK over an existing compatible installation, without
 uninstalling or clearing its data. Stop active sessions first. There is no
 firmware to install on an FT232H head.

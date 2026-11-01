@@ -52,7 +52,7 @@ class UvirRecordArchiveUiTest {
     }
     @After fun cleanup() { database.close(); root.deleteRecursively() }
 
-    @Test fun islandUsesStandardActionsAndUpdatesOnlyItsOwnExportAvailability() {
+    @Test fun islandHasOneActionPairAndExportsBothRecordFamilies() {
         fixture {
             val red = UvirDestructiveActionColor
             val purple = MaterialTheme.colorScheme.primary
@@ -64,28 +64,26 @@ class UvirRecordArchiveUiTest {
                 }
             }
         }
-        compose.waitUntil { compose.onAllNodesWithTag("archive_import_ALERTS").fetchSemanticsNodes().isNotEmpty() }
-        compose.onNodeWithTag("archive_export_ACQUISITIONS").assertIsNotEnabled()
-        compose.onNodeWithTag("archive_export_ALERTS").assertIsNotEnabled()
-        compose.onNodeWithTag("archive_import_ACQUISITIONS").assertIsEnabled()
+        compose.waitUntil { compose.onAllNodesWithTag("archive_import_all").fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithTag("archive_export_all").assertIsNotEnabled()
+        compose.onNodeWithTag("archive_export_ALERTS").assertDoesNotExist()
+        compose.onNodeWithTag("archive_import_all").assertIsEnabled()
         compose.runOnIdle { database.saveAcquisition(SensorSample(), "private fixture", timestamp = 1000) }
-        compose.waitUntil { runCatching { compose.onNodeWithTag("archive_export_ACQUISITIONS").assertIsEnabled() }.isSuccess }
-        compose.onNodeWithTag("archive_export_ALERTS").assertIsNotEnabled()
+        compose.waitUntil { runCatching { compose.onNodeWithTag("archive_export_all").assertIsEnabled() }.isSuccess }
         compose.runOnIdle {
             database.insertThresholdAlertLog(listOf(ThresholdAlertViolation(
                 ThresholdAlertRule(ThresholdAlertMetric.UVB, true, ThresholdAlertDirection.ABOVE, .1f), .2)),
                 timestamp = 2000)
         }
-        compose.waitUntil { runCatching { compose.onNodeWithTag("archive_export_ALERTS").assertIsEnabled() }.isSuccess }
+        compose.waitUntil { runCatching { compose.onNodeWithTag("archive_export_all").assertIsEnabled() }.isSuccess }
         for (dark in listOf(false, true)) {
             compose.runOnIdle { night.value = dark }
-            compose.onNodeWithTag("archive_export_ACQUISITIONS").performScrollTo()
+            compose.onNodeWithTag("archive_export_all").performScrollTo()
             saveScreenshot("record-archive-island-${if (dark) "night" else "day"}")
-            for (direction in listOf(false, true)) for ((kind, title) in listOf(
-                UvirArchiveKind.ACQUISITIONS to R.string.record_archive_export_acquisitions_title,
-                UvirArchiveKind.ALERTS to R.string.record_archive_export_alerts_title)) {
+            for (direction in listOf(false, true)) {
+                val title = R.string.record_archive_export_title
                 compose.runOnIdle { rtl.value = direction }
-                compose.onNodeWithTag("archive_export_${kind.name}").performScrollTo().performClick()
+                compose.onNodeWithTag("archive_export_all").performScrollTo().performClick()
                 compose.onNodeWithText(context.getString(title)).assertIsDisplayed()
                 compose.onNodeWithText(context.getString(R.string.record_archive_export_description)).assertIsDisplayed()
                 compose.onNodeWithText(context.getString(R.string.export_file_count, "JSON", 1)).assertIsDisplayed()
@@ -97,7 +95,7 @@ class UvirRecordArchiveUiTest {
                     compose.onNodeWithText(formatUvirActionLabel(context.getString(action), Locale.getDefault()),
                         useUnmergedTree = true).assertUvirActionTextColor(actionColor)
                 }
-                if (!direction) saveScreenshot("record-archive-export-${kind.name.lowercase()}-${if (dark) "night" else "day"}")
+                if (!direction) saveScreenshot("record-archive-export-all-${if (dark) "night" else "day"}")
                 compose.onNodeWithTag("archive_export_close").assertIsEnabled().performClick()
                 compose.onNodeWithText(context.getString(title)).assertDoesNotExist()
             }

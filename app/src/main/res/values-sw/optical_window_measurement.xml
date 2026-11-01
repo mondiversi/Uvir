@@ -12,7 +12,7 @@
     <string name="window_measure_unavailable">Chaneli haipatikani</string>
     <string name="window_measure_insufficient">Data haitoshi</string>
     <string name="window_measure_unstable">Mwanga usio thabiti</string>
-    <string name="window_measure_saturated">Ishara iko nje ya kiwango</string>
+    <string name="window_measure_saturated">@string/sensor_saturation</string>
     <string name="window_measure_brighter">Thamani yenye kichujio ni kubwa zaidi</string>
     <string name="window_measure_out_of_range">Kizidishi kiko nje ya kiwango kinachoruhusiwa</string>
 </resources>

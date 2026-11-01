@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="record_archive_title">Erfassungen und Warnungen</string>
-    <string name="record_archive_description">Erfassungen oder Warnungen einschließlich ihrer Sitzungen in einer einzigen Datei exportieren/importieren.</string>
-    <string name="record_archive_export_description">Exportiere alle Datensätze dieses Typs einschließlich Sitzungen in einer einzigen Datei.</string>
-    <string name="record_archive_import_description">Die Daten werden dem Archiv hinzugefügt. Vorhandene Datensätze werden übersprungen. Unbekannte Sensoren werden bis zur Kopplung mit ihrer Hardware-ID angezeigt.</string>
+    <string name="record_archive_description">Erfassungen und Alarme einschließlich ihrer Sitzungen in einer Datei exportieren/importieren.</string>
+    <string name="record_archive_export_description">Alle Erfassungen und Alarme einschließlich Sitzungen in einer Datei exportieren.</string>
+    <string name="record_archive_import_description">Erfassungen, Alarme und Sitzungen importieren. Vorhandene Datensätze werden übersprungen.</string>
     <string name="record_archive_import_summary">Datensätze: %1$d · Sitzungen: %2$d</string>
     <string name="record_archive_import_success">Importiert: %1$d · Bereits vorhanden: %2$d</string>
     <string name="record_archive_failed">Datensätze konnten nicht übertragen werden. Datei und Datentyp prüfen.</string>

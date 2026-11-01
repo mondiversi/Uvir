@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_log_open">Otwórz dziennik błędów</string>
+    <string name="error_log_view_description">Wyświetl i eksportuj błędy zapisane przez aplikację.</string>
+    <string name="error_log_read_failed">Nie można odczytać dziennika błędów.</string>
+    <string name="debug_fake_saturation">Nasycenie</string>
+    <string name="debug_fake_saturation_description">Okresowo symuluj nasycenie czujnika.</string>
+    <string name="record_archive_export_title">Eksportuj pomiary i alerty</string>
+    <string name="error_log_clear_title">Wyczyścić dziennik błędów?</string>
+    <string name="error_log_clear_description">Trwale usuń wszystkie zapisane błędy.</string>
+    <string name="error_log_clear_complete">Dziennik błędów wyczyszczony.</string>
+    <string name="error_log_clear_failed">Nie można wyczyścić dziennika błędów.</string>
+    <string name="error_log_size">Rozmiar dziennika: %1$s</string>
+</resources>

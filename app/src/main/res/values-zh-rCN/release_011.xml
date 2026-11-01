@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="release_011_status">开发已暂停：原型可以运行，但光学校准问题尚未解决。</string>
+    <string name="release_011_case">已发布修正USB开口的参考外壳，以及带两个直径5 mm孔的平盖。</string>
+    <string name="release_011_improvements">改进了USB采样、饱和处理、诊断、存档和文档。</string>
+</resources>

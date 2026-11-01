@@ -32,27 +32,9 @@ class UvirRecordListFiltersTest {
         assertEquals(listOf(4L), ids(UvirRecordListFilters(notes = setOf("לילה"))))
         assertEquals(listOf(4L), ids(UvirRecordListFilters(notes = setOf("🌙"))))
     }
-    @Test fun sensorsFilterByIdentityNotTheirRenameableName() {
-        assertEquals(listOf(4L), ids(UvirRecordListFilters(sensorKeys = setOf("2"))))
-        assertEquals(listOf(5L), ids(UvirRecordListFilters(sensorKeys = setOf("unknown"))))
-    }
-    @Test fun modesAreIndependentOfSessionMembership() {
-        assertEquals(listOf(1L, 5L), ids(UvirRecordListFilters(modes = setOf(UvirRecordFilterMode.MANUAL))))
-        assertEquals(listOf(2L, 3L, 4L), ids(UvirRecordListFilters(modes = setOf(UvirRecordFilterMode.AUTOMATIC))))
-    }
-    @Test fun externalModeIsDistinctFromManualAndAutomatic() {
-        val external = SavedRecordSummary(
-            id = 6, timestamp = 6000, note = "External", automatic = false,
-            sensorId = 1, externalCommand = true
-        )
-        val withExternal = records + external
-        assertEquals(listOf(6L), filterAcquisitionRecords(
-            withExternal, UvirRecordListFilters(modes = setOf(UvirRecordFilterMode.EXTERNAL))
-        ).map { it.id })
-        assertEquals(listOf(1L, 5L), filterAcquisitionRecords(
-            withExternal, UvirRecordListFilters(modes = setOf(UvirRecordFilterMode.MANUAL))
-        ).map { it.id })
-    }
+
+
+
     @Test fun idQueriesAreExactNotSubstringMatches() {
         assertEquals(listOf(2L), ids(UvirRecordListFilters(recordIds = setOf("2"))))
         assertEquals(listOf(2L, 3L), ids(UvirRecordListFilters(sessionIds = setOf("10"))))
@@ -67,8 +49,11 @@ class UvirRecordListFiltersTest {
     }
     @Test fun allCriteriaAreConjunctive() {
         assertEquals(listOf(3L), ids(UvirRecordListFilters(fromInclusive = 3000,
-            notes = setOf("garden"), sensorKeys = setOf("1"),
-            modes = setOf(UvirRecordFilterMode.AUTOMATIC), sessionIds = setOf("10"))))
+            notes = setOf("garden"),
+            sessionIds = setOf("10"))))
+        assertEquals(listOf(1L,5L), ids(UvirRecordListFilters(modes=setOf(UvirRecordFilterMode.MANUAL))))
+        assertEquals(listOf(2L,3L,4L), ids(UvirRecordListFilters(modes=setOf(UvirRecordFilterMode.AUTOMATIC))))
+        assertEquals(records.map { it.id }, ids(UvirRecordListFilters(modes=UvirRecordFilterMode.entries.toSet())))
     }
     @Test fun selectedDaysCoverTheWholeDayAndCannotRemainInverted() {
         val utc = ZoneId.of("UTC")
@@ -124,8 +109,8 @@ class UvirRecordListFiltersTest {
         val entries = records.map { ThresholdAlertLogEntry(it.id, it.timestamp, "",
             it.sessionId, it.sessionSequence, it.note, it.sensorId) }
         assertEquals(listOf(2L, 3L), filterAlertEntries(entries,
-            UvirRecordListFilters(notes = setOf("garden"), modes = setOf(UvirRecordFilterMode.AUTOMATIC))).map { it.id })
-        assertTrue(filterAlertEntries(entries, UvirRecordListFilters(modes = setOf(UvirRecordFilterMode.MANUAL))).isEmpty())
+            UvirRecordListFilters(notes = setOf("garden"))).map { it.id })
+        assertEquals(entries, filterAlertEntries(entries, UvirRecordListFilters()))
     }
     @Test fun filteredAcquisitionSelectionCannotBecomeAnIncompleteFullSessionExport() {
         val all = records.map { SavedRecordDetail(it.id, it.timestamp, it.note,
@@ -164,12 +149,7 @@ class UvirRecordListFiltersTest {
             UvirRecordListFilters(fromInclusive = day, untilInclusive = day * 2 - 1)).map { it.id })
     }
 
-    @Test fun multipleSensorsAreAlternativesAndOtherFieldsRemainConjunctive() {
-        assertEquals(listOf(1L, 2L, 3L, 4L), ids(UvirRecordListFilters(sensorKeys = setOf("1", "2"))))
-        assertEquals(listOf(2L, 3L, 4L), ids(UvirRecordListFilters(sensorKeys = setOf("1", "2"),
-            modes = setOf(UvirRecordFilterMode.AUTOMATIC))))
-        assertEquals(listOf(4L, 5L), ids(UvirRecordListFilters(sensorKeys = setOf("2", "unknown"))))
-    }
+
 
     @Test fun multipleNotesIdsSessionsAndVariantCountsUseOrWithinEachField() {
         assertEquals(listOf(2L, 3L, 4L), ids(UvirRecordListFilters(notes = setOf("Garden", "🌙"))))
@@ -182,25 +162,33 @@ class UvirRecordListFiltersTest {
         assertFalse(f.matches(1, 1, "", 1, true, 10, recordVariantCount = 0))
     }
 
-    @Test fun externalRecordsHaveOneModeEvenInsideAnotherSessionType() {
-        val f = UvirRecordListFilters(modes = setOf(UvirRecordFilterMode.MANUAL, UvirRecordFilterMode.AUTOMATIC))
-        assertFalse(f.matches(1, 1, "", 1, true, 10, isExternalCommand = true))
-        assertTrue(f.copy(modes = f.modes + UvirRecordFilterMode.EXTERNAL)
-            .matches(1, 1, "", 1, true, 10, isExternalCommand = true))
-    }
+
 
     @Test fun multiChoiceStateRoundTripsWithoutLosingUnicodeOrDelimiters() {
         val f = UvirRecordListFilters(1000, 2000, setOf("مرحبا, 🌙\nא", "Garden"),
-            setOf("1", "2", "unknown"), UvirRecordFilterMode.entries.toSet(),
-            setOf("1", "2"), setOf("10", "20"), setOf(0, -1, 2, 5))
+            setOf("1", "2"), setOf("10", "20"), setOf(0, -1, 2, 5), setOf(UvirRecordFilterMode.AUTOMATIC))
         assertEquals(f, UvirRecordListFilters.fromSavedValues(f.savedValues()))
         assertEquals(UvirRecordListFilters(), UvirRecordListFilters.fromSavedValues(UvirRecordListFilters().savedValues()))
     }
 
+    @Test fun retiredSensorAndExternalFiltersAreDiscardedWithoutHidingRecords() {
+        val old = listOf("multi-v1", "", "", "0", "1", "17", "1", "EXTERNAL", "0", "0", "0")
+        assertEquals(UvirRecordListFilters(), UvirRecordListFilters.fromSavedValues(old))
+        assertFalse(UvirRecordListFilters().savedValues().contains("EXTERNAL"))
+    }
+    @Test fun savedManualAutomaticFiltersAreDiscardedWhileOtherCriteriaSurvive() {
+        val old = listOf("multi-v2", "1000", "2000", "1", "Garden", "1", "AUTOMATIC", "1", "2", "1", "10", "1", "5")
+        val expected = UvirRecordListFilters(1000,2000,setOf("Garden"),setOf("2"),setOf("10"),setOf(5))
+        assertEquals(expected,UvirRecordListFilters.fromSavedValues(old))
+        assertFalse(expected.savedValues().contains("AUTOMATIC"))
+        assertEquals("multi-v4",expected.savedValues().first())
+        val previous = listOf("multi-v3","1000","2000","1","Garden","1","2","1","10","1","5")
+        assertEquals(expected,UvirRecordListFilters.fromSavedValues(previous))
+    }
     @Test fun previousSingleChoiceStateIsUpgradedAndMalformedStateIsRejected() {
         val old = listOf("1000", "2000", "Garden", "1", "true", "2", "10", "false", "5")
-        assertEquals(UvirRecordListFilters(1000, 2000, setOf("Garden"), setOf("1"),
-            setOf(UvirRecordFilterMode.AUTOMATIC), setOf("2"), setOf("10"), setOf(5)),
+        assertEquals(UvirRecordListFilters(1000, 2000, setOf("Garden"),
+            setOf("2"), setOf("10"), setOf(5)),
             UvirRecordListFilters.fromSavedValues(old))
         assertNull(UvirRecordListFilters.fromSavedValues(listOf("multi-v1", "", "", "-1")))
         assertNull(UvirRecordListFilters.fromSavedValues(listOf("multi-v1", "", "", "99999")))

@@ -13,6 +13,10 @@ internal interface MpsseIo : Closeable {
  * 100 kHz, three-phase clocking; clock stretching is not supported by this implementation.
  */
 internal class Ft232hMpsse(private val io: MpsseIo) : I2cBus {
+    // 64 × 12 + SEND_IMMEDIATE fits the FT232H's 1 KiB command FIFO;
+    // the response also stays well below its 1 KiB receive FIFO.
+    private val readChunkSize = 64
+    private val readAndAck = bytes(0x80, 2, 3, 0x20, 0, 0, 0x13, 0, 0, 0x80, 2, 3)
     fun initialize() {
         io.write(bytes(0xaa, 0x87))
         check(io.readExactly(2).contentEquals(bytes(0xfa, 0xaa))) { "FT232H MPSSE synchronization failed" }
@@ -21,7 +25,7 @@ internal class Ft232hMpsse(private val io: MpsseIo) : I2cBus {
         io.write(bytes(0x8a, 0x97, 0x8c, 0x85, 0x86, 199, 0, 0x9e, 0x03, 0, 0x80, 0x03, 0x03))
         io.write(bytes(0x81, 0x87))
         if ((io.readExactly(1)[0].toInt() and 0x05) != 0x05) {
-            throw IOException("I2C lines held low: check pull-ups, power and AD1/AD2 jumper")
+            throw I2cLinesHeldLow()
         }
     }
 
@@ -37,7 +41,7 @@ internal class Ft232hMpsse(private val io: MpsseIo) : I2cBus {
             if (readCount > 0) {
                 if (write.isNotEmpty()) start()
                 send((address shl 1) or 1, address)
-                return ByteArray(readCount) { index -> receive(index == readCount - 1) }
+                return receive(readCount)
             }
             return byteArrayOf()
         } finally {
@@ -55,11 +59,26 @@ internal class Ft232hMpsse(private val io: MpsseIo) : I2cBus {
         io.write(bytes(0x11, 0, 0, value, 0x80, 2, 3, 0x22, 0, 0x87))
         if (io.readExactly(1)[0].toInt() and 1 != 0) throw I2cNack(address)
     }
-    private fun receive(last: Boolean): Byte {
-        io.write(bytes(0x80, 2, 3, 0x20, 0, 0, 0x87))
-        val result = io.readExactly(1)[0]
-        // Final byte receives NACK. Do not ACK it and accidentally request another byte.
-        io.write(bytes(0x13, 0, if (last) 0xff else 0, 0x80, 2, 3))
+    private fun receive(count: Int): ByteArray {
+        val result = ByteArray(count)
+        var offset = 0
+        while (offset < count) {
+            val size = minOf(readChunkSize, count - offset)
+            val commands = ByteArray(size * readAndAck.size + 1)
+            repeat(size) { index ->
+                val position = index * readAndAck.size
+                readAndAck.copyInto(commands, position)
+                // ACK every byte across chunks; NACK only the final byte of the
+                // entire I²C read. GPIO/clock commands match the old bytewise path.
+                if (offset + index == count - 1) commands[position + 8] = 0xff.toByte()
+            }
+            commands[commands.lastIndex] = 0x87.toByte() // Flush after the complete chunk.
+            io.write(commands)
+            val chunk = io.readExactly(size)
+            if (chunk.size != size) throw IOException("FT232H incomplete I2C block (${chunk.size}/$size)")
+            chunk.copyInto(result, offset)
+            offset += size
+        }
         return result
     }
     override fun close() { runCatching { stop() }; io.close() }

@@ -8,7 +8,9 @@
     <string name="usb_hardware_pending">USB 支持正在准备中。真实测量必须使用 FT232H 开发板验证。光学响应和绝对校准仍未验证。</string>
     <string name="usb_connect">使用 USB OTG 数据转接器连接 FT232H 和两个传感器。</string>
     <string name="usb_permission">允许 USB 访问</string>
-    <string name="usb_initializing">正在初始化传感器…</string>
+    <string name="usb_initializing">正在初始化…</string>
+    <string name="usb_waiting">等待数据…</string>
+    <string name="sensor_saturation">饱和</string>
     <string name="usb_ready">USB 已连接</string>
     <string name="usb_error">USB 不可用</string>
     <string name="usb_retry">重新连接 USB</string>

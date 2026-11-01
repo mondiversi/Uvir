@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="usb_diagnostic_progress">घटकों की जाँच: %1$d/%2$d</string>
+    <string name="usb_diagnostic_recognition">पहचान</string>
+    <string name="usb_diagnostic_initialization">आरंभीकरण</string>
+    <string name="usb_diagnostic_reading">रीडिंग</string>
+    <string name="usb_diagnostic_not_tested">जाँच नहीं हुई</string>
+    <string name="usb_diagnostic_readings">नई रीडिंग: %1$d/%2$d</string>
+    <string name="usb_diagnostic_notes">घटकों की पहचान और रीडिंग की जाँच करता है। कैलिब्रेशन के लिए अलग परीक्षण चाहिए।</string>
+    <string name="usb_diagnostic_wiring">बिजली, GND, SDA/SCL और D1–D2 जम्पर जाँचें।</string>
+    <string name="usb_diagnostic_technical">तकनीकी विवरण</string>
+</resources>

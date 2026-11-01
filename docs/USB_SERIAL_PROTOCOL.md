@@ -1,4 +1,8 @@
-# Uvir USB serial integration
+# Uvir USB serial integration — legacy ESP32
+
+> **Legacy ESP32 only.** The current FT232H head uses binary MPSSE/I²C and
+> does not accept this text protocol. Use the
+> [current standalone USB guide](usb/STANDALONE.md) for `main`.
 
 Status: development documentation for protocol `uvir-sensor-v1`.
 

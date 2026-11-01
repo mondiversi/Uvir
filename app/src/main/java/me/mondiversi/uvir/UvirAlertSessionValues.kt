@@ -232,7 +232,7 @@ private fun AlertViolationDataRow(
     val outOfRange = qualityFlags.isOutOfRange(violation.rule.metric)
     val recordedValue =
         if (outOfRange) {
-            stringResource(R.string.out_of_range_short)
+            stringResource(R.string.sensor_saturation)
         } else {
             displayedUvirIrradianceNumber(violation.value)
         }

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_log_open">打开错误日志</string>
+    <string name="error_log_view_description">查看并导出应用记录的错误。</string>
+    <string name="error_log_read_failed">无法读取错误日志。</string>
+    <string name="debug_fake_saturation">饱和</string>
+    <string name="debug_fake_saturation_description">定期模拟传感器饱和。</string>
+    <string name="record_archive_export_title">导出测量和警报</string>
+    <string name="error_log_clear_title">清空错误日志？</string>
+    <string name="error_log_clear_description">永久删除所有已记录的错误。</string>
+    <string name="error_log_clear_complete">错误日志已清空。</string>
+    <string name="error_log_clear_failed">无法清空错误日志。</string>
+    <string name="error_log_size">日志大小：%1$s</string>
+</resources>

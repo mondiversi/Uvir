@@ -156,21 +156,12 @@ fun HistoryScreen(
         uvirSessionIndicatorColor(darkMode)
 
     var allRecords by rememberLiveAcquisitionRecords(database)
-    val sensorProfiles by rememberLiveSensorProfiles(database)
     var filters by rememberRecordListFilters(filterPreferences, KEY_ACQUISITION_LIST_FILTERS)
     var showFilters by rememberSaveable { mutableStateOf(false) }
     val records = remember(allRecords, filters) { filterAcquisitionRecords(allRecords, filters) }
-    val filterSensorNames = remember(allRecords, sensorProfiles) {
-        allRecords.map { it.sensorId }.distinct().associate { id ->
-            id.filterSensorKey() to detailSensorDisplayName(sensorProfiles[id])
-        }
-    }
-    val filterModes = remember(allRecords) {
-        allRecords.filterNot { it.externalCommand }.map { it.automatic }.toSet()
-    }
-    val filterExternalModeAvailable = remember(allRecords) {
-        allRecords.any { it.externalCommand }
-    }
+
+
+
     val filterRecordIds = remember(allRecords) { allRecords.map { it.id }.distinct() }
     val filterSessionIds = remember(allRecords) { allRecords.mapNotNull { it.sessionId }.distinct() }
     val filterNotes = remember(allRecords) {
@@ -811,9 +802,7 @@ fun HistoryScreen(
                         notes = filterNotes,
                         dates = filterDays,
                         variantCounts = filterVariantCounts,
-                        sensorNames = filterSensorNames,
-                        modes = filterModes,
-                        externalModeAvailable = filterExternalModeAvailable,
+
                         backgroundColor = backgroundColor,
                         onChange = {
                             filters = it
@@ -1290,7 +1279,6 @@ fun HistoryScreen(
 
                                 AcquisitionTypeBadge(
                                     automatic = record.automatic,
-                                    externalCommand = record.externalCommand,
                                     primaryText = secondaryText,
                                     compact = true
                                 )

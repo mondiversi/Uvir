@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="usb_diagnostic_progress">Kukagua vipengele: %1$d/%2$d</string>
+    <string name="usb_diagnostic_recognition">Utambuzi</string>
+    <string name="usb_diagnostic_initialization">Uanzishaji</string>
+    <string name="usb_diagnostic_reading">Usomaji</string>
+    <string name="usb_diagnostic_not_tested">Haijajaribiwa</string>
+    <string name="usb_diagnostic_readings">Usomaji mpya: %1$d/%2$d</string>
+    <string name="usb_diagnostic_notes">Hukagua utambuzi na usomaji wa vipengele. Urekebishaji wa vipimo unahitaji jaribio tofauti.</string>
+    <string name="usb_diagnostic_wiring">Kagua umeme, GND, SDA/SCL na kiunganishi cha D1–D2.</string>
+    <string name="usb_diagnostic_technical">Maelezo ya kiufundi</string>
+</resources>

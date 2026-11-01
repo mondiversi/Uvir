@@ -3,7 +3,6 @@ package me.mondiversi.uvir
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -34,7 +33,7 @@ internal fun UvirPasswordTextField(
     val visibilityDescription =
         stringResource(if (revealPassword) R.string.hide_password else R.string.show_password)
 
-    OutlinedTextField(
+    UvirCompactTextField(
         value = value,
         onValueChange = onValueChange,
         modifier = modifier.fillMaxWidth(),
@@ -49,7 +48,7 @@ internal fun UvirPasswordTextField(
                 contentDescription = visibilityDescription,
                 onClick = { passwordVisible = !passwordVisible },
                 enabled = enabled,
-                modifier = Modifier.size(48.dp)
+                modifier = Modifier.size(UvirCompactFieldIconSize)
             ) {
                 UvirPasswordVisibilityIcon(
                     visible = revealPassword,

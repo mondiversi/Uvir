@@ -148,7 +148,7 @@
     <string name="sensor_settings_connection_required">Schließen Sie den Sensor an, um diese Einstellungen zu ändern.</string>
     <string name="sensor_parameters_description">Konfigurieren Sie die allgemeinen Einstellungen des Sensors.</string>
     <string name="home_sensor_disconnected_title">Sensor nicht verbunden</string>
-    <string name="home_sensor_disconnected_description">Verbinde einen Sensor, um Messwerte zu erfassen und Alarme aufzuzeichnen.</string>
+    <string name="home_sensor_disconnected_description">Verbinde den Sensor, um Messwerte zu erfassen und Alarme aufzuzeichnen.</string>
     <string name="home_sensor_disconnected_hint">Öffnen Sie Einstellungen › Sensor › Verbindung, um USB, Wi-Fi, Bluetooth oder Internet auszuwählen und die Anweisungen anzuzeigen.</string>
     <string name="sensor_connection_provisioning_reminder">Um Wi-Fi oder Bluetooth zu verwenden, schließen Sie den Sensor mindestens einmal über USB an. Die App erfasst die eindeutige Identität und die Zugangsdaten des Sensors sicher.</string>
     <string name="sensor_connection_usb">USB</string>
@@ -746,14 +746,12 @@
     <string name="language_formats_description">Wählen Sie, wie Daten in der App angezeigt und formatiert werden.</string>
     <string name="irradiance_measurement_heading">Bestrahlungsstärkemessung</string>
     <string name="irradiance_measurement_description">Wähle die Einheit zur Anzeige der Bestrahlungsstärke. Gespeicherte Sensorwerte behalten ihre ursprüngliche Genauigkeit.</string>
-    <string name="out_of_range_short">OL - Außerhalb des Messbereichs</string>
-    <string name="out_of_range_csv_header">Außerhalb_des_Messbereichs</string>
     <string name="language_english_localized">Englisch</string>
     <string name="settings_section_notifications">Benachrichtigungen</string>
-    <string name="acquisition_feedback_description">Wählen Sie das Signal, das die App beim Speichern einer manuellen oder automatischen Messung wiedergibt.</string>
+    <string name="acquisition_feedback_description">Verwalte die App-Einstellungen für Messungen.</string>
     <string name="acquisition_feedback_preview_hint">Die endgültige Lautstärke hängt auch von der Alarmlautstärke des Telefons ab.</string>
     <string name="confirmation_question_suffix">?</string>
-    <string name="threshold_alerts_sound_description_v2">Wählen Sie das Signal, das die App beim Speichern eines Alarms wiedergibt.</string>
+    <string name="threshold_alerts_sound_description_v2">Verwalte die App-Einstellungen für Alarme.</string>
     <string name="list_filter_export_question">Alle angezeigten Ergebnisse exportieren?</string>
     <string name="list_filter_export_warning">Es sind keine Einträge ausgewählt. Alle Einträge, die den aktuellen Filtern entsprechen, werden exportiert.</string>
     <string name="settings_include_sensitive_information">Sensible Daten einschließen</string>

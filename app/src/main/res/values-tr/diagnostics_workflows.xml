@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_log_open">Hata günlüğünü aç</string>
+    <string name="error_log_view_description">Uygulamanın kaydettiği hataları görüntüle ve dışa aktar.</string>
+    <string name="error_log_read_failed">Hata günlüğü okunamıyor.</string>
+    <string name="debug_fake_saturation">Doygunluk</string>
+    <string name="debug_fake_saturation_description">Sensör doygunluğunu düzenli aralıklarla simüle et.</string>
+    <string name="record_archive_export_title">Ölçümleri ve uyarıları dışa aktar</string>
+    <string name="error_log_clear_title">Hata günlüğü silinsin mi?</string>
+    <string name="error_log_clear_description">Kaydedilen tüm hataları kalıcı olarak sil.</string>
+    <string name="error_log_clear_complete">Hata günlüğü silindi.</string>
+    <string name="error_log_clear_failed">Hata günlüğü silinemiyor.</string>
+    <string name="error_log_size">Günlük boyutu: %1$s</string>
+</resources>

@@ -18,7 +18,7 @@
     <string name="debug_performance_indiana_jones">Indiana Jones</string>
     <string name="debug_performance_jurassic_park">Jurassic Park</string>
     <string name="debug_performance_star_wars">Star Wars</string>
-    <string name="debug_diagnostic">PRUEBA DIAGNÓSTICA</string>
+    <string name="debug_diagnostic">EJECUTAR DIAGNÓSTICO</string>
     <string name="diagnostic_description">Ejecuta una prueba de diagnóstico completa del sensor.</string>
     <string name="diagnostic_title">Diagnóstico del sensor</string>
     <string name="diagnostic_progress">%1$d/%2$d solicitudes completadas</string>
@@ -41,8 +41,6 @@
     <string name="diagnostic_share_error">No se pudo compartir el informe diagnóstico.</string>
     <string name="diagnostic_failed">No se pudo completar la prueba diagnóstica.</string>
     <string name="debug_secret_melody_found">Has encontrado la melodía secreta</string>
-    <string name="debug_fake_out_of_range">Valores fuera de escala</string>
-    <string name="debug_fake_out_of_range_description">Simula ocasionalmente valores fuera de escala.</string>
     <string name="debug_simulate_events">SIMULAR EVENTOS</string>
     <string name="debug_simulate_events_description">Añade adquisiciones y alertas simuladas.</string>
     <string name="debug_simulate_events_question">¿Simular eventos de prueba?</string>

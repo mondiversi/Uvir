@@ -29,36 +29,118 @@ class UvirRecordArchiveTest {
     }
     @After fun cleanup() { helpers.forEach { it.close() }; root.deleteRecursively() }
 
-    @Test fun differentPhonesWithTheSameLocalSensorIdKeepTheCorrectHardwareAndChronology() {
-        source.renameSensor("ESP-SOURCE", "Private source alias")
-        source.saveAcquisition(SensorSample(uvc = .012345678901234), "old source", sensorDeviceId = "ESP-SOURCE", timestamp = 1000)
-        target.renameSensor("ESP-TARGET", "My sensor")
-        target.saveAcquisition(SensorSample(), "recent target", sensorDeviceId = "ESP-TARGET", timestamp = 9000)
-        assertEquals(source.findSensorProfile("ESP-SOURCE")!!.id, target.findSensorProfile("ESP-TARGET")!!.id)
-        val result = importUvirRecordArchives(target, listOf(roundTrip()))
-        assertEquals(UvirRecordImportResult(1, 0), result)
-        val records = target.readSavedRecords()
-        assertEquals(listOf("recent target", "old source"), records.map { it.note })
-        val imported = target.readRecord(records.last().id)!!
-        assertEquals(.012345678901234, imported.sample.uvc, 0.0)
-        assertEquals("ESP-SOURCE", imported.sensorDisplayName)
-        assertNotEquals(records.first().sensorId, imported.sensorId)
-        assertEquals(0L, target.findSensorProfile(imported.sensorId!!)!!.lastSeenAt)
-        assertFalse(UvirSensorCredentialStore.associatedDeviceIds(context).contains("ESP-SOURCE"))
+    @Test fun combinedArchiveTransfersBothFamiliesAndSessionsAndKeepsDeduplication() {
+        val acquisition = source.nextSessionId()
+        source.startAcquisitionSession(acquisition, "acquisition note", 1000)
+        source.saveAcquisition(SensorSample(uva = .123456789), "sample", true, acquisition, 1, timestamp = 2000)
+        val alert = source.nextSessionId()
+        source.startAlertSession(alert, "alert note", 1000)
+        source.insertThresholdAlertLog(listOf(ThresholdAlertViolation(
+            ThresholdAlertRule(ThresholdAlertMetric.UVB, true, ThresholdAlertDirection.ABOVE, .1f), .2)),
+            timestamp = 3000, sessionId = alert)
+        val bundle = combinedUvirRecordArchiveJson(exportCombinedUvirRecordArchive(source)).toString()
+        val parsed = parseCombinedUvirRecordArchive(bundle)
+        assertEquals(2, parsed.size)
+        assertEquals(UvirRecordImportResult(2, 0), importUvirRecordArchives(target, parsed))
+        assertEquals(UvirRecordImportResult(0, 2), importUvirRecordArchives(target, parseCombinedUvirRecordArchive(bundle)))
+        assertEquals(.123456789, target.readRecord(target.readSavedRecords().single().id)!!.sample.uva, 0.0)
+        assertEquals("alert note", target.readThresholdAlertLog().single().note)
+        assertNotEquals(target.readSavedRecords().single().sessionId, target.readThresholdAlertLog().single().sessionId)
+        for (kind in UvirArchiveKind.entries) {
+            val old = exportUvirRecordArchive(source, kind).toJson().toString()
+            assertEquals(kind, parseCombinedUvirRecordArchive(old).single().kind)
+        }
     }
 
-    @Test fun knownHardwareReusesItsLocalIdWithoutRenamingAndLaterPairingResolvesOldRecords() {
-        source.saveAcquisition(SensorSample(), "same", sensorDeviceId = "esp-same", timestamp = 1000)
-        target.ensureSensorProfile("OTHER")
-        val known = target.renameSensor("ESP-SAME", "Local name")!!
-        importUvirRecordArchives(target, listOf(roundTrip()))
-        val recordId = target.readSavedRecords().single().id
-        assertEquals(known.id, target.readRecord(recordId)!!.sensorId)
-        assertEquals("Local name", target.readRecord(recordId)!!.sensorDisplayName)
-        target.renameSensor("ESP-SAME", "After pairing")
-        assertEquals("After pairing", target.readRecord(recordId)!!.sensorDisplayName)
-        assertEquals(2, target.readSensorProfiles().size)
+    @Test fun legacyQualityFlagsBecomeSaturationWithoutRewritingMeasurementsAndSurviveTransfer() {
+        assertTrue(context.packageName.endsWith(".verification"))
+        val acquisitionSession = source.nextSessionId()
+        val alertSession = source.nextSessionId()
+        source.startAcquisitionSession(acquisitionSession, "legacy acquisition", 1000)
+        source.startAlertSession(alertSession, "legacy alert", 1000)
+        for (flags in 1..3) {
+            // Literal values are the bits already stored by previous app versions.
+            source.saveAcquisition(SensorSample(uva = .123456789, blu = .234567891,
+                nir = .345678912, qualityFlags = flags), "legacy-$flags", true,
+                acquisitionSession, flags, timestamp = 1000L + flags)
+            source.insertThresholdAlertLog(listOf(ThresholdAlertViolation(
+                ThresholdAlertRule(ThresholdAlertMetric.UVA, true, ThresholdAlertDirection.ABOVE, .1f), .2),
+                ThresholdAlertViolation(ThresholdAlertRule(ThresholdAlertMetric.BLUE, true,
+                    ThresholdAlertDirection.ABOVE, .1f), .3)),
+                timestamp = 2000L + flags, sessionId = alertSession, qualityFlags = flags)
+        }
+        val before = source.readSavedRecords().map { source.readRecord(it.id)!! }
+        val alertsBefore = source.readThresholdAlertLog()
+        source.close()
+        source = database("source", existing = true)
+        assertEquals(27, source.readableDatabase.version)
+        assertEquals(before, source.readSavedRecords().map { source.readRecord(it.id)!! })
+        assertEquals(alertsBefore, source.readThresholdAlertLog())
+        val bundle = combinedUvirRecordArchiveJson(exportCombinedUvirRecordArchive(source)).toString()
+        assertEquals(UvirRecordImportResult(6, 0),
+            importUvirRecordArchives(target, parseCombinedUvirRecordArchive(bundle)))
+        val restored = target.readSavedRecords().map { target.readRecord(it.id)!! }
+        assertEquals(3, restored.size)
+        assertEquals(before.associate { it.timestamp to it.sample }, restored.associate { it.timestamp to it.sample })
+        assertEquals(alertsBefore.map { it.details to it.qualityFlags },
+            target.readThresholdAlertLog().map { it.details to it.qualityFlags })
+        for (language in AppLanguage.entries.filter { it != AppLanguage.SYSTEM }) {
+            val locale = java.util.Locale.forLanguageTag(language.languageTag)
+            val localized = context.createConfigurationContext(
+                android.content.res.Configuration(context.resources.configuration).apply { setLocale(locale) })
+            val label = localized.getString(R.string.sensor_saturation)
+            val readable = readableMeasurementTable(localized, restored, UvirNumericFormat.INTERNATIONAL,
+                irradianceUnit = UvirIrradianceUnit.W_M2, irradianceDecimals = null)
+            val readableAlerts = readableThresholdAlertLog(localized, target.readThresholdAlertLog(),
+                UvirNumericFormat.INTERNATIONAL, irradianceUnit = UvirIrradianceUnit.W_M2,
+                irradianceDecimals = null)
+            val headers = measurementExportColumns(localized, locale.language, UvirIrradianceUnit.W_M2)
+            val csvAlerts = thresholdAlertLogCsv(localized, target.readThresholdAlertLog(),
+                UvirNumericFormat.INTERNATIONAL, irradianceUnit = UvirIrradianceUnit.W_M2,
+                irradianceDecimals = null)
+            assertTrue(language.name, readable.contains(label))
+            assertTrue(language.name, readableAlerts.contains(label))
+            assertTrue(language.name, headers.any { it.replace('_', ' ') == label })
+            assertTrue(language.name, csvAlerts.lineSequence().first().contains(label))
+        }
     }
+
+    @Test fun combinedArchiveRejectsMissingKindsWrongUnitsAndCrossKindIdentityReuse() {
+        source.saveAcquisition(SensorSample(), "record", timestamp = 1000)
+        source.insertThresholdAlertLog(listOf(ThresholdAlertViolation(
+            ThresholdAlertRule(ThresholdAlertMetric.UVB, true, ThresholdAlertDirection.ABOVE, .1f), .2)), timestamp = 2000)
+        val json = combinedUvirRecordArchiveJson(exportCombinedUvirRecordArchive(source))
+        for (mutate in listOf<(JSONObject) -> Unit>(
+            { it.put("unit", "uW/cm2") },
+            { it.getJSONArray("archives").remove(1) },
+            { it.getJSONArray("archives").put(1, it.getJSONArray("archives").getJSONObject(0)) },
+            { it.getJSONArray("archives").getJSONObject(1).getJSONArray("records").getJSONObject(0).put("id",
+                it.getJSONArray("archives").getJSONObject(0).getJSONArray("records").getJSONObject(0).getString("id")) }
+        )) {
+            val broken = JSONObject(json.toString()).also(mutate)
+            assertTrue(runCatching { parseCombinedUvirRecordArchive(broken.toString()) }.isFailure)
+            assertTrue(target.readSavedRecords().isEmpty())
+        }
+    }
+
+    @Test fun aConflictInTheSecondFamilyRollsBackTheEntireCombinedImport() {
+        source.saveAcquisition(SensorSample(uva = .25), "new record", timestamp = 1000)
+        source.insertThresholdAlertLog(listOf(ThresholdAlertViolation(
+            ThresholdAlertRule(ThresholdAlertMetric.UVB, true, ThresholdAlertDirection.ABOVE, .1f), .2)), timestamp = 2000)
+        importUvirRecordArchives(target, listOf(parse(exportUvirRecordArchive(source, UvirArchiveKind.ALERTS))))
+        val original = target.readThresholdAlertLog().single().details
+        val bundle = combinedUvirRecordArchiveJson(exportCombinedUvirRecordArchive(source))
+        bundle.getJSONArray("archives").getJSONObject(1).getJSONArray("records").getJSONObject(0)
+            .put("details", "UVB|999.0|ABOVE|999.0")
+        val validated = parseCombinedUvirRecordArchive(bundle.toString())
+        assertTrue(runCatching { importUvirRecordArchives(target, validated) }.isFailure)
+        assertTrue(target.readSavedRecords().isEmpty())
+        assertEquals(original, target.readThresholdAlertLog().single().details)
+    }
+
+
+
+
 
     @Test fun repeatedImportAndReexportToAnotherPhoneKeepStableIdentities() {
         source.saveAcquisition(SensorSample(), "one", timestamp = 1000)
@@ -107,7 +189,7 @@ class UvirRecordArchiveTest {
         val entry = target.readThresholdAlertLog().single()
         assertEquals(violations, parseThresholdAlertLogDetails(entry.details))
         assertEquals("alert note", entry.note)
-        assertEquals("ALERT-SOURCE", entry.sensorDisplayName)
+        assertNull(entry.sensorId)
         assertEquals(3, entry.qualityFlags)
         assertTrue(target.canEditAlertSessionNote(entry.sessionId))
         assertEquals(UvirRecordImportResult(0, 1), importUvirRecordArchives(target, listOf(archive)))
@@ -120,17 +202,12 @@ class UvirRecordArchiveTest {
         importUvirRecordArchives(target, listOf(roundTrip()))
         val record = target.readRecord(target.readSavedRecords().single().id)!!
         assertNull(record.sensorId)
-        assertEquals("—", record.sensorDisplayName)
+        assertEquals("", record.sensorDisplayName)
         assertTrue(target.readSensorProfiles().isEmpty())
         assertTrue(target.canEditAcquisitionSessionNote(record.sessionId))
     }
 
-    @Test fun nativeSensorRecordsAlreadySyncedOnTheReceivingPhoneAreNotDuplicated() {
-        source.saveRecoveredAcquisition(1000, SensorSample(uvb = .25), "note", 0, 0, "ESP", 42)
-        target.saveRecoveredAcquisition(1000, SensorSample(uvb = .25), "local", 0, 0, "ESP", 42)
-        assertEquals(UvirRecordImportResult(0, 1), importUvirRecordArchives(target, listOf(roundTrip())))
-        assertEquals(1, target.readSavedRecords().size)
-    }
+
 
     @Test fun aLaterConflictingFileRollsBackAllEarlierFilesAndNewSensorRows() {
         source.saveAcquisition(SensorSample(), "source", sensorDeviceId = "SOURCE", timestamp = 1000)
@@ -152,7 +229,7 @@ class UvirRecordArchiveTest {
             assertTrue(runCatching { parseUvirRecordArchive(changed.toString(), kind) }.isFailure)
         }
         val broken = JSONObject(original.toString())
-        broken.getJSONArray("records").getJSONObject(0).put("sensor", "missing-hardware")
+        broken.getJSONArray("records").getJSONObject(0).put("session", UUID.randomUUID().toString())
         assertTrue(runCatching { parseUvirRecordArchive(broken.toString(), kind) }.isFailure)
         assertTrue(target.readSavedRecords().isEmpty())
     }
@@ -193,11 +270,11 @@ class UvirRecordArchiveTest {
 
     @Test fun upgradeFromPreviousSchemaPreservesAllStoredMeasurements() {
         val id = source.saveAcquisition(SensorSample(uva = .123456789), "before", timestamp = 1000)
-        source.writableDatabase.execSQL("DROP TABLE record_transfer_ids")
-        source.writableDatabase.version = 25
+        source.writableDatabase.execSQL("DELETE FROM record_transfer_ids")
+        source.writableDatabase.version = 26
         source.close()
         source = database("source", existing = true)
-        assertEquals(26, source.readableDatabase.version)
+        assertEquals(27, source.readableDatabase.version)
         assertEquals(.123456789, source.readRecord(id)!!.sample.uva, 0.0)
         assertEquals("before", source.readRecord(id)!!.note)
         assertEquals(1, roundTrip().records.size)

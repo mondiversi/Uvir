@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="release_011_status">Die Entwicklung ist ausgesetzt: Der Prototyp funktioniert, die optische Kalibrierung ist jedoch noch ungelöst.</string>
+    <string name="release_011_case">Referenzgehäuse mit korrigierter USB-Öffnung und flachem Deckel mit zwei 5-mm-Öffnungen veröffentlicht.</string>
+    <string name="release_011_improvements">USB-Abtastung, Sättigungserkennung, Diagnose, Archive und Dokumentation verbessert.</string>
+</resources>

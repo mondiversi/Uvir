@@ -49,10 +49,6 @@ internal fun readableMeasurementSpectralAreaBody(
         appendLine(
             "${context.getString(R.string.share_measurement_id_label)}: ${record.id}"
         )
-        appendLine(
-            "${context.getString(R.string.sensor_selector_label)}: " +
-                exportSensorName(record.sensorDisplayName)
-        )
         appendLine(hardware.models(record.sensorId).caption())
         appendLine("${context.getString(R.string.optical_window_title)}: ${opticalWindowSummary(record.sample.opticalWindow, numericFormat)}")
         appendLine(
@@ -66,9 +62,7 @@ internal fun readableMeasurementSpectralAreaBody(
         appendLine(
             "${context.getString(R.string.share_acquisition_label)}: " +
                 context.getString(
-                    if (record.externalCommand) {
-                        R.string.external_measurement
-                    } else if (record.automatic) {
+                    if (record.automatic) {
                         R.string.share_automatic
                     } else {
                         R.string.share_manual
@@ -181,7 +175,7 @@ internal fun readableMeasurementSpectralAreaBody(
                 )
             ) {
                 appendLine(
-                    "${context.getString(R.string.out_of_range_short)} · $scoreText/100"
+                    "${context.getString(R.string.sensor_saturation)} · $scoreText/100"
                 )
             } else {
                 appendLine(

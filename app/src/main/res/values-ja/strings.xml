@@ -735,14 +735,12 @@
     <string name="language_formats_description">アプリでのデータの表示方法と書式を選択します。</string>
     <string name="irradiance_measurement_heading">放射照度の測定</string>
     <string name="irradiance_measurement_description">放射照度の表示単位を選択します。保存値はセンサー本来の精度を維持します。</string>
-    <string name="out_of_range_short">OL - 測定範囲外</string>
-    <string name="out_of_range_csv_header">測定範囲外</string>
     <string name="language_english_localized">英語</string>
     <string name="settings_section_notifications">通知</string>
-    <string name="acquisition_feedback_description">手動または自動の測定を保存したときにアプリが再生する通知を選択します。</string>
+    <string name="acquisition_feedback_description">測定に関するアプリの設定を管理します。</string>
     <string name="acquisition_feedback_preview_hint">最終音量はスマートフォンのアラーム音量にも依存します。</string>
     <string name="confirmation_question_suffix">?</string>
-    <string name="threshold_alerts_sound_description_v2">アラートを記録したときにアプリが再生する通知を選択します。</string>
+    <string name="threshold_alerts_sound_description_v2">アラートに関するアプリの設定を管理します。</string>
     <string name="list_filter_export_question">表示中の結果をすべてエクスポートしますか？</string>
     <string name="list_filter_export_warning">レコードが選択されていません。現在のフィルターに一致するすべてのレコードをエクスポートします。</string>
     <string name="settings_include_sensitive_information">機密データを含める</string>

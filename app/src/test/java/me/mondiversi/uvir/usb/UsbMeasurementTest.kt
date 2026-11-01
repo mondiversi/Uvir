@@ -64,6 +64,14 @@ class UsbMeasurementTest {
     @Test(expected = InvalidSensorReading::class) fun lineErrorsAreNotOpticalCounts() {
         stripFtdiStatus(byteArrayOf(1, 0x62, 99), 3, 512)
     }
+    @Test fun uartBreakDoesNotBlockMpsseButOverflowAndReceiveErrorsStillDo() {
+        assertArrayEquals(byteArrayOf(0xfa.toByte(), 0xaa.toByte()),
+            stripFtdiStatus(byteArrayOf(1, 0x70, 0xfa.toByte(), 0xaa.toByte()), 4, 512))
+        for (error in listOf(0x02, 0x04, 0x08, 0x80)) {
+            try { stripFtdiStatus(byteArrayOf(1, (0x60 or error).toByte(), 99), 3, 512); fail("Corrupted payload") }
+            catch (expected: InvalidSensorReading) { assertTrue(expected.message!!.contains("0x")) }
+        }
+    }
     @Test fun uvGainSelectionIsBoundedAndReducesOverload() {
         assertEquals(4, nextUvGain(64, 65535, true))
         assertEquals(1, nextUvGain(1, 65535, true))
@@ -90,11 +98,11 @@ class UsbMeasurementTest {
         assertArrayEquals(byteArrayOf(0x80.toByte(), 0, 3, 0x80.toByte(), 1, 3, 0x80.toByte(), 3, 3), io.writes.last())
     }
     @Test fun repeatedStartReadsBytesAndNacksTheLastOne() {
-        val io = FakeIo(listOf(byteArrayOf(0), byteArrayOf(0), byteArrayOf(0), byteArrayOf(0x12), byteArrayOf(0x34)))
+        val io = FakeIo(listOf(byteArrayOf(0), byteArrayOf(0), byteArrayOf(0), byteArrayOf(0x12, 0x34)))
         assertArrayEquals(byteArrayOf(0x12, 0x34), Ft232hMpsse(io).transfer(0x74, byteArrayOf(2), 2))
-        val acknowledgements = io.writes.filter { it.firstOrNull() == 0x13.toByte() }
-        assertEquals(0, acknowledgements[0][2].toInt())
-        assertEquals(255, acknowledgements[1][2].toInt() and 255)
+        val read = io.writes.single { it.size > 12 && it[3] == 0x20.toByte() }
+        assertEquals(0, read[8].toInt())
+        assertEquals(255, read[20].toInt() and 255)
     }
     @Test fun uvRegistersAndChannelUnits() {
         val bus = RegisterBus()
@@ -121,14 +129,92 @@ class UsbMeasurementTest {
         val bus = RegisterBus()
         bus.reads[0xc6 to 1] = byteArrayOf(0)
         bus.reads[0x90 to 1] = byteArrayOf(0x50) // Ready + digital saturation.
-        bus.reads[0x95 to 36] = ByteArray(36) { if (it % 2 == 0) 0x10 else 0x27 } // 10,000 counts.
+        bus.reads[0x94 to 37] = byteArrayOf(0x80.toByte()) + ByteArray(36) { if (it % 2 == 0) 0x10 else 0x27 }
         val sensor = As7343(bus) {}
         try { sensor.capture(); fail("Must reject saturated data") }
         catch (expected: InvalidSensorReading) { assertTrue(expected.retryable) }
-        assertEquals(6, sensor.gainIndex) // 256 -> 128 -> 64 -> 32; next capture retains 32.
+        assertEquals(3, sensor.gainIndex) // 256 -> 64 -> 16 -> 4; next capture retains 4.
         bus.reads[0x90 to 1] = byteArrayOf(0x40)
-        bus.reads[0x95 to 36] = ByteArray(36) { if (it % 2 == 0) 0xe8.toByte() else 3 } // 1,000 counts.
-        assertEquals(32.0, sensor.capture().gain, 0.0)
+        bus.reads[0x94 to 37] = byteArrayOf(0) + ByteArray(36) { if (it % 2 == 0) 0xe8.toByte() else 3 }
+        assertEquals(4.0, sensor.capture(lockGain = true).gain, 0.0)
+    }
+
+    @Test fun visibleSnapshotLatchesBeforeReadingAndIgnoresUnrelatedLiveSaturation() {
+        val bus = RegisterBus()
+        bus.reads[0xc6 to 1] = byteArrayOf(0)
+        bus.reads[0x90 to 1] = byteArrayOf(0x50) // Next running cycle may saturate.
+        bus.reads[0x94 to 37] = byteArrayOf(0) + ByteArray(36) { if (it % 2 == 0) 0xff.toByte() else 0 }
+        val result = As7343(bus) {}.capture(lockGain = true)
+        assertEquals(256.0, result.gain, 0.0)
+        assertTrue(result.wm2.all { it.isFinite() && it > 0 })
+        assertTrue(bus.requests.contains(0x94 to 37))
+        assertFalse(bus.requests.any { it.first == 0x95 })
+    }
+
+    @Test fun saturatedLatchedFrameCannotPassEvenIfLiveStatusLooksFine() {
+        val bus = RegisterBus()
+        bus.reads[0xc6 to 1] = byteArrayOf(0)
+        bus.reads[0x90 to 1] = byteArrayOf(0x40)
+        bus.reads[0x94 to 37] = byteArrayOf(0x80.toByte()) + ByteArray(36)
+        try { As7343(bus) {}.capture(lockGain = true); fail("Latched saturation must be rejected") }
+        catch (error: InvalidSensorReading) { assertTrue(error.saturated) }
+    }
+
+    @Test fun wrongGainOrTruncatedFrameCannotBeNormalizedAsANewMeasurement() {
+        for (snapshot in listOf(byteArrayOf(15) + ByteArray(36), ByteArray(36))) {
+            val bus = RegisterBus().apply { echoGain = false }
+            bus.reads[0xc6 to 1] = byteArrayOf(0)
+            bus.reads[0x90 to 1] = byteArrayOf(0x40)
+            bus.reads[0x94 to 37] = snapshot
+            try { As7343(bus) {}.capture(lockGain = true); fail("Invalid snapshot") }
+            catch (error: InvalidSensorReading) { assertTrue(error.retryable) }
+        }
+    }
+
+    @Test fun anOldGainOrClearedStatusWaitsForTheCurrentConversionWithoutRestartingIt() {
+        val bus = RegisterBus().apply { echoGain = false }
+        bus.reads[0xc6 to 1] = byteArrayOf(9)
+        bus.reads[0x90 to 1] = byteArrayOf(0x40)
+        bus.snapshots = ArrayDeque(listOf(
+            byteArrayOf(0) + ByteArray(36),
+            byteArrayOf(0x88.toByte()) + ByteArray(36), // Previous saturated 128× frame.
+            byteArrayOf(9) + ByteArray(36) { if (it % 2 == 0) 100 else 0 }))
+        val sample = As7343(bus) {}.capture(lockGain = true)
+        assertEquals(256.0, sample.gain, 0.0)
+        assertTrue(sample.wm2.all { it > 0 })
+        assertEquals(3, bus.requests.count { it == (0x94 to 37) })
+        assertEquals(1, bus.writes.count { it.contentEquals(byteArrayOf(0x80.toByte(), 3)) })
+    }
+
+    @Test fun brightClearChannelsPreventGainHuntingEvenWhenNarrowBandsAreDim() {
+        for (clearChannel in listOf(4, 5, 10, 11, 16, 17)) {
+            val bus = RegisterBus()
+            bus.reads[0xc6 to 1] = byteArrayOf(9)
+            bus.reads[0x90 to 1] = byteArrayOf(0x40)
+            val data = ByteArray(37)
+            repeat(18) { channel ->
+                val value = if (channel == clearChannel) 6000 else 100
+                data[1 + channel * 2] = value.toByte()
+                data[2 + channel * 2] = (value shr 8).toByte()
+            }
+            bus.reads[0x94 to 37] = data
+            val result = As7343(bus) {}.capture()
+            assertEquals("Stable gain for clear ADC $clearChannel", 256.0, result.gain, 0.0)
+            assertEquals(1, bus.requests.count { it == (0x94 to 37) })
+            // Clear intensity affects range selection, never the reported color values.
+            assertArrayEquals(visibleWm2(IntArray(12) { 100 }, 9), result.wm2, 1e-12)
+        }
+    }
+
+    @Test fun clippedClearChannelsRemainInvalidInsteadOfBecomingOrdinarySpectralReadings() {
+        val bus = RegisterBus()
+        bus.reads[0xc6 to 1] = byteArrayOf(9)
+        bus.reads[0x90 to 1] = byteArrayOf(0x40)
+        val data = ByteArray(37)
+        data[1 + 4 * 2] = 0x10; data[2 + 4 * 2] = 0x27 // Clear ADC at 10,000 counts.
+        bus.reads[0x94 to 37] = data
+        try { As7343(bus) {}.capture(lockGain = true); fail("Clipped ADC") }
+        catch (expected: InvalidSensorReading) { assertTrue(expected.saturated) }
     }
 
     private class FakeIo(reads: List<ByteArray>) : MpsseIo {
@@ -141,9 +227,22 @@ class UsbMeasurementTest {
     private class RegisterBus : I2cBus {
         val reads = mutableMapOf<Pair<Int, Int>, ByteArray>()
         val writes = mutableListOf<ByteArray>()
+        val requests = mutableListOf<Pair<Int, Int>>()
+        var echoGain = true
+        var snapshots: ArrayDeque<ByteArray>? = null
+        private var visibleGain = 9
         override fun transfer(address: Int, write: ByteArray, readCount: Int): ByteArray {
-            if (readCount == 0) { writes.add(write); return byteArrayOf() }
-            return reads[(write[0].toInt() and 255) to readCount] ?: throw IOException("Missing fixture")
+            val register = write[0].toInt() and 255
+            if (readCount == 0) {
+                writes.add(write)
+                if (register == 0xc6) visibleGain = write[1].toInt() and 15
+                return byteArrayOf()
+            }
+            requests.add(register to readCount)
+            val result = (if (register == 0x94 && snapshots != null) snapshots!!.removeFirst()
+                else reads[register to readCount] ?: throw IOException("Missing fixture")).copyOf()
+            if (echoGain && register == 0x94) result[0] = ((result[0].toInt() and 0xf0) or visibleGain).toByte()
+            return result
         }
         override fun close() {}
     }

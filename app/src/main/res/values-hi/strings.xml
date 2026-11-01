@@ -148,7 +148,7 @@
     <string name="sensor_settings_connection_required">इन सेटिंग्स को बदलने के लिए सेंसर को कनेक्ट करें।</string>
     <string name="sensor_parameters_description">सेंसर की सामान्य सेटिंग कॉन्फ़िगर करें।</string>
     <string name="home_sensor_disconnected_title">सेंसर कनेक्ट नहीं है</string>
-    <string name="home_sensor_disconnected_description">डेटा प्राप्त करने और अलर्ट रिकॉर्ड करने के लिए एक सेंसर जोड़ें।</string>
+    <string name="home_sensor_disconnected_description">डेटा प्राप्त करने और अलर्ट रिकॉर्ड करने के लिए सेंसर जोड़ें।</string>
     <string name="home_sensor_disconnected_hint">USB, Wi-Fi, Bluetooth या इंटरनेट चुनने और निर्देश देखने के लिए सेटिंग्स › सेंसर › कनेक्शन खोलें।</string>
     <string name="sensor_connection_provisioning_reminder">Wi-Fi या Bluetooth का उपयोग करने के लिए, सेंसर को कम से कम एक बार USB से कनेक्ट करें। ऐप सेंसर की विशिष्ट पहचान और एक्सेस क्रेडेंशियल सुरक्षित रूप से प्राप्त करेगा।</string>
     <string name="sensor_connection_usb">USB</string>
@@ -746,14 +746,12 @@
     <string name="language_formats_description">चुनें कि ऐप में डेटा कैसे प्रदर्शित और स्वरूपित किया जाए।</string>
     <string name="irradiance_measurement_heading">विकिरण मापन</string>
     <string name="irradiance_measurement_description">विकिरण दिखाने के लिए उपयोग की जाने वाली इकाई चुनें। सहेजे गए मान सेंसर की मूल सटीकता बनाए रखते हैं।</string>
-    <string name="out_of_range_short">OL - सीमा से बाहर</string>
-    <string name="out_of_range_csv_header">सीमा_से_बाहर_मान</string>
     <string name="language_english_localized">अंग्रेज़ी</string>
     <string name="settings_section_notifications">सूचनाएँ</string>
-    <string name="acquisition_feedback_description">मैन्युअल या स्वचालित माप सहेजे जाने पर ऐप द्वारा बजाया जाने वाला संकेत चुनें।</string>
+    <string name="acquisition_feedback_description">माप के लिए ऐप की प्राथमिकताएँ प्रबंधित करें।</string>
     <string name="acquisition_feedback_preview_hint">अंतिम आवाज़ फ़ोन के अलार्म वॉल्यूम पर भी निर्भर करती है।</string>
     <string name="confirmation_question_suffix">?</string>
-    <string name="threshold_alerts_sound_description_v2">अलर्ट दर्ज होने पर ऐप द्वारा बजाया जाने वाला संकेत चुनें।</string>
+    <string name="threshold_alerts_sound_description_v2">अलर्ट के लिए ऐप की प्राथमिकताएँ प्रबंधित करें।</string>
     <string name="list_filter_export_question">सभी दिखाए गए परिणाम निर्यात करें?</string>
     <string name="list_filter_export_warning">कोई रिकॉर्ड चयनित नहीं है। वर्तमान फ़िल्टर से मेल खाने वाले सभी रिकॉर्ड निर्यात किए जाते हैं।</string>
     <string name="settings_include_sensitive_information">संवेदनशील डेटा शामिल करें</string>

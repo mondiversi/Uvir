@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="usb_diagnostic_progress">Componenten controleren: %1$d/%2$d</string>
+    <string name="usb_diagnostic_recognition">Herkenning</string>
+    <string name="usb_diagnostic_initialization">Initialisatie</string>
+    <string name="usb_diagnostic_reading">Meting</string>
+    <string name="usb_diagnostic_not_tested">Niet getest</string>
+    <string name="usb_diagnostic_readings">Nieuwe metingen: %1$d/%2$d</string>
+    <string name="usb_diagnostic_notes">Controleert de herkenning en metingen van de componenten. Kalibratie vereist een aparte test.</string>
+    <string name="usb_diagnostic_wiring">Controleer voeding, GND, SDA/SCL en de D1–D2-brug.</string>
+    <string name="usb_diagnostic_technical">Technische details</string>
+</resources>

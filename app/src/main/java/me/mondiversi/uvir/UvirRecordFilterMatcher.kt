@@ -19,12 +19,8 @@ internal class UvirRecordFilterMatcher(private val filters: UvirRecordListFilter
         (filters.fromInclusive == null || timestamp >= filters.fromInclusive) &&
             (filters.untilInclusive == null || timestamp <= filters.untilInclusive) &&
             (notes.isEmpty() || notes.any { recordNote.contains(it, ignoreCase = true) }) &&
-            (filters.sensorKeys.isEmpty() || sensorId.filterSensorKey() in filters.sensorKeys) &&
-            (filters.modes.isEmpty() || when {
-                isExternalCommand -> UvirRecordFilterMode.EXTERNAL
-                isAutomatic -> UvirRecordFilterMode.AUTOMATIC
-                else -> UvirRecordFilterMode.MANUAL
-            } in filters.modes) &&
+            (filters.modes.isEmpty() ||
+                (if (isAutomatic) UvirRecordFilterMode.AUTOMATIC else UvirRecordFilterMode.MANUAL) in filters.modes) &&
             // Invalid nonempty ID selections must match nothing, not mean "all".
             (filters.recordIds.isEmpty() || id in recordIds) &&
             (filters.sessionIds.isEmpty() || recordSessionId != null && recordSessionId in sessionIds) &&

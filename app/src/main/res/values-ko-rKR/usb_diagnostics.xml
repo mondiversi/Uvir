@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="usb_diagnostic_progress">구성 요소 확인 중: %1$d/%2$d</string>
+    <string name="usb_diagnostic_recognition">인식</string>
+    <string name="usb_diagnostic_initialization">초기화</string>
+    <string name="usb_diagnostic_reading">측정</string>
+    <string name="usb_diagnostic_not_tested">미확인</string>
+    <string name="usb_diagnostic_readings">새 측정값: %1$d/%2$d</string>
+    <string name="usb_diagnostic_notes">구성 요소의 인식과 측정을 확인합니다. 보정에는 별도 테스트가 필요합니다.</string>
+    <string name="usb_diagnostic_wiring">전원, GND, SDA/SCL 및 D1–D2 점퍼를 확인하세요.</string>
+    <string name="usb_diagnostic_technical">기술 세부 정보</string>
+</resources>

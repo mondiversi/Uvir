@@ -745,14 +745,12 @@
     <string name="language_formats_description">Chagua jinsi data inavyoonyeshwa na kupangiliwa katika programu.</string>
     <string name="irradiance_measurement_heading">Kipimo cha mwangaza</string>
     <string name="irradiance_measurement_description">Chagua kipimo kinachotumika kuonyesha mwangaza. Thamani zilizohifadhiwa hubaki na usahihi wa awali wa kihisi.</string>
-    <string name="out_of_range_short">OL - Nje ya kiwango</string>
-    <string name="out_of_range_csv_header">Thamani_nje_ya_kiwango</string>
     <string name="language_english_localized">Kiingereza</string>
     <string name="settings_section_notifications">Arifa</string>
-    <string name="acquisition_feedback_description">Chagua ishara inayotolewa na programu wakati kipimo cha mkono au kiotomatiki kinahifadhiwa.</string>
+    <string name="acquisition_feedback_description">Dhibiti mipangilio ya programu kwa ajili ya vipimo.</string>
     <string name="acquisition_feedback_preview_hint">Sauti ya mwisho pia inategemea sauti ya kengele ya simu.</string>
     <string name="confirmation_question_suffix">?</string>
-    <string name="threshold_alerts_sound_description_v2">Chagua ishara inayotolewa na programu wakati arifa inarekodiwa.</string>
+    <string name="threshold_alerts_sound_description_v2">Dhibiti mipangilio ya programu kwa ajili ya arifa.</string>
     <string name="list_filter_export_question">Hamisha matokeo yote yanayoonekana?</string>
     <string name="list_filter_export_warning">Hakuna rekodi iliyochaguliwa. Rekodi zote zinazolingana na vichujio vya sasa zinahamishwa.</string>
     <string name="settings_include_sensitive_information">Jumuisha data nyeti</string>

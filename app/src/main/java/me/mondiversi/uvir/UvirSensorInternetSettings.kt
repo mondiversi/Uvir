@@ -2,7 +2,6 @@ package me.mondiversi.uvir
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -71,7 +70,7 @@ internal fun UvirSensorInternetSettings(
         )
 
         if (!usePrimaryWifi) {
-            OutlinedTextField(
+            UvirCompactTextField(
                 value = wifiSsid,
                 onValueChange = onWifiSsidChange,
                 modifier = Modifier.fillMaxWidth().settingsCommitOnBlur(),
@@ -91,7 +90,7 @@ internal fun UvirSensorInternetSettings(
             )
         }
 
-        OutlinedTextField(
+        UvirCompactTextField(
             value = relayHost,
             onValueChange = onRelayHostChange,
             modifier = Modifier.fillMaxWidth().settingsCommitOnBlur(),
@@ -103,7 +102,7 @@ internal fun UvirSensorInternetSettings(
             singleLine = true,
             colors = UvirOutlinedTextFieldColors()
         )
-        OutlinedTextField(
+        UvirCompactTextField(
             value = relayPort,
             onValueChange = { value ->
                 onRelayPortChange(value.filter(Char::isDigit).take(5))
@@ -115,7 +114,7 @@ internal fun UvirSensorInternetSettings(
             singleLine = true,
             colors = UvirOutlinedTextFieldColors()
         )
-        OutlinedTextField(
+        UvirCompactTextField(
             value = mqttUsername,
             onValueChange = onMqttUsernameChange,
             modifier = Modifier.fillMaxWidth().settingsCommitOnBlur(),

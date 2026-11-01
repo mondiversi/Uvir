@@ -8,7 +8,9 @@
     <string name="usb_hardware_pending">La prise en charge USB est en préparation. Les mesures réelles doivent être vérifiées avec la carte FT232H. La réponse optique et l’étalonnage absolu restent à valider.</string>
     <string name="usb_connect">Connectez le FT232H et les deux capteurs avec un adaptateur de données USB OTG.</string>
     <string name="usb_permission">Autorisez l’accès USB</string>
-    <string name="usb_initializing">Initialisation des capteurs…</string>
+    <string name="usb_initializing">Initialisation…</string>
+    <string name="usb_waiting">En attente de données…</string>
+    <string name="sensor_saturation">Saturation</string>
     <string name="usb_ready">USB connecté</string>
     <string name="usb_error">USB indisponible</string>
     <string name="usb_retry">Reconnecter USB</string>
