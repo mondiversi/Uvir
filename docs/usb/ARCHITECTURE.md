@@ -81,9 +81,9 @@ measurements, IDs, notes or sessions. The database and transfer schemas stay com
 Simulated data overrides physical connection states with an orange filled dot of the same size. These colors
 apply in both themes; existing activity/initialization pulses vary opacity.
 
-The AS7343 conversion is the provisional datasheet estimate used by the previous
-project, not a laboratory calibration. Physical channels are combined into the
-same displayed colors before their color offset is subtracted.
+The AS7343 conversion is a provisional datasheet estimate, not a laboratory
+calibration. Physical channels are combined into displayed color groups before
+the corresponding color offset is subtracted.
 
 For each displayed channel the phone uses:
 
@@ -212,7 +212,7 @@ Database replacement retains integrity/schema validation and a single transactio
 
 ## Release boundary
 
-`0.1.0` started Uvir's new development version line; `0.1.1` publishes the current
+Uvir is distributed as a development prerelease. Version `0.1.1` includes the
 prototype and documents suspended development at optical calibration.
 A separate signed application channel must be validated before enabling
 automatic updates; signature/hash/installer checks remain in use. The head

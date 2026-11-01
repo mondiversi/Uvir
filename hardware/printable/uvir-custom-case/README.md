@@ -46,11 +46,10 @@ The lid has four plain 2.4 mm screw-clearance holes, without screw-head recesses
 The base has 1.6 mm blind pilot holes: depth 4 mm for the carrier supports and
 6 mm for lid posts. Choose screw lengths that do not break through the floor.
 
-## USB opening correction
+## USB opening
 
-The previous printed opening was filed only upwards until its total height was
-13 mm. Its lowest 6 mm was then reported as unused space. Keeping the original
-lower datum at 5 mm from the **outside** bottom gives this corrected opening:
+The USB-A connector opening is positioned relative to the **outside** bottom
+of the case:
 
 | Item | Dimension |
 |---|---:|
@@ -62,11 +61,10 @@ lower datum at 5 mm from the **outside** bottom gives this corrected opening:
 | Covered / exposed protrusion | Approximately 3 / 12 mm |
 
 The connector centre is 0.5 mm right of the carrier centre. The carrier is offset
-0.5 mm left in the case so the USB is centred on the enclosure. The opening
-correction changes neither carrier supports nor the lid seat. These are the
-user-specified opening dimensions derived from a fit adjustment, not a separate
-precision measurement of every connector surface. No additional height allowance
-was silently added. A fresh physical fit of the revised STL is not claimed.
+0.5 mm left in the case so the USB is centred on the enclosure. Opening dimensions
+reflect the reported prototype fit. Verify the actual connector, socket height
+and cable/OTG adapter clearance before printing; mesh checks do not establish
+physical fit.
 
 ## Carrier and mounting coordinates
 
@@ -86,11 +84,11 @@ The optical breakouts are removable on raised plug-in sockets/supports; they
 are not soldered directly to the carrier. The individual wire layout is not
 prescribed by these mechanical coordinates.
 
-## Latest sensor centres and lid holes
+## Sensor centres and lid holes
 
 The origin below is the **top-left corner of the carrier**, components facing up,
-USB down. X runs rightwards and Y downwards. Latest references supersede earlier
-rough measurements:
+USB down. X runs rightwards and Y downwards. The positions below describe the
+measured prototype:
 
 | Sensor | X from carrier left | Y from carrier top |
 |---|---:|---:|

@@ -6,7 +6,7 @@ Use [the Uvir custom-case package](uvir-custom-case/README.md):
 
 | Part | Current published file |
 |---|---|
-| Lower case R0.3, USB opening corrected to 14.1 × 7 mm at Z=11–18 mm | [Case STL](uvir-custom-case/uvir-custom-case-base-r03.stl) |
+| Lower case R0.3, USB opening 14.1 × 7 mm at Z=11–18 mm | [Case STL](uvir-custom-case/uvir-custom-case-base-r03.stl) |
 | Flat lid R0.6, two straight 5 mm apertures, no tubes | [Lid STL](uvir-custom-case/uvir-custom-case-lid-r06-5mm.stl) |
 
 Measured carrier/sensor positions, editable generators, lid OpenSCAD, dependency

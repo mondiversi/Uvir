@@ -22,10 +22,9 @@ who wants to study or continue the work. This is a functioning acquisition
 prototype with unfinished metrology, **not a calibrated measuring instrument**.
 See [what works, what remains and how to resume](docs/PROJECT_STATUS.md).
 
-**The `main` branch develops Uvir for a measuring head connected through USB:
+**Uvir connects an Android phone to a USB spectral measuring head:
 FT232H + UV 5 Click / AS7331 + GY-AS734X / AS7343.** The phone owns
 sampling, processing, acquisition schedules, alerts, time and storage.
-The measuring head supplies readings over USB; the phone handles processing and storage.
 
 ## Download 0.1.1
 
@@ -36,12 +35,12 @@ The measuring head supplies readings over USB; the phone handles processing and 
 This is a prerelease. Keep the original signing identity when updating, stop any
 active session, and do not uninstall the app or clear its archive for testing.
 
-## New hardware
+## Hardware
 
 - Android phone with USB host/OTG and a USB data adapter/cable.
 - FT232H MPSSE USB-to-I²C board (FT232R/FT232RL UART adapters cannot substitute).
 - MIKROE UV 5 Click with AS7331, default I²C address `0x74`.
-- Existing GY-AS734X breakout with AS7343, address `0x39`.
+- GY-AS734X breakout with AS7343, address `0x39`.
 
 See the [wiring guide](docs/usb/WIRING.md) before connecting power.
 The GY breakout's regulation/level shifting and the actual FT232H board's
@@ -54,13 +53,13 @@ flowchart LR
     B -->|SCL + SDA · shared bus| D[GY-AS734X · AS7343 · 0x39]
 ```
 
-The current build uses a **hand-built perfboard carrier**, with the optical
+The assembly uses a **hand-built perfboard carrier**, with the optical
 breakouts plugged into raised removable sockets rather than soldered directly
 to the carrier. The [hardware guide](hardware/usb/README.md) documents functional
 connections, without prescribing the prototype's individual wire-routing layout.
 
 The [reference printable enclosure](hardware/printable/uvir-custom-case/README.md)
-contains the corrected USB opening and a flat experimental lid with two **5 mm**
+contains the USB opening and a flat experimental lid with two **5 mm**
 apertures. Source files and measured carrier/mounting/sensor positions are included.
 These dimensions describe this prototype; the lid is not a validated optical head.
 
@@ -78,23 +77,24 @@ The independent Python example is not yet validated on physical hardware.
 
 - One attached USB measuring head, with a fixed localized name.
 - General settings combine Theme with acquisition and alert notification options.
-- One phone-settings JSON and one SQLite database export, without new passwords;
-  older encrypted backups remain importable.
+- Phone-settings JSON and SQLite database exports do not require passwords;
+  encrypted backups are supported on import.
 - Separate detection of the adapter and both optical chips.
 - Missing, incomplete, timed-out or saturated readings do not become valid zeros.
 - W/m² calculations and database values; display units and decimals remain presentation choices.
 - Channel offsets, factors and independent optical-window master × channel multipliers
-  are applied on the phone. The reference-measurement dialogs are retained.
+  are applied on the phone. Reference-measurement dialogs collect offsets and
+  optical-window multipliers, with explicit application of the results.
 - Manual acquisitions, manual groups, timed/conditional acquisition sessions and
   threshold alerts are phone-owned.
 - Disconnecting USB stops ongoing sessions. Reconnection never silently resumes them.
-- Existing acquisitions, sessions, alerts, notes and full-precision measurements remain readable.
-  The phone archive removes sensor profiles, hardware IDs and external-trigger metadata;
+- Acquisitions, sessions, alerts, notes and full-precision measurements are stored
+  on the phone, without sensor profiles, hardware IDs or external-trigger metadata;
   calibration belongs to the phone and is not inherited from an imported archive.
 - Simulated readings/events remain available for testing. Live simulation starts off
   and is foreground-only; it cannot claim a real USB device or acquire a hardware wake lock.
 
-[Architecture and migration](docs/usb/ARCHITECTURE.md) ·
+[Architecture and storage](docs/usb/ARCHITECTURE.md) ·
 [Validation checklist](docs/usb/VALIDATION.md)
 
 ## Optical limitations

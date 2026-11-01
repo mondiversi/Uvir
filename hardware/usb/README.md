@@ -1,4 +1,4 @@
-# Current Uvir hardware
+# Uvir hardware
 
 > **Development is suspended at optical calibration.** The assembled prototype
 > reads both modules and works with the Android app, but reliable absolute

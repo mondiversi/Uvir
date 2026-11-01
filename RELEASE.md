@@ -1,6 +1,6 @@
 # Uvir distribution
 
-`main` develops Uvir on its new 0.x line; the current release is **0.1.1** (`versionCode` 10).
+The current Uvir release is **0.1.1** (`versionCode` 10).
 This is a public **prerelease**, with optical calibration unresolved and development suspended.
 
 ## Application identity

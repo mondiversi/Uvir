@@ -1,7 +1,7 @@
 # v0.1.0
 
-First public **development preview of Uvir**. This is a new 0.x
-development line, not a calibrated instrument release.
+Public **development preview of Uvir**. Optical calibration remains unresolved;
+this is not a calibrated instrument release.
 
 - USB-only measuring head: FT232H MPSSE with UV 5 Click / AS7331 and
   GY-AS734X / AS7343 on one I2C bus. Android handles both chip drivers directly.
@@ -11,8 +11,8 @@ development line, not a calibrated instrument release.
   The original home controls and the compact settings menu are retained.
 - Existing records remain readable in full-precision W/m². Display visibility,
   percentages and rounding do not alter recorded measurements.
-- One phone-settings JSON export and one SQLite database export, without new
-  password prompts. Earlier encrypted backups remain importable.
+- Phone-settings JSON and SQLite database exports do not require passwords.
+  Encrypted backups are supported on import.
 - Updated wiring diagram, first-connection guide and explicit hardware-validation
   checklist. Simulated readings remain available and start disabled.
 
