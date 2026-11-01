@@ -49,7 +49,3 @@ remain provisional estimates rather than validated continuous-spectrum irradianc
 - [Reference mechanical files and dimensions](../../hardware/printable/uvir-custom-case/README.md)
 - [AS7331 optical design guidance, §§4.1–4.2](https://look.ams-osram.com/m/45d5dfb4a22ecb04/original/AS7331_Design_Guidelines_PD001048_2-00.pdf)
 - [AS7343 datasheet, §11.3](https://look.ams-osram.com/m/5f2d27fff9a874d2/original/AS7343-14-Channel-Multi-Spectral-Sensor.pdf)
-
-The [historical calibration document](../../hardware/calibration/README.md)
-retains the former ESP32 firmware procedures. Those firmware commands are not
-the current phone-owned FT232H calibration path.

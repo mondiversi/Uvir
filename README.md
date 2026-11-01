@@ -25,7 +25,7 @@ See [what works, what remains and how to resume](docs/PROJECT_STATUS.md).
 **The `main` branch develops Uvir for a measuring head connected through USB:
 FT232H + UV 5 Click / AS7331 + GY-AS734X / AS7343.** The phone owns
 sampling, processing, acquisition schedules, alerts, time and storage.
-The measuring head has no ESP32, firmware, battery-backed clock or local archive.
+The measuring head supplies readings over USB; the phone handles processing and storage.
 
 ## Download 0.1.1
 
@@ -35,21 +35,6 @@ The measuring head has no ESP32, firmware, battery-backed clock or local archive
 
 This is a prerelease. Keep the original signing identity when updating, stop any
 active session, and do not uninstall the app or clear its archive for testing.
-
-## Preserved ESP32 project
-
-The complete previous project is preserved on the
-[legacy-esp32 branch](https://github.com/mondiversi/Uvir/tree/legacy-esp32),
-at commit `7161a31711f249de2bc346199c269da7aaea88c5`.
-Its preserved version is **1.4.2**, with firmware **0.5.119**.
-Its source, firmware, PCB, printable parts, wireless
-protocols and documentation remain recoverable.
-The [archived README](docs/LEGACY_ESP32_README.md) describes that architecture.
-
-The old ESP32 release pages and downloadable installers have been retired.
-The ESP32 branch, source history and Git
-tags remain intact, so that edition can still be rebuilt. The old ESP32 stable
-update feed no longer has a published release. The Uvir APK is not an ESP32 update.
 
 ## New hardware
 
@@ -86,7 +71,7 @@ conversion requests, returned register data and saturation checks for both
 optical modules. It includes a [Python terminal reader](tools/examples/uvir_ft232h.py)
 for individual or continuous **raw-count** readings. The external host must
 implement any conversion, calibration, averaging and recording it needs.
-This is USB/MPSSE/I²C, not the preserved ESP32 text/COM-port protocol.
+The host communicates using USB/MPSSE/I²C register transactions.
 The independent Python example is not yet validated on physical hardware.
 
 ## App behavior
@@ -105,9 +90,7 @@ The independent Python example is not yet validated on physical hardware.
 - Disconnecting USB stops ongoing sessions. Reconnection never silently resumes them.
 - Existing acquisitions, sessions, alerts, notes and full-precision measurements remain readable.
   The phone archive removes sensor profiles, hardware IDs and external-trigger metadata;
-  legacy sensor calibration is not automatically transferred to a new head.
-- No wireless association, sensor naming, autonomous storage, RTC battery warnings,
-  status LEDs/buzzer, external trigger or ESP32 firmware update in the new interface.
+  calibration belongs to the phone and is not inherited from an imported archive.
 - Simulated readings/events remain available for testing. Live simulation starts off
   and is foreground-only; it cannot claim a real USB device or acquire a hardware wake lock.
 
@@ -116,13 +99,12 @@ The independent Python example is not yet validated on physical hardware.
 
 ## Optical limitations
 
-The previous lid and light-entry tubes are **theoretical prototypes**, not a
-validated measuring head. Narrow tubes reject oblique and diffuse light.
+The reference case and 5 mm lid are **mechanical prototypes**, not a
+validated measuring head. Aperture geometry changes angular acceptance.
 A constant software multiplier cannot restore an angle-dependent loss.
 The final mechanical assembly, any protective window/diffuser and both optical
 channels require comparison with suitable reference instruments.
 See [current optical calibration status](docs/usb/CALIBRATION.md).
-The old ESP32 PCB/enclosure design is not a finished PCB for the new USB head.
 
 ## Build
 
@@ -141,4 +123,4 @@ physical compatibility of every breakout variant, or operation on every Android 
 
 ## License
 
-See [LICENSE](LICENSE) and [third-party notices](third_party).
+See [LICENSE](LICENSE).

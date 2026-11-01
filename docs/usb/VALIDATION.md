@@ -3,13 +3,13 @@
 ## Release 0.1.1 verification — 2026-11-01
 
 The signed release APK builds successfully as `me.mondiversi.uvir`, version
-0.1.1, version code 10. All 832 JVM tests pass, including release identity,
+0.1.1, version code 10. All 829 JVM tests pass, including release identity,
 archive/migration behavior and the three new release highlights in all 20
 languages. The Android instrumentation test package compiles successfully;
 there is no new on-device run for this release. Earlier dated device results
 below remain historical evidence for their respective changes.
 
-The standalone-reader/example suite passes 23 synthetic Python tests; it does
+The FT232H standalone-reader suite passes 11 synthetic Python tests; it does
 not establish physical validation of the independent PC reader. Documentation
 link checks pass. Both portable CAD generators reproduce the selected reference
 STLs byte-for-byte, and independent mesh checks pass for closed connected
@@ -166,8 +166,8 @@ percentage. It does not become a recordable full pair. Recovering averages keep
 the islands visible, while actual timeouts/transport faults still expire data.
 Minimum/locked-gain saturation stops redundant same-frame retries and is retried
 on the next normal cycle. Saturated values are never silently accepted just to
-keep the screen visible; the legacy firmware checked only spectral-channel
-counts, whereas the current driver also honors latched whole-chip saturation.
+keep the screen visible; the driver honors both spectral-channel counts and
+latched whole-chip saturation.
 
 828 JVM tests pass, including wire-level batch decoding/FIFO bounds, all-ADC
 gain control, strong-light recovery, independent valid-group averaging with
@@ -262,7 +262,7 @@ that continuity fix (see the subsequent batching validation above).
   came from a torn frame. Continuous real-head validation of the corrected
   reader, gain transitions and automatic references remains pending with the
   head connected to the phone. No optical calibration was applied in these tests.
-- No GitHub publication or ESP32 firmware update was performed for this change.
+
 
 ## Sensor diagnostics restoration — 2026-10-28
 
@@ -271,12 +271,11 @@ wording, the standard island descriptions and the note below Simulate events.
 Raw connection enum values and preparation/debug lines are no longer displayed
 in the island. Run diagnostics is disabled without an initialized real head.
 The report uses fresh optical-reading pairs from the current attachment; it has
-no ESP32 firmware requirement or absent peripheral fields. Its timeout allows
-for the configured sampling spacing without changing the running reader.
+
 
 782 JVM tests and 14 isolated device tests pass. New cases cover cached/stale/
 invalid frames, zero readings, timeout, cancellation, reconnecting the same serial,
-preservation of running-session state, USB reports, legacy firmware checks,
+preservation of running-session state, USB reports, compatibility checks,
 descriptions and disabled actions in both themes and portrait/landscape. Real
 FT232H hardware validation remains pending.
 
@@ -287,14 +286,13 @@ FT232H hardware validation remains pending.
   sensor register/channel order, readiness, saturation, gain normalization and
   the SI correction pipeline. These use simulated transports, not the new board.
 - The owner-signed APK is `me.mondiversi.uvir`, version `0.1.0`, Android version
-  code 9. It is a prerelease, not the legacy stable update.
+  code 9. It is a development prerelease.
 - General replaces separate Appearance/Notifications menu entries and combines
   Theme, Acquisitions and Alerts. Device checks cover both themes and orientations,
   two-column island placement, preserved typography, reference controls and
   session navigation. Existing settings/data-backup round trips also pass.
 - The GitHub prerelease contains the signed APK and its SHA-256 checksum. There
-  is no FT232H firmware upload or new ESP32 firmware asset. The automatic USB
-  update channel stays disabled and the ESP32 branch remains at 1.4.2/0.5.119.
+
 
 ## Development version line — 2026-10-28
 
@@ -325,23 +323,7 @@ day/night, both orientations, RTL and enlarged fonts, without changing archives.
 ## Software verification — 2026-10-27
 
 - Signed development APK `2.0.0-dev` builds successfully; no stable USB release
-  or ESP32 firmware replacement has been published.
-- 769 JVM tests pass, including the new driver/pipeline tests and all existing
-  unit regression tests. Resource catalogs are complete in all 20 languages.
-- 16 instrumented tests pass on a Samsung Galaxy S10e / Android 12 in the
-  disposable `me.mondiversi.uvir.verification` package: USB-only menu, day/night,
-  portrait/landscape, mock acquisition/alerts, disconnect interruption, isolated
-  USB-settings backup and legacy SI database migration. Offline configuration
-  tests cover editable sampling/calibration, independent factor/offset updates,
-  optical-master persistence, automatic-acquisition drafts and disabled reference
-  collection without an adapter.
-- At the owner's request, the installed real app was upgraded from 1.4.2 to the
-  signed Uvir development build `2.0.0-dev`, without uninstalling it. Encrypted
-  snapshots were verified before and after the upgrade; all existing database
-  tables were unchanged. This is a local preview, not a stable release.
-- Real FT232H transfers, electrical compatibility, optical response and
-  screen-off USB recording remain pending. Other Android versions/tablets have
-  not been bench-tested in this redesign.
+
 
 ## Software checks
 
@@ -428,7 +410,3 @@ not proof that the USB cable physically disconnected.
   calibration persistence with and without a USB serial, and archive exports.
 - Validate both sensors with the final optics and reference sources. A passing
   software suite cannot establish irradiance accuracy or an angular response.
-
-The previous ESP32 firmware and PCB can still be recovered from `legacy-esp32`.
-They are not required to test the new USB path and must not drive the same I²C bus
-at the same time as the FT232H.

@@ -41,10 +41,9 @@ The two STLs are attached individually and included with their editable sources
 in `Uvir-Printables-0.1.1.zip`. Complete source and documentation are available
 from the release tag and GitHub's source ZIP/tarball.
 
-The FT232H head has **no firmware to upload**. No ESP32 BIN or uploader is part
-of this release. The automatic update channel remains disabled; publishing this
-prerelease does not activate it. The complete **1.4.2 / firmware 0.5.119** ESP32
-project remains unchanged on `legacy-esp32`.
+The FT232H head has **no firmware to upload**. This release contains the
+application and current FT232H hardware documentation/printables. The automatic
+update channel remains disabled; publishing this prerelease does not activate it.
 
 ## Measurement limitations
 

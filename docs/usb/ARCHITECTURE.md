@@ -1,18 +1,11 @@
 # Phone-owned USB architecture
 
-The full ESP32 implementation is retained on `legacy-esp32`, based on commit
-`7161a31711f249de2bc346199c269da7aaea88c5`. Local Git-bundle, source-ZIP and
-release-package backups were verified before development started.
-
 ## Active path
 
-`MainActivity` opens `UvirUsbPhoneApp` and `UvirUsbPhoneRuntime`. It does not start
-the legacy multi-sensor runtime, remote server, serial ESP32 manager or wireless
-manager. Only the FT232H USB attachment filter is registered. Wireless/location
-permissions and the ESP32 firmware service are absent from the active manifest.
-Some legacy implementation files remain as compatibility/reference code while
-shared archive, presentation, import/export and settings components are reused.
-They are not a second selectable hardware backend in this edition.
+`MainActivity` opens `UvirUsbPhoneApp` and `UvirUsbPhoneRuntime`. Only the
+FT232H USB attachment filter is registered. The phone owns processing,
+configuration, scheduling and storage. One attached head contains both optical
+modules; there is no selectable wireless hardware backend.
 
 The bus has one serialized I/O owner. `AndroidFt232h` handles USB requests and
 strips FTDI status headers from every USB packet. `Ft232hMpsse` implements I²C
@@ -123,7 +116,7 @@ six new raw pairs must arrive without interrupting acquisition/alert jobs or
 changing phone calibration. Cached display values and frames from a previous
 attachment cannot complete a probe. Timeout, cancellation and attachment changes
 are handled explicitly. Reports can be saved/shared and failures enter the error
-log. There are no ESP32 firmware, RTC, storage, wireless or actuator fields.
+log. Reports describe the adapter, bus and both optical modules.
 
 ## External USB hosts
 
@@ -132,7 +125,6 @@ transactions and includes a small independent PyFtdi raw-count reader. Its host
 program owns initialization, fixed-gain conversions and status checks; it does
 not inherit phone settings or the calibrated/averaged Android pipeline. The
 reader is covered by synthetic register tests, not a physical PC/driver test.
-The preserved ESP32 text protocol is separate and is not accepted by FT232H.
 
 ## Lifecycle and recording
 
@@ -199,8 +191,8 @@ even without an attached adapter. All configuration belongs to the phone. The me
 General combines Theme with acquisition/alert notification islands. Only automatic reference
 measurements require real live readings. FT232H identity is used only in memory
 to validate attachment/reference/diagnostic generations, never as record provenance
-or the owner of settings. Old ESP32 sensor settings are not silently promoted
-and cannot be sent as ESP32 commands to an FT232H.
+or the owner of settings. Archived hardware settings never silently replace
+the phone configuration or become FT232H commands.
 Automatic acquisition and alert registration both reuse their original forms.
 The automatic page retains separate interval, delayed-start, duration, maximum,
 conditional and note islands, with hours/minutes/seconds editors. External
@@ -222,9 +214,6 @@ Database replacement retains integrity/schema validation and a single transactio
 
 `0.1.0` started Uvir's new development version line; `0.1.1` publishes the current
 prototype and documents suspended development at optical calibration.
-The former ESP32 binary releases have been retired; `legacy-esp32`,
-its source history and Git tags are unchanged. The old stable update feed no longer
-has a published release and must not deliver the incompatible current Uvir app.
-A separate signed USB channel is required
-before enabling automatic USB updates; signature/hash/installer checks remain in
-use. There is no firmware to upload to the FT232H head through this app.
+A separate signed application channel must be validated before enabling
+automatic updates; signature/hash/installer checks remain in use. The head
+does not require a firmware upload. See [distribution and updates](../UPDATES.md).

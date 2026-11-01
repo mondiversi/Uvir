@@ -48,20 +48,11 @@ Changing sockets, stack height or module placement can require a revised lid.
 
 ## Head and host responsibilities
 
-The head supplies readings only. There is no ESP32 firmware, RTC, SD/FRAM storage,
-wireless link, external trigger, status buzzer or autonomous recording in this
-architecture. Android owns processing, calibration settings, time, sessions and
-the archive. An FT232H does not accept the old ESP32 serial text commands.
+The head supplies readings over USB. Android owns processing, calibration
+settings, time, sessions and the archive. FT232H accepts binary MPSSE/I²C
+transactions; the optical modules expose conversion and status registers.
 
 [Standalone USB reading](../../docs/usb/STANDALONE.md) provides the register
 send/receive reference and a Python raw-count reader for another host. That
 independent Python reader still requires physical validation; it does not inherit
 the phone's calibration or processing merely by reading the same components.
-
-## PCB and historical hardware
-
-The retained carrier PCB/Gerber files and TEKO-style enclosure/tube designs belong
-to the **legacy ESP32** implementation. They are not a manufactured PCB or a
-validated optical solution for this FT232H perfboard prototype. The complete old
-project remains available on the
-[legacy-esp32 branch](https://github.com/mondiversi/Uvir/tree/legacy-esp32).

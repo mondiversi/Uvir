@@ -1,7 +1,7 @@
 @echo off
 setlocal
 
-rem ESP32 version 1.4.2 is preserved in legacy-esp32. This builds the Uvir 0.1.1 APK.
+rem Build the signed Uvir 0.1.1 APK.
 
 set "PROJECT_DIR=%~dp0"
 if not defined JAVA_HOME set "JAVA_HOME=C:\Program Files\Android\Android Studio\jbr"

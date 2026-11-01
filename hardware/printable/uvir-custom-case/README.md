@@ -2,7 +2,7 @@
 
 The published pair is **lower case R0.3** with the corrected USB opening and
 **flat lid R0.6** with two **5 mm diameter** apertures. These are original
-prototype parts for the current FT232H assembly, not the former TEKO/ESP32 case.
+prototype parts for the current FT232H assembly.
 Optical calibration remains unresolved; the lid is a test variant.
 
 ![Reference case render](case-isometric.png)
@@ -125,4 +125,4 @@ python verify_stl.py
 Checks reopen the exported STL files and verify closed connected geometry,
 dimensions, support heights, USB opening and lid clearance. They do not establish
 physical print fit or radiometric accuracy. The [project repository](https://github.com/mondiversi/Uvir)
-contains wiring, calibration limitations and the preserved ESP32 history.
+contains wiring, calibration limitations and application source.

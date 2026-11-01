@@ -1,123 +1,25 @@
 # Device testing and archive safety
 
-Prefer a disposable emulator or dedicated test phone. Isolated UI fixtures do not
-insert production acquisitions or alerts, but that alone does not make a test runner
-safe for a personal installation.
+Prefer a disposable emulator or a dedicated test phone. Build with
+`-PuvirIsolatedVerification=true` for the separate verification package and
+preferences. Do not run a complete instrumentation suite against a personal
+installation or open its USB hardware in unrelated UI fixtures.
 
-Android Gradle Plugin 9.3.1 defaults to uninstalling the target and test APKs when
-connected instrumentation tests finish. This also deletes the target app's data.
-The project therefore explicitly sets:
+The project keeps test APKs installed after a connected run and disables
+automatic uninstallation of incompatible APKs. Do not override those settings.
+Never uninstall, clear data or use signature recovery on a phone containing
+an archive to work around an installation problem.
 
-- `android.injected.androidTest.leaveApksInstalledAfterRun=true`
-- `android.experimental.testOptions.uninstallIncompatibleApks=false`
+Before an authorized personal-device check, retain verified settings/database
+exports, compare installed/new signing certificates and update using
+`adb install -r`. Stop if installation fails. Verify that archive counts and the
+original installation timestamp remain unchanged. Restore temporary device
+settings after the test. Cloud restore is not evidence that recent data survived.
 
-Do not override these settings. Do not use uninstall, clear-data or an automatic
-signature-recovery operation on a phone containing a user archive. Android cloud
-restore is neither an up-to-date archive guarantee nor a credential backup.
+Public reports must distinguish compilation, synthetic tests, isolated device
+tests and physical hardware/optical trials. Keep private archives, incident
+reports, credentials and recovered snapshots out of source and release assets.
 
-Before any instrumentation run on a personal device:
-
-1. Obtain explicit authorization for the selected test classes and keep a verified
-   database/settings export, including an encrypted sensor profile export.
-2. Verify that both installed and new APKs have matching signing certificates.
-3. Build APKs without running a connected test task, then update with `adb install -r`.
-   Stop if installation fails; do not uninstall to work around the failure.
-4. Run only reviewed, isolated classes through `adb shell am instrument`.
-   Do not run the complete suite against a personal installation.
-5. Verify that the package's original `firstInstallTime`, archive counts and sensor
-   association remain unchanged; restore temporarily changed screen settings.
-
-Verification reports must distinguish an archive-preserving update from a fresh
-installation followed by automatic cloud restore. Restored counts alone do not prove
-that recent data were included. Keep any incident report or recovered user snapshot
-local; neither is a public release artifact.
-
-## Local filter result-count update — 2026-10-05, unpublished
-
-Acquisition and alert list filter fields now append the final intersected row
-count in parentheses. Each real list passes the size of its existing filtered
-collection; no second database query or filter pass is added. Enabled ID, session,
-date, mode, sensor, note and acquisition-variant fields share the same count.
-The alert page's disabled variant field omits the suffix. Number preferences,
-accessible descriptions and the selected-label ellipsis preserve the count.
-Choices remain derived from unfiltered data and filter storage stays unchanged.
-
-The debug build and all **565 JVM tests** passed. Android test sources compiled;
-existing private-database integration fixtures now assert the count in each
-enabled field, but no instrumentation was executed for this update. The Samsung
-phone check covered actual list fields and a temporary additional variant filter,
-then restored the exact original filters, including the existing ID criterion.
-Archive data were not edited and no acquisitions were started by the check.
-The locally signed APK matched the installed signing identity, was installed with
-`-r`, and its installed bytes and original first-install timestamp were verified.
-Tablet, RTL and dark-mode checks were not repeated. No GitHub publication occurred.
-
-## Development snapshot validation - 2026-10-17
-
-The source snapshot consolidates the current Android/firmware work and adds the
-anonymized hardware collection and setup tutorial. It is not a new installable
-release and does not replace existing APKs, firmware assets or signed update indexes.
-
-| Check | Result |
-|---|---|
-| Android JVM suite | 586 tests, zero failures/errors/skips; rerun locally |
-| Android builds | Debug and release builds passed; release vital lint passed |
-| Android instrumentation sources | Compiled; no connected-device suite executed for this push |
-| Portable signing resolver | Standalone Java tests passed without exposing key/password contents |
-| Firmware host checks | 10 executable suites passed |
-| ESP32 firmware build | `huge_app`, successful; 2,099,425 bytes flash, 72,312 bytes static RAM |
-| Hardware collection | 15 manifest entries verified; JSON and ZIP checks passed |
-| Documentation links | Local links in the setup guide and primary indexes resolved |
-| Publication hygiene | Private keys/configuration, APKs, binaries, local databases and build outputs excluded |
-
-The firmware host suites cover bounded acquisition retries, acquisition/alert
-beep patterns, condition parsing and runtime transitions, external-command
-policy, visible automatic gain, volume previews, LED status and Wi-Fi/Bluetooth
-reset helpers. They use host stubs, not physical hardware. A test-only hardware
-identity was replaced with a synthetic fixture; behavior and rejection tests
-remain covered.
-
-Firmware toolchain used for this build: ESP32 board package 3.3.11,
-ArduinoMqttClient 0.1.8, SparkFun AS7343 1.0.0, SparkFun AS7331 2.2.0 and
-SparkFun Toolkit 1.2.0. Static RAM usage is compiler output, not a runtime
-heap/stack safety proof. The firmware was compiled only, not flashed.
-
-No phone was installed, cleared, uninstalled or exercised by this publication
-check; no acquisitions, alerts or associations were created or changed. PCB
-ERC/DRC, footprint/outline review, community-library permissions and final
-assembled optical calibration remain separate review items, documented with
-the hardware bundle.
-
-## Complete build and standalone guides - 2026-10-17
-
-The follow-up documentation pass adds a complete wiring index and nine guides
-(controller, visible/NIR, UV, RTC, FRAM, microSD, LEDs, buzzer and external input),
-a bill of materials, assembly/acceptance instructions and independent operation
-over USB, Wi-Fi TCP, Bluetooth SPP and MQTT/TLS. The protocol reference was checked
-against firmware source 0.5.104: corrected SENSOR_CONFIG boolean tokens/ranges,
-added settings revisions, kept-alive host ownership and persisted conditions,
-and distinguished live/offline alert delivery and non-atomic configuration.
-
-The live-only Python example uses no persistent configuration commands and no
-record acknowledgements; it refuses a reported busy sensor and does not print
-provisioning replies. Its 12 host-only tests cover framing, keepalive, protocol
-and identity rejection, busy-state rejection, cleanup, command/response bounds,
-case-sensitive non-hex tokens and output-field filtering. No physical USB/radio
-test is claimed for this documentation pass.
-
-To repeat the documentation/example checks:
-
-```text
-python tools/check_documentation.py
-python tools/check_hardware_bundle.py
-python -m unittest discover -s tools/examples -p "test_*.py" -v
-python tools/examples/uvir_live.py --help
-```
-
-The documentation checker verifies local file links, component-guide coverage,
-GPIO/address references against UvirHardwareConfig.h and the documented firmware
-version. It does not verify physical wiring or certify the PCB. Hardware bundle
-contents, app/firmware behavior, calibration and device archives are unchanged.
-The existing R1 logical generator also passed its firmware-pin, wire-reachability
-and junction checks (52 wired pins, 17 nets, 69 segments). It generated a separate
-local verification copy equal to the published schematic; no CAD was rewritten.
+See [current verification history](usb/VALIDATION.md) and
+[project status](PROJECT_STATUS.md). Software checks do not validate optical
+calibration or every USB host/breakout configuration.

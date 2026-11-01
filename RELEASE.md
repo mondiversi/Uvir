@@ -2,9 +2,6 @@
 
 `main` develops Uvir on its new 0.x line; the current release is **0.1.1** (`versionCode` 10).
 This is a public **prerelease**, with optical calibration unresolved and development suspended.
-The preserved ESP32 edition is **1.4.2 / firmware 0.5.119** on `legacy-esp32`.
-Its old public release assets have been retired; source and Git tags remain
-available for rebuilding. This Uvir APK is not an ESP32 firmware/app update.
 
 ## Application identity
 
@@ -29,13 +26,11 @@ available for rebuilding. This Uvir APK is not an ESP32 firmware/app update.
    `Uvir-0.1.1.apk`, the two current STLs, `Uvir-Printables-0.1.1.zip`
    and `SHA256SUMS`, and mark it **prerelease**.
 5. Validate the package, version, existing signing certificate and downloaded
-   checksums before publishing. Keep `make_latest` false; the preserved ESP32 update feed is not reactivated.
+   checksums before publishing. Keep `make_latest` false while distributing this development prerelease.
 
 GitHub provides the tagged source ZIP/tarball automatically. Make corresponding
-source available under the [GPL-3.0 license](LICENSE). Do not attach an ESP32 BIN,
-USB firmware uploader or the legacy `uvir-update.json` to this Uvir preview.
-The current automatic update channel remains disabled until separately validated.
-The historical `tools/ReleaseTool.java` procedure belongs to `legacy-esp32`.
+source available under the [GPL-3.0 license](LICENSE). Publish only application and current measuring-head assets. The application
+automatic update channel remains disabled until separately validated.
 
 ## Signing and updates
 
@@ -49,7 +44,7 @@ Dropbox folder. The default location follows the current account's home folder:
 The complete private configuration is `signing.properties` beside the key. It
 contains `storePassword`, `keyAlias`, `keyPassword` and an optional `storeFile`.
 Leave `storeFile` blank to resolve `uvir-release.jks` in this directory.
-Gradle and `tools/ReleaseTool.java` read this shared configuration automatically;
+Gradle reads this shared configuration automatically;
 an ignored project-local `keystore.properties` can optionally override its values.
 If Dropbox is installed elsewhere, set `MONDIVERSI_SIGNING_DIR` to the absolute
 private `UvirSigning` directory. An explicit absolute `storeFile` takes precedence.
@@ -58,7 +53,7 @@ The username is not embedded in the project.
 On a new trusted computer, install the Android/JDK tools, use the updated project
 sources, and sync the whole private folder with its files available offline.
 No project-local password file or manually entered password environment variables
-are required. The release build and update-index signer then use Dropbox directly.
+are required. The release build then uses Dropbox directly.
 Do not generate a replacement key. Keep a separate protected backup and restrict
 folder access: anyone with both files can sign the applications. Never publish
 the private folder, key or credentials to GitHub or public archives.
@@ -66,19 +61,6 @@ the private folder, key or credentials to GitHub or public archives.
 The existing UVIR and Space Compass distribution identities use this same key;
 the applications and repositories remain independent while the private signing
 configuration is intentionally shared.
-To print only the resolved key path without signing or creating release assets:
-
-```text
-java tools/ReleaseTool.java --keystore-path .
-```
-
-Standalone resolver and local credential checks (no release assets are signed):
-
-```text
-javac -d build/signing-path-test tools/ReleaseTool.java tools/UvirSigningPathTest.java
-java -cp build/signing-path-test UvirSigningPathTest --live
-```
-
 The exported public certificate is available at:
 
 ```text

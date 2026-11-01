@@ -142,17 +142,4 @@ class UvirConnectionHandoverTest {
         }
     }
 
-    @Test fun firmwareRepliesBeforeChangingRadioAndPreservesRepeatedRequestFallback() {
-        val file = listOf(File("../firmware/esp32/UvirSensor/UvirSensor.ino"),
-            File("firmware/esp32/UvirSensor/UvirSensor.ino")).first { it.isFile }
-        val firmware = file.readText()
-        val start = firmware.indexOf("if (command.startsWith(\"WIRELESS \"))")
-        val end = firmware.indexOf("if (command.startsWith(\"RADIO \"))", start)
-        val command = firmware.substring(start, end)
-        assertTrue(command.indexOf("output.flush();") < command.indexOf("applyWirelessMode(newMode, true);"))
-        assertFalse(command.contains("stopWirelessFallback(false)"))
-        assertTrue(command.contains("wirelessModeStartedAtMs = millis();"))
-        assertTrue(command.contains("alternateWirelessMode(wirelessMode) != WirelessMode::Off"))
-        assertTrue(firmware.contains("kWirelessFallbackIntervalMs = 20000"))
-    }
 }

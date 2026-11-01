@@ -1,7 +1,7 @@
 # v0.1.0
 
 First public **development preview of Uvir**. This is a new 0.x
-development line, not an ESP32 firmware update or a calibrated instrument release.
+development line, not a calibrated instrument release.
 
 - USB-only measuring head: FT232H MPSSE with UV 5 Click / AS7331 and
   GY-AS734X / AS7343 on one I2C bus. Android handles both chip drivers directly.
@@ -31,15 +31,5 @@ compatibility, screen-off/OTG operation, optical response and traceable calibrat
 remain pending. The AS7343 conversion is a provisional datasheet estimate.
 This preview does not establish measurement accuracy.
 
-There is no ESP32, sensor firmware upload, wireless association or autonomous
-sensor archive in this edition. Unplugging USB stops phone-owned sessions;
+The phone owns sessions and storage. Unplugging USB stops ongoing sessions;
 reconnection does not silently restart them.
-
-## Preserved ESP32 edition
-
-ESP32 users should keep **v1.4.2 / firmware 0.5.119** from `legacy-esp32`.
-Its branch, complete source history and Git tags remain unchanged. The old
-GitHub release pages and downloadable installers have been retired, leaving
-only this Uvir prerelease. The legacy stable update feed no longer has a published
-release; the Uvir APK is not delivered to ESP32 users through that feed.
-Automatic USB updates remain disabled until a separate signed channel is validated.

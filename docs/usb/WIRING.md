@@ -3,7 +3,7 @@
 The assembled prototype uses this shared-bus connection plan. The diagram is
 not a physical header photograph or an individual perfboard wire-routing plan.
 Check the actual breakout markings and power circuitry when replicating it.
-Leave the old ESP32 disconnected from the bus. See the
+See the
 [hardware and removable-module guide](../../hardware/usb/README.md).
 
 ![Logical FT232H wiring for both optical modules](wiring.svg)
@@ -50,7 +50,7 @@ by this initial driver; verify both modules work with the chosen timing.
    on an Android 8.0+ phone with USB host/OTG support. An existing installation
    can be updated with the same signing identity; do not uninstall it to test.
 2. With USB disconnected, wire the modules as above and inspect the supply,
-   grounds, pull-ups and the **AD1–AD2 bridge**. Do not connect the old ESP32.
+   grounds, pull-ups and the **AD1–AD2 bridge**. Use one active I²C controller.
 3. Attach the head to the phone through the OTG data adapter. Open Uvir and
    accept Android's permission to use the FT232H. No COM-port terminal, FTDI
    Android package or sensor firmware upload is required by this app.
@@ -65,8 +65,7 @@ by this initial driver; verify both modules work with the chosen timing.
    A failed idle connection gets one fresh initialization attempt. A healthy
    connection supplies six new reading pairs without reconnecting or interrupting
    sessions. Calibration and saved records are unchanged; failures enter the
-   error log, and the report can be saved or shared. No RTC, FRAM, SD or ESP32
-   firmware fields appear. The button is disabled without an authorized real
+   error log, and the report can be saved or shared. The button is disabled without an authorized real
    FT232H, during initialization/reference collection and with simulated data.
 6. Compare covered/uncovered readings without applying new calibration first.
    Live readings should update before starting manual acquisition, an automatic
@@ -89,7 +88,7 @@ calibration remain unresolved. See [project status](../PROJECT_STATUS.md).
 
 See [Read Uvir without the Android app](STANDALONE.md) for the terminal reader,
 register send/receive sequences and the division between raw readings and
-host-side calculations. No ESP32 serial commands or firmware are involved.
+host-side calculations. Communication uses binary USB/MPSSE/I²C transactions.
 
 ## Identity
 
@@ -99,7 +98,7 @@ its model or I²C addresses. The app uses a temporary attachment identity for
 connection/reference/diagnostic tracking in memory when no serial is available.
 It is not saved as record provenance. Sampling and calibration settings
 belong to the phone and survive disconnect/reconnect independently of that
-identity. No ESP32 hardware ID is fabricated.
+identity.
 
 ## Primary references
 

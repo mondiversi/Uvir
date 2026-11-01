@@ -3,8 +3,6 @@
 This guide covers the current **FT232H + AS7331 + AS7343** measuring head.
 It is the standalone USB reference for `main`, checked against the current
 [Android chip drivers](../../app/src/main/java/me/mondiversi/uvir/usb/SpectralChips.kt).
-The [ESP32 serial commands](../USB_SERIAL_PROTOCOL.md) belong to the preserved
-legacy hardware and do not work with this head.
 
 ## What USB exposes
 
@@ -201,6 +199,3 @@ and the final optical assembly still require calibration.
 - [AS7331 manufacturer datasheet hosted by MIKROE](https://download.mikroe.com/documents/datasheets/AS7331_datasheet.pdf)
 - [AS7343 manufacturer datasheet](https://look.ams-osram.com/m/5f2d27fff9a874d2/original/AS7343-14-Channel-Multi-Spectral-Sensor.pdf)
 - [PyFtdi I²C API](https://eblot.github.io/pyftdi/api/i2c.html)
-
-For the preserved ESP32 hardware, use the
-[legacy standalone guide](../STANDALONE_SENSOR.md) instead.

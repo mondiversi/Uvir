@@ -12,7 +12,7 @@ To confirm an import, press and hold the purple **IMPORT** action for five secon
 
 ## Phone-owned records and local numbering
 
-Uvir has no named sensor profiles or record-origin field. Neither hardware IDs nor sensor aliases are exported or imported. Version 1 files from the ESP32 edition remain importable: their measurements and sessions are retained while sensor/external-trigger metadata is discarded. The original ESP32 behavior is preserved on the `legacy-esp32` branch.
+Uvir has no named sensor profiles or record-origin field. Neither hardware IDs nor sensor aliases are exported or imported. Older version-1 files remain importable: their measurements and sessions are retained while retired hardware metadata is discarded.
 
 Acquisitions, alerts and sessions receive local IDs on import, with all session and variant relationships remapped together. Original timestamps determine chronological placement; older imports do not jump to the top simply because their local IDs are newer. Imported snapshots of ongoing sessions are closed at their last archived record and never start a recording on the receiving phone.
 

@@ -56,5 +56,4 @@ their sums are not validated continuous-spectrum radiometer measurements.
 See [wiring and removable modules](../hardware/usb/README.md),
 [mechanical reference](../hardware/printable/uvir-custom-case/README.md),
 [calibration notes](usb/CALIBRATION.md), and
-[software verification history](usb/VALIDATION.md). The complete former ESP32
-implementation remains preserved on `legacy-esp32`; it is not the active head.
+[software verification history](usb/VALIDATION.md).

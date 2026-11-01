@@ -28,10 +28,9 @@ class UvirUsbArchitectureTest {
         assertFalse(BuildConfig.USB_UPDATE_CHANNEL_READY)
         assertTrue(source("UvirUpdates").contains("if (BuildConfig.USB_ONLY) emptySet()"))
     }
-    @Test fun legacyAndUnresolvedCalibrationAreExplicitlyDocumented() {
+    @Test fun currentHardwareAndUnresolvedCalibrationAreExplicitlyDocumented() {
         val readme = File(root, "README.md").readText()
-        assertTrue(readme.contains("legacy-esp32"))
-        assertTrue(readme.contains("7161a31711f249de2bc346199c269da7aaea88c5"))
+        for (component in listOf("FT232H", "AS7331", "AS7343")) assertTrue(readme.contains(component))
         assertTrue(readme.contains("PROJECT SUSPENDED"))
         assertTrue(readme.contains("OPTICAL CALIBRATION IS UNRESOLVED"))
         assertTrue(readme.contains("Reliable absolute irradiance measurements have not been achieved or validated"))
